@@ -30,9 +30,7 @@ const __dirname = path.dirname(__filename);
 // Socket.IO setup with CORS
 const io = new Server(httpServer, {
   cors: {
-    origin: process.env.NODE_ENV === 'production' 
-      ? process.env.FRONTEND_URL 
-      : "http://localhost:5173",
+    origin: process.env.FRONTEND_URL || "http://localhost:5173", // Default to localhost in case FRONTEND_URL is not set
     methods: ["GET", "POST"],
     credentials: true
   }
@@ -53,6 +51,7 @@ webpush.setVapidDetails(
 // Middleware
 app.use(cors({
   origin: (origin, callback) => {
+    // Allow CORS for both the frontend URL and localhost
     if (!origin || origin === process.env.FRONTEND_URL || origin === 'http://localhost:5173') {
       callback(null, true);
     } else {
@@ -117,7 +116,6 @@ mongoose.connect(process.env.MONGODB_URI)
     createDefaultDeveloper(); // Ensure default developer is created
   })
   .catch((err) => console.error('MongoDB connection error:', err));
-
 
 // Server start
 const PORT = process.env.PORT || 5000;
