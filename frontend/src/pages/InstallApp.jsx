@@ -31,7 +31,8 @@ function InstallApp() {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
       window.removeEventListener('appinstalled', detectStandalone);
     };
-  }, []);  
+  }, []);
+  
 
   const handleInstall = async () => {
     if (!deferredPrompt) return;
