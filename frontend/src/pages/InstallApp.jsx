@@ -7,28 +7,31 @@ function InstallApp() {
   const [isIOS, setIsIOS] = useState(false);
 
   useEffect(() => {
-    // Check if it's iOS
     const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     setIsIOS(isIOSDevice);
-
-    // Handle the beforeinstallprompt event
+  
     const handleBeforeInstallPrompt = (e) => {
-      e.preventDefault(); // Prevent the default installation prompt
+      e.preventDefault(); // Prevent default behavior
       setDeferredPrompt(e);
       setIsInstallable(true);
     };
-
+  
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-
-    // Check if app is already installed
-    if (window.matchMedia('(display-mode: standalone)').matches) {
-      setIsInstallable(false); // If app is in standalone mode, no need to show the install button
-    }
-
+  
+    const detectStandalone = () => {
+      if (window.matchMedia('(display-mode: standalone)').matches || navigator.standalone) {
+        setIsInstallable(false); // Already installed
+      }
+    };
+  
+    window.addEventListener('appinstalled', detectStandalone);
+    detectStandalone();
+  
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', detectStandalone);
     };
-  }, []);
+  }, []);  
 
   const handleInstall = async () => {
     if (!deferredPrompt) return;
