@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      registerType: 'autoUpdate', // Ensures the service worker is updated automatically
+      registerType: 'autoUpdate',
       manifest: {
         name: 'NBK Youth',
         short_name: 'NBK Youth',
