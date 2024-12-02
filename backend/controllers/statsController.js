@@ -1,7 +1,7 @@
 import Income from '../models/Income.js';
 import Expense from '../models/Expense.js';
 import User from '../models/User.js';
-import Payment from '../models/payment.js';
+import Payment from '../models/Payment.js';
 import PreviousYear from '../models/PreviousYear.js';
 
 export const statsController = {
