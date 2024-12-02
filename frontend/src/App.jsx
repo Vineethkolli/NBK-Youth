@@ -17,6 +17,7 @@ import Expense from './pages/Expense';
 import Verification from './pages/Verification';
 import RecycleBin from './pages/RecycleBin';
 import DeveloperOptions from './pages/DeveloperOptions';
+import Vibe from './pages/Vibe';
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './context/AuthContext';
 
@@ -44,6 +45,7 @@ function App() {
             <Route path="/verification" element={<Verification />} />
             <Route path="/recycle-bin" element={<RecycleBin />} />
             <Route path="/developer-options" element={<DeveloperOptions />} />
+            <Route path="/vibe" element={<Vibe />} />
           </Route>
         </Routes>
       </Router>

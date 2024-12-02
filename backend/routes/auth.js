@@ -1,10 +1,13 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
+import OTP from '../models/OTP.js';
 import { auth } from '../middleware/auth.js';
+import { sendOTPEmail } from '../utils/emailService.js';
 
 const router = express.Router();
 
+// Existing routes...
 // Sign up
 router.post('/signup', async (req, res) => {
   try {
@@ -91,7 +94,86 @@ router.post('/signin', async (req, res) => {
   }
 });
 
-// Change password
+// Request password reset
+router.post('/forgot-password', async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Generate 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Save OTP to database
+    await OTP.create({ email, otp });
+
+    // Send OTP via email
+    const emailSent = await sendOTPEmail(email, otp);
+
+    if (!emailSent) {
+      return res.status(500).json({ message: 'Failed to send OTP email' });
+    }
+
+    res.json({ message: 'OTP sent successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Verify OTP
+router.post('/verify-otp', async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+    
+    const otpRecord = await OTP.findOne({ email, otp });
+    
+    if (!otpRecord) {
+      return res.status(400).json({ message: 'Invalid OTP' });
+    }
+
+    await OTP.deleteOne({ _id: otpRecord._id });
+    
+    // Generate temporary token for password reset
+    const resetToken = jwt.sign(
+      { email },
+      process.env.JWT_SECRET,
+      { expiresIn: '10m' }
+    );
+
+    res.json({ resetToken });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Reset password
+router.post('/reset-password', async (req, res) => {
+  try {
+    const { resetToken, newPassword } = req.body;
+    
+    const decoded = jwt.verify(resetToken, process.env.JWT_SECRET);
+    const user = await User.findOne({ email: decoded.email });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    user.password = newPassword;
+    await user.save();
+
+    res.json({ message: 'Password reset successful' });
+  } catch (error) {
+    if (error.name === 'JsonWebTokenError') {
+      return res.status(401).json({ message: 'Invalid or expired reset token' });
+    }
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Change password (existing route)
 router.post('/change-password', auth, async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;

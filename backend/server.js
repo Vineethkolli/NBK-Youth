@@ -17,6 +17,7 @@ import expenseRoutes from './routes/expenses.js';
 import verificationRoutes from './routes/verification.js';
 import statsRoutes from './routes/stats.js';
 import developerRoutes from './routes/developer.js';
+import collectionRoutes from './routes/collections.js';
 import { createDefaultDeveloper } from './utils/setupDefaults.js';
 
 // Load environment variables
@@ -30,7 +31,7 @@ const __dirname = path.dirname(__filename);
 // Socket.IO setup with CORS
 const io = new Server(httpServer, {
   cors: {
-    origin: process.env.FRONTEND_URL, // Ensure only the frontend URL is allowed
+    origin: process.env.FRONTEND_URL,
     methods: ["GET", "POST"],
     credentials: true
   }
@@ -93,6 +94,7 @@ app.use('/api/expenses', expenseRoutes);
 app.use('/api/verification', verificationRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/developer', developerRoutes);
+app.use('/api/collections', collectionRoutes);
 
 // Health check endpoint
 app.get('/', (req, res) => {
@@ -112,7 +114,7 @@ app.use((err, req, res, next) => {
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => {
     console.log('Connected to MongoDB');
-    createDefaultDeveloper(); // Ensure default developer is created
+    createDefaultDeveloper();
   })
   .catch((err) => console.error('MongoDB connection error:', err));
 

@@ -11,7 +11,7 @@ export const statsController = {
       const incomes = await Income.find({ isDeleted: false });
       const expenses = await Expense.find({ isDeleted: false });
       const users = await User.find();
-      const payments = await Payment.find({ status: 'success' });
+      const successfulPayments = await Payment.find({ transactionStatus: 'successful' });
       const previousYear = await PreviousYear.findOne() || { amount: 0 };
 
       // Round numbers and remove decimals
@@ -102,7 +102,7 @@ export const statsController = {
         },
         userStats: {
           totalUsers: users.length,
-          onlinePayments: payments.length
+          successfulPayments: successfulPayments.length
         },
         villagers: calculateGroupStats('villagers'),
         youth: calculateGroupStats('youth')

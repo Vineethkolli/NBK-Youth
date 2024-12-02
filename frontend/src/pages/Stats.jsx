@@ -20,7 +20,7 @@ function Stats() {
     },
     userStats: {
       totalUsers: 0,
-      onlinePayments: 0
+      successfulPayments: 0
     },
     villagers: {
       paid: { cash: 0, online: 0, webApp: 0, total: 0 },
@@ -160,8 +160,8 @@ function Stats() {
               <p className="text-lg font-bold">{stats.userStats.totalUsers}</p>
             </div>
             <div>
-              <p className="text-sm text-gray-600">Online Payments</p>
-              <p className="text-lg font-bold">{stats.userStats.onlinePayments}</p>
+              <p className="text-sm text-gray-600">Web APP Payments</p>
+              <p className="text-lg font-bold">{stats.userStats.successfulPayments}</p>
             </div>
           </div>
         </div>
