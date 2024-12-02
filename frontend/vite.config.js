@@ -6,11 +6,11 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      registerType: 'autoUpdate',
+      registerType: 'autoUpdate', // Ensures the service worker is updated automatically
       manifest: {
         name: 'NBK Youth',
-        short_name: 'NBKYouth',
-        description: 'Your NBK Youth App',
+        short_name: 'NBK Youth',
+        description: 'NBK Youth Gangavaram',
         theme_color: '#ffffff',
         background_color: '#ffffff',
         display: 'standalone',

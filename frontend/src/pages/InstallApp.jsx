@@ -7,7 +7,6 @@ function InstallApp() {
   const [isIOS, setIsIOS] = useState(false);
 
   useEffect(() => {
-    // Check if it's iOS
     const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     setIsIOS(isIOSDevice);
 
