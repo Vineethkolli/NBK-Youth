@@ -13,7 +13,7 @@ createRoot(document.getElementById('root')).render(
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', async () => {
     try {
-      const registration = await navigator.serviceWorker.register('/sw.js');
+      const registration = await navigator.serviceWorker.register('/dist/sw.js');
       console.log('Service Worker registered with scope:', registration.scope);
     } catch (error) {
       console.error('Service Worker registration failed:', error);
