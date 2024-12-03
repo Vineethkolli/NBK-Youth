@@ -4,6 +4,7 @@ import { IndianRupee, Users, Edit2 } from 'lucide-react';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import { API_URL } from '../utils/config';
+import StatsPrint from '../components/stats/StatsPrint';
 
 function Stats() {
   const { user } = useAuth();
@@ -75,7 +76,10 @@ function Stats() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold">Statistics</h1>
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-semibold">Statistics</h1>
+        <StatsPrint stats={stats} />
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Budget Stats */}
@@ -160,7 +164,7 @@ function Stats() {
               <p className="text-lg font-bold">{stats.userStats.totalUsers}</p>
             </div>
             <div>
-              <p className="text-sm text-gray-600">Web APP Payments</p>
+              <p className="text-sm text-gray-600">Successful Online Payments</p>
               <p className="text-lg font-bold">{stats.userStats.successfulPayments}</p>
             </div>
           </div>

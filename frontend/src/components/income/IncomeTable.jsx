@@ -1,18 +1,21 @@
 import { Eye, EyeOff, Edit2, Trash2 } from 'lucide-react';
+import { useHiddenProfiles } from '../../context/HiddenProfileContext';
 
 function IncomeTable({
   incomes,
   visibleColumns,
-  hiddenProfiles,
-  onPrivacyToggle,
   onEdit,
   onDelete,
   isPrivilegedUser,
-  userRole, // assuming userRole is passed as 'developer', 'financier', 'admin', 'user', etc.
+  userRole
 }) {
+  const { hiddenProfiles, toggleProfileHidden } = useHiddenProfiles();
+
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleString();
   };
+
+  const canViewPhoneNumber = ['developer', 'financier', 'admin'].includes(userRole);
 
   return (
     <div className="overflow-x-auto">
@@ -22,13 +25,11 @@ function IncomeTable({
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
               S.No
             </th>
-            {/* Only show Register ID for 'developer', 'financier' roles */}
-            {(userRole === 'developer' || userRole === 'financier') &&
-              visibleColumns.registerId && (
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Register ID
-                </th>
-              )}
+            {(userRole === 'developer' || userRole === 'financier') && visibleColumns.registerId && (
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                Register ID
+              </th>
+            )}
             {visibleColumns.incomeId && (
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                 Income ID
@@ -44,13 +45,12 @@ function IncomeTable({
                 Name
               </th>
             )}
-            {/* Only show Email and Phone Number for non-user roles */}
-            {(userRole !== 'user') && visibleColumns.email && (
+            {canViewPhoneNumber && visibleColumns.email && (
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                 Email
               </th>
             )}
-            {(userRole !== 'user') && visibleColumns.phoneNumber && (
+            {canViewPhoneNumber && visibleColumns.phoneNumber && (
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                 Phone Number
               </th>
@@ -80,7 +80,7 @@ function IncomeTable({
                 Verify Log
               </th>
             )}
-            {isPrivilegedUser && userRole !== 'user' && (
+            {isPrivilegedUser && userRole !== 'user'&& (
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                 Actions
               </th>
@@ -89,16 +89,14 @@ function IncomeTable({
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
           {incomes.map((income, index) => {
-            const isHidden = hiddenProfiles.has(income._id); // Check if this income is hidden
+            const isHidden = hiddenProfiles.has(income._id);
 
             return (
               <tr key={income._id}>
                 <td className="px-6 py-4 whitespace-nowrap text-sm">{index + 1}</td>
-                {/* Only show Register ID for 'developer', 'financier' */}
-                {(userRole === 'developer' || userRole === 'financier') &&
-                  visibleColumns.registerId && (
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">{income.registerId}</td>
-                  )}
+                {(userRole === 'developer' || userRole === 'financier') && visibleColumns.registerId && (
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">{income.registerId}</td>
+                )}
                 {visibleColumns.incomeId && (
                   <td className="px-6 py-4 whitespace-nowrap text-sm">{income.incomeId}</td>
                 )}
@@ -112,13 +110,12 @@ function IncomeTable({
                     {isHidden ? <span className="text-gray-500">Hidden</span> : income.name}
                   </td>
                 )}
-                {/* Only show Email and Phone Number for non-user roles */}
-                {userRole !== 'user' && visibleColumns.email && (
+                {canViewPhoneNumber && visibleColumns.email && (
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
                     {isHidden ? <span className="text-gray-500">Hidden</span> : income.email}
                   </td>
                 )}
-                {userRole !== 'user' && visibleColumns.phoneNumber && (
+                {canViewPhoneNumber && visibleColumns.phoneNumber && (
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
                     {isHidden ? <span className="text-gray-500">Hidden</span> : income.phoneNumber}
                   </td>
@@ -160,12 +157,12 @@ function IncomeTable({
                     </span>
                   </td>
                 )}
-                {isPrivilegedUser && userRole !== 'user' && (
+                {isPrivilegedUser && userRole !== 'user' &&(
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     <div className="flex space-x-2">
-                      {userRole !== 'admin' && (
+                      {(userRole === 'developer' || userRole === 'financier' || userRole === 'admin') && (
                         <button
-                          onClick={() => onPrivacyToggle(income._id)}
+                          onClick={() => toggleProfileHidden(income._id)}
                           className="text-gray-600 hover:text-gray-900"
                         >
                           {isHidden ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}

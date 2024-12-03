@@ -8,7 +8,12 @@ function MusicPlayer({ song, isPlaying, onPlayPause, onNext, onPrevious, hasNext
 
   useEffect(() => {
     const audio = audioRef.current;
-    audio.src = song.url;
+
+    // Only update the audio source if the song changes
+    if (audio.src !== song.url) {
+      audio.src = song.url;
+      audio.load(); // Load the new song
+    }
     
     if (isPlaying) {
       audio.play();

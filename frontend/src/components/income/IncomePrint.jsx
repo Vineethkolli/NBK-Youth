@@ -2,26 +2,31 @@ import React from 'react';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 import { Printer } from 'lucide-react';
+import { useHiddenProfiles } from '../../context/HiddenProfileContext';
 
 const IncomePrint = ({ incomes, visibleColumns }) => {
+  const { hiddenProfiles } = useHiddenProfiles();
+
   const handlePrint = () => {
     const doc = new jsPDF();
     const headers = [];
     const body = [];
+    const title = "Income Report";
+    const timestamp = new Date().toLocaleString();
 
     // Dynamically generate headers and body based on visibleColumns
     const columns = Object.keys(visibleColumns).filter(column => visibleColumns[column]);
 
     // Create header with Register ID first, followed by Income ID
-    headers.push('S.No'); // Adding Serial Number 
-    
+    headers.push('S.No'); // Adding Serial Number
+
     columns.forEach(column => {
       switch (column) {
         case 'registerId':
-          headers.push('Register ID'); // Register ID comes first
+          headers.push('Register ID');
           break;
         case 'incomeId':
-          headers.push('Income ID'); // Income ID comes second
+          headers.push('Income ID');
           break;
         case 'dateTime':
           headers.push('Date & Time');
@@ -58,25 +63,27 @@ const IncomePrint = ({ incomes, visibleColumns }) => {
     // Create body rows with Register ID first, followed by Income ID
     incomes.forEach((income, index) => {
       const row = [index + 1]; // Add Serial Number
+      const isHidden = hiddenProfiles.has(income._id);
+
       columns.forEach(column => {
         switch (column) {
           case 'registerId':
-            row.push(income.registerId); // Register ID first
+            row.push(income.registerId);
             break;
           case 'incomeId':
-            row.push(income.incomeId); // Income ID second
+            row.push(income.incomeId);
             break;
           case 'dateTime':
             row.push(new Date(income.createdAt).toLocaleString());
             break;
           case 'name':
-            row.push(income.name);
+            row.push(isHidden ? 'Hidden' : income.name);
             break;
           case 'email':
-            row.push(income.email);
+            row.push(isHidden ? 'Hidden' : (income.email || 'N/A'));
             break;
           case 'phoneNumber':
-            row.push(income.phoneNumber);
+            row.push(isHidden ? 'Hidden' : (income.phoneNumber || 'N/A'));
             break;
           case 'amount':
             row.push(income.amount);
@@ -100,13 +107,34 @@ const IncomePrint = ({ incomes, visibleColumns }) => {
       body.push(row);
     });
 
+    // Add title 
+    doc.setFontSize(16);
+    doc.text(title, 105, 15, { align: 'center' }); // Centered title
+
     // Generate PDF with the filtered columns and serial number
     doc.autoTable({
       head: [headers],
-      body: body
+      body: body,
+      startY: 25, // Start below the title
+      margin: { top: 10 },
+      didDrawPage: (data) => {
+        // Footer with timestamp and page number
+        const pageCount = doc.internal.getNumberOfPages();
+        doc.setFontSize(9);
+        doc.text(
+          `Generated on: ${timestamp}`,
+          data.settings.margin.left,
+          doc.internal.pageSize.height - 10
+        );
+        doc.text(
+          `Page ${doc.internal.getCurrentPageInfo().pageNumber} of ${pageCount}`,
+          doc.internal.pageSize.width - data.settings.margin.right - 30,
+          doc.internal.pageSize.height - 10
+        );
+      },
     });
 
-    doc.save('Income-Report.pdf');
+    doc.save('Income_Report.pdf');
   };
 
   return (

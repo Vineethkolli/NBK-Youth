@@ -1,7 +1,16 @@
+import { useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { subscribeToPushNotifications } from '../utils/notifications';
 
 function Home() {
   const { user } = useAuth();
+
+  useEffect(() => {
+    // Request notification permission when user first lands on home page
+    if (Notification.permission === 'default') {
+      subscribeToPushNotifications().catch(console.error);
+    }
+  }, []);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

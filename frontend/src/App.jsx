@@ -20,10 +20,12 @@ import DeveloperOptions from './pages/DeveloperOptions';
 import Vibe from './pages/Vibe';
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './context/AuthContext';
+import { HiddenProfileProvider } from './context/HiddenProfileContext';
 
 function App() {
   return (
     <AuthProvider> {/* AuthProvider should wrap the whole app */}
+    <HiddenProfileProvider>
       <Router> {/* Only one Router here */}
         <Toaster position="top-right" />
         <Routes>
@@ -49,6 +51,7 @@ function App() {
           </Route>
         </Routes>
       </Router>
+      </HiddenProfileProvider>
     </AuthProvider>
   );
 }
