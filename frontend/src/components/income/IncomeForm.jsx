@@ -18,6 +18,7 @@ function IncomeForm({ income, onClose, onSuccess }) {
   });
 
   const [nameError, setNameError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false); // Add isSubmitting state
 
   useEffect(() => {
     if (income) {
@@ -54,6 +55,7 @@ function IncomeForm({ income, onClose, onSuccess }) {
       return;
     }
 
+    setIsSubmitting(true); // Disable the button upon submission
     try {
       if (income) {
         await axios.put(`${API_URL}/api/incomes/${income._id}`, {
@@ -78,6 +80,8 @@ function IncomeForm({ income, onClose, onSuccess }) {
       } else {
         toast.error(error.response?.data?.message || 'Operation failed');
       }
+    } finally {
+      setIsSubmitting(false); // Re-enable the button after completion
     }
   };
 
@@ -191,7 +195,10 @@ function IncomeForm({ income, onClose, onSuccess }) {
             </button>
             <button
               type="submit"
-              className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700"
+              disabled={isSubmitting} // Disable when submitting
+              className={`px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 ${
+                isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
             >
               {income ? 'Update' : 'Add'} Income
             </button>

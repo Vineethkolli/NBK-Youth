@@ -17,6 +17,7 @@ function ExpenseForm({ expense, onClose, onSuccess }) {
     subExpenses: []
   });
 
+  const [isSubmitting, setIsSubmitting] = useState(false); // New state for button disabling
   const [isBalanced, setIsBalanced] = useState(true);
 
   useEffect(() => {
@@ -126,11 +127,13 @@ function ExpenseForm({ expense, onClose, onSuccess }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Different validation based on whether it's an edit or new expense
-    if (!expense && !validateInitialForm()) return;
-    if (expense && !validateFullForm()) return;
+    if (isSubmitting) return; // Prevent multiple submissions
+    setIsSubmitting(true); // Disable submit button
 
     try {
+      if (!expense && !validateInitialForm()) throw new Error('Validation failed');
+      if (expense && !validateFullForm()) throw new Error('Validation failed');
+
       if (expense) {
         await axios.put(`${API_URL}/api/expenses/${expense._id}`, {
           ...formData,
@@ -147,6 +150,8 @@ function ExpenseForm({ expense, onClose, onSuccess }) {
       onSuccess();
     } catch (error) {
       toast.error(error.response?.data?.message || 'Operation failed');
+    } finally {
+      setIsSubmitting(false); // Re-enable submit button
     }
   };
 
@@ -315,12 +320,15 @@ function ExpenseForm({ expense, onClose, onSuccess }) {
             </>
           )}
 
-          <div className="text-right">
+            <div className="text-right">
             <button
               type="submit"
-              className="bg-indigo-500 text-white px-6 py-2 rounded-md"
+              disabled={isSubmitting}
+              className={`bg-indigo-500 text-white px-6 py-2 rounded-md ${
+                isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
             >
-              {expense ? 'Update' : 'Add'}
+              {isSubmitting ? 'Submitting...' : expense ? 'Update' : 'Add'}
             </button>
           </div>
         </form>

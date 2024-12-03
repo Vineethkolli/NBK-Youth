@@ -1,16 +1,16 @@
 import { useState } from 'react';
-import { Plus, Edit2, Trash2, Upload, X } from 'lucide-react';
+import { Plus, Edit2, Upload, X } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { API_URL } from '../../utils/config';
 import { useAuth } from '../../context/AuthContext';
 
-function CollectionManager({ collections, onUpdate }) {
+function CollectionManager({ collections, onUpdate, isEditMode, onEditModeToggle }) {
   const { user } = useAuth();
   const [showCreateCollection, setShowCreateCollection] = useState(false);
   const [showCreateSubCollection, setShowCreateSubCollection] = useState(false);
   const [showUploadSong, setShowUploadSong] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     collectionId: '',
@@ -50,11 +50,9 @@ function CollectionManager({ collections, onUpdate }) {
 
   const handleUploadSong = async (e) => {
     e.preventDefault();
-    if (!formData.file) {
-      toast.error('Please select a song file');
-      return;
-    }
+    if (!formData.file || isUploading) return;
 
+    setIsUploading(true);
     const reader = new FileReader();
     reader.readAsDataURL(formData.file);
     reader.onload = async () => {
@@ -72,30 +70,10 @@ function CollectionManager({ collections, onUpdate }) {
         onUpdate();
       } catch (error) {
         toast.error('Failed to upload song');
+      } finally {
+        setIsUploading(false);
       }
     };
-  };
-
-  const handleDelete = async (type, id, parentId = null) => {
-    if (!window.confirm('Are you sure you want to delete this item?')) return;
-
-    try {
-      let url = `${API_URL}/api/collections`;
-      if (type === 'collection') {
-        url += `/${id}`;
-      } else if (type === 'subcollection') {
-        url += `/${parentId}/subcollections/${id}`;
-      } else if (type === 'song') {
-        const [collectionId, subCollectionId] = parentId.split('/');
-        url += `/${collectionId}/subcollections/${subCollectionId}/songs/${id}`;
-      }
-
-      await axios.delete(url);
-      toast.success('Item deleted successfully');
-      onUpdate();
-    } catch (error) {
-      toast.error('Failed to delete item');
-    }
   };
 
   return (
@@ -118,29 +96,30 @@ function CollectionManager({ collections, onUpdate }) {
               Create Sub-Collection
             </button>
             <button
-              onClick={() => setIsEditing(!isEditing)}
-              className={`btn-secondary ${isEditing ? 'bg-red-100' : ''}`}
+              onClick={onEditModeToggle}
+              className={`btn-secondary ${isEditMode ? 'bg-red-100' : ''}`}
             >
               <Edit2 className="h-4 w-4 mr-2" />
-              {isEditing ? 'Done' : 'Edit'}
+              {isEditMode ? 'Done Editing' : 'Edit Mode'}
             </button>
           </>
         )}
         <button
           onClick={() => setShowUploadSong(true)}
           className="btn-primary"
+          disabled={isUploading}
         >
           <Upload className="h-4 w-4 mr-2" />
-          Upload Song
+          {isUploading ? 'Uploading...' : 'Upload Song'}
         </button>
-        
       </div>
 
+      {/* Create Collection Modal */}
       {showCreateCollection && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-96">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold">Create Collection</h2>
+              <h3 className="text-lg font-medium">Create Collection</h3>
               <button onClick={() => setShowCreateCollection(false)}>
                 <X className="h-6 w-6" />
               </button>
@@ -148,13 +127,13 @@ function CollectionManager({ collections, onUpdate }) {
             <form onSubmit={handleCreateCollection}>
               <input
                 type="text"
+                required
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 placeholder="Collection Name"
-                className="w-full px-3 py-2 border rounded-md"
-                required
+                className="w-full border rounded-md p-2 mb-4"
               />
-              <button type="submit" className="btn-primary mt-4 w-full">
+              <button type="submit" className="btn-primary w-full">
                 Create
               </button>
             </form>
@@ -162,107 +141,109 @@ function CollectionManager({ collections, onUpdate }) {
         </div>
       )}
 
+      {/* Create Sub-Collection Modal */}
       {showCreateSubCollection && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-96">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold">Create Sub-Collection</h2>
+              <h3 className="text-lg font-medium">Create Sub-Collection</h3>
               <button onClick={() => setShowCreateSubCollection(false)}>
                 <X className="h-6 w-6" />
               </button>
             </div>
             <form onSubmit={handleCreateSubCollection}>
-              <div className="space-y-4">
-                <select
-                  value={formData.collectionId}
-                  onChange={(e) => setFormData({ ...formData, collectionId: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-md"
-                  required
-                >
-                  <option value="">Select Collection</option>
-                  {collections.map(collection => (
-                    <option key={collection._id} value={collection._id}>
-                      {collection.name}
-                    </option>
-                  ))}
-                </select>
-                <input
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="Sub-Collection Name"
-                  className="w-full px-3 py-2 border rounded-md"
-                  required
-                />
-                <button type="submit" className="btn-primary w-full">
-                  Create
-                </button>
-              </div>
+              <select
+                required
+                value={formData.collectionId}
+                onChange={(e) => setFormData({ ...formData, collectionId: e.target.value })}
+                className="w-full border rounded-md p-2 mb-4"
+              >
+                <option value="">Select Collection</option>
+                {collections.map(collection => (
+                  <option key={collection._id} value={collection._id}>
+                    {collection.name}
+                  </option>
+                ))}
+              </select>
+              <input
+                type="text"
+                required
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                placeholder="Sub-Collection Name"
+                className="w-full border rounded-md p-2 mb-4"
+              />
+              <button type="submit" className="btn-primary w-full">
+                Create
+              </button>
             </form>
           </div>
         </div>
       )}
 
+      {/* Upload Song Modal */}
       {showUploadSong && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-96">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold">Upload Song</h2>
+              <h3 className="text-lg font-medium">Upload Song</h3>
               <button onClick={() => setShowUploadSong(false)}>
                 <X className="h-6 w-6" />
               </button>
             </div>
             <form onSubmit={handleUploadSong}>
-              <div className="space-y-4">
+              <select
+                required
+                value={formData.collectionId}
+                onChange={(e) => setFormData({ ...formData, collectionId: e.target.value })}
+                className="w-full border rounded-md p-2 mb-4"
+              >
+                <option value="">Select Collection</option>
+                {collections.map(collection => (
+                  <option key={collection._id} value={collection._id}>
+                    {collection.name}
+                  </option>
+                ))}
+              </select>
+              {formData.collectionId && (
                 <select
-                  value={formData.collectionId}
-                  onChange={(e) => setFormData({ ...formData, collectionId: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-md"
                   required
+                  value={formData.subCollectionId}
+                  onChange={(e) => setFormData({ ...formData, subCollectionId: e.target.value })}
+                  className="w-full border rounded-md p-2 mb-4"
                 >
-                  <option value="">Select Collection</option>
-                  {collections.map(collection => (
-                    <option key={collection._id} value={collection._id}>
-                      {collection.name}
-                    </option>
-                  ))}
+                  <option value="">Select Sub-Collection</option>
+                  {collections
+                    .find(c => c._id === formData.collectionId)
+                    ?.subCollections.map(sub => (
+                      <option key={sub._id} value={sub._id}>
+                        {sub.name}
+                      </option>
+                    ))}
                 </select>
-                {formData.collectionId && (
-                  <select
-                    value={formData.subCollectionId}
-                    onChange={(e) => setFormData({ ...formData, subCollectionId: e.target.value })}
-                    className="w-full px-3 py-2 border rounded-md"
-                    required
-                  >
-                    <option value="">Select Sub-Collection</option>
-                    {collections
-                      .find(c => c._id === formData.collectionId)
-                      ?.subCollections.map(sub => (
-                        <option key={sub._id} value={sub._id}>
-                          {sub.name}
-                        </option>
-                      ))}
-                  </select>
-                )}
-                <input
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="Song Name"
-                  className="w-full px-3 py-2 border rounded-md"
-                  required
-                />
-                <input
-                  type="file"
-                  accept="audio/*"
-                  onChange={(e) => setFormData({ ...formData, file: e.target.files[0] })}
-                  className="w-full"
-                  required
-                />
-                <button type="submit" className="btn-primary w-full">
-                  Upload
-                </button>
-              </div>
+              )}
+              <input
+                type="text"
+                required
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                placeholder="Song Name"
+                className="w-full border rounded-md p-2 mb-4"
+              />
+              <input
+                type="file"
+                required
+                accept="audio/*"
+                onChange={(e) => setFormData({ ...formData, file: e.target.files[0] })}
+                className="w-full mb-4"
+              />
+              <button 
+                type="submit" 
+                className="btn-primary w-full"
+                disabled={isUploading}
+              >
+                {isUploading ? 'Uploading...' : 'Upload'}
+              </button>
             </form>
           </div>
         </div>

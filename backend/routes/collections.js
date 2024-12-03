@@ -32,6 +32,27 @@ router.post('/',
   }
 );
 
+// Update collection
+router.put('/:id',
+  auth,
+  checkRole(['developer', 'financier', 'admin']),
+  async (req, res) => {
+    try {
+      const collection = await Collection.findByIdAndUpdate(
+        req.params.id,
+        { name: req.body.name },
+        { new: true }
+      );
+      if (!collection) {
+        return res.status(404).json({ message: 'Collection not found' });
+      }
+      res.json(collection);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to update collection' });
+    }
+  }
+);
+
 // Create sub-collection
 router.post('/:collectionId/subcollections',
   auth,
@@ -48,6 +69,61 @@ router.post('/:collectionId/subcollections',
       res.status(201).json(collection);
     } catch (error) {
       res.status(500).json({ message: 'Failed to create sub-collection' });
+    }
+  }
+);
+
+// Update sub-collection
+router.put('/:collectionId/subcollections/:subCollectionId',
+  auth,
+  checkRole(['developer', 'financier', 'admin']),
+  async (req, res) => {
+    try {
+      const collection = await Collection.findById(req.params.collectionId);
+      if (!collection) {
+        return res.status(404).json({ message: 'Collection not found' });
+      }
+
+      const subCollection = collection.subCollections.id(req.params.subCollectionId);
+      if (!subCollection) {
+        return res.status(404).json({ message: 'Sub-collection not found' });
+      }
+
+      subCollection.name = req.body.name;
+      await collection.save();
+      res.json(collection);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to update sub-collection' });
+    }
+  }
+);
+
+// Update song
+router.put('/:collectionId/subcollections/:subCollectionId/songs/:songId',
+  auth,
+  checkRole(['developer', 'financier', 'admin']),
+  async (req, res) => {
+    try {
+      const collection = await Collection.findById(req.params.collectionId);
+      if (!collection) {
+        return res.status(404).json({ message: 'Collection not found' });
+      }
+
+      const subCollection = collection.subCollections.id(req.params.subCollectionId);
+      if (!subCollection) {
+        return res.status(404).json({ message: 'Sub-collection not found' });
+      }
+
+      const song = subCollection.songs.id(req.params.songId);
+      if (!song) {
+        return res.status(404).json({ message: 'Song not found' });
+      }
+
+      song.name = req.body.name;
+      await collection.save();
+      res.json(collection);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to update song' });
     }
   }
 );

@@ -9,29 +9,29 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-export const uploadToCloudinary = async (file, type = 'image') => {
+export const uploadToCloudinary = async (file, folder = 'PaymentScreenshots') => {
   try {
     // Remove the data:[content-type];base64, prefix
     const base64Data = file.replace(/^data:([^;]+);base64,/, '');
     
     const options = {
-      resource_type: type,
+      folder,
+      resource_type: 'auto',
       quality: 'auto:good'
     };
 
-    // Add specific folder and options based on type
-    if (type === 'image') {
-      options.folder = 'PaymentScreenshots';
+    // Add specific options based on folder type
+    if (folder === 'PaymentScreenshots' || folder === 'ExpenseBills') {
       options.format = 'jpg';
-    } else if (type === 'audio') {
-      options.folder = 'Vibe';
-      options.resource_type = 'auto';
-      options.format = 'mp3'; // Default format for audio
+      options.resource_type = 'image';
+    } else if (folder === 'Vibe') {
+      options.format = 'mp3';
+      options.resource_type = 'video'; // Cloudinary uses 'video' for audio files
     }
 
     // Upload to Cloudinary
     const result = await cloudinary.uploader.upload(
-      `data:${type === 'image' ? 'image/png' : 'audio/mpeg'};base64,${base64Data}`,
+      `data:${options.resource_type === 'image' ? 'image/png' : 'audio/mpeg'};base64,${base64Data}`,
       options
     );
 

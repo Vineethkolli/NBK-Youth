@@ -42,7 +42,7 @@ const PaymentController = {
     try {
       const { paymentId, registerId, name, email, phoneNumber, amount, belongsTo, screenshot } = req.body;
     
-      const screenshotUrl = await uploadToCloudinary(screenshot);
+      const screenshotUrl = await uploadToCloudinary(screenshot, 'PaymentScreenshots');
     
       const newPayment = new Payment({
         paymentId,
