@@ -1,5 +1,6 @@
 import { Eye, EyeOff, Edit2, Trash2 } from 'lucide-react';
 import { useHiddenProfiles } from '../../context/HiddenProfileContext';
+import { useAuth } from '../../context/AuthContext';
 
 function IncomeTable({
   incomes,
@@ -10,12 +11,19 @@ function IncomeTable({
   userRole
 }) {
   const { hiddenProfiles, toggleProfileHidden } = useHiddenProfiles();
+  const { user } = useAuth();
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleString();
   };
 
   const canViewPhoneNumber = ['developer', 'financier', 'admin'].includes(userRole);
+  const canToggleHidden = ['developer', 'financier'].includes(userRole);
+
+  const handleToggleHidden = async (incomeId) => {
+    if (!canToggleHidden) return;
+    await toggleProfileHidden(incomeId);
+  };
 
   return (
     <div className="overflow-x-auto">
@@ -80,7 +88,7 @@ function IncomeTable({
                 Verify Log
               </th>
             )}
-            {isPrivilegedUser && userRole !== 'user'&& (
+            {isPrivilegedUser && (
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                 Actions
               </th>
@@ -157,12 +165,12 @@ function IncomeTable({
                     </span>
                   </td>
                 )}
-                {isPrivilegedUser && userRole !== 'user' &&(
+                {isPrivilegedUser && (
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     <div className="flex space-x-2">
-                      {(userRole === 'developer' || userRole === 'financier' || userRole === 'admin') && (
+                      {canToggleHidden && (
                         <button
-                          onClick={() => toggleProfileHidden(income._id)}
+                          onClick={() => handleToggleHidden(income._id)}
                           className="text-gray-600 hover:text-gray-900"
                         >
                           {isHidden ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
