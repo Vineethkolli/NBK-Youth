@@ -164,7 +164,7 @@ function Stats() {
               <p className="text-lg font-bold">{stats.userStats.totalUsers}</p>
             </div>
             <div>
-              <p className="text-sm text-gray-600">Successful Online Payments</p>
+              <p className="text-sm text-gray-600">Online Payments</p>
               <p className="text-lg font-bold">{stats.userStats.successfulPayments}</p>
             </div>
           </div>
