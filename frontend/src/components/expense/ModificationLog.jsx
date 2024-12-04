@@ -33,34 +33,34 @@ function ModificationLog({ onClose }) {
       `${sub.subPurpose}: ${sub.subAmount}`
     ).join(', ');
   };
-
   const handlePrint = () => {
     const doc = new jsPDF();
-    
+  
     // Title
     doc.setFontSize(16);
     doc.text('Expense Modification Log', 14, 15);
-
+  
     let yPos = 30;
     const pageHeight = doc.internal.pageSize.height;
     const margin = 20;
-
+  
     logs.forEach((log, index) => {
+      // Reverse the numbering
+      const logNumber = logs.length - index;
+  
       // Check if we need a new page
       if (yPos > pageHeight - 60) {
         doc.addPage();
         yPos = 30;
       }
-
+  
       // Add log entry number
       doc.setFontSize(12);
       doc.setTextColor(100);
-      doc.text(`Log Entry #${index + 1}`, 14, yPos);
+      doc.text(`Log Entry #${logNumber}`, 14, yPos);
       yPos += 10;
-
-      // Original Data
-      doc.setFontSize(10);
-      doc.setTextColor(0);
+  
+      // Original and Updated Data
       const originalData = [
         `Expense ID: ${log.originalData.expenseId}`,
         `Register ID: ${log.originalData.registerId}`,
@@ -74,21 +74,7 @@ function ModificationLog({ onClose }) {
         `Verify Log: ${log.originalData.verifyLog}`,
         `Created At: ${formatDate(log.originalData.createdAt)}`
       ];
-
-      doc.text('Original Data:', 14, yPos);
-      yPos += 5;
-      originalData.forEach(line => {
-        if (yPos > pageHeight - 20) {
-          doc.addPage();
-          yPos = 30;
-        }
-        doc.text(line, 20, yPos);
-        yPos += 5;
-      });
-
-      yPos += 5;
-
-      // Updated Data
+  
       const updatedData = [
         `Expense ID: ${log.updatedData.expenseId || log.originalData.expenseId}`,
         `Register ID: ${log.updatedData.registerId || log.originalData.registerId}`,
@@ -102,30 +88,49 @@ function ModificationLog({ onClose }) {
         `Verify Log: ${log.updatedData.verifyLog || log.originalData.verifyLog}`,
         `Modified At: ${formatDate(log.createdAt)}`
       ];
-
-      doc.text('Updated Data:', 14, yPos);
+  
+      // Print side by side
+      doc.setFontSize(10);
+      doc.setTextColor(0);
+  
+      const leftColumnX = 14;
+      const rightColumnX = 105;
+  
+      doc.text('Original Data:', leftColumnX, yPos);
+      doc.text('Updated Data:', rightColumnX, yPos);
       yPos += 5;
-      updatedData.forEach(line => {
-        if (yPos > pageHeight - 20) {
+  
+      for (let i = 0; i < Math.max(originalData.length, updatedData.length); i++) {
+        if (yPos > pageHeight - margin) {
           doc.addPage();
           yPos = 30;
+          doc.text('Original Data:', leftColumnX, yPos);
+          doc.text('Updated Data:', rightColumnX, yPos);
+          yPos += 5;
         }
-        doc.text(line, 20, yPos);
+  
+        if (originalData[i]) {
+          doc.text(originalData[i], leftColumnX, yPos);
+        }
+        if (updatedData[i]) {
+          doc.text(updatedData[i], rightColumnX, yPos);
+        }
+  
         yPos += 5;
-      });
-
+      }
+  
       // Add separator
       yPos += 10;
-      if (yPos < pageHeight - 20) {
+      if (yPos < pageHeight - margin) {
         doc.setDrawColor(200);
         doc.line(14, yPos, 196, yPos);
         yPos += 15;
       }
     });
-
-    doc.save('expense-modification-log.pdf');
+  
+    doc.save('Expense_Modification_Log.pdf');
   };
-
+  
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[80vh] overflow-auto">

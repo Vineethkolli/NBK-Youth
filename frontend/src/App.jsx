@@ -1,4 +1,4 @@
-// App.jsx
+import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'; 
 import { Toaster } from 'react-hot-toast';
 import AuthLayout from './layouts/AuthLayout';
@@ -21,36 +21,43 @@ import Vibe from './pages/Vibe';
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './context/AuthContext';
 import { HiddenProfileProvider } from './context/HiddenProfileContext';
+import ColdStateMessage from './components/ColdStateMessage';
 
 function App() {
+  const [serverReady, setServerReady] = useState(false);
+
   return (
-    <AuthProvider> {/* AuthProvider should wrap the whole app */}
-    <HiddenProfileProvider>
-      <Router> {/* Only one Router here */}
-        <Toaster position="top-right" />
-        <Routes>
-          <Route element={<AuthLayout />}>
-            <Route path="/signin" element={<SignIn />} />
-            <Route path="/signup" element={<SignUp />} />
-          </Route>
-          
-          <Route element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
-            <Route path="/" element={<Home />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/stats" element={<Stats />} />
-            <Route path="/users" element={<Users />} />
-            <Route path="/pay-online" element={<PayOnline />} />
-            <Route path="/notifier" element={<Notifier />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/income" element={<Income />} />
-            <Route path="/expense" element={<Expense />} />
-            <Route path="/verification" element={<Verification />} />
-            <Route path="/recycle-bin" element={<RecycleBin />} />
-            <Route path="/developer-options" element={<DeveloperOptions />} />
-            <Route path="/vibe" element={<Vibe />} />
-          </Route>
-        </Routes>
-      </Router>
+    <AuthProvider>
+      <HiddenProfileProvider>
+        <Router>
+          <Toaster position="top-right" />
+          {!serverReady ? (
+            <ColdStateMessage onServerReady={() => setServerReady(true)} />
+          ) : (
+            <Routes>
+              <Route element={<AuthLayout />}>
+                <Route path="/signin" element={<SignIn />} />
+                <Route path="/signup" element={<SignUp />} />
+              </Route>
+
+              <Route element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
+                <Route path="/" element={<Home />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/stats" element={<Stats />} />
+                <Route path="/users" element={<Users />} />
+                <Route path="/pay-online" element={<PayOnline />} />
+                <Route path="/notifier" element={<Notifier />} />
+                <Route path="/settings" element={<Settings />} />
+                <Route path="/income" element={<Income />} />
+                <Route path="/expense" element={<Expense />} />
+                <Route path="/verification" element={<Verification />} />
+                <Route path="/recycle-bin" element={<RecycleBin />} />
+                <Route path="/developer-options" element={<DeveloperOptions />} />
+                <Route path="/vibe" element={<Vibe />} />
+              </Route>
+            </Routes>
+          )}
+        </Router>
       </HiddenProfileProvider>
     </AuthProvider>
   );

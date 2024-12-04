@@ -80,7 +80,7 @@ function ModificationLog({ onClose }) {
       doc.line(10, startY + 55, 200, startY + 55);
     });
 
-    doc.save('modification-log.pdf');
+    doc.save('Income_Modification_Log.pdf');
   };
 
   return (
