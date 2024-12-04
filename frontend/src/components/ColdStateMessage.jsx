@@ -4,7 +4,6 @@ const ColdStateMessage = ({ onServerReady }) => {
   const [timeLeft, setTimeLeft] = useState(50); // Countdown time
   const [serverReady, setServerReady] = useState(false); // Track if the server is ready
   const [showMessage, setShowMessage] = useState(false); // To toggle the message visibility
-  const [timerStart, setTimerStart] = useState(false); // To control when to start the timer
 
   useEffect(() => {
     const checkServerStatus = async () => {
@@ -16,19 +15,17 @@ const ColdStateMessage = ({ onServerReady }) => {
         if (response.ok) {
           setServerReady(true);
           onServerReady(); // Notify parent component that the server is ready
-          clearInterval(intervalId); // Stop the interval once the server is ready
+          setShowMessage(false); // Hide cold start message once the server is ready
         } else {
           setShowMessage(true); // Show message if server is in cold state
-          setTimerStart(true); // Start the countdown timer if server is in cold state
         }
       } catch (err) {
         console.error('Error connecting to server:', err);
-        setShowMessage(true); // Show message in case of an error (e.g., server down)
-        setTimerStart(true); // Start the countdown timer
+        setShowMessage(true); // Show message if an error occurs (e.g., server down)
       }
     };
 
-    // Check the server every 5 seconds
+    // Polling server status every second until the server is ready
     const intervalId = setInterval(checkServerStatus, 1000);
 
     // Cleanup interval on component unmount
@@ -38,21 +35,19 @@ const ColdStateMessage = ({ onServerReady }) => {
   useEffect(() => {
     // Reverse countdown logic for the timer
     const timer = setInterval(() => {
-      if (timerStart && timeLeft > 0) {
+      if (timeLeft > 0 && showMessage) {
         setTimeLeft((prev) => prev - 1);
       }
     }, 1000);
 
-    // If the server is ready, we stop the countdown and remove the message
     if (serverReady) {
-      clearInterval(timer); // Clear the countdown timer once server is ready
-      setShowMessage(false); // Hide the cold state message
+      clearInterval(timer); // Clear countdown timer once server is ready
     }
 
-    return () => clearInterval(timer); // Cleanup the timer on unmount
-  }, [timerStart, timeLeft, serverReady]);
+    return () => clearInterval(timer); // Cleanup the countdown timer on unmount
+  }, [timeLeft, serverReady, showMessage]);
 
-  if (serverReady) return null; // Return null if the server is ready, stopping the cold state message
+  if (serverReady) return null; // Return null if the server is ready, hiding the cold start message
 
   return (
     showMessage && (
