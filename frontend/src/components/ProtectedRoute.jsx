@@ -5,7 +5,7 @@ function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
 
   if (loading) {
-    return <div>HI</div>;
+    return <div>Loadinghi..</div>;
   }
 
   if (!user) {
