@@ -1,8 +1,12 @@
 import express from 'express';
 import { auth, checkRole } from '../middleware/auth.js';
 import User from '../models/User.js';
+import { userController } from '../controllers/userController.js';
 
 const router = express.Router();
+
+// Update profile image
+router.post('/profile/image', auth, userController.updateProfileImage);
 
 // Get all users (developer only)
 router.get('/', auth, checkRole(['developer']), async (req, res) => {

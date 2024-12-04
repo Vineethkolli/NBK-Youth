@@ -47,7 +47,7 @@ const StatsPrint = ({ stats }) => {
       body: budgetData.slice(1),
       theme: 'grid',
       headStyles: { 
-        fillColor: [66, 66, 66],
+        fillColor: [33, 115, 175], 
         textColor: [255, 255, 255],
         fontSize: 10
       },
@@ -83,8 +83,8 @@ const StatsPrint = ({ stats }) => {
       body: paymentData.slice(1),
       theme: 'grid',
       headStyles: { 
-        fillColor: [66, 66, 66],
-        textColor: [255, 255, 255]
+        fillColor: [33, 115, 175], 
+        textColor: [255, 255, 255],
       },
       styles: {
         fontSize: 10,
@@ -113,7 +113,7 @@ const StatsPrint = ({ stats }) => {
       body: userData.slice(1),
       theme: 'grid',
       headStyles: { 
-        fillColor: [66, 66, 66],
+        fillColor: [33, 115, 175], 
         textColor: [255, 255, 255]
       },
       styles: {
@@ -157,7 +157,7 @@ const StatsPrint = ({ stats }) => {
       body: villagersData.slice(1),
       theme: 'grid',
       headStyles: { 
-        fillColor: [66, 66, 66],
+        fillColor: [33, 115, 175], 
         textColor: [255, 255, 255]
       },
       styles: {
@@ -201,7 +201,7 @@ const StatsPrint = ({ stats }) => {
       body: youthData.slice(1),
       theme: 'grid',
       headStyles: { 
-        fillColor: [66, 66, 66],
+        fillColor: [33, 115, 175], 
         textColor: [255, 255, 255]
       },
       styles: {

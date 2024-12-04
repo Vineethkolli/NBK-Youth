@@ -37,6 +37,10 @@ const userSchema = new mongoose.Schema({
     enum: ['user', 'admin', 'developer', 'financier'],
     default: 'user'
   },
+  profileImage: {
+    type: String,
+    default: null
+  },
   pushSubscription: {
     type: Object,
     select: false
@@ -55,12 +59,10 @@ userSchema.pre('save', async function (next) {
       { $inc: { seq: 1 } },
       { new: true, upsert: true }
     );
-    // Remove padding logic to start from R0, R1, R2, ...
     this.registerId = `R${counter.seq}`;
   }
   next();
 });
-
 
 // Hash password before saving
 userSchema.pre('save', async function(next) {

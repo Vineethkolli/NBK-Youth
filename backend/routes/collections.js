@@ -1,234 +1,72 @@
 import express from 'express';
 import { auth, checkRole } from '../middleware/auth.js';
-import Collection from '../models/Collection.js';
-import { uploadToCloudinary } from '../config/cloudinary.js';
+import CollectionController from '../controllers/collectionController.js';
 
 const router = express.Router();
 
 // Get all collections
-router.get('/', async (req, res) => {
-  try {
-    const collections = await Collection.find().sort({ createdAt: -1 });
-    res.json(collections);
-  } catch (error) {
-    res.status(500).json({ message: 'Failed to fetch collections' });
-  }
-});
+router.get('/', CollectionController.getAllCollections);
 
 // Create collection (privileged users only)
 router.post('/', 
   auth, 
   checkRole(['developer', 'financier', 'admin']),
-  async (req, res) => {
-    try {
-      const collection = await Collection.create({
-        name: req.body.name,
-        createdBy: req.user.id
-      });
-      res.status(201).json(collection);
-    } catch (error) {
-      res.status(500).json({ message: 'Failed to create collection' });
-    }
-  }
+  CollectionController.createCollection
 );
 
 // Update collection
 router.put('/:id',
   auth,
   checkRole(['developer', 'financier', 'admin']),
-  async (req, res) => {
-    try {
-      const collection = await Collection.findByIdAndUpdate(
-        req.params.id,
-        { name: req.body.name },
-        { new: true }
-      );
-      if (!collection) {
-        return res.status(404).json({ message: 'Collection not found' });
-      }
-      res.json(collection);
-    } catch (error) {
-      res.status(500).json({ message: 'Failed to update collection' });
-    }
-  }
-);
-
-// Create sub-collection
-router.post('/:collectionId/subcollections',
-  auth,
-  checkRole(['developer', 'financier', 'admin']),
-  async (req, res) => {
-    try {
-      const collection = await Collection.findById(req.params.collectionId);
-      if (!collection) {
-        return res.status(404).json({ message: 'Collection not found' });
-      }
-
-      collection.subCollections.push({ name: req.body.name });
-      await collection.save();
-      res.status(201).json(collection);
-    } catch (error) {
-      res.status(500).json({ message: 'Failed to create sub-collection' });
-    }
-  }
-);
-
-// Update sub-collection
-router.put('/:collectionId/subcollections/:subCollectionId',
-  auth,
-  checkRole(['developer', 'financier', 'admin']),
-  async (req, res) => {
-    try {
-      const collection = await Collection.findById(req.params.collectionId);
-      if (!collection) {
-        return res.status(404).json({ message: 'Collection not found' });
-      }
-
-      const subCollection = collection.subCollections.id(req.params.subCollectionId);
-      if (!subCollection) {
-        return res.status(404).json({ message: 'Sub-collection not found' });
-      }
-
-      subCollection.name = req.body.name;
-      await collection.save();
-      res.json(collection);
-    } catch (error) {
-      res.status(500).json({ message: 'Failed to update sub-collection' });
-    }
-  }
-);
-
-// Update song
-router.put('/:collectionId/subcollections/:subCollectionId/songs/:songId',
-  auth,
-  checkRole(['developer', 'financier', 'admin']),
-  async (req, res) => {
-    try {
-      const collection = await Collection.findById(req.params.collectionId);
-      if (!collection) {
-        return res.status(404).json({ message: 'Collection not found' });
-      }
-
-      const subCollection = collection.subCollections.id(req.params.subCollectionId);
-      if (!subCollection) {
-        return res.status(404).json({ message: 'Sub-collection not found' });
-      }
-
-      const song = subCollection.songs.id(req.params.songId);
-      if (!song) {
-        return res.status(404).json({ message: 'Song not found' });
-      }
-
-      song.name = req.body.name;
-      await collection.save();
-      res.json(collection);
-    } catch (error) {
-      res.status(500).json({ message: 'Failed to update song' });
-    }
-  }
-);
-
-// Upload song
-router.post('/:collectionId/subcollections/:subCollectionId/songs',
-  auth,
-  async (req, res) => {
-    try {
-      const collection = await Collection.findById(req.params.collectionId);
-      if (!collection) {
-        return res.status(404).json({ message: 'Collection not found' });
-      }
-
-      const subCollection = collection.subCollections.id(req.params.subCollectionId);
-      if (!subCollection) {
-        return res.status(404).json({ message: 'Sub-collection not found' });
-      }
-
-      // Validate file format
-      const fileData = req.body.file;
-      const fileFormat = fileData.split(';')[0].split('/')[1];
-      const allowedFormats = ['mp3', 'wav', 'aac', 'flac', 'mpeg'];
-      
-      if (!allowedFormats.includes(fileFormat.toLowerCase())) {
-        return res.status(400).json({ 
-          message: 'Invalid file format. Allowed formats: MP3, WAV, AAC, FLAC' 
-        });
-      }
-
-      // Upload to Cloudinary with audio type
-      const url = await uploadToCloudinary(fileData, 'audio');
-
-      // Add song to sub-collection
-      subCollection.songs.push({
-        name: req.body.name,
-        url
-      });
-
-      await collection.save();
-      res.status(201).json(collection);
-    } catch (error) {
-      console.error('Upload error:', error);
-      res.status(500).json({ message: 'Failed to upload song' });
-    }
-  }
+  CollectionController.updateCollection
 );
 
 // Delete collection
 router.delete('/:id',
   auth,
   checkRole(['developer', 'financier', 'admin']),
-  async (req, res) => {
-    try {
-      await Collection.findByIdAndDelete(req.params.id);
-      res.json({ message: 'Collection deleted successfully' });
-    } catch (error) {
-      res.status(500).json({ message: 'Failed to delete collection' });
-    }
-  }
+  CollectionController.deleteCollection
+);
+
+// Create sub-collection
+router.post('/:collectionId/subcollections',
+  auth,
+  checkRole(['developer', 'financier', 'admin']),
+  CollectionController.createSubCollection
+);
+
+// Update sub-collection
+router.put('/:collectionId/subcollections/:subCollectionId',
+  auth,
+  checkRole(['developer', 'financier', 'admin']),
+  CollectionController.updateSubCollection
 );
 
 // Delete sub-collection
 router.delete('/:collectionId/subcollections/:subCollectionId',
   auth,
   checkRole(['developer', 'financier', 'admin']),
-  async (req, res) => {
-    try {
-      const collection = await Collection.findById(req.params.collectionId);
-      if (!collection) {
-        return res.status(404).json({ message: 'Collection not found' });
-      }
+  CollectionController.deleteSubCollection
+);
 
-      collection.subCollections.pull(req.params.subCollectionId);
-      await collection.save();
-      res.json({ message: 'Sub-collection deleted successfully' });
-    } catch (error) {
-      res.status(500).json({ message: 'Failed to delete sub-collection' });
-    }
-  }
+// Upload song
+router.post('/:collectionId/subcollections/:subCollectionId/songs',
+  auth,
+  CollectionController.uploadSong
+);
+
+// Update song
+router.put('/:collectionId/subcollections/:subCollectionId/songs/:songId',
+  auth,
+  checkRole(['developer', 'financier', 'admin']),
+  CollectionController.updateSong
 );
 
 // Delete song
 router.delete('/:collectionId/subcollections/:subCollectionId/songs/:songId',
   auth,
   checkRole(['developer', 'financier', 'admin']),
-  async (req, res) => {
-    try {
-      const collection = await Collection.findById(req.params.collectionId);
-      if (!collection) {
-        return res.status(404).json({ message: 'Collection not found' });
-      }
-
-      const subCollection = collection.subCollections.id(req.params.subCollectionId);
-      if (!subCollection) {
-        return res.status(404).json({ message: 'Sub-collection not found' });
-      }
-
-      subCollection.songs.pull(req.params.songId);
-      await collection.save();
-      res.json({ message: 'Song deleted successfully' });
-    } catch (error) {
-      res.status(500).json({ message: 'Failed to delete song' });
-    }
-  }
+  CollectionController.deleteSong
 );
 
 export default router;
