@@ -35,9 +35,9 @@ function ProtectedRoute({ children }) {
         </p>
 
         {/* Progress Bar */}
-        <div className="relative w-full h-6 bg-green-500 rounded-full overflow-hidden mb-6">
+        <div className="relative w-full h-6 bg-gray-300 rounded-full overflow-hidden mb-6">
           <div
-            className="absolute top-0 left-0 h-full bg-gray-300 rounded-full"
+            className="absolute top-0 left-0 h-full bg-green-500 rounded-full"
             style={{
               width: `${(50 - timeLeft) / 50 * 100}%`,
               transition: 'width 1s linear',

@@ -20,7 +20,7 @@ function Home() {
             Hello, {user.name}!
           </h1>
           <p className="mt-1 text-sm text-gray-500">
-            Welcome to your dashboard. You are logged in as a {user.role}.
+            Welcome to NBK Youth.
           </p>
         </div>
       </div>
