@@ -1,63 +1,50 @@
 import { useState, useEffect } from 'react';
 import { Bell, Download, AlertTriangle } from 'lucide-react';
-import { subscribeToPushNotifications, unsubscribeFromPushNotifications, checkNotificationStatus } from '../utils/notifications';
+import { subscribeToPushNotifications, unsubscribeFromPushNotifications } from '../utils/notifications';
 import { toast } from 'react-hot-toast';
+import axios from 'axios';
+import { API_URL } from '../utils/config';
 
 function Settings() {
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [notificationsSupported, setNotificationsSupported] = useState(true);
-  const [isLoading, setIsLoading] = useState(true);
-  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [installPrompt, setInstallPrompt] = useState(null);
   const [isInstallable, setIsInstallable] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
 
   useEffect(() => {
     checkNotificationSupport();
-    loadNotificationStatus();
+    checkNotificationStatus();
     checkInstallability();
-
-    const handleBeforeInstallPrompt = (e) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
-      setIsInstallable(true);
-    };
-
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-
-    // Check if already installed
-    const detectStandalone = () => {
-      if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
-        setIsInstallable(false);
-      }
-    };
-
-    window.addEventListener('appinstalled', detectStandalone);
-    detectStandalone();
-
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-      window.removeEventListener('appinstalled', detectStandalone);
-    };
   }, []);
-
-  const checkInstallability = () => {
-    const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-    setIsIOS(isIOSDevice);
-  };
 
   const checkNotificationSupport = () => {
     const supported = 'Notification' in window && 'serviceWorker' in navigator;
     setNotificationsSupported(supported);
   };
 
-  const loadNotificationStatus = async () => {
+  const checkInstallability = () => {
+    const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    setIsIOS(isIOSDevice);
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      setInstallPrompt(e);
+      setIsInstallable(true);
+    });
+
+    // Check if already installed
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+      setIsInstallable(false);
+    }
+  };
+
+  const checkNotificationStatus = async () => {
     try {
-      const status = await checkNotificationStatus();
-      setNotificationsEnabled(status);
+      const { data } = await axios.get(`${API_URL}/api/notifications/status`);
+      setNotificationsEnabled(data.enabled);
     } catch (error) {
-      console.error('Failed to load notification status:', error);
-    } finally {
-      setIsLoading(false);
+      console.error('Failed to check notification status:', error);
     }
   };
 
@@ -68,9 +55,11 @@ function Settings() {
         setNotificationsEnabled(false);
         toast.success('Notifications disabled');
       } else {
-        await subscribeToPushNotifications();
-        setNotificationsEnabled(true);
-        toast.success('Notifications enabled');
+        const success = await subscribeToPushNotifications();
+        if (success) {
+          setNotificationsEnabled(true);
+          toast.success('Notifications enabled');
+        }
       }
     } catch (error) {
       toast.error(error.message || 'Failed to update notification settings');
@@ -78,74 +67,24 @@ function Settings() {
   };
 
   const handleInstall = async () => {
-    if (!deferredPrompt) return;
+    if (!installPrompt) return;
 
     try {
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      
-      if (outcome === 'accepted') {
-        setDeferredPrompt(null);
+      const result = await installPrompt.prompt();
+      if (result.outcome === 'accepted') {
+        setInstallPrompt(null);
         setIsInstallable(false);
-        toast.success('App installed successfully!');
+        toast.success('App installed successfully');
       }
     } catch (error) {
-      console.error('Installation error:', error);
-      toast.error('Failed to install app');
+      toast.error('Installation failed');
     }
   };
-
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
 
   return (
     <div className="max-w-4xl mx-auto">
       <div className="bg-white shadow-lg rounded-lg p-6 space-y-8">
         <h2 className="text-2xl font-semibold">Settings</h2>
-
-        {/* App Installation Section */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-medium flex items-center">
-            <Download className="mr-2" /> App Installation
-          </h3>
-          
-          <div className="bg-gray-50 p-4 rounded-lg">
-            {window.matchMedia('(display-mode: standalone)').matches ? (
-              <div className="flex items-center text-green-700">
-                <AlertTriangle className="h-5 w-5 mr-2" />
-                <p>App is already installed</p>
-              </div>
-            ) : isIOS ? (
-              <div className="space-y-2">
-                <p className="font-medium">Install on iOS:</p>
-                <ol className="list-decimal list-inside space-y-1 text-gray-600">
-                  <li>Tap the share button in Safari</li>
-                  <li>Scroll down and tap "Add to Home Screen"</li>
-                  <li>Tap "Add" to install the app</li>
-                </ol>
-              </div>
-            ) : isInstallable ? (
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">Install NBK Youth App</p>
-                  <p className="text-sm text-gray-500">Get the best experience with our installable app</p>
-                </div>
-                <button
-                  onClick={handleInstall}
-                  className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
-                >
-                  <Download className="h-4 w-4 mr-2 inline-block" />
-                  Install Now
-                </button>
-              </div>
-            ) : (
-              <p className="text-gray-600">
-                App installation is not available on this device/browser
-              </p>
-            )}
-          </div>
-        </div>
 
         {/* Notifications Section */}
         <div className="space-y-4">
@@ -178,6 +117,47 @@ function Settings() {
                   {notificationsEnabled ? 'Disable' : 'Enable'} Notifications
                 </button>
               </div>
+            )}
+          </div>
+        </div>
+
+        {/* Install App Section */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-medium flex items-center">
+            <Download className="mr-2" /> Install App
+          </h3>
+          
+          <div className="bg-gray-50 p-4 rounded-lg">
+            {window.matchMedia('(display-mode: standalone)').matches ? (
+              <p className="text-gray-500">App is already installed</p>
+            ) : isIOS ? (
+              <div className="space-y-2">
+                <p className="font-medium">Install on iOS:</p>
+                <ol className="list-decimal list-inside text-gray-600">
+                  <li>Tap the share button in Safari</li>
+                  <li>Scroll down and tap "Add to Home Screen"</li>
+                  <li>Tap "Add" to install</li>
+                </ol>
+              </div>
+            ) : isInstallable ? (
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium">Install as desktop app</p>
+                  <p className="text-sm text-gray-500">
+                    Get quick access and offline support
+                  </p>
+                </div>
+                <button
+                  onClick={handleInstall}
+                  className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+                >
+                  Install Now
+                </button>
+              </div>
+            ) : (
+              <p className="text-gray-500">
+                Installation is not available on this device/browser
+              </p>
             )}
           </div>
         </div>

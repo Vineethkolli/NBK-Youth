@@ -1,60 +1,50 @@
 import axios from 'axios';
 import { API_URL } from './config';
 
-export const showNotification = (title, body, options = {}) => {
-  if (!('Notification' in window)) {
-    console.warn('This browser does not support notifications');
-    return;
-  }
-
-  if (Notification.permission === 'granted') {
-    const notification = new Notification(title, {
-      body,
-      icon: '/logo.png',
-      badge: '/logo.png',
-      ...options
-    });
-
-    notification.onclick = () => {
-      if (options.url) {
-        window.focus();
-        window.location.href = options.url;
-      }
-    };
-  }
-};
-
 export async function subscribeToPushNotifications() {
   try {
+    // Check if notifications are supported
     if (!('Notification' in window)) {
       throw new Error('This browser does not support notifications');
     }
 
-    if (!('serviceWorker' in navigator)) {
-      throw new Error('Service Worker not supported');
-    }
-
+    // Request notification permission
     const permission = await Notification.requestPermission();
     if (permission !== 'granted') {
       throw new Error('Notification permission denied');
     }
 
+    // Register service worker if not already registered
+    if (!('serviceWorker' in navigator)) {
+      throw new Error('Service Worker not supported');
+    }
+
+    // Get VAPID public key from server
+    const response = await fetch(`${API_URL}/api/notifications/vapidPublicKey`);
+    const { publicKey } = await response.json();
+
     const registration = await navigator.serviceWorker.ready;
     
-    // Get existing subscription
+    // Unsubscribe from any existing subscriptions
     const existingSubscription = await registration.pushManager.getSubscription();
     if (existingSubscription) {
-      return true; // Already subscribed
+      await existingSubscription.unsubscribe();
     }
 
     // Subscribe to push notifications
     const subscription = await registration.pushManager.subscribe({
       userVisibleOnly: true,
-      applicationServerKey: import.meta.env.VITE_VAPID_PUBLIC_KEY
+      applicationServerKey: publicKey
     });
 
     // Send subscription to server
-    await axios.post(`${API_URL}/api/notifications/subscribe`, subscription);
+    await axios.post(`${API_URL}/api/notifications/subscribe`, subscription, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
     return true;
   } catch (error) {
     console.error('Failed to subscribe to push notifications:', error);
@@ -73,8 +63,13 @@ export async function unsubscribeFromPushNotifications() {
     
     if (subscription) {
       await subscription.unsubscribe();
-      await axios.post(`${API_URL}/api/notifications/unsubscribe`);
     }
+
+    await axios.post(`${API_URL}/api/notifications/unsubscribe`, {}, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+    });
 
     return true;
   } catch (error) {
@@ -83,12 +78,38 @@ export async function unsubscribeFromPushNotifications() {
   }
 }
 
-export async function checkNotificationStatus() {
-  try {
-    const { data } = await axios.get(`${API_URL}/api/notifications/status`);
-    return data.enabled;
-  } catch (error) {
-    console.error('Failed to check notification status:', error);
-    return false;
+export function showNotification(title, body, data = {}) {
+  if (!('Notification' in window)) {
+    console.warn('Notifications not supported');
+    return;
+  }
+
+  if (Notification.permission === 'granted') {
+    const options = {
+      body,
+      icon: '/logo.png',
+      badge: '/logo.png',
+      vibrate: [200, 100, 200],
+      data,
+      requireInteraction: true,
+      actions: [
+        {
+          action: 'open',
+          title: 'Open',
+        },
+        {
+          action: 'close',
+          title: 'Close',
+        }
+      ]
+    };
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.ready.then(registration => {
+        registration.showNotification(title, options);
+      });
+    } else {
+      new Notification(title, options);
+    }
   }
 }
