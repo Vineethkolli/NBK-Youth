@@ -20,7 +20,7 @@ function Home() {
             Hello, {user.name}!
           </h1>
           <p className="mt-1 text-sm text-gray-500">
-            Welcome to NBK Youth.
+            Welcome to NBK Youth Web APP.
           </p>
         </div>
       </div>
