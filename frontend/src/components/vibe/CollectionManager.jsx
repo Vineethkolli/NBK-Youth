@@ -102,8 +102,7 @@ function CollectionManager({ collections, onUpdate, isEditMode, onEditModeToggle
               <Edit2 className="h-4 w-4 mr-2" />
               {isEditMode ? 'Done Editing' : 'Edit Mode'}
             </button>
-          </>
-        )}
+          
         <button
           onClick={() => setShowUploadSong(true)}
           className="btn-primary"
@@ -112,6 +111,8 @@ function CollectionManager({ collections, onUpdate, isEditMode, onEditModeToggle
           <Upload className="h-4 w-4 mr-2" />
           {isUploading ? 'Uploading...' : 'Upload Song'}
         </button>
+        </>
+        )}
       </div>
 
       {/* Create Collection Modal */}
