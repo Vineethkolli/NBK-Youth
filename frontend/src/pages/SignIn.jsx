@@ -66,6 +66,7 @@ function SignIn() {
   }
 
   return (
+    <>
     <form onSubmit={handleSubmit} className="space-y-6">
       <div>
         <input
@@ -119,6 +120,12 @@ function SignIn() {
         </p>
       </div>
     </form>
+    <div className="w-full max-w-md text-black text-center mt-10">
+        <p className="font-bold text-lg tracking-wide">
+          Crafted with ❤️ Love
+        </p>
+      </div>
+  </>
   );
 }
 
