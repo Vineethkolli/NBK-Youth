@@ -50,6 +50,9 @@ function ProtectedRoute({ children }) {
           <span className="text-gray-800">APP starts in:</span>{' '}
           <span className="text-green-600">{timeLeft} seconds</span>
         </p>
+        <p className="text-md text-gray-600 text-center mb-6">
+          Thank you for your patience...
+        </p>
       </div>
     );
   }
