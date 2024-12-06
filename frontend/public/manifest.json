@@ -5,8 +5,7 @@
   "theme_color": "#ffffff",
   "background_color": "#ffffff",
   "display": "standalone",
-  "orientation": "portrait",
-  "start_url": "/?source=pwa",
+  "start_url": "/?homescreen=1",
   "scope": "/",
   "icons": [
     {
@@ -20,18 +19,6 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
-    }
-  ],
-  "shortcuts": [
-    {
-      "name": "Pay Online",
-      "url": "/pay-online",
-      "icons": [{ "src": "/logo.png", "sizes": "192x192" }]
-    },
-    {
-      "name": "Profile",
-      "url": "/profile",
-      "icons": [{ "src": "/logo.png", "sizes": "192x192" }]
     }
   ]
 }

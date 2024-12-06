@@ -7,43 +7,27 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['logo.png'],
       manifest: {
         name: 'NBK Youth',
-        short_name: 'NBKYouth',
-        description: 'Your NBK Youth App',
+        short_name: 'NBK Youth',
+        description: 'NBK Youth Gangavaram',
         theme_color: '#ffffff',
         background_color: '#ffffff',
         display: 'standalone',
-        orientation: 'portrait',
-        scope: '/',
-        start_url: '/?source=pwa',
+        start_url: '/',
         icons: [
           {
             src: '/logo.png',
             sizes: '192x192',
             type: 'image/png',
-            purpose: 'any maskable'
+            purpose: 'any maskable',
           },
           {
             src: '/logo.png',
             sizes: '512x512',
             type: 'image/png',
-            purpose: 'any maskable'
-          }
-        ],
-        shortcuts: [
-          {
-            name: 'Pay Online',
-            url: '/pay-online',
-            icons: [{ src: '/logo.png', sizes: '192x192' }]
           },
-          {
-            name: 'Profile',
-            url: '/profile',
-            icons: [{ src: '/logo.png', sizes: '192x192' }]
-          }
-        ]
+        ],
       },
       workbox: {
         runtimeCaching: [
@@ -52,28 +36,17 @@ export default defineConfig({
             handler: 'NetworkFirst',
             options: {
               cacheName: 'api-cache',
-              cacheableResponse: {
-                statuses: [0, 200]
-              }
-            }
+            },
           },
           {
             urlPattern: ({ url }) => url.origin === location.origin,
             handler: 'StaleWhileRevalidate',
             options: {
               cacheName: 'assets-cache',
-              cacheableResponse: {
-                statuses: [0, 200]
-              }
-            }
-          }
+            },
+          },
         ],
-        navigateFallback: 'index.html'
-      }
-    })
+      },
+    }),
   ],
-  server: {
-    host: true,
-    port: 5173
-  }
 });
