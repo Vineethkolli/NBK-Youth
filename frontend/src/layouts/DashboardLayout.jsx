@@ -10,10 +10,10 @@ function DashboardLayout() {
   const closeSidebar = () => setSidebarOpen(false);
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen bg-gray-100 safe-top safe-bottom">
       <Header toggleSidebar={toggleSidebar} />
       <Sidebar isOpen={sidebarOpen} onNavigate={closeSidebar} />
-      <main className="flex-1 overflow-auto p-8 mt-16 md:ml-64">
+      <main className="flex-1 overflow-auto p-8 mt-16 md:ml-64 -webkit-overflow-scrolling-touch">
         <Outlet />
       </main>
     </div>
