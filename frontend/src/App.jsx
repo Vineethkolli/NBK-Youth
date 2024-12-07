@@ -19,6 +19,7 @@ import Verification from './pages/Verification';
 import RecycleBin from './pages/RecycleBin';
 import DeveloperOptions from './pages/DeveloperOptions';
 import Vibe from './pages/Vibe';
+import Moments from './pages/Moments';
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './context/AuthContext';
 import { HiddenProfileProvider } from './context/HiddenProfileContext';
@@ -54,6 +55,7 @@ function AppContent() {
           <Route path="/recycle-bin" element={<RecycleBin />} />
           <Route path="/developer-options" element={<DeveloperOptions />} />
           <Route path="/vibe" element={<Vibe />} />
+          <Route path="/moments" element={<Moments />} />
         </Route>
       </Routes>
     </>

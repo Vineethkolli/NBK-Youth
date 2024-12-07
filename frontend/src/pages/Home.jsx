@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import Footer from '../components/Footer';
 
 function Home() {
   const { user } = useAuth();
@@ -16,6 +17,23 @@ function Home() {
           </p>
         </div>
       </div>
+
+      <div className="bg-gray-100 border-t border-gray-200 mt-6 rounded-lg">
+        <div className="px-4 py-4 sm:px-6 sm:py-6">
+          <h2 className="text-xl font-medium text-gray-800">
+            Current Mode:
+          </h2>
+          <div className="mt-2 flex items-center">
+            <div className="inline-flex items-center px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-full shadow">
+              Development & Testing
+            </div>
+          </div>
+          <p className="mt-2 text-sm text-gray-500">
+            This mode is intended for developers and admins to test and refine features.
+          </p>
+        </div>
+      </div>
+      <Footer />
     </div>
   );
 }
