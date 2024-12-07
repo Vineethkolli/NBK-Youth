@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'; 
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
@@ -22,7 +22,7 @@ import Vibe from './pages/Vibe';
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './context/AuthContext';
 import { HiddenProfileProvider } from './context/HiddenProfileContext';
-import { trackPageView } from './utils/analytics';
+import { initializeAnalytics, trackPageView } from './utils/analytics';
 
 function AppContent() {
   const location = useLocation();
@@ -39,7 +39,7 @@ function AppContent() {
           <Route path="/signin" element={<SignIn />} />
           <Route path="/signup" element={<SignUp />} />
         </Route>
-        
+
         <Route element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
           <Route path="/" element={<Home />} />
           <Route path="/profile" element={<Profile />} />
@@ -61,6 +61,10 @@ function AppContent() {
 }
 
 function App() {
+  useEffect(() => {
+    initializeAnalytics();
+  }, []);
+
   return (
     <AuthProvider>
       <HiddenProfileProvider>
