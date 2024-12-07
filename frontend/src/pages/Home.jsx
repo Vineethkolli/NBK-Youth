@@ -29,7 +29,7 @@ function Home() {
             </div>
           </div>
           <p className="mt-2 text-sm text-gray-500">
-            This mode is intended for developers and admins to test and refine features.
+           Raise Concerns, Recommend Enhancements, Share Your Thoughts
           </p>
         </div>
       </div>
