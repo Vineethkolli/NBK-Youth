@@ -107,6 +107,11 @@ function Profile() {
         <div className="px-4 py-5 sm:px-6 flex justify-between items-center">
           <h3 className="text-lg leading-6 font-medium text-gray-900">
             Profile Information
+            {user.category === 'youth' && (
+                <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-300 text-yellow-900">
+                  Youth
+                </span>
+                )}
           </h3>
           <div className="space-x-2">
             <button
