@@ -72,9 +72,9 @@ const StatsPrint = ({ stats }) => {
     yPos += 4;
 
     const paymentData = [
-      ['Mode', 'Count', 'Amount'],
-      ['Online', `${stats.budgetStats.online.count} entries`, formatAmount(stats.budgetStats.online.amount)],
-      ['Offline', `${stats.budgetStats.offline.count} entries`, formatAmount(stats.budgetStats.offline.amount)]
+      ['Mode', 'Count', 'Amount Received', 'Amount Left'],
+      ['Online', `${stats.budgetStats.online.count} entries`, formatAmount(stats.budgetStats.online.amount), formatAmount(stats.budgetStats.amountLeft.onlineAmount)],
+      ['Offline', `${stats.budgetStats.offline.count} entries`, formatAmount(stats.budgetStats.offline.amount), formatAmount(stats.budgetStats.amountLeft.cashAmount)]
     ];
 
     doc.autoTable({

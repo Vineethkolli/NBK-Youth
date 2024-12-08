@@ -75,6 +75,32 @@ router.patch('/profile', auth, async (req, res) => {
   }
 });
 
+// Add this route alongside other routes
+router.patch('/:userId/category', auth, checkRole(['developer']), async (req, res) => {
+  try {
+    const userToUpdate = await User.findById(req.params.userId);
+    
+    if (!userToUpdate) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Prevent category change for default developer account
+    if (userToUpdate.email === 'developer@gmail.com') {
+      return res.status(403).json({ message: 'Cannot change default developer category' });
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      req.params.userId,
+      { category: req.body.category },
+      { new: true }
+    ).select('-password');
+
+    res.json(updatedUser);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 // Delete user (developer only)
 router.delete('/:userId', auth, checkRole(['developer']), async (req, res) => {
   try {

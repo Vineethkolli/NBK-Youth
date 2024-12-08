@@ -56,6 +56,7 @@ function ModificationLog({ onClose }) {
         `Status: ${log.originalData.status}`,
         `Payment Mode: ${log.originalData.paymentMode}`,
         `Belongs To: ${log.originalData.belongsTo || 'N/A'}`,
+        `Verify Log: ${log.originalData.verifyLog}`,
         `Created By: ${log.originalData.registerId}`,
         `Created At: ${formatDate(log.originalData.createdAt)}`,
       ].join('\n'), 14, startY + 6);
@@ -72,6 +73,7 @@ function ModificationLog({ onClose }) {
         `Status: ${log.updatedData.status || log.originalData.status}`,
         `Payment Mode: ${log.updatedData.paymentMode || log.originalData.paymentMode}`,
         `Belongs To: ${log.updatedData.belongsTo || 'N/A'}`,
+        `Verify Log: ${log.updatedData.verifyLog || log.originalData.verifyLog}`,
         `Modified By: ${log.registerId}`,
         `Modified At: ${formatDate(log.createdAt)}`,
       ].join('\n'), 105, startY + 6);
@@ -127,6 +129,7 @@ function ModificationLog({ onClose }) {
                     <p>Status: {log.originalData.status}</p>
                     <p>Payment Mode: {log.originalData.paymentMode}</p>
                     <p>Belongs To: {log.originalData.belongsTo || 'N/A'}</p>
+                    <p>Verify Log: {log.originalData.verifyLog}</p>
                     <p>Created By: {log.originalData.registerId}</p>
                     <p>Created At: {formatDate(log.originalData.createdAt)}</p>
                   </div>
@@ -146,6 +149,7 @@ function ModificationLog({ onClose }) {
                     <p>Status: {log.updatedData.status || log.originalData.status}</p>
                     <p>Payment Mode: {log.updatedData.paymentMode || log.originalData.paymentMode}</p>
                     <p>Belongs To: {log.updatedData.belongsTo || log.originalData.belongsTo}</p>
+                    <p>Verify Log: {log.updatedData.verifyLog || log.originalData.verifyLog}</p>
                     <p>Modified By: {log.registerId}</p>
                     <p>Modified At: {formatDate(log.createdAt)}</p>
                   </div>

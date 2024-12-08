@@ -19,6 +19,10 @@ function PaymentForm({ onSubmit }) {
   const [screenshot, setScreenshot] = useState(null);
   const [belongsTo, setBelongsTo] = useState('youth');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [copiedDetails, setCopiedDetails] = useState({
+    upiNumber: '',
+    upiId: ''
+  });
 
   useEffect(() => {
     fetchPaymentDetails();
@@ -46,6 +50,13 @@ function PaymentForm({ onSubmit }) {
   const handleCopy = (text, type) => {
     navigator.clipboard.writeText(text);
     toast.success(`${type} copied to clipboard`);
+
+    // Update copied details state based on type
+    if (type === 'UPI Number') {
+      setCopiedDetails({ ...copiedDetails, upiNumber: text, upiId: '' });
+    } else if (type === 'UPI ID') {
+      setCopiedDetails({ ...copiedDetails, upiNumber: '', upiId: text });
+    }
   };
 
   const handleScreenshotUpload = (e) => {
@@ -160,6 +171,18 @@ function PaymentForm({ onSubmit }) {
 
       {showPaymentOptions && (
         <div className="mt-6 space-y-6">
+          {/* Display copied details above amount */}
+          {(copiedDetails.upiNumber || copiedDetails.upiId) && (
+            <div className="text-center space-y-2">
+              {copiedDetails.upiNumber && (
+                <p className="font-medium text-green-600">Copied UPI Number: {copiedDetails.upiNumber}</p>
+              )}
+              {copiedDetails.upiId && (
+                <p className="font-medium text-green-600">Copied UPI ID: {copiedDetails.upiId}</p>
+              )}
+            </div>
+          )}
+
           <div className="flex justify-center space-x-4">
             <button
               onClick={() => {

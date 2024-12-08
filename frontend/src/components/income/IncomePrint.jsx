@@ -77,13 +77,13 @@ const IncomePrint = ({ incomes, visibleColumns }) => {
             row.push(new Date(income.createdAt).toLocaleString());
             break;
           case 'name':
-            row.push(isHidden ? 'Hidden' : income.name);
+            row.push(isHidden ? 'Donor' : income.name);
             break;
           case 'email':
-            row.push(isHidden ? 'Hidden' : (income.email || 'N/A'));
+            row.push(isHidden ? 'Donor' : (income.email || 'N/A'));
             break;
           case 'phoneNumber':
-            row.push(isHidden ? 'Hidden' : (income.phoneNumber || 'N/A'));
+            row.push(isHidden ? 'Donor' : (income.phoneNumber || 'N/A'));
             break;
           case 'amount':
             row.push(income.amount);

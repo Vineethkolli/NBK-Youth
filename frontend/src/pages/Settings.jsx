@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Bell, Download, AlertTriangle } from 'lucide-react';
+import { Bell, Download, AlertTriangle, Share2 } from 'lucide-react';
 import { subscribeToPushNotifications, unsubscribeFromPushNotifications } from '../utils/notifications';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
@@ -10,7 +10,7 @@ function Settings() {
   const [notificationsSupported, setNotificationsSupported] = useState(true);
   const [installPrompt, setInstallPrompt] = useState(null);
   const [isInstallable, setIsInstallable] = useState(false);
-  const [isIOS, setIsIOS] = useState(false);
+  const [platform, setPlatform] = useState(null);
 
   useEffect(() => {
     checkNotificationSupport();
@@ -24,8 +24,14 @@ function Settings() {
   };
 
   const checkInstallability = () => {
-    const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-    setIsIOS(isIOSDevice);
+    // Detect platform
+    if (/iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream) {
+      setPlatform('ios');
+    } else if (/Android/.test(navigator.userAgent)) {
+      setPlatform('android');
+    } else if (/Windows/.test(navigator.userAgent)) {
+      setPlatform('windows');
+    }
 
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
@@ -81,6 +87,46 @@ function Settings() {
     }
   };
 
+  const renderInstallInstructions = () => {
+    switch (platform) {
+      case 'ios':
+        return (
+          <div className="space-y-2">
+            <p className="font-medium">Install on iOS:</p>
+            <ol className="list-decimal list-inside text-gray-600">
+              <li>Tap the <Share2 className="inline h-4 w-4" /> Share button in Safari</li>
+              <li>Scroll down and tap "Add to Home Screen"</li>
+              <li>Tap "Add" to install</li>
+            </ol>
+          </div>
+        );
+      case 'android':
+        return (
+          <div className="space-y-2">
+            <p className="font-medium">Install on Android:</p>
+            <ol className="list-decimal list-inside text-gray-600">
+              <li>Tap the menu icon (three dots) in Chrome</li>
+              <li>Tap "Add to Home screen"</li>
+              <li>Tap "Add" to install</li>
+            </ol>
+          </div>
+        );
+      case 'windows':
+        return (
+          <div className="space-y-2">
+            <p className="font-medium">Install on Windows:</p>
+            <ol className="list-decimal list-inside text-gray-600">
+              <li>Click the install icon in the address bar</li>
+              <li>Or click the menu (three dots) and select "Install app"</li>
+              <li>Click "Install" in the prompt</li>
+            </ol>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="max-w-4xl mx-auto">
       <div className="bg-white shadow-lg rounded-lg p-6 space-y-8">
@@ -130,34 +176,31 @@ function Settings() {
           <div className="bg-gray-50 p-4 rounded-lg">
             {window.matchMedia('(display-mode: standalone)').matches ? (
               <p className="text-gray-500">App is already installed</p>
-            ) : isIOS ? (
-              <div className="space-y-2">
-                <p className="font-medium">Install on iOS:</p>
-                <ol className="list-decimal list-inside text-gray-600">
-                  <li>Tap the share button in Safari</li>
-                  <li>Scroll down and tap "Add to Home Screen"</li>
-                  <li>Tap "Add" to install</li>
-                </ol>
-              </div>
-            ) : isInstallable ? (
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">Install as desktop app</p>
-                  <p className="text-sm text-gray-500">
-                    Get quick access and offline support
-                  </p>
-                </div>
-                <button
-                  onClick={handleInstall}
-                  className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
-                >
-                  Install Now
-                </button>
-              </div>
             ) : (
-              <p className="text-gray-500">
-                Installation is not available on this device/browser
-              </p>
+              <div className="space-y-4">
+                {isInstallable && (
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">Install as desktop app</p>
+                      <p className="text-sm text-gray-500">
+                        Get quick access and offline support
+                      </p>
+                    </div>
+                    <button
+                      onClick={handleInstall}
+                      className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 flex items-center"
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Install Now
+                    </button>
+                  </div>
+                )}
+
+                <div className="border-t pt-4">
+                  <p className="font-medium mb-4">Installation Instructions:</p>
+                  {renderInstallInstructions()}
+                </div>
+              </div>
             )}
           </div>
         </div>

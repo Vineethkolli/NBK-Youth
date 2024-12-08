@@ -13,9 +13,9 @@ function Stats() {
       totalIncome: { count: 0, amount: 0 },
       amountReceived: { count: 0, amount: 0 },
       amountPending: { count: 0, amount: 0 },
-      totalExpenses: { count: 0, amount: 0 },
+      totalExpenses: { count: 0, amount: 0, onlineAmount: 0, cashAmount: 0 },
       previousYearAmount: { amount: 0 },
-      amountLeft: { amount: 0 },
+      amountLeft: { amount: 0, onlineAmount: 0, cashAmount: 0 },
       online: { count: 0, amount: 0 },
       offline: { count: 0, amount: 0 }
     },
@@ -90,27 +90,35 @@ function Stats() {
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-sm text-gray-600">Total Income</p>
-                <p className="font-semibold">{stats.budgetStats.totalIncome.count} entries</p>
-                <p className="text-lg font-bold">{formatAmount(stats.budgetStats.totalIncome.amount)}</p>
+                <p className="font-semibold">Total Income</p>
+                <p className="text-sm text-gray-600">{stats.budgetStats.totalIncome.count} entries</p>
+                <p className="text-lg font-bold text-green-600">{formatAmount(stats.budgetStats.totalIncome.amount)}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-600">Amount Received</p>
-                <p className="font-semibold">{stats.budgetStats.amountReceived.count} entries</p>
-                <p className="text-lg font-bold text-green-600">{formatAmount(stats.budgetStats.amountReceived.amount)}</p>
+                <p className="font-semibold">Amount Received</p>
+                <p className="text-sm text-gray-600">{stats.budgetStats.amountReceived.count} entries</p>
+                <p className="text-lg font-bold text-green-600">
+                  {formatAmount(stats.budgetStats.amountReceived.amount)}
+                </p>
+                <div className="text-sm text-gray-600 mt-1">
+                  <p>Online: {formatAmount(stats.budgetStats.online.amount)}</p>
+                  <p>Offline: {formatAmount(stats.budgetStats.offline.amount)}</p>
+                </div>
               </div>
               <div>
-                <p className="text-sm text-gray-600">Amount Pending</p>
-                <p className="font-semibold">{stats.budgetStats.amountPending.count} entries</p>
+                <p className="font-semibold">Amount Pending</p>
+                <p className="text-sm text-gray-600">{stats.budgetStats.amountPending.count} entries</p>
                 <p className="text-lg font-bold text-red-600">{formatAmount(stats.budgetStats.amountPending.amount)}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-600">Total Expenses</p>
-                <p className="font-semibold">{stats.budgetStats.totalExpenses.count} entries</p>
+                <p className="font-semibold">Total Expenses</p>
+                <p className="text-sm text-gray-600">{stats.budgetStats.totalExpenses.count} entries</p>
                 <p className="text-lg font-bold text-red-600">{formatAmount(stats.budgetStats.totalExpenses.amount)}</p>
+                <div className="text-sm text-gray-600 mt-1">
+                </div>
               </div>
               <div>
-                <p className="text-sm text-gray-600">Previous Year Amount</p>
+                <p className="font-semibold">Previous Year Amount</p>
                 {(user?.role === 'developer' || user?.role === 'financier') && isEditingPreviousYear ? (
                   <div className="flex items-center space-x-2">
                     <input
@@ -141,18 +149,18 @@ function Stats() {
                 )}
               </div>
               <div>
-                <p className="text-sm text-gray-600">Amount Left <span className="text-gray-500">(excluding previous year amount)</span>
-                </p>
+                <p className="font-semibold">Amount Left</p>
                 <p className="text-lg font-bold">{formatAmount(stats.budgetStats.amountLeft.amount)}</p>
-                <div className="text-sm">
-                  <p>Online: {formatAmount(stats.budgetStats.online.amount)}</p>
-                  <p>Offline: {formatAmount(stats.budgetStats.offline.amount)}</p>
+                <div className="text-sm text-gray-600 mt-1">
+                  <p>Online: {formatAmount(stats.budgetStats.amountLeft.onlineAmount)}</p>
+                  <p>Offline: {formatAmount(stats.budgetStats.amountLeft.cashAmount)}</p>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
+        {/* Rest of the components remain the same */}
         {/* User Stats */}
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-xl font-semibold mb-4 flex items-center">
@@ -179,11 +187,11 @@ function Stats() {
           <table className="min-w-full">
             <thead>
               <tr>
-                <th className="text-left">Status</th>
-                <th className="text-right">Cash</th>
-                <th className="text-right">Online</th>
-                <th className="text-right">Web App</th>
-                <th className="text-right">Total</th>
+                <th className="text-left font-semibold">Status</th>
+                <th className="text-right font-semibold">Cash</th>
+                <th className="text-right font-semibold">Online</th>
+                <th className="text-right font-semibold">Web App</th>
+                <th className="text-right font-semibold">Total</th>
               </tr>
             </thead>
             <tbody>
@@ -192,14 +200,14 @@ function Stats() {
                 <td className="text-right">{formatAmount(stats.villagers.paid.cash)}</td>
                 <td className="text-right">{formatAmount(stats.villagers.paid.online)}</td>
                 <td className="text-right">{formatAmount(stats.villagers.paid.webApp)}</td>
-                <td className="text-right font-bold">{formatAmount(stats.villagers.paid.total)}</td>
+                <td className="text-right font-semibold">{formatAmount(stats.villagers.paid.total)}</td>
               </tr>
               <tr>
                 <td>Pending</td>
                 <td className="text-right">{formatAmount(stats.villagers.pending.cash)}</td>
                 <td className="text-right">{formatAmount(stats.villagers.pending.online)}</td>
                 <td className="text-right">{formatAmount(stats.villagers.pending.webApp)}</td>
-                <td className="text-right font-bold">{formatAmount(stats.villagers.pending.total)}</td>
+                <td className="text-right font-semibold">{formatAmount(stats.villagers.pending.total)}</td>
               </tr>
             </tbody>
           </table>
@@ -214,11 +222,11 @@ function Stats() {
           <table className="min-w-full">
             <thead>
               <tr>
-                <th className="text-left">Status</th>
-                <th className="text-right">Cash</th>
-                <th className="text-right">Online</th>
-                <th className="text-right">Web App</th>
-                <th className="text-right">Total</th>
+                <th className="text-left font-semibold">Status</th>
+                <th className="text-right font-semibold">Cash</th>
+                <th className="text-right font-semibold">Online</th>
+                <th className="text-right font-semibold">Web App</th>
+                <th className="text-right font-semibold">Total</th>
               </tr>
             </thead>
             <tbody>
@@ -227,14 +235,14 @@ function Stats() {
                 <td className="text-right">{formatAmount(stats.youth.paid.cash)}</td>
                 <td className="text-right">{formatAmount(stats.youth.paid.online)}</td>
                 <td className="text-right">{formatAmount(stats.youth.paid.webApp)}</td>
-                <td className="text-right font-bold">{formatAmount(stats.youth.paid.total)}</td>
+                <td className="text-right font-semibold">{formatAmount(stats.youth.paid.total)}</td>
               </tr>
               <tr>
                 <td>Pending</td>
                 <td className="text-right">{formatAmount(stats.youth.pending.cash)}</td>
                 <td className="text-right">{formatAmount(stats.youth.pending.online)}</td>
                 <td className="text-right">{formatAmount(stats.youth.pending.webApp)}</td>
-                <td className="text-right font-bold">{formatAmount(stats.youth.pending.total)}</td>
+                <td className="text-right font-semibold">{formatAmount(stats.youth.pending.total)}</td>
               </tr>
             </tbody>
           </table>

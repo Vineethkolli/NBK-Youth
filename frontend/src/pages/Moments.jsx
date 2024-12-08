@@ -1,0 +1,20 @@
+import { useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
+
+function Home() {
+  const { user } = useAuth();
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="bg-white overflow-hidden shadow rounded-lg">
+        <div className="px-4 py-5 sm:p-6">
+          <h1 className="text-2xl font-semibold text-gray-900">
+            Crafting
+          </h1>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default Home;

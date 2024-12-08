@@ -30,7 +30,7 @@ function ModificationLog({ onClose }) {
   const getSubExpensesText = (subExpenses) => {
     if (!subExpenses || !subExpenses.length) return 'N/A';
     return subExpenses.map(sub => 
-      `${sub.subPurpose}: ${sub.subAmount}`
+      `${sub.subPurpose}: ${sub.subAmount}: ${sub.billImage ? 'Available' : 'No Bill'}`
     ).join(', ');
   };
   const handlePrint = () => {
@@ -72,6 +72,7 @@ function ModificationLog({ onClose }) {
         `Purpose: ${log.originalData.purpose}`,
         `Sub Expenses: ${getSubExpensesText(log.originalData.subExpenses)}`,
         `Verify Log: ${log.originalData.verifyLog}`,
+        `Created By: ${log.originalData.registerId}`,
         `Created At: ${formatDate(log.originalData.createdAt)}`
       ];
   
@@ -86,6 +87,7 @@ function ModificationLog({ onClose }) {
         `Purpose: ${log.updatedData.purpose || log.originalData.purpose}`,
         `Sub Expenses: ${getSubExpensesText(log.updatedData.subExpenses)}`,
         `Verify Log: ${log.updatedData.verifyLog || log.originalData.verifyLog}`,
+        `Modified By: ${log.registerId}`,
         `Modified At: ${formatDate(log.createdAt)}`
       ];
   
@@ -177,6 +179,7 @@ function ModificationLog({ onClose }) {
                     <p>Purpose: {log.originalData.purpose}</p>
                     <p>Sub Expenses: {getSubExpensesText(log.originalData.subExpenses)}</p>
                     <p>Verify Log: {log.originalData.verifyLog}</p>
+                    <p>Created By: {log.originalData.registerId}</p>
                     <p>Created At: {formatDate(log.originalData.createdAt)}</p>
                   </div>
                 </div>
@@ -197,6 +200,7 @@ function ModificationLog({ onClose }) {
                     <p>Purpose: {log.updatedData.purpose || log.originalData.purpose}</p>
                     <p>Sub Expenses: {getSubExpensesText(log.updatedData.subExpenses)}</p>
                     <p>Verify Log: {log.updatedData.verifyLog || log.originalData.verifyLog}</p>
+                    <p>Modified By: {log.registerId}</p>
                     <p>Modified At: {formatDate(log.createdAt)}</p>
                   </div>
                 </div>

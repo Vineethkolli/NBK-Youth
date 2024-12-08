@@ -35,10 +35,15 @@ export const statsController = {
         amount: roundNumber(pendingIncomes.reduce((sum, income) => sum + income.amount, 0))
       };
 
+      // Calculate total expenses with online/offline breakdown
       const totalExpenses = {
         count: expenses.length,
         amount: roundNumber(expenses.reduce((sum, expense) => 
-          sum + expense.subExpenses.reduce((subSum, sub) => subSum + sub.subAmount, 0), 0))
+          sum + expense.subExpenses.reduce((subSum, sub) => subSum + sub.subAmount, 0), 0)),
+        onlineAmount: roundNumber(expenses.filter(expense => expense.paymentMode === 'online')
+          .reduce((sum, expense) => sum + expense.subExpenses.reduce((subSum, sub) => subSum + sub.subAmount, 0), 0)),
+        cashAmount: roundNumber(expenses.filter(expense => expense.paymentMode === 'cash')
+          .reduce((sum, expense) => sum + expense.subExpenses.reduce((subSum, sub) => subSum + sub.subAmount, 0), 0))
       };
 
       // Calculate online/offline amounts (only paid incomes)
@@ -56,7 +61,14 @@ export const statsController = {
         amount: roundNumber(offlinePayments.reduce((sum, income) => sum + income.amount, 0))
       };
 
-      // Calculate villagers and youth stats
+      // Calculate amount left with online/offline breakdown
+      const amountLeft = {
+        amount: roundNumber(amountReceived.amount - totalExpenses.amount),
+        onlineAmount: roundNumber(online.amount - totalExpenses.onlineAmount),
+        cashAmount: roundNumber(offline.amount - totalExpenses.cashAmount)
+      };
+
+      // Calculate villagers stats
       const calculateGroupStats = (belongsTo) => {
         const groupIncomes = incomes.filter(income => 
           income.belongsTo.toLowerCase() === belongsTo.toLowerCase());
@@ -94,9 +106,7 @@ export const statsController = {
           amountPending,
           totalExpenses,
           previousYearAmount: { amount: roundNumber(previousYear.amount) },
-          amountLeft: { 
-            amount: roundNumber(amountReceived.amount - totalExpenses.amount)
-          },
+          amountLeft,
           online,
           offline
         },

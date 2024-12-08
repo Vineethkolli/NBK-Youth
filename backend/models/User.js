@@ -37,6 +37,11 @@ const userSchema = new mongoose.Schema({
     enum: ['user', 'admin', 'developer', 'financier'],
     default: 'user'
   },
+  category: {
+    type: String,
+    enum: ['youth', 'general'],
+    default: 'general'
+  },
   profileImage: {
     type: String,
     default: null

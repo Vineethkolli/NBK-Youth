@@ -13,15 +13,19 @@ function SignIn() {
     email: '',
     resetToken: ''
   });
+  const [isSubmitting, setIsSubmitting] = useState(false); // Track submitting state
   const { signin } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true); // Start submission process
     try {
       await signin(identifier, password);
       toast.success('Signed in successfully');
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to sign in');
+    } finally {
+      setIsSubmitting(false); // End submission process
     }
   };
 
@@ -67,65 +71,66 @@ function SignIn() {
 
   return (
     <>
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div>
-        <input
-          type="text"
-          required
-          value={identifier}
-          onChange={(e) => setIdentifier(e.target.value)}
-          placeholder="Email or Phone Number"
-          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500"
-        />
-      </div>
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div>
+          <input
+            type="text"
+            required
+            value={identifier}
+            onChange={(e) => setIdentifier(e.target.value)}
+            placeholder="Email or Phone Number"
+            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500"
+          />
+        </div>
 
-      <div>
-        <input
-          type="password"
-          required
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Password"
-          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500"
-        />
-      </div>
+        <div>
+          <input
+            type="password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Password"
+            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500"
+          />
+        </div>
 
-      <div>
-        <button
-          type="submit"
-          className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-        >
-          Sign in
-        </button>
-      </div>
+        <div>
+          <button
+            type="submit"
+            disabled={isSubmitting} // Disable button while submitting
+            className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${isSubmitting ? 'bg-gray-400' : 'bg-green-600 hover:bg-green-700'} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500`}
+          >
+            {isSubmitting ? 'Signing In...' : 'Sign in'} {/* Show loading text */}
+          </button>
+        </div>
 
-      <div className="text-sm text-center">
-        <p className="text-black">
-          Don't have an account?{'  '}
-          <a href="/signup" className="font-medium text-green-600 hover:text-green-500">
-            Sign up
-          </a>
-        </p>
-      </div>
-      <div className="text-sm text-center">
-        <p className="text-black">
-          Forgot password?{'  '}
-        <button
-          type="button"
-          onClick={() => setResetFlow({ ...resetFlow, step: 'forgot' })}
-          className="font-medium text-green-600 hover:text-green-500"
-        >
-          Reset
-        </button>
-        </p>
-      </div>
-    </form>
-    <div className="w-full max-w-md text-black text-center mt-10">
+        <div className="text-sm text-center">
+          <p className="text-black">
+            Don't have an account?{'  '}
+            <a href="/signup" className="font-medium text-green-600 hover:text-green-500">
+              Sign up
+            </a>
+          </p>
+        </div>
+        <div className="text-sm text-center">
+          <p className="text-black">
+            Forgot password?{'  '}
+            <button
+              type="button"
+              onClick={() => setResetFlow({ ...resetFlow, step: 'forgot' })}
+              className="font-medium text-green-600 hover:text-green-500"
+            >
+              Reset
+            </button>
+          </p>
+        </div>
+      </form>
+      <div className="w-full max-w-md text-black text-center mt-10">
         <p className="font-bold text-lg tracking-wide">
           Crafted with ❤️ Love
         </p>
       </div>
-  </>
+    </>
   );
 }
 
