@@ -3,6 +3,8 @@ import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import { useAuth } from '../../context/AuthContext';
 import { API_URL } from '../../utils/config';
+import { Download } from 'lucide-react';
+import { generatePaymentReceipt } from '../../utils/paymentReceipt';
 
 function PaymentHistory() {
   const [payments, setPayments] = useState([]);
@@ -49,6 +51,17 @@ function PaymentHistory() {
     }
   };
 
+  const handleDownloadReceipt = (payment) => {
+    try {
+      const doc = generatePaymentReceipt(payment);
+      doc.save(`NBK_Youth_Payment_${payment.paymentId}.pdf`);
+      toast.success('Receipt downloaded successfully');
+    } catch (error) {
+      console.error('Failed to generate receipt:', error);
+      toast.error('Failed to download receipt');
+    }
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-md p-6 mt-8">
       <h2 className="text-xl font-semibold mb-4">Payment History</h2>
@@ -86,7 +99,14 @@ function PaymentHistory() {
             <tbody className="bg-white divide-y divide-gray-200">
               {payments.map((payment) => (
                 <tr key={payment._id}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm flex items-center">
+                    <button
+                      onClick={() => handleDownloadReceipt(payment)}
+                      className="mr-2 text-gray-600 hover:text-gray-900"
+                      title="Download Receipt"
+                    >
+                      <Download className="h-4 w-4" />
+                    </button>
                     {payment.paymentId}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
