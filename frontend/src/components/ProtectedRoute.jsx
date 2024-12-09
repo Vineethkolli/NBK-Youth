@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
-  const [timeLeft, setTimeLeft] = useState(50); // Countdown timer starting at 50 seconds
+  const [timeLeft, setTimeLeft] = useState(45); // Countdown timer starting at 50 seconds
 
   useEffect(() => {
     if (loading) {
@@ -39,7 +39,7 @@ function ProtectedRoute({ children }) {
           <div
             className="absolute top-0 left-0 h-full bg-green-500 rounded-full"
             style={{
-              width: `${(50 - timeLeft) / 50 * 100}%`,
+              width: `${(45 - timeLeft) / 45 * 100}%`,
               transition: 'width 1s linear',
             }}
           ></div>

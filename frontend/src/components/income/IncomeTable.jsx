@@ -1,4 +1,5 @@
 import { Eye, EyeOff, Edit2, Trash2 } from 'lucide-react';
+import { FaWhatsapp } from 'react-icons/fa';
 import { useHiddenProfiles } from '../../context/HiddenProfileContext';
 import { useAuth } from '../../context/AuthContext';
 
@@ -8,7 +9,7 @@ function IncomeTable({
   onEdit,
   onDelete,
   isPrivilegedUser,
-  userRole
+  userRole,
 }) {
   const { hiddenProfiles, toggleProfileHidden } = useHiddenProfiles();
   const { user } = useAuth();
@@ -18,11 +19,21 @@ function IncomeTable({
   };
 
   const canViewPhoneNumber = ['developer', 'financier', 'admin'].includes(userRole);
-  const canToggleHidden = ['developer', 'financier'].includes(userRole);
+  const canToggleHidden = ['developer', 'financier', 'admin'].includes(userRole);
+  const showActionsColumn = ['developer', 'financier', 'admin'].includes(userRole);
 
   const handleToggleHidden = async (incomeId) => {
     if (!canToggleHidden) return;
     await toggleProfileHidden(incomeId);
+  };
+
+  const sendWhatsAppMessage = (income) => {
+    const countryCode = '+91'; // Default to India
+    const phoneNumber = income.phoneNumber;
+    const name = income.name;
+    const message = `Hello ${name},\n\nThank you for paying.\n\nDetails:\n- Amount: ${income.amount}\n- Status: ${income.status}\n- Payment Mode: ${income.paymentMode}`;
+    const url = `https://wa.me/${countryCode}${phoneNumber}?text=${encodeURIComponent(message)}`;
+    window.open(url, '_blank');
   };
 
   return (
@@ -88,7 +99,7 @@ function IncomeTable({
                 Verify Log
               </th>
             )}
-            {isPrivilegedUser && (
+            {showActionsColumn && (
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                 Actions
               </th>
@@ -124,8 +135,20 @@ function IncomeTable({
                   </td>
                 )}
                 {canViewPhoneNumber && visibleColumns.phoneNumber && (
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    {isHidden ? <span className="text-gray-500">Donor</span> : income.phoneNumber}
+                  <td className="px-6 py-4 whitespace-nowrap text-sm flex items-center">
+                    {isHidden ? (
+                      <span className="text-gray-500">Donor</span>
+                    ) : (
+                      <>
+                        {income.phoneNumber}
+                        <button
+                          onClick={() => sendWhatsAppMessage(income)}
+                          className="ml-2 text-green-500 hover:text-green-700"
+                        >
+                          <FaWhatsapp className="h-5 w-5" />
+                        </button>
+                      </>
+                    )}
                   </td>
                 )}
                 {visibleColumns.amount && (
@@ -165,7 +188,7 @@ function IncomeTable({
                     </span>
                   </td>
                 )}
-                {isPrivilegedUser && (
+                {showActionsColumn && (
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     <div className="flex space-x-2">
                       {canToggleHidden && (
@@ -176,13 +199,15 @@ function IncomeTable({
                           {isHidden ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                         </button>
                       )}
-                      <button
-                        onClick={() => onEdit(income)}
-                        className="text-indigo-600 hover:text-indigo-900"
-                      >
-                        <Edit2 className="h-5 w-5" />
-                      </button>
-                      {userRole !== 'admin' && (
+                      {['developer', 'financier', 'admin'].includes(userRole) && (
+                        <button
+                          onClick={() => onEdit(income)}
+                          className="text-indigo-600 hover:text-indigo-900"
+                        >
+                          <Edit2 className="h-5 w-5" />
+                        </button>
+                      )}
+                      {['developer', 'financier'].includes(userRole) && (
                         <button
                           onClick={() => onDelete(income._id)}
                           className="text-red-600 hover:text-red-900"
