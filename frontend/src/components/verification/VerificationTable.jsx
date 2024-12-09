@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { CheckCircle, XCircle, AlertCircle, Edit2, Save } from 'lucide-react';
+import { FaWhatsapp } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
 
 function VerificationTable({ data, type, onVerifyLogUpdate, onUpdatePayment }) {
@@ -23,6 +24,27 @@ function VerificationTable({ data, type, onVerifyLogUpdate, onUpdatePayment }) {
       default:
         return 'bg-yellow-100 text-yellow-800';
     }
+  };
+
+  const sendWhatsAppMessage = (payment) => {
+    const countryCode = '+91'; // Default to India
+    const phoneNumber = payment.phoneNumber;
+    const name = payment.name;
+    let message;
+
+    if (payment.verifyLog === 'verified') {
+      message = `Dear ${name},\n\nYour payment has been verified successfully!\n\nPayment Details:\n- Payment Id: ${payment.paymentId}\n- Amount: ₹${payment.amount}\n- Date: ${formatDate(payment.createdAt)}\n- Transaction Status: ${payment.transactionStatus}\n- Payment Mode: Web App\n- Verification Status: ${payment.verifyLog}\n\nThank you for your contribution!\n\nBest regards,\nNBK Youth`;
+    } else if (payment.verifyLog === 'rejected') {
+      message = `Dear ${name},\n\nWe regret to inform you that your payment has been rejected.\n\nPayment Details:\n- Payment Id: ${payment.paymentId}\n- Amount: ₹${payment.amount}\n- Date: ${formatDate(payment.createdAt)}\n- Transaction Status: ${payment.transactionStatus}\n- Payment Mode: Web App\n- Verification Status: ${payment.verifyLog}\n\nPlease contact the administrator for more details.\n\nBest regards,\nNBK Youth`;
+    }
+
+    const url = `https://wa.me/${countryCode}${phoneNumber}?text=${encodeURIComponent(message)}`;
+    window.open(url, '_blank');
+  };
+
+  const getWhatsAppIconColor = (payment) => {
+    if (!payment.phoneNumber) return 'text-gray-300'; // Disabled state
+    return payment.verifyLog === 'verified' ? 'text-green-500 hover:text-green-700' : 'text-red-500 hover:text-red-700';
   };
 
   const handleEdit = (payment) => {
@@ -241,59 +263,71 @@ function VerificationTable({ data, type, onVerifyLogUpdate, onUpdatePayment }) {
                 {formatDate(item.createdAt)}
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
+              <div className="flex items-center space-x-2">
                 <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getVerifyLogColor(item.verifyLog)}`}>
                   {item.verifyLog}
                 </span>
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap">
-                <div className="flex space-x-2">
-                  {type === 'payment' && item.verifyLog !== 'verified' && (
-                    <>
-                      {editingPayment === item._id ? (
-                        <button
-                          onClick={() => handleSave(item._id)}
-                          className="text-green-600 hover:text-green-900"
-                          title="Save"
-                        >
-                          <Save className="h-5 w-5" />
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() => handleEdit(item)}
-                          className="text-blue-600 hover:text-blue-900"
-                          title="Edit"
-                        >
-                          <Edit2 className="h-5 w-5" />
-                        </button>
-                      )}
-                    </>
-                  )}
+                {type === 'payment' && (item.verifyLog === 'verified' || item.verifyLog === 'rejected') && (
                   <button
-                    onClick={() => type === 'payment' ? handleVerify(item._id) : onVerifyLogUpdate(item._id, 'verified')}
-                    className="text-green-600 hover:text-green-900"
-                    title="Verify"
+                    onClick={() => item.phoneNumber && sendWhatsAppMessage(item)}
+                    disabled={!item.phoneNumber}
+                    className={`${getWhatsAppIconColor(item)} transition-colors duration-200`}
+                    title={item.phoneNumber ? 'Send WhatsApp message' : 'No phone number available'}
                   >
-                    <CheckCircle className="h-5 w-5" />
+                    <FaWhatsapp className="h-5 w-5" />
                   </button>
-                  <button
-                    onClick={() => onVerifyLogUpdate(item._id, 'not verified')}
-                    className="text-yellow-600 hover:text-yellow-900"
-                    title="Mark as Not Verified"
-                  >
-                    <AlertCircle className="h-5 w-5" />
-                  </button>
-                  <button
-                    onClick={() => onVerifyLogUpdate(item._id, 'rejected')}
-                    className="text-red-600 hover:text-red-900"
-                    title="Reject"
-                  >
-                    <XCircle className="h-5 w-5" />
-                  </button>
-                </div>
-              </td>
-            </tr>
-          ))}
-        </tbody>
+                )}
+              </div>
+            </td>
+            <td className="px-6 py-4 whitespace-nowrap">
+              <div className="flex space-x-2">
+                {type === 'payment' && item.verifyLog !== 'verified' && (
+                  <>
+                    {editingPayment === item._id ? (
+                      <button
+                        onClick={() => handleSave(item._id)}
+                        className="text-green-600 hover:text-green-900"
+                        title="Save"
+                      >
+                        <Save className="h-5 w-5" />
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => handleEdit(item)}
+                        className="text-blue-600 hover:text-blue-900"
+                        title="Edit"
+                      >
+                        <Edit2 className="h-5 w-5" />
+                      </button>
+                    )}
+                  </>
+                )}
+                <button
+                  onClick={() => type === 'payment' ? handleVerify(item._id) : onVerifyLogUpdate(item._id, 'verified')}
+                  className="text-green-600 hover:text-green-900"
+                  title="Verify"
+                >
+                  <CheckCircle className="h-5 w-5" />
+                </button>
+                <button
+                  onClick={() => onVerifyLogUpdate(item._id, 'not verified')}
+                  className="text-yellow-600 hover:text-yellow-900"
+                  title="Mark as Not Verified"
+                >
+                  <AlertCircle className="h-5 w-5" />
+                </button>
+                <button
+                  onClick={() => onVerifyLogUpdate(item._id, 'rejected')}
+                  className="text-red-600 hover:text-red-900"
+                  title="Reject"
+                >
+                  <XCircle className="h-5 w-5" />
+                </button>
+              </div>
+            </td>
+          </tr>
+        ))}
+      </tbody>
       </table>
     </div>
   );

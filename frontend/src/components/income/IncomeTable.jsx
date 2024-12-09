@@ -31,9 +31,22 @@ function IncomeTable({
     const countryCode = '+91'; // Default to India
     const phoneNumber = income.phoneNumber;
     const name = income.name;
-    const message = `Hello ${name},\n\nThank you for paying.\n\nDetails:\n- Amount: ${income.amount}\n- Status: ${income.status}\n- Payment Mode: ${income.paymentMode}`;
+    const formattedDate = new Date(income.createdAt).toLocaleString();
+    let message;
+
+    if (income.status === 'paid') {
+      message = `Dear ${name},\n\nThank you for your contribution!\n\nPayment Details:\n- Income Id: ${income.incomeId}\n- Amount: ₹${income.amount}\n- Date: ${formattedDate}\n- Status: ${income.status}\n- Payment Mode: ${income.paymentMode}\n\nYour support is greatly appreciated.\n\nBest regards,\nNBK Youth`;
+    } else {
+      message = `Dear ${name},\n\nThis is a gentle reminder about your pending contribution.\n\nPayment Details:\n- Income Id: ${income.incomeId}\n- Amount: ₹${income.amount}\n- Date: ${formattedDate}\n- Status: ${income.status}\n\nKindly make the payment at your earliest convenience.\n\nBest regards,\nNBK Youth`;
+    }
+
     const url = `https://wa.me/${countryCode}${phoneNumber}?text=${encodeURIComponent(message)}`;
     window.open(url, '_blank');
+  };
+
+  const getWhatsAppIconColor = (income) => {
+    if (!income.phoneNumber) return 'text-gray-300'; // Disabled state
+    return income.status === 'paid' ? 'text-green-500 hover:text-green-700' : 'text-red-500 hover:text-red-700';
   };
 
   return (
@@ -135,15 +148,17 @@ function IncomeTable({
                   </td>
                 )}
                 {canViewPhoneNumber && visibleColumns.phoneNumber && (
-                  <td className="px-6 py-4 whitespace-nowrap text-sm flex items-center">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm flex items-center space-x-2">
                     {isHidden ? (
                       <span className="text-gray-500">Donor</span>
                     ) : (
                       <>
-                        {income.phoneNumber}
+                        <span>{income.phoneNumber}</span>
                         <button
-                          onClick={() => sendWhatsAppMessage(income)}
-                          className="ml-2 text-green-500 hover:text-green-700"
+                          onClick={() => income.phoneNumber && sendWhatsAppMessage(income)}
+                          disabled={!income.phoneNumber}
+                          className={`${getWhatsAppIconColor(income)} transition-colors duration-200`}
+                          title={income.phoneNumber ? 'Send WhatsApp message' : 'No phone number available'}
                         >
                           <FaWhatsapp className="h-5 w-5" />
                         </button>
