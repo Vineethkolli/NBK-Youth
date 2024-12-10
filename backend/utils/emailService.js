@@ -1,18 +1,22 @@
-import axios from 'axios';
+import nodemailer from 'nodemailer';
+import dotenv from 'dotenv';
 
-const MAILTRAP_API_URL = 'https://send.api.mailtrap.io/api/send';
+dotenv.config();
 
 export const sendOTPEmail = async (email, otp) => {
   try {
-    const payload = {
-      from: {
-        email: "noreply@nbkyouth.com",
-        name: "NBK Youth"
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.GMAIL_USER, // Gmail address
+        pass: process.env.GMAIL_PASS, // Gmail app password
       },
-      to: [{
-        email: email
-      }],
-      subject: "Password Reset OTP",
+    });
+
+    const mailOptions = {
+      from: '"NBK Youth" <gangavaramnbkyouth@gmail.com>',
+      to: email,
+      subject: 'Password Reset OTP',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #333;">Password Reset Request</h2>
@@ -27,19 +31,13 @@ export const sendOTPEmail = async (email, otp) => {
           </p>
         </div>
       `,
-      category: "Password Reset"
     };
 
-    const response = await axios.post(MAILTRAP_API_URL, payload, {
-      headers: {
-        'Authorization': `Bearer ${process.env.MAILTRAP_API_TOKEN}`,
-        'Content-Type': 'application/json'
-      }
-    });
-
-    return response.status === 200;
+    const info = await transporter.sendMail(mailOptions);
+    console.log('Email sent:', info.response);
+    return true;
   } catch (error) {
-    console.error('Email sending failed:', error.response?.data || error.message);
+    console.error('Email sending failed:', error.message);
     return false;
   }
 };
