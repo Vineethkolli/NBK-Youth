@@ -1,85 +1,48 @@
 import { useState, useEffect } from 'react';
 import { Bell, Download, AlertTriangle, Share2 } from 'lucide-react';
-import { subscribeToPushNotifications, unsubscribeFromPushNotifications } from '../utils/notifications';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { API_URL } from '../utils/config';
 
 function Settings() {
-  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
-  const [notificationsSupported, setNotificationsSupported] = useState(true);
-  const [installPrompt, setInstallPrompt] = useState(null);
-  const [isInstallable, setIsInstallable] = useState(false);
-  const [platform, setPlatform] = useState(null);
+  const [installPromptEvent, setInstallPromptEvent] = useState(null);
+  const [isAppInstallable, setIsAppInstallable] = useState(false);
+  const [userPlatform, setUserPlatform] = useState(null);
 
   useEffect(() => {
-    checkNotificationSupport();
-    checkNotificationStatus();
-    checkInstallability();
+    detectInstallability();
   }, []);
 
-  const checkNotificationSupport = () => {
-    const supported = 'Notification' in window && 'serviceWorker' in navigator;
-    setNotificationsSupported(supported);
-  };
-
-  const checkInstallability = () => {
-    // Detect platform
+  // Check if the app can be installed
+  const detectInstallability = () => {
     if (/iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream) {
-      setPlatform('ios');
+      setUserPlatform('ios');
     } else if (/Android/.test(navigator.userAgent)) {
-      setPlatform('android');
+      setUserPlatform('android');
     } else if (/Windows/.test(navigator.userAgent)) {
-      setPlatform('windows');
+      setUserPlatform('windows');
     }
 
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
-      setInstallPrompt(e);
-      setIsInstallable(true);
+      setInstallPromptEvent(e);
+      setIsAppInstallable(true);
     });
 
-    // Check if already installed
     if (window.matchMedia('(display-mode: standalone)').matches) {
-      setIsInstallable(false);
+      setIsAppInstallable(false);
     }
   };
 
-  const checkNotificationStatus = async () => {
-    try {
-      const { data } = await axios.get(`${API_URL}/api/notifications/status`);
-      setNotificationsEnabled(data.enabled);
-    } catch (error) {
-      console.error('Failed to check notification status:', error);
-    }
-  };
-
-  const toggleNotifications = async () => {
-    try {
-      if (notificationsEnabled) {
-        await unsubscribeFromPushNotifications();
-        setNotificationsEnabled(false);
-        toast.success('Notifications disabled');
-      } else {
-        const success = await subscribeToPushNotifications();
-        if (success) {
-          setNotificationsEnabled(true);
-          toast.success('Notifications enabled');
-        }
-      }
-    } catch (error) {
-      toast.error(error.message || 'Failed to update notification settings');
-    }
-  };
-
-  const handleInstall = async () => {
-    if (!installPrompt) return;
+  // Trigger app installation
+  const handleInstallApp = async () => {
+    if (!installPromptEvent) return;
 
     try {
-      const result = await installPrompt.prompt();
+      const result = await installPromptEvent.prompt();
       if (result.outcome === 'accepted') {
-        setInstallPrompt(null);
-        setIsInstallable(false);
+        setInstallPromptEvent(null);
+        setIsAppInstallable(false);
         toast.success('App installed successfully');
       }
     } catch (error) {
@@ -87,8 +50,9 @@ function Settings() {
     }
   };
 
+  // Render platform-specific installation instructions
   const renderInstallInstructions = () => {
-    switch (platform) {
+    switch (userPlatform) {
       case 'ios':
         return (
           <div className="space-y-2">
@@ -132,53 +96,18 @@ function Settings() {
       <div className="bg-white shadow-lg rounded-lg p-6 space-y-8">
         <h2 className="text-2xl font-semibold">Settings</h2>
 
-        {/* Notifications Section */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-medium flex items-center">
-            <Bell className="mr-2" /> Notifications
-          </h3>
-          
-          <div className="bg-gray-50 p-4 rounded-lg">
-            {!notificationsSupported ? (
-              <div className="flex items-center text-yellow-700">
-                <AlertTriangle className="h-5 w-5 mr-2" />
-                <p>Notifications are not supported in this browser</p>
-              </div>
-            ) : (
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">Push Notifications</p>
-                  <p className="text-sm text-gray-500">
-                    {notificationsEnabled ? 'Enabled' : 'Disabled'}
-                  </p>
-                </div>
-                <button
-                  onClick={toggleNotifications}
-                  className={`px-4 py-2 rounded-md text-white ${
-                    notificationsEnabled
-                      ? 'bg-red-600 hover:bg-red-700'
-                      : 'bg-indigo-600 hover:bg-indigo-700'
-                  }`}
-                >
-                  {notificationsEnabled ? 'Disable' : 'Enable'} Notifications
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-
         {/* Install App Section */}
         <div className="space-y-4">
           <h3 className="text-lg font-medium flex items-center">
             <Download className="mr-2" /> Install App
           </h3>
-          
+
           <div className="bg-gray-50 p-4 rounded-lg">
             {window.matchMedia('(display-mode: standalone)').matches ? (
               <p className="text-gray-500">App is already installed</p>
             ) : (
               <div className="space-y-4">
-                {isInstallable && (
+                {isAppInstallable && (
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="font-medium">Install as desktop app</p>
@@ -187,7 +116,7 @@ function Settings() {
                       </p>
                     </div>
                     <button
-                      onClick={handleInstall}
+                      onClick={handleInstallApp}
                       className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 flex items-center"
                     >
                       <Download className="h-4 w-4 mr-2" />
