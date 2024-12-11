@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Bell, Send } from 'lucide-react';
+import { Bell, Send, Check, Users } from 'lucide-react';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import { API_URL } from '../utils/config';
+import { getSocket } from '../utils/socket';
 import { showNotification, subscribeToPushNotifications } from '../utils/notifications';
 import NotificationHistory from '../components/notification/NotificationHistory';
 
@@ -19,15 +20,40 @@ function Notifier() {
 
   useEffect(() => {
     fetchNotifications();
-    setupPushNotifications();
+    setupNotifications();
   }, [user]);
 
-  const setupPushNotifications = async () => {
-    try {
-      await subscribeToPushNotifications();
-    } catch (error) {
-      console.error('Failed to setup push notifications:', error);
+  const setupNotifications = async () => {
+    if (Notification.permission === 'default') {
+      try {
+        await subscribeToPushNotifications();
+      } catch (error) {
+        console.error('Failed to setup notifications:', error);
+      }
     }
+
+    const socket = getSocket();
+    if (socket && user) {
+      socket.on('newNotification', handleNewNotification);
+    }
+
+    return () => {
+      if (socket) {
+        socket.off('newNotification');
+      }
+    };
+  };
+
+  const handleNewNotification = (notification) => {
+    setNotifications(prev => [notification, ...prev]);
+    showNotification(
+      notification.title,
+      notification.body,
+      {
+        url: '/notifier',
+        notificationId: notification._id
+      }
+    );
   };
 
   const fetchNotifications = async () => {
@@ -98,6 +124,10 @@ function Notifier() {
               >
                 <option value="all">All Users</option>
                 <option value="registerId">Specific Register ID</option>
+                <option value="allUsers">All Regular Users</option>
+                <option value="allDevelopers">All Developers</option>
+                <option value="allAdmins">All Admins</option>
+                <option value="allFinanciers">All Financiers</option>
               </select>
             </div>
 
