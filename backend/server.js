@@ -2,8 +2,6 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
-import { createServer } from 'http';
-import { Server } from 'socket.io';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import webpush from 'web-push';
@@ -25,18 +23,8 @@ import { createDefaultDeveloper } from './utils/setupDefaults.js';
 dotenv.config();
 
 const app = express();
-const httpServer = createServer(app);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-// Socket.IO setup with CORS
-const io = new Server(httpServer, {
-  cors: {
-    origin: process.env.FRONTEND_URL,
-    methods: ["GET", "POST"],
-    credentials: true
-  }
-});
 
 // Web Push Notification Setup
 const vapidKeys = {
@@ -66,23 +54,6 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 // Serve static files
 app.use('/assets', express.static(path.join(__dirname, 'public/assets')));
-
-// Socket.IO events
-io.on('connection', (socket) => {
-  console.log('User connected:', socket.id);
-
-  socket.on('join', (userId) => {
-    socket.join(userId);
-    console.log(`User ${userId} joined their room`);
-  });
-
-  socket.on('disconnect', () => {
-    console.log('User disconnected:', socket.id);
-  });
-});
-
-// Make io available in routes
-app.set('io', io);
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -122,6 +93,6 @@ mongoose.connect(process.env.MONGODB_URI)
 
 // Server start
 const PORT = process.env.PORT || 5000;
-httpServer.listen(PORT, () => {
+app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
