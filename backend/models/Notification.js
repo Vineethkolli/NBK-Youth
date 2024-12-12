@@ -14,18 +14,15 @@ const notificationSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
-  recipients: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
-  }],
-  isGlobal: {
-    type: Boolean,
-    default: false
+  target: {
+    type: String,
+    enum: ['all', 'registerId', 'allUsers', 'allDevelopers', 'allAdmins', 'allFinanciers', 'allYouth'],
+    required: true
   },
-  read: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
-  }]
-}, { timestamps: true });
+  createdAt: {
+    type: Date,
+    default: Date.now
+  }
+});
 
 export default mongoose.model('Notification', notificationSchema);

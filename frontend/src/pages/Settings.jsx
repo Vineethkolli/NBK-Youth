@@ -23,6 +23,32 @@ function Settings() {
     setNotificationsSupported(supported);
   };
 
+  const checkNotificationStatus = async () => {
+    try {
+      const { data } = await axios.get(`${API_URL}/api/notifications/status`);
+      setNotificationsEnabled(data.enabled);
+    } catch (error) {
+      console.error('Failed to check notification status:', error);
+    }
+  };
+
+  const toggleNotifications = async () => {
+    try {
+      if (notificationsEnabled) {
+        await unsubscribeFromPushNotifications();
+        setNotificationsEnabled(false);
+        toast.success('Notifications disabled');
+      } else {
+        await subscribeToPushNotifications();
+        setNotificationsEnabled(true);
+        toast.success('Notifications enabled');
+      }
+      checkNotificationStatus();
+    } catch (error) {
+      toast.error(error.message || 'Failed to update notification settings');
+    }
+  };
+
   const checkInstallability = () => {
     // Detect platform
     if (/iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream) {
@@ -42,33 +68,6 @@ function Settings() {
     // Check if already installed
     if (window.matchMedia('(display-mode: standalone)').matches) {
       setIsInstallable(false);
-    }
-  };
-
-  const checkNotificationStatus = async () => {
-    try {
-      const { data } = await axios.get(`${API_URL}/api/notifications/status`);
-      setNotificationsEnabled(data.enabled);
-    } catch (error) {
-      console.error('Failed to check notification status:', error);
-    }
-  };
-
-  const toggleNotifications = async () => {
-    try {
-      if (notificationsEnabled) {
-        await unsubscribeFromPushNotifications();
-        setNotificationsEnabled(false);
-        toast.success('Notifications disabled');
-      } else {
-        const success = await subscribeToPushNotifications();
-        if (success) {
-          setNotificationsEnabled(true);
-          toast.success('Notifications enabled');
-        }
-      }
-    } catch (error) {
-      toast.error(error.message || 'Failed to update notification settings');
     }
   };
 
