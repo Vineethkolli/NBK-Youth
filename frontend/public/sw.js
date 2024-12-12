@@ -1,8 +1,16 @@
 self.addEventListener('push', function(event) {
-  const data = event.data.json();
+  let data = {};
+
+  try {
+    // Try to parse the push data as JSON
+    data = event.data.json();
+  } catch (e) {
+    // If it's not JSON, handle as plain text
+    data = { body: event.data.text() }; // Use text if JSON parsing fails
+  }
 
   const options = {
-    body: data.body,
+    body: data.body || 'Default message body',
     icon: '/logo.png',
     badge: '/logo.png',
     data: data.url || '/',
@@ -10,7 +18,7 @@ self.addEventListener('push', function(event) {
   };
 
   event.waitUntil(
-    self.registration.showNotification(data.title, options)
+    self.registration.showNotification(data.title || 'Notification', options)
   );
 });
 
@@ -32,10 +40,11 @@ self.addEventListener('notificationclick', function(event) {
 });
 
 self.addEventListener('install', function(event) {
-  // You can add any custom installation logic here if needed
+  // Optional custom installation logic
   event.waitUntil(self.skipWaiting());
 });
 
 self.addEventListener('activate', function(event) {
+  // Activate immediately
   event.waitUntil(self.clients.claim());
 });
