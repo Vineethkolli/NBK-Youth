@@ -4,7 +4,7 @@ import { Bell, Send } from 'lucide-react';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import { API_URL } from '../utils/config';
-import { subscribeToPushNotifications } from '../utils/notifications';
+import { showNotification, subscribeToPushNotifications } from '../utils/notifications';
 import NotificationHistory from '../components/notification/NotificationHistory';
 
 function Notifier() {
@@ -104,7 +104,6 @@ function Notifier() {
                 <option value="allDevelopers">All Developers</option>
                 <option value="allAdmins">All Admins</option>
                 <option value="allFinanciers">All Financiers</option>
-                <option value="allYouth">All Youth Members</option>
               </select>
             </div>
 
