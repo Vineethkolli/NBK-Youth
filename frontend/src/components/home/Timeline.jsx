@@ -38,7 +38,9 @@ function Timeline({ events, isEditing, onUpdate }) {
     }
   };
 
+  // Improved date formatting that considers local timezone
   const formatDate = (dateString) => {
+    const eventDate = new Date(dateString);
     const options = {
       year: 'numeric',
       month: 'long',
@@ -48,9 +50,8 @@ function Timeline({ events, isEditing, onUpdate }) {
       second: 'numeric',
       hour12: true,
     };
-  
-    return new Intl.DateTimeFormat('en-US', options).format(new Date(dateString));
-  };  
+    return eventDate.toLocaleString('en-US', options);
+  };
 
   return (
     <div className="space-y-4">
