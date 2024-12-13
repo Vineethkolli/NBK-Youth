@@ -13,10 +13,6 @@ function Timeline({ events, isEditing, onUpdate }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.name || !formData.dateTime) {
-      toast.error('Both fields are required');
-      return;
-    }
     try {
       await axios.post(`${API_URL}/api/homepage/events`, formData);
       toast.success('Event added successfully');
@@ -38,19 +34,8 @@ function Timeline({ events, isEditing, onUpdate }) {
     }
   };
 
-  // Improved date formatting that considers local timezone
   const formatDate = (dateString) => {
-    const eventDate = new Date(dateString);
-    const options = {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: 'numeric',
-      second: 'numeric',
-      hour12: true,
-    };
-    return eventDate.toLocaleString('en-US', options);
+    return new Date(dateString).toLocaleString();
   };
 
   return (
@@ -61,7 +46,6 @@ function Timeline({ events, isEditing, onUpdate }) {
           <button
             onClick={() => setShowForm(true)}
             className="inline-flex items-center px-3 py-2 bg-indigo-600 text-white rounded-md"
-            aria-label="Add new event"
           >
             <Plus className="h-4 w-4 mr-2" />
             Add Event
@@ -84,7 +68,6 @@ function Timeline({ events, isEditing, onUpdate }) {
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                  aria-label="Event name"
                 />
               </div>
               <div>
@@ -97,7 +80,6 @@ function Timeline({ events, isEditing, onUpdate }) {
                   value={formData.dateTime}
                   onChange={(e) => setFormData({ ...formData, dateTime: e.target.value })}
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                  aria-label="Event date and time"
                 />
               </div>
               <div className="flex justify-end space-x-2">
@@ -105,14 +87,12 @@ function Timeline({ events, isEditing, onUpdate }) {
                   type="button"
                   onClick={() => setShowForm(false)}
                   className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
-                  aria-label="Cancel adding event"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700"
-                  aria-label="Add event"
                 >
                   Add Event
                 </button>
@@ -143,7 +123,6 @@ function Timeline({ events, isEditing, onUpdate }) {
                       <button
                         onClick={() => handleDelete(event._id)}
                         className="text-red-600 hover:text-red-800"
-                        aria-label="Delete event"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
