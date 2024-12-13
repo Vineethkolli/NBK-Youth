@@ -17,6 +17,7 @@ import statsRoutes from './routes/stats.js';
 import developerRoutes from './routes/developer.js';
 import collectionRoutes from './routes/collections.js';
 import hiddenProfileRoutes from './routes/hiddenProfiles.js';
+import homepageRoutes from './routes/homepage.js';
 import { createDefaultDeveloper } from './utils/setupDefaults.js';
 
 // Load environment variables
@@ -68,6 +69,7 @@ app.use('/api/stats', statsRoutes);
 app.use('/api/developer', developerRoutes);
 app.use('/api/collections', collectionRoutes);
 app.use('/api/hidden-profiles', hiddenProfileRoutes);
+app.use('/api/homepage', homepageRoutes);
 
 // Health check endpoint
 app.get('/', (req, res) => {
