@@ -35,8 +35,18 @@ function Timeline({ events, isEditing, onUpdate }) {
   };
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleString();
-  };
+    const options = {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+      second: 'numeric',
+      hour12: true,
+    };
+  
+    return new Intl.DateTimeFormat('en-US', options).format(new Date(dateString));
+  };  
 
   return (
     <div className="space-y-4">
