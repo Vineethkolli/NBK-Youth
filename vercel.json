@@ -2,10 +2,10 @@
   "builds": [
     {
       "src": "frontend/package.json",
-      "use": "@vercel/static-build"
+      "use": "@vercel/react"
     },
     {
-      "src": "backend/api/**/*.js",
+      "src": "backend/**/*.js", 
       "use": "@vercel/node"
     }
   ],
@@ -16,7 +16,7 @@
     },
     {
       "src": "/api/(.*)",
-      "dest": "/backend/api/$1"
+      "dest": "/backend/$1"
     }
   ]
 }
