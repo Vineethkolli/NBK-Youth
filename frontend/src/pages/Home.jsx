@@ -28,7 +28,7 @@ function Home() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-      {user?.role === 'developer' && (
+      {['developer', 'financier', 'admin'].includes(user?.role) && (
         <div className="flex justify-end">
           <button
             onClick={() => setIsEditing(!isEditing)}
@@ -69,6 +69,9 @@ function Home() {
             Raise Concerns, Recommend Enhancements, Share Your Thoughts.
           </p>
         </div>
+        <p className="mt-4 text-sm text-gray-500">
+            If any issue is faced at any time, just refresh the page by scrolling down. We are working hard to sort out the errors.
+          </p>
       </div>
 
       {/* Footer */}

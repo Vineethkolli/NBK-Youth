@@ -14,7 +14,12 @@ function Timeline({ events, isEditing, onUpdate }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(`${API_URL}/api/homepage/events`, formData);
+      // Convert local datetime to ISO string for backend
+      const dateTime = new Date(formData.dateTime).toISOString();
+      await axios.post(`${API_URL}/api/homepage/events`, {
+        ...formData,
+        dateTime
+      });
       toast.success('Event added successfully');
       setShowForm(false);
       setFormData({ name: '', dateTime: '' });
@@ -35,7 +40,21 @@ function Timeline({ events, isEditing, onUpdate }) {
   };
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleString();
+    const date = new Date(dateString);
+    
+    // Format date
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    
+    // Format time in 12-hour format with AM/PM
+    let hours = date.getHours();
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12; // Convert 0 to 12
+    
+    return `${day}/${month}/${year}, ${hours}:${minutes} ${ampm}`;
   };
 
   return (
@@ -108,7 +127,7 @@ function Timeline({ events, isEditing, onUpdate }) {
         ) : (
           <div className="relative">
             <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-200" />
-            {events.map((event, index) => (
+            {events.map((event) => (
               <div key={event._id} className="relative pl-8 pb-8">
                 <div className="absolute left-2 top-2 w-4 h-4 bg-indigo-600 rounded-full border-4 border-white" />
                 <div className="bg-white rounded-lg shadow p-4">
