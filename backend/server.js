@@ -40,11 +40,25 @@ webpush.setVapidDetails(
 );
 
 // Middleware
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', process.env.FRONTEND_URL); // Replace with your frontend URL
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS'); // Allow necessary methods
+  res.header(
+    'Access-Control-Allow-Headers',
+    'Origin, X-Requested-With, Content-Type, Accept, Authorization'
+  ); // Allow necessary headers
+  res.header('Access-Control-Allow-Credentials', 'true'); // Allow credentials
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  next();
+});
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL, // Allow requests only from your frontend URL
-  credentials: true, // Allow credentials like cookies
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'], // Allow specific methods
-  allowedHeaders: ['Content-Type', 'Authorization'], // Allow necessary headers
+  origin: process.env.FRONTEND_URL, // Frontend origin
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'], // Allowed methods
+  allowedHeaders: ['Content-Type', 'Authorization'], // Necessary headers
 }));
 app.use(express.json({ limit: '50mb' })); // Handle large payloads
 app.use(express.urlencoded({ extended: true, limit: '50mb' })); // Handle URL-encoded data
@@ -82,7 +96,7 @@ app.use((err, req, res, next) => {
 });
 
 // MongoDB connection
-mongoose.connect(process.env.MONGODB_URI)
+mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => {
     console.log('Connected to MongoDB');
     createDefaultDeveloper();
