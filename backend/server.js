@@ -39,25 +39,33 @@ webpush.setVapidDetails(
   vapidKeys.privateKey
 );
 
-// Middleware
+// CORS configuration
+const allowedOrigins = [
+  'https://nbkyouth.vercel.app',
+  'http://localhost:5173',
+  'http://localhost:3000'
+];
+
 app.use(cors({
-  origin: (origin, callback) => {
-    const allowedOrigins = [process.env.FRONTEND_URL];
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
+  origin: function(origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) === -1) {
+      return callback(new Error('CORS not allowed'));
     }
+    return callback(null, true);
   },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
+// Pre-flight requests
+app.options('*', cors());
+
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
-
-// Serve static files
-app.use('/assets', express.static(path.join(__dirname, 'public/assets')));
 
 // Routes
 app.use('/api/auth', authRoutes);
