@@ -3,17 +3,28 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET
+// Main Cloudinary configuration for images (Cloudinary Account 1)
+const cloudinary1 = cloudinary.config({
+  cloud_name: process.env.CLOUDINARY1_CLOUD_NAME_ACCOUNT,
+  api_key: process.env.CLOUDINARY1_API_KEY_ACCOUNT,
+  api_secret: process.env.CLOUDINARY1_API_SECRET_ACCOUNT
+});
+
+// Separate Cloudinary configuration for Vibe (audio files) (Cloudinary Account 2)
+const cloudinary2 = cloudinary.config({
+  cloud_name: process.env.CLOUDINARY2_CLOUD_NAME_ACCOUNT,
+  api_key: process.env.CLOUDINARY2_API_KEY_ACCOUNT,
+  api_secret: process.env.CLOUDINARY2_API_SECRET_ACCOUNT
 });
 
 export const uploadToCloudinary = async (file, folder = 'PaymentScreenshots') => {
   try {
     // Remove the data:[content-type];base64, prefix
     const base64Data = file.replace(/^data:([^;]+);base64,/, '');
-    
+
+    // Determine which Cloudinary instance to use based on folder
+    const cloudinaryInstance = folder === 'Vibe' ? cloudinary2 : cloudinary1;
+
     const options = {
       folder,
       resource_type: 'auto',
@@ -29,8 +40,8 @@ export const uploadToCloudinary = async (file, folder = 'PaymentScreenshots') =>
       options.resource_type = 'video'; // Cloudinary uses 'video' for audio files
     }
 
-    // Upload to Cloudinary
-    const result = await cloudinary.uploader.upload(
+    // Upload to appropriate Cloudinary account
+    const result = await cloudinaryInstance.uploader.upload(
       `data:${options.resource_type === 'image' ? 'image/png' : 'audio/mpeg'};base64,${base64Data}`,
       options
     );
@@ -42,4 +53,4 @@ export const uploadToCloudinary = async (file, folder = 'PaymentScreenshots') =>
   }
 };
 
-export default cloudinary;
+export { cloudinary1, cloudinary2 };
