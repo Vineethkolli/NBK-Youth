@@ -9,7 +9,7 @@ import authRoutes from './routes/auth.js';
 import userRoutes from './routes/users.js';
 import notificationRoutes from './routes/notifications.js';
 import paymentRoutes from './routes/payment.js';
-import paymentDetailsRoutes from './routes/paymentDetails.js'; 
+import paymentDetailsRoutes from './routes/paymentDetails.js';
 import incomeRoutes from './routes/incomes.js';
 import expenseRoutes from './routes/expenses.js';
 import verificationRoutes from './routes/verification.js';
@@ -34,21 +34,17 @@ const vapidKeys = {
 };
 
 webpush.setVapidDetails(
-  'mailto:example@yourdomain.com',
+  'mailto:your-email@example.com', // Replace with your actual email
   vapidKeys.publicKey,
   vapidKeys.privateKey
 );
 
 // Middleware
 app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || origin === process.env.FRONTEND_URL) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true
+  origin: [process.env.FRONTEND_URL], // Allow only the frontend origin
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
@@ -60,7 +56,7 @@ app.use('/assets', express.static(path.join(__dirname, 'public/assets')));
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/notifications', notificationRoutes);
-app.use('/api/payments', paymentRoutes); 
+app.use('/api/payments', paymentRoutes);
 app.use('/api/payment-details', paymentDetailsRoutes);
 app.use('/api/incomes', incomeRoutes);
 app.use('/api/expenses', expenseRoutes);
@@ -78,8 +74,17 @@ app.get('/', (req, res) => {
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ 
+  console.error('Error:', err.stack);
+
+  if (err.name === 'UnauthorizedError') {
+    return res.status(401).json({ message: 'Invalid token' });
+  }
+
+  if (err.message === 'Not allowed by CORS') {
+    return res.status(403).json({ message: 'CORS Error: Origin not allowed' });
+  }
+
+  res.status(500).json({
     message: 'Internal Server Error',
     error: process.env.NODE_ENV === 'development' ? err.message : undefined
   });
@@ -89,7 +94,7 @@ app.use((err, req, res, next) => {
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => {
     console.log('Connected to MongoDB');
-    createDefaultDeveloper();
+    createDefaultDeveloper(); // Create default developer user
   })
   .catch((err) => console.error('MongoDB connection error:', err));
 
