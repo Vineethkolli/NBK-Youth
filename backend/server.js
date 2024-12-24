@@ -9,7 +9,7 @@ import authRoutes from './routes/auth.js';
 import userRoutes from './routes/users.js';
 import notificationRoutes from './routes/notifications.js';
 import paymentRoutes from './routes/payment.js';
-import paymentDetailsRoutes from './routes/paymentDetails.js';
+import paymentDetailsRoutes from './routes/paymentDetails.js'; 
 import incomeRoutes from './routes/incomes.js';
 import expenseRoutes from './routes/expenses.js';
 import verificationRoutes from './routes/verification.js';
@@ -30,7 +30,7 @@ const __dirname = path.dirname(__filename);
 // Web Push Notification Setup
 const vapidKeys = {
   publicKey: process.env.VAPID_PUBLIC_KEY,
-  privateKey: process.env.VAPID_PRIVATE_KEY,
+  privateKey: process.env.VAPID_PRIVATE_KEY
 };
 
 webpush.setVapidDetails(
@@ -40,28 +40,18 @@ webpush.setVapidDetails(
 );
 
 // Middleware
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', process.env.FRONTEND_URL); // Replace with your frontend URL
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS'); // Allow necessary methods
-  res.header(
-    'Access-Control-Allow-Headers',
-    'Origin, X-Requested-With, Content-Type, Accept, Authorization'
-  ); // Allow necessary headers
-  res.header('Access-Control-Allow-Credentials', 'true'); // Allow credentials
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);
-  }
-  next();
-});
-
 app.use(cors({
-  origin: process.env.FRONTEND_URL, // Frontend origin
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'], // Allowed methods
-  allowedHeaders: ['Content-Type', 'Authorization'], // Necessary headers
+  origin: (origin, callback) => {
+    if (!origin || origin === process.env.FRONTEND_URL) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
 }));
-app.use(express.json({ limit: '50mb' })); // Handle large payloads
-app.use(express.urlencoded({ extended: true, limit: '50mb' })); // Handle URL-encoded data
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 // Serve static files
 app.use('/assets', express.static(path.join(__dirname, 'public/assets')));
@@ -70,7 +60,7 @@ app.use('/assets', express.static(path.join(__dirname, 'public/assets')));
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/notifications', notificationRoutes);
-app.use('/api/payments', paymentRoutes);
+app.use('/api/payments', paymentRoutes); 
 app.use('/api/payment-details', paymentDetailsRoutes);
 app.use('/api/incomes', incomeRoutes);
 app.use('/api/expenses', expenseRoutes);
@@ -88,15 +78,15 @@ app.get('/', (req, res) => {
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  console.error('Error:', err.message);
-  res.status(err.status || 500).json({
-    success: false,
-    message: err.message || 'Internal Server Error',
+  console.error(err.stack);
+  res.status(500).json({ 
+    message: 'Internal Server Error',
+    error: process.env.NODE_ENV === 'development' ? err.message : undefined
   });
 });
 
 // MongoDB connection
-mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(process.env.MONGODB_URI)
   .then(() => {
     console.log('Connected to MongoDB');
     createDefaultDeveloper();
