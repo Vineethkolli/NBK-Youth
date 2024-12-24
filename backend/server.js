@@ -30,24 +30,24 @@ const __dirname = path.dirname(__filename);
 // Web Push Notification Setup
 const vapidKeys = {
   publicKey: process.env.VAPID_PUBLIC_KEY,
-  privateKey: process.env.VAPID_PRIVATE_KEY
+  privateKey: process.env.VAPID_PRIVATE_KEY,
 };
 
 webpush.setVapidDetails(
-  'mailto:your-email@example.com', // Replace with your actual email
+  'mailto:example@yourdomain.com',
   vapidKeys.publicKey,
   vapidKeys.privateKey
 );
 
 // Middleware
 app.use(cors({
-  origin: [process.env.FRONTEND_URL], // Allow only the frontend origin
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  origin: process.env.FRONTEND_URL, // Allow requests only from your frontend URL
+  credentials: true, // Allow credentials like cookies
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'], // Allow specific methods
+  allowedHeaders: ['Content-Type', 'Authorization'], // Allow necessary headers
 }));
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+app.use(express.json({ limit: '50mb' })); // Handle large payloads
+app.use(express.urlencoded({ extended: true, limit: '50mb' })); // Handle URL-encoded data
 
 // Serve static files
 app.use('/assets', express.static(path.join(__dirname, 'public/assets')));
@@ -74,19 +74,10 @@ app.get('/', (req, res) => {
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  console.error('Error:', err.stack);
-
-  if (err.name === 'UnauthorizedError') {
-    return res.status(401).json({ message: 'Invalid token' });
-  }
-
-  if (err.message === 'Not allowed by CORS') {
-    return res.status(403).json({ message: 'CORS Error: Origin not allowed' });
-  }
-
-  res.status(500).json({
-    message: 'Internal Server Error',
-    error: process.env.NODE_ENV === 'development' ? err.message : undefined
+  console.error('Error:', err.message);
+  res.status(err.status || 500).json({
+    success: false,
+    message: err.message || 'Internal Server Error',
   });
 });
 
@@ -94,7 +85,7 @@ app.use((err, req, res, next) => {
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => {
     console.log('Connected to MongoDB');
-    createDefaultDeveloper(); // Create default developer user
+    createDefaultDeveloper();
   })
   .catch((err) => console.error('MongoDB connection error:', err));
 
