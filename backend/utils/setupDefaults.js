@@ -11,13 +11,13 @@ export const createDefaultDeveloper = async () => {
       { upsert: true, new: true }
     );
 
-    const existingDev = await User.findOne({ email: 'developer@gmail.com' });
+    const existingDev = await User.findOne({ email: 'devvineel@gmail.com' });
     if (!existingDev) {
       await User.create({
-        name: 'Default Developer',
-        email: 'developer@gmail.com',
-        phoneNumber: '1234567890',
-        password: 'dev15',
+        name: 'Dev Vineel',
+        email: 'devvineel@gmail.com',
+        phoneNumber: '0000000000',
+        password: 'DevVineel@15',
         role: 'developer'
       });
       console.log('Default developer account created');
