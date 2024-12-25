@@ -5,13 +5,11 @@ import mongoose from 'mongoose';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import webpush from 'web-push';
-import cron from 'node-cron'; // Import node-cron
-import axios from 'axios'; // Import axios for self-pinging
 import authRoutes from './routes/auth.js';
 import userRoutes from './routes/users.js';
 import notificationRoutes from './routes/notifications.js';
 import paymentRoutes from './routes/payment.js';
-import paymentDetailsRoutes from './routes/paymentDetails.js';
+import paymentDetailsRoutes from './routes/paymentDetails.js'; 
 import incomeRoutes from './routes/incomes.js';
 import expenseRoutes from './routes/expenses.js';
 import verificationRoutes from './routes/verification.js';
@@ -94,18 +92,6 @@ mongoose.connect(process.env.MONGODB_URI)
     createDefaultDeveloper();
   })
   .catch((err) => console.error('MongoDB connection error:', err));
-
-// Self-pinging cron job
-const SERVER_URL = process.env.SERVER_URL || `http://localhost:${process.env.PORT || 5000}`; // Use environment variable for URL
-
-cron.schedule('*/5 * * * *', async () => {
-  try {
-    const response = await axios.get(SERVER_URL);
-    console.log('Self-ping successful:', response.data);
-  } catch (error) {
-    console.error('Self-ping failed:', error.message);
-  }
-});
 
 // Server start
 const PORT = process.env.PORT || 5000;
