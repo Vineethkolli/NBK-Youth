@@ -150,6 +150,7 @@ function Stats() {
               </div>
               <div>
                 <p className="font-semibold">Amount Left</p>
+                <p className="text-xs text-gray-500">(Excluding Previous Year Amount)</p>
                 <p className="text-lg font-bold">{formatAmount(stats.budgetStats.amountLeft.amount)}</p>
                 <div className="text-sm text-gray-600 mt-1">
                   <p>Online: {formatAmount(stats.budgetStats.amountLeft.onlineAmount)}</p>
