@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-hot-toast';
+import { Eye, EyeOff } from 'lucide-react'; // Import icons for visibility toggle
 import ForgotPassword from '../components/auth/ForgotPassword';
 import OTPVerification from '../components/auth/OTPVerification';
 import ResetPassword from '../components/auth/ResetPassword';
@@ -8,24 +9,29 @@ import ResetPassword from '../components/auth/ResetPassword';
 function SignIn() {
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false); // State for toggling password visibility
   const [resetFlow, setResetFlow] = useState({
     step: 'signin', // signin, forgot, otp, reset
     email: '',
     resetToken: ''
   });
-  const [isSubmitting, setIsSubmitting] = useState(false); // Track submitting state
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { signin } = useAuth();
+
+  const togglePasswordVisibility = () => {
+    setShowPassword((prevState) => !prevState);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsSubmitting(true); // Start submission process
+    setIsSubmitting(true);
     try {
       await signin(identifier, password);
       toast.success('Signed in successfully');
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to sign in');
     } finally {
-      setIsSubmitting(false); // End submission process
+      setIsSubmitting(false);
     }
   };
 
@@ -83,30 +89,37 @@ function SignIn() {
           />
         </div>
 
-        <div>
+        <div className="relative">
           <input
-            type="password"
+            type={showPassword ? 'text' : 'password'} // Toggle input type
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Password"
             className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500"
           />
+          <button
+            type="button"
+            onClick={togglePasswordVisibility}
+            className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700"
+          >
+            {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+          </button>
         </div>
 
         <div>
           <button
             type="submit"
-            disabled={isSubmitting} // Disable button while submitting
+            disabled={isSubmitting}
             className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${isSubmitting ? 'bg-gray-400' : 'bg-green-600 hover:bg-green-700'} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500`}
           >
-            {isSubmitting ? 'Signing In...' : 'Sign in'} {/* Show loading text */}
+            {isSubmitting ? 'Signing In...' : 'Sign in'}
           </button>
         </div>
 
         <div className="text-sm text-center">
           <p className="text-black">
-            Don't have an account?{'  '}
+            Don't have an account?{' '}
             <a href="/signup" className="font-medium text-green-600 hover:text-green-500">
               Sign up
             </a>
@@ -114,7 +127,7 @@ function SignIn() {
         </div>
         <div className="text-sm text-center">
           <p className="text-black">
-            Forgot password?{'  '}
+            Forgot password?{' '}
             <button
               type="button"
               onClick={() => setResetFlow({ ...resetFlow, step: 'forgot' })}

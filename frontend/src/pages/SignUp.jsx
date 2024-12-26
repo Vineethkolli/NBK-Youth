@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-hot-toast';
+import { Eye, EyeOff } from 'lucide-react'; // Import icons for visibility toggle
 
 function SignUp() {
   const [formData, setFormData] = useState({
@@ -11,6 +12,8 @@ function SignUp() {
     confirmPassword: ''
   });
 
+  const [showPassword, setShowPassword] = useState(false); // State for toggling password visibility
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false); // State for toggling confirm password visibility
   const [isSubmitting, setIsSubmitting] = useState(false); // Track submitting state
   const { signup } = useAuth();
 
@@ -36,6 +39,16 @@ function SignUp() {
     }
   };
 
+  // Toggle password visibility
+  const togglePasswordVisibility = () => {
+    setShowPassword((prevState) => !prevState);
+  };
+
+  // Toggle confirm password visibility
+  const toggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword((prevState) => !prevState);
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div>
@@ -54,7 +67,7 @@ function SignUp() {
         <input
           type="email"
           name="email"
-          placeholder="Email    (Not Mandatory)"
+          placeholder="Email (Not Mandatory)"
           value={formData.email}
           onChange={handleChange}
           className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500"
@@ -73,9 +86,9 @@ function SignUp() {
         />
       </div>
 
-      <div>
+      <div className="relative">
         <input
-          type="password"
+          type={showPassword ? 'text' : 'password'} // Toggle input type for password
           name="password"
           required
           placeholder="Password"
@@ -83,11 +96,18 @@ function SignUp() {
           onChange={handleChange}
           className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500"
         />
+        <button
+          type="button"
+          onClick={togglePasswordVisibility}
+          className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700"
+        >
+          {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+        </button>
       </div>
 
-      <div>
+      <div className="relative">
         <input
-          type="password"
+          type={showConfirmPassword ? 'text' : 'password'} // Toggle input type for confirm password
           name="confirmPassword"
           required
           placeholder="Confirm Password"
@@ -95,6 +115,13 @@ function SignUp() {
           onChange={handleChange}
           className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500"
         />
+        <button
+          type="button"
+          onClick={toggleConfirmPasswordVisibility}
+          className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700"
+        >
+          {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+        </button>
       </div>
 
       <div>
