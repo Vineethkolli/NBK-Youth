@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, User, Users, Download, Bell, CreditCard, Settings, IndianRupee, Trash2, CheckSquare, BarChart2, Terminal, MusicIcon, CameraIcon } from 'lucide-react';
+import { Home, User, Users, Bell, ShieldCheck, Settings, IndianRupee, Trash2, CheckSquare, BarChart2, Terminal, MusicIcon, CameraIcon } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 function Sidebar({ isOpen, onNavigate }) {
@@ -14,7 +14,7 @@ function Sidebar({ isOpen, onNavigate }) {
     { to: '/income', icon: IndianRupee, label: 'Income' },
     { to: '/expense', icon: IndianRupee, label: 'Expense' },
     { to: '/profile', icon: User, label: 'Profile' },
-    { to: '/pay-online', icon: CreditCard, label: 'Pay Online' },
+    { to: '/pay-online', icon: ShieldCheck, label: 'Pay Online' },
     { to: '/notifier', icon: Bell, label: 'Notifications' },
     { to: '/settings', icon: Settings, label: 'Settings' },
     ...(user?.role === 'developer' ? [

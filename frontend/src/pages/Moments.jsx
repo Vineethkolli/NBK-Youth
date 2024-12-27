@@ -71,7 +71,7 @@ const handleTogglePin = async (momentId) => {
     setShowForm(true);
   };
 
-  const isPrivilegedUser = ['developer', 'admin'].includes(user?.role);
+  const isPrivilegedUser = ['developer', 'admin', 'financier'].includes(user?.role);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
