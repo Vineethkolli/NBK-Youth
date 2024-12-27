@@ -8,7 +8,5 @@ router.get('/', momentController.getAllMoments);
 router.post('/youtube', auth, checkRole(['developer', 'admin']), momentController.addYouTubeMoment);
 router.post('/media', auth, checkRole(['developer', 'admin']), momentController.uploadMediaMoment);
 router.delete('/:id', auth, checkRole(['developer', 'admin']), momentController.deleteMoment);
-// In backend/routes/moments.js
-router.patch('/:id/pin', auth, checkRole(['developer', 'admin']), momentController.togglePin);
 
 export default router;

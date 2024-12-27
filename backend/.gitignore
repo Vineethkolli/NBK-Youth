@@ -9,17 +9,17 @@ lerna-debug.log*
 
 # Runtime data
 node_modules
-dist
-dist-ssr
-*.local
-
-# Coverage reports
-coverage
-*.lcov
+build
+tmp
+temp
 
 # Environment files
 .env
 .env.*.local
+
+# Coverage reports
+coverage
+*.lcov
 
 # Temporary files
 *.tmp
@@ -36,9 +36,22 @@ coverage
 *.njsproj
 *.sln
 
+# OS-specific files
+._*
+Thumbs.db
+
 # Optional npm cache directory
 .npm
 
-# MacOS system files
-._*
-Thumbs.db
+# Debugging tools
+*.repl_history
+
+# Database dumps
+*.sql
+*.sqlite
+*.sqlite3
+
+# Other
+*.pid
+*.seed
+*.pid.lock
