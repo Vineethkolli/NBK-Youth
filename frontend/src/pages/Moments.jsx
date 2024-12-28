@@ -41,7 +41,6 @@ function Moments() {
     }
   };
 
-  // In frontend/src/pages/Moments.jsx
 const handleTogglePin = async (momentId) => {
   try {
     await axios.patch(`${API_URL}/api/moments/${momentId}/pin`);
@@ -51,9 +50,6 @@ const handleTogglePin = async (momentId) => {
     toast.error('Failed to update pin status');
   }
 };
-
-
-
 
   const handleDelete = async (momentId) => {
     if (!window.confirm('Are you sure you want to delete this moment?')) return;
@@ -74,7 +70,7 @@ const handleTogglePin = async (momentId) => {
   const isPrivilegedUser = ['developer', 'admin', 'financier'].includes(user?.role);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-0 py-0">
       {isPrivilegedUser && (
         <div className="flex justify-between items-center mb-6">
           <div className="space-x-2">

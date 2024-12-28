@@ -77,7 +77,7 @@ function RecycleBin() {
   };
 
   return (
-    <div className="space-y-8 p-6">
+    <div className="space-y-8 p-0">
       {/* Income Bin */}
       <div>
         <h1 className="text-2xl font-semibold text-gray-800 mb-4">Income Bin</h1>

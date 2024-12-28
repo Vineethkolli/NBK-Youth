@@ -61,7 +61,7 @@ function Notifier() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
+    <div className="max-w-1xl mx-auto space-y-8">
       {user?.role === 'developer' && (
         <div className="bg-white shadow-lg rounded-lg p-6">
           <h2 className="text-2xl font-semibold mb-6 flex items-center">
