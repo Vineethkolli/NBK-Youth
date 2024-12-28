@@ -3,18 +3,10 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-// Main Cloudinary config for images
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET
-});
-
-// Create a separate Cloudinary instance for Vibe audio files
-const vibeCloudinary = cloudinary.config({
-  cloud_name: process.env.VIBE_CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.VIBE_CLOUDINARY_API_KEY,
-  api_secret: process.env.VIBE_CLOUDINARY_API_SECRET
 });
 
 export const uploadToCloudinary = async (file, folder = 'PaymentScreenshots') => {
@@ -32,21 +24,9 @@ export const uploadToCloudinary = async (file, folder = 'PaymentScreenshots') =>
     if (folder === 'PaymentScreenshots' || folder === 'ExpenseBills') {
       options.format = 'jpg';
       options.resource_type = 'image';
-      // Use main Cloudinary config
-      cloudinary.config({
-        cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-        api_key: process.env.CLOUDINARY_API_KEY,
-        api_secret: process.env.CLOUDINARY_API_SECRET
-      });
     } else if (folder === 'Vibe') {
       options.format = 'mp3';
       options.resource_type = 'video'; // Cloudinary uses 'video' for audio files
-      // Use Vibe Cloudinary config
-      cloudinary.config({
-        cloud_name: process.env.VIBE_CLOUDINARY_CLOUD_NAME,
-        api_key: process.env.VIBE_CLOUDINARY_API_KEY,
-        api_secret: process.env.VIBE_CLOUDINARY_API_SECRET
-      });
     }
 
     // Upload to Cloudinary
