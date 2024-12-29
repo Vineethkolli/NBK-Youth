@@ -20,6 +20,7 @@ import RecycleBin from './pages/RecycleBin';
 import DeveloperOptions from './pages/DeveloperOptions';
 import Vibe from './pages/Vibe';
 import Moments from './pages/Moments';
+import LetsPlay from './pages/LetsPlay';
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './context/AuthContext';
 import { HiddenProfileProvider } from './context/HiddenProfileContext';
@@ -56,6 +57,7 @@ function AppContent() {
           <Route path="/developer-options" element={<DeveloperOptions />} />
           <Route path="/vibe" element={<Vibe />} />
           <Route path="/moments" element={<Moments />} />
+          <Route path="/lets-play" element={<LetsPlay />} />
         </Route>
       </Routes>
     </>

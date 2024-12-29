@@ -18,9 +18,9 @@ import developerRoutes from './routes/developer.js';
 import collectionRoutes from './routes/collections.js';
 import hiddenProfileRoutes from './routes/hiddenProfiles.js';
 import homepageRoutes from './routes/homepage.js';
-import { createDefaultDeveloper } from './utils/setupDefaults.js';
 import momentsRoutes from './routes/moments.js';
-
+import gameRoutes from './routes/games.js';
+import { createDefaultDeveloper } from './utils/setupDefaults.js';
 
 // Load environment variables
 dotenv.config();
@@ -73,6 +73,7 @@ app.use('/api/collections', collectionRoutes);
 app.use('/api/hidden-profiles', hiddenProfileRoutes);
 app.use('/api/homepage', homepageRoutes);
 app.use('/api/moments', momentsRoutes);
+app.use('/api/games', gameRoutes);
 
 // Health check endpoint
 app.get('/', (req, res) => {
