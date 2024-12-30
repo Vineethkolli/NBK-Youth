@@ -37,13 +37,18 @@ function LetsPlay() {
 
   // Game CRUD operations
   const handleCreateGame = async (formData) => {
+    if (games.some((g) => g.name.toLowerCase() === formData.name.toLowerCase())) {
+      toast.error('Game name already exists. Please choose a different name.');
+      return;
+    }
+  
     try {
       const { data } = await axios.post(`${API_URL}/api/games`, formData);
-      setGames(prevGames => [...prevGames, data].sort((a, b) => a.name.localeCompare(b.name)));
+      setGames((prevGames) => [...prevGames, data].sort((a, b) => a.name.localeCompare(b.name)));
       setShowGameForm(false);
       toast.success('Game created successfully');
     } catch (error) {
-      toast.error('Failed to create game');
+      toast.error(error.response?.data?.message || 'Failed to create game');
     }
   };
 
