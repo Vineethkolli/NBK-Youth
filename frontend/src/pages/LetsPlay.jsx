@@ -55,14 +55,16 @@ function LetsPlay() {
   const handleGameEdit = async (game) => {
     const newName = prompt('Enter new game name:', game.name);
     if (!newName || newName === game.name) return;
-
+  
+    if (games.some((g) => g.name.toLowerCase() === newName.toLowerCase())) {
+      toast.error('Game name already exists. Please choose a different name.');
+      return;
+    }
+  
     try {
-      const { data } = await axios.put(`${API_URL}/api/games/${game._id}`, {
-        name: newName
-      });
-      setGames(prevGames => 
-        prevGames.map(g => g._id === game._id ? data : g)
-          .sort((a, b) => a.name.localeCompare(b.name))
+      const { data } = await axios.put(`${API_URL}/api/games/${game._id}`, { name: newName });
+      setGames((prevGames) =>
+        prevGames.map((g) => (g._id === game._id ? data : g)).sort((a, b) => a.name.localeCompare(b.name))
       );
       if (selectedGame?._id === game._id) {
         setSelectedGame(data);
@@ -71,7 +73,7 @@ function LetsPlay() {
     } catch (error) {
       toast.error('Failed to update game');
     }
-  };
+  };  
 
   const handleGameDelete = async (game) => {
     if (!window.confirm('Are you sure you want to delete this game?')) return;
