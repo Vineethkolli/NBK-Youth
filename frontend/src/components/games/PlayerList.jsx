@@ -1,4 +1,5 @@
 import { Clock, Edit2, Trash2 } from 'lucide-react';
+import { useState } from 'react';
 
 function PlayerList({ 
   players, 
@@ -9,6 +10,9 @@ function PlayerList({
   onEdit, 
   onDelete 
 }) {
+  const [editingPlayerId, setEditingPlayerId] = useState(null);
+  const [newName, setNewName] = useState('');
+
   const sortPlayersByRank = (players) => {
     return [...players].sort((a, b) => {
       if (timerRequired) {
@@ -21,7 +25,7 @@ function PlayerList({
           'winner-2nd': 2,
           'winner-3rd': 3,
           '': 4,
-          'eliminated': 5
+          'eliminated': 5,
         };
         return ranks[a.status || ''] - ranks[b.status || ''];
       }
@@ -58,6 +62,19 @@ function PlayerList({
     );
   };
 
+  const handleNameChange = (playerId, name) => {
+    setEditingPlayerId(playerId);
+    setNewName(name);
+  };
+
+  const saveUpdatedName = (playerId) => {
+    if (newName.trim()) {
+      onEdit(playerId, newName);
+      setEditingPlayerId(null);
+      setNewName('');
+    }
+  };
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {sortPlayersByRank(players).map((player) => (
@@ -69,7 +86,21 @@ function PlayerList({
           `}
         >
           <div className="space-y-2">
-            <h3 className="font-medium">{player.name}</h3>
+            {editingPlayerId === player._id ? (
+              <input
+                type="text"
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                onBlur={() => saveUpdatedName(player._id)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') saveUpdatedName(player._id);
+                }}
+                className="form-input text-sm"
+                autoFocus
+              />
+            ) : (
+              <h3 className="font-medium">{player.name}</h3>
+            )}
             {getStatusBadge(player)}
           </div>
 
@@ -98,7 +129,7 @@ function PlayerList({
             {isEditMode && (
               <>
                 <button
-                  onClick={() => onEdit(player)}
+                  onClick={() => handleNameChange(player._id, player.name)}
                   className="text-blue-600 hover:text-blue-800"
                 >
                   <Edit2 className="h-4 w-4" />

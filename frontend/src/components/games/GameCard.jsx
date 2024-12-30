@@ -84,7 +84,7 @@ function GameCard({ game, isEditMode, onSelect, onEdit, onDelete }) {
         onClick={() => onSelect(game)}
         className="w-full flex items-center justify-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
       >
-        <span className="mr-2">Go</span>
+        <span className="mr-2">Players</span>
         <ChevronRight className="h-4 w-4" />
       </button>
     </div>

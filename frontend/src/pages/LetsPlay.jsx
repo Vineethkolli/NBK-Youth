@@ -35,29 +35,36 @@ function LetsPlay() {
     }
   };
 
-  // Game CRUD operations
   const handleCreateGame = async (formData) => {
+    if (games.some((g) => g.name.toLowerCase() === formData.name.toLowerCase())) {
+      toast.error('Game name already exists. Please choose a different name.');
+      return;
+    }
+  
     try {
       const { data } = await axios.post(`${API_URL}/api/games`, formData);
-      setGames(prevGames => [...prevGames, data].sort((a, b) => a.name.localeCompare(b.name)));
+      setGames((prevGames) => [...prevGames, data].sort((a, b) => a.name.localeCompare(b.name)));
       setShowGameForm(false);
       toast.success('Game created successfully');
     } catch (error) {
-      toast.error('Failed to create game');
+      toast.error(error.response?.data?.message || 'Failed to create game');
     }
   };
+  
 
   const handleGameEdit = async (game) => {
     const newName = prompt('Enter new game name:', game.name);
     if (!newName || newName === game.name) return;
-
+  
+    if (games.some((g) => g.name.toLowerCase() === newName.toLowerCase())) {
+      toast.error('Game name already exists. Please choose a different name.');
+      return;
+    }
+  
     try {
-      const { data } = await axios.put(`${API_URL}/api/games/${game._id}`, {
-        name: newName
-      });
-      setGames(prevGames => 
-        prevGames.map(g => g._id === game._id ? data : g)
-          .sort((a, b) => a.name.localeCompare(b.name))
+      const { data } = await axios.put(`${API_URL}/api/games/${game._id}`, { name: newName });
+      setGames((prevGames) =>
+        prevGames.map((g) => (g._id === game._id ? data : g)).sort((a, b) => a.name.localeCompare(b.name))
       );
       if (selectedGame?._id === game._id) {
         setSelectedGame(data);
@@ -67,12 +74,14 @@ function LetsPlay() {
       toast.error('Failed to update game');
     }
   };
+  
 
   const handleGameDelete = async (game) => {
     if (!window.confirm('Are you sure you want to delete this game?')) return;
+
     try {
       await axios.delete(`${API_URL}/api/games/${game._id}`);
-      setGames(prevGames => prevGames.filter(g => g._id !== game._id));
+      setGames((prevGames) => prevGames.filter((g) => g._id !== game._id));
       if (selectedGame?._id === game._id) {
         setSelectedGame(null);
       }
@@ -82,45 +91,49 @@ function LetsPlay() {
     }
   };
 
-  // Player management
   const handleAddPlayer = async (playerName) => {
+    if (selectedGame.players.some((p) => p.name.toLowerCase() === playerName.toLowerCase())) {
+      toast.error('Player name already exists. Please choose a different name.');
+      return;
+    }
+  
     try {
-      const { data: newPlayer } = await axios.post(`${API_URL}/api/games/${selectedGame._id}/players`, {
-        name: playerName
+      const { data } = await axios.post(`${API_URL}/api/games/${selectedGame._id}/players`, {
+        name: playerName,
       });
-      
-      const updatedGame = {
-        ...selectedGame,
-        players: [...selectedGame.players, newPlayer]
-      };
-      
-      setSelectedGame(updatedGame);
-      setGames(prevGames => 
-        prevGames.map(g => g._id === selectedGame._id ? updatedGame : g)
-      );
-      
+      updateGameData(data);
       setShowPlayerForm(false);
       toast.success('Player added successfully');
     } catch (error) {
-      toast.error('Failed to add player');
+      toast.error(error.response?.data?.message || 'Failed to add player');
     }
   };
+  
+
+  const handlePlayerUpdate = async (playerId, newName) => {
+    if (selectedGame.players.some((p) => p.name.toLowerCase() === newName.toLowerCase())) {
+      toast.error('Player name already exists. Please choose a different name.');
+      return;
+    }
+  
+    try {
+      const { data } = await axios.put(`${API_URL}/api/games/${selectedGame._id}/players/${playerId}`, {
+        name: newName,
+      });
+      updateGameData(data);
+      toast.success('Player updated successfully');
+    } catch (error) {
+      toast.error('Failed to update player');
+    }
+  };
+  
 
   const handlePlayerDelete = async (playerId) => {
     if (!window.confirm('Are you sure you want to delete this player?')) return;
+
     try {
-      await axios.delete(`${API_URL}/api/games/${selectedGame._id}/players/${playerId}`);
-      
-      const updatedGame = {
-        ...selectedGame,
-        players: selectedGame.players.filter(p => p._id !== playerId)
-      };
-      
-      setSelectedGame(updatedGame);
-      setGames(prevGames => 
-        prevGames.map(g => g._id === selectedGame._id ? updatedGame : g)
-      );
-      
+      const { data } = await axios.delete(`${API_URL}/api/games/${selectedGame._id}/players/${playerId}`);
+      updateGameData(data);
       toast.success('Player deleted successfully');
     } catch (error) {
       toast.error('Failed to delete player');
@@ -129,23 +142,11 @@ function LetsPlay() {
 
   const handleTimeUpdate = async (milliseconds) => {
     try {
-      const { data: updatedPlayer } = await axios.put(
+      const { data } = await axios.put(
         `${API_URL}/api/games/${selectedGame._id}/players/${selectedPlayer._id}`,
         { timeCompleted: milliseconds }
       );
-      
-      const updatedGame = {
-        ...selectedGame,
-        players: selectedGame.players.map(p => 
-          p._id === selectedPlayer._id ? updatedPlayer : p
-        )
-      };
-      
-      setSelectedGame(updatedGame);
-      setGames(prevGames => 
-        prevGames.map(g => g._id === selectedGame._id ? updatedGame : g)
-      );
-      
+      updateGameData(data);
       setShowTimeForm(false);
       setSelectedPlayer(null);
       toast.success('Time updated successfully');
@@ -154,29 +155,11 @@ function LetsPlay() {
     }
   };
 
-  const handleStatusUpdate = async (playerId, status) => {
-    try {
-      const { data: updatedPlayer } = await axios.put(
-        `${API_URL}/api/games/${selectedGame._id}/players/${playerId}`,
-        { status }
-      );
-      
-      const updatedGame = {
-        ...selectedGame,
-        players: selectedGame.players.map(p => 
-          p._id === playerId ? updatedPlayer : p
-        )
-      };
-      
-      setSelectedGame(updatedGame);
-      setGames(prevGames => 
-        prevGames.map(g => g._id === selectedGame._id ? updatedGame : g)
-      );
-      
-      toast.success('Status updated successfully');
-    } catch (error) {
-      toast.error('Failed to update status');
-    }
+  const updateGameData = (data) => {
+    setGames((prevGames) =>
+      prevGames.map((g) => (g._id === selectedGame._id ? data : g)).sort((a, b) => a.name.localeCompare(b.name))
+    );
+    setSelectedGame(data);
   };
 
   return (
@@ -207,7 +190,7 @@ function LetsPlay() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {games.map(game => (
+            {games.map((game) => (
               <GameCard
                 key={game._id}
                 game={game}
@@ -262,8 +245,8 @@ function LetsPlay() {
               setSelectedPlayer(player);
               setShowTimeForm(true);
             }}
-            onStatusUpdate={handleStatusUpdate}
-            onEdit={() => {}} // Add edit functionality if needed
+            onStatusUpdate={(playerId, status) => handlePlayerUpdate(playerId, status)}
+            onEdit={handlePlayerUpdate}
             onDelete={handlePlayerDelete}
           />
         </div>
