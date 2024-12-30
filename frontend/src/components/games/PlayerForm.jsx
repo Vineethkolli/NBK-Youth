@@ -1,4 +1,3 @@
-// src/components/games/PlayerForm.jsx
 import { useState } from 'react';
 import { X } from 'lucide-react';
 

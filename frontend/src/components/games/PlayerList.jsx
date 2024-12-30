@@ -1,5 +1,5 @@
-import { Clock, Edit2, Trash2 } from 'lucide-react';
 import { useState } from 'react';
+import { Edit2, Trash2, Clock } from 'lucide-react';
 
 function PlayerList({ 
   players, 
@@ -7,29 +7,30 @@ function PlayerList({
   timerRequired, 
   onTimeUpdate, 
   onStatusUpdate, 
-  onEdit, 
+  onEdit,
   onDelete 
 }) {
   const [editingPlayerId, setEditingPlayerId] = useState(null);
   const [newName, setNewName] = useState('');
+  const [error, setError] = useState('');
 
   const sortPlayersByRank = (players) => {
-    return [...players].sort((a, b) => {
-      if (timerRequired) {
+    if (timerRequired) {
+      return [...players].sort((a, b) => {
         if (!a.timeCompleted) return 1;
         if (!b.timeCompleted) return -1;
         return a.timeCompleted - b.timeCompleted;
-      } else {
-        const ranks = {
-          'winner-1st': 1,
-          'winner-2nd': 2,
-          'winner-3rd': 3,
-          '': 4,
-          'eliminated': 5,
-        };
-        return ranks[a.status || ''] - ranks[b.status || ''];
-      }
-    });
+      });
+    } else {
+      const ranks = {
+        'winner-1st': 1,
+        'winner-2nd': 2,
+        'winner-3rd': 3,
+        '': 4,
+        'eliminated': 5,
+      };
+      return [...players].sort((a, b) => ranks[a.status || ''] - ranks[b.status || '']);
+    }
   };
 
   const getStatusBadge = (player) => {
@@ -65,18 +66,24 @@ function PlayerList({
   const handleNameChange = (playerId, name) => {
     setEditingPlayerId(playerId);
     setNewName(name);
+    setError('');
   };
 
-  const saveUpdatedName = (playerId) => {
-    if (newName.trim()) {
-      onEdit(playerId, newName);
+  const saveUpdatedName = async (playerId) => {
+    if (!newName.trim()) return;
+    
+    try {
+      await onEdit(playerId, newName);
       setEditingPlayerId(null);
       setNewName('');
+      setError('');
+    } catch (error) {
+      setError(error.response?.data?.message || 'Failed to update player name');
     }
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {sortPlayersByRank(players).map((player) => (
         <div
           key={player._id}
@@ -85,19 +92,27 @@ function PlayerList({
             ${(player.timeCompleted || player.status) ? 'border-l-4 border-green-500' : ''}
           `}
         >
-          <div className="space-y-2">
+          <div className="space-y-2 flex-1">
             {editingPlayerId === player._id ? (
-              <input
-                type="text"
-                value={newName}
-                onChange={(e) => setNewName(e.target.value)}
-                onBlur={() => saveUpdatedName(player._id)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') saveUpdatedName(player._id);
-                }}
-                className="form-input text-sm"
-                autoFocus
-              />
+              <div>
+                <input
+                  type="text"
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                  onBlur={() => saveUpdatedName(player._id)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') saveUpdatedName(player._id);
+                    if (e.key === 'Escape') {
+                      setEditingPlayerId(null);
+                      setNewName('');
+                      setError('');
+                    }
+                  }}
+                  className="form-input text-sm w-full"
+                  autoFocus
+                />
+                {error && <p className="text-sm text-red-600 mt-1">{error}</p>}
+              </div>
             ) : (
               <h3 className="font-medium">{player.name}</h3>
             )}
