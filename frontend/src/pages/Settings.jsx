@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Bell, Download, AlertTriangle, Share2 } from 'lucide-react';
+import { Bell, Download, AlertTriangle, Share2, Home, Lightbulb, Rocket } from 'lucide-react';
 import { subscribeToPushNotifications, unsubscribeFromPushNotifications } from '../utils/notifications';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
@@ -24,7 +24,6 @@ function Settings() {
   };
 
   const checkInstallability = () => {
-    // Detect platform
     if (/iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream) {
       setPlatform('ios');
     } else if (/Android/.test(navigator.userAgent)) {
@@ -39,7 +38,6 @@ function Settings() {
       setIsInstallable(true);
     });
 
-    // Check if already installed
     if (window.matchMedia('(display-mode: standalone)').matches) {
       setIsInstallable(false);
     }
@@ -137,7 +135,6 @@ function Settings() {
           <h3 className="text-lg font-medium flex items-center">
             <Bell className="mr-2" /> Notifications
           </h3>
-          
           <div className="bg-gray-50 p-4 rounded-lg">
             {!notificationsSupported ? (
               <div className="flex items-center text-yellow-700">
@@ -172,7 +169,6 @@ function Settings() {
           <h3 className="text-lg font-medium flex items-center">
             <Download className="mr-2" /> Install App
           </h3>
-          
           <div className="bg-gray-50 p-4 rounded-lg">
             {window.matchMedia('(display-mode: standalone)').matches ? (
               <p className="text-gray-500">App is already installed</p>
@@ -202,6 +198,51 @@ function Settings() {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+
+        {/* Future Enhancements Timeline Section */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-medium flex items-center">
+          <Rocket className="h-6 w-6 text-black-500 mr-2" />
+            Future Enhancements
+          </h3>
+          <div className="pl-4 space-y-4">
+            <div className="flex items-start">
+              <div className="bg-indigo-500 h-4 w-4 rounded-full mt-0.5 mr-4"></div>
+              <div>
+                <p className="font-medium">Notification Trigger</p>
+                <p className="text-sm text-gray-500">Enhance notifications as a device notifications.</p>
+              </div>
+            </div>
+            <div className="flex items-start">
+              <div className="bg-indigo-500 h-4 w-4 rounded-full mt-0.5 mr-4"></div>
+              <div>
+                <p className="font-medium"> Memory Cache</p>
+                <p className="text-sm text-gray-500">Implement memory caching for faster and offline performance.</p>
+              </div>
+            </div>
+            <div className="flex items-start">
+              <div className="bg-indigo-500 h-4 w-4 rounded-full mt-0.5 mr-4"></div>
+              <div>
+                <p className="font-medium">Vibe</p>
+                <p className="text-sm text-gray-500">Make media player work effectively in background.</p>
+              </div>
+            </div>
+            <div className="flex items-start">
+              <div className="bg-indigo-500 h-4 w-4 rounded-full mt-0.5 mr-4"></div>
+              <div>
+                <p className="font-medium">App Download</p>
+                <p className="text-sm text-gray-500">Improve app download and installation process.</p>
+              </div>
+            </div>
+            <div className="flex items-start">
+              <div className="bg-indigo-500 h-4 w-4 rounded-full mt-0.5 mr-4"></div>
+              <div>
+                <p className="font-medium">Enhance UI</p>
+                <p className="text-sm text-gray-500">Progress of uploading and Update all interface components.</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
