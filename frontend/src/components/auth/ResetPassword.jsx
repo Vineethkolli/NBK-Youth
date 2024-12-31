@@ -12,7 +12,11 @@ function ResetPassword({ resetToken, onSuccess }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
+    if (passwords.newPassword.length < 4) {
+      return toast.error('Password must be at least 4 characters long');
+    }
+
     if (passwords.newPassword !== passwords.confirmPassword) {
       return toast.error('Passwords do not match');
     }
@@ -24,7 +28,7 @@ function ResetPassword({ resetToken, onSuccess }) {
         resetToken,
         newPassword: passwords.newPassword
       });
-      
+
       toast.success('Password reset successful');
       onSuccess();
     } catch (error) {

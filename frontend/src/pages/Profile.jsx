@@ -10,6 +10,7 @@ import ProfileImageDialog from '../components/profile/ProfileImageDialog';
 function Profile() {
   const { user, signout, updateUserData } = useAuth();
   const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [showImageDialog, setShowImageDialog] = useState(false);
   const [userData, setUserData] = useState({
@@ -96,7 +97,7 @@ function Profile() {
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       return toast.error('New passwords do not match');
     }
-
+    setIsUpdatingPassword(true); 
     try {
       await axios.post(`${API_URL}/api/auth/change-password`, {
         currentPassword: passwordData.currentPassword,
@@ -111,6 +112,8 @@ function Profile() {
       });
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to update password');
+    } finally {
+      setIsUpdatingPassword(false); 
     }
   };
 
@@ -321,8 +324,9 @@ function Profile() {
                 <button
                   type="submit"
                   className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
+                  disabled={isUpdatingPassword}
                 >
-                  Update Password
+                  {isUpdatingPassword ? 'Updating...' : 'Update Password'}
                 </button>
               </form>
             )}
