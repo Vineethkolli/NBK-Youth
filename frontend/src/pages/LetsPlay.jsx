@@ -187,17 +187,23 @@ function LetsPlay() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {games.map((game) => (
-              <GameCard
-                key={game._id}
-                game={game}
-                isEditMode={isEditMode}
-                onSelect={() => setSelectedGame(game)}
-                onEdit={(gameId, newName) => handleGameEdit(gameId, newName)}
-                onDelete={() => handleGameDelete(game)}
-              />
-            ))}
-          </div>
+  {games.length > 0 ? (
+    games.map((game) => (
+      <GameCard
+        key={game._id}
+        game={game}
+        isEditMode={isEditMode}
+        onSelect={() => setSelectedGame(game)}
+        onEdit={(gameId, newName) => handleGameEdit(gameId, newName)}
+        onDelete={() => handleGameDelete(game)}
+      />
+    ))
+  ) : (
+    <div className="text-center text-gray-500">
+      No games created yet
+    </div>
+  )}
+</div>
         </div>
       )}
 
@@ -234,19 +240,25 @@ function LetsPlay() {
             )}
           </div>
 
-          <PlayerList
-            players={selectedGame.players}
-            isEditMode={isEditMode}
-            timerRequired={selectedGame.timerRequired}
-            onTimeUpdate={(player) => {
-              setSelectedPlayer(player);
-              setShowTimeForm(true);
-            }}
-            onStatusUpdate={handleStatusUpdate}
-            onEdit={handleUpdatePlayer}
-            onDelete={handlePlayerDelete}
-          />
-        </div>
+          {selectedGame.players.length > 0 ? (
+      <PlayerList
+        players={selectedGame.players}
+        isEditMode={isEditMode}
+        timerRequired={selectedGame.timerRequired}
+        onTimeUpdate={(player) => {
+          setSelectedPlayer(player);
+          setShowTimeForm(true);
+        }}
+        onStatusUpdate={handleStatusUpdate}
+        onEdit={handleUpdatePlayer}
+        onDelete={handlePlayerDelete}
+      />
+    ) : (
+      <div className="text-center text-gray-500 text-g">
+        No players added yet
+      </div>
+    )}
+  </div>
       )}
 
       {/* Modals */}
