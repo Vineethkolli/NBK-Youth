@@ -66,7 +66,7 @@ function Home() {
             </div>
           </div>
           <p className="mt-2 text-sm text-black-500">
-            First Phase of Development Completed.
+            First Phase of Development Completed 31-12-24.
           </p>
           <p className="mt-2 text-sm text-gray-500">
             Raise Concerns, Recommend Enhancements, Share Your Thoughts.
