@@ -9,8 +9,8 @@ export const paymentDetailsController = {
       // If no details exist, create default
       if (!details) {
         details = await PaymentDetails.create({
-          upiNumber: '8309211259',
-          upiId: 'kollivineeth15@oksbi',
+          upiNumber: '0000000000',
+          upiId: 'xxxxxxxxxx@xxx',
           accountHolder: 'NBK Youth'
         });
       }

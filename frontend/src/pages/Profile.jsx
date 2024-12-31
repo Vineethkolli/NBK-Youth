@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
-import { LogOut, Save } from 'lucide-react';
+import { LogOut, Save, Eye, EyeOff } from 'lucide-react';
 import { API_URL } from '../utils/config';
 import ProfileImage from '../components/profile/ProfileImage';
 import ProfileImageDialog from '../components/profile/ProfileImageDialog';
@@ -23,6 +23,17 @@ function Profile() {
     newPassword: '',
     confirmPassword: ''
   });
+  const [showPasswords, setShowPasswords] = useState({
+    currentPassword: false,
+    newPassword: false,
+    confirmPassword: false,
+  });
+  const togglePasswordVisibility = (field) => {
+    setShowPasswords((prev) => ({
+      ...prev,
+      [field]: !prev[field],
+    }));
+  };
 
   useEffect(() => {
     if (user) {
@@ -78,6 +89,10 @@ function Profile() {
       return;
     }
 
+    if (passwordData.newPassword.length < 4) {
+      return toast.error('Password must be at least 4 characters long');
+    }
+    
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       return toast.error('New passwords do not match');
     }
@@ -176,6 +191,7 @@ function Profile() {
                   <input
                     type="tel"
                     name="phoneNumber"
+                    pattern="^[\+\-\d\s\(\)]*$"  
                     value={userData.phoneNumber}
                     onChange={handleUserDataChange}
                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
@@ -235,47 +251,73 @@ function Profile() {
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Current Password
-                  </label>
-                  <input
-                    type="password"
-                    name="currentPassword"
-                    required
-                    value={passwordData.currentPassword}
-                    onChange={handlePasswordChange}
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                  />
-                </div>
+  <label className="block text-sm font-medium text-gray-700">
+    Current Password
+  </label>
+  <div className="relative">
+    <input
+      type={showPasswords.currentPassword ? 'text' : 'password'}
+      name="currentPassword"
+      required
+      value={passwordData.currentPassword}
+      onChange={handlePasswordChange}
+      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+    />
+    <button
+      type="button"
+      onClick={() => togglePasswordVisibility('currentPassword')}
+      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+    >
+      {showPasswords.currentPassword ? <EyeOff /> : <Eye />}
+    </button>
+  </div>
+</div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    New Password
-                  </label>
-                  <input
-                    type="password"
-                    name="newPassword"
-                    required
-                    value={passwordData.newPassword}
-                    onChange={handlePasswordChange}
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                  />
-                </div>
+<div>
+  <label className="block text-sm font-medium text-gray-700">
+    New Password
+  </label>
+  <div className="relative">
+    <input
+      type={showPasswords.newPassword ? 'text' : 'password'}
+      name="newPassword"
+      required
+      value={passwordData.newPassword}
+      onChange={handlePasswordChange}
+      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+    />
+    <button
+      type="button"
+      onClick={() => togglePasswordVisibility('newPassword')}
+      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+    >
+      {showPasswords.newPassword ? <EyeOff /> : <Eye />}
+    </button>
+  </div>
+</div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Confirm New Password
-                  </label>
-                  <input
-                    type="password"
-                    name="confirmPassword"
-                    required
-                    value={passwordData.confirmPassword}
-                    onChange={handlePasswordChange}
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                  />
-                </div>
-
+<div>
+  <label className="block text-sm font-medium text-gray-700">
+    Confirm New Password
+  </label>
+  <div className="relative">
+    <input
+      type={showPasswords.confirmPassword ? 'text' : 'password'}
+      name="confirmPassword"
+      required
+      value={passwordData.confirmPassword}
+      onChange={handlePasswordChange}
+      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+    />
+    <button
+      type="button"
+      onClick={() => togglePasswordVisibility('confirmPassword')}
+      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+    >
+      {showPasswords.confirmPassword ? <EyeOff /> : <Eye />}
+    </button>
+  </div>
+</div>
                 <button
                   type="submit"
                   className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"

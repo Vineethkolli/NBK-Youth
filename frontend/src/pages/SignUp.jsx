@@ -24,6 +24,12 @@ function SignUp() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Password length validation
+    if (formData.password.length < 4) {
+      return toast.error('Password must be at least 4 characters long');
+    }
+
     if (formData.password !== formData.confirmPassword) {
       return toast.error('Passwords do not match');
     }
@@ -80,6 +86,7 @@ function SignUp() {
           name="phoneNumber"
           required
           placeholder="Phone Number"
+          pattern="^[\+\-\d\s\(\)]*$"    // Regex to allow +, -, digits, and spaces anywhere
           value={formData.phoneNumber}
           onChange={handleChange}
           className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500"
