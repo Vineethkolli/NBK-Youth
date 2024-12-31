@@ -1,7 +1,12 @@
-import { Edit2, Trash2, ChevronRight } from 'lucide-react';
+import { useState } from 'react';
+import { Edit2, Trash2, ChevronRight, Check } from 'lucide-react';
 import { getTopPlayers } from '../../utils/gameUtils';
 
 function GameCard({ game, isEditMode, onSelect, onEdit, onDelete }) {
+  const [editingGameId, setEditingGameId] = useState(null);
+  const [newGameName, setNewGameName] = useState('');
+  const [error, setError] = useState('');
+
   const topPlayers = getTopPlayers(game);
 
   const getRankBadge = (index, player) => {
@@ -14,7 +19,7 @@ function GameCard({ game, isEditMode, onSelect, onEdit, onDelete }) {
       ];
       return colors[index] || 'bg-gray-200 text-gray-700';
     }
-    
+
     // For non-timer games, use the actual rank from status
     const rank = player.status.split('-')[1];
     switch (rank) {
@@ -29,23 +34,71 @@ function GameCard({ game, isEditMode, onSelect, onEdit, onDelete }) {
     }
   };
 
+  const handleNameEdit = (gameId, name) => {
+    setEditingGameId(gameId);
+    setNewGameName(name);
+    setError('');
+  };
+
+  const saveGameName = async (gameId) => {
+    if (!newGameName.trim()) return;
+
+    try {
+      await onEdit(gameId, newGameName);
+      setEditingGameId(null);
+      setNewGameName('');
+      setError('');
+    } catch (error) {
+      setError(error.response?.data?.message || 'Failed to update game name');
+    }
+  };
+
   return (
     <div className="bg-white rounded-lg shadow p-4">
       <div className="flex justify-between items-start mb-2">
         <div>
-          <h3 className="text-lg font-medium">{game.name}</h3>
+          {editingGameId === game._id ? (
+            <input
+              type="text"
+              value={newGameName}
+              onChange={(e) => setNewGameName(e.target.value)}
+              onBlur={() => saveGameName(game._id)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') saveGameName(game._id);
+                if (e.key === 'Escape') {
+                  setEditingGameId(null);
+                  setNewGameName('');
+                  setError('');
+                }
+              }}
+              className="form-input text-lg font-medium w-full"
+              autoFocus
+            />
+          ) : (
+            <h3 className="text-lg font-medium">{game.name}</h3>
+          )}
+          {error && <p className="text-sm text-red-600">{error}</p>}
           <p className="text-sm text-gray-500">
             {game.timerRequired ? 'Timer Required' : 'No Timer'}
           </p>
         </div>
         {isEditMode && (
           <div className="flex space-x-2">
-            <button
-              onClick={() => onEdit(game)}
-              className="text-blue-600 hover:text-blue-800"
-            >
-              <Edit2 className="h-4 w-4" />
-            </button>
+            {editingGameId === game._id ? (
+              <button
+                onClick={() => saveGameName(game._id)}
+                className="text-green-600 hover:text-green-800"
+              >
+                <Check className="h-5 w-5" />
+              </button>
+            ) : (
+              <button
+                onClick={() => handleNameEdit(game._id, game.name)}
+                className="text-blue-600 hover:text-blue-800"
+              >
+                <Edit2 className="h-4 w-4" />
+              </button>
+            )}
             <button
               onClick={() => onDelete(game)}
               className="text-red-600 hover:text-red-800"
@@ -62,11 +115,8 @@ function GameCard({ game, isEditMode, onSelect, onEdit, onDelete }) {
             key={player._id}
             className="inline-flex items-center"
           >
-            <div className={`
-              w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold
-              ${getRankBadge(index, player)}
-            `}>
-              {game.timerRequired ? (index + 1) : player.status.split('-')[1][0]}
+            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${getRankBadge(index, player)}`}>
+              {game.timerRequired ? index + 1 : player.status.split('-')[1][0]}
             </div>
             <span className="ml-1 text-sm">
               {player.name}

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Edit2, Trash2, Clock } from 'lucide-react';
+import { Edit2, Trash2, Clock, Check } from 'lucide-react';
 
 function PlayerList({ 
   players, 
@@ -87,10 +87,9 @@ function PlayerList({
       {sortPlayersByRank(players).map((player) => (
         <div
           key={player._id}
-          className={`
-            bg-white rounded-lg shadow p-4 flex justify-between items-center
-            ${(player.timeCompleted || player.status) ? 'border-l-4 border-green-500' : ''}
-          `}
+          className={`bg-white rounded-lg shadow p-4 flex justify-between items-center ${
+            (player.timeCompleted || player.status) ? 'border-l-4 border-green-500' : ''
+          }`}
         >
           <div className="space-y-2 flex-1">
             {editingPlayerId === player._id ? (
@@ -99,15 +98,6 @@ function PlayerList({
                   type="text"
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)}
-                  onBlur={() => saveUpdatedName(player._id)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') saveUpdatedName(player._id);
-                    if (e.key === 'Escape') {
-                      setEditingPlayerId(null);
-                      setNewName('');
-                      setError('');
-                    }
-                  }}
                   className="form-input text-sm w-full"
                   autoFocus
                 />
@@ -143,12 +133,21 @@ function PlayerList({
 
             {isEditMode && (
               <>
-                <button
-                  onClick={() => handleNameChange(player._id, player.name)}
-                  className="text-blue-600 hover:text-blue-800"
-                >
-                  <Edit2 className="h-4 w-4" />
-                </button>
+                {editingPlayerId === player._id ? (
+                  <button
+                    onClick={() => saveUpdatedName(player._id)}
+                    className="text-green-600 hover:text-green-800"
+                  >
+                    <Check className="h-5 w-5" />
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => handleNameChange(player._id, player.name)}
+                    className="text-blue-600 hover:text-blue-800"
+                  >
+                    <Edit2 className="h-4 w-4" />
+                  </button>
+                )}
                 <button
                   onClick={() => onDelete(player._id)}
                   className="text-red-600 hover:text-red-800"

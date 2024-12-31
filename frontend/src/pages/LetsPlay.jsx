@@ -47,16 +47,13 @@ function LetsPlay() {
     }
   };
 
-  const handleGameEdit = async (game) => {
-    const newName = prompt('Enter new game name:', game.name);
-    if (!newName || newName === game.name) return;
-
+  const handleGameEdit = async (gameId, newName) => {
     try {
-      const { data } = await axios.put(`${API_URL}/api/games/${game._id}`, { name: newName });
+      const { data } = await axios.put(`${API_URL}/api/games/${gameId}`, { name: newName });
       setGames((prevGames) =>
-        prevGames.map((g) => (g._id === game._id ? data : g)).sort((a, b) => a.name.localeCompare(b.name))
+        prevGames.map((g) => (g._id === gameId ? data : g)).sort((a, b) => a.name.localeCompare(b.name))
       );
-      if (selectedGame?._id === game._id) {
+      if (selectedGame?._id === gameId) {
         setSelectedGame(data);
       }
       toast.success('Game updated successfully');
@@ -69,7 +66,7 @@ function LetsPlay() {
     if (!window.confirm('Are you sure you want to delete this game?')) return;
     try {
       await axios.delete(`${API_URL}/api/games/${game._id}`);
-      setGames(prevGames => prevGames.filter(g => g._id !== game._id));
+      setGames((prevGames) => prevGames.filter((g) => g._id !== game._id));
       if (selectedGame?._id === game._id) {
         setSelectedGame(null);
       }
@@ -83,9 +80,11 @@ function LetsPlay() {
   const handleAddPlayer = async (playerName) => {
     try {
       const { data } = await axios.post(`${API_URL}/api/games/${selectedGame._id}/players`, {
-        name: playerName
+        name: playerName,
       });
-      setGames(games.map(g => g._id === selectedGame._id ? data : g));
+      setGames((prevGames) =>
+        prevGames.map((g) => (g._id === selectedGame._id ? data : g))
+      );
       setSelectedGame(data);
       setShowPlayerForm(false);
       toast.success('Player added successfully');
@@ -100,7 +99,9 @@ function LetsPlay() {
         `${API_URL}/api/games/${selectedGame._id}/players/${playerId}`,
         { name: newName }
       );
-      setGames(games.map(g => g._id === selectedGame._id ? data : g));
+      setGames((prevGames) =>
+        prevGames.map((g) => (g._id === selectedGame._id ? data : g))
+      );
       setSelectedGame(data);
       toast.success('Player updated successfully');
     } catch (error) {
@@ -111,8 +112,12 @@ function LetsPlay() {
   const handlePlayerDelete = async (playerId) => {
     if (!window.confirm('Are you sure you want to delete this player?')) return;
     try {
-      const { data } = await axios.delete(`${API_URL}/api/games/${selectedGame._id}/players/${playerId}`);
-      setGames(games.map(g => g._id === selectedGame._id ? data : g));
+      const { data } = await axios.delete(
+        `${API_URL}/api/games/${selectedGame._id}/players/${playerId}`
+      );
+      setGames((prevGames) =>
+        prevGames.map((g) => (g._id === selectedGame._id ? data : g))
+      );
       setSelectedGame(data);
       toast.success('Player deleted successfully');
     } catch (error) {
@@ -126,7 +131,9 @@ function LetsPlay() {
         `${API_URL}/api/games/${selectedGame._id}/players/${selectedPlayer._id}`,
         { timeCompleted: milliseconds }
       );
-      setGames(games.map(g => g._id === selectedGame._id ? data : g));
+      setGames((prevGames) =>
+        prevGames.map((g) => (g._id === selectedGame._id ? data : g))
+      );
       setSelectedGame(data);
       setShowTimeForm(false);
       setSelectedPlayer(null);
@@ -142,7 +149,9 @@ function LetsPlay() {
         `${API_URL}/api/games/${selectedGame._id}/players/${playerId}`,
         { status }
       );
-      setGames(games.map(g => g._id === selectedGame._id ? data : g));
+      setGames((prevGames) =>
+        prevGames.map((g) => (g._id === selectedGame._id ? data : g))
+      );
       setSelectedGame(data);
       toast.success('Status updated successfully');
     } catch (error) {
@@ -178,13 +187,13 @@ function LetsPlay() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {games.map(game => (
+            {games.map((game) => (
               <GameCard
                 key={game._id}
                 game={game}
                 isEditMode={isEditMode}
                 onSelect={() => setSelectedGame(game)}
-                onEdit={() => handleGameEdit(game)}
+                onEdit={(gameId, newName) => handleGameEdit(gameId, newName)}
                 onDelete={() => handleGameDelete(game)}
               />
             ))}

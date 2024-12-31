@@ -72,7 +72,7 @@ function Profile() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (user.email === 'developer@gmail.com') {
+    if (user.email === 'devvineel@gmail.com') {
       toast.error("Default developer's password cannot be changed");
       setIsChangingPassword(false);
       return;
@@ -228,7 +228,7 @@ function Profile() {
 
         {isChangingPassword && (
           <div className="px-4 py-5 sm:px-6">
-            {user.email === 'developer@gmail.com' ? (
+            {user.email === 'devvineel@gmail.com' ? (
               <div className="text-red-600 font-medium">
                 Default developer's password cannot be changed
               </div>

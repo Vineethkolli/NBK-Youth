@@ -1,10 +1,24 @@
-import { Trash2, Pin } from 'lucide-react';
+import { Trash2, Pin, Edit2, Check } from 'lucide-react';
 import MediaPreview from './MediaPreview';
+import { useState } from 'react';
 
-function MomentGrid({ moments, isEditMode, onDelete, onTogglePin }) {
+function MomentGrid({ moments, isEditMode, onDelete, onTogglePin, onUpdateTitle }) {
   const getEmbedUrl = (url) => {
     const videoId = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?]+)/);
     return videoId ? `https://www.youtube.com/embed/${videoId[1]}` : url;
+  };
+
+  const [editingTitleId, setEditingTitleId] = useState(null);
+  const [tempTitle, setTempTitle] = useState('');
+
+  const handleEditTitle = (id, currentTitle) => {
+    setEditingTitleId(id);
+    setTempTitle(currentTitle);
+  };
+
+  const handleSaveTitle = (id) => {
+    onUpdateTitle(id, tempTitle);
+    setEditingTitleId(null);
   };
 
   return (
@@ -46,11 +60,30 @@ function MomentGrid({ moments, isEditMode, onDelete, onTogglePin }) {
             )}
           </div>
 
-          {moment.title && (
-            <div className="p-4">
-              <h3 className="font-semibold text-lg">{moment.title}</h3>
-            </div>
-          )}
+          <div className="p-4">
+            {editingTitleId === moment._id ? (
+              <div className="flex items-center space-x-2">
+                <input
+                  type="text"
+                  value={tempTitle}
+                  onChange={(e) => setTempTitle(e.target.value)}
+                  className="border rounded px-2 py-1 w-full"
+                />
+                <button onClick={() => handleSaveTitle(moment._id)} className="text-green-600">
+                  <Check className="h-5 w-5" />
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold text-lg">{moment.title}</h3>
+                {isEditMode && (
+                  <button onClick={() => handleEditTitle(moment._id, moment.title)} className="text-gray-500 hover:text-gray-700">
+                    <Edit2 className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       ))}
     </div>

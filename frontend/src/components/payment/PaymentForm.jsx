@@ -155,7 +155,7 @@ function PaymentForm({ onSubmit }) {
             onChange={(e) => setAmount(e.target.value)}
             required
             min="1"
-            className="mt-1 block w-full rounded-md border-gray-300"
+            className="mt-1 block w-full rounded-md border-gray-300" placeholder="Enter amount"
           />
         </div>
 

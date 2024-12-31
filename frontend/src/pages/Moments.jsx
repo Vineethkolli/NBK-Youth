@@ -62,6 +62,16 @@ const handleTogglePin = async (momentId) => {
     }
   };
 
+  const handleUpdateTitle = async (id, newTitle) => {
+    try {
+      await axios.patch(`${API_URL}/api/moments/${id}/title`, { title: newTitle });
+      toast.success('Title updated successfully');
+      fetchMoments();
+    } catch (error) {
+      toast.error('Failed to update title');
+    }
+  };  
+
   const openForm = (type) => {
     setFormType(type);
     setShowForm(true);
@@ -73,7 +83,7 @@ const handleTogglePin = async (momentId) => {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-0 py-0">
       {isPrivilegedUser && (
         <div className="flex justify-between items-center mb-6">
-          <div className="space-x-2">
+          <div className="flex space-x-4">
             <button
               onClick={() => openForm('youtube')}
               className="btn-primary"
@@ -104,6 +114,7 @@ const handleTogglePin = async (momentId) => {
         isEditMode={isEditMode}
         onDelete={handleDelete}
         onTogglePin={handleTogglePin}
+        onUpdateTitle={handleUpdateTitle}
       />
 
       {showForm && (
