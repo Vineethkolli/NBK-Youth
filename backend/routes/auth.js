@@ -16,20 +16,23 @@ router.post('/signup', async (req, res) => {
       return res.status(400).json({ message: 'Required fields missing' });
     }
 
-    const userExists = await User.findOne({ 
-      $or: [
-        { email: email || '' },
-        { phoneNumber }
-      ]
-    });
-
-    if (userExists) {
+    // Check for existing user with same phone number
+    const phoneExists = await User.findOne({ phoneNumber });
+    if (phoneExists) {
       return res.status(400).json({ message: 'User already exists' });
+    }
+
+    // If email is provided, check if it's already in use
+    if (email) {
+      const emailExists = await User.findOne({ email });
+      if (emailExists) {
+        return res.status(400).json({ message: 'User already exists' });
+      }
     }
 
     const user = await User.create({
       name,
-      email,
+      email: email || undefined, // Only set email if provided
       phoneNumber,
       password
     });
@@ -51,6 +54,7 @@ router.post('/signup', async (req, res) => {
       }
     });
   } catch (error) {
+    console.error('Signup error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });

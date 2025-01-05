@@ -19,9 +19,8 @@ const userSchema = new mongoose.Schema({
   },
   email: {
     type: String,
-    required: false,
-    unique: true,
-    sparse: true
+    sparse: true,
+    unique: true
   },
   phoneNumber: {
     type: String,
