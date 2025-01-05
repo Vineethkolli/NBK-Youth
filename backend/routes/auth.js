@@ -7,7 +7,6 @@ import { sendOTPEmail } from '../utils/emailService.js';
 
 const router = express.Router();
 
-// Existing routes...
 // Sign up
 router.post('/signup', async (req, res) => {
   try {
@@ -30,7 +29,7 @@ router.post('/signup', async (req, res) => {
 
     const user = await User.create({
       name,
-      email,
+      email: email || undefined,
       phoneNumber,
       password
     });
