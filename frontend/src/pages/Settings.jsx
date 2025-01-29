@@ -11,6 +11,24 @@ function Settings() {
   const [installPrompt, setInstallPrompt] = useState(null);
   const [isInstallable, setIsInstallable] = useState(false);
   const [platform, setPlatform] = useState(null);
+  const [translate, setTranslate] = useState(false);
+  
+  useEffect(() => {
+    if (translate) {
+      const script = document.createElement('script');
+      script.src = "//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
+      script.async = true;
+      document.body.appendChild(script);
+      
+      window.googleTranslateElementInit = () => {
+        new window.google.translate.TranslateElement({
+          pageLanguage: 'en',
+          includedLanguages: 'te',
+          layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE,
+        }, 'google_translate_element');
+      };
+    }
+  }, [translate]);
 
   useEffect(() => {
     checkNotificationSupport();
@@ -130,6 +148,17 @@ function Settings() {
       <div className="bg-white shadow-lg rounded-lg p-6 space-y-8">
         <h2 className="text-2xl font-semibold">Settings</h2>
 
+        {/* Translate Section */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-medium flex items-center">Translate Website</h3>
+          <button 
+            onClick={() => setTranslate(true)} 
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+            Translate to Telugu
+          </button>
+          <div id="google_translate_element"></div>
+        </div>
+
         {/* Notifications Section */}
         <div className="space-y-4">
           <h3 className="text-lg font-medium flex items-center">
@@ -199,9 +228,9 @@ function Settings() {
               </div>
             )}
           </div>
-        </div>
+          </div>
 
-        {/* Future Enhancements Timeline Section */}
+          {/* Future Enhancements Timeline Section */}
         <div className="space-y-4">
           <h3 className="text-lg font-medium flex items-center">
           <Rocket className="h-6 w-6 text-black-500 mr-2" />
@@ -244,6 +273,7 @@ function Settings() {
               </div>
             </div>
           </div>
+
         </div>
       </div>
     </div>

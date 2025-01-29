@@ -37,8 +37,8 @@ const StatsPrint = ({ stats }) => {
       ['Amount Received', `${stats.budgetStats.amountReceived.count} entries`, formatAmount(stats.budgetStats.amountReceived.amount)],
       ['Amount Pending', `${stats.budgetStats.amountPending.count} entries`, formatAmount(stats.budgetStats.amountPending.amount)],
       ['Total Expenses', `${stats.budgetStats.totalExpenses.count} entries`, formatAmount(stats.budgetStats.totalExpenses.amount)],
-      ['Previous Year Amount', '-', formatAmount(stats.budgetStats.previousYearAmount.amount)],
       ['Amount Left', '-', formatAmount(stats.budgetStats.amountLeft.amount)],
+      ['Previous Year Amount', '-', formatAmount(stats.budgetStats.previousYearAmount.amount)],
       ['Amount Left (including previous)', '-', formatAmount(stats.budgetStats.amountLeft.amount + stats.budgetStats.previousYearAmount.amount)]
     ];
 
