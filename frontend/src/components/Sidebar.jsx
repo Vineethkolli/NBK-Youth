@@ -44,7 +44,7 @@ function Sidebar({ isOpen, onNavigate }) {
         <nav className="flex-1 px-2 py-4 space-y-1">
           {links.map((link, index) => {
             const Icon = link.icon;
-            const isSeparator = [3, 6, 10].includes(index); // Indices after which to place separators
+            const isSeparator = [3, 6, 10,14].includes(index); // Indices after which to place separators
             return (
               <div key={link.to}>
                 <Link
