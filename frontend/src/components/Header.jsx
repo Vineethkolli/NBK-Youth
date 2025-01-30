@@ -1,4 +1,4 @@
-import { Menu, User } from 'lucide-react';
+import { Menu, User, Flame } from 'lucide-react'; // using Home as an alternative to Lion
 import { useNavigate } from 'react-router-dom';
 
 function Header({ toggleSidebar }) {
@@ -14,7 +14,10 @@ function Header({ toggleSidebar }) {
         >
           <Menu className="h-6 w-6" />
         </button>
-        <h1 className="text-2xl font-bold text-yellow-700">NBK Youth</h1>
+        <div className="flex items-center space-x-2">
+          <h1 className="text-2xl font-bold text-yellow-700">NBK Youth</h1>
+          <Flame className="h-6 w-6 text-yellow-700" /> 
+        </div>
         <button
           onClick={() => navigate('/profile')}
           className="p-2 hover:bg-gray-100 rounded-full"
