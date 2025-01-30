@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, User, Users, Bell, ShieldCheck, Settings, IndianRupee, Trash2, CheckSquare, BarChart2, Terminal, MusicIcon, CameraIcon,  TrophyIcon } from 'lucide-react';
+import { Home, User, Users, Bell, ShieldCheck, Settings, IndianRupee, DollarSign, Trash2, CheckSquare, BarChart2, Terminal, MusicIcon, CameraIcon,  TrophyIcon, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 function Sidebar({ isOpen, onNavigate }) {
@@ -13,7 +13,7 @@ function Sidebar({ isOpen, onNavigate }) {
     { to: '/lets-play', icon: TrophyIcon, label: "Let's Play" },
     { to: '/stats', icon: BarChart2, label: 'Stats' },
     { to: '/income', icon: IndianRupee, label: 'Income' },
-    { to: '/expense', icon: IndianRupee, label: 'Expense' },
+    { to: '/expense', icon: DollarSign, label: 'Expense' },
     { to: '/profile', icon: User, label: 'Profile' },
     { to: '/pay-online', icon: ShieldCheck, label: 'Pay Online' },
     { to: '/notifier', icon: Bell, label: 'Notifications' },
@@ -63,6 +63,13 @@ function Sidebar({ isOpen, onNavigate }) {
               </div>
             );
           })}
+          <button
+            onClick={onNavigate}
+            className="text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-12 py-2 text-sm font-medium rounded-md mt-2"
+          >
+            <X className="mr-3 h-6 w-6 text-gray-800" />
+            <span>Close</span>
+          </button>
         </nav>
       </div>
     </div>
