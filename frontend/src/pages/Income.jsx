@@ -8,6 +8,7 @@ import IncomeFilters from '../components/income/IncomeFilters';
 import IncomeForm from '../components/income/IncomeForm';
 import ModificationLog from '../components/income/ModificationLog';
 import IncomePrint from '../components/income/IncomePrint';
+import TeluguIncomePrint from '../components/income/TeluguIncomePrint';
 import { API_URL } from '../utils/config';
 
 function Income() {
@@ -123,6 +124,7 @@ function Income() {
             </button>
           )}
           <IncomePrint incomes={incomes} visibleColumns={visibleColumns} />
+          <TeluguIncomePrint incomes={incomes} visibleColumns={visibleColumns} />
         </div>
       </div>
 
