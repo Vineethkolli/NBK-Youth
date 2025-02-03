@@ -15,17 +15,31 @@ function Settings() {
   
   useEffect(() => {
     if (translate) {
-      const script = document.createElement('script');
-      script.src = "//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
+      const script = document.createElement("script");
+      script.src =
+        "https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
       script.async = true;
       document.body.appendChild(script);
-      
+  
       window.googleTranslateElementInit = () => {
-        new window.google.translate.TranslateElement({
-          pageLanguage: 'en',
-          includedLanguages: 'te',
-          layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE,
-        }, 'google_translate_element');
+        new window.google.translate.TranslateElement(
+          {
+            pageLanguage: "en",
+            includedLanguages: "te",
+            autoDisplay: false, // Prevents showing the language selection menu
+          },
+          "google_translate_element"
+        );
+        const observer = new MutationObserver(() => {
+          const selectLang = document.querySelector(".goog-te-combo");
+          if (selectLang) {
+            selectLang.value = "te"; // Select Telugu
+            selectLang.dispatchEvent(new Event("change")); // Trigger translation
+            observer.disconnect(); // Stop observing once translation is triggered
+          }
+        });
+
+        observer.observe(document.body, { childList: true, subtree: true });
       };
     }
   }, [translate]);

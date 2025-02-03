@@ -15,6 +15,7 @@ import Settings from './pages/Settings';
 import Stats from './pages/Stats';
 import Income from './pages/Income';
 import Expense from './pages/Expense';
+import Estimation from './pages/Estimation';
 import Verification from './pages/Verification';
 import RecycleBin from './pages/RecycleBin';
 import DeveloperOptions from './pages/DeveloperOptions';
@@ -52,6 +53,7 @@ function AppContent() {
           <Route path="/settings" element={<Settings />} />
           <Route path="/income" element={<Income />} />
           <Route path="/expense" element={<Expense />} />
+          <Route path="/estimation" element={<Estimation />} />
           <Route path="/verification" element={<Verification />} />
           <Route path="/recycle-bin" element={<RecycleBin />} />
           <Route path="/developer-options" element={<DeveloperOptions />} />

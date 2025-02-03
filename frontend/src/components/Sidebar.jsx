@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, User, Users, Bell, ShieldCheck, Settings, IndianRupee, DollarSign, Trash2, CheckSquare, BarChart2, Terminal, MusicIcon, CameraIcon,  TrophyIcon, X } from 'lucide-react';
+import { Home, User, Users, Bell, ShieldCheck, Settings, IndianRupee, DollarSign, Trash2, CheckSquare, BarChart2, Terminal, MusicIcon, CameraIcon,  TrophyIcon, X, PieChart, CalculatorIcon, TrendingUp, TractorIcon, Calculator } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 function Sidebar({ isOpen, onNavigate }) {
@@ -14,6 +14,7 @@ function Sidebar({ isOpen, onNavigate }) {
     { to: '/stats', icon: BarChart2, label: 'Stats' },
     { to: '/income', icon: IndianRupee, label: 'Income' },
     { to: '/expense', icon: DollarSign, label: 'Expense' },
+    { to: '/estimation', icon: Calculator, label: 'Estimation' },
     { to: '/profile', icon: User, label: 'Profile' },
     { to: '/pay-online', icon: ShieldCheck, label: 'Pay Online' },
     { to: '/notifier', icon: Bell, label: 'Notifications' },
@@ -44,7 +45,7 @@ function Sidebar({ isOpen, onNavigate }) {
         <nav className="flex-1 px-2 py-4 space-y-1">
           {links.map((link, index) => {
             const Icon = link.icon;
-            const isSeparator = [3, 6, 10,14].includes(index); // Indices after which to place separators
+            const isSeparator = [3, 7, 11,15].includes(index); // Indices after which to place separators
             return (
               <div key={link.to}>
                 <Link
