@@ -73,7 +73,6 @@ function InstallApp() {
       }
     } catch (error) {
       toast.error('Installation failed');
-      console.error('Installation error:', error);
     }
   };
 
@@ -108,7 +107,7 @@ function InstallApp() {
             iOS Installation Steps:
           </h4>
           <ol className="mt-2 ml-6 list-decimal text-sm text-gray-600">
-            <li>Open this website in Safari</li>
+            <li>Open this website in Safari/Chrome</li>
             <li>Tap the Share button</li>
             <li>Scroll down and tap "Add to Home Screen"</li>
             <li>Tap "Add" to install</li>
@@ -120,3 +119,4 @@ function InstallApp() {
 }
 
 export default InstallApp;
+ 
