@@ -1,4 +1,4 @@
-import { Filter } from 'lucide-react';
+import { Filter, ArrowDown, ArrowUp } from 'lucide-react';
 
 function ExpenseFilters({ filters, onChange }) {
   const handleChange = (field, value) => {
@@ -15,6 +15,16 @@ function ExpenseFilters({ filters, onChange }) {
         <span className="text-sm font-medium">Filters:</span>
       </div>
 
+      <select
+        value={filters.sort}
+        onChange={(e) => handleChange('sort', e.target.value)}
+        className="form-select"
+      >
+        <option value="">Sort</option>
+        <option value="desc">Descending</option>
+        <option value="asc">Ascending</option>
+      </select>
+      
       <select
         value={filters.paymentMode}
         onChange={(e) => handleChange('paymentMode', e.target.value)}
@@ -36,6 +46,7 @@ function ExpenseFilters({ filters, onChange }) {
         <option value="not verified">Not Verified</option>
         <option value="rejected">Rejected</option>
       </select>
+
     </div>
   );
 }

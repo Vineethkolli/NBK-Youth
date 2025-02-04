@@ -151,12 +151,18 @@ function Stats() {
               <div>
                 <p className="font-semibold">Amount Left</p>
                 <p className="text-xs text-gray-500">(Excluding Previous Year Amount)</p>
-                <p className="text-lg font-bold">{formatAmount(stats.budgetStats.amountLeft.amount)}</p>
+                <p className={`text-lg font-bold ${stats.budgetStats.amountLeft.amount < 0 ? 'text-red-600' : ''}`}>
+    {formatAmount(stats.budgetStats.amountLeft.amount)}
+    {stats.budgetStats.amountLeft.amount < 0 && (
+      <span className="ml-2 text-red-500 font-semibold">(Shortage)</span>
+    )}
+  </p>
+
                 <div className="text-sm text-gray-600 mt-1">
                   <p>Online: {formatAmount(stats.budgetStats.amountLeft.onlineAmount)}</p>
                   <p>Offline: {formatAmount(stats.budgetStats.amountLeft.cashAmount)}</p>
                 </div>
-              </div>
+              </div> 
             </div>
           </div>
         </div>

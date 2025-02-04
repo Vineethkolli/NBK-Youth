@@ -1,19 +1,12 @@
-import { Filter } from 'lucide-react';
-import { useState } from 'react';
+import { Filter, ArrowDown, ArrowUp } from 'lucide-react';
 
 function IncomeFilters({ filters, onChange }) {
-  const [showEmail, setShowEmail] = useState(false);
-  const [showPhoneNumber, setShowPhoneNumber] = useState(false);
-
   const handleChange = (field, value) => {
     onChange({
       ...filters,
       [field]: value
     });
   };
-
-  const handleToggleEmail = () => setShowEmail(!showEmail);
-  const handleTogglePhoneNumber = () => setShowPhoneNumber(!showPhoneNumber);
 
   return (
     <div className="flex items-center space-x-4">
@@ -33,6 +26,26 @@ function IncomeFilters({ filters, onChange }) {
       </select>
 
       <select
+        value={filters.belongsTo}
+        onChange={(e) => handleChange('belongsTo', e.target.value)}
+        className="form-select"
+      >
+        <option value="">Belongs To</option>
+        <option value="villagers">Villagers</option>
+        <option value="youth">Youth</option>
+      </select>
+
+      <select
+        value={filters.sort}
+        onChange={(e) => handleChange('sort', e.target.value)}
+        className="form-select"
+      >
+        <option value="">Sort</option>
+        <option value="desc">Descending</option>
+        <option value="asc">Ascending</option>
+      </select>
+
+      <select
         value={filters.paymentMode}
         onChange={(e) => handleChange('paymentMode', e.target.value)}
         className="form-select"
@@ -44,16 +57,6 @@ function IncomeFilters({ filters, onChange }) {
       </select>
 
       <select
-        value={filters.belongsTo}
-        onChange={(e) => handleChange('belongsTo', e.target.value)}
-        className="form-select"
-      >
-        <option value="">Belongs To</option>
-        <option value="villagers">Villagers</option>
-        <option value="youth">Youth</option>
-      </select>
-
-      <select
         value={filters.verifyLog}
         onChange={(e) => handleChange('verifyLog', e.target.value)}
         className="form-select"
@@ -62,7 +65,9 @@ function IncomeFilters({ filters, onChange }) {
         <option value="verified">Verified</option>
         <option value="not verified">Not Verified</option>
         <option value="rejected">Rejected</option>
-        </select>
+      </select>
+
+      
     </div>
   );
 }

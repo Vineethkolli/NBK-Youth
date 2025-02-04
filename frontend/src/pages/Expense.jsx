@@ -17,6 +17,7 @@ function Expense() {
   const [filters, setFilters] = useState({
     paymentMode: '',
     verifyLog: '',
+    sort: '',
   });
   const [visibleColumns, setVisibleColumns] = useState({
     registerId: false,
@@ -44,18 +45,30 @@ function Expense() {
     fetchExpenses();
   }, [search, filters]);
 
-  const fetchExpenses = async () => {
-    try {
-      const params = new URLSearchParams({
-        search,
-        ...filters,
+const fetchExpenses = async () => {
+  try {
+    const params = new URLSearchParams({
+      search,
+      ...filters
+    });
+    const { data } = await axios.get(`${API_URL}/api/expenses?${params}`);
+    
+    // Sort the data if sort filter is applied
+    if (filters.sort) {
+      data.sort((a, b) => {
+        if (filters.sort === 'desc') {
+          return b.amount - a.amount;
+        }
+        return a.amount - b.amount;
       });
-      const { data } = await axios.get(`${API_URL}/api/expenses?${params}`);
-      setExpenses(data);
-    } catch (error) {
-      toast.error('Failed to fetch expenses');
     }
-  };
+    
+    setExpenses(data);
+  } catch (error) {
+    toast.error('Failed to fetch expenses');
+  }
+};
+
 
   const handleFilterChange = (newFilters) => {
     setFilters(newFilters);

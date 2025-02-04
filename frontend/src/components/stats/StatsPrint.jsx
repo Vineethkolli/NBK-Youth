@@ -11,6 +11,10 @@ const StatsPrint = ({ stats }) => {
     }).format(amount);
   };
 
+  const displayAmountWithShortage = (amount) => {
+    return amount < 0 ? `${formatAmount(amount)} (Shortage)` : formatAmount(amount);
+  };
+
   const handlePrint = () => {
     const doc = new jsPDF();
     let yPos = 20; // Starting Y position for the content
@@ -30,16 +34,18 @@ const StatsPrint = ({ stats }) => {
     doc.setTextColor(0, 0, 0);
     doc.text('Budget Statistics', 15, yPos);
     yPos += 4;
-
+    const amountLeft = stats.budgetStats.amountLeft.amount;
+    const previousYearAmount = stats.budgetStats.previousYearAmount.amount;
+    const totalAmountLeftIncludingPrevious = amountLeft + previousYearAmount;
     const budgetData = [
       ['Category', 'Count', 'Amount'],
       ['Total Income', `${stats.budgetStats.totalIncome.count} entries`, formatAmount(stats.budgetStats.totalIncome.amount)],
       ['Amount Received', `${stats.budgetStats.amountReceived.count} entries`, formatAmount(stats.budgetStats.amountReceived.amount)],
       ['Amount Pending', `${stats.budgetStats.amountPending.count} entries`, formatAmount(stats.budgetStats.amountPending.amount)],
       ['Total Expenses', `${stats.budgetStats.totalExpenses.count} entries`, formatAmount(stats.budgetStats.totalExpenses.amount)],
-      ['Amount Left', '-', formatAmount(stats.budgetStats.amountLeft.amount)],
-      ['Previous Year Amount', '-', formatAmount(stats.budgetStats.previousYearAmount.amount)],
-      ['Amount Left (including previous)', '-', formatAmount(stats.budgetStats.amountLeft.amount + stats.budgetStats.previousYearAmount.amount)]
+      ['Amount Left', '-', displayAmountWithShortage(amountLeft)],
+      ['Previous Year Amount', '-', formatAmount(previousYearAmount)],
+      ['Amount Left (including previous)', '-', displayAmountWithShortage(totalAmountLeftIncludingPrevious)]
     ];
 
     doc.autoTable({

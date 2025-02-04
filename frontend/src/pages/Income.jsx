@@ -18,7 +18,8 @@ function Income() {
     status: '',
     paymentMode: '',
     belongsTo: '',
-    verifyLog: ''
+    verifyLog: '',
+    sort: ''
   });
   const [visibleColumns, setVisibleColumns] = useState({
     incomeId: false,
@@ -42,18 +43,29 @@ function Income() {
     fetchIncomes();
   }, [search, filters]);
 
-  const fetchIncomes = async () => {
-    try {
-      const params = new URLSearchParams({
-        search,
-        ...filters
+const fetchIncomes = async () => {
+  try {
+    const params = new URLSearchParams({
+      search,
+      ...filters
+    });
+    const { data } = await axios.get(`${API_URL}/api/incomes?${params}`);
+    
+    // Sort the data if sort filter is applied
+    if (filters.sort) {
+      data.sort((a, b) => {
+        if (filters.sort === 'desc') {
+          return b.amount - a.amount;
+        }
+        return a.amount - b.amount;
       });
-      const { data } = await axios.get(`${API_URL}/api/incomes?${params}`);
-      setIncomes(data);
-    } catch (error) {
-      toast.error('Failed to fetch incomes');
     }
-  };
+    
+    setIncomes(data);
+  } catch (error) {
+    toast.error('Failed to fetch incomes');
+  }
+};
 
   const handleFilterChange = (newFilters) => {
     setFilters(newFilters);
