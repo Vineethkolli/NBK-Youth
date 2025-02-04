@@ -69,7 +69,7 @@ function InstallApp() {
   const handleInstall = async () => {
     if (!deferredPrompt) {
       if (platform === 'ios') {
-        toast.info('Please use Safari\'s "Add to Home Screen" option to install');
+        toast.info('Use share menu of Safari/Chrome "Add to Home Screen" option to install');
         return;
       }
       toast.error('Installation not available');
