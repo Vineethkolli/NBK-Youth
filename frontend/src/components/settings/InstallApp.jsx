@@ -1,4 +1,3 @@
-// frontend/src/components/InstallApp.jsx
 import { useState, useEffect } from 'react';
 import { Download, Share2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
@@ -9,76 +8,67 @@ function InstallApp() {
   const [isInstalled, setIsInstalled] = useState(false);
 
   useEffect(() => {
-    // Detect platform for showing instructions (iOS doesn’t support beforeinstallprompt)
-    const ua = window.navigator.userAgent;
-    if (/iPad|iPhone|iPod/.test(ua)) {
-      setPlatform('ios');
-    } else if (/Android/.test(ua)) {
-      setPlatform('android');
-    } else {
-      setPlatform('desktop');
-    }
+    // Detect platform
+    const detectPlatform = () => {
+      if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+        setPlatform('ios');
+      } else {
+        setPlatform('desktop');
+      }
+    };
 
-    // Check if app is already installed
+    detectPlatform();
+
+    // Check if already installed
     const checkInstalled = () => {
-      // For most browsers (standalone mode)
-      if (window.matchMedia('(display-mode: standalone)').matches ||
+      if (window.matchMedia('(display-mode: standalone)').matches || 
           window.navigator.standalone === true) {
         setIsInstalled(true);
       }
     };
+
     checkInstalled();
 
-    // Listen for the beforeinstallprompt event to capture the install prompt
+    // Handle install prompt
     const handleBeforeInstallPrompt = (e) => {
       e.preventDefault();
       setDeferredPrompt(e);
     };
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
-    // Listen for appinstalled event to update UI immediately
-    const handleAppInstalled = () => {
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('appinstalled', () => {
       setIsInstalled(true);
       setDeferredPrompt(null);
       toast.success('App installed successfully!');
-    };
-    window.addEventListener('appinstalled', handleAppInstalled);
+    });
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-      window.removeEventListener('appinstalled', handleAppInstalled);
     };
   }, []);
 
   const handleInstall = async () => {
-    // If no deferred prompt, then installation isn’t available
     if (!deferredPrompt) {
       if (platform === 'ios') {
-        toast.info('On iOS, please use Safari’s "Add to Home Screen" option to install.');
-      } else {
-        toast.error('Installation is not available at this time.');
+        toast.info('Please use Safari\'s "Add to Home Screen" option to install');
+        return;
       }
+      toast.error('Installation not available');
       return;
     }
 
     try {
-      // Show the installation prompt
       deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
       if (outcome === 'accepted') {
-        toast.success('Installation accepted!');
-      } else {
-        toast.info('Installation dismissed');
+        setDeferredPrompt(null);
       }
-      // Clear the deferred prompt once used
-      setDeferredPrompt(null);
     } catch (error) {
       toast.error('Installation failed');
       console.error('Installation error:', error);
     }
   };
 
-  // If app is installed, you can either hide or disable the button
   if (isInstalled) {
     return (
       <div className="bg-green-50 p-4 rounded-lg">
@@ -92,7 +82,7 @@ function InstallApp() {
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-lg font-medium">Install App</h3>
-          <p className="text-sm text-gray-500">Get quick access and improved performance.</p>
+          <p className="text-sm text-gray-500">Get quick access and better performance</p>
         </div>
         <button
           onClick={handleInstall}
@@ -110,10 +100,10 @@ function InstallApp() {
             iOS Installation Steps:
           </h4>
           <ol className="mt-2 ml-6 list-decimal text-sm text-gray-600">
-            <li>Open this website in Safari.</li>
-            <li>Tap the Share button at the bottom.</li>
-            <li>Select "Add to Home Screen".</li>
-            <li>Tap "Add" to install the app.</li>
+            <li>Open this website in Safari</li>
+            <li>Tap the Share button</li>
+            <li>Scroll down and tap "Add to Home Screen"</li>
+            <li>Tap "Add" to install</li>
           </ol>
         </div>
       )}

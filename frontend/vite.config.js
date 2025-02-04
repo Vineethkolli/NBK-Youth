@@ -14,7 +14,7 @@ export default defineConfig({
         theme_color: '#ffffff',
         background_color: '#ffffff',
         display: 'standalone',
-        start_url: '/?homescreen=1',
+        start_url: '/',
         icons: [
           {
             src: '/logo.png',
@@ -26,14 +26,12 @@ export default defineConfig({
             src: '/logo.png',
             sizes: '512x512',
             type: 'image/png',
-            purpose: 'any maskable',
           },
         ],
       },
       workbox: {
         runtimeCaching: [
           {
-            // Cache API requests (example)
             urlPattern: ({ url }) => url.origin === 'https://nbkyouth.vercel.app',
             handler: 'NetworkFirst',
             options: {
@@ -41,7 +39,6 @@ export default defineConfig({
             },
           },
           {
-            // Cache all same-origin assets
             urlPattern: ({ url }) => url.origin === location.origin,
             handler: 'StaleWhileRevalidate',
             options: {
