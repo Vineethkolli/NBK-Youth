@@ -2,8 +2,14 @@ import { useState, useEffect } from 'react';
 import { Download, Share2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
+let deferredPrompt;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+});
+
 function InstallApp() {
-  const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [platform, setPlatform] = useState(null);
   const [isInstalled, setIsInstalled] = useState(false);
 
@@ -31,21 +37,18 @@ function InstallApp() {
 
     checkInstalled();
 
-    // Handle install prompt
-    const handleBeforeInstallPrompt = (e) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
-    };
-
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     window.addEventListener('appinstalled', () => {
       setIsInstalled(true);
-      setDeferredPrompt(null);
+      deferredPrompt = null;
       toast.success('App installed successfully!');
     });
 
     return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', () => {
+        setIsInstalled(true);
+        deferredPrompt = null;
+        toast.success('App installed successfully!');
+      });
     };
   }, []);
 
@@ -63,7 +66,7 @@ function InstallApp() {
       deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
       if (outcome === 'accepted') {
-        setDeferredPrompt(null);
+        deferredPrompt = null;
         toast.success('Installation accepted');
       } else {
         toast.error('Installation rejected');
