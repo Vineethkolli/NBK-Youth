@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Download, X } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 function InstallApp() {
-  const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
   const [platform, setPlatform] = useState(null);
+  const deferredPrompt = useRef(null);
 
   useEffect(() => {
     // Detect platform
@@ -25,7 +25,7 @@ function InstallApp() {
     if (!isAppInstalled) {
       const handleBeforeInstallPrompt = (e) => {
         e.preventDefault();
-        setDeferredPrompt(e);
+        deferredPrompt.current = e;
         setShowInstallPrompt(true);
 
         const timer = setTimeout(() => {
@@ -44,13 +44,13 @@ function InstallApp() {
   }, []);
 
   const handleInstallClick = async () => {
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
+    if (deferredPrompt.current) {
+      deferredPrompt.current.prompt();
+      const { outcome } = await deferredPrompt.current.userChoice;
       if (outcome === 'accepted') {
         toast.success('App installed successfully!');
         setShowInstallPrompt(false);
-        setDeferredPrompt(null);
+        deferredPrompt.current = null;
       } else {
         toast.error('Installation rejected');
       }
