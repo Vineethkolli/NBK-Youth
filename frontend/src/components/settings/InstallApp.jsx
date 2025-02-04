@@ -12,6 +12,8 @@ function InstallApp() {
     const detectPlatform = () => {
       if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
         setPlatform('ios');
+      } else if (/Android/.test(navigator.userAgent)) {
+        setPlatform('android');
       } else {
         setPlatform('desktop');
       }
