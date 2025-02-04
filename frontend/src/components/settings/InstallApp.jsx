@@ -64,6 +64,9 @@ function InstallApp() {
       const { outcome } = await deferredPrompt.userChoice;
       if (outcome === 'accepted') {
         setDeferredPrompt(null);
+        toast.success('Installation accepted');
+      } else {
+        toast.error('Installation rejected');
       }
     } catch (error) {
       toast.error('Installation failed');
