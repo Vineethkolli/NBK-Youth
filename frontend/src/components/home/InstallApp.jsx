@@ -30,7 +30,7 @@ function InstallApp() {
 
         const timer = setTimeout(() => {
           setShowInstallPrompt(false);
-        }, 1000000);
+        }, 3000);
 
         return () => clearTimeout(timer);
       };
