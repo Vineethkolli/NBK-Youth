@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Bell, AlertTriangle } from 'lucide-react';
-import { subscribeToPushNotifications, unsubscribeFromPushNotifications } from '../../utils/notifications';
+import { subscribeToPushNotifications } from '../../utils/notifications';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { API_URL } from '../../utils/config';
@@ -8,10 +8,24 @@ import { API_URL } from '../../utils/config';
 function Notifications() {
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [notificationsSupported, setNotificationsSupported] = useState(true);
+  const [permissionStatus, setPermissionStatus] = useState('default');
 
   useEffect(() => {
     checkNotificationSupport();
-    checkNotificationStatus();
+    handlePermissionStatus();
+
+    // Listen for changes in permission state if the Permissions API is available.
+    if ('permissions' in navigator) {
+      navigator.permissions.query({ name: 'notifications' }).then((status) => {
+        setPermissionStatus(status.state);
+        status.onchange = () => {
+          setPermissionStatus(status.state);
+        };
+      });
+    } else {
+      // Fallback if Permissions API isn't supported.
+      setPermissionStatus(Notification.permission);
+    }
   }, []);
 
   const checkNotificationSupport = () => {
@@ -19,30 +33,51 @@ function Notifications() {
     setNotificationsSupported(supported);
   };
 
-  const checkNotificationStatus = async () => {
-    try {
-      const { data } = await axios.get(`${API_URL}/api/notifications/status`);
-      setNotificationsEnabled(data.enabled);
-    } catch (error) {
-      console.error('Failed to check notification status:', error);
+  const handlePermissionStatus = () => {
+    const permission = Notification.permission;
+    setPermissionStatus(permission);
+    if (permission === 'granted') {
+      setNotificationsEnabled(true);
+    } else {
+      setNotificationsEnabled(false);
     }
   };
 
   const toggleNotifications = async () => {
-    try {
-      if (notificationsEnabled) {
-        await unsubscribeFromPushNotifications();
-        setNotificationsEnabled(false);
-        toast.success('Notifications disabled');
-      } else {
+    if (!notificationsEnabled) {
+      // Request permission only when notifications are not enabled.
+      if (Notification.permission === 'denied') {
+        // If permission was already denied, instruct the user to change it manually.
+        toast.error('Please enable notifications from your browser settings.');
+        return;
+      }
+      const permission = await Notification.requestPermission();
+      setPermissionStatus(permission);
+      if (permission === 'granted') {
+        // Call your subscription logic here.
         const success = await subscribeToPushNotifications();
         if (success) {
           setNotificationsEnabled(true);
           toast.success('Notifications enabled');
         }
+      } else {
+        toast.error('Notification permission was not granted');
       }
-    } catch (error) {
-      toast.error(error.message || 'Failed to update notification settings');
+    } else {
+      // When notifications are already enabled, instruct the user to disable via browser settings.
+      toast.error('Disable notifications from your browser settings.');
+    }
+  };
+
+  // Map the permission status to a friendly text.
+  const displayPermission = () => {
+    switch (permissionStatus) {
+      case 'granted':
+        return 'Allowed';
+      case 'denied':
+        return 'Denied';
+      default:
+        return 'Not Yet Granted';
     }
   };
 
@@ -60,9 +95,8 @@ function Notifications() {
         ) : (
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-medium">Push Notifications</p>
-              <p className="text-sm text-gray-500">
-                {notificationsEnabled ? 'Enabled' : 'Disabled'}
+              <p className="font-medium">
+                Permission: <span className="ml-1 text-sm text-gray-500">{displayPermission()}</span>
               </p>
             </div>
             <button
@@ -73,7 +107,7 @@ function Notifications() {
                   : 'bg-indigo-600 hover:bg-indigo-700'
               }`}
             >
-              {notificationsEnabled ? 'Disable' : 'Enable'} Notifications
+              {notificationsEnabled ? 'Block' : 'Allow'} Notifications
             </button>
           </div>
         )}

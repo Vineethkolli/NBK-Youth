@@ -4,7 +4,7 @@ import { Bell, Send } from 'lucide-react';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import { API_URL } from '../utils/config';
-import { showNotification, subscribeToPushNotifications } from '../utils/notifications';
+import { showNotification } from '../utils/notifications';
 import NotificationHistory from '../components/notification/NotificationHistory';
 
 function Notifier() {
@@ -19,18 +19,7 @@ function Notifier() {
 
   useEffect(() => {
     fetchNotifications();
-    setupNotifications();
   }, [user]);
-
-  const setupNotifications = async () => {
-    if (Notification.permission === 'default') {
-      try {
-        await subscribeToPushNotifications();
-      } catch (error) {
-        console.error('Failed to setup notifications:', error);
-      }
-    }
-  };
 
   const fetchNotifications = async () => {
     try {
@@ -61,7 +50,7 @@ function Notifier() {
   };
 
   return (
-    <div className="max-w-1xl mx-auto space-y-8">
+    <div className="max-w-4xl mx-auto space-y-8">
       {user?.role === 'developer' && (
         <div className="bg-white shadow-lg rounded-lg p-6">
           <h2 className="text-2xl font-semibold mb-6 flex items-center">
@@ -99,8 +88,9 @@ function Notifier() {
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
               >
                 <option value="all">All Users</option>
-                <option value="registerId">Specific Register ID</option>
                 <option value="allUsers">All Regular Users</option>
+                <option value="youthUsers">All Youth Users</option>
+                <option value="registerId">Specific Register ID</option>
                 <option value="allDevelopers">All Developers</option>
                 <option value="allAdmins">All Admins</option>
                 <option value="allFinanciers">All Financiers</option>
