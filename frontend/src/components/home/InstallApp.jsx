@@ -48,7 +48,7 @@ function InstallApp() {
       sessionStorage.setItem('installPromptShown', 'true');
       timer = setTimeout(() => {
         setShowInstallPrompt(false);
-      }, 3000);
+      }, 4000);
     }
 
     // Listen for the appinstalled event
