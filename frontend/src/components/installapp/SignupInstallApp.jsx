@@ -12,6 +12,7 @@ window.addEventListener('beforeinstallprompt', (e) => {
 function InstallApp() {
   const [platform, setPlatform] = useState(null);
   const [isInstalled, setIsInstalled] = useState(false);
+  const [showInstallPrompt, setShowInstallPrompt] = useState(true);
 
   useEffect(() => {
     const detectPlatform = () => {
@@ -63,6 +64,7 @@ function InstallApp() {
       if (outcome === 'accepted') {
         deferredPrompt = null;
         toast.success('Installation accepted');
+        setShowInstallPrompt(false);
       } else {
         toast.error('Installation rejected');
       }
@@ -71,7 +73,7 @@ function InstallApp() {
     }
   };
 
-  if (isInstalled) {
+  if (isInstalled || !showInstallPrompt) {
     return null;
   }
 
