@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Download, Share2, Home, Lightbulb, Rocket } from 'lucide-react';
-import InstallApp from '../components/settings/InstallApp';
+import InstallApp from '../components/installapp/SettingsInstallApp';
 import Notifications from '../components/settings/Notifications';
 
 function Settings() {
@@ -59,7 +59,7 @@ function Settings() {
         {/* Install App Section */}
         <div className="space-y-4">
           <h3 className="text-lg font-medium flex items-center">
-            <Download className="mr-2" /> Install App
+            <Download className="mr-2" /> Download App
           </h3>
           <InstallApp />
           </div>

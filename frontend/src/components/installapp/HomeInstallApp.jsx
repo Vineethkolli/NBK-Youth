@@ -99,7 +99,7 @@ function InstallApp() {
   return (
     <div className="fixed top-4 left-4 right-4 bg-green-50 bg-opacity-80 text-green-800 p-4 flex items-center justify-between shadow-lg rounded-lg z-50">
       <div>
-        <h3 className="text-lg font-medium">Install Our App</h3>
+        <h3 className="text-lg font-medium">Download Our App</h3>
       </div>
       <div className="flex items-center space-x-2">
         <button
@@ -107,7 +107,7 @@ function InstallApp() {
           className="px-4 py-2 bg-green-800 text-white rounded-md hover:bg-green-700 flex items-center transition-colors duration-200"
         >
           <Download className="h-4 w-4 mr-2" />
-          Install Now
+          Download Now
         </button>
         <button onClick={() => setShowInstallPrompt(false)}>
           <X className="h-6 w-6" />

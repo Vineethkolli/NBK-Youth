@@ -78,6 +78,14 @@ function SignIn() {
   return (
     <>
       <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="text-center">
+  <h1 className="mt-2 text-4xl md:text-3xl font-extrabold tracking-wide text-green-600">
+    NBK YOUTH
+  </h1>
+  <h2 className="text-xl md:text-lg font-medium text-gray-600">
+    Gangavaram
+  </h2>
+  </div> 
         <div>
           <input
             type="text"

@@ -88,7 +88,7 @@ function InstallApp() {
     <div className="bg-white rounded-lg shadow p-6 space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-medium">Install App</h3>
+          <h3 className="text-lg font-medium">Download App</h3>
           <p className="text-sm text-gray-500">Get quick access and better performance</p>
         </div>
         <button
@@ -96,7 +96,7 @@ function InstallApp() {
           className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 flex items-center"
         >
           <Download className="h-4 w-4 mr-2" />
-          Install Now
+          Download Now
         </button>
       </div>
 
