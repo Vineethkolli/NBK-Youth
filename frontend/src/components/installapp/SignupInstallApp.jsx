@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { Download, Share2, X } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
-// Store the deferred prompt outside of component state
 let deferredPrompt;
 
 window.addEventListener('beforeinstallprompt', (e) => {
@@ -13,10 +12,8 @@ window.addEventListener('beforeinstallprompt', (e) => {
 function InstallApp() {
   const [platform, setPlatform] = useState(null);
   const [isInstalled, setIsInstalled] = useState(false);
-  const [showInstallPrompt, setShowInstallPrompt] = useState(false);
 
   useEffect(() => {
-    // Detect the platform
     const detectPlatform = () => {
       if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
         setPlatform('ios');
@@ -28,7 +25,6 @@ function InstallApp() {
     };
     detectPlatform();
 
-    // Check if the app is installed
     const checkInstalled = () => {
       if (
         window.matchMedia('(display-mode: standalone)').matches ||
@@ -39,19 +35,6 @@ function InstallApp() {
     };
     checkInstalled();
 
-    let timer;
-    // Only show the install prompt if it hasn't already been shown during this session
-    const alreadyShown = sessionStorage.getItem('installPromptShown');
-    if (!isInstalled && !alreadyShown) {
-      setShowInstallPrompt(true);
-      // Mark as shown in session storage so it won't be re-shown
-      sessionStorage.setItem('installPromptShown', 'true');
-      timer = setTimeout(() => {
-        setShowInstallPrompt(false);
-      }, 4000);
-    }
-
-    // Listen for the appinstalled event
     const onAppInstalled = () => {
       setIsInstalled(true);
       deferredPrompt = null;
@@ -61,11 +44,9 @@ function InstallApp() {
 
     return () => {
       window.removeEventListener('appinstalled', onAppInstalled);
-      if (timer) clearTimeout(timer);
     };
-  }, [isInstalled]);
+  }, []);
 
-  // Handle the installation click
   const handleInstall = async () => {
     if (!deferredPrompt) {
       if (platform === 'ios') {
@@ -82,7 +63,6 @@ function InstallApp() {
       if (outcome === 'accepted') {
         deferredPrompt = null;
         toast.success('Installation accepted');
-        setShowInstallPrompt(false);
       } else {
         toast.error('Installation rejected');
       }
@@ -91,8 +71,7 @@ function InstallApp() {
     }
   };
 
-  // Don't render the prompt if the app is installed or if the prompt is hidden
-  if (isInstalled || !showInstallPrompt) {
+  if (isInstalled) {
     return null;
   }
 
