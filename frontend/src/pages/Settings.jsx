@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Download, Share2, Home, Lightbulb, Rocket } from 'lucide-react';
 import InstallApp from '../components/installapp/SettingsInstallApp';
+import Footer from '../components/Footer';
 import Notifications from '../components/settings/Notifications';
 
 function Settings() {
@@ -64,6 +65,8 @@ function Settings() {
           <InstallApp />
           </div>
         </div>
+        {/* Footer */}
+      <Footer />
     </div>
   );
 }

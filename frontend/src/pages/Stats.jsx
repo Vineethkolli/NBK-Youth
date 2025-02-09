@@ -4,6 +4,7 @@ import { IndianRupee, Users, Edit2 } from 'lucide-react';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import { API_URL } from '../utils/config';
+import Footer from '../components/Footer';
 import StatsPrint from '../components/stats/StatsPrint';
 
 function Stats() {
@@ -255,6 +256,8 @@ function Stats() {
           </table>
         </div>
       </div>
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }

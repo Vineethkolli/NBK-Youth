@@ -64,20 +64,6 @@ function Home() {
 
         {/* Mode Section */}
         <div className="bg-gray-100 border-t border-gray-200 rounded-lg">
-          <div className="px-4 py-4 sm:px-6 sm:py-6">
-            <h2 className="text-xl font-medium text-gray-800">Current Mode:</h2>
-            <div className="mt-2 flex items-center">
-              <div className="inline-flex items-center px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-full shadow">
-                Development &amp; Testing
-              </div>
-            </div>
-            <p className="mt-2 text-sm text-black-500">
-              First Phase of Development Completed 31-12-24.
-            </p>
-            <p className="mt-2 text-sm text-gray-500">
-              Raise Concerns, Recommend Enhancements, Share Your Thoughts.
-            </p>
-          </div>
           <p className="mt-4 text-sm text-gray-500 px-4">
             If any issue is faced at any time, just refresh the page by scrolling down. We are working hard to sort out the errors.
           </p>
