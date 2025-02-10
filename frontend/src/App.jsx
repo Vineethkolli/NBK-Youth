@@ -26,6 +26,8 @@ import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './context/AuthContext';
 import { HiddenProfileProvider } from './context/HiddenProfileContext';
 import { initializeAnalytics, trackPageView } from './utils/analytics';
+import { LanguageProvider } from './context/LanguageContext';
+
 
 function AppContent() {
   const location = useLocation();
@@ -73,11 +75,13 @@ function App() {
 
   return (
     <AuthProvider>
+    <LanguageProvider>
       <HiddenProfileProvider>
         <Router>
           <AppContent />
         </Router>
       </HiddenProfileProvider>
+      </LanguageProvider>
     </AuthProvider>
   );
 }

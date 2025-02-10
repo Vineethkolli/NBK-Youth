@@ -161,4 +161,19 @@ router.get('/profile', auth, async (req, res) => {
   }
 });
 
+router.patch('/language', auth, async (req, res) => {
+  try {
+    const { language } = req.body;
+    const user = await User.findByIdAndUpdate(
+      req.user.id,
+      { language },
+      { new: true }
+    ).select('-password');
+    
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to update language preference' });
+  }
+});
+
 export default router;
