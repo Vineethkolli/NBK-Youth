@@ -1,4 +1,4 @@
-import { Download, Globe2Icon, Languages } from 'lucide-react';
+import { Download, Languages } from 'lucide-react';
 import InstallApp from '../components/installapp/SettingsInstallApp';
 import Footer from '../components/Footer';
 import Notifications from '../components/settings/Notifications';
