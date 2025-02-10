@@ -25,7 +25,7 @@ function Sidebar({ isOpen, onNavigate }) {
     ...(user?.role === 'developer' || user?.role === 'financier' ? [
       { to: '/verification', icon: CheckSquare, label: 'Verification' }
     ] : []),
-    ...(user?.role === 'developer' || user?.role === 'financier' ? [
+    ...(user?.role === 'developer'? [
       { to: '/recycle-bin', icon: Trash2, label: 'Recycle Bin' }
     ] : []),
     ...(user?.role === 'developer' ? [
