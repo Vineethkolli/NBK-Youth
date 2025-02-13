@@ -10,6 +10,9 @@ function Slideshow({ isEditing }) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
   const videoRef = useRef(null);
+  const touchStartX = useRef(0);
+  const touchEndX = useRef(0);
+  const swipeThreshold = 50; // Minimum swipe distance in pixels to trigger slide change
   const { user } = useAuth();
 
   useEffect(() => {
@@ -97,6 +100,28 @@ function Slideshow({ isEditing }) {
     setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
   };
 
+  // Touch event handlers for swipe functionality
+  const handleTouchStart = (e) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchMove = (e) => {
+    touchEndX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = () => {
+    const swipeDistance = touchStartX.current - touchEndX.current;
+    if (Math.abs(swipeDistance) > swipeThreshold) {
+      if (swipeDistance > 0) {
+        // Swiped left
+        nextSlide();
+      } else {
+        // Swiped right
+        previousSlide();
+      }
+    }
+  };
+
   if (slides.length === 0) {
     return (
       <div className="h-96 bg-gray-100 rounded-lg flex items-center justify-center">
@@ -128,7 +153,12 @@ function Slideshow({ isEditing }) {
   const currentSlideData = slides[currentSlide];
 
   return (
-    <div className="relative h-96 bg-black rounded-lg overflow-hidden group">
+    <div
+      className="relative h-96 bg-black rounded-lg overflow-hidden group"
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+    >
       {currentSlideData.type === 'image' ? (
         <img
           src={currentSlideData.url}
