@@ -1,5 +1,5 @@
 import webpush from 'web-push';
-import Subscription from '../models/notification.js'; 
+import Subscription from '../models/Notification.js'; 
 import User from '../models/User.js';
 import NotificationHistory from '../models/NotificationHistory.js';
 

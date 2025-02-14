@@ -1,6 +1,7 @@
 import express from 'express';
 import { auth, checkRole } from '../middleware/auth.js';
 import User from '../models/User.js';
+import Notification from '../models/Notification.js'; // Import the Notification model
 import { userController } from '../controllers/userController.js';
 
 const router = express.Router();
@@ -8,7 +9,8 @@ const router = express.Router();
 // Update profile image
 router.post('/profile/image', auth, userController.updateProfileImage);
 
-// Get all users (developer only)
+
+// Get all users (developer only) with notification status
 router.get('/', auth, checkRole(['developer']), async (req, res) => {
   try {
     const { search } = req.query;
@@ -27,11 +29,23 @@ router.get('/', auth, checkRole(['developer']), async (req, res) => {
     }
     
     const users = await User.find(query).select('-password');
-    res.json(users);
+    // For each user, check if notifications are enabled (i.e. there is a Notification record with subscriptions)
+    const usersWithNotificationStatus = await Promise.all(
+      users.map(async (user) => {
+        const notificationRecord = await Notification.findOne({ registerId: user.registerId });
+        const notificationsEnabled = notificationRecord &&
+          notificationRecord.subscriptions &&
+          notificationRecord.subscriptions.length > 0;
+        return { ...user.toObject(), notificationsEnabled };
+      })
+    );
+    
+    res.json(usersWithNotificationStatus);
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
   }
 });
+
 
 // Update user profile
 router.patch('/profile', auth, async (req, res) => {
