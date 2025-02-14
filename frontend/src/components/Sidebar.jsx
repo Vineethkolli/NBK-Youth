@@ -17,7 +17,7 @@ function Sidebar({ isOpen, onNavigate }) {
     { to: '/estimation', icon: Calculator, label: 'Estimation' },
     { to: '/profile', icon: User, label: 'Profile' },
     { to: '/pay-online', icon: ShieldCheck, label: 'Pay Online' },
-    { to: '/notifier', icon: Bell, label: 'Notifications' },
+    { to: '/notifications', icon: Bell, label: 'Notifications' },
     { to: '/settings', icon: Settings, label: 'Settings' },
     ...(user?.role === 'developer' ? [
       { to: '/users', icon: Users, label: 'Users' }

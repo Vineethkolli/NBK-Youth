@@ -7,7 +7,7 @@ import { API_URL } from '../utils/config';
 import Slideshow from '../components/home/Slideshow';
 import Timeline from '../components/home/Timeline';
 import Footer from '../components/Footer';
-import InstallApp from '../components/installapp/HomeInstallApp';
+import InstallApp from '../components/home/InstallApp';
 
 function Home() {
   const { user } = useAuth();

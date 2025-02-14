@@ -89,7 +89,7 @@ function InstallApp() {
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-lg font-medium">Download App</h3>
-          <p className="text-sm text-gray-500">Get quick access and better performance</p>
+          <p className="text-sm text-gray-500">Click "Download Now" to get better performance.</p>
         </div>
         <button
           onClick={handleInstall}

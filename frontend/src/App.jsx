@@ -10,7 +10,6 @@ import Home from './pages/Home';
 import Profile from './pages/Profile';
 import Users from './pages/Users';
 import PayOnline from './pages/PayOnline';
-import Notifier from './pages/Notifier';
 import Settings from './pages/Settings';
 import Stats from './pages/Stats';
 import Income from './pages/Income';
@@ -27,7 +26,7 @@ import { AuthProvider } from './context/AuthContext';
 import { HiddenProfileProvider } from './context/HiddenProfileContext';
 import { initializeAnalytics, trackPageView } from './utils/analytics';
 import { LanguageProvider } from './context/LanguageContext';
-
+import Notifications from './pages/Notifications';
 
 function AppContent() {
   const location = useLocation();
@@ -51,7 +50,6 @@ function AppContent() {
           <Route path="/stats" element={<Stats />} />
           <Route path="/users" element={<Users />} />
           <Route path="/pay-online" element={<PayOnline />} />
-          <Route path="/notifier" element={<Notifier />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/income" element={<Income />} />
           <Route path="/expense" element={<Expense />} />
@@ -62,6 +60,7 @@ function AppContent() {
           <Route path="/vibe" element={<Vibe />} />
           <Route path="/moments" element={<Moments />} />
           <Route path="/lets-play" element={<LetsPlay />} />
+          <Route path="/notifications" element={<Notifications />} />
         </Route>
       </Routes>
     </>

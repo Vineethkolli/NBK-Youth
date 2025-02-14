@@ -7,9 +7,8 @@ import { fileURLToPath } from 'url';
 import webpush from 'web-push';
 import authRoutes from './routes/auth.js';
 import userRoutes from './routes/users.js';
-import notificationRoutes from './routes/notifications.js';
 import paymentRoutes from './routes/payment.js';
-import paymentDetailsRoutes from './routes/paymentDetails.js'; 
+import paymentDetailsRoutes from './routes/paymentDetails.js';
 import incomeRoutes from './routes/incomes.js';
 import expenseRoutes from './routes/expenses.js';
 import verificationRoutes from './routes/verification.js';
@@ -20,6 +19,7 @@ import hiddenProfileRoutes from './routes/hiddenProfiles.js';
 import homepageRoutes from './routes/homepage.js';
 import momentsRoutes from './routes/moments.js';
 import gameRoutes from './routes/games.js';
+import notificationRoutes from './routes/notifications.js';
 import { createDefaultDeveloper } from './utils/setupDefaults.js';
 
 // Load environment variables
@@ -29,27 +29,21 @@ const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Web Push Notification Setup
-const vapidKeys = {
-  publicKey: process.env.VAPID_PUBLIC_KEY,
-  privateKey: process.env.VAPID_PRIVATE_KEY
-};
+// Set VAPID details
+if (!process.env.PUBLIC_VAPID_KEY || !process.env.PRIVATE_VAPID_KEY) {
+  console.error('Missing VAPID keys in environment variables');
+  process.exit(1);
+}
 
 webpush.setVapidDetails(
-  'mailto:example@yourdomain.com',
-  vapidKeys.publicKey,
-  vapidKeys.privateKey
+  'mailto:youremail@example.com',
+  process.env.PUBLIC_VAPID_KEY,
+  process.env.PRIVATE_VAPID_KEY
 );
 
 // Middleware
 app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || origin === process.env.FRONTEND_URL) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: process.env.FRONTEND_URL || '*',
   credentials: true
 }));
 app.use(express.json({ limit: '500mb' }));
@@ -61,8 +55,7 @@ app.use('/assets', express.static(path.join(__dirname, 'public/assets')));
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
-app.use('/api/notifications', notificationRoutes);
-app.use('/api/payments', paymentRoutes); 
+app.use('/api/payments', paymentRoutes);
 app.use('/api/payment-details', paymentDetailsRoutes);
 app.use('/api/incomes', incomeRoutes);
 app.use('/api/expenses', expenseRoutes);
@@ -74,23 +67,15 @@ app.use('/api/hidden-profiles', hiddenProfileRoutes);
 app.use('/api/homepage', homepageRoutes);
 app.use('/api/moments', momentsRoutes);
 app.use('/api/games', gameRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Health check endpoint
 app.get('/', (req, res) => {
   res.json({ status: 'API is running' });
 });
 
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ 
-    message: 'Internal Server Error',
-    error: process.env.NODE_ENV === 'development' ? err.message : undefined
-  });
-});
-
 // MongoDB connection
-mongoose.connect(process.env.MONGODB_URI)
+mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => {
     console.log('Connected to MongoDB');
     createDefaultDeveloper();

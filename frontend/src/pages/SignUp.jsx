@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-hot-toast';
 import { Eye, EyeOff } from 'lucide-react'; // Import icons for visibility toggle
-import InstallApp from '../components/installapp/SignupInstallApp'; // Import the InstallApp component
+import InstallApp from '../components/auth/InstallApp'; // Import the InstallApp component
 
 function SignUp() {
   const [formData, setFormData] = useState({

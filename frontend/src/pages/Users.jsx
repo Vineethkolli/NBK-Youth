@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Bell, BellOff } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { API_URL } from '../utils/config';
 
@@ -25,9 +25,7 @@ function Users() {
 
   const handleRoleChange = async (userId, newRole) => {
     try {
-      await axios.patch(`${API_URL}/api/users/${userId}/role`, {
-        role: newRole
-      });
+      await axios.patch(`${API_URL}/api/users/${userId}/role`, { role: newRole });
       toast.success('Role updated successfully');
       fetchUsers();
     } catch (error) {
@@ -37,9 +35,7 @@ function Users() {
 
   const handleCategoryChange = async (userId, newCategory) => {
     try {
-      await axios.patch(`${API_URL}/api/users/${userId}/category`, {
-        category: newCategory
-      });
+      await axios.patch(`${API_URL}/api/users/${userId}/category`, { category: newCategory });
       toast.success('Category updated successfully');
       fetchUsers();
     } catch (error) {
@@ -49,7 +45,6 @@ function Users() {
 
   const handleDeleteUser = async (userId) => {
     if (!window.confirm('Are you sure you want to delete this user?')) return;
-    
     try {
       await axios.delete(`${API_URL}/api/users/${userId}`);
       toast.success('User deleted successfully');
@@ -87,6 +82,8 @@ function Users() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Phone</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
+                {/* New Notifications column */}
+                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Notifications</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
               </tr>
             </thead>
@@ -127,6 +124,14 @@ function Users() {
                       <option value="youth">Youth</option>
                       <option value="general">General</option>
                     </select>
+                  </td>
+                  {/* Notifications status column */}
+                  <td className="px-6 py-4 whitespace-nowrap text-center">
+                    {user.notificationsEnabled ? (
+                      <Bell className="h-5 w-5 text-green-600" title="Notifications Enabled" />
+                    ) : (
+                      <BellOff className="h-5 w-5 text-gray-400" title="Notifications Disabled" />
+                    )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
                     <button

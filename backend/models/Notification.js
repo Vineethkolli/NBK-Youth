@@ -1,31 +1,20 @@
 import mongoose from 'mongoose';
 
 const notificationSchema = new mongoose.Schema({
-  title: {
+  registerId: {
     type: String,
-    required: true
+    required: true,
+    unique: false, // Multiple devices for the same user
   },
-  body: {
-    type: String,
-    required: true
-  },
-  sender: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
-  },
-  recipients: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
-  }],
-  isGlobal: {
-    type: Boolean,
-    default: false
-  },
-  read: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
-  }]
+  subscriptions: [
+    {
+      endpoint: { type: String, required: true },
+      keys: {
+        auth: { type: String, required: true },
+        p256dh: { type: String, required: true }
+      }
+    }
+  ]
 }, { timestamps: true });
 
 export default mongoose.model('Notification', notificationSchema);
