@@ -1,7 +1,7 @@
 import { Download, Languages } from 'lucide-react';
-import InstallApp from '../components/installapp/SettingsInstallApp';
+import InstallApp from '../components/settings/InstallApp';
 import Footer from '../components/Footer';
-import Notifications from '../components/settings/Notifications';
+import Notifications from '../components/settings/NotificationSettings';
 import { useLanguage } from '../context/LanguageContext';
 
 function Settings() {
