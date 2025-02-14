@@ -3,7 +3,6 @@ import InstallApp from '../components/settings/InstallApp';
 import Footer from '../components/Footer';
 import Notifications from '../components/settings/NotificationSettings';
 import { useLanguage } from '../context/LanguageContext';
-import DataClear from '../components/settings/ClearData';
 
 function Settings() {
   const { language, changeLanguage } = useLanguage();
@@ -58,8 +57,6 @@ function Settings() {
         </div>
       </div>
       {/* Footer */}
-      {/* Notifications Section */}
-      <DataClear />
       <Footer />
     </div>
   );
