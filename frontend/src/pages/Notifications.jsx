@@ -11,8 +11,11 @@ import NotificationHistory from '../components/notifications/NotificationHistory
 function Notifications() {
   const { user } = useAuth();
   const [subscription, setSubscription] = useState(null);
+  const [permissionStatus, setPermissionStatus] = useState(Notification.permission);
+  const [showResetPrompt, setShowResetPrompt] = useState(false);
 
   useEffect(() => {
+    // Register the service worker if available.
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker
         .register('/sw.js')
@@ -20,6 +23,15 @@ function Notifications() {
         .catch((error) => console.error('Service Worker Error:', error));
     }
     getSubscription();
+
+    // Optional: update permissionStatus if user changes settings externally.
+    const handleVisibilityChange = () => {
+      setPermissionStatus(Notification.permission);
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, []);
 
   const registerServiceWorker = async (registration) => {
@@ -29,9 +41,13 @@ function Notifications() {
   const askPermission = async () => {
     try {
       const permissionResult = await Notification.requestPermission();
+      setPermissionStatus(permissionResult);
       if (permissionResult !== 'granted') {
+        setShowResetPrompt(true);
         throw new Error('Permission denied');
       }
+      // If permission granted, hide any reset prompt.
+      setShowResetPrompt(false);
       await subscribeUser();
     } catch (error) {
       console.error('Permission error:', error);
@@ -45,7 +61,6 @@ function Notifications() {
         toast.error('User is not logged in or registerId is missing');
         return;
       }
-
       const registration = await navigator.serviceWorker.ready;
       const response = await axios.get(`${API_URL}/api/notifications/publicKey`);
       const publicVapidKey = response.data.publicKey;
@@ -86,6 +101,11 @@ function Notifications() {
             <p className="text-sm text-gray-500">
               Click "Allow Notifications" to receive real-time updates.
             </p>
+            {showResetPrompt && (
+              <p className="mt-2 text-sm text-red-600">
+                Notifications are blocked. Please reset permissions by clearing the app data in your settings or clicking the info "i" icon near the URL bar.
+              </p>
+            )}
           </div>
           {!subscription ? (
             <button
@@ -105,7 +125,6 @@ function Notifications() {
       <NotificationHistory />
     </div>
   );
-  }
-  
-  export default Notifications;
-  
+}
+
+export default Notifications;

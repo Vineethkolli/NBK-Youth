@@ -10,6 +10,8 @@ import { Bell } from 'lucide-react';
 const NotificationSettings = () => {
   const { user } = useAuth();
   const [subscription, setSubscription] = useState(null);
+  const [permissionStatus, setPermissionStatus] = useState(Notification.permission);
+  const [showResetPrompt, setShowResetPrompt] = useState(false);
 
   useEffect(() => {
     if ('serviceWorker' in navigator) {
@@ -28,9 +30,12 @@ const NotificationSettings = () => {
   const askPermission = async () => {
     try {
       const permissionResult = await Notification.requestPermission();
+      setPermissionStatus(permissionResult);
       if (permissionResult !== 'granted') {
+        setShowResetPrompt(true);
         throw new Error('Permission denied');
       }
+      setShowResetPrompt(false);
       await subscribeUser();
     } catch (error) {
       console.error('Permission error:', error);
@@ -77,9 +82,16 @@ const NotificationSettings = () => {
   return (
     <div className="bg-white rounded-lg shadow p-6 space-y-4">
       <div className="flex items-center justify-between">
-      <div>
+        <div>
           <h3 className="text-lg font-medium">Notifications Permission</h3>
-          <p className="text-sm text-gray-500">Click "Allow Notifications" to receive real-time updates.</p>
+          <p className="text-sm text-gray-500">
+            Click "Allow Notifications" to receive real-time updates.
+          </p>
+          {showResetPrompt && (
+            <p className="mt-2 text-sm text-red-600">
+              Notifications are blocked. Reset permissions by clearing the app data in your settings or clicking the info "i" icon near the URL bar.
+            </p>
+          )}
         </div>
         {!subscription ? (
           <button
