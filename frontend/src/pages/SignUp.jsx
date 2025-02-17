@@ -26,11 +26,24 @@ function SignUp() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Email validation (if provided)
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (formData.email && !emailRegex.test(formData.email)) {
+      return toast.error('Please enter a valid email address');
+    }
+
+    // Phone number validation
+    const phoneRegex = /^(?=(?:.*\d){8,})[\+\-\d\s\(\)]*$/;
+    if (!phoneRegex.test(formData.phoneNumber)) {
+      return toast.error('Please enter a valid phone number');
+    }
+
     // Password length validation
     if (formData.password.length < 4) {
       return toast.error('Password must be at least 4 characters long');
     }
 
+    // Password match validation
     if (formData.password !== formData.confirmPassword) {
       return toast.error('Passwords do not match');
     }
@@ -82,7 +95,7 @@ function SignUp() {
           <input
             type="email"
             name="email"
-            placeholder="Email  (Not Mandatory but Recommended)"
+            placeholder="Email (Not Mandatory but Recommended)"
             value={formData.email}
             onChange={handleChange}
             className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500"
@@ -94,7 +107,6 @@ function SignUp() {
             name="phoneNumber"
             required
             placeholder="Phone Number"
-            pattern="^[\+\-\d\s\(\)]*$"
             value={formData.phoneNumber}
             onChange={handleChange}
             className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500"
