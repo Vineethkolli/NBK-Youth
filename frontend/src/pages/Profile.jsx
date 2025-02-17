@@ -83,12 +83,6 @@ function Profile() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (user.email === 'devvineel@gmail.com') {
-      toast.error("Default developer's password cannot be changed");
-      setIsChangingPassword(false);
-      return;
-    }
 
     if (passwordData.newPassword.length < 4) {
       return toast.error('Password must be at least 4 characters long');
@@ -247,11 +241,7 @@ function Profile() {
 
         {isChangingPassword && (
           <div className="px-4 py-5 sm:px-6">
-            {user.email === 'devvineel@gmail.com' ? (
-              <div className="text-red-600 font-medium">
-                Default developer's password cannot be changed
-              </div>
-            ) : (
+            {(
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
   <label className="block text-sm font-medium text-gray-700">

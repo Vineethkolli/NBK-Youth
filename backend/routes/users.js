@@ -58,7 +58,7 @@ router.patch('/profile', auth, async (req, res) => {
     }
 
     // Prevent updating default developer email
-    if (user.email === 'devvineel@gmail.com' && email !== 'devvineel@gmail.com') {
+    if (user.email === 'gangavaramnbkyouth@gmail.com' && email !== 'gangavaramnbkyouth@gmail.com') {
       return res.status(403).json({ message: 'Cannot change default developer email' });
     }
 
@@ -99,7 +99,7 @@ router.patch('/:userId/category', auth, checkRole(['developer']), async (req, re
     }
 
     // Prevent category change for default developer account
-    if (userToUpdate.email === 'devvineel@gmail.com') {
+    if (userToUpdate.email === 'gangavaramnbkyouth@gmail.com') {
       return res.status(403).json({ message: 'Cannot change default developer category' });
     }
 
@@ -125,7 +125,7 @@ router.delete('/:userId', auth, checkRole(['developer']), async (req, res) => {
     }
 
     // Prevent deletion of default developer account
-    if (userToDelete.email === 'devvineel@gmail.com') {
+    if (userToDelete.email === 'gangavaramnbkyouth@gmail.com') {
       return res.status(403).json({ message: 'Cannot delete default developer account' });
     }
 
@@ -146,7 +146,7 @@ router.patch('/:userId/role', auth, checkRole(['developer']), async (req, res) =
     }
 
     // Prevent role change for default developer account
-    if (userToUpdate.email === 'devvineel@gmail.com') {
+    if (userToUpdate.email === 'gangavaramnbkyouth@gmail.com') {
       return res.status(403).json({ message: 'Cannot change default developer role' });
     }
 

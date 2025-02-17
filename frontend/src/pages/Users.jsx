@@ -105,7 +105,7 @@ function Users() {
                     <select
                       value={user.role}
                       onChange={(e) => handleRoleChange(user._id, e.target.value)}
-                      disabled={user.email === 'devvineel@gmail.com'}
+                      disabled={user.email === 'gangavaramnbkyouth@gmail.com'}
                       className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
                     >
                       <option value="user">User</option>
@@ -118,7 +118,7 @@ function Users() {
                     <select
                       value={user.category}
                       onChange={(e) => handleCategoryChange(user._id, e.target.value)}
-                      disabled={user.email === 'devvineel@gmail.com'}
+                      disabled={user.email === 'gangavaramnbkyouth@gmail.com'}
                       className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
                     >
                       <option value="youth">Youth</option>
@@ -136,7 +136,7 @@ function Users() {
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
                     <button
                       onClick={() => handleDeleteUser(user._id)}
-                      disabled={user.email === 'devvineel@gmail.com'}
+                      disabled={user.email === 'gangavaramnbkyouth@gmail.com'}
                       className="text-red-600 hover:text-red-900 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <Trash2 className="h-5 w-5" />

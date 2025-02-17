@@ -1,5 +1,9 @@
 import User from '../models/User.js';
 import mongoose from 'mongoose';
+import dotenv from 'dotenv';
+
+// Load environment variables from .env file
+dotenv.config();
 
 export const createDefaultDeveloper = async () => {
   try {
@@ -11,14 +15,15 @@ export const createDefaultDeveloper = async () => {
       { upsert: true, new: true }
     );
 
-    const existingDev = await User.findOne({ email: 'devvineel@gmail.com' });
+    const existingDev = await User.findOne({ email: 'gangavaramnbkyouth@gmail.com' });
     if (!existingDev) {
       await User.create({
-        name: 'Dev Vineel',
-        email: 'devvineel@gmail.com',
+        name: 'Dev Vineeth',
+        email: 'gangavaramnbkyouth@gmail.com',
         phoneNumber: '0000000000',
-        password: 'DevVineel@15',
-        role: 'developer'
+        password: process.env.DEFAULT_DEVELOPER_PASSWORD, // Using .env variable
+        role: 'developer',
+        category: 'youth'
       });
       console.log('Default developer account created');
     }
