@@ -1,4 +1,4 @@
-import { Download, Languages } from 'lucide-react';
+import { Download, Languages, Bell } from 'lucide-react';
 import InstallApp from '../components/settings/InstallApp';
 import Footer from '../components/Footer';
 import Notifications from '../components/settings/NotificationSettings';
@@ -46,7 +46,12 @@ function Settings() {
         </div>
 
         {/* Notifications Section */}
-        <Notifications />
+        <div className="space-y-4">
+          <h3 className="text-lg font-medium flex items-center">
+            <Bell className="mr-2" /> Notifications
+          </h3>
+          <Notifications />
+        </div>
 
         {/* Install App Section */}
         <div className="space-y-4">
