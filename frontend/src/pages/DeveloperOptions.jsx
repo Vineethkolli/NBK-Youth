@@ -8,7 +8,10 @@ import ClearData from '../components/developer/ClearData';
 
 function DeveloperOptions() {
   const { user } = useAuth();
-  const [roleStats, setRoleStats] = useState({});
+  const [roleStats, setRoleStats] = useState({
+    admin: { count: 0, registerIds: [] },
+    developer: { count: 0, registerIds: [] },
+  });
 
   useEffect(() => {
     fetchRoleStats();
@@ -17,16 +20,17 @@ function DeveloperOptions() {
   const fetchRoleStats = async () => {
     try {
       const { data } = await axios.get(`${API_URL}/api/users`);
-      const stats = {};
+      const stats = {
+        developer: { count: 0, registerIds: [] },
+        financier: { count: 0, registerIds: [] },
+        admin: { count: 0, registerIds: [] },
+      };
 
-      // Group users by role with registerIds
       data.forEach((user) => {
         const role = user.role;
-        if (stats[role]) {
+        if (role !== 'user' && stats.hasOwnProperty(role)) {
           stats[role].count++;
           stats[role].registerIds.push(user.registerId);
-        } else {
-          stats[role] = { count: 1, registerIds: [user.registerId] };
         }
       });
 
@@ -70,7 +74,7 @@ function DeveloperOptions() {
                     {count}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {registerIds.join(', ')}
+                    {registerIds.length > 0 ? registerIds.join(', ') : 'N/A'}
                   </td>
                 </tr>
               ))}
