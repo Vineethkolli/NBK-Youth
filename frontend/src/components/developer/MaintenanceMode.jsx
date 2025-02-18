@@ -30,7 +30,7 @@ function MaintenanceMode() {
       <div className="flex items-center justify-between">
         <div>
           <p className="text-gray-600 mb-2">
-            When enabled, all users except the developer will see the maintenance page.
+            When enabled, all users except the developer will see the maintenance page alone.
           </p>
           <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm ${isMaintenanceMode ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>
             <Laptop2Icon className="h-4 w-4 mr-2" />

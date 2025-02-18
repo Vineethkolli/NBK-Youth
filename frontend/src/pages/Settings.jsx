@@ -9,7 +9,7 @@ function Settings() {
 
   return (
     <div className="max-w-1xl mx-auto">
-      <div className="bg-white shadow-lg rounded-lg p-6 space-y-8">
+      <div className="space-y-8">
         <h2 className="text-2xl font-semibold">Settings</h2>
 
         {/* Language Section */}
