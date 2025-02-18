@@ -1,7 +1,6 @@
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
-import { useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
 import AuthLayout from './layouts/AuthLayout';
 import DashboardLayout from './layouts/DashboardLayout';
 import SignIn from './pages/SignIn';
@@ -21,19 +20,20 @@ import DeveloperOptions from './pages/DeveloperOptions';
 import Vibe from './pages/Vibe';
 import Moments from './pages/Moments';
 import LetsPlay from './pages/LetsPlay';
-import ProtectedRoute from './components/ProtectedRoute';
-import { AuthProvider } from './context/AuthContext';
-import { HiddenProfileProvider } from './context/HiddenProfileContext';
-import { initializeAnalytics, trackPageView } from './utils/analytics';
-import { LanguageProvider } from './context/LanguageContext';
 import Notifications from './pages/Notifications';
+import MaintenancePage from './pages/Maintenance';
+import ProtectedRoute from './components/ProtectedRoute';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import { HiddenProfileProvider } from './context/HiddenProfileContext';
+import { LanguageProvider } from './context/LanguageContext';
+import { MaintenanceModeProvider, useMaintenanceMode } from './context/MaintenanceModeContext';
 
 function AppContent() {
-  const location = useLocation();
-
-  useEffect(() => {
-    trackPageView(location.pathname + location.search);
-  }, [location]);
+  const { user } = useAuth();
+  const { isMaintenanceMode } = useMaintenanceMode();
+  if (isMaintenanceMode && user?.role !== 'developer') {
+    return <MaintenancePage />;
+  }
 
   return (
     <>
@@ -43,7 +43,6 @@ function AppContent() {
           <Route path="/signin" element={<SignIn />} />
           <Route path="/signup" element={<SignUp />} />
         </Route>
-
         <Route element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
           <Route path="/" element={<Home />} />
           <Route path="/profile" element={<Profile />} />
@@ -68,18 +67,16 @@ function AppContent() {
 }
 
 function App() {
-  useEffect(() => {
-    initializeAnalytics();
-  }, []);
-
   return (
     <AuthProvider>
-    <LanguageProvider>
-      <HiddenProfileProvider>
-        <Router>
-          <AppContent />
-        </Router>
-      </HiddenProfileProvider>
+      <LanguageProvider>
+        <HiddenProfileProvider>
+          <MaintenanceModeProvider>
+            <Router>
+              <AppContent />
+            </Router>
+          </MaintenanceModeProvider>
+        </HiddenProfileProvider>
       </LanguageProvider>
     </AuthProvider>
   );

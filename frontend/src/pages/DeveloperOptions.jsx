@@ -5,12 +5,14 @@ import axios from 'axios';
 import { API_URL } from '../utils/config';
 import PaymentDetails from '../components/developer/PaymentDetails';
 import ClearData from '../components/developer/ClearData';
+import MaintenanceMode from '../components/developer/MaintenanceMode';
 
 function DeveloperOptions() {
   const { user } = useAuth();
   const [roleStats, setRoleStats] = useState({
     admin: { count: 0, registerIds: [] },
     developer: { count: 0, registerIds: [] },
+    financier: { count: 0, registerIds: [] },
   });
 
   useEffect(() => {
@@ -46,6 +48,9 @@ function DeveloperOptions() {
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
+      {/* Maintenance Mode Section */}
+      <MaintenanceMode />
+
       {/* Role Statistics */}
       <div className="bg-white rounded-lg shadow p-6">
         <h2 className="text-xl font-semibold mb-4">Role Statistics</h2>

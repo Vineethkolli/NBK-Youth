@@ -21,6 +21,8 @@ import momentsRoutes from './routes/moments.js';
 import gameRoutes from './routes/games.js';
 import notificationRoutes from './routes/notifications.js';
 import { createDefaultDeveloper } from './utils/setupDefaults.js';
+import maintenanceRoutes from './routes/maintenance.js';
+
 
 dotenv.config();
 
@@ -67,6 +69,7 @@ app.use('/api/homepage', homepageRoutes);
 app.use('/api/moments', momentsRoutes);
 app.use('/api/games', gameRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/maintenance', maintenanceRoutes);
 
 // Health check endpoint
 app.get('/', (req, res) => {
