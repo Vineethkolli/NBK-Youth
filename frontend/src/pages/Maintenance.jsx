@@ -19,21 +19,18 @@ function MaintenancePage() {
     fetchStatus();
   }, []);
 
-  // Custom formatter for 12-hour format with AM/PM
   const formatDateTime = (dateStr) => {
     const date = new Date(dateStr);
     if (isNaN(date.getTime())) return 'Invalid Date';
-
-    let hours = date.getHours();
-    const minutes = date.getMinutes();
-    const ampm = hours >= 12 ? 'PM' : 'AM';
-    hours = hours % 12 || 12; // Convert '0' to 12
-    const paddedMinutes = minutes < 10 ? '0' + minutes : minutes;
-    const day = date.getDate();
-    const month = date.getMonth() + 1;
-    const year = date.getFullYear();
-
-    return `${day}-${month}-${year} ${hours}:${paddedMinutes} ${ampm}`;
+    const options = {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+    };
+    return date.toLocaleString(undefined, options);
   };
 
   return (
@@ -50,7 +47,7 @@ function MaintenancePage() {
         </p>
         {maintenanceData && maintenanceData.expectedBackAt && (
           <p className="text-gray-800">
-            Services are live {formatDateTime(maintenanceData.expectedBackAt)}
+            Services are live on {formatDateTime(maintenanceData.expectedBackAt)}
           </p>
         )}
       </div>
