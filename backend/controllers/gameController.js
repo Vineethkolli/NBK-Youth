@@ -29,15 +29,13 @@ export const gameController = {
     }
   },
   
-
-  // Update game
   // Update game
 updateGame: async (req, res) => {
   try {
     // Check if another game with the same name exists
     const existingGame = await Game.findOne({
       name: req.body.name,
-      _id: { $ne: req.params.id }, // Exclude the current game
+      _id: { $ne: req.params.id }, 
     });
 
     if (existingGame) {

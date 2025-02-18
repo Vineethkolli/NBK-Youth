@@ -9,10 +9,8 @@ const ExpensePrint = ({ expenses, visibleColumns, userRole }) => {
     const headers = [];
     const body = [];
 
-    // Title of the report
     const title = "Expense Report";
 
-    // Generate timestamp
     const timestamp = new Date().toLocaleString();
 
     // Dynamically generate headers based on visibleColumns
@@ -72,7 +70,7 @@ const ExpensePrint = ({ expenses, visibleColumns, userRole }) => {
 
     // Create body rows
     expenses.forEach((expense, index) => {
-      const row = [index + 1]; // Add Serial Number
+      const row = [index + 1]; 
 
       columns.forEach(column => {
         switch (column) {
@@ -127,13 +125,13 @@ const ExpensePrint = ({ expenses, visibleColumns, userRole }) => {
 
     // Add title 
     doc.setFontSize(16);
-    doc.text(title, 105, 15, { align: 'center' }); // Centered title
+    doc.text(title, 105, 15, { align: 'center' }); 
 
     // Generate PDF with the filtered columns and serial number
     doc.autoTable({
       head: [headers],
       body: body,
-      startY: 25, // Start below the title
+      startY: 25, 
       margin: { top: 10 },
       didDrawPage: (data) => {
         // Footer with timestamp and page number

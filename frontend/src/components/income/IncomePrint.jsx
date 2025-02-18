@@ -17,8 +17,7 @@ const IncomePrint = ({ incomes, visibleColumns }) => {
     // Dynamically generate headers and body based on visibleColumns
     const columns = Object.keys(visibleColumns).filter(column => visibleColumns[column]);
 
-    // Create header with Register ID first, followed by Income ID
-    headers.push('S.No'); // Adding Serial Number
+    headers.push('S.No'); 
 
     columns.forEach(column => {
       switch (column) {
@@ -60,9 +59,8 @@ const IncomePrint = ({ incomes, visibleColumns }) => {
       }
     });
 
-    // Create body rows with Register ID first, followed by Income ID
     incomes.forEach((income, index) => {
-      const row = [index + 1]; // Add Serial Number
+      const row = [index + 1]; 
       const isHidden = hiddenProfiles.has(income._id);
 
       columns.forEach(column => {
@@ -107,15 +105,14 @@ const IncomePrint = ({ incomes, visibleColumns }) => {
       body.push(row);
     });
 
-    // Add title 
     doc.setFontSize(16);
-    doc.text(title, 105, 15, { align: 'center' }); // Centered title
+    doc.text(title, 105, 15, { align: 'center' }); 
 
     // Generate PDF with the filtered columns and serial number
     doc.autoTable({
       head: [headers],
       body: body,
-      startY: 25, // Start below the title
+      startY: 25, 
       margin: { top: 10 },
       didDrawPage: (data) => {
         // Footer with timestamp and page number

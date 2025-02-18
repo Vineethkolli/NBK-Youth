@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-hot-toast';
-import { Eye, EyeOff } from 'lucide-react'; // Import icons for visibility toggle
-import InstallApp from '../components/auth/InstallApp'; // Import the InstallApp component
+import { Eye, EyeOff } from 'lucide-react';
+import InstallApp from '../components/auth/InstallApp'; 
 
 function SignUp() {
   const [formData, setFormData] = useState({
@@ -13,9 +13,9 @@ function SignUp() {
     confirmPassword: ''
   });
 
-  const [showPassword, setShowPassword] = useState(false); // Toggle for password visibility
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false); // Toggle for confirm password visibility
-  const [isSubmitting, setIsSubmitting] = useState(false); // Track submission state
+  const [showPassword, setShowPassword] = useState(false); 
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false); 
+  const [isSubmitting, setIsSubmitting] = useState(false); 
   const { signup } = useAuth();
 
   const handleChange = (e) => {

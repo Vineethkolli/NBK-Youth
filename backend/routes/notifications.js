@@ -13,7 +13,7 @@ const router = express.Router();
 router.get('/publicKey', getPublicKey);
 router.post('/subscribe', subscribe);
 router.post('/unsubscribe', unsubscribe);
-router.post('/notify', auth, sendNotification); // Add auth middleware here
-router.get('/history', auth, getNotificationHistory); // Add auth middleware here
+router.post('/notify', auth, sendNotification); 
+router.get('/history', auth, getNotificationHistory); 
 
 export default router;

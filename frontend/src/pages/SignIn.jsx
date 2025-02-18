@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-hot-toast';
-import { Eye, EyeOff } from 'lucide-react'; // Import icons for visibility toggle
+import { Eye, EyeOff } from 'lucide-react'; 
 import ForgotPassword from '../components/auth/ForgotPassword';
 import OTPVerification from '../components/auth/OTPVerification';
 import ResetPassword from '../components/auth/ResetPassword';
@@ -9,7 +9,7 @@ import ResetPassword from '../components/auth/ResetPassword';
 function SignIn() {
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false); // State for toggling password visibility
+  const [showPassword, setShowPassword] = useState(false);
   const [resetFlow, setResetFlow] = useState({
     step: 'signin', // signin, forgot, otp, reset
     email: '',
@@ -99,7 +99,7 @@ function SignIn() {
 
         <div className="relative">
           <input
-            type={showPassword ? 'text' : 'password'} // Toggle input type
+            type={showPassword ? 'text' : 'password'} 
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}

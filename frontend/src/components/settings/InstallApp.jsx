@@ -27,7 +27,6 @@ function InstallApp() {
 
     detectPlatform();
 
-    // Check if already installed
     const checkInstalled = () => {
       if (window.matchMedia('(display-mode: standalone)').matches || 
           window.navigator.standalone === true) {

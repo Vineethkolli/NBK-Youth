@@ -35,7 +35,7 @@ const NotificationHistory = () => {
     return <div>Please log in to see your notification history.</div>;
   }
 
-  // Custom link component to render links as styled buttons with an icon
+  // Custom link component to render links as styled button
   const linkDecorator = (href, text, key) => (
     <button
       key={key}

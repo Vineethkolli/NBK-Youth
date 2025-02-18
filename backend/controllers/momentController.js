@@ -116,7 +116,6 @@ export const momentController = {
       const { id } = req.params;
       const { title } = req.body;
 
-      // Validate input
       if (!title || typeof title !== 'string' || title.trim() === '') {
         return res.status(400).json({ message: 'Invalid title' });
       }

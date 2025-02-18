@@ -1,4 +1,4 @@
-import { Menu, User, Flame } from 'lucide-react'; // using Home as an alternative to Lion
+import { Menu, User, Flame } from 'lucide-react'; 
 import { useNavigate } from 'react-router-dom';
 
 function Header({ toggleSidebar }) {

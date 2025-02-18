@@ -168,7 +168,6 @@ function Stats() {
           </div>
         </div>
 
-        {/* Rest of the components remain the same */}
         {/* User Stats */}
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-xl font-semibold mb-4 flex items-center">
@@ -256,6 +255,7 @@ function Stats() {
           </table>
         </div>
       </div>
+      
       {/* Footer */}
       <Footer />
     </div>

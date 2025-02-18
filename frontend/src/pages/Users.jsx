@@ -82,7 +82,6 @@ function Users() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Phone</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
-                {/* New Notifications column */}
                 <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Notifications</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
               </tr>
@@ -125,7 +124,6 @@ function Users() {
                       <option value="general">General</option>
                     </select>
                   </td>
-                  {/* Notifications status column */}
                   <td className="px-6 py-4 whitespace-nowrap text-center">
                     {user.notificationsEnabled ? (
                       <Bell className="h-5 w-5 text-green-600" title="Notifications Enabled" />

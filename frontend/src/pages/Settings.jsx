@@ -41,7 +41,6 @@ function Settings() {
               తెలుగు
             </button>
           </div>
-          {/* The translation widget container */}
           <div id="google_translate_element" className={language === 'te' ? '' : 'hidden'}></div>
         </div>
 
@@ -61,6 +60,7 @@ function Settings() {
           <InstallApp />
         </div>
       </div>
+      
       {/* Footer */}
       <Footer />
     </div>

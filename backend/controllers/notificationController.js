@@ -46,7 +46,7 @@ export const unsubscribe = async (req, res) => {
   }
 
   try {
-    // Use $pull to remove only the matching subscription from the subscriptions array
+    // Remove only the matching subscription from the subscriptions array
     await Subscription.updateOne(
       { "subscriptions.endpoint": endpoint },
       { $pull: { subscriptions: { endpoint } } }
@@ -61,7 +61,7 @@ export const unsubscribe = async (req, res) => {
 
 export const sendNotification = async (req, res) => {
   const { title, body, target, registerId } = req.body;
-  const senderRegisterId = req.user.registerId; // Get sender's registerId from authenticated user
+  const senderRegisterId = req.user.registerId; 
   const payload = JSON.stringify({ title, body });
 
   try {
@@ -124,7 +124,7 @@ export const sendNotification = async (req, res) => {
   }
 };
 
-// New: Fetch Notification History for a User based on eligibility
+// Fetch Notification History for a User based on eligibility
 export const getNotificationHistory = async (req, res) => {
   try {
     const { registerId } = req.query;

@@ -4,7 +4,7 @@ import { uploadToCloudinary } from '../config/cloudinary.js';
 import cloudinary from '../config/cloudinary.js';
 
 export const homepageController = {
-  // Slide Controllers
+  // Get all Slides
   getSlides: async (req, res) => {
     try {
       const slides = await Slide.find().sort('order');
@@ -77,7 +77,7 @@ export const homepageController = {
     }
   },
 
-  // Event Controllers
+  // Get all Events 
   getEvents: async (req, res) => {
     try {
       const events = await Event.find().sort('-dateTime');
@@ -87,6 +87,7 @@ export const homepageController = {
     }
   },
 
+  // Add an Event
   addEvent: async (req, res) => {
     try {
       const event = await Event.create({
@@ -99,6 +100,7 @@ export const homepageController = {
     }
   },
 
+  //Delete an Event
   deleteEvent: async (req, res) => {
     try {
       await Event.findByIdAndDelete(req.params.id);

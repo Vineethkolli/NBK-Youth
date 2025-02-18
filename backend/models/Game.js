@@ -6,7 +6,7 @@ const playerSchema = new mongoose.Schema({
     required: true,
     validate: {
       validator: function (value) {
-        const game = this.ownerDocument(); // Access parent document (Game)
+        const game = this.ownerDocument(); 
         return !game.players.some(player => player.name === value && player._id.toString() !== this._id.toString());
       },
       message: 'Player name must be unique within the game.'
@@ -18,7 +18,7 @@ const playerSchema = new mongoose.Schema({
     default: ''
   },
   timeCompleted: {
-    type: Number, // Store time in milliseconds
+    type: Number, 
     default: null
   },
   createdBy: {

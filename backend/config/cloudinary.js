@@ -26,7 +26,7 @@ export const uploadToCloudinary = async (file, folder = 'PaymentScreenshots') =>
       options.resource_type = 'image';
     } else if (folder === 'Vibe') {
       options.format = 'mp3';
-      options.resource_type = 'video'; // Cloudinary uses 'video' for audio files
+      options.resource_type = 'video'; 
     }
 
     // Upload to Cloudinary

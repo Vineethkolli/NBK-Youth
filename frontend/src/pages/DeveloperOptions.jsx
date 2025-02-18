@@ -46,7 +46,7 @@ function DeveloperOptions() {
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
-      {/* Role Statistics Section */}
+      {/* Role Statistics */}
       <div className="bg-white rounded-lg shadow p-6">
         <h2 className="text-xl font-semibold mb-4">Role Statistics</h2>
         <div className="overflow-x-auto">
@@ -83,10 +83,10 @@ function DeveloperOptions() {
         </div>
       </div>
 
-      {/* Payment Details Section */}
+      {/* Payment Details */}
       <PaymentDetails />
 
-      {/* Clear Data Section */}
+      {/* Clear Data */}
       <ClearData />
     </div>
   );

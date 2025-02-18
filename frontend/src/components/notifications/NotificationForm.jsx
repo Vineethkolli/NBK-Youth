@@ -7,8 +7,8 @@ function NotificationForm() {
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [target, setTarget] = useState('All'); // Default: Send to all users
-  const [registerId, setRegisterId] = useState(''); // Only for "Specific User"
+  const [target, setTarget] = useState('All');
+  const [registerId, setRegisterId] = useState(''); 
 
   const sendNotification = async (e) => {
     e.preventDefault();
@@ -53,7 +53,6 @@ function NotificationForm() {
       <h2 className="text-xl font-semibold mb-4">Send Notification</h2>
       <form onSubmit={sendNotification} className="space-y-4">
 
-        {/* Notification Title */}
         <div>
           <label className="block text-sm font-medium text-gray-700">Title</label>
           <input
@@ -65,7 +64,6 @@ function NotificationForm() {
           />
         </div>
 
-        {/* Notification Message */}
         <div>
           <label className="block text-sm font-medium text-gray-700">Message</label>
           <textarea
@@ -107,7 +105,6 @@ function NotificationForm() {
           </div>
         )}
 
-        {/* Send Button */}
         <button
           type="submit"
           disabled={isLoading}

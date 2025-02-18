@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Download, Share2, X } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
-// Store the deferred prompt outside of component state
+
 let deferredPrompt;
 
 window.addEventListener('beforeinstallprompt', (e) => {

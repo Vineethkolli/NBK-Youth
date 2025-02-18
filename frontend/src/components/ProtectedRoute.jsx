@@ -12,19 +12,18 @@ function ProtectedRoute({ children }) {
         setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
       }, 1000);
 
-      return () => clearInterval(timer); // Cleanup interval on component unmount
+      return () => clearInterval(timer); 
     }
   }, [loading]);
 
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center mt-12 p-8 bg-white rounded-xl shadow-md max-w-lg mx-auto border border-gray-200">
-        {/* Heading */}
+
         <h1 className="text-2xl font-bold text-gray-800 mb-4 text-center">
           Server is Starting
         </h1>
 
-        {/* Description */}
         <p className="text-lg text-gray-700 font-medium text-center mb-4">
           <span className="font-semibold text-gray-800">
             Since no one has used the app in the last 15 minutes, the server went to sleep.

@@ -101,7 +101,7 @@ const fetchExpenses = async () => {
   };
 
   const handleDelete = async (expenseId) => {
-    // Only allow deletion for users with roles 'developer' or 'financier'
+    // Deletion for users with roles 'developer' or 'financier'
     if (!['developer', 'financier'].includes(user?.role)) return;
   
     if (!window.confirm('Are you sure you want to move this item to recycle bin?')) return;
@@ -169,11 +169,11 @@ const fetchExpenses = async () => {
           <h2 className="font-medium">Visible Columns</h2>
           <div className="mt-2 flex flex-wrap gap-2">
             {Object.entries(visibleColumns).map(([column, isVisible]) => {
-              // Only show registerId checkbox for admin, developer, or financier roles
+              // Show registerId checkbox for admin, developer, or financier roles
               if (column === 'registerId' && !['developer', 'financier'].includes(user?.role)) {
                 return null;
               }
-              // Only show phoneNumber checkbox for admin, developer, or financier roles
+              // Show phoneNumber checkbox for admin, developer, or financier roles
               if (column === 'phoneNumber' && !['admin', 'developer', 'financier'].includes(user?.role)) {
                 return null;
               }

@@ -11,7 +11,7 @@ const subExpenseSchema = new mongoose.Schema({
     min: [0, 'Sub amount must be a positive number']
   },
   billImage: {
-    type: String // URL or base64 of the bill image
+    type: String  // URL of the bill image
   }
 });
 

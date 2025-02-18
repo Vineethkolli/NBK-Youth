@@ -15,7 +15,7 @@ function Notifications() {
   const [showResetPrompt, setShowResetPrompt] = useState(false);
 
   useEffect(() => {
-    // Register the service worker if available.
+    // Register the service worker 
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker
         .register('/sw.js')
@@ -24,7 +24,7 @@ function Notifications() {
     }
     getSubscription();
 
-    // Optional: update permissionStatus if user changes settings externally.
+    // Update permissionStatus if user changes settings externally.
     const handleVisibilityChange = () => {
       setPermissionStatus(Notification.permission);
     };

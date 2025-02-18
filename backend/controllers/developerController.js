@@ -12,7 +12,7 @@ export const developerController = {
       switch (type) {
         case 'users':
           // Delete all users except developer account
-          await User.deleteMany({ email: { $ne: 'developer@gmail.com' } });
+          await User.deleteMany({ email: { $ne: 'gangavaramnbkyouth@gmail.com' } });
           break;
 
         case 'income':

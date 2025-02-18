@@ -32,8 +32,8 @@ function Home() {
       {/* Overlay Install Prompt */}
       <InstallApp />
 
-      {/* Rest of your Home component */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-0 space-y-8">
+      {/* Home component */}
+      <div className="max-w-7xl mx-auto sm:px-6 lg:px-0 space-y-8">
         {['developer', 'financier', 'admin'].includes(user?.role) && (
           <div className="flex justify-end">
             <button
@@ -61,8 +61,7 @@ function Home() {
 
         {/* Timeline Component */}
         <Timeline events={events} isEditing={isEditing} onUpdate={fetchEvents} />
-
-        {/* Mode Section */}
+        
         <div className="bg-gray-100 border-t border-gray-200 rounded-lg">
           <p className="mt-4 text-sm text-gray-500 px-4">
             If any issue is faced at any time, just refresh the page by scrolling down. We are working hard to sort out the errors.

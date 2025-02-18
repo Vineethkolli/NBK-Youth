@@ -28,7 +28,7 @@ function IncomeTable({
   };
 
   const sendWhatsAppMessage = (income) => {
-    const countryCode = '+91'; // Default to India
+    const countryCode = '+91'; 
     const phoneNumber = income.phoneNumber;
     const name = income.name;
     const formattedDate = new Date(income.createdAt).toLocaleString();
@@ -45,7 +45,7 @@ function IncomeTable({
   };
 
   const getWhatsAppIconColor = (income) => {
-    if (!income.phoneNumber) return 'text-gray-300'; // Disabled state
+    if (!income.phoneNumber) return 'text-gray-300'; 
     return income.status === 'paid' ? 'text-green-500 hover:text-green-700' : 'text-red-500 hover:text-red-700';
   };
 

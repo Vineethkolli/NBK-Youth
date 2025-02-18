@@ -171,7 +171,6 @@ function PaymentForm({ onSubmit }) {
 
       {showPaymentOptions && (
         <div className="mt-6 space-y-6">
-          {/* Display copied details above amount */}
           {(copiedDetails.upiNumber || copiedDetails.upiId) && (
             <div className="text-center space-y-2">
               {copiedDetails.upiNumber && (

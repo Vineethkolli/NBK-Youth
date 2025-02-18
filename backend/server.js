@@ -22,7 +22,6 @@ import gameRoutes from './routes/games.js';
 import notificationRoutes from './routes/notifications.js';
 import { createDefaultDeveloper } from './utils/setupDefaults.js';
 
-// Load environment variables
 dotenv.config();
 
 const app = express();

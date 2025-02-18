@@ -27,7 +27,7 @@ function VerificationTable({ data, type, onVerifyLogUpdate, onUpdatePayment }) {
   };
 
   const sendWhatsAppMessage = (payment) => {
-    const countryCode = '+91'; // Default to India
+    const countryCode = '+91'; 
     const phoneNumber = payment.phoneNumber;
     const name = payment.name;
     let message;
@@ -43,7 +43,7 @@ function VerificationTable({ data, type, onVerifyLogUpdate, onUpdatePayment }) {
   };
 
   const getWhatsAppIconColor = (payment) => {
-    if (!payment.phoneNumber) return 'text-gray-300'; // Disabled state
+    if (!payment.phoneNumber) return 'text-gray-300';
     return payment.verifyLog === 'verified' ? 'text-green-500 hover:text-green-700' : 'text-red-500 hover:text-red-700';
   };
 

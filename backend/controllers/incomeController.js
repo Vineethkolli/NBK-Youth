@@ -169,7 +169,7 @@ export const incomeController = {
 
       income.isDeleted = true;
       income.deletedAt = new Date();
-      income.deletedBy = req.user.registerId; // Store the registerId of the user who deleted
+      income.deletedBy = req.user.registerId; 
       await income.save();
 
       res.json({ message: 'Income moved to recycle bin' });

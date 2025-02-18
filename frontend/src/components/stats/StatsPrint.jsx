@@ -17,9 +17,8 @@ const StatsPrint = ({ stats }) => {
 
   const handlePrint = () => {
     const doc = new jsPDF();
-    let yPos = 20; // Starting Y position for the content
+    let yPos = 20; 
 
-    // Title - Centered for the first page
     doc.setFontSize(20);
     doc.setTextColor(0, 0, 0);
     const title = 'NBK Youth Statistics Report';
@@ -27,7 +26,7 @@ const StatsPrint = ({ stats }) => {
     const xPos = (doc.internal.pageSize.width - titleWidth) / 2;
     doc.text(title, xPos, yPos);
 
-    yPos += 15; // Adding some space after the title
+    yPos += 15; 
 
     // Budget Stats Section
     doc.setFontSize(14);

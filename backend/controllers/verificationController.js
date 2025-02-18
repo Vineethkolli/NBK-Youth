@@ -1,9 +1,9 @@
 import Income from '../models/Income.js';
 import Expense from '../models/Expense.js';
-import Payment from '../models/Payment.js'; // Import the Payment model
+import Payment from '../models/Payment.js'; 
 import IncomeLog from '../models/IncomeLog.js';
 import ExpenseLog from '../models/ExpenseLog.js';
-import PaymentLog from '../models/PaymentLog.js'; // Import PaymentLog model
+import PaymentLog from '../models/PaymentLog.js'; 
 import PaymentController from './paymentController.js';
 
 export const verificationController = {
@@ -20,7 +20,7 @@ export const verificationController = {
         data = await Income.find(query).sort({ createdAt: -1 });
       } else if (type === 'expense') {
         data = await Expense.find(query).sort({ createdAt: -1 });
-      } else if (type === 'payment') { // Handle 'payment' type
+      } else if (type === 'payment') { 
         data = await Payment.find(query).sort({ createdAt: -1 });
       } else {
         return res.status(400).json({ message: 'Invalid type specified' });
@@ -48,9 +48,9 @@ export const verificationController = {
       } else if (type === 'expense') {
         Model = Expense;
         LogModel = ExpenseLog;
-      } else if (type === 'payment') { // Handle 'payment' type
+      } else if (type === 'payment') { 
         Model = Payment;
-        LogModel = PaymentLog; // Assuming PaymentLog model exists
+        LogModel = PaymentLog;
       } else {
         return res.status(400).json({ message: 'Invalid type specified' });
       }

@@ -9,10 +9,10 @@ function MusicPlayer({ song, isPlaying, onPlayPause, onNext, onPrevious, hasNext
   useEffect(() => {
     const audio = audioRef.current;
 
-    // Only update the audio source if the song changes
+    // Update the audio source if the song changes
     if (audio.src !== song.url) {
       audio.src = song.url;
-      audio.load(); // Load the new song
+      audio.load(); 
     }
     
     if (isPlaying) {
@@ -109,7 +109,7 @@ function MusicPlayer({ song, isPlaying, onPlayPause, onNext, onPrevious, hasNext
           </div>
         </div>
 
-        <div className="w-40" /> {/* Spacer for balance */}
+        <div className="w-40" /> 
       </div>
     </div>
   );

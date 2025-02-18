@@ -12,7 +12,7 @@ function Slideshow({ isEditing }) {
   const videoRef = useRef(null);
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
-  const swipeThreshold = 50; // Minimum swipe distance in pixels to trigger slide change
+  const swipeThreshold = 50; 
   const { user } = useAuth();
 
   useEffect(() => {
@@ -30,8 +30,8 @@ function Slideshow({ isEditing }) {
       } else if (currentSlideData.type === 'video') {
         const video = videoRef.current;
         if (video) {
-          video.play(); // Play video automatically
-          video.onended = nextSlide; // Move to next slide when video ends
+          video.play(); 
+          video.onended = nextSlide; 
         }
       }
     }
@@ -39,7 +39,7 @@ function Slideshow({ isEditing }) {
     return () => {
       clearTimeout(interval);
       if (videoRef.current) {
-        videoRef.current.onended = null; // Clean up event listener
+        videoRef.current.onended = null; 
       }
     };
   }, [currentSlide, slides, isEditing]);
@@ -113,10 +113,8 @@ function Slideshow({ isEditing }) {
     const swipeDistance = touchStartX.current - touchEndX.current;
     if (Math.abs(swipeDistance) > swipeThreshold) {
       if (swipeDistance > 0) {
-        // Swiped left
         nextSlide();
       } else {
-        // Swiped right
         previousSlide();
       }
     }
@@ -172,7 +170,7 @@ function Slideshow({ isEditing }) {
           className="w-full h-full object-cover"
           autoPlay
           controls={isEditing}
-          muted={false} // Enable sound for videos
+          muted={false} 
         />
       )}
 

@@ -36,7 +36,6 @@ function ModificationLog({ onClose }) {
   const handlePrint = () => {
     const doc = new jsPDF();
   
-    // Title
     doc.setFontSize(16);
     doc.text('Expense Modification Log', 14, 15);
   
@@ -45,16 +44,13 @@ function ModificationLog({ onClose }) {
     const margin = 20;
   
     logs.forEach((log, index) => {
-      // Reverse the numbering
       const logNumber = logs.length - index;
   
-      // Check if we need a new page
       if (yPos > pageHeight - 60) {
         doc.addPage();
         yPos = 30;
       }
   
-      // Add log entry number
       doc.setFontSize(12);
       doc.setTextColor(100);
       doc.text(`Log Entry #${logNumber}`, 14, yPos);
@@ -91,7 +87,6 @@ function ModificationLog({ onClose }) {
         `Modified At: ${formatDate(log.createdAt)}`
       ];
   
-      // Print side by side
       doc.setFontSize(10);
       doc.setTextColor(0);
   
@@ -121,7 +116,6 @@ function ModificationLog({ onClose }) {
         yPos += 5;
       }
   
-      // Add separator
       yPos += 10;
       if (yPos < pageHeight - margin) {
         doc.setDrawColor(200);

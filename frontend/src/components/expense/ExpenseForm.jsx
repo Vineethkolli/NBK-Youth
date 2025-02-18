@@ -17,7 +17,7 @@ function ExpenseForm({ expense, onClose, onSuccess }) {
     subExpenses: []
   });
 
-  const [isSubmitting, setIsSubmitting] = useState(false); // New state for button disabling
+  const [isSubmitting, setIsSubmitting] = useState(false); 
   const [isBalanced, setIsBalanced] = useState(true);
 
   useEffect(() => {
@@ -127,8 +127,8 @@ function ExpenseForm({ expense, onClose, onSuccess }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (isSubmitting) return; // Prevent multiple submissions
-    setIsSubmitting(true); // Disable submit button
+    if (isSubmitting) return; 
+    setIsSubmitting(true);
 
     try {
       if (!expense && !validateInitialForm()) throw new Error('Validation failed');
@@ -151,7 +151,7 @@ function ExpenseForm({ expense, onClose, onSuccess }) {
     } catch (error) {
       toast.error(error.response?.data?.message || 'Operation failed');
     } finally {
-      setIsSubmitting(false); // Re-enable submit button
+      setIsSubmitting(false); 
     }
   };
 

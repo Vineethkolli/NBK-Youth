@@ -28,7 +28,7 @@ function DashboardLayout() {
     <div className="flex h-screen bg-gray-100">
       <Header toggleSidebar={toggleSidebar} />
       <Sidebar isOpen={sidebarOpen} onNavigate={closeSidebar} />
-      <main className="flex-1 overflow-auto p-8 mt-16 md:ml-64 pb-20">
+      <main className="flex-1 overflow-auto p-8 mt-12 md:ml-64 pb-20">
         <Outlet />
       </main>
 
@@ -90,7 +90,6 @@ function DashboardLayout() {
           {budgetOpen && (
             <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2">
               <div className="relative">
-                {/* Semi-circular menu */}
                 <div className="flex items-end justify-center space-x-4 mb-4">
                   {/* Stats Button */}
                   <button

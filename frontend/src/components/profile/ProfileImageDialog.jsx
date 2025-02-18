@@ -9,7 +9,6 @@ function ProfileImageDialog({ image, onClose, onUpload }) {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Validate file type
     if (!file.type.startsWith('image/')) {
       alert('Please upload an image file');
       return;
@@ -21,7 +20,6 @@ function ProfileImageDialog({ image, onClose, onUpload }) {
       return;
     }
 
-    // Create preview
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onload = () => {

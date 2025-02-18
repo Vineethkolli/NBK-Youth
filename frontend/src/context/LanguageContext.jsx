@@ -1,4 +1,3 @@
-// frontend/src/context/LanguageContext.jsx
 import { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 import { API_URL } from '../utils/config';
@@ -81,7 +80,6 @@ export const LanguageProvider = ({ children }) => {
     setLanguage(newLanguage);
     initializeTranslation(newLanguage);
     
-    // If switching back to English, you may want to reload the page to revert translations.
     if (newLanguage === 'en') {
       window.location.reload();
     }

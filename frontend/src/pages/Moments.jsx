@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Plus, Edit2, Youtube, Upload } from 'lucide-react';
+import { Edit2, Youtube, Upload } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { API_URL } from '../utils/config';
@@ -80,7 +80,7 @@ const handleTogglePin = async (momentId) => {
   const isPrivilegedUser = ['developer', 'admin', 'financier'].includes(user?.role);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-0 py-0">
+    <div className="max-w-7xl mx-auto sm:px-6 lg:px-0 py-0">
       {isPrivilegedUser && (
         <div className="flex justify-between items-center mb-6">
           <div className="flex space-x-4">
