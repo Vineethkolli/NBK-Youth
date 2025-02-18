@@ -19,7 +19,6 @@ export const sortPlayersByWinnerStatus = (players) => {
 export const getTopPlayers = (game) => {
   if (game.timerRequired) {
     const topPlayers = sortPlayersByTime(game.players);
-    // Return only names without times for display
     return topPlayers.map(player => ({
       ...player,
       timeCompleted: undefined

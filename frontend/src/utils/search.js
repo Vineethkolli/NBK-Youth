@@ -37,7 +37,7 @@ export const filterCollections = (collections, searchQuery) => {
   
           return null;
         })
-        .filter(Boolean); // Remove null sub-collections
+        .filter(Boolean); 
   
       // Return collection if it matches or has matching sub-collections
       if (collectionMatches || filteredSubCollections.length > 0) {
@@ -47,5 +47,5 @@ export const filterCollections = (collections, searchQuery) => {
         };
       }
       return null;
-    }).filter(Boolean); // Remove null collections
+    }).filter(Boolean); 
   };

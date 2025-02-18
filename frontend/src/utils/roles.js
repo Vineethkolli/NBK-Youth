@@ -1,4 +1,3 @@
-// Role hierarchy and permissions
 export const ROLES = {
   DEVELOPER: 'developer',
   FINANCIER: 'financier',
