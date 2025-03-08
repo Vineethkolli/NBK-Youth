@@ -1,7 +1,15 @@
 import { useState, useEffect, useRef } from 'react';
 import { Play, Pause, SkipBack, SkipForward } from 'lucide-react';
 
-function MusicPlayer({ song, isPlaying, onPlayPause, onNext, onPrevious, hasNext, hasPrevious }) {
+function MusicPlayer({
+  song,
+  isPlaying,
+  onPlayPause,
+  onNext,
+  onPrevious,
+  hasNext,
+  hasPrevious,
+}) {
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const audioRef = useRef(new Audio());
@@ -12,9 +20,9 @@ function MusicPlayer({ song, isPlaying, onPlayPause, onNext, onPrevious, hasNext
     // Update the audio source if the song changes
     if (audio.src !== song.url) {
       audio.src = song.url;
-      audio.load(); 
+      audio.load();
     }
-    
+
     if (isPlaying) {
       audio.play();
     } else {
@@ -35,14 +43,14 @@ function MusicPlayer({ song, isPlaying, onPlayPause, onNext, onPrevious, hasNext
       }
     };
 
-    audio.addEventListener('timeupdate', handleTimeUpdate);
-    audio.addEventListener('loadedmetadata', handleLoadedMetadata);
-    audio.addEventListener('ended', handleEnded);
+    audio.addEventListener("timeupdate", handleTimeUpdate);
+    audio.addEventListener("loadedmetadata", handleLoadedMetadata);
+    audio.addEventListener("ended", handleEnded);
 
     return () => {
-      audio.removeEventListener('timeupdate', handleTimeUpdate);
-      audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
-      audio.removeEventListener('ended', handleEnded);
+      audio.removeEventListener("timeupdate", handleTimeUpdate);
+      audio.removeEventListener("loadedmetadata", handleLoadedMetadata);
+      audio.removeEventListener("ended", handleEnded);
     };
   }, [song, isPlaying, hasNext, onNext]);
 
@@ -55,19 +63,25 @@ function MusicPlayer({ song, isPlaying, onPlayPause, onNext, onPrevious, hasNext
   const formatTime = (time) => {
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
-    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg p-4">
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
-        <div className="flex items-center space-x-4">
+    // The container adapts to the device:
+    // - On mobile devices: full width (left-0 right-0)
+    // - On medium screens and above: left offset (md:left-64) to account for a sidebar.
+    // The bottom offset (bottom-16) ensures the player doesn't overlap with a bottom nav.
+    <div className="fixed bottom-16 left-0 right-0 md:left-64 md:right-0 bg-white border-t shadow-lg p-4 z-50">
+      <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between">
+        {/* Song Details */}
+        <div className="flex items-center space-x-4 mb-4 sm:mb-0">
           <div className="w-12 h-12 bg-gray-200 rounded-lg flex-shrink-0" />
           <div>
             <h3 className="font-medium">{song.name}</h3>
           </div>
         </div>
 
+        {/* Controls */}
         <div className="flex-1 max-w-2xl mx-8">
           <div className="flex items-center justify-center space-x-6">
             <button
@@ -95,6 +109,7 @@ function MusicPlayer({ song, isPlaying, onPlayPause, onNext, onPrevious, hasNext
               <SkipForward className="h-6 w-6" />
             </button>
           </div>
+          {/* Progress Bar */}
           <div className="flex items-center space-x-2 mt-2">
             <span className="text-sm text-gray-500">{formatTime(progress)}</span>
             <input
@@ -109,7 +124,8 @@ function MusicPlayer({ song, isPlaying, onPlayPause, onNext, onPrevious, hasNext
           </div>
         </div>
 
-        <div className="w-40" /> 
+        {/* Spacer for layout symmetry */}
+        <div className="w-40" />
       </div>
     </div>
   );
