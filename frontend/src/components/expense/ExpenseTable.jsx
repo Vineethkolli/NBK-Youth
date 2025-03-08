@@ -107,7 +107,7 @@ function ExpenseTable({
         <tbody className="bg-white divide-y divide-gray-200">
           {expenses.map((expense, index) => (
             <tr key={expense._id}>
-              <td className="px-6 py-4 whitespace-nowrap text-sm">{index + 1}</td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{index + 1}</td>
               {(userRole === 'developer' || userRole === 'financier') && visibleColumns.registerId && (
                 <td className="px-6 py-4 whitespace-nowrap text-sm">{expense.registerId}</td>
               )}
@@ -129,10 +129,10 @@ function ExpenseTable({
                 <td className="px-6 py-4 whitespace-nowrap text-sm">{expense.phoneNumber}</td>
               )}
               {visibleColumns.amountTaken && (
-                <td className="px-6 py-4 whitespace-nowrap text-sm">{expense.amount}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{expense.amount}</td>
               )}
               {visibleColumns.totalSpent && (
-                <td className="px-6 py-4 whitespace-nowrap text-sm">
+                <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">
                   {calculateTotalSpent(expense.subExpenses)}
                 </td>
               )}
@@ -146,7 +146,7 @@ function ExpenseTable({
                 </td>
               )}
               {visibleColumns.subAmount && (
-                <td className="px-6 py-4 whitespace-nowrap text-sm">
+                <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">
                   <ul className="list-inside">
                     {expense.subExpenses.map((sub, idx) => (
                       <li key={idx}>{sub.subAmount}</li>
@@ -155,7 +155,7 @@ function ExpenseTable({
                 </td>
               )}
               {visibleColumns.amountReturned && (
-                <td className="px-6 py-4 whitespace-nowrap text-sm">
+                <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">
                   {expense.amountReturned || 0}
                 </td>
               )}

@@ -66,13 +66,25 @@ function Stats() {
     }
   };
 
+  // Helper function to wrap content to avoid translation
+  const noTranslate = (value) => {
+    return <span translate="no" className="notranslate">{value}</span>;
+  };
+
+  // Wrap currency values in a noTranslate span
   const formatAmount = (amount) => {
-    return new Intl.NumberFormat('en-IN', {
+    const formatted = new Intl.NumberFormat('en-IN', {
       style: 'currency',
       currency: 'INR',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     }).format(amount);
+    return noTranslate(formatted);
+  };
+
+  // Wrap plain numbers in a noTranslate span
+  const formatNumber = (num) => {
+    return noTranslate(num);
   };
 
   return (
@@ -92,12 +104,18 @@ function Stats() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p className="font-semibold">Total Income</p>
-                <p className="text-sm text-gray-600">{stats.budgetStats.totalIncome.count} entries</p>
-                <p className="text-lg font-bold text-green-600">{formatAmount(stats.budgetStats.totalIncome.amount)}</p>
+                <p className="text-sm text-gray-600">
+                  {formatNumber(stats.budgetStats.totalIncome.count)} entries
+                </p>
+                <p className="text-lg font-bold text-green-600">
+                  {formatAmount(stats.budgetStats.totalIncome.amount)}
+                </p>
               </div>
               <div>
                 <p className="font-semibold">Amount Received</p>
-                <p className="text-sm text-gray-600">{stats.budgetStats.amountReceived.count} entries</p>
+                <p className="text-sm text-gray-600">
+                  {formatNumber(stats.budgetStats.amountReceived.count)} entries
+                </p>
                 <p className="text-lg font-bold text-green-600">
                   {formatAmount(stats.budgetStats.amountReceived.amount)}
                 </p>
@@ -108,15 +126,21 @@ function Stats() {
               </div>
               <div>
                 <p className="font-semibold">Amount Pending</p>
-                <p className="text-sm text-gray-600">{stats.budgetStats.amountPending.count} entries</p>
-                <p className="text-lg font-bold text-red-600">{formatAmount(stats.budgetStats.amountPending.amount)}</p>
+                <p className="text-sm text-gray-600">
+                  {formatNumber(stats.budgetStats.amountPending.count)} entries
+                </p>
+                <p className="text-lg font-bold text-red-600">
+                  {formatAmount(stats.budgetStats.amountPending.amount)}
+                </p>
               </div>
               <div>
                 <p className="font-semibold">Total Expenses</p>
-                <p className="text-sm text-gray-600">{stats.budgetStats.totalExpenses.count} entries</p>
-                <p className="text-lg font-bold text-red-600">{formatAmount(stats.budgetStats.totalExpenses.amount)}</p>
-                <div className="text-sm text-gray-600 mt-1">
-                </div>
+                <p className="text-sm text-gray-600">
+                  {formatNumber(stats.budgetStats.totalExpenses.count)} entries
+                </p>
+                <p className="text-lg font-bold text-red-600">
+                  {formatAmount(stats.budgetStats.totalExpenses.amount)}
+                </p>
               </div>
               <div>
                 <p className="font-semibold">Previous Year Amount</p>
@@ -137,7 +161,9 @@ function Stats() {
                   </div>
                 ) : (
                   <div className="flex items-center space-x-2">
-                    <p className="text-lg font-bold">{formatAmount(stats.budgetStats.previousYearAmount.amount)}</p>
+                    <p className="text-lg font-bold">
+                      {formatAmount(stats.budgetStats.previousYearAmount.amount)}
+                    </p>
                     {(user?.role === 'developer' || user?.role === 'financier') && (
                       <button
                         onClick={() => setIsEditingPreviousYear(true)}
@@ -153,17 +179,16 @@ function Stats() {
                 <p className="font-semibold">Amount Left</p>
                 <p className="text-xs text-gray-500">(Excluding Previous Year Amount)</p>
                 <p className={`text-lg font-bold ${stats.budgetStats.amountLeft.amount < 0 ? 'text-red-600' : ''}`}>
-    {formatAmount(stats.budgetStats.amountLeft.amount)}
-    {stats.budgetStats.amountLeft.amount < 0 && (
-      <span className="ml-2 text-red-500 font-semibold">(Shortage)</span>
-    )}
-  </p>
-
+                  {formatAmount(stats.budgetStats.amountLeft.amount)}
+                  {stats.budgetStats.amountLeft.amount < 0 && (
+                    <span className="ml-2 text-red-500 font-semibold">(Shortage)</span>
+                  )}
+                </p>
                 <div className="text-sm text-gray-600 mt-1">
                   <p>Online: {formatAmount(stats.budgetStats.amountLeft.onlineAmount)}</p>
                   <p>Offline: {formatAmount(stats.budgetStats.amountLeft.cashAmount)}</p>
                 </div>
-              </div> 
+              </div>
             </div>
           </div>
         </div>
@@ -176,11 +201,15 @@ function Stats() {
           <div className="space-y-4">
             <div>
               <p className="text-sm text-gray-600">Total Users</p>
-              <p className="text-lg font-bold">{stats.userStats.totalUsers}</p>
+              <p className="text-lg font-bold">
+                {formatNumber(stats.userStats.totalUsers)}
+              </p>
             </div>
             <div>
               <p className="text-sm text-gray-600">APP Payments</p>
-              <p className="text-lg font-bold">{stats.userStats.successfulPayments}</p>
+              <p className="text-lg font-bold">
+                {formatNumber(stats.userStats.successfulPayments)}
+              </p>
             </div>
           </div>
         </div>
@@ -189,7 +218,9 @@ function Stats() {
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-xl font-semibold mb-4">Villagers</h2>
           <div className="mb-4">
-            <p className="text-lg font-bold">Total Amount: {formatAmount(stats.villagers.total)}</p>
+            <p className="text-lg font-bold">
+              Total Amount: {formatAmount(stats.villagers.total)}
+            </p>
           </div>
           <table className="min-w-full">
             <thead>
@@ -224,7 +255,9 @@ function Stats() {
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-xl font-semibold mb-4">Youth</h2>
           <div className="mb-4">
-            <p className="text-lg font-bold">Total Amount: {formatAmount(stats.youth.total)}</p>
+            <p className="text-lg font-bold">
+              Total Amount: {formatAmount(stats.youth.total)}
+            </p>
           </div>
           <table className="min-w-full">
             <thead>
