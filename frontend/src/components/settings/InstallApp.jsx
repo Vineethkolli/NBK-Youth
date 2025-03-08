@@ -12,6 +12,7 @@ window.addEventListener('beforeinstallprompt', (e) => {
 function InstallApp() {
   const [platform, setPlatform] = useState(null);
   const [isInstalled, setIsInstalled] = useState(false);
+  const [showIOSPopup, setShowIOSPopup] = useState(false);
 
   useEffect(() => {
     // Detect platform
@@ -28,8 +29,10 @@ function InstallApp() {
     detectPlatform();
 
     const checkInstalled = () => {
-      if (window.matchMedia('(display-mode: standalone)').matches || 
-          window.navigator.standalone === true) {
+      if (
+        window.matchMedia('(display-mode: standalone)').matches ||
+        window.navigator.standalone === true
+      ) {
         setIsInstalled(true);
       }
     };
@@ -52,11 +55,12 @@ function InstallApp() {
   }, []);
 
   const handleInstall = async () => {
+    if (platform === 'ios') {
+      setShowIOSPopup(true);
+      return;
+    }
+
     if (!deferredPrompt) {
-      if (platform === 'ios') {
-        toast.info('Please use Safari\'s "Add to Home Screen" option to install');
-        return;
-      }
       toast.error('Installation not available');
       return;
     }
@@ -84,38 +88,54 @@ function InstallApp() {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow p-6 space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h3 className="text-lg font-medium">Download App</h3>
-          <p className="text-sm text-gray-500">Click "Download Now" to get better performance.</p>
+    <>
+      <div className="bg-white rounded-lg shadow p-6 space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-lg font-medium">Download App</h3>
+            <p className="text-sm text-gray-500">
+              Click "Download Now" to get better performance.
+            </p>
+          </div>
+          <button
+            onClick={handleInstall}
+            className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 flex items-center transition"
+          >
+            <Download className="h-4 w-4 mr-2" />
+            Download Now
+          </button>
         </div>
-        <button
-          onClick={handleInstall}
-          className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 flex items-center"
-        >
-          <Download className="h-4 w-4 mr-2" />
-          Download Now
-        </button>
       </div>
 
-      {platform === 'ios' && (
-        <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-          <h4 className="font-medium flex items-center">
-            <Share2 className="h-4 w-4 mr-2" />
-            iOS Installation Steps:
-          </h4>
-          <ol className="mt-2 ml-6 list-decimal text-sm text-gray-600">
-            <li>Open this website in Safari/Chrome</li>
-            <li>Tap the Share button</li>
-            <li>Scroll down and tap "Add to Home Screen"</li>
-            <li>Tap "Add" to install</li>
-          </ol>
+      {showIOSPopup && (
+        <div
+          className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+          onClick={() => setShowIOSPopup(false)}
+        >
+          <div
+            className="bg-white p-6 rounded-lg shadow-lg max-w-sm mx-4 hover:scale-100"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-lg font-semibold mb-4 text-center text-gray-900">
+              Install App
+            </h3>
+            <ol className="mt-2 ml-6 list-decimal text-sm text-gray-700 space-y-2">
+              <li>Open this website in Safari / Chrome</li>
+              <li>Tap the <b>Share</b> button</li>
+              <li>Scroll down and select <b>Add to Home Screen</b></li>
+              <li>Tap <b>Add</b> to install</li>
+            </ol>
+            <button
+              onClick={() => setShowIOSPopup(false)}
+              className="mt-4 w-full px-4 py-2 bg-green-600 text-white rounded-md shadow-md hover:bg-green-700 transition"
+            >
+              Got it
+            </button>
+          </div>
         </div>
       )}
-    </div>
+    </>
   );
 }
 
 export default InstallApp;
- 

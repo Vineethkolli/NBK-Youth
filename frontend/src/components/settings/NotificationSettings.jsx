@@ -6,7 +6,29 @@ import { urlBase64ToUint8Array } from '../../utils/vapidKeys';
 import { useAuth } from '../../context/AuthContext';
 import { Bell } from 'lucide-react';
 
+// Helper function to detect iOS devices.
+const isIos = () => {
+  const userAgent = window.navigator.userAgent.toLowerCase();
+  return /iphone|ipad|ipod/.test(userAgent);
+};
+
+// Check if the app is running in standalone mode (PWA)
+const isInStandaloneMode = () =>
+  ('standalone' in window.navigator) && window.navigator.standalone;
+
 const NotificationSettings = () => {
+  // If running on iOS browser (not standalone), prompt the user to install the app.
+  if (isIos() && !isInStandaloneMode()) {
+    return (
+      <div className="bg-white rounded-lg shadow p-6">
+        <h3 className="text-lg font-medium">Notifications Permission</h3>
+        <p className="text-sm text-gray-500">
+          To allow notifications, please download the app.
+        </p>
+      </div>
+    );
+  }
+
   const { user } = useAuth();
   const [subscription, setSubscription] = useState(null);
   const [permissionStatus, setPermissionStatus] = useState(Notification.permission);
