@@ -67,15 +67,10 @@ function MusicPlayer({
   };
 
   return (
-    // The container adapts to the device:
-    // - On mobile devices: full width (left-0 right-0)
-    // - On medium screens and above: left offset (md:left-64) to account for a sidebar.
-    // The bottom offset (bottom-16) ensures the player doesn't overlap with a bottom nav.
     <div className="fixed bottom-16 left-0 right-0 md:left-64 md:right-0 bg-white border-t shadow-lg p-4 z-50">
-      <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between">
+      <div >
         {/* Song Details */}
         <div className="flex items-center space-x-4 mb-4 sm:mb-0">
-          <div className="w-12 h-12 bg-gray-200 rounded-lg flex-shrink-0" />
           <div>
             <h3 className="font-medium">{song.name}</h3>
           </div>
