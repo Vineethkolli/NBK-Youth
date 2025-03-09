@@ -92,55 +92,50 @@ function DashboardLayout() {
               <div className="relative">
                 <div className="flex items-end justify-center space-x-4 mb-4">
                   {/* Stats Button */}
-                  <button
-                    onClick={() => handleNavigation('/stats')}
-                    className={`transform -translate-y-16 -translate-x-8 ${
-                      isActive('/stats') ? 'text-indigo-600' : 'text-gray-600'
-                    }`}
-                  >
-                    <div className={`rounded-full p-4 ${
-                      isActive('/stats') ? 'bg-indigo-600' : 'bg-white'
-                    } shadow-lg`}>
-                      <BarChart2 className={`h-6 w-6 ${
-                        isActive('/stats') ? 'text-white' : 'text-current'
-                      }`} />
-                    </div>
-                    <span className="text-xs mt-2 block">Stats</span>
-                  </button>
+<button
+  onClick={() => handleNavigation('/stats')}
+  className="transform -translate-y-16 -translate-x-8"
+>
+  <div
+    className={`rounded-full p-4 flex flex-col items-center justify-center w-16 h-16 shadow-lg ${
+      isActive('/stats') ? 'bg-indigo-600 text-white' : 'bg-white text-gray-600'
+    }`}
+  >
+    <BarChart2 className="h-6 w-6" />
+    <span className="text-xs mt-1">Stats</span>
+  </div>
+</button>
 
-                  {/* Income Button */}
-                  <button
-                    onClick={() => handleNavigation('/income')}
-                    className={`transform -translate-y-20 ${
-                      isActive('/income') ? 'text-indigo-600' : 'text-gray-600'
-                    }`}
-                  >
-                    <div className={`rounded-full p-4 ${
-                      isActive('/income') ? 'bg-indigo-600' : 'bg-white'
-                    } shadow-lg`}>
-                      <IndianRupee className={`h-6 w-6 ${
-                        isActive('/income') ? 'text-white' : 'text-current'
-                      }`} />
-                    </div>
-                    <span className="text-xs mt-2 block">Income</span>
-                  </button>
+{/* Income Button */}
+<button
+  onClick={() => handleNavigation('/income')}
+  className="transform -translate-y-20"
+>
+  <div
+    className={`rounded-full p-4 flex flex-col items-center justify-center w-16 h-16 shadow-lg ${
+      isActive('/income') ? 'bg-indigo-600 text-white' : 'bg-white text-gray-600'
+    }`}
+  >
+    <IndianRupee className="h-6 w-6" />
+    <span className="text-xs mt-1">Income</span>
+  </div>
+</button>
 
-                  {/* Expense Button */}
-                  <button
-                    onClick={() => handleNavigation('/expense')}
-                    className={`transform -translate-y-16 translate-x-8 ${
-                      isActive('/expense') ? 'text-indigo-600' : 'text-gray-600'
-                    }`}
-                  >
-                    <div className={`rounded-full p-4 ${
-                      isActive('/expense') ? 'bg-indigo-600' : 'bg-white'
-                    } shadow-lg`}>
-                      <DollarSign className={`h-6 w-6 ${
-                        isActive('/expense') ? 'text-white' : 'text-current'
-                      }`} />
-                    </div>
-                    <span className="text-xs mt-2 block">Expense</span>
-                  </button>
+{/* Expense Button */}
+<button
+  onClick={() => handleNavigation('/expense')}
+  className="transform -translate-y-16 translate-x-8"
+>
+  <div
+    className={`rounded-full p-4 flex flex-col items-center justify-center w-16 h-16 shadow-lg ${
+      isActive('/expense') ? 'bg-indigo-600 text-white' : 'bg-white text-gray-600'
+    }`}
+  >
+    <DollarSign className="h-6 w-6" />
+    <span className="text-xs mt-1">Expense</span>
+  </div>
+</button>
+
                 </div>
               </div>
             </div>
