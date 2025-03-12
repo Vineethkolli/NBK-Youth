@@ -27,6 +27,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { HiddenProfileProvider } from './context/HiddenProfileContext';
 import { LanguageProvider } from './context/LanguageContext';
 import { MaintenanceModeProvider, useMaintenanceMode } from './context/MaintenanceModeContext';
+import TechStack from './pages/TechStack';
 
 function AppContent() {
   const { user } = useAuth();
@@ -60,6 +61,7 @@ function AppContent() {
           <Route path="/moments" element={<Moments />} />
           <Route path="/lets-play" element={<LetsPlay />} />
           <Route path="/notifications" element={<Notifications />} />
+          <Route path="/tech-stack" element={<TechStack />} />
         </Route>
       </Routes>
     </>
