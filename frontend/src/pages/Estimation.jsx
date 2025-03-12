@@ -1,41 +1,97 @@
-import { useEffect, useState } from "react";
-import { Loader, Hammer, PenTool } from "lucide-react";
+import { useState, useEffect } from 'react';
+import axios from 'axios';
+import { toast } from 'react-hot-toast';
+import { API_URL } from '../utils/config';
+import EstimationStats from '../components/estimation/Stats';
+import IncomeSection from '../components/estimation/IncomeSection';
+import ExpenseSection from '../components/estimation/ExpenseSection';
+import { useAuth } from '../context/AuthContext';
 
-export default function Estimation() {
-  // Array of messages to cycle through
-  const words = ["Designing", "Developing", "Innovating"];
-  const [currentWord, setCurrentWord] = useState(0);
-  const [dots, setDots] = useState(".");
+function Estimation() {
+  const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState('stats'); 
+  const [stats, setStats] = useState({
+    totalEstimatedIncome: 0,
+    totalEstimatedPaidIncome: 0,
+    totalEstimatedNotPaidIncome: 0,
+    totalEstimatedExpense: 0,
+    balance: 0
+  });
 
   useEffect(() => {
-    // Cycle words every 3 seconds
-    const wordInterval = setInterval(() => {
-      setCurrentWord((prev) => (prev + 1) % words.length);
-    }, 3000);
+    if (activeTab === 'stats') {
+      fetchStats();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab]);
 
-    // Animate dots for a typewriter effect every 500ms
-    const dotsInterval = setInterval(() => {
-      setDots((prev) => (prev.length < 3 ? prev + "." : "."));
-    }, 500);
-
-    return () => {
-      clearInterval(wordInterval);
-      clearInterval(dotsInterval);
-    };
-  }, [words.length]);
+  const fetchStats = async () => {
+    try {
+      const statsResponse = await axios.get(`${API_URL}/api/estimation/stats`);
+      setStats(statsResponse.data);
+    } catch (error) {
+      toast.error('Failed to fetch stats');
+    }
+  };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen  text-black p-6">
-      <div className="flex space-x-6 items-center">
-        <Hammer className="w-16 h-16 animate-bounce text-yellow-400" />
-        <PenTool className="w-16 h-16 animate-pulse text-pink-400" />
+    <div className="space-y-6">
+      {/* Tab Buttons */}
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-semibold">Estimation Management</h1>
+        <div className="space-x-2">
+          <button
+            onClick={() => setActiveTab('stats')}
+            className={`px-4 py-2 rounded-md ${
+              activeTab === 'stats'
+                ? 'bg-indigo-600 text-white'
+                : 'bg-gray-200 text-gray-700'
+            }`}
+          >
+            Stats
+          </button>
+          {/* Render Income and Expense buttons only if the user's role is not "user" */}
+          {user?.role !== 'user' && (
+            <>
+              <button
+                onClick={() => setActiveTab('income')}
+                className={`px-4 py-2 rounded-md ${
+                  activeTab === 'income'
+                    ? 'bg-indigo-600 text-white'
+                    : 'bg-gray-200 text-gray-700'
+                }`}
+              >
+                Income
+              </button>
+              <button
+                onClick={() => setActiveTab('expense')}
+                className={`px-4 py-2 rounded-md ${
+                  activeTab === 'expense'
+                    ? 'bg-indigo-600 text-white'
+                    : 'bg-gray-200 text-gray-700'
+                }`}
+              >
+                Expense
+              </button>
+            </>
+          )}
+        </div>
       </div>
-      <p className="text-3xl mt-6 font-bold drop-shadow-lg">
-        We're {words[currentWord]}{dots}
-      </p>
-      <div className="flex items-center mt-8">
-        <Loader className="w-10 h-10 animate-spin text-blue-800" />
-      </div>
+
+      {/* Render content based on active tab */}
+      {activeTab === 'stats' && (
+        <EstimationStats stats={stats} />
+      )}
+
+      {activeTab === 'income' && user?.role !== 'user' && (
+        <IncomeSection refreshStats={fetchStats} />
+      )}
+
+      {activeTab === 'expense' && user?.role !== 'user' && (
+        <ExpenseSection refreshStats={fetchStats} />
+      )}
     </div>
   );
 }
+
+export default Estimation;
