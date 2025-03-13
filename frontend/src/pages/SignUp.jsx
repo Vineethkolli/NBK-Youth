@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-hot-toast';
 import { Eye, EyeOff } from 'lucide-react';
 import InstallApp from '../components/auth/InstallApp'; 
+import LanguageToggle from '../components/auth/LanguageToggle';
 
 function SignUp() {
   const [formData, setFormData] = useState({
@@ -71,6 +72,12 @@ function SignUp() {
 
   return (
     <>
+        {/* Hidden container for Google Translate */}
+        <div id="google_translate_element" style={{ display: 'none' }}></div>
+    <div className="relative ">
+      <div className="absolute top-6 right-0">
+        <LanguageToggle /> {/* language toggle */}
+      </div>
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="text-center">
           <h1 className="mt-2 text-4xl md:text-3xl font-extrabold tracking-wide text-green-600">
@@ -169,6 +176,7 @@ function SignUp() {
           </a>
         </div>
       </form>
+      </div>
       {/* The InstallApp component displays the download box if the app isn’t already installed */}
       <InstallApp />
     </>

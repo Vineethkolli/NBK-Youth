@@ -5,6 +5,7 @@ import { Eye, EyeOff } from 'lucide-react';
 import ForgotPassword from '../components/auth/ForgotPassword';
 import OTPVerification from '../components/auth/OTPVerification';
 import ResetPassword from '../components/auth/ResetPassword';
+import LanguageToggle from '../components/auth/LanguageToggle';
 
 function SignIn() {
   const [identifier, setIdentifier] = useState('');
@@ -77,6 +78,12 @@ function SignIn() {
 
   return (
     <>
+        {/* Hidden container for Google Translate */}
+    <div id="google_translate_element" style={{ display: 'none' }}></div>
+    <div className="relative ">
+      <div className="absolute top-6 right-0">
+        <LanguageToggle /> {/* language toggle */}
+      </div>
       <form onSubmit={handleSubmit} className="space-y-6">
       <div className="text-center">
   <h1 className="mt-2 text-4xl md:text-3xl font-extrabold tracking-wide text-green-600">
@@ -146,6 +153,7 @@ function SignIn() {
           </p>
         </div>
       </form>
+      </div>
       <div className="w-full max-w-md text-black text-center mt-10">
         <p className="font-bold text-lg tracking-wide">
           Crafted with ❤️ Love

@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, User, Users, Bell, ShieldCheck, Settings, IndianRupee, DollarSign, Trash2, CheckSquare, BarChart2, Terminal, MusicIcon, CameraIcon, TrophyIcon, X, Calculator, Layers } from 'lucide-react';
+import { Home, User, Users, Bell, ShieldCheck, Settings, IndianRupee, DollarSign, Trash2, CheckSquare, BarChart2, Terminal, MusicIcon, CameraIcon, TrophyIcon, X, ChevronLeft, Calculator, Layers } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 function Sidebar({ isOpen, onNavigate }) {
@@ -31,7 +31,6 @@ function Sidebar({ isOpen, onNavigate }) {
     ...(user?.role === 'developer' ? [
       { to: '/developer-options', icon: Terminal, label: 'Developer Options' }
     ] : []),
-    
     { to: '/tech-stack', icon: Layers, label: 'Tech Stack' }
   ];
 
@@ -42,12 +41,17 @@ function Sidebar({ isOpen, onNavigate }) {
   };
 
   return (
-    <div className={`fixed top-16 left-0 h-[calc(100vh-4rem)] bg-white shadow-lg transition-transform duration-300 ease-in-out transform ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 z-10 overflow-y-auto`}>
+    <div
+      className={`fixed top-16 left-0 h-[calc(100vh-4rem)] bg-white shadow-lg transition-transform duration-300 ease-in-out transform ${
+        isOpen ? 'translate-x-0' : '-translate-x-full'
+      } md:translate-x-0 z-10 overflow-y-auto`}
+      style={{ WebkitOverflowScrolling: 'touch' }}
+    >
       <div className="w-60 h-full flex flex-col">
         <nav className="flex-1 px-2 py-4 space-y-1">
           {links.map((link, index) => {
             const Icon = link.icon;
-            const isSeparator = [3, 7, 11, 15].includes(index); // Line separator
+            const isSeparator = [3, 7, 11, 15].includes(index);
             return (
               <div key={link.to}>
                 <Link
@@ -66,6 +70,8 @@ function Sidebar({ isOpen, onNavigate }) {
               </div>
             );
           })}
+
+          {/* Bottom Close Button */}
           <button
             onClick={onNavigate}
             className="text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-12 py-2 text-sm font-medium rounded-md mt-2"
@@ -75,6 +81,14 @@ function Sidebar({ isOpen, onNavigate }) {
           </button>
         </nav>
       </div>
+
+      {/* Arrow Close Button at Middle Right */}
+      <button
+        onClick={onNavigate}
+        className="absolute top-1/2 right-[-0px] transform -translate-y-1/2 bg-gray-200 hover:bg-gray-300 text-gray-800 p-2 rounded-full shadow-md z-20"
+      >
+        <ChevronLeft className="h-6 w-6" />
+      </button>
     </div>
   );
 }

@@ -33,16 +33,16 @@ export const AuthProvider = ({ children }) => {
   };
 
   const updateUserData = (newData) => {
-    setUser(prevUser => ({
+    setUser((prevUser) => ({
       ...prevUser,
-      ...newData
+      ...newData,
     }));
   };
 
   const signin = async (identifier, password) => {
     const { data } = await axios.post(`${API_URL}/api/auth/signin`, {
       identifier,
-      password
+      password,
     });
     localStorage.setItem('token', data.token);
     axios.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
@@ -50,7 +50,14 @@ export const AuthProvider = ({ children }) => {
   };
 
   const signup = async (userData) => {
-    const { data } = await axios.post(`${API_URL}/api/auth/signup`, userData);
+    // Get the current language preference
+    const language = localStorage.getItem('preferredLanguage') || 'en';
+
+    const { data } = await axios.post(`${API_URL}/api/auth/signup`, {
+      ...userData,
+      language, // Include language preference in signup data
+    });
+
     localStorage.setItem('token', data.token);
     axios.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
     setUser(data.user);
@@ -68,7 +75,7 @@ export const AuthProvider = ({ children }) => {
     signin,
     signup,
     signout,
-    updateUserData
+    updateUserData,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
