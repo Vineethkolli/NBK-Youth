@@ -6,21 +6,6 @@ function Sidebar({ isOpen, onNavigate }) {
   const location = useLocation();
   const { user } = useAuth();
 
-  // State to track if the device is mobile (width < 768px)
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    // Handler to update state on resize
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-
-    // Initial check
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
   const links = [
     { to: '/', icon: Home, label: 'Home' },
     { to: '/moments', icon: CameraIcon, label: 'Moments' },
@@ -34,18 +19,18 @@ function Sidebar({ isOpen, onNavigate }) {
     { to: '/pay-online', icon: ShieldCheck, label: 'Pay Online' },
     { to: '/notifications', icon: Bell, label: 'Notifications' },
     { to: '/settings', icon: Settings, label: 'Settings' },
-    ...(user?.role === 'developer'
-      ? [{ to: '/users', icon: Users, label: 'Users' }]
-      : []),
-    ...(user?.role === 'developer' || user?.role === 'financier'
-      ? [{ to: '/verification', icon: CheckSquare, label: 'Verification' }]
-      : []),
-    ...(user?.role === 'developer'
-      ? [{ to: '/recycle-bin', icon: Trash2, label: 'Recycle Bin' }]
-      : []),
-    ...(user?.role === 'developer'
-      ? [{ to: '/developer-options', icon: Terminal, label: 'Developer Options' }]
-      : []),
+    ...(user?.role === 'developer' ? [
+      { to: '/users', icon: Users, label: 'Users' }
+    ] : []),
+    ...(user?.role === 'developer' || user?.role === 'financier' ? [
+      { to: '/verification', icon: CheckSquare, label: 'Verification' }
+    ] : []),
+    ...(user?.role === 'developer' ? [
+      { to: '/recycle-bin', icon: Trash2, label: 'Recycle Bin' }
+    ] : []),
+    ...(user?.role === 'developer' ? [
+      { to: '/developer-options', icon: Terminal, label: 'Developer Options' }
+    ] : []),
     { to: '/tech-stack', icon: Layers, label: 'Tech Stack' }
   ];
 
@@ -97,15 +82,13 @@ function Sidebar({ isOpen, onNavigate }) {
         </nav>
       </div>
 
-      {/* Arrow Close Button at Middle Right - only show on mobile */}
-      {isMobile && (
-        <button
-          onClick={onNavigate}
-          className="absolute top-1/2 right-0 transform -translate-y-1/2 bg-gray-200 hover:bg-gray-300 text-gray-800 p-2 rounded-full shadow-md z-20"
-        >
-          <ChevronLeft className="h-6 w-6" />
-        </button>
-      )}
+      {/* Arrow Close Button at Middle Right */}
+      <button
+        onClick={onNavigate}
+        className="absolute top-1/2 right-[-0px] transform -translate-y-1/2 bg-gray-200 hover:bg-gray-300 text-gray-800 p-2 rounded-full shadow-md z-20"
+      >
+        <ChevronLeft className="h-6 w-6" />
+      </button>
     </div>
   );
 }
