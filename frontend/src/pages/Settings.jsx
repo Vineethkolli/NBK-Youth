@@ -60,7 +60,7 @@ function Settings() {
           <InstallApp />
         </div>
       </div>
-      <div className="text-center text-gray-500 text-sm mt-4">WEB APP Version 1.7</div>
+      <div className="text-center text-gray-500 text-sm mt-4">WEB APP Version 1.8</div>
       {/* Footer */}
       <Footer />
     </div>
