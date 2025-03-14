@@ -5,6 +5,7 @@ import axios from 'axios';
 import { API_URL } from '../../utils/config';
 import EstimatedExpenseTable from "./ExpenseTable"; 
 import EstimationForm from './Form';
+import ExpensePrint from './ExpensePrint'; // Import the ExpensePrint component
 
 function ExpenseSection({ refreshStats }) {
   const [expenses, setExpenses] = useState([]);
@@ -34,7 +35,20 @@ function ExpenseSection({ refreshStats }) {
       const { data } = await axios.get(`${API_URL}/api/estimation/expense`, {
         params: expenseFilters
       });
-      setExpenses(data);
+      
+      // Apply client-side sorting if sortOrder is provided
+      let sortedData = data;
+      if (expenseFilters.sortOrder) {
+        const { sortField, sortOrder } = expenseFilters;
+        sortedData = [...data].sort((a, b) => {
+          // Convert values to numbers; fallback to 0 if conversion fails
+          const aValue = Number(a[sortField]) || 0;
+          const bValue = Number(b[sortField]) || 0;
+          return sortOrder === 'asc' ? aValue - bValue : bValue - aValue;
+        });
+      }
+      
+      setExpenses(sortedData);
     } catch (error) {
       toast.error('Failed to fetch expense data');
     }
@@ -98,10 +112,14 @@ function ExpenseSection({ refreshStats }) {
             <option value="asc">Ascending</option>
           </select>
         </div>
-        <button onClick={handleAdd} className="btn-primary">
-              <Plus className="h-4 w-4 mr-2" />
-          Add New
-        </button>
+        <div className="flex items-center space-x-2">
+          <button onClick={handleAdd} className="btn-primary">
+            <Plus className="h-4 w-4 mr-2" />
+            Add New
+          </button>
+          {/* Print button */}
+          <ExpensePrint expenses={expenses} visibleColumns={expenseColumns} />
+        </div>
       </div>
       
       <div className="bg-white rounded-lg shadow">

@@ -1,4 +1,5 @@
 import { IndianRupee } from 'lucide-react';
+import StatsPrint from './StatsPrint';
 
 function EstimationStats({ stats }) {
   // Wrap content in a no-translate span
@@ -36,6 +37,9 @@ function EstimationStats({ stats }) {
 
   return (
     <div className="space-y-6">
+      <div className="flex justify-end mb-0">
+  <StatsPrint stats={stats} />
+</div>
       {/* Section 1: Estimated Income and Expense */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-white rounded-lg shadow p-6">

@@ -5,6 +5,7 @@ import axios from 'axios';
 import { API_URL } from '../../utils/config';
 import EstimatedIncomeTable from './IncomeTable';
 import EstimationForm from './Form';
+import IncomePrint from './IncomePrint'; // Import IncomePrint component
 
 function IncomeSection({ refreshStats }) {
   const [incomes, setIncomes] = useState([]);
@@ -83,7 +84,6 @@ function IncomeSection({ refreshStats }) {
       fetchIncomes();
       if (refreshStats) refreshStats();
     } catch (error) {
-      // Check if error response has a custom message (like duplicate name)
       if (error.response && error.response.data && error.response.data.message) {
         toast.error(error.response.data.message);
       } else {
@@ -94,46 +94,53 @@ function IncomeSection({ refreshStats }) {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-            {/* ADD NEW button with Plus icon */}
-        <button onClick={handleAdd} className="btn-primary">
-          <Plus className="h-4 w-4 mr-2" />
-          Add New
-        </button>
-          <Filter className="h-5 w-5 text-gray-400" />
-          
-          <select
-            value={incomeFilters.sortOrder}
-            onChange={(e) => setIncomeFilters({ ...incomeFilters, sortOrder: e.target.value })}
-            className="form-select"
-          >
-            <option value="">Sort</option>
-            <option value="desc">Descending</option>
-            <option value="asc">Ascending</option>
-          </select>
-          <select
-            value={incomeFilters.belongsTo}
-            onChange={(e) => setIncomeFilters({ ...incomeFilters, belongsTo: e.target.value })}
-            className="form-select"
-          >
-            <option value="">Belongs To</option>
-            <option value="youth">Youth</option>
-            <option value="villagers">Villagers</option>
-          </select>
-          <select
-            value={incomeFilters.status}
-            onChange={(e) => setIncomeFilters({ ...incomeFilters, status: e.target.value })}
-            className="form-select"
-          >
-            <option value="">Status</option>
-            <option value="paid">Paid</option>
-            <option value="not paid">Not Paid</option>
-          </select>
-        </div>
-        
+      {/* Top Row: Add New & Print */}
+      <div className="flex justify-end items-center space-x-4 mb-4">
+  <button onClick={handleAdd} className="btn-secondary flex items-center space-x-2">
+    <Plus className="h-4 w-4" />
+    <span>Add New</span>
+  </button>
+  <IncomePrint 
+    incomes={incomes} 
+    visibleColumns={incomeColumns} 
+    incomeFilters={incomeFilters} 
+  />
+</div>
+
       
+      {/* Filters Row */}
+      <div className="flex items-center space-x-4">
+        <Filter className="h-5 w-5 text-gray-400" />
+        <select
+          value={incomeFilters.sortOrder}
+          onChange={(e) => setIncomeFilters({ ...incomeFilters, sortOrder: e.target.value })}
+          className="form-select"
+        >
+          <option value="">Sort</option>
+          <option value="desc">Descending</option>
+          <option value="asc">Ascending</option>
+        </select>
+        <select
+          value={incomeFilters.belongsTo}
+          onChange={(e) => setIncomeFilters({ ...incomeFilters, belongsTo: e.target.value })}
+          className="form-select"
+        >
+          <option value="">Belongs To</option>
+          <option value="youth">Youth</option>
+          <option value="villagers">Villagers</option>
+        </select>
+        <select
+          value={incomeFilters.status}
+          onChange={(e) => setIncomeFilters({ ...incomeFilters, status: e.target.value })}
+          className="form-select"
+        >
+          <option value="">Status</option>
+          <option value="paid">Paid</option>
+          <option value="not paid">Not Paid</option>
+        </select>
       </div>
+      
+      {/* Table and Visible Columns */}
       <div className="bg-white rounded-lg shadow">
         <div className="p-4 border-b">
           <h2 className="font-medium">Visible Columns</h2>
