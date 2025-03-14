@@ -3,7 +3,7 @@ import { Edit2, Trash2, Play, Pause } from 'lucide-react';
 function SongItem({ song, isPlaying, onPlay, onEdit, onDelete, isEditMode }) {
   return (
     <div
-      className={`p-4 rounded-lg cursor-pointer transition-colors flex justify-between items-center ${
+      className={`p-4 rounded-lg cursor-pointer transition-colors flex justify-between items-center notranslate ${
         isPlaying ? 'bg-indigo-100' : 'bg-white hover:bg-gray-100'
       }`}
     >

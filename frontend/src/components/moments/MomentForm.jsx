@@ -18,9 +18,13 @@ function MomentForm({ type, onClose, onSubmit }) {
 
     setIsSubmitting(true);
     try {
-      if (type === 'youtube' && !formData.url.includes('youtube.com')) {
+      if (
+        type === 'youtube' && 
+        !formData.url.includes('youtube.com') && 
+        !formData.url.includes('youtu.be')
+      ) {
         throw new Error('Please enter a valid YouTube URL');
-      }
+      }    
 
       await onSubmit(formData, setUploadProgress);
       onClose();

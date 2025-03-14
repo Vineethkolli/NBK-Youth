@@ -7,7 +7,6 @@ import { API_URL } from '../utils/config';
 import Slideshow from '../components/home/Slideshow';
 import Timeline from '../components/home/Timeline';
 import Footer from '../components/Footer';
-import InstallApp from '../components/home/InstallApp';
 
 function Home() {
   const { user } = useAuth();
@@ -28,9 +27,7 @@ function Home() {
   };
 
   return (
-    <div className="relative">
-      {/* Overlay Install Prompt */}
-      <InstallApp />
+    <div>
 
       {/* Home component */}
       <div className="max-w-7xl mx-auto sm:px-6 lg:px-0 space-y-8">

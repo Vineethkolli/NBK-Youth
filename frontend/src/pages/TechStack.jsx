@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { ExternalLink } from "lucide-react";
 import { Github as LucideGithub } from "lucide-react";
-import { FaWhatsapp, FaCode, FaShareAlt, FaRobot } from "react-icons/fa";
+import { FaWhatsapp, FaCode, FaShareAlt, FaRobot, FaClock } from "react-icons/fa";
 import {SiVercel, SiRender, SiMongodb, SiGmail, SiCloudinary, SiReact, SiTailwindcss, SiVite, SiNodedotjs, SiExpress,
-        SiGit, SiGithub, SiGoogletranslate, SiGoogledrive, SiPostman, SiGoogle, SiOpenai, SiYoutube, SiGithubcopilot, SiInstagram } from "react-icons/si";
+   SiGoogleanalytics, SiGit, SiGithub, SiGoogletranslate, SiGoogledrive, SiPostman, SiGoogle, SiOpenai, SiYoutube, SiGithubcopilot, SiInstagram } from "react-icons/si";
 import Footer from '../components/Footer';
 
 function TechStack() {
@@ -11,15 +11,6 @@ function TechStack() {
     {
       name: "Current Website",
       url: "https://nbkyouth.vercel.app",
-    },
-    {
-      name: "Old Website",
-      url: "https://sites.google.com/view/nbkyouthgangavaram",
-    },
-    {
-      name: "GitHub",
-      url: "https://github.com/Vineethkolli/NBK-Youth",
-      isGitHub: true,
     },
   ]);
 
@@ -97,6 +88,8 @@ function TechStack() {
     { name: "Progressive Web App (APP)", icon: <FaCode className="h-8 w-8 mr-2 text-gray-500" /> },
     { name: "Google Translate (Multi Language)", icon: <SiGoogletranslate className="h-8 w-8 mr-2 text-blue-500" /> },
     { name: "WhatsApp (Auto Load Message)", icon: <FaWhatsapp className="h-8 w-8 mr-2 text-green-500" /> },
+    { name: "Google Analytics (User Interactions)", icon: <SiGoogleanalytics className="h-8 w-8 mr-2 text-yellow-500" /> },
+    { name: "Cron-job.org (Keeps server warm)", icon: <FaClock className="h-8 w-8 mr-2 text-orange-600" /> },
   ];
   const tools = [
     { name: "GitHub", icon: <SiGithub className="h-8 w-8 mr-2 text-gray-800" /> },
@@ -127,7 +120,8 @@ function TechStack() {
     if (navigator.share) {
       navigator
         .share({
-          title: "Check this out",
+          title: "NBK Youth Gangavaram",
+          text: "NBK Youth Gangavaram",
           url,
         })
         .catch((error) => console.log("Error sharing", error));
@@ -163,43 +157,32 @@ function TechStack() {
 
     {/* Website Links Section */}
     <div className="space-y-4">
-      {websites.map((site) => (
-        <div
-          key={site.name}
-          className="flex items-center justify-between text-gray-700 hover:text-indigo-600"
-        >
-          <span>
-            {site.isGitHub ? (
-              <div className="flex items-center">
-                <LucideGithub className="h-4 w-4 mr-2" />
-                GitHub
-              </div>
-            ) : (
-              site.name
-            )}
-          </span>
-          <div className="flex items-center space-x-2">
-            <ExternalLink
-              className="h-4 w-4 cursor-pointer"
-              title="Open Link"
-              onClick={() =>
-                window.open(site.url, "_blank", "noopener,noreferrer")
-              }
-            />
-            <FaShareAlt
-              className="h-4 w-4 cursor-pointer"
-              title="Share Link"
-              onClick={() => handleShare(site.url)}
-            />
+        {websites.map((site) => (
+          <div
+            key={site.name}
+            className="flex items-center justify-between text-gray-700 "
+          >
+            <span>{site.name}</span>
+            <div className="flex items-center space-x-2 "><br></br>
+              <ExternalLink
+                className="h-4 w-4 cursor-pointer hover:text-indigo-600"
+                title="Open Link"
+                onClick={() =>
+                  window.open(site.url, "_blank", "noopener,noreferrer")
+                }
+              />
+              <FaShareAlt
+                className="h-4 w-4 cursor-pointer hover:text-indigo-600"
+                title="Share Link"
+                onClick={() => handleShare(site.url)}
+              />
+            </div>
           </div>
-        </div>
-      ))}
-    </div>
-
+        ))}
+      </div>
 
     <div className="space-y-4"><br></br>  
   </div>  
-
 
         {/* Logo with Developer Name */}
         <div className="md:w-1/2 text-center  ">
