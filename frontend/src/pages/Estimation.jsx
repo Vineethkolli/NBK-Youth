@@ -22,7 +22,6 @@ function Estimation() {
     if (activeTab === 'stats') {
       fetchStats();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
 
   const fetchStats = async () => {

@@ -109,10 +109,10 @@ function ExpenseTable({
             <tr key={expense._id}>
               <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{index + 1}</td>
               {(userRole === 'developer' || userRole === 'financier') && visibleColumns.registerId && (
-                <td className="px-6 py-4 whitespace-nowrap text-sm">{expense.registerId}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{expense.registerId}</td>
               )}
               {visibleColumns.expenseId && (
-                <td className="px-6 py-4 whitespace-nowrap text-sm">{expense.expenseId}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{expense.expenseId}</td>
               )}
               {visibleColumns.dateTime && (
                 <td className="px-6 py-4 whitespace-nowrap text-sm">

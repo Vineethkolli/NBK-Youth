@@ -5,7 +5,7 @@ import axios from 'axios';
 import { API_URL } from '../../utils/config';
 import EstimatedExpenseTable from "./ExpenseTable"; 
 import EstimationForm from './Form';
-import ExpensePrint from './ExpensePrint'; // Import the ExpensePrint component
+import ExpensePrint from './ExpensePrint'; 
 
 function ExpenseSection({ refreshStats }) {
   const [expenses, setExpenses] = useState([]);
@@ -20,14 +20,13 @@ function ExpenseSection({ refreshStats }) {
     presentAmount: true,
     others: false
   });
-  // Form modal state
+
   const [showForm, setShowForm] = useState(false);
-  const [formMode, setFormMode] = useState('add'); // 'add' or 'edit'
+  const [formMode, setFormMode] = useState('add'); 
   const [currentRecord, setCurrentRecord] = useState(null);
 
   useEffect(() => {
     fetchExpenses();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [expenseFilters]);
 
   const fetchExpenses = async () => {
@@ -83,7 +82,6 @@ function ExpenseSection({ refreshStats }) {
     try {
       if (formMode === 'add') {
         const { data } = await axios.post(`${API_URL}/api/estimation/expense`, formData);
-        // Prepend new expense so it appears at the top
         setExpenses([data, ...expenses]);
       } else if (formMode === 'edit') {
         const { data } = await axios.put(`${API_URL}/api/estimation/expense/${currentRecord._id}`, formData);

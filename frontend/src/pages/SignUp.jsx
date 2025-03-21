@@ -76,7 +76,7 @@ function SignUp() {
         <div id="google_translate_element" style={{ display: 'none' }}></div>
     <div className="relative ">
       <div className="absolute top-6 right-0">
-        <LanguageToggle /> {/* language toggle */}
+        <LanguageToggle /> 
       </div>
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="text-center">

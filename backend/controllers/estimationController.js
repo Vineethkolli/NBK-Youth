@@ -32,7 +32,7 @@ export const estimationController = {
   createEstimatedIncome: async (req, res) => {
     try {
       const { name } = req.body;
-      // Check if an income with this name already exists
+      // Check if an income with same name already exists
       const existingIncome = await EstimatedIncome.findOne({ name });
       if (existingIncome) {
         return res.status(400).json({ message: 'Name already exists' });
@@ -54,7 +54,7 @@ export const estimationController = {
     try {
       const { name } = req.body;
       if (name) {
-        // Check if another income with the same name exists (excluding the current one)
+        // Check if an income with the same name exists
         const existingIncome = await EstimatedIncome.findOne({
           name,
           _id: { $ne: req.params.id }

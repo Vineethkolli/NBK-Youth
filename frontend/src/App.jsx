@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import AuthLayout from './layouts/AuthLayout';
@@ -69,6 +69,16 @@ function AppContent() {
 }
 
 function App() {
+  // Listen for the new service worker taking control
+  useEffect(() => {
+    if (navigator.serviceWorker) {
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        // reload the page to apply the new version
+        window.location.reload();
+      });
+    }
+  }, []);
+
   return (
     <AuthProvider>
       <LanguageProvider>

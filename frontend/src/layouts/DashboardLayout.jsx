@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Outlet, useLocation } from 'react-router-dom';
 import { Menu, Home, BarChart2, IndianRupee, DollarSign, Wallet } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
@@ -23,19 +23,41 @@ function DashboardLayout() {
   const handleNavigation = (path) => {
     navigate(path);
     setBudgetOpen(false);
+    closeSidebar();
   };
 
+  // Disable body scroll when sidebar is open
+  useEffect(() => {
+    if (sidebarOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    // Cleanup on component unmount in case sidebar is still open
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [sidebarOpen]);
+
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen bg-gray-100 relative">
       {/* Overlay Install Prompt */}
       <InstallApp />
       <Header toggleSidebar={toggleSidebar} />
       <Sidebar isOpen={sidebarOpen} onNavigate={closeSidebar} />
-      <main
-  className="flex-1 overflow-auto p-8 mt-12 md:ml-64 pb-20 min-h-[calc(100vh-3rem)]"
-  style={{ WebkitOverflowScrolling: 'touch' }}
->
 
+      {/* Overlay that closes sidebar when clicked */}
+      {sidebarOpen && (
+        <div
+          onClick={closeSidebar}
+          className="fixed inset-0 z-5 bg-transparent"
+        />
+      )}
+
+      <main
+        className={`flex-1 overflow-auto p-8 mt-12 md:ml-64 pb-20 min-h-[calc(100vh-3rem)] ${sidebarOpen ? 'pointer-events-none' : ''}`}
+        style={{ WebkitOverflowScrolling: 'touch' }}
+      >
         <Outlet />
       </main>
 
@@ -45,9 +67,7 @@ function DashboardLayout() {
           {/* Menu Button */}
           <button
             onClick={toggleSidebar}
-            className={`flex flex-col items-center justify-center w-1/3 ${
-              sidebarOpen ? 'text-indigo-600' : 'text-gray-600'
-            }`}
+            className={`flex flex-col items-center justify-center w-1/3 ${sidebarOpen ? 'text-indigo-600' : 'text-gray-600'}`}
           >
             {sidebarOpen ? (
               <div className="bg-indigo-600 rounded-full p-3 -mt-8">
@@ -62,9 +82,7 @@ function DashboardLayout() {
           {/* Home Button */}
           <button
             onClick={() => handleNavigation('/')}
-            className={`flex flex-col items-center justify-center w-1/3 ${
-              isActive('/') ? 'text-indigo-600' : 'text-gray-600'
-            }`}
+            className={`flex flex-col items-center justify-center w-1/3 ${isActive('/') ? 'text-indigo-600' : 'text-gray-600'}`}
           >
             {isActive('/') ? (
               <div className="bg-indigo-600 rounded-full p-3 -mt-8">
@@ -79,9 +97,7 @@ function DashboardLayout() {
           {/* Budget Button */}
           <button
             onClick={handleBudgetClick}
-            className={`flex flex-col items-center justify-center w-1/3 ${
-              budgetOpen ? 'text-indigo-600' : 'text-gray-600'
-            }`}
+            className={`flex flex-col items-center justify-center w-1/3 ${budgetOpen ? 'text-indigo-600' : 'text-gray-600'}`}
           >
             {budgetOpen ? (
               <div className="bg-indigo-600 rounded-full p-3 -mt-8">
@@ -99,50 +115,37 @@ function DashboardLayout() {
               <div className="relative">
                 <div className="flex items-end justify-center space-x-4 mb-4">
                   {/* Stats Button */}
-<button
-  onClick={() => handleNavigation('/stats')}
-  className="transform -translate-y-16 -translate-x-8"
->
-  <div
-    className={`rounded-full p-4 flex flex-col items-center justify-center w-16 h-16 shadow-lg ${
-      isActive('/stats') ? 'bg-indigo-600 text-white' : 'bg-white text-gray-600'
-    }`}
-  >
-    <BarChart2 className="h-6 w-6" />
-    <span className="text-xs mt-1">Stats</span>
-  </div>
-</button>
+                  <button
+                    onClick={() => handleNavigation('/stats')}
+                    className="transform -translate-y-16 -translate-x-8"
+                  >
+                    <div className={`rounded-full p-4 flex flex-col items-center justify-center w-16 h-16 shadow-lg ${isActive('/stats') ? 'bg-indigo-600 text-white' : 'bg-white text-gray-600'}`}>
+                      <BarChart2 className="h-6 w-6" />
+                      <span className="text-xs mt-1">Stats</span>
+                    </div>
+                  </button>
 
-{/* Income Button */}
-<button
-  onClick={() => handleNavigation('/income')}
-  className="transform -translate-y-20"
->
-  <div
-    className={`rounded-full p-4 flex flex-col items-center justify-center w-16 h-16 shadow-lg ${
-      isActive('/income') ? 'bg-indigo-600 text-white' : 'bg-white text-gray-600'
-    }`}
-  >
-    <IndianRupee className="h-6 w-6" />
-    <span className="text-xs mt-1">Income</span>
-  </div>
-</button>
+                  {/* Income Button */}
+                  <button
+                    onClick={() => handleNavigation('/income')}
+                    className="transform -translate-y-20"
+                  >
+                    <div className={`rounded-full p-4 flex flex-col items-center justify-center w-16 h-16 shadow-lg ${isActive('/income') ? 'bg-indigo-600 text-white' : 'bg-white text-gray-600'}`}>
+                      <IndianRupee className="h-6 w-6" />
+                      <span className="text-xs mt-1">Income</span>
+                    </div>
+                  </button>
 
-{/* Expense Button */}
-<button
-  onClick={() => handleNavigation('/expense')}
-  className="transform -translate-y-16 translate-x-8"
->
-  <div
-    className={`rounded-full p-4 flex flex-col items-center justify-center w-16 h-16 shadow-lg ${
-      isActive('/expense') ? 'bg-indigo-600 text-white' : 'bg-white text-gray-600'
-    }`}
-  >
-    <DollarSign className="h-6 w-6" />
-    <span className="text-xs mt-1">Expense</span>
-  </div>
-</button>
-
+                  {/* Expense Button */}
+                  <button
+                    onClick={() => handleNavigation('/expense')}
+                    className="transform -translate-y-16 translate-x-8"
+                  >
+                    <div className={`rounded-full p-4 flex flex-col items-center justify-center w-16 h-16 shadow-lg ${isActive('/expense') ? 'bg-indigo-600 text-white' : 'bg-white text-gray-600'}`}>
+                      <DollarSign className="h-6 w-6" />
+                      <span className="text-xs mt-1">Expense</span>
+                    </div>
+                  </button>
                 </div>
               </div>
             </div>

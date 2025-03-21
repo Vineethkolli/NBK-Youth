@@ -2,6 +2,15 @@ import { precacheAndRoute } from 'workbox-precaching';
 
 precacheAndRoute(self.__WB_MANIFEST || []);
 
+// Force the new service worker to activate immediately
+self.addEventListener('install', (event) => {
+  self.skipWaiting();
+});
+
+self.addEventListener('activate', (event) => {
+  event.waitUntil(clients.claim());
+});
+
 // Notification logic
 self.addEventListener('push', (event) => {
   const data = event.data ? event.data.json() : {};

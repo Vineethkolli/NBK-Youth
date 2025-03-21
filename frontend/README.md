@@ -161,6 +161,7 @@ DIRECTORY STRUCTURE
         |   |       StatsPrint.jsx
         |   |       
         |   +---expense
+        |   |       ExpenseExcel.jsx
         |   |       ExpenseFilters.jsx
         |   |       ExpenseForm.jsx
         |   |       ExpensePrint.jsx
@@ -180,6 +181,7 @@ DIRECTORY STRUCTURE
         |   |       Timeline.jsx
         |   |       
         |   +---income
+        |   |       IncomeExcel.jsx
         |   |       IncomeFilters.jsx
         |   |       IncomeForm.jsx
         |   |       IncomePrint.jsx
@@ -209,6 +211,10 @@ DIRECTORY STRUCTURE
         |   |       
         |   +---stats
         |   |       StatsPrint.jsx
+        |   |       
+        |   +---techstack
+        |   |       MindMap.jsx
+        |   |       Technologies.jsx
         |   |       
         |   +---verification
         |   |       VerificationFilters.jsx

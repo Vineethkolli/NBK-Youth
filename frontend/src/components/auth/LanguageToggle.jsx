@@ -1,4 +1,3 @@
-// src/components/auth/LanguageToggle.jsx
 import { Languages } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 

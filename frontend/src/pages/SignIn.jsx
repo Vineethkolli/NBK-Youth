@@ -12,7 +12,7 @@ function SignIn() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [resetFlow, setResetFlow] = useState({
-    step: 'signin', // signin, forgot, otp, reset
+    step: 'signin', 
     email: '',
     resetToken: ''
   });
@@ -82,7 +82,7 @@ function SignIn() {
     <div id="google_translate_element" style={{ display: 'none' }}></div>
     <div className="relative ">
       <div className="absolute top-6 right-0">
-        <LanguageToggle /> {/* language toggle */}
+        <LanguageToggle /> 
       </div>
       <form onSubmit={handleSubmit} className="space-y-6">
       <div className="text-center">

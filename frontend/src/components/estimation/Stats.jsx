@@ -18,12 +18,10 @@ function EstimationStats({ stats }) {
     return noTranslate(formatted);
   };
 
-  // Format plain numbers and wrap them in a no-translate span
   const formatNumber = (num) => {
     return noTranslate(num);
   };
 
-  // Determine if balance is negative (shortage)
   const isShortage = stats.balance < 0;
 
   // Use the aggregated data from the backend
@@ -40,7 +38,7 @@ function EstimationStats({ stats }) {
       <div className="flex justify-end mb-0">
   <StatsPrint stats={stats} />
 </div>
-      {/* Section 1: Estimated Income and Expense */}
+      {/* Estimated Income and Expense */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-xl font-semibold flex items-center">
@@ -70,7 +68,7 @@ function EstimationStats({ stats }) {
         </div>
       </div>
     
-      {/* Section 2: Amount Left / Shortage */}
+      {/* Amount Left / Shortage */}
       <div className="bg-white rounded-lg shadow p-6">
         <h2 className="text-xl font-semibold mb-2">Amount Left</h2>
         <div className="flex items-center">
@@ -83,7 +81,6 @@ function EstimationStats({ stats }) {
         </div>
       </div>
     
-      {/* Section 3: Youth and Villagers */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Youth Section */}
         <div className="bg-white rounded-lg shadow p-6">

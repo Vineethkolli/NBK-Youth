@@ -3,7 +3,6 @@ import Subscription from '../models/Notification.js';
 import User from '../models/User.js';
 import NotificationHistory from '../models/NotificationHistory.js';
 
-// Get Public VAPID Key
 export const getPublicKey = (req, res) => {
   res.json({ publicKey: process.env.PUBLIC_VAPID_KEY });
 };

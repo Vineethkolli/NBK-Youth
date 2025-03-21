@@ -127,10 +127,10 @@ function IncomeTable({
               <tr key={income._id}>
                 <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{index + 1}</td>
                 {(userRole === 'developer' || userRole === 'financier') && visibleColumns.registerId && (
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">{income.registerId}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{income.registerId}</td>
                 )}
                 {visibleColumns.incomeId && (
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">{income.incomeId}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{income.incomeId}</td>
                 )}
                 {visibleColumns.dateTime && (
                   <td className="px-6 py-4 whitespace-nowrap text-sm">

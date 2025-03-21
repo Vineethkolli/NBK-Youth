@@ -8,6 +8,7 @@ import IncomeFilters from '../components/income/IncomeFilters';
 import IncomeForm from '../components/income/IncomeForm';
 import ModificationLog from '../components/income/ModificationLog';
 import IncomePrint from '../components/income/IncomePrint';
+import IncomeExcel from '../components/income/IncomeExcel';
 import { API_URL } from '../utils/config';
 
 function Income() {
@@ -43,29 +44,29 @@ function Income() {
     fetchIncomes();
   }, [search, filters]);
 
-const fetchIncomes = async () => {
-  try {
-    const params = new URLSearchParams({
-      search,
-      ...filters
-    });
-    const { data } = await axios.get(`${API_URL}/api/incomes?${params}`);
-    
-    // Sort the data if sort filter is applied
-    if (filters.sort) {
-      data.sort((a, b) => {
-        if (filters.sort === 'desc') {
-          return b.amount - a.amount;
-        }
-        return a.amount - b.amount;
+  const fetchIncomes = async () => {
+    try {
+      const params = new URLSearchParams({
+        search,
+        ...filters
       });
+      const { data } = await axios.get(`${API_URL}/api/incomes?${params}`);
+      
+      // Sort the data if sort filter is applied
+      if (filters.sort) {
+        data.sort((a, b) => {
+          if (filters.sort === 'desc') {
+            return b.amount - a.amount;
+          }
+          return a.amount - b.amount;
+        });
+      }
+      
+      setIncomes(data);
+    } catch (error) {
+      toast.error('Failed to fetch incomes');
     }
-    
-    setIncomes(data);
-  } catch (error) {
-    toast.error('Failed to fetch incomes');
-  }
-};
+  };
 
   const handleFilterChange = (newFilters) => {
     setFilters(newFilters);
@@ -135,6 +136,10 @@ const fetchIncomes = async () => {
             </button>
           )}
           <IncomePrint incomes={incomes} visibleColumns={visibleColumns} />
+          
+          {user?.role === 'developer' && (
+  <IncomeExcel incomes={incomes} visibleColumns={visibleColumns} />
+)}
         </div>
       </div>
 

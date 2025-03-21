@@ -21,7 +21,6 @@ const IncomePrint = ({ incomes, visibleColumns, incomeFilters }) => {
     const doc = new jsPDF();
     const timestamp = new Date().toLocaleString();
     
-    // Add centered title
     const pageWidth = doc.internal.pageSize.getWidth();
     doc.setFontSize(16);
     doc.text("Estimated Income", pageWidth / 2, 22, { align: 'center' });

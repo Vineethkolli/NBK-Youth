@@ -2,14 +2,13 @@ import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 
 function EstimationForm({ type, mode, data, onSubmit, onClose }) {
-  // Define initial fields based on type with default values
   const initialState = type === 'income'
     ? {
         name: '',
         previousAmount: '',
         presentAmount: '',
-        belongsTo: 'youth',     // default value set to "youth"
-        status: 'not paid',    // default value set to "not paid"
+        belongsTo: 'youth',    
+        status: 'not paid',    
         others: ''
       }
     : {
@@ -26,7 +25,6 @@ function EstimationForm({ type, mode, data, onSubmit, onClose }) {
     if (mode === 'edit' && data) {
       setFormData(data);
     } else {
-      // Reset to default values on add mode
       setFormData(initialState);
     }
   }, [mode, data, type]);

@@ -8,7 +8,6 @@ const ExpensePrint = ({ expenses, visibleColumns }) => {
     const doc = new jsPDF();
     const timestamp = new Date().toLocaleString();
 
-    // Add centered title
     const pageWidth = doc.internal.pageSize.getWidth();
     doc.setFontSize(16);
     doc.text("Estimated Expense", pageWidth / 2, 22, { align: 'center' });
@@ -32,7 +31,7 @@ const ExpensePrint = ({ expenses, visibleColumns }) => {
       return row;
     });
 
-    // Generate PDF table with autoTable, adding a footer with timestamp and page number
+    // PDF table with autoTable, adding a footer with timestamp and page number
     doc.autoTable({
       startY: 30,
       head: [tableColumns],

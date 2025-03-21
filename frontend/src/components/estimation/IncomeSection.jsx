@@ -5,7 +5,7 @@ import axios from 'axios';
 import { API_URL } from '../../utils/config';
 import EstimatedIncomeTable from './IncomeTable';
 import EstimationForm from './Form';
-import IncomePrint from './IncomePrint'; // Import IncomePrint component
+import IncomePrint from './IncomePrint';
 
 function IncomeSection({ refreshStats }) {
   const [incomes, setIncomes] = useState([]);
@@ -24,14 +24,13 @@ function IncomeSection({ refreshStats }) {
     status: false,
     others: false
   });
-  // Form modal state
+
   const [showForm, setShowForm] = useState(false);
-  const [formMode, setFormMode] = useState('add'); // 'add' or 'edit'
+  const [formMode, setFormMode] = useState('add'); 
   const [currentRecord, setCurrentRecord] = useState(null);
 
   useEffect(() => {
     fetchIncomes();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [incomeFilters]);
 
   const fetchIncomes = async () => {
@@ -74,7 +73,6 @@ function IncomeSection({ refreshStats }) {
     try {
       if (formMode === 'add') {
         const { data } = await axios.post(`${API_URL}/api/estimation/income`, formData);
-        // Prepend the new income so it appears on top
         setIncomes([data, ...incomes]);
       } else if (formMode === 'edit') {
         const { data } = await axios.put(`${API_URL}/api/estimation/income/${currentRecord._id}`, formData);
@@ -94,7 +92,6 @@ function IncomeSection({ refreshStats }) {
 
   return (
     <div className="space-y-4">
-      {/* Top Row: Add New & Print */}
       <div className="flex justify-end items-center space-x-4 mb-4">
   <button onClick={handleAdd} className="btn-secondary flex items-center space-x-2">
     <Plus className="h-4 w-4" />

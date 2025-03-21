@@ -3,7 +3,6 @@ import User from '../models/User.js';
 import { PERMISSIONS } from '../config/roles.js';
 
 // Authenticate the user using JWT
-
 export const auth = async (req, res, next) => {
   try {
     const token = req.headers.authorization?.split(' ')[1];
@@ -24,7 +23,6 @@ export const auth = async (req, res, next) => {
 };
 
 // Check if the user's role is allowed.
-
 export const checkRole = (allowedRoles) => (req, res, next) => {
   if (!allowedRoles.includes(req.user.role)) {
     return res.status(403).json({ message: 'Access denied' });
@@ -33,7 +31,6 @@ export const checkRole = (allowedRoles) => (req, res, next) => {
 };
 
 // Check if the user has the required permission.
- 
 export const checkPermission = (permission) => (req, res, next) => {
   if (!PERMISSIONS[permission]?.includes(req.user.role)) {
     return res.status(403).json({ message: 'Access denied' });

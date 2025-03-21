@@ -8,6 +8,7 @@ import ExpenseFilters from '../components/expense/ExpenseFilters';
 import ExpenseForm from '../components/expense/ExpenseForm';
 import ModificationLog from '../components/expense/ModificationLog';
 import ExpensePrint from '../components/expense/ExpensePrint';
+import ExpenseExcel from '../components/expense/ExpenseExcel';
 import { API_URL } from '../utils/config';
 
 function Expense() {
@@ -140,6 +141,9 @@ const fetchExpenses = async () => {
             </button>
           )}
           <ExpensePrint expenses={expenses} visibleColumns={visibleColumns} />
+          {user?.role === 'developer' && (
+  <ExpenseExcel expenses={expenses} visibleColumns={visibleColumns} />
+)}
         </div>
       </div>
 

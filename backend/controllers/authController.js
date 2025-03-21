@@ -30,7 +30,7 @@ export const signUp = async (req, res) => {
     const token = jwt.sign(
       { id: user._id, role: user.role },
       process.env.JWT_SECRET || 'your-secret-key',
-      { expiresIn: '60d' }
+      { expiresIn: '365d' }
     );
     return res.status(201).json({
       token,
@@ -63,7 +63,7 @@ export const signIn = async (req, res) => {
     const token = jwt.sign(
       { id: user._id, role: user.role },
       process.env.JWT_SECRET || 'your-secret-key',
-      { expiresIn: '60d' }
+      { expiresIn: '365d' }
     );
     return res.json({
       token,

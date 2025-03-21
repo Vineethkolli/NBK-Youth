@@ -42,7 +42,6 @@ const StatsPrint = ({ stats }) => {
       }
     };
 
-    // Header: Center aligned title
     doc.setFontSize(20);
     doc.setTextColor(0, 0, 0);
     const title = 'Estimation Stats';
@@ -52,7 +51,7 @@ const StatsPrint = ({ stats }) => {
 
     yPos += 20;
 
-    // Section 1: Estimation Overview
+    // Estimation Overview
     doc.setFontSize(14);
     doc.setTextColor(0, 0, 0);
     doc.text('Overview', 15, yPos);
@@ -72,7 +71,6 @@ const StatsPrint = ({ stats }) => {
         formatAmount((stats.villagersPaid || 0) + (stats.villagersNotPaid || 0))
       ],
       ['Estimated Expense', `${stats.expenseCount || 0} `, formatAmount(stats.totalEstimatedExpense)],
-      // For "Amount Left", we want to override the text rendering based on its value.
       ['Amount Left', '-', displayAmountWithShortage(stats.balance)]
     ];
 
@@ -82,9 +80,8 @@ const StatsPrint = ({ stats }) => {
       body: estimationData.slice(1),
       ...commonTableOptions,
       didParseCell: function(data) {
-        // In the "Amount Left" row (body row index 4) and in the Amount column (index 2)
         if (data.section === 'body' && data.row.index === 4 && data.column.index === 2) {
-          data.cell.text = []; // Clear automatic text rendering
+          data.cell.text = []; 
         }
       },
       didDrawCell: function(data) {
@@ -92,21 +89,21 @@ const StatsPrint = ({ stats }) => {
           const cellCenterX = data.cell.x + data.cell.width / 2;
           const cellCenterY = data.cell.y + data.cell.height / 2 + 2;
           if (stats.balance < 0) {
-            doc.setTextColor(255, 0, 0); // Red
+            doc.setTextColor(255, 0, 0); 
           } else if (stats.balance > 0) {
-            doc.setTextColor(0, 128, 0); // Green
+            doc.setTextColor(0, 128, 0); 
           } else {
-            doc.setTextColor(0, 0, 0);   // Normal (black)
+            doc.setTextColor(0, 0, 0);  
           }
           doc.text(displayAmountWithShortage(stats.balance), cellCenterX, cellCenterY, { align: 'center' });
-          doc.setTextColor(0, 0, 0); // Reset color for later text
+          doc.setTextColor(0, 0, 0);
         }
       }
     });
 
     yPos = doc.lastAutoTable.finalY + 20;
 
-    // Section 2: Youth Payment Statistics
+    // Youth Payment Statistics
     doc.setFontSize(14);
     doc.text('Youth Payment Stats', 15, yPos);
     yPos += 4;
@@ -126,7 +123,7 @@ const StatsPrint = ({ stats }) => {
 
     yPos = doc.lastAutoTable.finalY + 20;
 
-    // Section 3: Villagers Payment Statistics
+    // Villagers Payment Statistics
     doc.setFontSize(14);
     doc.text('Villagers Payment Stats', 15, yPos);
     yPos += 4;
@@ -146,7 +143,7 @@ const StatsPrint = ({ stats }) => {
 
     yPos = doc.lastAutoTable.finalY + 20;
 
-    // Section 4: Overall Payment Status
+    // Overall Payment Status
     doc.setFontSize(14);
     doc.text('Overall Payment Stats', 15, yPos);
     yPos += 4;
@@ -178,7 +175,7 @@ const StatsPrint = ({ stats }) => {
       );
     }
 
-    doc.save('Estimation_Stats_Report.pdf');
+    doc.save('Estimation_Stats.pdf');
   };
 
   return (
