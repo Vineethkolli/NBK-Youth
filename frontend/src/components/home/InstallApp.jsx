@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Download, X } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
@@ -14,6 +14,7 @@ function InstallApp() {
   const [isInstalled, setIsInstalled] = useState(false);
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
   const [showIOSPopup, setShowIOSPopup] = useState(false);
+  const promptRef = useRef(null);
 
   useEffect(() => {
     const detectPlatform = () => {
@@ -54,9 +55,19 @@ function InstallApp() {
     };
     window.addEventListener('appinstalled', onAppInstalled);
 
+    // Global click listener to close the ribbon when clicking outside the prompt
+    const handleClickOutside = (event) => {
+      if (promptRef.current && !promptRef.current.contains(event.target)) {
+        setShowInstallPrompt(false);
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+
     return () => {
       window.removeEventListener('appinstalled', onAppInstalled);
       if (timer) clearTimeout(timer);
+      document.removeEventListener('click', handleClickOutside);
     };
   }, [isInstalled]);
 
@@ -90,7 +101,12 @@ function InstallApp() {
 
   return (
     <>
-      <div className="fixed top-4 left-4 right-4 bg-green-50 bg-opacity-80 text-green-800 p-4 flex items-center justify-between shadow-lg rounded-lg z-50">
+      <div
+        ref={promptRef}
+        className="fixed top-4 left-4 right-4 bg-green-50 bg-opacity-80 text-green-800 p-4 flex items-center justify-between shadow-lg rounded-lg z-50"
+        // Clicks inside the container don’t trigger the document listener
+        onClick={(e) => e.stopPropagation()}
+      >
         <div>
           <h3 className="text-lg font-medium">Download Our App</h3>
         </div>
@@ -114,8 +130,8 @@ function InstallApp() {
           onClick={() => setShowIOSPopup(false)}
         >
           <div
-            className="bg-white p-6 rounded-lg shadow-lg max-w-sm mx-4 hover:scale-100"
-            onClick={(e) => e.stopPropagation()} 
+            className="bg-white p-6 rounded-lg shadow-lg max-w-sm mx-4"
+            onClick={(e) => e.stopPropagation()}
           >
             <h3 className="text-lg font-semibold mb-4 text-center text-gray-900">
               Install App

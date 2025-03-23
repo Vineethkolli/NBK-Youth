@@ -5,7 +5,7 @@ import { sendOTPEmail } from '../utils/emailService.js';
 
 export const signUp = async (req, res) => {
   try {
-    const { name, email, phoneNumber, password } = req.body;
+    const { name, email, phoneNumber, password, language } = req.body;
     if (!name || !phoneNumber || !password) {
       return res.status(400).json({ message: 'Required fields missing' });
     }
@@ -25,7 +25,8 @@ export const signUp = async (req, res) => {
       name,
       email: email || undefined,
       phoneNumber,
-      password
+      password,
+      language: language || 'en'
     });
     const token = jwt.sign(
       { id: user._id, role: user.role },
@@ -39,7 +40,8 @@ export const signUp = async (req, res) => {
         name: user.name,
         email: user.email,
         phoneNumber: user.phoneNumber,
-        role: user.role
+        role: user.role,
+        language: user.language
       }
     });
   } catch (error) {
@@ -50,7 +52,7 @@ export const signUp = async (req, res) => {
 
 export const signIn = async (req, res) => {
   try {
-    const { identifier, password } = req.body;
+    const { identifier, password, language } = req.body;
     const user = await User.findOne({
       $or: [
         { email: identifier },
@@ -59,6 +61,11 @@ export const signIn = async (req, res) => {
     });
     if (!user || !(await user.comparePassword(password))) {
       return res.status(401).json({ message: 'Invalid credentials' });
+    }
+    // Update language preference if provided and it differs from stored language
+    if (language && language !== user.language) {
+      user.language = language;
+      await user.save();
     }
     const token = jwt.sign(
       { id: user._id, role: user.role },
@@ -73,7 +80,8 @@ export const signIn = async (req, res) => {
         name: user.name,
         email: user.email,
         phoneNumber: user.phoneNumber,
-        role: user.role
+        role: user.role,
+        language: user.language
       }
     });
   } catch (error) {
@@ -88,11 +96,8 @@ export const forgotPassword = async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-    // Generate 6-digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    // Save OTP to database
     await OTP.create({ email, otp });
-    // Send OTP via email
     const emailSent = await sendOTPEmail(email, otp);
     if (!emailSent) {
       return res.status(500).json({ message: 'Failed to send OTP email' });
@@ -111,7 +116,6 @@ export const verifyOtp = async (req, res) => {
       return res.status(400).json({ message: 'Invalid OTP' });
     }
     await OTP.deleteOne({ _id: otpRecord._id });
-    // Generate temporary token for password reset
     const resetToken = jwt.sign(
       { email },
       process.env.JWT_SECRET,

@@ -22,7 +22,7 @@ function Settings() {
           <div className="flex space-x-4">
             <button 
               onClick={() => changeLanguage('en')}
-              className={`px-4 py-2 rounded-md ${
+              className={`px-4 py-2 rounded-md notranslate ${
                 language === 'en' 
                   ? 'bg-blue-600 text-white' 
                   : 'bg-gray-200 text-gray-700'
