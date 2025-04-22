@@ -1,15 +1,18 @@
-import { useState, useEffect, useRef } from 'react';
-import { Play, Pause, SkipBack, SkipForward } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Play, Pause, SkipBack, SkipForward, X } from 'lucide-react';
+import { useMusicPlayer } from '../../context/MusicContext';
 
-function MusicPlayer({
-  song,
-  isPlaying,
-  onPlayPause,
-  onNext,
-  onPrevious,
-  hasNext,
-  hasPrevious,
-}) {
+function MusicPlayer() {
+  const {
+    currentSong,
+    isPlaying,
+    songQueue,
+    handleNext,
+    handlePrevious,
+    togglePlay,
+    closeMusicPlayer
+  } = useMusicPlayer();
+
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const audioRef = useRef(new Audio());
@@ -17,110 +20,100 @@ function MusicPlayer({
   useEffect(() => {
     const audio = audioRef.current;
 
-    // Update the audio source if the song changes
-    if (audio.src !== song.url) {
-      audio.src = song.url;
-      audio.load();
-    }
-
-    if (isPlaying) {
-      audio.play();
-    } else {
-      audio.pause();
-    }
-
-    const handleTimeUpdate = () => {
-      setProgress(audio.currentTime);
-    };
-
-    const handleLoadedMetadata = () => {
-      setDuration(audio.duration);
-    };
-
-    const handleEnded = () => {
-      if (hasNext) {
-        onNext();
+    if (currentSong) {
+      if (audio.src !== currentSong.url) {
+        audio.src = currentSong.url;
+        audio.load();
       }
-    };
+      isPlaying ? audio.play() : audio.pause();
+    }
 
-    audio.addEventListener("timeupdate", handleTimeUpdate);
-    audio.addEventListener("loadedmetadata", handleLoadedMetadata);
-    audio.addEventListener("ended", handleEnded);
+    const onTimeUpdate = () => setProgress(audio.currentTime);
+    const onLoadedMeta = () => setDuration(audio.duration);
+    const onEnded      = () => handleNext();
+
+    audio.addEventListener('timeupdate',    onTimeUpdate);
+    audio.addEventListener('loadedmetadata', onLoadedMeta);
+    audio.addEventListener('ended',          onEnded);
 
     return () => {
-      audio.removeEventListener("timeupdate", handleTimeUpdate);
-      audio.removeEventListener("loadedmetadata", handleLoadedMetadata);
-      audio.removeEventListener("ended", handleEnded);
+      audio.removeEventListener('timeupdate',    onTimeUpdate);
+      audio.removeEventListener('loadedmetadata', onLoadedMeta);
+      audio.removeEventListener('ended',          onEnded);
     };
-  }, [song, isPlaying, hasNext, onNext]);
+  }, [currentSong, isPlaying, handleNext]);
 
-  const handleSeek = (e) => {
-    const newTime = e.target.value;
-    audioRef.current.currentTime = newTime;
-    setProgress(newTime);
+  const handleSeek = e => {
+    const t = +e.target.value;
+    audioRef.current.currentTime = t;
+    setProgress(t);
   };
 
-  const formatTime = (time) => {
-    const minutes = Math.floor(time / 60);
-    const seconds = Math.floor(time % 60);
-    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+  const formatTime = t => {
+    const m = Math.floor(t / 60);
+    const s = Math.floor(t % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
   };
+
+  if (!currentSong) return null;
 
   return (
-    <div className="fixed bottom-16 left-0 right-0 md:left-64 md:right-0 bg-white border-t shadow-lg p-4 z-50">
-      <div >
-        {/* Song Details */}
-        <div className="flex items-center space-x-4 mb-4 sm:mb-0">
-          <div>
-            <h3 className="font-medium">{song.name}</h3>
-          </div>
+    <div className="fixed top-20 inset-x-0 bg-white border-t shadow-lg z-0">
+      <div className="max-w-screen-xl mx-auto grid grid-cols-3 items-center p-2 sm:grid-cols-2 sm:gap-2">
+
+        <div className="col-span-1 sm:col-span-2">
+          <h3 className="font-medium truncate">{currentSong.name}</h3>
         </div>
 
-        {/* Controls */}
-        <div className="flex-1 max-w-2xl mx-8">
-          <div className="flex items-center justify-center space-x-6">
+        <div className="col-span-2 sm:col-span-2 flex flex-col items-center space-y-2">
+          <div className="flex items-center space-x-4">
             <button
-              onClick={onPrevious}
-              disabled={!hasPrevious}
+              onClick={handlePrevious}
+              disabled={songQueue.length <= 1}
               className="p-2 hover:bg-gray-100 rounded-full disabled:opacity-50"
             >
-              <SkipBack className="h-6 w-6" />
+              <SkipBack className="h-5 w-5" />
             </button>
+
             <button
-              onClick={onPlayPause}
+              onClick={togglePlay}
               className="p-3 bg-indigo-600 text-white rounded-full hover:bg-indigo-700"
             >
-              {isPlaying ? (
-                <Pause className="h-6 w-6" />
-              ) : (
-                <Play className="h-6 w-6" />
-              )}
+              {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
             </button>
+
             <button
-              onClick={onNext}
-              disabled={!hasNext}
+              onClick={handleNext}
+              disabled={songQueue.length <= 1}
               className="p-2 hover:bg-gray-100 rounded-full disabled:opacity-50"
             >
-              <SkipForward className="h-6 w-6" />
+              <SkipForward className="h-5 w-5" />
             </button>
           </div>
-          {/* Progress Bar */}
-          <div className="flex items-center space-x-2 mt-2">
-            <span className="text-sm text-gray-500">{formatTime(progress)}</span>
+
+          <div className="flex items-center space-x-2 w-full">
+            <span className="text-xs text-gray-500 w-10">{formatTime(progress)}</span>
             <input
               type="range"
               min="0"
               max={duration || 0}
               value={progress}
               onChange={handleSeek}
-              className="flex-1"
+              className="flex-1 h-1 bg-gray-200 rounded-lg cursor-pointer"
             />
-            <span className="text-sm text-gray-500">{formatTime(duration)}</span>
+            <span className="text-xs text-gray-500 w-10">{formatTime(duration)}</span>
           </div>
         </div>
 
-        {/* Spacer for layout symmetry */}
-        <div className="w-40" />
+        <button
+          onClick={() => {
+            audioRef.current.pause();      
+            closeMusicPlayer();            
+          }}
+          className="absolute top-1 right-3 p-1 hover:bg-gray-100 rounded"
+        >
+          <X className="h-4 w-4 text-gray-600" />
+        </button>
       </div>
     </div>
   );

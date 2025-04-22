@@ -2,21 +2,18 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import CollectionManager from '../components/vibe/CollectionManager';
 import CollectionItem from '../components/vibe/CollectionItem';
-import MusicPlayer from '../components/vibe/MusicPlayer';
 import SearchBar from '../components/vibe/SearchBar';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { API_URL } from '../utils/config';
-import { createSongQueue, getNextSongIndex, getPreviousSongIndex, findSongIndex } from '../utils/songQueue';
+import { createSongQueue } from '../utils/songQueue';
 import { filterCollections } from '../utils/search';
+import { useMusicPlayer } from '../context/MusicContext';
 
 function Vibe() {
   const { user } = useAuth();
+  const { currentSong, handleSongSelect } = useMusicPlayer();
   const [collections, setCollections] = useState([]);
-  const [currentSong, setCurrentSong] = useState(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [songQueue, setSongQueue] = useState([]);
-  const [currentSongIndex, setCurrentSongIndex] = useState(0);
   const [isEditMode, setIsEditMode] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -24,16 +21,9 @@ function Vibe() {
     fetchCollections();
   }, []);
 
-  useEffect(() => {
-    // Create song queue whenever collections change
-    const queue = createSongQueue(collections);
-    setSongQueue(queue);
-  }, [collections]);
-
   const fetchCollections = async () => {
     try {
       const { data } = await axios.get(`${API_URL}/api/collections`);
-      // Sort collections alphabetically
       data.sort((a, b) => a.name.localeCompare(b.name));
       setCollections(data);
     } catch (error) {
@@ -41,23 +31,9 @@ function Vibe() {
     }
   };
 
-  const handleSongSelect = (song) => {
-    const index = findSongIndex(song, songQueue);
-    setCurrentSongIndex(index);
-    setCurrentSong(song);
-    setIsPlaying(true);
-  };
-
-  const handleNext = () => {
-    const nextIndex = getNextSongIndex(currentSongIndex, songQueue);
-    setCurrentSongIndex(nextIndex);
-    setCurrentSong(songQueue[nextIndex]);
-  };
-
-  const handlePrevious = () => {
-    const prevIndex = getPreviousSongIndex(currentSongIndex, songQueue);
-    setCurrentSongIndex(prevIndex);
-    setCurrentSong(songQueue[prevIndex]);
+  const handleSongPlay = (song) => {
+    const queue = createSongQueue(collections);
+    handleSongSelect(song, queue);
   };
 
   // Collection CRUD operations
@@ -186,7 +162,7 @@ function Vibe() {
   const filteredCollections = filterCollections(collections, searchQuery);
 
   return (
-    <div className="max-w-7xl mx-auto sm:px-6 lg:px-0 py-0">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6">
       <div className="space-y-8">
         <div className="flex flex-col space-y-4 md:flex-row md:space-y-0 md:space-x-4 md:items-center">
           <div className="flex-1">
@@ -207,7 +183,7 @@ function Vibe() {
               collection={collection}
               isEditMode={isEditMode}
               currentSong={currentSong}
-              onSongPlay={handleSongSelect}
+              onSongPlay={handleSongPlay}
               onEdit={handleCollectionEdit}
               onDelete={handleCollectionDelete}
               onSubCollectionEdit={handleSubCollectionEdit}
@@ -218,18 +194,6 @@ function Vibe() {
           ))}
         </div>
       </div>
-
-      {currentSong && (
-        <MusicPlayer
-          song={currentSong}
-          isPlaying={isPlaying}
-          onPlayPause={() => setIsPlaying(!isPlaying)}
-          onNext={handleNext}
-          onPrevious={handlePrevious}
-          hasNext={true}
-          hasPrevious={true}
-        />
-      )}
     </div>
   );
 }
