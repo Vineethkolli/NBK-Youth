@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, User, Users, Bell, ShieldCheck, Settings, IndianRupee, DollarSign, Trash2, CheckSquare, BarChart2, Terminal, MusicIcon, CameraIcon, TrophyIcon, X, ChevronLeft, Calculator, Layers } from 'lucide-react';
+import { Home, User, Users, Bell, ShieldCheck, Settings, IndianRupee, DollarSign, Trash2, CheckSquare, BarChart2, Terminal, MusicIcon, CameraIcon, TrophyIcon, X, ChevronLeft, Calculator, Layers, LayoutDashboard } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 function Sidebar({ isOpen, onNavigate }) {
@@ -19,14 +19,17 @@ function Sidebar({ isOpen, onNavigate }) {
     { to: '/pay-online', icon: ShieldCheck, label: 'Pay Online' },
     { to: '/notifications', icon: Bell, label: 'Notifications' },
     { to: '/settings', icon: Settings, label: 'Settings' },
-    ...(user?.role === 'developer' ? [
+    ...(user?.role === 'developer' || user?.role === 'financier'|| user?.role === 'admin' ? [
       { to: '/users', icon: Users, label: 'Users' }
     ] : []),
     ...(user?.role === 'developer' || user?.role === 'financier' ? [
       { to: '/verification', icon: CheckSquare, label: 'Verification' }
     ] : []),
-    ...(user?.role === 'developer' ? [
+    ...(user?.role === 'developer' || user?.role === 'financier' ? [
       { to: '/recycle-bin', icon: Trash2, label: 'Recycle Bin' }
+    ] : []),
+    ...((['admin', 'developer', 'financier'].includes(user?.role)) ? [
+      { to: '/admin-panel', icon: LayoutDashboard, label: 'Admin Panel' }
     ] : []),
     ...(user?.role === 'developer' ? [
       { to: '/developer-options', icon: Terminal, label: 'Developer Options' }

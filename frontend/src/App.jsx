@@ -16,6 +16,7 @@ import Expense from './pages/Expense';
 import Estimation from './pages/Estimation';
 import Verification from './pages/Verification';
 import RecycleBin from './pages/RecycleBin';
+import AdminPanel from './pages/AdminPanel';
 import DeveloperOptions from './pages/DeveloperOptions';
 import Vibe from './pages/Vibe';
 import Moments from './pages/Moments';
@@ -29,7 +30,8 @@ import { LanguageProvider } from './context/LanguageContext';
 import { MaintenanceModeProvider, useMaintenanceMode } from './context/MaintenanceModeContext';
 import { MusicProvider } from './context/MusicContext';
 import MusicPlayer from './components/vibe/MusicPlayer';
-import TechStack from './pages/TechStack';
+import TechStack from './pages/TechStack'
+import PopupBanner from './components/developer/PopupBanner';
 
 function AppContent() {
   const { user } = useAuth();
@@ -41,6 +43,7 @@ function AppContent() {
   return (
     <>
       <Toaster position="top-right" />
+      <PopupBanner />
       <Routes>
         <Route element={<AuthLayout />}>
           <Route path="/signin" element={<SignIn />} />
@@ -58,6 +61,7 @@ function AppContent() {
           <Route path="/estimation" element={<Estimation />} />
           <Route path="/verification" element={<Verification />} />
           <Route path="/recycle-bin" element={<RecycleBin />} />
+          <Route path="/admin-panel" element={<AdminPanel />} />
           <Route path="/developer-options" element={<DeveloperOptions />} />
           <Route path="/vibe" element={<Vibe />} />
           <Route path="/moments" element={<Moments />} />

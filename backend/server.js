@@ -23,6 +23,7 @@ import notificationRoutes from './routes/notifications.js';
 import { createDefaultDeveloper } from './utils/setupDefaults.js';
 import maintenanceRoutes from './routes/maintenance.js';
 import estimationRoutes from './routes/estimation.js';
+import bannerRoutes from './routes/banners.js';
 
 dotenv.config();
 
@@ -71,6 +72,7 @@ app.use('/api/games', gameRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/maintenance', maintenanceRoutes);
 app.use('/api/estimation', estimationRoutes);
+app.use('/api/banners', bannerRoutes);
 
 // Health check endpoint
 app.get('/', (req, res) => {

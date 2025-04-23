@@ -43,7 +43,7 @@ function ClearData() {
         ].map(({ name, type, description }) => (
           <div key={type} className="flex items-center justify-between">
             <div>
-              <h3 className="font-medium">Clear {name} Data</h3>
+              <h3 className="font-medium">{name} Data</h3>
               {description && <p className="text-sm text-gray-500">{description}</p>}
             </div>
             <button

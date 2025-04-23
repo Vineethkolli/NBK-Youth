@@ -7,8 +7,8 @@ const router = express.Router();
 // Update profile image
 router.post('/profile/image', auth, updateProfileImage);
 
-// Get all users (developer only) with notification status
-router.get('/', auth, checkRole(['developer']), getAllUsers);
+// Get all users 
+router.get('/', auth, checkRole(['developer', 'financier', 'admin']), getAllUsers);
 
 // Update user profile
 router.patch('/profile', auth, updateProfile);

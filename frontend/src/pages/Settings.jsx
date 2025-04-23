@@ -60,7 +60,11 @@ function Settings() {
           <InstallApp />
         </div>
       </div>
-      <div className="text-center text-gray-500 text-sm mt-4">WEB APP Version 1.8</div>
+
+      <div className="text-center text-gray-500 text-sm mt-4">WEB APP Version 2.0 </div>
+      <div className="text-center text-gray-500 text-sm mt-4">
+        For any queries, write an email to <a href="mailto:gangavaramnbkyouth@gmail.com" className=" hover:text-blue-600">gangavaramnbkyouth@gmail.com</a>
+      </div>
       {/* Footer */}
       <Footer />
     </div>

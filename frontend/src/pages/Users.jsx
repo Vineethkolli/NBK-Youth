@@ -54,7 +54,7 @@ function Users() {
     }
   };
 
-  if (currentUser.role !== 'developer') {
+  if (currentUser.role == 'user') {
     return <div>Access denied</div>;
   }
 
