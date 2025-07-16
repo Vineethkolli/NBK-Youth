@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import AuthLayout from './layouts/AuthLayout';
 import DashboardLayout from './layouts/DashboardLayout';
@@ -32,6 +32,16 @@ import { MusicProvider } from './context/MusicContext';
 import MusicPlayer from './components/vibe/MusicPlayer';
 import TechStack from './pages/TechStack'
 import PopupBanner from './components/developer/PopupBanner';
+import { initializeAnalytics, trackPageView } from './utils/analytics';
+
+function RouteTracker() {
+  const location = useLocation();
+
+  useEffect(() => {
+    trackPageView(location.pathname + location.search);
+  }, [location]);
+  return null; 
+}
 
 function AppContent() {
   const { user } = useAuth();
@@ -42,6 +52,7 @@ function AppContent() {
 
   return (
     <>
+      <RouteTracker />
       <Toaster position="top-right" />
       <PopupBanner />
       <Routes>
@@ -77,6 +88,7 @@ function AppContent() {
 
 function App() {
   useEffect(() => {
+    initializeAnalytics();
     if (navigator.serviceWorker) {
       navigator.serviceWorker.addEventListener('controllerchange', () => {
         // reload the page to apply the new version
