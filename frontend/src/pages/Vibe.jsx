@@ -162,8 +162,7 @@ function Vibe() {
   const filteredCollections = filterCollections(collections, searchQuery);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6">
-      <div className="space-y-8">
+      <div className="space-y-6">
         <div className="flex flex-col space-y-4 md:flex-row md:space-y-0 md:space-x-4 md:items-center">
           <div className="flex-1">
             <SearchBar value={searchQuery} onChange={setSearchQuery} />
@@ -194,7 +193,6 @@ function Vibe() {
           ))}
         </div>
       </div>
-    </div>
   );
 }
 
