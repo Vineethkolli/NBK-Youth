@@ -35,7 +35,7 @@ function Home() {
           <div className="flex justify-end">
             <button
               onClick={() => setIsEditing(!isEditing)}
-              className="inline-flex items-center px-4 py-2  rounded-md"
+              className="inline-flex items-center px-2 rounded-md"
             >
               <Edit2 className="h-4 w-4 mr-2" />
               {isEditing ? 'Done' : 'Edit'}
