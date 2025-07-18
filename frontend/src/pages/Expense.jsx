@@ -131,6 +131,8 @@ const fetchExpenses = async () => {
               Add New
             </button>
           )}
+          
+          <ExpensePrint expenses={expenses} visibleColumns={visibleColumns} />
           {(user?.role === 'developer' || user?.role === 'financier') && (
             <button
               onClick={() => setShowModificationLog(!showModificationLog)}
@@ -140,7 +142,6 @@ const fetchExpenses = async () => {
               Modification Log
             </button>
           )}
-          <ExpensePrint expenses={expenses} visibleColumns={visibleColumns} />
           {user?.role === 'developer' && (
   <ExpenseExcel expenses={expenses} visibleColumns={visibleColumns} />
 )}

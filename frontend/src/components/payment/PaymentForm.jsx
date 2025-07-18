@@ -226,7 +226,7 @@ function PaymentForm({ onSubmit }) {
 
           <div className="text-center space-y-4">
             <p className="font-medium">Amount: ₹{amount}</p>
-            <p className="text-sm text-gray-600">Pay to: {paymentDetails.accountHolder}</p>
+            <p className="text-sm text-gray-600">You're Paying to: {paymentDetails.accountHolder}</p>
           </div>
 
           {selectedOption === 'qr' && (

@@ -165,7 +165,7 @@ function LetsPlay() {
       {!selectedGame && (
         <div>
           <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-semibold">Let's Play</h1>
+            <h1 className="text-2xl font-semibold">Activities</h1>
             {isPrivilegedUser && (
               <div className="space-x-2">
                 <button

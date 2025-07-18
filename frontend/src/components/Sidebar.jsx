@@ -10,7 +10,7 @@ function Sidebar({ isOpen, onNavigate }) {
     { to: '/', icon: Home, label: 'Home' },
     { to: '/moments', icon: CameraIcon, label: 'Moments' },
     { to: '/vibe', icon: MusicIcon, label: 'Vibe' },
-    { to: '/lets-play', icon: TrophyIcon, label: "Let's Play" },
+    { to: '/lets-play', icon: TrophyIcon, label: "Activities" },
     { to: '/stats', icon: BarChart2, label: 'Stats' },
     { to: '/income', icon: IndianRupee, label: 'Income' },
     { to: '/expense', icon: DollarSign, label: 'Expense' },

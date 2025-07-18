@@ -1,4 +1,4 @@
-import { Menu, User, Flame } from 'lucide-react'; 
+import { Menu, User } from 'lucide-react'; 
 import { useNavigate } from 'react-router-dom';
 
 function Header({ toggleSidebar }) {
@@ -16,7 +16,6 @@ function Header({ toggleSidebar }) {
         </button>
         <div className="flex items-center space-x-2">
           <h1 className="text-2xl font-bold text-yellow-700">NBK Youth</h1>
-          <Flame className="h-6 w-6 text-yellow-700" /> 
         </div>
         <button
           onClick={() => navigate('/profile')}
