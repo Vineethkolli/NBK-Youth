@@ -4,10 +4,10 @@ import { Search, Filter, Calendar, Download, Trash2, BarChart3, Clock } from 'lu
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { API_URL } from '../utils/config';
-import LogTable from '../components/logs/LogTable';
-import LogFilters from '../components/logs/LogFilters';
-import LogStats from '../components/logs/LogStats';
-import LogPrint from '../components/logs/LogPrint'; 
+import LogTable from '../components/activityLogs/LogTable';
+import LogFilters from '../components/activityLogs/LogFilters';
+import LogStats from '../components/activityLogs/LogStats';
+import LogPrint from '../components/activityLogs/LogPrint'; 
 
 function ActivityLogs() {
   const { user } = useAuth();
