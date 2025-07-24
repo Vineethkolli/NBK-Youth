@@ -7,9 +7,11 @@ import IncomeTable from '../components/income/IncomeTable';
 import IncomeFilters from '../components/income/IncomeFilters';
 import IncomeForm from '../components/income/IncomeForm';
 import ModificationLog from '../components/income/ModificationLog';
-import IncomePrint from '../components/income/IncomePrint';
+import EnglishPrint from '../components/income/EnglishPrint';
+import TeluguPrint from '../components/income/TeluguPrint';
 import IncomeExcel from '../components/income/IncomeExcel';
 import { API_URL } from '../utils/config';
+import { useLanguage } from '../context/LanguageContext';
 
 function Income() {
   const { user } = useAuth();
@@ -39,6 +41,8 @@ function Income() {
   const [showModificationLog, setShowModificationLog] = useState(false);
   const [hiddenProfiles, setHiddenProfiles] = useState(new Set());
   const [editingIncome, setEditingIncome] = useState(null);
+  const { language } = useLanguage();
+  const PrintComponent = language === 'te' ? TeluguPrint : EnglishPrint;
 
   useEffect(() => {
     fetchIncomes();
@@ -135,10 +139,10 @@ function Income() {
               Modification Log
             </button>
           )}
-          <IncomePrint incomes={incomes} visibleColumns={visibleColumns} />
+          <PrintComponent incomes={incomes} visibleColumns={visibleColumns} />
           
           {user?.role === 'developer' && (
-  <IncomeExcel incomes={incomes} visibleColumns={visibleColumns} />
+  <IncomeExcel incomes={incomes} visibleColumns={visibleColumns} userRole={user?.role} />
 )}
         </div>
       </div>

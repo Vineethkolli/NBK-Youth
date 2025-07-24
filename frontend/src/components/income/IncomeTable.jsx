@@ -143,12 +143,12 @@ function IncomeTable({
                   </td>
                 )}
                 {canViewPhoneNumber && visibleColumns.email && (
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">
                     {isHidden ? <span className="text-gray-500">Donor</span> : income.email}
                   </td>
                 )}
                 {canViewPhoneNumber && visibleColumns.phoneNumber && (
-                  <td className="px-6 py-4 whitespace-nowrap text-sm flex items-center space-x-2">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm flex items-center space-x-2 notranslate">
                     {isHidden ? (
                       <span className="text-gray-500">Donor</span>
                     ) : (

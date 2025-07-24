@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
 import { Printer } from 'lucide-react';
 
-function IncomePrint({ incomes, visibleColumns, userRole }) {
+function IncomePrint({ incomes, visibleColumns }) {
   const printRef = useRef();
 
   const formatDate = (dateString) => {
@@ -11,10 +11,10 @@ function IncomePrint({ incomes, visibleColumns, userRole }) {
   const handlePrint = () => {
     const content = printRef.current.innerHTML;
     const printWindow = window.open('', '', 'height=700,width=1000');
-    printWindow.document.write('<html><head><title>Income Report</title>');
+    printWindow.document.write('<html><head>');
     printWindow.document.write('<style>table { width: 100%; border-collapse: collapse; } th, td { border: 1px solid #ccc; padding: 8px; text-align: left; font-size: 12px; } th { background: #f4f4f4; }</style>');
     printWindow.document.write('</head><body>');
-    printWindow.document.write('<h2>Income Report</h2>');
+    printWindow.document.write('<h2><span translate="no">ఆదాయ నిర్వహణ</span></h2>');
     printWindow.document.write(content);
     printWindow.document.write('</body></html>');
     printWindow.document.close();
@@ -23,22 +23,22 @@ function IncomePrint({ incomes, visibleColumns, userRole }) {
 
   return (
     <>
-    <button onClick={handlePrint} className="btn-secondary">
-      <Printer className="h-4 w-4 mr-2" />
-      Print
-    </button>
+      <button onClick={handlePrint} className="btn-secondary">
+        <Printer className="h-4 w-4 mr-2" />
+        Print
+      </button>
 
       <div ref={printRef} style={{ display: 'none' }}>
         <table>
           <thead>
             <tr>
               <th>S.No</th>
-              {(userRole === 'developer' || userRole === 'financier'|| userRole === 'admin') && visibleColumns.registerId && <th>Register ID</th>}
+              { visibleColumns.registerId && <th>Register ID</th>}
               {visibleColumns.incomeId && <th>Income ID</th>}
               {visibleColumns.dateTime && <th>Date & Time</th>}
               {visibleColumns.name && <th>Name</th>}
-              {['developer', 'financier', 'admin'].includes(userRole) && visibleColumns.email && <th>Email</th>}
-              {['developer', 'financier', 'admin'].includes(userRole) && visibleColumns.phoneNumber && <th>Phone Number</th>}
+              { visibleColumns.email && <th>Email</th>}
+              {visibleColumns.phoneNumber && <th>Phone Number</th>}
               {visibleColumns.amount && <th>Amount</th>}
               {visibleColumns.status && <th>Status</th>}
               {visibleColumns.paymentMode && <th>Payment Mode</th>}
@@ -49,16 +49,14 @@ function IncomePrint({ incomes, visibleColumns, userRole }) {
           <tbody>
             {incomes.map((income, index) => (
               <tr key={income._id}>
-                <td>{index + 1}</td>
-                {(userRole === 'developer' || userRole === 'financier') && visibleColumns.registerId && (
-                  <td>{income.registerId}</td>
-                )}
-                {visibleColumns.incomeId && <td>{income.incomeId}</td>}
-                {visibleColumns.dateTime && <td>{formatDate(income.createdAt)}</td>}
+                <td><span translate="no">{index + 1}</span></td>
+                {visibleColumns.registerId && <td><span translate="no">{income.registerId}</span></td>}
+                {visibleColumns.incomeId && <td><span translate="no">{income.incomeId}</span></td>}
+                {visibleColumns.dateTime && <td><span translate="no">{formatDate(income.createdAt)}</span></td>}
                 {visibleColumns.name && <td>{income.name}</td>}
-                {['developer', 'financier', 'admin'].includes(userRole) && visibleColumns.email && <td>{income.email}</td>}
-                {['developer', 'financier', 'admin'].includes(userRole) && visibleColumns.phoneNumber && <td>{income.phoneNumber}</td>}
-                {visibleColumns.amount && <td>{income.amount}</td>}
+                {visibleColumns.email && <td><span translate="no">{income.email}</span></td>}
+                {visibleColumns.phoneNumber && <td><span translate="no">{income.phoneNumber}</span></td>}
+                {visibleColumns.amount && <td><span translate="no">{income.amount}</span></td>}
                 {visibleColumns.status && <td>{income.status}</td>}
                 {visibleColumns.paymentMode && <td>{income.paymentMode}</td>}
                 {visibleColumns.belongsTo && <td>{income.belongsTo}</td>}

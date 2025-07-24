@@ -7,9 +7,11 @@ import ExpenseTable from '../components/expense/ExpenseTable';
 import ExpenseFilters from '../components/expense/ExpenseFilters';
 import ExpenseForm from '../components/expense/ExpenseForm';
 import ModificationLog from '../components/expense/ModificationLog';
-import ExpensePrint from '../components/expense/ExpensePrint';
+import EnglishPrint from '../components/expense/EnglishPrint';
+import TeluguPrint from '../components/expense/TeluguPrint';
 import ExpenseExcel from '../components/expense/ExpenseExcel';
 import { API_URL } from '../utils/config';
+import { useLanguage } from '../context/LanguageContext';
 
 function Expense() {
   const { user } = useAuth();
@@ -41,6 +43,8 @@ function Expense() {
   const [showModificationLog, setShowModificationLog] = useState(false);
   const [hiddenProfiles, setHiddenProfiles] = useState(new Set());
   const [editingExpense, setEditingExpense] = useState(null);
+  const { language } = useLanguage();
+  const PrintComponent = language === 'te' ? TeluguPrint : EnglishPrint;
 
   useEffect(() => {
     fetchExpenses();
@@ -132,7 +136,7 @@ const fetchExpenses = async () => {
             </button>
           )}
           
-          <ExpensePrint expenses={expenses} visibleColumns={visibleColumns} />
+          <PrintComponent expenses={expenses} visibleColumns={visibleColumns} />
           {(user?.role === 'developer' || user?.role === 'financier') && (
             <button
               onClick={() => setShowModificationLog(!showModificationLog)}
