@@ -8,7 +8,6 @@ import IncomeFilters from '../components/income/IncomeFilters';
 import IncomeForm from '../components/income/IncomeForm';
 import EnglishPrint from '../components/income/IncomeEnglishPrint';
 import TeluguPrint from '../components/income/IncomeTeluguPrint';
-import IncomeExcel from '../components/income/IncomeExcel';
 import { API_URL } from '../utils/config';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -130,9 +129,6 @@ function Income() {
           )}
           <PrintComponent incomes={incomes} visibleColumns={visibleColumns} />
           
-          {user?.role === 'developer' && (
-  <IncomeExcel incomes={incomes} visibleColumns={visibleColumns} userRole={user?.role} />
-)}
         </div>
       </div>
 

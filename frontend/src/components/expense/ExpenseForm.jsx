@@ -78,8 +78,8 @@ function ExpenseForm({ expense, onClose, onSuccess }) {
   const handleBillUpload = async (index, file) => {
     if (!file) return;
 
-    if (file.size > 5 * 1024 * 1024) {
-      return toast.error('File size should be less than 5MB');
+    if (file.size > 15 * 1024 * 1024) {
+      return toast.error('File size should be less than 15MB');
     }
 
     if (!file.type.startsWith('image/')) {

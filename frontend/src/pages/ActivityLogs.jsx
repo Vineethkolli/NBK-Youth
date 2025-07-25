@@ -104,9 +104,9 @@ function ActivityLogs() {
             }`}
           >
             <BarChart3 className="h-4 w-4 mr-2 inline" />
-            Statistics
+            Stats
           </button>
-        <LogPrint logs={logs} />
+        <LogPrint filters={filters} search={search} />
         </div>
       </div>
 

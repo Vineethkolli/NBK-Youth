@@ -67,7 +67,7 @@ const PaymentController = {
         'Payment',
         newPayment.paymentId,
         { before: null, after: newPayment.toObject() },
-        `Payment ${newPayment.paymentId} created by ${name} - Amount: ₹${amount}`
+        `Payment ${newPayment.paymentId} created by ${name}`
       );
 
       return res.status(201).json(newPayment);

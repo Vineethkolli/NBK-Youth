@@ -15,8 +15,8 @@ function ProfileImageDialog({ image, onClose, onUpload }) {
     }
 
     // Validate file size (5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      alert('Please upload an image less than 5MB');
+    if (file.size > 15 * 1024 * 1024) {
+      alert('Please upload an image less than 15MB');
       return;
     }
 

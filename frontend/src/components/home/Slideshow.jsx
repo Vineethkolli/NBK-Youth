@@ -57,8 +57,8 @@ function Slideshow({ isEditing }) {
     const file = e.target.files[0];
     if (!file) return;
 
-    if (file.size > 100 * 1024 * 1024) {
-      return toast.error('File size should be less than 100MB');
+    if (file.size > 200 * 1024 * 1024) {
+      return toast.error('File size should be less than 200MB');
     }
 
     const type = file.type.startsWith('image/') ? 'image' : 'video';

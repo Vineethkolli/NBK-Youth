@@ -40,7 +40,7 @@ function MomentForm({ type, onClose, onSubmit }) {
     if (!file) return;
 
     if (file.size > 1024 * 1024 * 1024) {
-      toast.error('File size should be less than 50MB');
+      toast.error('File size should be less than 1GB');
       return;
     }
 

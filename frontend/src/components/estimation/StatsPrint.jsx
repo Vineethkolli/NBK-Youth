@@ -179,8 +179,8 @@ const StatsPrint = ({ stats }) => {
   };
 
   return (
-    <button onClick={handlePrint} className="btn-secondary flex items-center space-x-2">
-      <Printer className="h-4 w-4 mr-2" />
+    <button onClick={handlePrint} className="btn-secondary ">
+      <Printer className="h-4 w-4 mr-2 inline" />
       <span>Print</span>
     </button>
   );

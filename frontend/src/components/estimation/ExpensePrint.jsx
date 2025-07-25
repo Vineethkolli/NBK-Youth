@@ -61,7 +61,7 @@ const ExpensePrint = ({ expenses, visibleColumns }) => {
 
   return (
     <button onClick={generatePDF} className="btn-secondary">
-      <Printer className="h-4 w-4 mr-2" />
+      <Printer className="h-4 w-4 mr-2 inline" />
       Print
     </button>
   );

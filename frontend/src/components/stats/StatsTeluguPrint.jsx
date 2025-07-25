@@ -80,14 +80,6 @@ const displayAmountWithShortage = (amount) =>
     ['Offline', `${pm.offline.count} entries`, formatAmount(pm.offline.amount), formatAmount(pm.amountLeft.cashAmount)],
   ];
 
-  // User Stats
-  const u = stats.userStats;
-  const userCols = ['Category', 'Count'];
-  const userRows = [
-    ['Total Users', u.totalUsers],
-    ['APP Payments', u.successfulPayments],
-  ];
-
   // Villagers & Youth Stats helper
   const makeGroup = (group, title) => {
     const cols = ['Category', 'Cash', 'Online', 'Web App', 'Total'];
@@ -130,9 +122,6 @@ const displayAmountWithShortage = (amount) =>
 
         <h3>Payment Mode Statistics</h3>
         <div dangerouslySetInnerHTML={{ __html: renderTable(paymentCols, paymentRows) }} />
-
-        <h3>User Statistics</h3>
-        <div dangerouslySetInnerHTML={{ __html: renderTable(userCols, userRows) }} />
 
         <h3>{villagersSection.title}</h3>
         <div dangerouslySetInnerHTML={{ __html: villagersSection.html }} />
