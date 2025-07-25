@@ -52,7 +52,7 @@ export const estimationController = {
         'EstimatedIncome',
         income.EIID,
         { before: null, after: income.toObject() },
-        `Estimated Income ${income.EIID} created - ${income.name}: ₹${income.presentAmount}`
+        `Estimated Income ${income.EIID} created by ${req.user.name}`
       );
 
       res.status(201).json(income);
@@ -96,7 +96,7 @@ export const estimationController = {
         'EstimatedIncome',
         income.EIID,
         { before: originalData, after: income.toObject() },
-        `Estimated Income ${income.EIID} updated - ${income.name}: ₹${income.presentAmount}`
+        `Estimated Income ${income.EIID} updated by ${req.user.name}`
       );
 
       res.json(income);
@@ -121,7 +121,7 @@ export const estimationController = {
         'EstimatedIncome',
         income.EIID,
         { before: originalData, after: null },
-        `Estimated Income ${income.EIID} deleted - ${income.name}`
+        `Estimated Income ${income.EIID} deleted by ${req.user.name}`
       );
 
       await EstimatedIncome.findByIdAndDelete(req.params.id);
@@ -155,7 +155,7 @@ export const estimationController = {
         'EstimatedExpense',
         expense.EEID,
         { before: null, after: expense.toObject() },
-        `Estimated Expense ${expense.EEID} created - ${expense.purpose}: ₹${expense.presentAmount}`
+        `Estimated Expense ${expense.EEID} created by ${req.user.name}`
       );
 
       res.status(201).json(expense);
@@ -186,7 +186,7 @@ export const estimationController = {
         'EstimatedExpense',
         expense.EEID,
         { before: originalData, after: expense.toObject() },
-        `Estimated Expense ${expense.EEID} updated - ${expense.purpose}: ₹${expense.presentAmount}`
+        `Estimated Expense ${expense.EEID} updated by ${req.user.name}`
       );
 
       res.json(expense);
@@ -211,7 +211,7 @@ export const estimationController = {
         'EstimatedExpense',
         expense.EEID,
         { before: originalData, after: null },
-        `Estimated Expense ${expense.EEID} deleted - ${expense.purpose}`
+        `Estimated Expense ${expense.EEID} deleted by ${req.user.name}`
       );
 
       await EstimatedExpense.findByIdAndDelete(req.params.id);

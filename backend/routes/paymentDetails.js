@@ -10,7 +10,7 @@ router.get('/', paymentDetailsController.getPaymentDetails);
 // Update payment details (developer only)
 router.put('/', 
   auth, 
-  checkRole(['developer', 'finanicer', 'admin']),
+  checkRole(['developer', 'financier', 'admin']),
   paymentDetailsController.updatePaymentDetails
 );
 

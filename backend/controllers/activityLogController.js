@@ -132,36 +132,4 @@ export const activityLogController = {
       res.status(500).json({ message: 'Failed to fetch log statistics' });
     }
   },
-
-  // Clear old logs (developer only)
-  clearOldLogs: async (req, res) => {
-    try {
-      const { days = 30 } = req.body;
-      const cutoffDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
-      
-      const result = await ActivityLog.deleteMany({
-        createdAt: { $lt: cutoffDate }
-      });
-
-      // Log the clearing of old logs
-      await logActivity(
-        {
-          user: req.user,
-          ip: req.ip,
-          get: req.get.bind(req)
-        },
-        'DELETE',
-        'ActivityLog',
-        'bulk-clear-old',
-        { before: { deletedCount: result.deletedCount }, after: null },
-        `Cleared ${result.deletedCount} activity logs older than ${days} days by ${req.user.name}`
-      );
-
-      res.json({ 
-        message: `Deleted ${result.deletedCount} logs older than ${days} days` 
-      });
-    } catch (error) {
-      res.status(500).json({ message: 'Failed to clear old logs' });
-    }
-  }
 };

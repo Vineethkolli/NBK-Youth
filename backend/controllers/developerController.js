@@ -1,58 +1,89 @@
 import Income from '../models/Income.js';
 import Expense from '../models/Expense.js';
-import IncomeLog from '../models/IncomeLog.js';
-import ExpenseLog from '../models/ExpenseLog.js';
 import NotificationHistory from '../models/NotificationHistory.js';
 import EstimatedIncome from '../models/EstimatedIncome.js';
 import EstimatedExpense from '../models/EstimatedExpense.js';
 import Game from '../models/Game.js';
+import ActivityLog from '../models/ActivityLog.js';
+import Event from '../models/Event.js';
+import { logActivity } from '../middleware/activityLogger.js'; 
+import User from '../models/User.js'; 
 
 export const developerController = {
   clearData: async (req, res) => {
     const { type } = req.params;
 
     try {
-      switch (type) {
+      let description = '';
+      let entity = 'DeveloperOptions';
 
+      switch (type) {
         case 'income':
-          // Delete all income records and logs
           await Income.deleteMany({});
-          await IncomeLog.deleteMany({});
+          description = 'Cleared all income records and logs';
           break;
 
         case 'expense':
-          // Delete all expense records and logs
           await Expense.deleteMany({});
-          await ExpenseLog.deleteMany({});
+          description = 'Cleared all expense records and logs';
           break;
 
         case 'notifications':
-          // Delete all notification subscriptions and history
           await NotificationHistory.deleteMany({});
+          description = 'Cleared all notification subscriptions and history';
           break;
 
         case 'estimatedIncome':
-          // Delete all estimated income records
           await EstimatedIncome.deleteMany({});
+          description = 'Cleared all estimated income records';
           break;
 
         case 'estimatedExpense':
-          // Delete all estimated expense records
           await EstimatedExpense.deleteMany({});
+          description = 'Cleared all estimated expense records';
           break;
 
         case 'letsPlay':
-          // Delete all games and players
           await Game.deleteMany({});
+          description = 'Cleared all game data (letsPlay)';
+          break;
+
+        case 'activityLog':
+          await ActivityLog.deleteMany({});
+          description = 'Cleared all activity logs';
+          break;
+
+        case 'events':
+          await Event.deleteMany({});
+          description = 'Cleared all events';
+          break;
+
+        case 'resetRoles':
+          const result = await User.updateMany(
+            { role: { $ne: 'developer' } },
+            { $set: { role: 'user' } }
+          );
+          description = `Reset roles of ${result.modifiedCount} users except developers to 'user'`;
           break;
 
         default:
           return res.status(400).json({ message: 'Invalid data type' });
       }
 
-      res.json({ message: `${type} data cleared successfully` });
+      // Log the activity
+      await logActivity(
+        req,
+        'DELETE',
+        entity,
+        req.user?.registerId || 'SYSTEM',
+        null,
+        description
+      );
+
+      res.json({ message: `${type} action completed successfully` });
     } catch (error) {
-      res.status(500).json({ message: `Failed to clear ${type} data` });
+      console.error('Clear data error:', error);
+      res.status(500).json({ message: `Failed to process ${type} action` });
     }
   }
 };

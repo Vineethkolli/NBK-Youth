@@ -18,11 +18,4 @@ router.get('/stats',
   activityLogController.getLogStats
 );
 
-// Clear old logs (developer only)
-router.delete('/clear', 
-  auth, 
-  checkRole(['developer']),
-  activityLogController.clearOldLogs
-);
-
 export default router;

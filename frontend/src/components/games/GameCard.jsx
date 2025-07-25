@@ -116,7 +116,9 @@ function GameCard({ game, isEditMode, onSelect, onEdit, onDelete }) {
             className="inline-flex items-center"
           >
             <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${getRankBadge(index, player)}`}>
+              <span translate="no">
               {game.timerRequired ? index + 1 : player.status.split('-')[1][0]}
+              </span>
             </div>
             <span className="ml-1 text-sm">
               {player.name}

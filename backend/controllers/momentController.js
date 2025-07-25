@@ -145,28 +145,26 @@ export const momentController = {
     }
   },
 
-  deleteMoment: async (req, res) => {
-    try {
-      // Fetch original
-      const m = await Moment.findById(req.params.id);
-      if (!m) {
-        return res.status(404).json({ message: 'Moment not found' });
-      }
-
-      const before = m.toObject();
-
-      // Log deletion
-      await logActivity(req, 'DELETE', 'Moment', m._id.toString(), {
-        before,
-        after: null
-      }, `Moment "${m.title || 'Untitled'}" deleted by ${req.user.name}`);
-
-      // Actually delete
-      await m.remove();
-
-      res.json({ message: 'Moment deleted successfully' });
-    } catch (error) {
-      res.status(500).json({ message: 'Failed to delete moment', error: error.message });
+deleteMoment: async (req, res) => {
+  try {
+    const m = await Moment.findById(req.params.id);
+    if (!m) {
+      return res.status(404).json({ message: 'Moment not found' });
     }
+
+    const before = m.toObject();
+
+    await logActivity(req, 'DELETE', 'Moment', m._id.toString(), {
+      before,
+      after: null
+    }, `Moment "${m.title || 'Untitled'}" deleted by ${req.user.name}`);
+
+    await Moment.deleteOne({ _id: m._id }); // ✅ This is safe and works
+
+    res.json({ message: 'Moment deleted successfully' });
+  } catch (error) {
+    console.error('Delete error:', error);
+    res.status(500).json({ message: 'Failed to delete moment', error: error.message });
+  }
   },
 };

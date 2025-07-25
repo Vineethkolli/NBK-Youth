@@ -6,9 +6,8 @@ import axios from 'axios';
 import ExpenseTable from '../components/expense/ExpenseTable';
 import ExpenseFilters from '../components/expense/ExpenseFilters';
 import ExpenseForm from '../components/expense/ExpenseForm';
-import ModificationLog from '../components/expense/ModificationLog';
-import EnglishPrint from '../components/expense/EnglishPrint';
-import TeluguPrint from '../components/expense/TeluguPrint';
+import EnglishPrint from '../components/expense/ExpenseEnglishPrint';
+import TeluguPrint from '../components/expense/ExpenseTeluguPrint';
 import ExpenseExcel from '../components/expense/ExpenseExcel';
 import { API_URL } from '../utils/config';
 import { useLanguage } from '../context/LanguageContext';
@@ -40,7 +39,6 @@ function Expense() {
   });
   
   const [showForm, setShowForm] = useState(false);
-  const [showModificationLog, setShowModificationLog] = useState(false);
   const [hiddenProfiles, setHiddenProfiles] = useState(new Set());
   const [editingExpense, setEditingExpense] = useState(null);
   const { language } = useLanguage();
@@ -137,15 +135,7 @@ const fetchExpenses = async () => {
           )}
           
           <PrintComponent expenses={expenses} visibleColumns={visibleColumns} />
-          {(user?.role === 'developer' || user?.role === 'financier') && (
-            <button
-              onClick={() => setShowModificationLog(!showModificationLog)}
-              className="btn-secondary"
-            >
-              <Clock className="h-4 w-4 mr-2" />
-              Modification Log
-            </button>
-          )}
+
           {user?.role === 'developer' && (
   <ExpenseExcel expenses={expenses} visibleColumns={visibleColumns} />
 )}
@@ -228,13 +218,6 @@ const fetchExpenses = async () => {
         />
       )}
 
-      {showModificationLog && (
-        <ModificationLog
-          search={search}
-          onSearch={(value) => setSearch(value)}
-          onClose={() => setShowModificationLog(false)}
-        />
-      )}
     </div>
   );
 }

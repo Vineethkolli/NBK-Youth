@@ -71,28 +71,6 @@ function ActivityLogs() {
     }
   };
 
-  const handleClearOldLogs = async () => {
-    const days = prompt('Delete logs older than how many days? (default: 30)');
-    if (days === null) return;
-
-    const daysToDelete = parseInt(days) || 30;
-    
-    if (!window.confirm(`Are you sure you want to delete logs older than ${daysToDelete} days? This action cannot be undone.`)) {
-      return;
-    }
-
-    try {
-      const { data } = await axios.delete(`${API_URL}/api/activity-logs/clear`, {
-        data: { days: daysToDelete }
-      });
-      toast.success(data.message);
-      fetchLogs();
-      fetchStats();
-    } catch (error) {
-      toast.error('Failed to clear old logs');
-    }
-  };
-
   const handleFilterChange = (newFilters) => {
     setFilters(newFilters);
     setPagination({ ...pagination, currentPage: 1 });
@@ -106,10 +84,10 @@ function ActivityLogs() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-semibold">Activity Logs</h1>
-        <div className="flex space-x-2">
+        <div className="space-x-2">
           <button
             onClick={() => setActiveTab('logs')}
-            className={`px-4 py-2 rounded-md ${
+            className={`px-2 py-2 rounded-md ${
               activeTab === 'logs'
                 ? 'bg-indigo-600 text-white'
                 : 'bg-gray-200 text-gray-700'
@@ -119,7 +97,7 @@ function ActivityLogs() {
           </button>
           <button
             onClick={() => setActiveTab('stats')}
-            className={`px-4 py-2 rounded-md ${
+            className={`px-2 py-2 rounded-md ${
               activeTab === 'stats'
                 ? 'bg-indigo-600 text-white'
                 : 'bg-gray-200 text-gray-700'
@@ -128,14 +106,7 @@ function ActivityLogs() {
             <BarChart3 className="h-4 w-4 mr-2 inline" />
             Statistics
           </button>
-<LogPrint logs={logs} />
-          <button
-            onClick={handleClearOldLogs}
-            className="btn-secondary text-red-600 hover:text-red-700"
-          >
-            <Trash2 className="h-4 w-4 mr-2 inline" />
-            Clear Logs
-          </button>
+        <LogPrint logs={logs} />
         </div>
       </div>
 

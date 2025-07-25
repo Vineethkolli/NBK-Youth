@@ -36,10 +36,12 @@ function ClearData() {
         {[
           { name: 'Income', type: 'income' },
           { name: 'Expense', type: 'expense' },
-          { name: 'Notification', type: 'notifications' },
           { name: 'Estimated Income', type: 'estimatedIncome' },
           { name: 'Estimated Expense', type: 'estimatedExpense' },
-          { name: "Let's Play", type: 'letsPlay' }
+          { name: 'Notification', type: 'notifications' },
+          { name: 'Events', type: 'events' },
+          { name: "Let's Play", type: 'letsPlay' },
+          { name: 'Activity Log', type: 'activityLog'},
         ].map(({ name, type, description }) => (
           <div key={type} className="flex items-center justify-between">
             <div>

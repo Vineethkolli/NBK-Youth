@@ -1,5 +1,4 @@
 import Expense from '../models/Expense.js';
-import ExpenseLog from '../models/ExpenseLog.js';
 import { uploadToCloudinary } from '../config/cloudinary.js';
 import { logActivity } from '../middleware/activityLogger.js';
 
@@ -77,7 +76,7 @@ export const expenseController = {
         'Expense',
         expense.expenseId,
         { before: null, after: expense.toObject() },
-        `Expense ${expense.expenseId} created for ${expense.name} - Amount: ₹${expense.amount}`
+        `Expense ${expense.expenseId} created by ${req.user.name}`
       );
 
       res.status(201).json(expense);
@@ -119,13 +118,6 @@ export const expenseController = {
         })
       );
 
-      // Create log entry
-      await ExpenseLog.create({
-        expenseId: expense._id,
-        registerId: req.body.registerId,
-        originalData: expense.toObject(),
-        updatedData: { ...expenseData, subExpenses: processedSubExpenses }
-      });
 
       // Update expense
       const updatedExpense = await Expense.findByIdAndUpdate(
@@ -145,7 +137,7 @@ export const expenseController = {
         'Expense',
         expense.expenseId,
         { before: originalData, after: updatedExpense.toObject() },
-        `Expense ${expense.expenseId} updated - Name: ${updatedExpense.name}, Amount: ₹${updatedExpense.amount}`
+        `Expense ${expense.expenseId} updated by ${req.user.name}`
       );
 
       res.json(updatedExpense);
@@ -174,13 +166,6 @@ export const expenseController = {
         expense.deletedBy = registerId;
       }
 
-      // Create log entry
-      await ExpenseLog.create({
-        expenseId: expense._id,
-        registerId,
-        originalData: expense.toObject(),
-        updatedData: { ...expense.toObject(), verifyLog }
-      });
 
       // Update verification status
       expense.verifyLog = verifyLog;
@@ -202,26 +187,6 @@ export const expenseController = {
     }
   },
 
-  // Get modification logs
-  getLogs: async (req, res) => {
-    try {
-      const { search } = req.query;
-      let query = {};
-
-      if (search) {
-        query.$or = [
-          { expenseId: { $regex: search, $options: 'i' } },
-          { registerId: { $regex: search, $options: 'i' } },
-          { 'originalData.name': { $regex: search, $options: 'i' } }
-        ];
-      }
-
-      const logs = await ExpenseLog.find(query).sort({ createdAt: -1 });
-      res.json(logs);
-    } catch (error) {
-      res.status(500).json({ message: 'Failed to fetch logs' });
-    }
-  },
 
   // Soft delete expense
   deleteExpense: async (req, res) => {

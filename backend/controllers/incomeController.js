@@ -1,5 +1,4 @@
 import Income from '../models/Income.js';
-import IncomeLog from '../models/IncomeLog.js';
 import { logActivity } from '../middleware/activityLogger.js';
 
 export const incomeController = {
@@ -56,7 +55,7 @@ export const incomeController = {
         'Income',
         income.incomeId,
         { before: null, after: income.toObject() },
-        `Income ${income.incomeId} created for ${income.name} - Amount: ₹${income.amount}`
+        `Income ${income.incomeId} created by ${req.user.name}`
       );
 
       res.status(201).json(income);
@@ -75,13 +74,6 @@ export const incomeController = {
 
       const originalData = income.toObject();
 
-      // Create log entry
-      await IncomeLog.create({
-        incomeId: income._id,
-        registerId: req.body.registerId,
-        originalData: income.toObject(),
-        updatedData: req.body
-      });
 
       // Update income and set verifyLog to 'not verified'
       const updatedIncome = await Income.findByIdAndUpdate(
@@ -97,7 +89,7 @@ export const incomeController = {
         'Income',
         income.incomeId,
         { before: originalData, after: updatedIncome.toObject() },
-        `Income ${income.incomeId} updated - Name: ${updatedIncome.name}, Amount: ₹${updatedIncome.amount}`
+        `Income ${income.incomeId} updated by ${req.user.name}`
       );
 
       res.json(updatedIncome);
@@ -125,13 +117,6 @@ export const incomeController = {
         income.deletedBy = registerId;
       }
 
-      // Create log entry
-      await IncomeLog.create({
-        incomeId: income._id,
-        registerId,
-        originalData: income.toObject(),
-        updatedData: { ...income.toObject(), verifyLog }
-      });
 
       // Update verification status
       income.verifyLog = verifyLog;
@@ -153,47 +138,6 @@ export const incomeController = {
     }
   },
 
-  // Get modification logs
-  getLogs: async (req, res) => {
-    try {
-      const { search } = req.query;
-      let query = {};
-
-      if (search) {
-        query.$or = [
-          { incomeId: { $regex: search, $options: 'i' } },
-          { registerId: { $regex: search, $options: 'i' } },
-          { 'originalData.name': { $regex: search, $options: 'i' } }
-        ];
-      }
-
-      const logs = await IncomeLog.find(query).sort({ createdAt: -1 });
-      res.json(logs);
-    } catch (error) {
-      res.status(500).json({ message: 'Failed to fetch logs' });
-    }
-  },
-
-  // Get modification logs
-  getLogs: async (req, res) => {
-    try {
-      const { search } = req.query;
-      let query = {};
-
-      if (search) {
-        query.$or = [
-          { incomeId: { $regex: search, $options: 'i' } },
-          { registerId: { $regex: search, $options: 'i' } },
-          { 'originalData.name': { $regex: search, $options: 'i' } }
-        ];
-      }
-
-      const logs = await IncomeLog.find(query).sort({ createdAt: -1 });
-      res.json(logs);
-    } catch (error) {
-      res.status(500).json({ message: 'Failed to fetch modification logs', error });
-    }
-  },
 
   // Soft delete income
   deleteIncome: async (req, res) => {

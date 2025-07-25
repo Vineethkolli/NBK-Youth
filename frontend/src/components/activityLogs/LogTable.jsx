@@ -41,19 +41,19 @@ function LogTable({ logs, loading, pagination, onPageChange }) {
     }
 
     return (
-      <div className="space-y-2">
+      <div className="flex space-x-4">
         {changes.before && (
-          <div>
-            <h5 className="font-medium text-red-600">Before:</h5>
-            <pre className="text-xs bg-red-50 p-2 rounded overflow-auto max-h-32">
+          <div className="flex-1">
+            <h5 className="font-medium text-red-600 mb-1">Before:</h5>
+            <pre className="text-xs bg-red-50 p-2 rounded overflow-auto max-h-48">
               {JSON.stringify(changes.before, null, 2)}
             </pre>
           </div>
         )}
         {changes.after && (
-          <div>
-            <h5 className="font-medium text-green-600">After:</h5>
-            <pre className="text-xs bg-green-50 p-2 rounded overflow-auto max-h-32">
+          <div className="flex-1">
+            <h5 className="font-medium text-green-600 mb-1">After:</h5>
+            <pre className="text-xs bg-green-50 p-2 rounded overflow-auto max-h-48">
               {JSON.stringify(changes.after, null, 2)}
             </pre>
           </div>
@@ -100,9 +100,7 @@ function LogTable({ logs, loading, pagination, onPageChange }) {
             {logs.map((log) => (
               <>
                 <tr key={log._id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    {formatDate(log.createdAt)}
-                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">{formatDate(log.createdAt)}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
                     <div>
                       <div className="font-medium">{log.userName}</div>
@@ -110,9 +108,7 @@ function LogTable({ logs, loading, pagination, onPageChange }) {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getActionColor(log.action)}`}>
-                      {log.action}
-                    </span>
+                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getActionColor(log.action)}`}>{log.action}</span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
                     <div>
@@ -120,19 +116,13 @@ function LogTable({ logs, loading, pagination, onPageChange }) {
                       <div className="text-gray-500">{log.entityId}</div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-sm">
-                    {log.description}
-                  </td>
+                  <td className="px-6 py-4 text-sm">{log.description}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
                     <button
                       onClick={() => toggleRowExpansion(log._id)}
                       className="text-indigo-600 hover:text-indigo-900"
                     >
-                      {expandedRows.has(log._id) ? (
-                        <EyeOff className="h-5 w-5" />
-                      ) : (
-                        <Eye className="h-5 w-5" />
-                      )}
+                      {expandedRows.has(log._id) ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                     </button>
                   </td>
                 </tr>
@@ -157,8 +147,7 @@ function LogTable({ logs, loading, pagination, onPageChange }) {
       {/* Pagination */}
       <div className="flex items-center justify-between px-6 py-3 border-t">
         <div className="text-sm text-gray-700">
-          Showing page {pagination.currentPage} of {pagination.totalPages} 
-          ({pagination.totalCount} total entries)
+          Showing page {pagination.currentPage} of {pagination.totalPages} ({pagination.totalCount} total entries)
         </div>
         <div className="flex space-x-2">
           <button

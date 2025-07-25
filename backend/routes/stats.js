@@ -7,10 +7,9 @@ const router = express.Router();
 // Get all stats
 router.get('/', auth, statsController.getStats);
 
-// Update previous year amount (developer/financier only)
 router.patch('/previous-year', 
   auth, 
-  checkRole(['developer', 'financier']),
+  checkRole(['developer', 'financier', 'admin']),
   statsController.updatePreviousYear
 );
 

@@ -10,11 +10,10 @@ function IncomePrint({ incomes, visibleColumns }) {
 
   const handlePrint = () => {
     const content = printRef.current.innerHTML;
-    const printWindow = window.open('', '', 'height=700,width=1000');
-    printWindow.document.write('<html><head>');
+    const printWindow = window.open('height=700,width=1000');
     printWindow.document.write('<style>table { width: 100%; border-collapse: collapse; } th, td { border: 1px solid #ccc; padding: 8px; text-align: left; font-size: 12px; } th { background: #f4f4f4; }</style>');
     printWindow.document.write('</head><body>');
-    printWindow.document.write('<h2><span translate="no">ఆదాయ నిర్వహణ</span></h2>');
+    printWindow.document.write('<div style="text-align: center;"><h2><span translate="no">ఆదాయ నిర్వహణ</span></h2></div>');
     printWindow.document.write(content);
     printWindow.document.write('</body></html>');
     printWindow.document.close();

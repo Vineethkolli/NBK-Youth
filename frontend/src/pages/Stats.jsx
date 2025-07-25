@@ -5,10 +5,14 @@ import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import { API_URL } from '../utils/config';
 import Footer from '../components/Footer';
-import StatsPrint from '../components/stats/StatsPrint';
+import TeluguPrint from '../components/stats/StatsTeluguPrint';
+import EnglishPrint from '../components/stats/StatsEnglishPrint';
+import { useLanguage } from '../context/LanguageContext';
 
 function Stats() {
   const { user } = useAuth();
+  const { language } = useLanguage();
+  const PrintComponent = language === 'te' ? TeluguPrint : EnglishPrint;
   const [stats, setStats] = useState({
     budgetStats: {
       totalIncome: { count: 0, amount: 0 },
@@ -91,7 +95,7 @@ function Stats() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-semibold">Statistics</h1>
-        <StatsPrint stats={stats} />
+        <PrintComponent stats={stats} />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

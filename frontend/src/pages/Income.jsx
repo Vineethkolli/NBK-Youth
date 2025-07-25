@@ -6,9 +6,8 @@ import axios from 'axios';
 import IncomeTable from '../components/income/IncomeTable';
 import IncomeFilters from '../components/income/IncomeFilters';
 import IncomeForm from '../components/income/IncomeForm';
-import ModificationLog from '../components/income/ModificationLog';
-import EnglishPrint from '../components/income/EnglishPrint';
-import TeluguPrint from '../components/income/TeluguPrint';
+import EnglishPrint from '../components/income/IncomeEnglishPrint';
+import TeluguPrint from '../components/income/IncomeTeluguPrint';
 import IncomeExcel from '../components/income/IncomeExcel';
 import { API_URL } from '../utils/config';
 import { useLanguage } from '../context/LanguageContext';
@@ -38,7 +37,6 @@ function Income() {
     verifyLog: false,
   });
   const [showForm, setShowForm] = useState(false);
-  const [showModificationLog, setShowModificationLog] = useState(false);
   const [hiddenProfiles, setHiddenProfiles] = useState(new Set());
   const [editingIncome, setEditingIncome] = useState(null);
   const { language } = useLanguage();
@@ -130,15 +128,6 @@ function Income() {
               Add New
             </button>
           )}
-          {(user?.role === 'developer' || user?.role === 'financier') && (
-            <button
-              onClick={() => setShowModificationLog(!showModificationLog)}
-              className="btn-secondary"
-            >
-              <Clock className="h-4 w-4 mr-2" />
-              Modification Log
-            </button>
-          )}
           <PrintComponent incomes={incomes} visibleColumns={visibleColumns} />
           
           {user?.role === 'developer' && (
@@ -223,13 +212,6 @@ function Income() {
         />
       )}
 
-      {showModificationLog && (
-        <ModificationLog
-          search={search}
-          onSearch={(value) => setSearch(value)}
-          onClose={() => setShowModificationLog(false)}
-        />
-      )}
     </div>
   );
 }

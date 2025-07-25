@@ -35,12 +35,6 @@ router.patch('/:id/verify',
   incomeController.updateVerificationStatus
 );
 
-// Get modification logs
-router.get('/logs', 
-  auth, 
-  checkPermission('ACCESS_LOGS'),
-  incomeController.getLogs
-);
 
 // Soft delete income (move to recycle bin)
 router.delete('/:id', 

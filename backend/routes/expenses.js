@@ -35,12 +35,6 @@ router.patch('/:id/verify',
   expenseController.updateVerificationStatus
 );
 
-// Get modification logs
-router.get('/logs', 
-  auth, 
-  checkPermission('ACCESS_LOGS'),
-  expenseController.getLogs
-);
 
 // Soft delete expense (move to recycle bin)
 router.delete('/:id', 

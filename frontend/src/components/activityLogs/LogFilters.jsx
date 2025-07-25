@@ -51,19 +51,20 @@ function LogFilters({ filters, onChange }) {
         <option value="User">User</option>
         <option value="Income">Income</option>
         <option value="Expense">Expense</option>
+        <option value="EstimatedIncome">Estimated Income</option>
+        <option value="EstimatedExpense">Estimated Expense</option>
         <option value="Payment">Payment</option>
+        <option value="Banner">PopUp Banner</option>
+        <option value="PreviousYear">Previous Year</option>
+        <option value="MaintenanceMode">Maintenance Mode</option>
+        <option value="HiddenProfile">Hidden Profile</option>
+        <option value="Event">Event</option>
+        <option value="Slide">Slide</option>
+        <option value="Notification">Notification</option>
         <option value="Collection">Vibe</option>
         <option value="Moment">Moment</option>
         <option value="Game">Game</option>
-        <option value="HiddenProfile">Hidden Profile</option>
-        <option value="Banner">PopUp Banner</option>
-        <option value="Slide">Slide</option>
-        <option value="Event">Event</option>
-        <option value="Notification">Notification</option>
-        <option value="PreviousYear">Previous Year</option>
-        <option value="MaintenanceMode">Maintenance Mode</option>
-        <option value="EstimatedIncome">Estimated Income</option>
-        <option value="EstimatedExpense">Estimated Expense</option>
+        <option value="DeveloperOptions">Developer Options</option>
       </select>
 
       <div

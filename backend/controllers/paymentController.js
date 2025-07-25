@@ -177,7 +177,6 @@ const PaymentController = {
       payment.verifiedAt = new Date();
 
       await payment.save();
-      return res.json({ message: 'Verification status updated successfully' });
       // Log verification status change
       await logActivity(
         req,
@@ -188,6 +187,7 @@ const PaymentController = {
         `Payment ${payment.paymentId} verification status changed to ${verifyLog} by ${registerId}`
       );
 
+      return res.json({ message: 'Verification status updated successfully' });
     } catch (error) {
       return res.status(500).json({ message: 'Failed to update verification status', error: error.message });
     }

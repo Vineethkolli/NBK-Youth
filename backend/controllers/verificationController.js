@@ -1,9 +1,6 @@
 import Income from '../models/Income.js';
 import Expense from '../models/Expense.js';
 import Payment from '../models/Payment.js'; 
-import IncomeLog from '../models/IncomeLog.js';
-import ExpenseLog from '../models/ExpenseLog.js';
-import PaymentLog from '../models/PaymentLog.js'; 
 import PaymentController from './paymentController.js';
 import { logActivity } from '../middleware/activityLogger.js';
 
@@ -41,17 +38,13 @@ export const verificationController = {
 
       let item;
       let Model;
-      let LogModel;
 
       if (type === 'income') {
         Model = Income;
-        LogModel = IncomeLog;
       } else if (type === 'expense') {
         Model = Expense;
-        LogModel = ExpenseLog;
       } else if (type === 'payment') { 
         Model = Payment;
-        LogModel = PaymentLog;
       } else {
         return res.status(400).json({ message: 'Invalid type specified' });
       }
@@ -69,13 +62,6 @@ export const verificationController = {
         item.deletedBy = registerId;
       }
 
-      // Create log entry
-      await LogModel.create({
-        [`${type}Id`]: item._id,
-        registerId,
-        originalData: item.toObject(),
-        updatedData: { ...item.toObject(), verifyLog }
-      });
 
       // Update verification status
       item.verifyLog = verifyLog;

@@ -144,7 +144,7 @@ export const statsController = {
         'PreviousYear',
         'previous-year-amount',
         { before: { amount: originalAmount }, after: { amount: Math.round(amount) } },
-        `Previous year amount updated from ₹${originalAmount} to ₹${Math.round(amount)} by ${req.user.name}`
+        `Previous year amount updated by ${req.user.name}`
       );
 
       res.json({ message: 'Previous year amount updated successfully' });
