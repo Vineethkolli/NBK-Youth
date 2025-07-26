@@ -61,7 +61,7 @@ function Users() {
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-semibold">User Management</h1>
+        <h1 className="text-2xl font-semibold">Users & Roles</h1>
         <input
           type="text"
           placeholder="Search users..."

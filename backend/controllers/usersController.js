@@ -47,6 +47,47 @@ export const updateProfileImage = async (req, res) => {
 };
 
 
+export const deleteProfileImage = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const originalImage = user.profileImage;
+
+    // Delete image from Cloudinary if it exists
+    if (user.profileImage && user.profileImage.includes('cloudinary.com')) {
+      try {
+        const publicId = user.profileImage.split('/').pop().split('.')[0];
+        await cloudinary.uploader.destroy(`ProfileImages/${publicId}`);
+      } catch (err) {
+        console.warn('Failed to delete Cloudinary image:', err);
+      }
+    }
+
+    // Remove profile image from user
+    user.profileImage = null;
+    await user.save();
+
+    // Log profile image deletion
+    await logActivity(
+      req,
+      'DELETE',
+      'User',
+      user.registerId,
+      { before: { profileImage: originalImage }, after: { profileImage: null } },
+      `Profile image deleted by ${user.name}`
+    );
+
+    res.json({ message: 'Profile image deleted successfully', profileImage: null });
+  } catch (error) {
+    console.error('Error deleting profile image:', error);
+    res.status(500).json({ message: 'Failed to delete profile image' });
+  }
+};
+
+
 // Get all users (developer only) with notification status
 export const getAllUsers = async (req, res) => {
   try {

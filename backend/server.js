@@ -25,6 +25,7 @@ import maintenanceRoutes from './routes/maintenance.js';
 import estimationRoutes from './routes/estimation.js';
 import bannerRoutes from './routes/banners.js';
 import activityLogRoutes from './routes/activityLogs.js';
+import committeeRoutes from './routes/committee.js';
 
 dotenv.config();
 
@@ -75,6 +76,7 @@ app.use('/api/maintenance', maintenanceRoutes);
 app.use('/api/estimation', estimationRoutes);
 app.use('/api/banners', bannerRoutes);
 app.use('/api/activity-logs', activityLogRoutes);
+app.use('/api/committee', committeeRoutes);
 
 // Health check endpoint
 app.get('/', (req, res) => {

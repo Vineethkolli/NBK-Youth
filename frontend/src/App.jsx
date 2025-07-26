@@ -33,7 +33,8 @@ import MusicPlayer from './components/vibe/MusicPlayer';
 import TechStack from './pages/TechStack'
 import PopupBanner from './components/developer/PopupBanner';
 import { initializeAnalytics, trackPageView } from './utils/analytics';
-import ActivityLogs from './pages/ActivityLogs';
+import ActivityLogs from './pages/ActivityLogs'; 
+import Committee from './pages/Committee';
 
 function RouteTracker() {
   const location = useLocation();
@@ -81,6 +82,7 @@ function AppContent() {
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/tech-stack" element={<TechStack />} />
           <Route path="/activity-logs" element={<ActivityLogs />} />
+          <Route path="/committee" element={<Committee />} />
         </Route>
       </Routes>
       <MusicPlayer />

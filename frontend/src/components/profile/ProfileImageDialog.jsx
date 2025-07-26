@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { X, Upload, Camera } from 'lucide-react';
+import { X, Upload, Camera, Trash2 } from 'lucide-react';
 
 function ProfileImageDialog({ image, onClose, onUpload }) {
   const [isUploading, setIsUploading] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
 
   const handleFileSelect = (e) => {
@@ -15,8 +16,8 @@ function ProfileImageDialog({ image, onClose, onUpload }) {
     }
 
     // Validate file size (5MB)
-    if (file.size > 15 * 1024 * 1024) {
-      alert('Please upload an image less than 15MB');
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Please upload an image less than 5MB');
       return;
     }
 
@@ -41,6 +42,23 @@ function ProfileImageDialog({ image, onClose, onUpload }) {
     }
   };
 
+  const handleDelete = async () => {
+    if (!image) return;
+    
+    if (!window.confirm('Are you sure you want to delete your profile image?')) {
+      return;
+    }
+
+    setIsDeleting(true);
+    try {
+      await onUpload(null); // Pass null to indicate deletion
+    } catch (error) {
+      console.error('Error deleting image:', error);
+      alert('Failed to delete image');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 max-w-lg w-full mx-4">
@@ -52,13 +70,29 @@ function ProfileImageDialog({ image, onClose, onUpload }) {
         </div>
 
         <div className="space-y-4">
-          <div className="aspect-square max-h-[400px] overflow-hidden rounded-lg">
+          <div className="aspect-square max-h-[400px] overflow-hidden rounded-lg relative">
             {selectedImage || image ? (
-              <img
-                src={selectedImage || image}
-                alt="Profile"
-                className="w-full h-full object-contain"
-              />
+              <>
+                <img
+                  src={selectedImage || image}
+                  alt="Profile"
+                  className="w-full h-full object-contain"
+                />
+                {image && !selectedImage && (
+                  <button
+                    onClick={handleDelete}
+                    disabled={isDeleting}
+                    className="absolute top-2 right-2 bg-red-600 text-white rounded-full p-2 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    title="Delete profile image"
+                  >
+                    {isDeleting ? (
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    ) : (
+                      <Trash2 className="h-4 w-4" />
+                    )}
+                  </button>
+                )}
+              </>
             ) : (
               <div className="w-full h-full bg-gray-100 rounded-lg flex items-center justify-center">
                 <Camera className="h-12 w-12 text-gray-400" />
@@ -73,7 +107,7 @@ function ProfileImageDialog({ image, onClose, onUpload }) {
                 type="file"
                 accept="image/*"
                 onChange={handleFileSelect}
-                disabled={isUploading}
+                disabled={isUploading || isDeleting}
                 className="block w-full text-sm text-gray-500
                   file:mr-4 file:py-2 file:px-4
                   file:rounded-full file:border-0
@@ -87,7 +121,7 @@ function ProfileImageDialog({ image, onClose, onUpload }) {
             {selectedImage && (
               <button
                 onClick={handleUpload}
-                disabled={isUploading}
+                disabled={isUploading || isDeleting}
                 className="inline-flex items-center px-4 py-2 border border-transparent 
                   text-sm font-medium rounded-md text-white bg-indigo-600 
                   hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"

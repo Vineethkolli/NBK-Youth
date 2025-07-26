@@ -83,15 +83,24 @@ function Profile() {
 
   const handleImageUpload = async (imageData) => {
     try {
-      const { data } = await axios.post(`${API_URL}/api/users/profile/image`, {
-        image: imageData
-      });
-      setUserData({ ...userData, profileImage: data.profileImage });
-      updateUserData({ ...user, profileImage: data.profileImage });
+      if (imageData === null) {
+        // Handle deletion
+        const { data } = await axios.delete(`${API_URL}/api/users/profile/image`);
+        setUserData({ ...userData, profileImage: null });
+        updateUserData({ ...user, profileImage: null });
+        toast.success('Profile image deleted successfully');
+      } else {
+        // Handle upload/update
+        const { data } = await axios.post(`${API_URL}/api/users/profile/image`, {
+          image: imageData
+        });
+        setUserData({ ...userData, profileImage: data.profileImage });
+        updateUserData({ ...user, profileImage: data.profileImage });
+        toast.success('Profile image updated successfully');
+      }
       setShowImageDialog(false);
-      toast.success('Profile image updated successfully');
     } catch (error) {
-      toast.error('Failed to update profile image');
+      toast.error(imageData === null ? 'Failed to delete profile image' : 'Failed to update profile image');
     }
   };
 

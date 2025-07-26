@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, User, Users, Bell, ShieldCheck, Settings, IndianRupee, DollarSign, Trash2, CheckSquare, BarChart2, Terminal, MusicIcon, CameraIcon, TrophyIcon, X, ChevronLeft, Calculator, Layers, LayoutDashboard, FileClock } from 'lucide-react';
+import { Home, User, UserCog, Users, Bell, ShieldCheck, Settings, IndianRupee, DollarSign, Trash2, CheckSquare, BarChart2, Terminal, MusicIcon, CameraIcon, TrophyIcon, X, ChevronLeft, Calculator, Layers, LayoutDashboard, FileClock } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 function Sidebar({ isOpen, onNavigate }) {
@@ -9,9 +9,9 @@ function Sidebar({ isOpen, onNavigate }) {
 
   const links = [
     { to: '/', icon: Home, label: 'Home' },
+    { to: '/committee', icon: Users, label: 'Committee' },
     { to: '/moments', icon: CameraIcon, label: 'Moments' },
     { to: '/vibe', icon: MusicIcon, label: 'Vibe' },
-    { to: '/lets-play', icon: TrophyIcon, label: "Activities" },
     { to: '/stats', icon: BarChart2, label: 'Stats' },
     { to: '/income', icon: IndianRupee, label: 'Income' },
     { to: '/expense', icon: DollarSign, label: 'Expense' },
@@ -21,7 +21,7 @@ function Sidebar({ isOpen, onNavigate }) {
     { to: '/notifications', icon: Bell, label: 'Notifications' },
     { to: '/settings', icon: Settings, label: 'Settings' },
     ...(user?.role === 'developer' || user?.role === 'financier'|| user?.role === 'admin' ? [
-      { to: '/users', icon: Users, label: 'Users' }
+      { to: '/users', icon: UserCog, label: 'Users & Roles' }
     ] : []),
     ...(user?.role === 'developer' || user?.role === 'financier' ? [
       { to: '/verification', icon: CheckSquare, label: 'Verification' }
@@ -36,6 +36,7 @@ function Sidebar({ isOpen, onNavigate }) {
         { to: '/developer-options', icon: Terminal, label: 'Developer Options' },
         { to: '/activity-logs',     icon: FileClock, label: 'Activity Logs' }
       ] : []),
+    { to: '/lets-play', icon: TrophyIcon, label: 'Activities' },
     { to: '/tech-stack', icon: Layers, label: 'Tech Stack' }
   ];
 
