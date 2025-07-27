@@ -1,4 +1,3 @@
-
 import Committee from '../models/Committee.js';
 import User from '../models/User.js';
 import { logActivity } from '../middleware/activityLogger.js';
