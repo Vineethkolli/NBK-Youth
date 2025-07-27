@@ -9,11 +9,14 @@ export const incomeController = {
       let query = { isDeleted: false };
 
       if (search) {
-        query.$or = [
+        const searchConditions = [
           { incomeId: { $regex: search, $options: 'i' } },
-          { name: { $regex: search, $options: 'i' } },
-          { amount: !isNaN(search) ? Number(search) : undefined }
-        ].filter(Boolean);
+          { name: { $regex: search, $options: 'i' } }
+        ];
+        if (!isNaN(search)) {
+          searchConditions.push({ amount: Number(search) });
+        }
+        query.$or = searchConditions;
       }
 
       if (status) query.status = status;
@@ -24,7 +27,7 @@ export const incomeController = {
       const incomes = await Income.find(query).sort({ createdAt: -1 });
       res.json(incomes);
     } catch (error) {
-      res.status(500).json({ message: 'Failed to fetch incomes' });
+      res.status(500).json({ message: 'Failed to fetch incomes', error: error.message });
     }
   },
 
@@ -32,69 +35,82 @@ export const incomeController = {
   getVerificationData: async (req, res) => {
     try {
       const { verifyLog } = req.query;
-      const incomes = await Income.find({ verifyLog, isDeleted: false })
-        .sort({ createdAt: -1 });
+      const incomes = await Income.find({ verifyLog, isDeleted: false }).sort({ createdAt: -1 });
       res.json(incomes);
     } catch (error) {
-      res.status(500).json({ message: 'Failed to fetch verification data' });
+      res.status(500).json({ message: 'Failed to fetch verification data', error: error.message });
     }
   },
 
   // Create new income
   createIncome: async (req, res) => {
     try {
+      const { name } = req.body;
+
+      const existingIncome = await Income.findOne({ name });
+      if (existingIncome) {
+        return res.status(400).json({ message: 'Name already exists' });
+      }
+
       const income = await Income.create({
         ...req.body,
         verifyLog: 'not verified'
       });
 
-      // Log income creation
       await logActivity(
         req,
         'CREATE',
         'Income',
         income.incomeId,
         { before: null, after: income.toObject() },
-        `Income ${income.incomeId} created by ${req.user.name}`
+        `Income ${income.incomeId} created by ${req.user?.name}`
       );
 
       res.status(201).json(income);
     } catch (error) {
-      res.status(500).json({ message: 'Failed to create income' });
+      res.status(500).json({ message: 'Failed to create income', error: error.message });
     }
   },
 
   // Update income
   updateIncome: async (req, res) => {
     try {
+      const { name } = req.body;
       const income = await Income.findById(req.params.id);
       if (!income) {
         return res.status(404).json({ message: 'Income not found' });
       }
 
+      if (name) {
+        const existingIncome = await Income.findOne({
+          name,
+          _id: { $ne: req.params.id }
+        });
+        if (existingIncome) {
+          return res.status(400).json({ message: 'Name already exists' });
+        }
+      }
+
       const originalData = income.toObject();
 
-
-      // Update income and set verifyLog to 'not verified'
       const updatedIncome = await Income.findByIdAndUpdate(
         req.params.id,
         { ...req.body, verifyLog: 'not verified' },
         { new: true }
       );
 
-      // Log income update
       await logActivity(
         req,
         'UPDATE',
         'Income',
         income.incomeId,
         { before: originalData, after: updatedIncome.toObject() },
-        `Income ${income.incomeId} updated by ${req.user.name}`
+        `Income ${income.incomeId} updated by ${req.user?.name}`
       );
 
       res.json(updatedIncome);
     } catch (error) {
-      res.status(500).json({ message: 'Failed to update income' });
+      res.status(500).json({ message: 'Failed to update income', error: error.message });
     }
   },
 
@@ -110,19 +126,15 @@ export const incomeController = {
 
       const originalData = income.toObject();
 
-      // If status is changing to rejected, move to recycle bin
       if (verifyLog === 'rejected') {
         income.isDeleted = true;
         income.deletedAt = new Date();
         income.deletedBy = registerId;
       }
 
-
-      // Update verification status
       income.verifyLog = verifyLog;
       await income.save();
 
-      // Log verification status change
       await logActivity(
         req,
         'VERIFY',
@@ -134,10 +146,9 @@ export const incomeController = {
 
       res.json({ message: 'Verification status updated successfully' });
     } catch (error) {
-      res.status(500).json({ message: 'Failed to update verification status' });
+      res.status(500).json({ message: 'Failed to update verification status', error: error.message });
     }
   },
-
 
   // Soft delete income
   deleteIncome: async (req, res) => {
@@ -151,22 +162,21 @@ export const incomeController = {
 
       income.isDeleted = true;
       income.deletedAt = new Date();
-      income.deletedBy = req.user.registerId; 
+      income.deletedBy = req.user?.registerId;
       await income.save();
 
-      // Log income deletion
       await logActivity(
         req,
         'DELETE',
         'Income',
         income.incomeId,
         { before: originalData, after: income.toObject() },
-        `Income ${income.incomeId} moved to recycle bin by ${req.user.name}`
+        `Income ${income.incomeId} moved to recycle bin by ${req.user?.name}`
       );
 
       res.json({ message: 'Income moved to recycle bin' });
     } catch (error) {
-      res.status(500).json({ message: 'Failed to delete income', error });
+      res.status(500).json({ message: 'Failed to delete income', error: error.message });
     }
   },
 
@@ -176,7 +186,7 @@ export const incomeController = {
       const deletedIncomes = await Income.find({ isDeleted: true }).sort({ updatedAt: -1 });
       res.json(deletedIncomes);
     } catch (error) {
-      res.status(500).json({ message: 'Failed to fetch deleted incomes', error });
+      res.status(500).json({ message: 'Failed to fetch deleted incomes', error: error.message });
     }
   },
 
@@ -193,19 +203,18 @@ export const incomeController = {
       income.isDeleted = false;
       await income.save();
 
-      // Log income restoration
       await logActivity(
         req,
         'RESTORE',
         'Income',
         income.incomeId,
         { before: originalData, after: income.toObject() },
-        `Income ${income.incomeId} restored from recycle bin by ${req.user.name}`
+        `Income ${income.incomeId} restored from recycle bin by ${req.user?.name}`
       );
 
       res.json({ message: 'Income restored successfully' });
     } catch (error) {
-      res.status(500).json({ message: 'Failed to restore income', error });
+      res.status(500).json({ message: 'Failed to restore income', error: error.message });
     }
   },
 
@@ -219,20 +228,19 @@ export const incomeController = {
 
       const originalData = income.toObject();
 
-      // Log permanent deletion
       await logActivity(
         req,
         'DELETE',
         'Income',
         income.incomeId,
         { before: originalData, after: null },
-        `Income ${income.incomeId} permanently deleted by ${req.user.name}`
+        `Income ${income.incomeId} permanently deleted by ${req.user?.name}`
       );
 
       await Income.findByIdAndDelete(req.params.id);
       res.json({ message: 'Income permanently deleted' });
     } catch (error) {
-      res.status(500).json({ message: 'Failed to delete income permanently', error });
+      res.status(500).json({ message: 'Failed to delete income permanently', error: error.message });
     }
   }
 };
