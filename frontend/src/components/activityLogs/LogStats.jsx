@@ -1,4 +1,4 @@
-import { Activity, Calendar, TrendingUp, User, ChevronDown, ChevronRight } from 'lucide-react';
+import { Activity, Calendar, User, ChevronDown, ChevronRight } from 'lucide-react';
 import { useState } from 'react';
 
 function LogStats({ stats, loading }) {

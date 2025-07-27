@@ -4,6 +4,7 @@ Started on OCT 2024
 
 DIRECTORY STRUCTURE
 |   
+|   README.md
 |   
 +---backend
 |   |   .env
@@ -17,9 +18,11 @@ DIRECTORY STRUCTURE
 |   |       roles.js
 |   |       
 |   +---controllers
+|   |       activityLogController.js
 |   |       authController.js
 |   |       bannerController.js
 |   |       collectionController.js
+|   |       committeeController.js
 |   |       developerController.js
 |   |       estimationController.js
 |   |       expenseController.js
@@ -33,25 +36,25 @@ DIRECTORY STRUCTURE
 |   |       paymentController.js
 |   |       paymentDetailsController.js
 |   |       statsController.js
-|   |       userController.js
 |   |       usersController.js
 |   |       verificationController.js
 |   |       
 |   +---middleware
+|   |       activityLogger.js
 |   |       auth.js
 |   |       
 |   +---models
+|   |       ActivityLog.js
 |   |       Banner.js
 |   |       Collection.js
+|   |       Committee.js
 |   |       EstimatedExpense.js
 |   |       EstimatedIncome.js
 |   |       Event.js
 |   |       Expense.js
-|   |       ExpenseLog.js
 |   |       Game.js
 |   |       HiddenProfile.js
 |   |       Income.js
-|   |       IncomeLog.js
 |   |       MaintenanceMode.js
 |   |       Moment.js
 |   |       Notification.js
@@ -59,15 +62,16 @@ DIRECTORY STRUCTURE
 |   |       OTP.js
 |   |       Payment.js
 |   |       PaymentDetails.js
-|   |       PaymentLog.js
 |   |       PreviousYear.js
 |   |       Slide.js
 |   |       User.js
 |   |       
 |   +---routes
+|   |       activityLogs.js
 |   |       auth.js
 |   |       banners.js
 |   |       collections.js
+|   |       committee.js
 |   |       developer.js
 |   |       estimation.js
 |   |       expenses.js
@@ -148,6 +152,12 @@ DIRECTORY STRUCTURE
         |   |   ProtectedRoute.jsx
         |   |   Sidebar.jsx
         |   |   
+        |   +---activityLogs
+        |   |       LogFilters.jsx
+        |   |       LogPrint.jsx
+        |   |       LogStats.jsx
+        |   |       LogTable.jsx
+        |   |       
         |   +---auth
         |   |       ForgotPassword.jsx
         |   |       InstallApp.jsx
@@ -175,12 +185,11 @@ DIRECTORY STRUCTURE
         |   |       StatsPrint.jsx
         |   |       
         |   +---expense
-        |   |       ExpenseExcel.jsx
+        |   |       ExpenseEnglishPrint.jsx
         |   |       ExpenseFilters.jsx
         |   |       ExpenseForm.jsx
-        |   |       ExpensePrint.jsx
         |   |       ExpenseTable.jsx
-        |   |       ModificationLog.jsx
+        |   |       ExpenseTeluguPrint.jsx
         |   |       
         |   +---games
         |   |       GameCard.jsx
@@ -195,12 +204,11 @@ DIRECTORY STRUCTURE
         |   |       Timeline.jsx
         |   |       
         |   +---income
-        |   |       IncomeExcel.jsx
+        |   |       IncomeEnglishPrint.jsx
         |   |       IncomeFilters.jsx
         |   |       IncomeForm.jsx
-        |   |       IncomePrint.jsx
         |   |       IncomeTable.jsx
-        |   |       ModificationLog.jsx
+        |   |       IncomeTeluguPrint.jsx
         |   |       
         |   +---moments
         |   |       MediaPreview.jsx
@@ -224,7 +232,8 @@ DIRECTORY STRUCTURE
         |   |       NotificationSettings.jsx
         |   |       
         |   +---stats
-        |   |       StatsPrint.jsx
+        |   |       StatsEnglishPrint.jsx
+        |   |       StatsTeluguPrint.jsx
         |   |       
         |   +---techstack
         |   |       Access.jsx
@@ -255,7 +264,9 @@ DIRECTORY STRUCTURE
         |       DashboardLayout.jsx
         |       
         +---pages
+        |       ActivityLogs.jsx
         |       AdminPanel.jsx
+        |       Committee.jsx
         |       DeveloperOptions.jsx
         |       Estimation.jsx
         |       Expense.jsx
@@ -288,5 +299,5 @@ DIRECTORY STRUCTURE
                 songQueue.js
                 vapidKeys.js
                 
-
+                
 tree /F /A  > directory_structure.txt
