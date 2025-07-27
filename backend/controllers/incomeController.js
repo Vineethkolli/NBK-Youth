@@ -42,12 +42,13 @@ export const incomeController = {
     }
   },
 
-  // Create new income
+  // Create new income (case-insensitive name uniqueness)
   createIncome: async (req, res) => {
     try {
       const { name } = req.body;
 
-      const existingIncome = await Income.findOne({ name });
+      // Check for existing name case-insensitively
+      const existingIncome = await Income.findOne({ name: { $regex: `^${name}$`, $options: 'i' } });
       if (existingIncome) {
         return res.status(400).json({ message: 'Name already exists' });
       }
@@ -72,7 +73,7 @@ export const incomeController = {
     }
   },
 
-  // Update income
+  // Update income (case-insensitive name check)
   updateIncome: async (req, res) => {
     try {
       const { name } = req.body;
@@ -82,8 +83,9 @@ export const incomeController = {
       }
 
       if (name) {
+        // Check other documents for same name case-insensitively
         const existingIncome = await Income.findOne({
-          name,
+          name: { $regex: `^${name}$`, $options: 'i' },
           _id: { $ne: req.params.id }
         });
         if (existingIncome) {
