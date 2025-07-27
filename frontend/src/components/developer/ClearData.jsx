@@ -30,8 +30,8 @@ function ClearData() {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow p-6">
-      <h2 className="text-xl font-semibold mb-4">Clear Data</h2>
+    <div className="bg-white rounded-lg shadow p-4">
+      <h2 className="text-2xl font-semibold mb-4">Clear Data</h2>
       <div className="space-y-4">
         {[
           { name: 'Income', type: 'income' },

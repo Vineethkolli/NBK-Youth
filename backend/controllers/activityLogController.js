@@ -81,7 +81,7 @@ export const activityLogController = {
   // Get activity statistics
   getLogStats: async (req, res) => {
     try {
-      const [actionStats, entityStats, totalLogs, recentActivity] = await Promise.all([
+      const [actionStats, entityStats, totalLogs, recentActivity, userActivityBreakdown] = await Promise.all([
         // Get action breakdown
         ActivityLog.aggregate([
           {
@@ -108,7 +108,60 @@ export const activityLogController = {
         // Get recent activity (last 24 hours)
         ActivityLog.find({
           createdAt: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) }
-        }).countDocuments()
+        }).countDocuments(),
+        
+        // Get detailed user activity breakdown for specific entities
+        ActivityLog.aggregate([
+          {
+            $match: {
+              entityType: { $in: ['Income', 'Expense', 'EstimatedIncome', 'EstimatedExpense'] },
+              registerId: { $exists: true, $ne: null, $ne: '' }
+            }
+          },
+          {
+            $group: {
+              _id: {
+                entityType: '$entityType',
+                registerId: '$registerId',
+                userName: '$userName',
+                action: '$action'
+              },
+              count: { $sum: 1 }
+            }
+          },
+          {
+            $group: {
+              _id: {
+                entityType: '$_id.entityType',
+                registerId: '$_id.registerId',
+                userName: '$_id.userName'
+              },
+              actions: {
+                $push: {
+                  action: '$_id.action',
+                  count: '$count'
+                }
+              },
+              totalActions: { $sum: '$count' }
+            }
+          },
+          {
+            $group: {
+              _id: '$_id.entityType',
+              users: {
+                $push: {
+                  registerId: '$_id.registerId',
+                  userName: '$_id.userName',
+                  actions: '$actions',
+                  totalActions: '$totalActions'
+                }
+              }
+            }
+          },
+          {
+            $sort: { '_id': 1 }
+          }
+        ])
       ]);
 
       // Convert arrays to objects
@@ -122,11 +175,28 @@ export const activityLogController = {
         entityBreakdown[stat._id] = stat.count;
       });
 
+      // Convert user activity breakdown to a more usable format
+      const detailedUserBreakdown = {};
+      userActivityBreakdown.forEach(entityGroup => {
+        const entityType = entityGroup._id;
+        detailedUserBreakdown[entityType] = entityGroup.users
+          .sort((a, b) => b.totalActions - a.totalActions) // Sort by total actions descending
+          .map(user => ({
+            registerId: user.registerId,
+            userName: user.userName,
+            totalActions: user.totalActions,
+            actions: user.actions.reduce((acc, action) => {
+              acc[action.action] = action.count;
+              return acc;
+            }, {})
+          }));
+      });
       res.json({
         totalLogs,
         recentActivity,
         actionBreakdown,
-        entityBreakdown
+        entityBreakdown,
+        detailedUserBreakdown
       });
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch log statistics' });

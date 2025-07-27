@@ -12,7 +12,7 @@ const ActivityLogPrint = ({ filters, search }) => {
       const params = new URLSearchParams({
         search,
         ...filters,
-        limit: 10000, // High enough to fetch all logs
+        limit: 10000, 
         page: 1,
       });
 
