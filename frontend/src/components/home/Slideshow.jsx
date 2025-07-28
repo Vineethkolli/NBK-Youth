@@ -4,8 +4,8 @@ import {
   Trash2,
   ArrowLeft,
   ArrowRight,
-  GripVertical,
   Loader2,
+  GripHorizontal,
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
@@ -205,17 +205,17 @@ function Slideshow({ isEditing }) {
       )}
 
       {isEditing && (
-        <div className="absolute top-4 right-4 space-x-2">
+        <div className="absolute top-2 right-2 space-x-2">
           <button
             onClick={() => setIsEditingOrder(!isEditingOrder)}
-            className={`inline-flex items-center px-3 py-1 rounded-md shadow-sm ${
+            className={`inline-flex items-center px-2 py-1 rounded-md shadow-sm transition-colors ${
               isEditingOrder
-                ? 'bg-yellow-600 text-white'
-                : 'bg-white text-gray-800'
+                ? 'bg-blue-600 text-white hover:bg-blue-700'
+                : 'bg-white text-gray-800 hover:bg-gray-50'
             }`}
           >
-            <GripVertical className="h-4 w-4 mr-1" />
-            {isEditingOrder ? 'Done' : 'Order'}
+            <GripHorizontal className="h-4 w-4 mr-1" />
+            {isEditingOrder ? 'Ordering...' : 'Reorder'}
           </button>
 
           <input
@@ -228,7 +228,7 @@ function Slideshow({ isEditing }) {
           />
           <label
             htmlFor="slide-upload"
-            className={`inline-flex items-center px-3 py-1 rounded-md shadow-sm bg-white ${
+            className={`inline-flex items-center px-2 py-1 rounded-md shadow-sm bg-white ${
               isUploading
                 ? 'cursor-not-allowed opacity-50'
                 : 'cursor-pointer'
@@ -246,7 +246,7 @@ function Slideshow({ isEditing }) {
             onClick={() =>
               handleDelete(slide._id, currentSlide)
             }
-            className={`inline-flex items-center px-3 py-1 rounded-md shadow-sm bg-red-600 text-white ${
+            className={`inline-flex items-center px-2 py-1 rounded-md shadow-sm bg-red-600 text-white ${
               isDeleting === currentSlide
                 ? 'cursor-not-allowed opacity-50'
                 : ''
@@ -289,6 +289,7 @@ function Slideshow({ isEditing }) {
           setCurrentSlide={setCurrentSlide}
           draggedSlide={draggedSlide}
           setDraggedSlide={setDraggedSlide}
+          setIsEditingOrder={setIsEditingOrder}
         />
       ) : (
         <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
