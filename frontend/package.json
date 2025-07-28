@@ -10,13 +10,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@google-cloud/storage": "^7.14.0",
     "@heroicons/react": "^2.2.0",
     "axios": "^1.7.8",
-    "file-saver": "^2.0.5",
-    "jspdf": "^2.5.2",
-    "jspdf-autotable": "^3.8.4",
-    "jwt-decode": "^4.0.0",
+    "jspdf": "^3.0.1",
+    "jspdf-autotable": "^5.0.2",
     "lucide-react": "^0.462.0",
     "qrcode.react": "^3.2.0",
     "react": "^18.3.1",
@@ -27,6 +24,7 @@
     "react-linkify": "^1.0.0-alpha",
     "react-router-dom": "^7.0.1",
     "vite-plugin-pwa": "^0.21.1",
+    "workbox-precaching": "^7.3.0",
     "workbox-window": "^7.3.0"
   },
   "devDependencies": {
