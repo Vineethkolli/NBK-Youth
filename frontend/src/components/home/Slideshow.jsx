@@ -19,7 +19,6 @@ function Slideshow({ isEditing }) {
   const [isUploading, setIsUploading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(null);
   const [isEditingOrder, setIsEditingOrder] = useState(false);
-  const [draggedSlide, setDraggedSlide] = useState(null);
 
   const videoRef = useRef(null);
   const touchStartX = useRef(0);
@@ -111,13 +110,12 @@ function Slideshow({ isEditing }) {
       toast.error('Failed to upload slide');
     } finally {
       setIsUploading(false);
-      // reset the file input so same file can be re-selected if needed
       e.target.value = '';
     }
   };
 
-  const handleDelete = async (id, index) => {
-    setIsDeleting(index);
+  const handleDelete = async (id) => {
+    setIsDeleting(currentSlide);
     try {
       await axios.delete(`${API_URL}/api/homepage/slides/${id}`);
       toast.success('Slide deleted successfully');
@@ -205,7 +203,13 @@ function Slideshow({ isEditing }) {
       )}
 
       {isEditing && (
-        <div className="absolute top-2 right-2 space-x-2">
+        // <-- Added touch-stop-propagation here
+        <div
+          className="absolute top-2 right-2 space-x-2"
+          onTouchStart={e => e.stopPropagation()}
+          onTouchMove={e => e.stopPropagation()}
+          onTouchEnd={e => e.stopPropagation()}
+        >
           <button
             onClick={() => setIsEditingOrder(!isEditingOrder)}
             className={`inline-flex items-center px-2 py-1 rounded-md shadow-sm transition-colors ${
@@ -243,9 +247,7 @@ function Slideshow({ isEditing }) {
           </label>
 
           <button
-            onClick={() =>
-              handleDelete(slide._id, currentSlide)
-            }
+            onClick={() => handleDelete(slide._id)}
             className={`inline-flex items-center px-2 py-1 rounded-md shadow-sm bg-red-600 text-white ${
               isDeleting === currentSlide
                 ? 'cursor-not-allowed opacity-50'
@@ -287,8 +289,6 @@ function Slideshow({ isEditing }) {
           slides={slides}
           setSlides={setSlides}
           setCurrentSlide={setCurrentSlide}
-          draggedSlide={draggedSlide}
-          setDraggedSlide={setDraggedSlide}
           setIsEditingOrder={setIsEditingOrder}
         />
       ) : (
