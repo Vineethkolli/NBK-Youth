@@ -4,7 +4,7 @@ import { Edit2 } from 'lucide-react';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import { API_URL } from '../utils/config';
-import Slideshow from '../components/home/SlideShow';
+import Slideshow from '../components/home/Slideshow';
 import Timeline from '../components/home/Timeline';
 import Footer from '../components/Footer';
 
