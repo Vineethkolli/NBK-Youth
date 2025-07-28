@@ -1,12 +1,12 @@
+// src/components/activityLogs/LogTable.jsx
+import { Fragment, useState } from 'react';
 import { ChevronLeft, ChevronRight, Eye, EyeOff } from 'lucide-react';
-import { useState } from 'react';
 
 function LogTable({ logs, loading, pagination, onPageChange }) {
   const [expandedRows, setExpandedRows] = useState(new Set());
 
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleString();
-  };
+  const formatDate = (dateString) =>
+    new Date(dateString).toLocaleString();
 
   const getActionColor = (action) => {
     switch (action) {
@@ -27,11 +27,8 @@ function LogTable({ logs, loading, pagination, onPageChange }) {
 
   const toggleRowExpansion = (logId) => {
     const newExpanded = new Set(expandedRows);
-    if (newExpanded.has(logId)) {
-      newExpanded.delete(logId);
-    } else {
-      newExpanded.add(logId);
-    }
+    if (newExpanded.has(logId)) newExpanded.delete(logId);
+    else newExpanded.add(logId);
     setExpandedRows(newExpanded);
   };
 
@@ -98,9 +95,11 @@ function LogTable({ logs, loading, pagination, onPageChange }) {
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {logs.map((log) => (
-              <>
-                <tr key={log._id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">{formatDate(log.createdAt)}</td>
+              <Fragment key={log._id}>
+                <tr className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    {formatDate(log.createdAt)}
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
                     <div>
                       <div className="font-medium">{log.userName}</div>
@@ -108,7 +107,13 @@ function LogTable({ logs, loading, pagination, onPageChange }) {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getActionColor(log.action)}`}>{log.action}</span>
+                    <span
+                      className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getActionColor(
+                        log.action
+                      )}`}
+                    >
+                      {log.action}
+                    </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
                     <div>
@@ -122,7 +127,11 @@ function LogTable({ logs, loading, pagination, onPageChange }) {
                       onClick={() => toggleRowExpansion(log._id)}
                       className="text-indigo-600 hover:text-indigo-900"
                     >
-                      {expandedRows.has(log._id) ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                      {expandedRows.has(log._id) ? (
+                        <EyeOff className="h-5 w-5" />
+                      ) : (
+                        <Eye className="h-5 w-5" />
+                      )}
                     </button>
                   </td>
                 </tr>
@@ -138,7 +147,7 @@ function LogTable({ logs, loading, pagination, onPageChange }) {
                     </td>
                   </tr>
                 )}
-              </>
+              </Fragment>
             ))}
           </tbody>
         </table>
@@ -147,7 +156,8 @@ function LogTable({ logs, loading, pagination, onPageChange }) {
       {/* Pagination */}
       <div className="flex items-center justify-between px-6 py-3 border-t">
         <div className="text-sm text-gray-700">
-          Showing page {pagination.currentPage} of {pagination.totalPages} ({pagination.totalCount} total entries)
+          Showing page {pagination.currentPage} of {pagination.totalPages} (
+          {pagination.totalCount} total entries)
         </div>
         <div className="flex space-x-2">
           <button

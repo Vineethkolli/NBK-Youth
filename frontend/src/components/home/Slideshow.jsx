@@ -1,126 +1,153 @@
 import { useState, useEffect, useRef } from 'react';
-import { Plus, Trash2, ArrowLeft, ArrowRight } from 'lucide-react';
+import {
+  Plus,
+  Trash2,
+  ArrowLeft,
+  ArrowRight,
+  GripVertical,
+  Loader2,
+} from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { API_URL } from '../../utils/config';
 import { useAuth } from '../../context/AuthContext';
+import SlidesOrder from './SlidesOrder';
 
 function Slideshow({ isEditing }) {
   const [slides, setSlides] = useState([]);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(null);
+  const [isEditingOrder, setIsEditingOrder] = useState(false);
+  const [draggedSlide, setDraggedSlide] = useState(null);
+
   const videoRef = useRef(null);
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
-  const swipeThreshold = 50; 
+  const swipeThreshold = 50;
   const { user } = useAuth();
 
+  // Fetch slides on mount
   useEffect(() => {
     fetchSlides();
   }, []);
 
+  // Clamp currentSlide whenever slides change
   useEffect(() => {
-    let interval;
+    if (slides.length === 0) {
+      setCurrentSlide(0);
+    } else if (currentSlide >= slides.length) {
+      setCurrentSlide(slides.length - 1);
+    }
+  }, [slides, currentSlide]);
 
-    if (slides.length > 0 && !isEditing) {
-      const currentSlideData = slides[currentSlide];
+  // Auto-advance logic
+  useEffect(() => {
+    let timeout;
 
-      if (currentSlideData.type === 'image') {
-        interval = setTimeout(nextSlide, 3000); // Display image for 3 seconds
-      } else if (currentSlideData.type === 'video') {
+    const slide = slides[currentSlide];
+    if (!slide) return;
+
+    if (!isEditing) {
+      if (slide.type === 'image') {
+        timeout = setTimeout(nextSlide, 3000);
+      } else if (slide.type === 'video') {
         const video = videoRef.current;
         if (video) {
-          video.play(); 
-          video.onended = nextSlide; 
+          video.play();
+          video.onended = nextSlide;
         }
       }
     }
 
     return () => {
-      clearTimeout(interval);
+      clearTimeout(timeout);
       if (videoRef.current) {
-        videoRef.current.onended = null; 
+        videoRef.current.onended = null;
       }
     };
   }, [currentSlide, slides, isEditing]);
 
-  const fetchSlides = async () => {
+  async function fetchSlides() {
     try {
       const { data } = await axios.get(`${API_URL}/api/homepage/slides`);
       setSlides(data);
-    } catch (error) {
+    } catch (err) {
       toast.error('Failed to fetch slides');
     }
-  };
+  }
 
-  const handleFileUpload = async (e) => {
-    const file = e.target.files[0];
+  // Utility to convert File -> base64
+  function toBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = () => reject('File read error');
+    });
+  }
+
+  const handleFileUpload = async e => {
+    const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 200 * 1024 * 1024) {
-      return toast.error('File size should be less than 200MB');
+    if (file.size > 100 * 1024 * 1024) {
+      toast.error('File size should be less than 100MB');
+      return;
     }
 
     const type = file.type.startsWith('image/') ? 'image' : 'video';
     setIsUploading(true);
 
     try {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = async () => {
-        await axios.post(`${API_URL}/api/homepage/slides`, {
-          file: reader.result,
-          type
-        });
-        toast.success('Slide added successfully');
-        fetchSlides();
-      };
-    } catch (error) {
+      const base64 = await toBase64(file);
+      await axios.post(`${API_URL}/api/homepage/slides`, {
+        file: base64,
+        type,
+      });
+      toast.success('Slide added successfully');
+      await fetchSlides();
+    } catch (err) {
       toast.error('Failed to upload slide');
     } finally {
       setIsUploading(false);
+      // reset the file input so same file can be re-selected if needed
+      e.target.value = '';
     }
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (id, index) => {
+    setIsDeleting(index);
     try {
       await axios.delete(`${API_URL}/api/homepage/slides/${id}`);
       toast.success('Slide deleted successfully');
-      fetchSlides();
-    } catch (error) {
+      await fetchSlides();
+    } catch {
       toast.error('Failed to delete slide');
+    } finally {
+      setIsDeleting(null);
     }
   };
 
-  const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % slides.length);
-  };
+  const nextSlide = () =>
+    setCurrentSlide(prev => (prev + 1) % slides.length);
 
-  const previousSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
-  };
+  const previousSlide = () =>
+    setCurrentSlide(prev => (prev - 1 + slides.length) % slides.length);
 
-  // Touch event handlers for swipe functionality
-  const handleTouchStart = (e) => {
-    touchStartX.current = e.touches[0].clientX;
-  };
-
-  const handleTouchMove = (e) => {
-    touchEndX.current = e.touches[0].clientX;
-  };
-
+  const handleTouchStart = e =>
+    (touchStartX.current = e.touches[0].clientX);
+  const handleTouchMove = e =>
+    (touchEndX.current = e.touches[0].clientX);
   const handleTouchEnd = () => {
-    const swipeDistance = touchStartX.current - touchEndX.current;
-    if (Math.abs(swipeDistance) > swipeThreshold) {
-      if (swipeDistance > 0) {
-        nextSlide();
-      } else {
-        previousSlide();
-      }
+    const delta = touchStartX.current - touchEndX.current;
+    if (Math.abs(delta) > swipeThreshold) {
+      delta > 0 ? nextSlide() : previousSlide();
     }
   };
 
-  if (slides.length === 0) {
+  // No slides or loading state
+  if (slides.length === 0 || !slides[currentSlide]) {
     return (
       <div className="h-96 bg-gray-100 rounded-lg flex items-center justify-center">
         {isEditing ? (
@@ -137,8 +164,12 @@ function Slideshow({ isEditing }) {
               htmlFor="slide-upload"
               className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md cursor-pointer"
             >
-              <Plus className="h-5 w-5 mr-2" />
-              Add Slide
+              {isUploading ? (
+                <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+              ) : (
+                <Plus className="h-5 w-5 mr-2" />
+              )}
+              {isUploading ? 'Adding...' : 'Add Slide'}
             </label>
           </div>
         ) : (
@@ -148,7 +179,7 @@ function Slideshow({ isEditing }) {
     );
   }
 
-  const currentSlideData = slides[currentSlide];
+  const slide = slides[currentSlide];
 
   return (
     <div
@@ -157,25 +188,36 @@ function Slideshow({ isEditing }) {
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
-      {currentSlideData.type === 'image' ? (
+      {slide.type === 'image' ? (
         <img
-          src={currentSlideData.url}
+          src={slide.url}
           alt="Slide"
           className="w-full h-full object-cover"
         />
       ) : (
         <video
           ref={videoRef}
-          src={currentSlideData.url}
+          src={slide.url}
           className="w-full h-full object-cover"
-          autoPlay
           controls={isEditing}
-          muted={false} 
+          muted={false}
         />
       )}
 
       {isEditing && (
         <div className="absolute top-4 right-4 space-x-2">
+          <button
+            onClick={() => setIsEditingOrder(!isEditingOrder)}
+            className={`inline-flex items-center px-3 py-1 rounded-md shadow-sm ${
+              isEditingOrder
+                ? 'bg-yellow-600 text-white'
+                : 'bg-white text-gray-800'
+            }`}
+          >
+            <GripVertical className="h-4 w-4 mr-1" />
+            {isEditingOrder ? 'Done' : 'Order'}
+          </button>
+
           <input
             type="file"
             accept="image/*,video/*"
@@ -186,22 +228,44 @@ function Slideshow({ isEditing }) {
           />
           <label
             htmlFor="slide-upload"
-            className="inline-flex items-center px-3 py-1 bg-white rounded-md shadow-sm cursor-pointer"
+            className={`inline-flex items-center px-3 py-1 rounded-md shadow-sm bg-white ${
+              isUploading
+                ? 'cursor-not-allowed opacity-50'
+                : 'cursor-pointer'
+            }`}
           >
-            <Plus className="h-4 w-4 mr-1" />
-            Add
+            {isUploading ? (
+              <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+            ) : (
+              <Plus className="h-4 w-4 mr-1" />
+            )}
+            {isUploading ? 'Adding...' : 'Add'}
           </label>
+
           <button
-            onClick={() => handleDelete(currentSlideData._id)}
-            className="inline-flex items-center px-3 py-1 bg-red-600 text-white rounded-md shadow-sm"
+            onClick={() =>
+              handleDelete(slide._id, currentSlide)
+            }
+            className={`inline-flex items-center px-3 py-1 rounded-md shadow-sm bg-red-600 text-white ${
+              isDeleting === currentSlide
+                ? 'cursor-not-allowed opacity-50'
+                : ''
+            }`}
+            disabled={isDeleting === currentSlide}
           >
-            <Trash2 className="h-4 w-4 mr-1" />
-            Delete
+            {isDeleting === currentSlide ? (
+              <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+            ) : (
+              <Trash2 className="h-4 w-4 mr-1" />
+            )}
+            {isDeleting === currentSlide
+              ? 'Deleting...'
+              : 'Delete'}
           </button>
         </div>
       )}
 
-      {slides.length > 1 && (
+      {slides.length > 1 && !isEditingOrder && (
         <>
           <button
             onClick={previousSlide}
@@ -218,17 +282,29 @@ function Slideshow({ isEditing }) {
         </>
       )}
 
-      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
-        {slides.map((_, index) => (
-          <button
-            key={index}
-            onClick={() => setCurrentSlide(index)}
-            className={`w-2 h-2 rounded-full ${
-              index === currentSlide ? 'bg-white' : 'bg-white/50'
-            }`}
-          />
-        ))}
-      </div>
+      {isEditingOrder ? (
+        <SlidesOrder
+          slides={slides}
+          setSlides={setSlides}
+          setCurrentSlide={setCurrentSlide}
+          draggedSlide={draggedSlide}
+          setDraggedSlide={setDraggedSlide}
+        />
+      ) : (
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+          {slides.map((_, idx) => (
+            <button
+              key={idx}
+              onClick={() => setCurrentSlide(idx)}
+              className={`w-2 h-2 rounded-full ${
+                idx === currentSlide
+                  ? 'bg-white'
+                  : 'bg-white/50'
+              }`}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

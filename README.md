@@ -122,7 +122,7 @@ MONGODB_URI=your_mongodb_connection_string
 PUBLIC_VAPID_KEY=your_webpush_public_key
 PRIVATE_VAPID_KEY=your_webpush_private_key
 FRONTEND_URL=http://localhost:5173
-Also include needed JWT secret, Cloudinary creds, email credentials, etc.
+Also include needed JWT secret, Cloudinary creds, email credentials, Google drive api credentials.
 ```
 
 Run backend:
@@ -145,7 +145,7 @@ Visit: [http://localhost:5173](http://localhost:5173)
 
 ---
 
-## 🙋‍♂️ Credits / ContactContact
+## 🙋‍♂️ Credits / Contact
 
 This project was developed by **Vineeth Kolli**  
 🔗 GitHub: [@Vineethkolli](https://github.com/Vineethkolli)

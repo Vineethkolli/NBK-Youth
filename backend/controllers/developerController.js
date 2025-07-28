@@ -20,17 +20,17 @@ export const developerController = {
       switch (type) {
         case 'income':
           await Income.deleteMany({});
-          description = 'Cleared all income records and logs';
+          description = 'Cleared all income records';
           break;
 
         case 'expense':
           await Expense.deleteMany({});
-          description = 'Cleared all expense records and logs';
+          description = 'Cleared all expense records';
           break;
 
         case 'notifications':
           await NotificationHistory.deleteMany({});
-          description = 'Cleared all notification subscriptions and history';
+          description = 'Cleared all notification history';
           break;
 
         case 'estimatedIncome':
