@@ -5,8 +5,6 @@ import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import { API_URL } from '../../utils/config';
 
-// Make sure to install: npm install @hello-pangea/dnd
-
 function SlidesOrder({
   slides,
   setSlides,
@@ -85,6 +83,7 @@ function SlidesOrder({
             </div>
           </div>
           <p className="text-sm text-gray-600 mt-2">
+            <GripHorizontal className="h-4 w-4 inline mr-1" />
             Drag slides or use arrows to reorder.
           </p>
         </div>
