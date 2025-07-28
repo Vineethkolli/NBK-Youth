@@ -210,18 +210,7 @@ function Slideshow({ isEditing }) {
           onTouchMove={e => e.stopPropagation()}
           onTouchEnd={e => e.stopPropagation()}
         >
-          <button
-            onClick={() => setIsEditingOrder(!isEditingOrder)}
-            className={`inline-flex items-center px-2 py-1 rounded-md shadow-sm transition-colors ${
-              isEditingOrder
-                ? 'bg-blue-600 text-white hover:bg-blue-700'
-                : 'bg-white text-gray-800 hover:bg-gray-50'
-            }`}
-          >
-            <GripHorizontal className="h-4 w-4 mr-1" />
-            {isEditingOrder ? 'Ordering...' : 'Reorder'}
-          </button>
-
+          
           <input
             type="file"
             accept="image/*,video/*"
@@ -245,6 +234,17 @@ function Slideshow({ isEditing }) {
             )}
             {isUploading ? 'Adding...' : 'Add'}
           </label>
+          <button
+            onClick={() => setIsEditingOrder(!isEditingOrder)}
+            className={`inline-flex items-center px-2 py-1 rounded-md shadow-sm transition-colors ${
+              isEditingOrder
+                ? 'bg-blue-600 text-white hover:bg-blue-700'
+                : 'bg-white text-gray-800 hover:bg-gray-50'
+            }`}
+          >
+            <GripHorizontal className="h-4 w-4 mr-1" />
+            {isEditingOrder ? 'Ordering...' : 'Reorder'}
+          </button>
 
           <button
             onClick={() => handleDelete(slide._id)}

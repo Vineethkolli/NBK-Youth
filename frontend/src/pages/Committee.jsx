@@ -106,13 +106,7 @@ function Committee() {
             <button onClick={() => setShowAddDialog(true)} className="btn-primary">
               <Plus className="h-4 w-4 mr-2" /> Add
             </button>
-            <button
-              onClick={() => { setIsEditMode(!isEditMode); setIsReorderMode(false); }}
-              className={`btn-secondary ${isEditMode ? 'bg-red-100' : ''}`}
-              disabled={showAddDialog}
-            >
-              <Edit2 className="h-4 w-4 mr-2" /> {isEditMode ? 'Done Editing' : 'Edit'}
-            </button>
+            
             <div className="relative">
   <button
     onClick={() => {
@@ -124,7 +118,14 @@ function Committee() {
   >
     <GripHorizontal className="h-4 w-4 mr-2" /> Reorder
   </button>
-</div>
+  </div>
+  <button
+              onClick={() => { setIsEditMode(!isEditMode); setIsReorderMode(false); }}
+              className={`btn-secondary ${isEditMode ? 'bg-red-100' : ''}`}
+              disabled={showAddDialog}
+            >
+              <Edit2 className="h-4 w-4 mr-2" /> {isEditMode ? 'Done Editing' : 'Edit'}
+            </button>
           </div>
         )}
       </div>
@@ -132,7 +133,7 @@ function Committee() {
       {isReorderMode && (
   <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex flex-col items-center space-y-3">
     <p className="text-blue-800 text-sm text-center">
-     <GripHorizontal className="h-4 w-4 inline mb-1" />  Drag or use arrows to change order of members.
+     <GripHorizontal className="h-4 w-4 inline mb-1" /> Drag or use arrows to change order of members.
     </p>
     <div className="flex justify-center space-x-3">
       <button
