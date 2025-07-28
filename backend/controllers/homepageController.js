@@ -87,18 +87,33 @@ export const homepageController = {
   },
 
   updateSlideOrder: async (req, res) => {
-    try {
-      const { slides } = req.body;
-      
-      for (const slide of slides) {
-        await Slide.findByIdAndUpdate(slide._id, { order: slide.order });
-      }
+  try {
+    const { slides } = req.body;
 
-      res.json({ message: 'Slide order updated successfully' });
-    } catch (error) {
-      res.status(500).json({ message: 'Failed to update slide order' });
+    const originalSlides = await Slide.find();
+    const originalData = originalSlides.map(s => s.toObject());
+
+    // Update order for each slide
+    for (const slide of slides) {
+      await Slide.findByIdAndUpdate(slide._id, { order: slide.order });
     }
-  },
+
+    // Log order update
+    await logActivity(
+      req,
+      'UPDATE',
+      'Slide',
+      'slide-order',
+      { before: originalData, after: slides },
+      `Slide order updated by ${req.user.name}`
+    );
+
+    res.json({ message: 'Slide order updated successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to update slide order' });
+  }
+},
+
 
   // Get all Events 
   getEvents: async (req, res) => {
