@@ -1,5 +1,5 @@
-import { GripHorizontal, ArrowUp, ArrowDown } from 'lucide-react';
-import { useState, useRef } from 'react';
+import { ArrowUp, ArrowDown, GripHorizontal } from 'lucide-react';
+import { useState } from 'react';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import { API_URL } from '../../utils/config';
@@ -8,52 +8,34 @@ function SlidesOrder({
   slides,
   setSlides,
   setCurrentSlide,
-  draggedSlide,
-  setDraggedSlide,
   setIsEditingOrder,
 }) {
   const [localSlides, setLocalSlides] = useState([...slides]);
-  const touchStartIndex = useRef(null);
+  const [draggedItem, setDraggedItem] = useState(null);
+  const [dragOverItem, setDragOverItem] = useState(null);
 
   const handleDragStart = (e, index) => {
-    setDraggedSlide(index);
+    setDraggedItem(index);
     e.dataTransfer.effectAllowed = 'move';
   };
 
-  const handleDragOver = (e) => {
+  const handleDragOver = (e, index) => {
     e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
+    setDragOverItem(index);
   };
 
-  const handleDrop = (e, dropIndex) => {
-    e.preventDefault();
-    if (draggedSlide === null || draggedSlide === dropIndex) return;
+  const handleDrop = async () => {
+    if (draggedItem === null || dragOverItem === null || draggedItem === dragOverItem) return;
 
     const newSlides = [...localSlides];
-    const draggedItem = newSlides[draggedSlide];
-    newSlides.splice(draggedSlide, 1);
-    newSlides.splice(dropIndex, 0, draggedItem);
-
+    const dragged = newSlides[draggedItem];
+    newSlides.splice(draggedItem, 1);
+    newSlides.splice(dragOverItem, 0, dragged);
     setLocalSlides(newSlides);
-    setDraggedSlide(null);
-  };
 
-  // Touch Handlers for Mobile
-  const handleTouchStart = (index) => {
-    touchStartIndex.current = index;
-  };
-
-  const handleTouchEnd = (dropIndex) => {
-    const fromIndex = touchStartIndex.current;
-    if (fromIndex === null || fromIndex === dropIndex) return;
-
-    const newSlides = [...localSlides];
-    const item = newSlides[fromIndex];
-    newSlides.splice(fromIndex, 1);
-    newSlides.splice(dropIndex, 0, item);
-
-    setLocalSlides(newSlides);
-    touchStartIndex.current = null;
+    // reset
+    setDraggedItem(null);
+    setDragOverItem(null);
   };
 
   const moveSlide = (fromIndex, toIndex) => {
@@ -89,7 +71,8 @@ function SlidesOrder({
   const cancelOrder = () => {
     setLocalSlides([...slides]);
     setIsEditingOrder(false);
-    setDraggedSlide(null);
+    setDraggedItem(null);
+    setDragOverItem(null);
   };
 
   return (
@@ -126,15 +109,12 @@ function SlidesOrder({
               <div
                 key={slide._id}
                 draggable
-                onDragStart={(e) => handleDragStart(e, index)}
-                onDragOver={handleDragOver}
-                onDrop={(e) => handleDrop(e, index)}
-                onTouchStart={() => handleTouchStart(index)}
-                onTouchEnd={() => handleTouchEnd(index)}
+                onDragStart={e => handleDragStart(e, index)}
+                onDragOver={e => handleDragOver(e, index)}
+                onDrop={handleDrop}
+                onDragEnd={handleDrop}
                 className={`relative bg-white border-2 rounded-lg overflow-hidden transition-all duration-200 ${
-                  draggedSlide === index
-                    ? 'opacity-50 border-blue-500 scale-95'
-                    : 'border-gray-200 hover:border-blue-300 hover:shadow-md cursor-move'
+                  index === dragOverItem ? 'ring-2 ring-indigo-500' : 'border-gray-200 hover:border-blue-300 hover:shadow-md'
                 }`}
               >
                 {/* Order Number Badge */}
@@ -159,31 +139,26 @@ function SlidesOrder({
                   )}
                 </div>
 
-                {/* Controls (Centered) */}
+                {/* Controls */}
                 <div className="p-3 bg-gray-50 flex justify-center items-center space-x-3">
-                  <GripHorizontal
-                    className="h-5 w-5 cursor-pointer text-gray-500"
-                    onMouseDown={(e) => handleDragStart(e, index)}
-                    onTouchStart={() => handleTouchStart(index)}
-                    title="Drag"
-                  />
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => moveSlide(index, index - 1)}
-                      disabled={index === 0}
-                      className="p-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50 transition-colors"
-                      title="Move up"
-                    >
-                      <ArrowUp className="h-4 w-4" />
-                    </button>
-                    <button
-                      onClick={() => moveSlide(index, index + 1)}
-                      disabled={index === localSlides.length - 1}
-                      className="p-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50 transition-colors"
-                      title="Move down"
-                    >
-                      <ArrowDown className="h-4 w-4" />
-                    </button>
+                  <button
+                    onClick={() => moveSlide(index, index - 1)}
+                    disabled={index === 0}
+                    className="p-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50 transition-colors"
+                    title="Move up"
+                  >
+                    <ArrowUp className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={() => moveSlide(index, index + 1)}
+                    disabled={index === localSlides.length - 1}
+                    className="p-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50 transition-colors"
+                    title="Move down"
+                  >
+                    <ArrowDown className="h-4 w-4" />
+                  </button>
+                  <div className="cursor-move p-1" title="Drag" draggable>
+                    <GripHorizontal className="h-5 w-5 text-gray-500 hover:text-gray-700" />
                   </div>
                 </div>
               </div>
