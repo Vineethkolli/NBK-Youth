@@ -117,14 +117,14 @@ function Income() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-semibold">Income Management</h1>
-        <div className="space-x-2">
+        <div className="flex items-center space-x-3">
           {['developer', 'admin', 'financier'].includes(user?.role) && (
             <button
               onClick={() => setShowForm(!showForm)}
-              className="btn-primary"
+              className="btn-secondary flex items-center"
             >
-              <Plus className="h-4 w-4 mr-2" />
-              Add New
+              <Plus className="h-4 w-4 mr-1 inline" />
+              Add
             </button>
           )}
           <PrintComponent incomes={incomes} visibleColumns={visibleColumns} />

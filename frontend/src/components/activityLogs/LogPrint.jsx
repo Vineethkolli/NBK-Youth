@@ -1,6 +1,6 @@
 import React from 'react';
 import { jsPDF } from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import { Printer } from 'lucide-react';
 import axios from 'axios';
 import { API_URL } from '../../utils/config';
@@ -83,7 +83,7 @@ const ActivityLogPrint = ({ filters, search }) => {
       doc.setFontSize(16);
       doc.text(title, doc.internal.pageSize.getWidth() / 2, 15, { align: 'center' });
 
-      doc.autoTable({
+    autoTable(doc, {
         head: [headers],
         body: rows,
         startY: 25,

@@ -1,6 +1,6 @@
 import React from 'react';
 import { jsPDF } from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import { Printer } from 'lucide-react';
 
 const ExpensePrint = ({ expenses, visibleColumns }) => {
@@ -32,7 +32,7 @@ const ExpensePrint = ({ expenses, visibleColumns }) => {
     });
 
     // PDF table with autoTable, adding a footer with timestamp and page number
-    doc.autoTable({
+    autoTable(doc, {
       startY: 30,
       head: [tableColumns],
       body: tableRows,
@@ -60,8 +60,8 @@ const ExpensePrint = ({ expenses, visibleColumns }) => {
   };
 
   return (
-    <button onClick={generatePDF} className="btn-secondary">
-      <Printer className="h-4 w-4 mr-2 inline" />
+    <button onClick={generatePDF} className="btn-secondary flex items-center">
+      <Printer className="h-4 w-4 mr-1 inline" />
       Print
     </button>
   );

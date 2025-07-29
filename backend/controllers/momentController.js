@@ -11,11 +11,28 @@ const drive = google.drive({
   }),
 });
 
+// Helper function to extract Google Drive file ID from URL
+const extractFileIdFromUrl = (url) => {
+  // Handle direct view URLs: https://drive.google.com/uc?export=view&id=FILE_ID
+  const directMatch = url.match(/[?&]id=([^&]+)/);
+  if (directMatch) {
+    return directMatch[1];
+  }
+  
+  // Handle other Google Drive URL formats
+  const fileMatch = url.match(/\/file\/d\/([^\/]+)/);
+  if (fileMatch) {
+    return fileMatch[1];
+  }
+  
+  return null;
+};
+
 export const momentController = {
   getAllMoments: async (req, res) => {
     try {
-      const moments = await Moment.find()
-        .sort({ isPinned: -1, createdAt: -1 });
+      // Sort by pinned status first, then by creation date
+      const moments = await Moment.find().sort({ isPinned: -1, createdAt: -1 });
       res.json(moments);
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch moments', error: error.message });
@@ -25,6 +42,7 @@ export const momentController = {
   addYouTubeMoment: async (req, res) => {
     try {
       const { title, url, isPinned } = req.body;
+
       const moment = await Moment.create({
         title,
         type: 'youtube',
@@ -33,10 +51,15 @@ export const momentController = {
         createdBy: req.user.registerId,
       });
 
-      await logActivity(req, 'CREATE', 'Moment', moment._id.toString(), {
-        before: null,
-        after: moment.toObject()
-      }, `YouTube moment "${title || 'Untitled'}" added by ${req.user.name}`);
+      // Log YouTube moment creation
+      await logActivity(
+        req,
+        'CREATE',
+        'Moment',
+        moment._id.toString(),
+        { before: null, after: moment.toObject() },
+        `YouTube moment "${title || 'Untitled'}" added by ${req.user.name}`
+      );
 
       res.status(201).json(moment);
     } catch (error) {
@@ -47,47 +70,61 @@ export const momentController = {
   uploadMediaMoment: async (req, res) => {
     try {
       const { title, file, isPinned } = req.body;
-      // Convert base64 → buffer → stream
+
+      // Convert base64 to buffer
       const buffer = Buffer.from(file.split(',')[1], 'base64');
       const stream = Readable.from(buffer);
       const mimeType = file.match(/^data:(.*);base64/)[1];
 
-      // Upload to Drive
-      const driveRes = await drive.files.create({
+      // Upload to Google Drive
+      const driveResponse = await drive.files.create({
         requestBody: {
           name: `${title || 'untitled'}-${Date.now()}`,
           mimeType,
           parents: [process.env.GOOGLE_DRIVE_FOLDER_ID],
         },
-        media: { mimeType, body: stream },
+        media: {
+          mimeType,
+          body: stream,
+        },
       });
 
-      // Make it public
+      // Make file publicly accessible
       await drive.permissions.create({
-        fileId: driveRes.data.id,
-        requestBody: { role: 'reader', type: 'anyone' },
+        fileId: driveResponse.data.id,
+        requestBody: {
+          role: 'reader',
+          type: 'anyone',
+        },
       });
 
-      // Fetch webContentLink
-      const { data: meta } = await drive.files.get({
-        fileId: driveRes.data.id,
-        fields: 'webContentLink',
+      // Get file metadata
+      const fileData = await drive.files.get({
+        fileId: driveResponse.data.id,
+        fields: 'webContentLink,id',
       });
 
-      const directUrl = `https://drive.google.com/uc?export=view&id=${driveRes.data.id}`;
+      // Create a direct view URL
+      const directUrl = `https://drive.google.com/uc?export=view&id=${driveResponse.data.id}`;
+
       const moment = await Moment.create({
         title,
         type: 'media',
         url: directUrl,
-        downloadUrl: meta.webContentLink,
+        downloadUrl: fileData.data.webContentLink,
         isPinned: !!isPinned,
         createdBy: req.user.registerId,
       });
 
-      await logActivity(req, 'CREATE', 'Moment', moment._id.toString(), {
-        before: null,
-        after: moment.toObject()
-      }, `Media moment "${title || 'Untitled'}" uploaded by ${req.user.name}`);
+      // Log media moment creation
+      await logActivity(
+        req,
+        'CREATE',
+        'Moment',
+        moment._id.toString(),
+        { before: null, after: moment.toObject() },
+        `Media moment "${title || 'Untitled'}" uploaded by ${req.user.name}`
+      );
 
       res.status(201).json(moment);
     } catch (error) {
@@ -97,21 +134,28 @@ export const momentController = {
 
   togglePin: async (req, res) => {
     try {
-      const m = await Moment.findById(req.params.id);
-      if (!m) {
+      const moment = await Moment.findById(req.params.id);
+
+      if (!moment) {
         return res.status(404).json({ message: 'Moment not found' });
       }
 
-      const before = m.toObject();
-      m.isPinned = !m.isPinned;
-      await m.save();
+      const originalData = moment.toObject();
 
-      await logActivity(req, 'UPDATE', 'Moment', m._id.toString(), {
-        before,
-        after: m.toObject()
-      }, `Moment "${m.title || 'Untitled'}" ${m.isPinned ? 'pinned' : 'unpinned'} by ${req.user.name}`);
+      moment.isPinned = !moment.isPinned;
+      await moment.save();
 
-      res.json(m);
+      // Log pin toggle
+      await logActivity(
+        req,
+        'UPDATE',
+        'Moment',
+        moment._id.toString(),
+        { before: originalData, after: moment.toObject() },
+        `Moment "${moment.title || 'Untitled'}" ${moment.isPinned ? 'pinned' : 'unpinned'} by ${req.user.name}`
+      );
+
+      res.json(moment);
     } catch (error) {
       res.status(500).json({ message: 'Failed to toggle pin status', error: error.message });
     }
@@ -121,50 +165,78 @@ export const momentController = {
     try {
       const { id } = req.params;
       const { title } = req.body;
-      if (!title || typeof title !== 'string' || !title.trim()) {
+
+      if (!title || typeof title !== 'string' || title.trim() === '') {
         return res.status(400).json({ message: 'Invalid title' });
       }
 
-      const m = await Moment.findById(id);
-      if (!m) {
+      const moment = await Moment.findById(id);
+
+      if (!moment) {
         return res.status(404).json({ message: 'Moment not found' });
       }
 
-      const before = m.toObject();
-      m.title = title;
-      await m.save();
+      const originalData = moment.toObject();
 
-      await logActivity(req, 'UPDATE', 'Moment', m._id.toString(), {
-        before,
-        after: m.toObject()
-      }, `Moment title updated to "${title}" by ${req.user.name}`);
+      moment.title = title;
+      await moment.save();
 
-      res.json({ message: 'Title updated successfully', moment: m });
+      // Log title update
+      await logActivity(
+        req,
+        'UPDATE',
+        'Moment',
+        moment._id.toString(),
+        { before: originalData, after: moment.toObject() },
+        `Moment title updated to "${title}" by ${req.user.name}`
+      );
+
+      res.json({ message: 'Title updated successfully', moment });
     } catch (error) {
       res.status(500).json({ message: 'Failed to update title', error: error.message });
     }
   },
 
-deleteMoment: async (req, res) => {
-  try {
-    const m = await Moment.findById(req.params.id);
-    if (!m) {
-      return res.status(404).json({ message: 'Moment not found' });
+  deleteMoment: async (req, res) => {
+    try {
+      const moment = await Moment.findById(req.params.id);
+      if (!moment) {
+        return res.status(404).json({ message: 'Moment not found' });
+      }
+
+      const originalData = moment.toObject();
+
+      // If it's a media moment (uploaded to Google Drive), delete from Drive
+      if (moment.type === 'media' && moment.url) {
+        try {
+          const fileId = extractFileIdFromUrl(moment.url);
+          if (fileId) {
+            await drive.files.delete({
+              fileId: fileId
+            });
+            console.log(`Deleted file ${fileId} from Google Drive`);
+          }
+        } catch (driveError) {
+          console.error('Failed to delete file from Google Drive:', driveError);
+          // Continue with database deletion even if Drive deletion fails
+        }
+      }
+
+      // Log moment deletion
+      await logActivity(
+        req,
+        'DELETE',
+        'Moment',
+        moment._id.toString(),
+        { before: originalData, after: null },
+        `Moment "${moment.title || 'Untitled'}" deleted by ${req.user.name}`
+      );
+
+      await Moment.findByIdAndDelete(req.params.id);
+
+      res.json({ message: 'Moment deleted successfully' });
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to delete moment', error: error.message });
     }
-
-    const before = m.toObject();
-
-    await logActivity(req, 'DELETE', 'Moment', m._id.toString(), {
-      before,
-      after: null
-    }, `Moment "${m.title || 'Untitled'}" deleted by ${req.user.name}`);
-
-    await Moment.deleteOne({ _id: m._id }); // ✅ This is safe and works
-
-    res.json({ message: 'Moment deleted successfully' });
-  } catch (error) {
-    console.error('Delete error:', error);
-    res.status(500).json({ message: 'Failed to delete moment', error: error.message });
-  }
   },
 };

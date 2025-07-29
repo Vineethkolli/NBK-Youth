@@ -1,6 +1,6 @@
 import React from 'react';
 import { jsPDF } from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import { Printer } from 'lucide-react';
 
 const IncomePrint = ({ incomes, visibleColumns, incomeFilters }) => {
@@ -49,7 +49,7 @@ const IncomePrint = ({ incomes, visibleColumns, incomeFilters }) => {
     });
     
     // Generate table using autoTable plugin with a footer
-    doc.autoTable({
+    autoTable(doc, {
       startY: 30,
       head: [tableColumns],
       body: tableRows,
@@ -77,8 +77,8 @@ const IncomePrint = ({ incomes, visibleColumns, incomeFilters }) => {
   };
 
   return (
-    <button onClick={generatePDF} className="btn-secondary flex items-center space-x-2">
-      <Printer className="h-4 w-4" />
+    <button onClick={generatePDF} className="btn-secondary flex items-center">
+      <Printer className="h-4 w-4 mr-1 inline" />
       <span>Print</span>
     </button>
   );
