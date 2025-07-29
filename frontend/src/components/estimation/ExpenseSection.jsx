@@ -110,10 +110,10 @@ function ExpenseSection({ refreshStats }) {
             <option value="asc">Ascending</option>
           </select>
         </div>
-        <div className="flex items-center space-x-2">
-          <button onClick={handleAdd} className="btn-primary">
-            <Plus className="h-4 w-4 mr-2 inline" />
-            Add New
+        <div className="flex items-center space-x-3">
+          <button onClick={handleAdd} className="btn-secondary flex items-center">
+            <Plus className="h-4 w-4 mr-1 inline" />
+            Add
           </button>
           {/* Print button */}
           <ExpensePrint expenses={expenses} visibleColumns={expenseColumns} />

@@ -200,6 +200,7 @@ DIRECTORY STRUCTURE
         |   |       
         |   +---home
         |   |       InstallApp.jsx
+        |   |       SlideOrder.jsx
         |   |       Slideshow.jsx
         |   |       Timeline.jsx
         |   |       

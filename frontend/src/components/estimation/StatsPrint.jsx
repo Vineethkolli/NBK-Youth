@@ -1,6 +1,6 @@
 import React from 'react';
 import { jsPDF } from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import { Printer } from 'lucide-react';
 
 const StatsPrint = ({ stats }) => {
@@ -74,7 +74,7 @@ const StatsPrint = ({ stats }) => {
       ['Amount Left', '-', displayAmountWithShortage(stats.balance)]
     ];
 
-    doc.autoTable({
+    autoTable(doc, {
       startY: yPos,
       head: [estimationData[0]],
       body: estimationData.slice(1),
@@ -114,7 +114,7 @@ const StatsPrint = ({ stats }) => {
       ['Not Paid', `${stats.youthNotPaidCount || '-'}`, formatAmount(stats.youthNotPaid || 0)]
     ];
 
-    doc.autoTable({
+    autoTable(doc, {
       startY: yPos,
       head: [youthPaymentData[0]],
       body: youthPaymentData.slice(1),
@@ -134,7 +134,7 @@ const StatsPrint = ({ stats }) => {
       ['Not Paid', `${stats.villagersNotPaidCount || '-'}`, formatAmount(stats.villagersNotPaid || 0)]
     ];
 
-    doc.autoTable({
+    autoTable(doc, {
       startY: yPos,
       head: [villagersPaymentData[0]],
       body: villagersPaymentData.slice(1),
@@ -154,7 +154,7 @@ const StatsPrint = ({ stats }) => {
       ['Not Paid', `${stats.overallNotPaidCount || '-'}`, formatAmount(stats.totalEstimatedNotPaidIncome || 0)]
     ];
 
-    doc.autoTable({
+    autoTable(doc, {
       startY: yPos,
       head: [overallPaymentData[0]],
       body: overallPaymentData.slice(1),
@@ -179,8 +179,8 @@ const StatsPrint = ({ stats }) => {
   };
 
   return (
-    <button onClick={handlePrint} className="btn-secondary ">
-      <Printer className="h-4 w-4 mr-2 inline" />
+    <button onClick={handlePrint} className="btn-secondary flex items-center">
+      <Printer className="h-4 w-4 mr-1 inline" />
       <span>Print</span>
     </button>
   );

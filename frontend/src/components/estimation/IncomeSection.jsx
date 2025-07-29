@@ -92,10 +92,10 @@ function IncomeSection({ refreshStats }) {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-end items-center space-x-4 mb-4">
-  <button onClick={handleAdd} className="btn-secondary flex items-center space-x-2">
-    <Plus className="h-4 w-4" />
-    <span>Add New</span>
+      <div className="flex justify-end items-center space-x-3">
+  <button onClick={handleAdd} className="btn-secondary flex items-center ">
+    <Plus className="h-4 w-4 mr-1 inline" />
+    <span>Add</span>
   </button>
   <IncomePrint 
     incomes={incomes} 

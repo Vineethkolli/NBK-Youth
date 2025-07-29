@@ -1,6 +1,6 @@
 import React from 'react';
 import { jsPDF } from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import { Printer } from 'lucide-react';
 import { useHiddenProfiles } from '../../context/HiddenProfileContext';
 
@@ -109,7 +109,7 @@ const IncomePrint = ({ incomes, visibleColumns, userRole }) => {
     doc.text(title, 105, 15, { align: 'center' }); 
 
     // Generate PDF with the filtered columns and serial number
-    doc.autoTable({
+    autoTable(doc, {
       head: [headers],
       body: body,
       startY: 25, 
@@ -135,8 +135,8 @@ const IncomePrint = ({ incomes, visibleColumns, userRole }) => {
   };
 
   return (
-    <button onClick={handlePrint} className="btn-secondary">
-      <Printer className="h-4 w-4 mr-2" />
+    <button onClick={handlePrint} className="btn-secondary flex items-center">
+      <Printer className="h-4 w-4 mr-1 inline" />
       Print
     </button>
   );
