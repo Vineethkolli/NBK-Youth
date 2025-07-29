@@ -19,7 +19,8 @@ export const sendOTPEmail = async (email, otp) => {
       subject: 'Password Reset OTP',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #333;">Password Reset Request</h2>
+          <h1 style="color: #23984eff;">NBK YOUTH WEB APP</h1>
+         <h2 style="color: #333;">Password Reset Request</h2>
           <p>You have requested to reset your password. Please use the following OTP to proceed:</p>
           <div style="background-color: #f4f4f4; padding: 15px; text-align: center; font-size: 24px; font-weight: bold; letter-spacing: 5px; margin: 20px 0;">
             ${otp}
