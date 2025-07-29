@@ -81,7 +81,7 @@ function InstallApp() {
       {!isInstalled && showInstallPrompt && (
         <div className="fixed top-4 left-4 right-4 bg-green-50 bg-opacity-80 text-green-800 p-4 flex items-center justify-between shadow-lg rounded-lg z-50">
           <div>
-            <h3 className="text-lg font-medium">Download Our App</h3>
+            <h3 className="text-lg font-medium">Download App</h3>
           </div>
           <div className="flex items-center space-x-2">
             <button

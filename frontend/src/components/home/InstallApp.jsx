@@ -108,7 +108,7 @@ function InstallApp() {
         onClick={(e) => e.stopPropagation()}
       >
         <div>
-          <h3 className="text-lg font-medium">Download Our App</h3>
+          <h3 className="text-lg font-medium">Download App</h3>
         </div>
         <div className="flex items-center space-x-2">
           <button
