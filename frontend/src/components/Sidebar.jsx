@@ -32,11 +32,11 @@ function Sidebar({ isOpen, onNavigate }) {
     ...((['admin', 'developer', 'financier'].includes(user?.role)) ? [
       { to: '/admin-panel', icon: LayoutDashboard, label: 'Admin Panel' }
     ] : []),
+    { to: '/lets-play', icon: TrophyIcon, label: 'Activities' },
   ...(user?.email === defaultdeveloper? [
         { to: '/developer-options', icon: Terminal, label: 'Developer Options' },
         { to: '/activity-logs',     icon: FileClock, label: 'Activity Logs' }
       ] : []),
-    { to: '/lets-play', icon: TrophyIcon, label: 'Activities' },
     { to: '/tech-stack', icon: Layers, label: 'Tech Stack' }
   ];
 

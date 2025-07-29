@@ -1,21 +1,48 @@
-import { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { API_URL } from '../../utils/config';
 
 function OTPVerification({ email, onVerified, onBack }) {
-  const [otp, setOtp] = useState('');
+  const OTP_LENGTH = 6;
+  const [otpValues, setOtpValues] = useState(Array(OTP_LENGTH).fill(''));
   const [isLoading, setIsLoading] = useState(false);
+  const inputsRef = useRef([]);
+
+  // On mount, focus first input
+  useEffect(() => {
+    inputsRef.current[0]?.focus();
+  }, []);
+
+  const handleChange = (e, idx) => {
+    const val = e.target.value;
+    if (/^[0-9]?$/.test(val)) {
+      const newOtp = [...otpValues];
+      newOtp[idx] = val;
+      setOtpValues(newOtp);
+      if (val && idx < OTP_LENGTH - 1) {
+        inputsRef.current[idx + 1]?.focus();
+      }
+    }
+  };
+
+  const handleKeyDown = (e, idx) => {
+    if (e.key === 'Backspace' && !otpValues[idx] && idx > 0) {
+      inputsRef.current[idx - 1]?.focus();
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
+    const otp = otpValues.join('');
+    if (otp.length < OTP_LENGTH) {
+      toast.error('Please enter the complete OTP');
+      return;
+    }
 
+    setIsLoading(true);
     try {
-      const { data } = await axios.post(`${API_URL}/api/auth/verify-otp`, {
-        email,
-        otp
-      });
+      const { data } = await axios.post(`${API_URL}/api/auth/verify-otp`, { email, otp });
       onVerified(data.resetToken);
     } catch (error) {
       toast.error(error.response?.data?.message || 'Invalid OTP');
@@ -34,17 +61,20 @@ function OTPVerification({ email, onVerified, onBack }) {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <input
-            type="text"
-            required
-            value={otp}
-            onChange={(e) => setOtp(e.target.value)}
-            placeholder="Enter 6-digit OTP"
-            maxLength="6"
-            pattern="\d{6}"
-            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-          />
+        <div className="flex justify-center space-x-2">
+          {otpValues.map((digit, idx) => (
+            <input
+              key={idx}
+              type="text"
+              inputMode="numeric"
+              maxLength={1}
+              value={digit}
+              onChange={(e) => handleChange(e, idx)}
+              onKeyDown={(e) => handleKeyDown(e, idx)}
+              ref={(el) => (inputsRef.current[idx] = el)}
+              className="w-10 h-12 text-center border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" 
+            />
+          ))}
         </div>
 
         <button
