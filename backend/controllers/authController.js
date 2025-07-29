@@ -53,7 +53,8 @@ export const signUp = async (req, res) => {
         email: user.email,
         phoneNumber: user.phoneNumber,
         role: user.role,
-        language: user.language
+        language: user.language,
+        profileImage: user.profileImage
       }
     });
   } catch (error) {
@@ -104,7 +105,8 @@ export const signIn = async (req, res) => {
         email: user.email,
         phoneNumber: user.phoneNumber,
         role: user.role,
-        language: user.language
+        language: user.language,
+        profileImage: user.profileImage
       }
     });
   } catch (error) {
