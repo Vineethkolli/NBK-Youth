@@ -104,7 +104,7 @@
       "type": "image/png",
       "purpose": "maskable"
     },
-        {
+    {
       "src": "logo-1024x1024.png",
       "sizes": "512x512",
       "type": "image/png",
@@ -116,5 +116,25 @@
       "type": "image/png",
       "purpose": "maskable"
     }
+  ],
+  "id": "15",
+  "lang": "en",
+  "display_override": [
+    "browser",
+    "window-controls-overlay",
+    "minimal-ui",
+    "standalone",
+    "fullscreen"
+  ],
+  "categories": [
+    "business",
+    "entertainment",
+    "finance",
+    "games",
+    "music",
+    "photo",
+    "politics",
+    "security",
+    "social"
   ]
 }
