@@ -16,9 +16,11 @@ export function MusicProvider({ children }) {
   // ─── playback controls ────────────────────────────────────────────────────
   const handleSongSelect = (song, queue) => {
     const idx = queue.findIndex(s => s._id === song._id);
+    if (idx < 0) return;
+
     setSongQueue(queue);
     setCurrentSongIndex(idx);
-    setCurrentSong(song);
+    setCurrentSong(queue[idx]);
     setIsPlaying(true);
   };
 
@@ -100,11 +102,11 @@ export function MusicProvider({ children }) {
       artist: currentSong.collectionName,
       album: currentSong.collectionName,
       artwork: [
-        { src: '/logo-96x96.png',  sizes: '96x96',  type: 'image/png' },
-        { src: '/logo-128x128.png',sizes: '128x128',type: 'image/png' },
-        { src: '/logo-192x192.png',sizes: '192x192',type: 'image/png' },
-        { src: '/logo-384x384.png',sizes: '384x384',type: 'image/png' },
-        { src: '/logo-512x512.png',sizes: '512x512',type: 'image/png' }
+        { src: '/logo/96.png',  sizes: '96x96',  type: 'image/png' },
+        { src: '/logo/128.png',sizes: '128x128',type: 'image/png' },
+        { src: '/logo/192.png',sizes: '192x192',type: 'image/png' },
+        { src: '/logo/384.png',sizes: '384x384',type: 'image/png' },
+        { src: '/logo/512.png',sizes: '512x512',type: 'image/png' }
       ]
     });
 
