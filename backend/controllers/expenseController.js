@@ -1,5 +1,6 @@
 import Expense from '../models/Expense.js';
 import { uploadToCloudinary } from '../config/cloudinary.js';
+import cloudinary from '../config/cloudinary.js';
 import { logActivity } from '../middleware/activityLogger.js';
 
 export const expenseController = {
@@ -198,6 +199,30 @@ export const expenseController = {
 
       const originalData = expense.toObject();
 
+      // Delete bill images from Cloudinary
+      for (const subExpense of expense.subExpenses) {
+        if (subExpense.billImage && subExpense.billImage.includes('cloudinary.com')) {
+          try {
+            const publicId = subExpense.billImage.split('/').pop().split('.')[0];
+            await cloudinary.uploader.destroy(`ExpenseBills/${publicId}`);
+          } catch (err) {
+            console.warn('Failed to delete bill image from Cloudinary:', err);
+          }
+        }
+      }
+
+      // Delete bill images from Cloudinary
+      for (const subExpense of expense.subExpenses) {
+        if (subExpense.billImage && subExpense.billImage.includes('cloudinary.com')) {
+          try {
+            const publicId = subExpense.billImage.split('/').pop().split('.')[0];
+            await cloudinary.uploader.destroy(`ExpenseBills/${publicId}`);
+          } catch (err) {
+            console.warn('Failed to delete bill image from Cloudinary:', err);
+          }
+        }
+      }
+
       expense.isDeleted = true;
       expense.deletedAt = new Date();
       expense.deletedBy = req.user.registerId;
@@ -268,6 +293,18 @@ export const expenseController = {
       }
 
       const originalData = expense.toObject();
+
+      // Delete bill images from Cloudinary
+      for (const subExpense of expense.subExpenses) {
+        if (subExpense.billImage && subExpense.billImage.includes('cloudinary.com')) {
+          try {
+            const publicId = subExpense.billImage.split('/').pop().split('.')[0];
+            await cloudinary.uploader.destroy(`ExpenseBills/${publicId}`);
+          } catch (err) {
+            console.warn('Failed to delete bill image from Cloudinary:', err);
+          }
+        }
+      }
 
       // Log permanent deletion
       await logActivity(
