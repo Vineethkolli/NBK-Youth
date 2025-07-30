@@ -38,7 +38,7 @@
 
 ## 🔍 Overview
 
-**NBK-Youth** is a full-stack, secure, and scalable web application. It combines a robust **React + Vite** frontend with a feature-rich **Node.js + Express** backend, powered by **MongoDB**, **Web Push**, **Cloudinary**, and **PWA** support.
+**NBK-Youth** is a full-stack, secure, and scalable web application. It combines a robust **React + Vite** frontend with a feature-rich **Node.js + Express** backend, powered by **MongoDB**, **Web Push**, **Cloudinary**, and **PWA** support. It's under active development with frequent updates, new features, and ongoing improvements.
 
 🔗 Live : [nbkyouth.vercel.app](https://nbkyouth.vercel.app)
 

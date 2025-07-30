@@ -1,5 +1,6 @@
 import Banner from '../models/Banner.js';
 import { uploadToCloudinary } from '../config/cloudinary.js';
+import cloudinary from '../config/cloudinary.js';
 import { logActivity } from '../middleware/activityLogger.js';
 
 export const bannerController = {
@@ -141,6 +142,46 @@ export const bannerController = {
       }
 
       const originalData = banner.toObject();
+
+      // Delete image from Cloudinary if it exists
+      if (banner.image && banner.image.includes('cloudinary.com')) {
+        try {
+          const publicId = banner.image.split('/').pop().split('.')[0];
+          await cloudinary.uploader.destroy(`Banners/${publicId}`);
+        } catch (err) {
+          console.warn('Failed to delete banner image from Cloudinary:', err);
+        }
+      }
+
+      // Delete video from Cloudinary if it exists
+      if (banner.video && banner.video.includes('cloudinary.com')) {
+        try {
+          const publicId = banner.video.split('/').pop().split('.')[0];
+          await cloudinary.uploader.destroy(`Banners/${publicId}`, { resource_type: 'video' });
+        } catch (err) {
+          console.warn('Failed to delete banner video from Cloudinary:', err);
+        }
+      }
+
+      // Delete image from Cloudinary if it exists
+      if (banner.image && banner.image.includes('cloudinary.com')) {
+        try {
+          const publicId = banner.image.split('/').pop().split('.')[0];
+          await cloudinary.uploader.destroy(`Banners/${publicId}`);
+        } catch (err) {
+          console.warn('Failed to delete banner image from Cloudinary:', err);
+        }
+      }
+
+      // Delete video from Cloudinary if it exists
+      if (banner.video && banner.video.includes('cloudinary.com')) {
+        try {
+          const publicId = banner.video.split('/').pop().split('.')[0];
+          await cloudinary.uploader.destroy(`Banners/${publicId}`, { resource_type: 'video' });
+        } catch (err) {
+          console.warn('Failed to delete banner video from Cloudinary:', err);
+        }
+      }
 
       // Log banner deletion
       await logActivity(
