@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      strategies: 'injectManifest', 
+      strategies: 'injectManifest',
       srcDir: 'src',
       filename: 'sw.js',
       registerType: 'autoUpdate',
@@ -20,36 +20,33 @@ export default defineConfig({
         start_url: '/',
         icons: [
           {
-            src: '/logo.png',
+            src: '/logo/icon-192x192.png',
             sizes: '192x192',
             type: 'image/png',
             purpose: 'any maskable',
           },
           {
-            src: '/logo.png',
+            src: '/logo/icon-512x512.png',
             sizes: '512x512',
             type: 'image/png',
-          },
-        ],
+            purpose: 'any maskable',
+          }
+        ]
       },
       workbox: {
         runtimeCaching: [
           {
             urlPattern: ({ url }) => url.origin === 'https://nbkyouth.vercel.app',
             handler: 'NetworkFirst',
-            options: {
-              cacheName: 'api-cache',
-            },
+            options: { cacheName: 'api-cache' }
           },
           {
             urlPattern: ({ url }) => url.origin === location.origin,
             handler: 'StaleWhileRevalidate',
-            options: {
-              cacheName: 'assets-cache',
-            },
-          },
-        ],
-      },
-    }),
-  ],
+            options: { cacheName: 'assets-cache' }
+          }
+        ]
+      }
+    })
+  ]
 });

@@ -17,7 +17,7 @@ self.addEventListener('push', (event) => {
   const title = data.title || 'Default Title';
   const options = {
     body: data.body || 'Default message',
-    icon: '/logo.png',
+    icon: '/logo/icon-192x192.png',
     badge: '/notificationlogo.png',
   };
   event.waitUntil(self.registration.showNotification(title, options));
