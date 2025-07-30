@@ -6,6 +6,7 @@ import { API_URL } from '../../utils/config';
 import EstimatedExpenseTable from "./ExpenseTable"; 
 import EstimationForm from './Form';
 import ExpensePrint from './ExpensePrint'; 
+import { useAuth } from '../../context/AuthContext';
 
 function ExpenseSection({ refreshStats }) {
   const [expenses, setExpenses] = useState([]);
@@ -24,6 +25,7 @@ function ExpenseSection({ refreshStats }) {
   const [showForm, setShowForm] = useState(false);
   const [formMode, setFormMode] = useState('add'); 
   const [currentRecord, setCurrentRecord] = useState(null);
+    const { user } = useAuth();
 
   useEffect(() => {
     fetchExpenses();
@@ -111,10 +113,12 @@ function ExpenseSection({ refreshStats }) {
           </select>
         </div>
         <div className="flex items-center space-x-3">
-          <button onClick={handleAdd} className="btn-secondary flex items-center">
-            <Plus className="h-4 w-4 mr-1 inline" />
-            Add
-          </button>
+          {['developer', 'financier', 'admin'].includes(user?.role) && (
+  <button onClick={handleAdd} className="btn-secondary flex items-center">
+    <Plus className="h-4 w-4 mr-1 inline" />
+    <span>Add</span>
+  </button>
+)}
           {/* Print button */}
           <ExpensePrint expenses={expenses} visibleColumns={expenseColumns} />
         </div>

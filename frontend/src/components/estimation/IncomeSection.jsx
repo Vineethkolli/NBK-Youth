@@ -6,6 +6,7 @@ import { API_URL } from '../../utils/config';
 import EstimatedIncomeTable from './IncomeTable';
 import EstimationForm from './Form';
 import IncomePrint from './IncomePrint';
+import { useAuth } from '../../context/AuthContext';
 
 function IncomeSection({ refreshStats }) {
   const [incomes, setIncomes] = useState([]);
@@ -28,6 +29,7 @@ function IncomeSection({ refreshStats }) {
   const [showForm, setShowForm] = useState(false);
   const [formMode, setFormMode] = useState('add'); 
   const [currentRecord, setCurrentRecord] = useState(null);
+  const { user } = useAuth();
 
   useEffect(() => {
     fetchIncomes();
@@ -93,10 +95,12 @@ function IncomeSection({ refreshStats }) {
   return (
     <div className="space-y-4">
       <div className="flex justify-end items-center space-x-3">
-  <button onClick={handleAdd} className="btn-secondary flex items-center ">
+  {['developer', 'financier', 'admin'].includes(user?.role) && (
+  <button onClick={handleAdd} className="btn-secondary flex items-center">
     <Plus className="h-4 w-4 mr-1 inline" />
     <span>Add</span>
   </button>
+)}
   <IncomePrint 
     incomes={incomes} 
     visibleColumns={incomeColumns} 

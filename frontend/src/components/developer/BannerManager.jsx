@@ -166,23 +166,24 @@ export default function BannerManager() {
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-semibold">Popup Banner</h2>
         <div className="space-x-2">
-          <button
-            onClick={() => setIsEditing(!isEditing)}
-            className={`px-4 py-2 rounded-md ${
-              isEditing ? 'bg-red-600 text-white' : 'bg-gray-200 text-gray-700'
-            }`}
-          >
-            {isEditing ? 'Done' : 'Edit'}
-          </button>
+          
           <button
             onClick={() => {
               resetForm();
               setShowForm(true);
             }}
-            className="px-4 py-2 bg-indigo-600 text-white rounded-md"
+            className="px-2 py-2 bg-indigo-600 text-white rounded-md"
           >
             <Plus className="inline-block mr-1 h-4 w-4" />
             Add
+          </button>
+          <button
+            onClick={() => setIsEditing(!isEditing)}
+            className={`px-2 py-2 rounded-md ${
+              isEditing ? 'bg-red-600 text-white' : 'bg-gray-200 text-gray-700'
+            }`}
+          ><Edit2 className="inline-block mr-1 h-4 w-4 mr-1 " />
+            {isEditing ? 'Done' : 'Edit'}
           </button>
         </div>
       </div>
