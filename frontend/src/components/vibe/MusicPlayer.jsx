@@ -1,8 +1,8 @@
-import { useEffect } from 'react';
+// src/components/vibe/MusicPlayer.jsx
 import { Play, Pause, SkipBack, SkipForward, X } from 'lucide-react';
 import { useMusicPlayer } from '../../context/MusicContext';
 
-export function MusicPlayer() {
+export default function MusicPlayer() {
   const {
     currentSong,
     isPlaying,
@@ -16,21 +16,6 @@ export function MusicPlayer() {
     closeMusicPlayer
   } = useMusicPlayer();
 
-  // Update Media Session position
-  useEffect(() => {
-    if ('mediaSession' in navigator && currentSong && duration > 0) {
-      try {
-        navigator.mediaSession.setPositionState({
-          duration,
-          playbackRate: 1,
-          position: Math.min(progress, duration)
-        });
-      } catch (err) {
-        console.warn(err);
-      }
-    }
-  }, [currentSong, progress, duration]);
-
   if (!currentSong) return null;
 
   const formatTime = t => {
@@ -42,10 +27,12 @@ export function MusicPlayer() {
   return (
     <div className="fixed bottom-20 inset-x-0 bg-white border-t shadow-lg z-0">
       <div className="max-w-screen-xl mx-auto grid grid-cols-3 items-center p-2 sm:grid-cols-2 sm:gap-2">
+        {/* Title */}
         <div className="col-span-1 sm:col-span-2">
           <h3 className="font-medium truncate">{currentSong.name}</h3>
         </div>
 
+        {/* Controls + Progress */}
         <div className="col-span-2 sm:col-span-2 flex flex-col items-center space-y-2">
           <div className="flex items-center space-x-4">
             <button
@@ -86,6 +73,7 @@ export function MusicPlayer() {
           </div>
         </div>
 
+        {/* Close */}
         <button
           onClick={closeMusicPlayer}
           className="absolute top-1 right-3 p-1 hover:bg-gray-100 rounded"
@@ -96,5 +84,3 @@ export function MusicPlayer() {
     </div>
   );
 }
-
-export default MusicPlayer;
