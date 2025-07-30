@@ -21,6 +21,20 @@ function Vibe() {
     fetchCollections();
   }, []);
 
+  // Listen for messages from service worker
+  useEffect(() => {
+    const handleMessage = (event) => {
+      if (event.data && event.data.type === 'NAVIGATE_TO_VIBE') {
+        // User clicked on media notification, focus on the vibe page
+        console.log('Navigated to Vibe from media notification');
+      }
+    };
+
+    navigator.serviceWorker?.addEventListener('message', handleMessage);
+    return () => {
+      navigator.serviceWorker?.removeEventListener('message', handleMessage);
+    };
+  }, []);
   const fetchCollections = async () => {
     try {
       const { data } = await axios.get(`${API_URL}/api/collections`);

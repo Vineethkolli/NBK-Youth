@@ -26,6 +26,48 @@ function MusicPlayer() {
         audio.load();
       }
       isPlaying ? audio.play() : audio.pause();
+
+      // Set up media session
+      if ('mediaSession' in navigator) {
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title: currentSong.name,
+          artist: `${currentSong.subCollectionName} - ${currentSong.collectionName}`,
+          album: currentSong.collectionName,
+          artwork: [
+            { src: '/logo/96.png', sizes: '96x96', type: 'image/png' },
+            { src: '/logo/128.png', sizes: '128x128', type: 'image/png' },
+            { src: '/logo/192.png', sizes: '192x192', type: 'image/png' },
+            { src: '/logo/384.png', sizes: '384x384', type: 'image/png' },
+            { src: '/logo/512.png', sizes: '512x512', type: 'image/png' }
+          ]
+        });
+
+        // Set up action handlers
+        navigator.mediaSession.setActionHandler('play', () => {
+          if (!isPlaying) togglePlay();
+        });
+
+        navigator.mediaSession.setActionHandler('pause', () => {
+          if (isPlaying) togglePlay();
+        });
+
+        navigator.mediaSession.setActionHandler('previoustrack', () => {
+          handlePrevious();
+        });
+
+        navigator.mediaSession.setActionHandler('nexttrack', () => {
+          handleNext();
+        });
+
+        // Update playback state
+        navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
+      }
+    } else {
+      // Clear media session when no song is playing
+      if ('mediaSession' in navigator) {
+        navigator.mediaSession.metadata = null;
+        navigator.mediaSession.playbackState = 'none';
+      }
     }
 
     const onTimeUpdate = () => setProgress(audio.currentTime);
@@ -43,6 +85,31 @@ function MusicPlayer() {
     };
   }, [currentSong, isPlaying, handleNext]);
 
+  // Update media session position
+  useEffect(() => {
+    if ('mediaSession' in navigator && currentSong && duration > 0) {
+      navigator.mediaSession.setPositionState({
+        duration: duration,
+        playbackRate: 1,
+        position: progress
+      });
+    }
+  }, [progress, duration, currentSong]);
+
+  // Handle page visibility change to update media session
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden && currentSong && 'mediaSession' in navigator) {
+        // When page becomes hidden, ensure media session is active
+        navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [currentSong, isPlaying]);
   const handleSeek = e => {
     const t = +e.target.value;
     audioRef.current.currentTime = t;

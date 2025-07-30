@@ -27,3 +27,27 @@ self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   event.waitUntil(clients.openWindow('/notifications'));
 });
+
+
+// Handle vibe song actions when app is in background
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'MEDIA_SESSION_ACTION') {
+    // Forward media session actions to the main app
+    event.waitUntil(
+      clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+        if (clientList.length > 0) {
+          // Focus the existing window and navigate to vibe page
+          const client = clientList[0];
+          client.focus();
+          client.postMessage({
+            type: 'NAVIGATE_TO_VIBE',
+            action: event.data.action
+          });
+        } else {
+          // Open new window to vibe page
+          clients.openWindow('/vibe');
+        }
+      })
+    );
+  }
+});
