@@ -28,42 +28,21 @@ router.delete('/:id',
   CollectionController.deleteCollection
 );
 
-// Create sub-collection
-router.post('/:collectionId/subcollections',
-  auth,
-  checkRole(['developer', 'financier', 'admin']),
-  CollectionController.createSubCollection
-);
-
-// Update sub-collection
-router.put('/:collectionId/subcollections/:subCollectionId',
-  auth,
-  checkRole(['developer', 'financier', 'admin']),
-  CollectionController.updateSubCollection
-);
-
-// Delete sub-collection
-router.delete('/:collectionId/subcollections/:subCollectionId',
-  auth,
-  checkRole(['developer', 'financier', 'admin']),
-  CollectionController.deleteSubCollection
-);
-
 // Upload song
-router.post('/:collectionId/subcollections/:subCollectionId/songs',
+router.post('/:collectionId/songs',
   auth,
   CollectionController.uploadSong
 );
 
 // Update song
-router.put('/:collectionId/subcollections/:subCollectionId/songs/:songId',
+router.put('/:collectionId/songs/:songId',
   auth,
   checkRole(['developer', 'financier', 'admin']),
   CollectionController.updateSong
 );
 
 // Delete song
-router.delete('/:collectionId/subcollections/:subCollectionId/songs/:songId',
+router.delete('/:collectionId/songs/:songId',
   auth,
   checkRole(['developer', 'financier', 'admin']),
   CollectionController.deleteSong

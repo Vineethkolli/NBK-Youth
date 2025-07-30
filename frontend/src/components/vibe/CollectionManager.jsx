@@ -8,13 +8,11 @@ import { useAuth } from '../../context/AuthContext';
 function CollectionManager({ collections, onUpdate, isEditMode, onEditModeToggle }) {
   const { user } = useAuth();
   const [showCreateCollection, setShowCreateCollection] = useState(false);
-  const [showCreateSubCollection, setShowCreateSubCollection] = useState(false);
   const [showUploadSong, setShowUploadSong] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     collectionId: '',
-    subCollectionId: '',
     file: null
   });
 
@@ -33,21 +31,6 @@ function CollectionManager({ collections, onUpdate, isEditMode, onEditModeToggle
     }
   };
 
-  const handleCreateSubCollection = async (e) => {
-    e.preventDefault();
-    try {
-      await axios.post(`${API_URL}/api/collections/${formData.collectionId}/subcollections`, {
-        name: formData.name
-      });
-      toast.success('Sub-collection created successfully');
-      setShowCreateSubCollection(false);
-      setFormData({ ...formData, name: '', collectionId: '' });
-      onUpdate();
-    } catch (error) {
-      toast.error('Failed to create sub-collection');
-    }
-  };
-
   const handleUploadSong = async (e) => {
     e.preventDefault();
     if (!formData.file || isUploading) return;
@@ -58,7 +41,7 @@ function CollectionManager({ collections, onUpdate, isEditMode, onEditModeToggle
     reader.onload = async () => {
       try {
         await axios.post(
-          `${API_URL}/api/collections/${formData.collectionId}/subcollections/${formData.subCollectionId}/songs`,
+          `${API_URL}/api/collections/${formData.collectionId}/songs`,
           {
             name: formData.name,
             file: reader.result
@@ -66,7 +49,7 @@ function CollectionManager({ collections, onUpdate, isEditMode, onEditModeToggle
         );
         toast.success('Song uploaded successfully');
         setShowUploadSong(false);
-        setFormData({ name: '', collectionId: '', subCollectionId: '', file: null });
+        setFormData({ name: '', collectionId: '', file: null });
         onUpdate();
       } catch (error) {
         toast.error('Failed to upload song');
@@ -89,13 +72,6 @@ function CollectionManager({ collections, onUpdate, isEditMode, onEditModeToggle
               Create Collection
             </button>
             <button
-              onClick={() => setShowCreateSubCollection(true)}
-              className="btn-primary"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Create Sub-Collection
-            </button>
-            <button
               onClick={onEditModeToggle}
               className={`btn-secondary ${isEditMode ? 'bg-red-100' : ''}`}
             >
@@ -103,15 +79,15 @@ function CollectionManager({ collections, onUpdate, isEditMode, onEditModeToggle
               {isEditMode ? 'Done Editing' : 'Edit Mode'}
             </button>
           
-        <button
-          onClick={() => setShowUploadSong(true)}
-          className="btn-primary"
-          disabled={isUploading}
-        >
-          <Upload className="h-4 w-4 mr-2" />
-          {isUploading ? 'Uploading...' : 'Upload Song'}
-        </button>
-        </>
+            <button
+              onClick={() => setShowUploadSong(true)}
+              className="btn-primary"
+              disabled={isUploading}
+            >
+              <Upload className="h-4 w-4 mr-2" />
+              {isUploading ? 'Uploading...' : 'Upload Song'}
+            </button>
+          </>
         )}
       </div>
 
@@ -132,46 +108,6 @@ function CollectionManager({ collections, onUpdate, isEditMode, onEditModeToggle
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 placeholder="Collection Name"
-                className="w-full border rounded-md p-2 mb-4"
-              />
-              <button type="submit" className="btn-primary w-full">
-                Create
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Create Sub-Collection Modal */}
-      {showCreateSubCollection && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-96">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-medium">Create Sub-Collection</h3>
-              <button onClick={() => setShowCreateSubCollection(false)}>
-                <X className="h-6 w-6" />
-              </button>
-            </div>
-            <form onSubmit={handleCreateSubCollection}>
-              <select
-                required
-                value={formData.collectionId}
-                onChange={(e) => setFormData({ ...formData, collectionId: e.target.value })}
-                className="w-full border rounded-md p-2 mb-4"
-              >
-                <option value="">Select Collection</option>
-                {collections.map(collection => (
-                  <option key={collection._id} value={collection._id}>
-                    {collection.name}
-                  </option>
-                ))}
-              </select>
-              <input
-                type="text"
-                required
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="Sub-Collection Name"
                 className="w-full border rounded-md p-2 mb-4"
               />
               <button type="submit" className="btn-primary w-full">
@@ -206,23 +142,6 @@ function CollectionManager({ collections, onUpdate, isEditMode, onEditModeToggle
                   </option>
                 ))}
               </select>
-              {formData.collectionId && (
-                <select
-                  required
-                  value={formData.subCollectionId}
-                  onChange={(e) => setFormData({ ...formData, subCollectionId: e.target.value })}
-                  className="w-full border rounded-md p-2 mb-4"
-                >
-                  <option value="">Select Sub-Collection</option>
-                  {collections
-                    .find(c => c._id === formData.collectionId)
-                    ?.subCollections.map(sub => (
-                      <option key={sub._id} value={sub._id}>
-                        {sub.name}
-                      </option>
-                    ))}
-                </select>
-              )}
               <input
                 type="text"
                 required

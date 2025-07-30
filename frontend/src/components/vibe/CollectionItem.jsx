@@ -1,5 +1,5 @@
 import { Edit2, Trash2 } from 'lucide-react';
-import SubCollectionItem from './SubCollectionItem';
+import SongItem from './SongItem';
 
 function CollectionItem({
   collection,
@@ -8,8 +8,6 @@ function CollectionItem({
   onSongPlay,
   onEdit,
   onDelete,
-  onSubCollectionEdit,
-  onSubCollectionDelete,
   onSongEdit,
   onSongDelete
 }) {
@@ -35,20 +33,18 @@ function CollectionItem({
         )}
       </div>
 
-      <div className="space-y-4">
-        {collection.subCollections
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {collection.songs
           ?.sort((a, b) => a.name.localeCompare(b.name))
-          .map(subCollection => (
-            <SubCollectionItem
-              key={subCollection._id}
-              subCollection={subCollection}
+          .map(song => (
+            <SongItem
+              key={song._id}
+              song={song}
+              isPlaying={currentSong?._id === song._id}
+              onPlay={onSongPlay}
+              onEdit={() => onSongEdit(song)}
+              onDelete={() => onSongDelete(song)}
               isEditMode={isEditMode}
-              currentSong={currentSong}
-              onSongPlay={onSongPlay}
-              onEdit={() => onSubCollectionEdit(subCollection)}
-              onDelete={() => onSubCollectionDelete(subCollection)}
-              onSongEdit={onSongEdit}
-              onSongDelete={onSongDelete}
             />
           ))}
       </div>
