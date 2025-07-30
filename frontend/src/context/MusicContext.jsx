@@ -13,11 +13,16 @@ export function MusicProvider({ children }) {
   const [progress, setProgress]           = useState(0);
   const [duration, setDuration]           = useState(0);
 
-  // ─── playback controls ────────────────────────────────────────────────────
+  // Reset old progress when a new track is selected
+  useEffect(() => {
+    setProgress(0);
+    setDuration(0);
+  }, [currentSong]);
+
+  // Playback controls
   const handleSongSelect = (song, queue) => {
     const idx = queue.findIndex(s => s._id === song._id);
     if (idx < 0) return;
-
     setSongQueue(queue);
     setCurrentSongIndex(idx);
     setCurrentSong(queue[idx]);
@@ -56,10 +61,9 @@ export function MusicProvider({ children }) {
     setDuration(0);
   };
 
-  // ─── sync <audio> element when song or play/pause changes ───────────────
+  // Sync <audio> element when song or play/pause changes
   useEffect(() => {
     const audio = audioRef.current;
-
     if (!currentSong) {
       audio.pause();
       return;
@@ -70,11 +74,17 @@ export function MusicProvider({ children }) {
       audio.load();
     }
 
-    isPlaying ? audio.play() : audio.pause();
+    if (isPlaying) {
+      audio.play().catch(err => {
+        if (err.name !== 'AbortError') console.warn('Audio play failed:', err);
+      });
+    } else {
+      audio.pause();
+    }
 
-    const onTimeUpdate    = () => setProgress(audio.currentTime);
-    const onLoadedMeta    = () => setDuration(audio.duration);
-    const onEnded         = () => handleNext();
+    const onTimeUpdate = () => setProgress(audio.currentTime);
+    const onLoadedMeta = () => setDuration(audio.duration);
+    const onEnded      = () => handleNext();
 
     audio.addEventListener('timeupdate',    onTimeUpdate);
     audio.addEventListener('loadedmetadata', onLoadedMeta);
@@ -87,7 +97,7 @@ export function MusicProvider({ children }) {
     };
   }, [currentSong, isPlaying, handleNext]);
 
-  // ─── setup MediaSession metadata & action handlers ──────────────────────
+  // Setup MediaSession metadata & action handlers
   useEffect(() => {
     if (!('mediaSession' in navigator) || !currentSong) {
       if ('mediaSession' in navigator) {
@@ -103,27 +113,27 @@ export function MusicProvider({ children }) {
       album: currentSong.collectionName,
       artwork: [
         { src: '/logo/96.png',  sizes: '96x96',  type: 'image/png' },
-        { src: '/logo/128.png',sizes: '128x128',type: 'image/png' },
-        { src: '/logo/192.png',sizes: '192x192',type: 'image/png' },
-        { src: '/logo/384.png',sizes: '384x384',type: 'image/png' },
-        { src: '/logo/512.png',sizes: '512x512',type: 'image/png' }
+        { src: '/logo/128.png', sizes: '128x128', type: 'image/png' },
+        { src: '/logo/192.png', sizes: '192x192', type: 'image/png' },
+        { src: '/logo/384.png', sizes: '384x384', type: 'image/png' },
+        { src: '/logo/512.png', sizes: '512x512', type: 'image/png' }
       ]
     });
 
-    navigator.mediaSession.setActionHandler('play',    () => { if (!isPlaying) togglePlay(); });
-    navigator.mediaSession.setActionHandler('pause',   () => { if (isPlaying)  togglePlay(); });
+    navigator.mediaSession.setActionHandler('play',         () => { if (!isPlaying) togglePlay(); });
+    navigator.mediaSession.setActionHandler('pause',        () => { if (isPlaying)  togglePlay(); });
     navigator.mediaSession.setActionHandler('previoustrack', handlePrevious);
     navigator.mediaSession.setActionHandler('nexttrack',     handleNext);
-
     navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
   }, [currentSong, isPlaying, handleNext, handlePrevious, togglePlay]);
 
-  // ─── update MediaSession playback position ───────────────────────────────
+  // Update MediaSession playback position (only while playing)
   useEffect(() => {
     if (
       'mediaSession' in navigator &&
       currentSong &&
-      duration > 0
+      duration > 0 &&
+      isPlaying
     ) {
       try {
         navigator.mediaSession.setPositionState({
@@ -135,9 +145,9 @@ export function MusicProvider({ children }) {
         console.warn('MediaSession.setPositionState failed:', err);
       }
     }
-  }, [progress, duration, currentSong]);
+  }, [progress, duration, currentSong, isPlaying]);
 
-  // ─── keep playbackState alive on visibility change ───────────────────────
+  // Keep playbackState alive on visibility change
   useEffect(() => {
     const onVisChange = () => {
       if (document.hidden && currentSong && 'mediaSession' in navigator) {
