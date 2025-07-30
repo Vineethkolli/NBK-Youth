@@ -90,11 +90,9 @@ const CollectionController = {
       const originalData = collection.toObject();
 
       // Delete all songs from Cloudinary
-      for (const subCollection of collection.subCollections) {
-        for (const song of subCollection.songs) {
-          const publicId = extractPublicId(song.url);
-          await cloudinary.uploader.destroy(publicId, { resource_type: 'video' });
-        }
+      for (const song of collection.songs) {
+        const publicId = extractPublicId(song.url);
+        await cloudinary.uploader.destroy(publicId, { resource_type: 'video' });
       }
 
       // Log collection deletion
@@ -114,70 +112,6 @@ const CollectionController = {
     }
   },
 
-  // Create sub-collection
-  createSubCollection: async (req, res) => {
-    try {
-      const collection = await Collection.findById(req.params.collectionId);
-      if (!collection) {
-        return res.status(404).json({ message: 'Collection not found' });
-      }
-
-      collection.subCollections.push({ name: req.body.name });
-      await collection.save();
-      res.status(201).json(collection);
-    } catch (error) {
-      res.status(500).json({ message: 'Failed to create sub-collection' });
-    }
-  },
-
-  // Update sub-collection
-  updateSubCollection: async (req, res) => {
-    try {
-      const collection = await Collection.findById(req.params.collectionId);
-      if (!collection) {
-        return res.status(404).json({ message: 'Collection not found' });
-      }
-
-      const subCollection = collection.subCollections.id(req.params.subCollectionId);
-      if (!subCollection) {
-        return res.status(404).json({ message: 'Sub-collection not found' });
-      }
-
-      subCollection.name = req.body.name;
-      await collection.save();
-      res.json(collection);
-    } catch (error) {
-      res.status(500).json({ message: 'Failed to update sub-collection' });
-    }
-  },
-
-  // Delete sub-collection
-  deleteSubCollection: async (req, res) => {
-    try {
-      const collection = await Collection.findById(req.params.collectionId);
-      if (!collection) {
-        return res.status(404).json({ message: 'Collection not found' });
-      }
-
-      const subCollection = collection.subCollections.id(req.params.subCollectionId);
-      if (!subCollection) {
-        return res.status(404).json({ message: 'Sub-collection not found' });
-      }
-
-      // Delete all songs in the sub-collection from Cloudinary
-      for (const song of subCollection.songs) {
-        const publicId = extractPublicId(song.url);
-        await cloudinary.uploader.destroy(publicId, { resource_type: 'video' });
-      }
-
-      collection.subCollections.pull(req.params.subCollectionId);
-      await collection.save();
-      res.json({ message: 'Sub-collection deleted successfully' });
-    } catch (error) {
-      res.status(500).json({ message: 'Failed to delete sub-collection' });
-    }
-  },
-
   // Upload song
   uploadSong: async (req, res) => {
     try {
@@ -186,28 +120,24 @@ const CollectionController = {
         return res.status(404).json({ message: 'Collection not found' });
       }
 
-      const subCollection = collection.subCollections.id(req.params.subCollectionId);
-      if (!subCollection) {
-        return res.status(404).json({ message: 'Sub-collection not found' });
-      }
-
       const url = await uploadToCloudinary(req.body.file, 'Vibe');
 
-      subCollection.songs.push({
+      collection.songs.push({
         name: req.body.name,
         url
       });
 
       await collection.save();
       res.status(201).json(collection);
+      
       // Log song upload
       await logActivity(
         req,
         'CREATE',
         'Collection',
         collection._id.toString(),
-        { before: null, after: { songName: req.body.name, subCollection: subCollection.name } },
-        `Song "${req.body.name}" uploaded to "${subCollection.name}" in collection "${collection.name}" by ${req.user.name}`
+        { before: null, after: { songName: req.body.name } },
+        `Song "${req.body.name}" uploaded to collection "${collection.name}" by ${req.user.name}`
       );
 
     } catch (error) {
@@ -223,12 +153,7 @@ const CollectionController = {
         return res.status(404).json({ message: 'Collection not found' });
       }
 
-      const subCollection = collection.subCollections.id(req.params.subCollectionId);
-      if (!subCollection) {
-        return res.status(404).json({ message: 'Sub-collection not found' });
-      }
-
-      const song = subCollection.songs.id(req.params.songId);
+      const song = collection.songs.id(req.params.songId);
       if (!song) {
         return res.status(404).json({ message: 'Song not found' });
       }
@@ -260,12 +185,7 @@ const CollectionController = {
         return res.status(404).json({ message: 'Collection not found' });
       }
 
-      const subCollection = collection.subCollections.id(req.params.subCollectionId);
-      if (!subCollection) {
-        return res.status(404).json({ message: 'Sub-collection not found' });
-      }
-
-      const song = subCollection.songs.id(req.params.songId);
+      const song = collection.songs.id(req.params.songId);
       if (!song) {
         return res.status(404).json({ message: 'Song not found' });
       }
@@ -283,11 +203,11 @@ const CollectionController = {
         'Collection',
         collection._id.toString(),
         { before: originalSongData, after: null },
-        `Song "${song.name}" deleted from "${subCollection.name}" in collection "${collection.name}" by ${req.user.name}`
+        `Song "${song.name}" deleted from collection "${collection.name}" by ${req.user.name}`
       );
 
       // Remove from database
-      subCollection.songs.pull(req.params.songId);
+      collection.songs.pull(req.params.songId);
       await collection.save();
       res.json({ message: 'Song deleted successfully' });
     } catch (error) {

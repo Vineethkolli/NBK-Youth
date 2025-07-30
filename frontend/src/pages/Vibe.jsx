@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import CollectionManager from '../components/vibe/CollectionManager';
 import CollectionItem from '../components/vibe/CollectionItem';
 import SearchBar from '../components/vibe/SearchBar';
+import MusicPlayer from '../components/vibe/MusicPlayer';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { API_URL } from '../utils/config';
@@ -25,6 +26,7 @@ function Vibe() {
   useEffect(() => {
     const handleMessage = (event) => {
       if (event.data && event.data.type === 'NAVIGATE_TO_VIBE') {
+        // User clicked on media notification, focus on the vibe page
         console.log('Navigated to Vibe from media notification');
       }
     };
@@ -34,6 +36,7 @@ function Vibe() {
       navigator.serviceWorker?.removeEventListener('message', handleMessage);
     };
   }, []);
+
   const fetchCollections = async () => {
     try {
       const { data } = await axios.get(`${API_URL}/api/collections`);
@@ -76,48 +79,6 @@ function Vibe() {
     }
   };
 
-  // Sub-collection CRUD operations
-  const handleSubCollectionEdit = async (subCollection) => {
-    const newName = prompt('Enter new sub-collection name:', subCollection.name);
-    if (!newName || newName === subCollection.name) return;
-
-    try {
-      const collectionId = collections.find(c => 
-        c.subCollections.some(sc => sc._id === subCollection._id)
-      )?._id;
-      
-      if (!collectionId) throw new Error('Collection not found');
-
-      await axios.put(
-        `${API_URL}/api/collections/${collectionId}/subcollections/${subCollection._id}`,
-        { name: newName }
-      );
-      toast.success('Sub-collection updated successfully');
-      fetchCollections();
-    } catch (error) {
-      toast.error('Failed to update sub-collection');
-    }
-  };
-
-  const handleSubCollectionDelete = async (subCollection) => {
-    if (!window.confirm('Are you sure you want to delete this sub-collection?')) return;
-    try {
-      const collectionId = collections.find(c => 
-        c.subCollections.some(sc => sc._id === subCollection._id)
-      )?._id;
-      
-      if (!collectionId) throw new Error('Collection not found');
-
-      await axios.delete(
-        `${API_URL}/api/collections/${collectionId}/subcollections/${subCollection._id}`
-      );
-      toast.success('Sub-collection deleted successfully');
-      fetchCollections();
-    } catch (error) {
-      toast.error('Failed to delete sub-collection');
-    }
-  };
-
   // Song CRUD operations
   const handleSongEdit = async (song) => {
     const newName = prompt('Enter new song name:', song.name);
@@ -125,19 +86,13 @@ function Vibe() {
 
     try {
       const collection = collections.find(c => 
-        c.subCollections.some(sc => 
-          sc.songs.some(s => s._id === song._id)
-        )
-      );
-      
-      const subCollection = collection?.subCollections.find(sc => 
-        sc.songs.some(s => s._id === song._id)
+        c.songs.some(s => s._id === song._id)
       );
 
-      if (!collection || !subCollection) throw new Error('Song not found');
+      if (!collection) throw new Error('Song not found');
 
       await axios.put(
-        `${API_URL}/api/collections/${collection._id}/subcollections/${subCollection._id}/songs/${song._id}`,
+        `${API_URL}/api/collections/${collection._id}/songs/${song._id}`,
         { name: newName }
       );
       toast.success('Song updated successfully');
@@ -151,19 +106,13 @@ function Vibe() {
     if (!window.confirm('Are you sure you want to delete this song?')) return;
     try {
       const collection = collections.find(c => 
-        c.subCollections.some(sc => 
-          sc.songs.some(s => s._id === song._id)
-        )
-      );
-      
-      const subCollection = collection?.subCollections.find(sc => 
-        sc.songs.some(s => s._id === song._id)
+        c.songs.some(s => s._id === song._id)
       );
 
-      if (!collection || !subCollection) throw new Error('Song not found');
+      if (!collection) throw new Error('Song not found');
 
       await axios.delete(
-        `${API_URL}/api/collections/${collection._id}/subcollections/${subCollection._id}/songs/${song._id}`
+        `${API_URL}/api/collections/${collection._id}/songs/${song._id}`
       );
       toast.success('Song deleted successfully');
       fetchCollections();
@@ -175,37 +124,38 @@ function Vibe() {
   const filteredCollections = filterCollections(collections, searchQuery);
 
   return (
-      <div className="space-y-6">
-        <div className="flex flex-col space-y-4 md:flex-row md:space-y-0 md:space-x-4 md:items-center">
-          <div className="flex-1">
-            <SearchBar value={searchQuery} onChange={setSearchQuery} />
-          </div>
-          <CollectionManager 
-            collections={collections}
-            onUpdate={fetchCollections}
-            isEditMode={isEditMode}
-            onEditModeToggle={() => setIsEditMode(!isEditMode)}
-          />
+    <div className="space-y-6">
+      <div className="flex flex-col space-y-4 md:flex-row md:space-y-0 md:space-x-4 md:items-center">
+        <div className="flex-1">
+          <SearchBar value={searchQuery} onChange={setSearchQuery} />
         </div>
-
-        <div className="grid grid-cols-1 gap-6">
-          {filteredCollections.map(collection => (
-            <CollectionItem
-              key={collection._id}
-              collection={collection}
-              isEditMode={isEditMode}
-              currentSong={currentSong}
-              onSongPlay={handleSongPlay}
-              onEdit={handleCollectionEdit}
-              onDelete={handleCollectionDelete}
-              onSubCollectionEdit={handleSubCollectionEdit}
-              onSubCollectionDelete={handleSubCollectionDelete}
-              onSongEdit={handleSongEdit}
-              onSongDelete={handleSongDelete}
-            />
-          ))}
-        </div>
+        <CollectionManager 
+          collections={collections}
+          onUpdate={fetchCollections}
+          isEditMode={isEditMode}
+          onEditModeToggle={() => setIsEditMode(!isEditMode)}
+        />
       </div>
+
+      <div className="grid grid-cols-1 gap-6">
+        {filteredCollections.map(collection => (
+          <CollectionItem
+            key={collection._id}
+            collection={collection}
+            isEditMode={isEditMode}
+            currentSong={currentSong}
+            onSongPlay={handleSongPlay}
+            onEdit={handleCollectionEdit}
+            onDelete={handleCollectionDelete}
+            onSongEdit={handleSongEdit}
+            onSongDelete={handleSongDelete}
+          />
+        ))}
+      </div>
+
+      {/* Show music player only on Vibe page */}
+      <MusicPlayer />
+    </div>
   );
 }
 

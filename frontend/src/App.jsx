@@ -29,7 +29,7 @@ import { HiddenProfileProvider } from './context/HiddenProfileContext';
 import { LanguageProvider } from './context/LanguageContext';
 import { MaintenanceModeProvider, useMaintenanceMode } from './context/MaintenanceModeContext';
 import { MusicProvider } from './context/MusicContext';
-import MusicPlayer from './components/vibe/MusicPlayer';
+import FloatingMusicIcon from './components/vibe/FloatingMusicIcon';
 import TechStack from './pages/TechStack'
 import PopupBanner from './components/developer/PopupBanner';
 import { initializeAnalytics, trackPageView } from './utils/analytics';
@@ -85,7 +85,7 @@ function AppContent() {
           <Route path="/committee" element={<Committee />} />
         </Route>
       </Routes>
-      <MusicPlayer />
+      <FloatingMusicIcon />
     </>
   );
 }
