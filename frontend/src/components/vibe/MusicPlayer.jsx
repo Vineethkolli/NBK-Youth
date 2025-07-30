@@ -27,9 +27,10 @@ export default function MusicPlayer() {
   return (
     <div className="fixed bottom-20 inset-x-0 bg-white border-t shadow-lg z-0">
       <div className="max-w-screen-xl mx-auto grid grid-cols-3 items-center p-2 sm:grid-cols-2 sm:gap-2">
-        {/* Title */}
-        <div className="col-span-1 sm:col-span-2">
+        {/* Title + Collection */}
+        <div className="col-span-1 sm:col-span-2 space-y-0.5">
           <h3 className="font-medium truncate">{currentSong.name}</h3>
+          <p className="text-sm text-gray-500 truncate">{currentSong.collectionName}</p>
         </div>
 
         {/* Controls + Progress */}
