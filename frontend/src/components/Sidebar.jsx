@@ -20,20 +20,20 @@ function Sidebar({ isOpen, onNavigate }) {
     { to: '/pay-online', icon: ShieldCheck, label: 'Pay Online' },
     { to: '/notifications', icon: Bell, label: 'Notifications' },
     { to: '/settings', icon: Settings, label: 'Settings' },
-    ...(user?.role === 'developer' || user?.role === 'financier'|| user?.role === 'admin' ? [
-      { to: '/users', icon: UserCog, label: 'Users & Roles' }
-    ] : []),
-    ...(user?.role === 'developer' || user?.role === 'financier' ? [
+    { to: '/lets-play', icon: TrophyIcon, label: 'Activities' },
+    ...((['developer', 'financier'].includes(user?.role)) ? [
       { to: '/verification', icon: CheckSquare, label: 'Verification' }
     ] : []),
-    ...(user?.role === 'developer' || user?.role === 'financier' ? [
-      { to: '/recycle-bin', icon: Trash2, label: 'Recycle Bin' }
+    ...((['admin', 'developer', 'financier'].includes(user?.role)) ? [
+      { to: '/users', icon: UserCog, label: 'Users & Roles' }
     ] : []),
     ...((['admin', 'developer', 'financier'].includes(user?.role)) ? [
       { to: '/admin-panel', icon: LayoutDashboard, label: 'Admin Panel' }
     ] : []),
-    { to: '/lets-play', icon: TrophyIcon, label: 'Activities' },
-  ...(user?.email === defaultdeveloper? [
+        ...(([ 'developer', 'financier'].includes(user?.role)) ? [
+      { to: '/recycle-bin', icon: Trash2, label: 'Recycle Bin' }
+    ] : []),
+    ...(user?.email === defaultdeveloper? [
         { to: '/developer-options', icon: Terminal, label: 'Developer Options' },
         { to: '/activity-logs',     icon: FileClock, label: 'Activity Logs' }
       ] : []),

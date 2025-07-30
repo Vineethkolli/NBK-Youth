@@ -5,7 +5,7 @@ export const generatePaymentReceipt = (payment) => {
   const doc = new jsPDF();
 
   // Add logo
-  const logoUrl = '/logo.png'; 
+  const logoUrl = '/logo/logo.png'; 
   doc.addImage(logoUrl, 'PNG', 20, 10, 40, 40); 
 
   // Add header
