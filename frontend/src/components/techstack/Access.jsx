@@ -3,9 +3,9 @@ import React from 'react';
 const accessControl = {
   pages: {
     'Home': { full: ['Admin', 'Financier'], view: ['User'] },
+    'Committee': { full: ['Admin', 'Financier'], view: ['User'] },
     'Moments': { full: ['Admin', 'Financier'], view: ['User'] },
     'Vibe': { full: ['Admin', 'Financier'], view: ['User'] },
-    'Activities': { full: ['Admin', 'Financier'], view: ['User'] },
     'Stats': { full: ['Admin', 'Financier'], view: ['User'] },
     'Income': { full: ['Admin','Financier'], view: ['User'] },
     'Expense': { full: ['Financier'], view: ['User', 'Admin'] },
@@ -16,13 +16,14 @@ const accessControl = {
     'PayOnline': { full: ['User', 'Admin', 'Financier'], view: [] },
     'Notifications': { full: ['Admin', 'User', 'Financier'], view: [] },
     'Settings': { full: ['Admin', 'User', 'Financier'], view: [] },
-    'Users': { full: [], view: ['Admin','Financier'] },
+    'Activities': { full: ['Admin', 'Financier'], view: ['User'] },
     'Verification': { full: ['Financier'], view: [] },
-    'RecycleBin': { full: ['Financier'], view: [] },
+    'Users & Roles': { full: [], view: ['Admin','Financier'] },
     'AdminPanel': { full: ['Admin','Financier'], view: [] },
+    'PopUp Banner': { full: ['Admin','Financier'], view: [] },
+    'RecycleBin': { full: ['Financier'], view: [] },
     'TechStack': { full: [], view: ['User','Admin', 'Financier'] },
     'DeveloperOptions': { full: [], view: [] },
-    'PopUp Banner': { full: ['Admin','Financier'], view: [] },
   },
 };
 

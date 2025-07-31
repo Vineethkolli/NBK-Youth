@@ -38,7 +38,7 @@ function TechStack() {
     if (navigator.share) {
       navigator
         .share({
-          title: "NBK Youth Gangavaram",
+          title: "NBK Youth",
           text: "NBK Youth Gangavaram",
           url,
         })
