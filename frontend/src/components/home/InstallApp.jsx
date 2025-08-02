@@ -24,7 +24,6 @@ function InstallApp() {
         setPlatform('android');
       } else {
         setPlatform('desktop');
-        setShowInstallPrompt(false);
       }
     };
     detectPlatform();
