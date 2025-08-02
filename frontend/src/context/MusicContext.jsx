@@ -109,39 +109,13 @@ export function MusicProvider({ children }) {
       ]
     });
 
-  navigator.mediaSession.setActionHandler('play',      () => { if (!isPlaying) togglePlay(); });
-  navigator.mediaSession.setActionHandler('pause',     () => { if (isPlaying)  togglePlay(); });
-  navigator.mediaSession.setActionHandler('previoustrack', handlePrevious);
-  navigator.mediaSession.setActionHandler('nexttrack',       handleNext);
+    navigator.mediaSession.setActionHandler('play',    () => { if (!isPlaying) togglePlay(); });
+    navigator.mediaSession.setActionHandler('pause',   () => { if (isPlaying)  togglePlay(); });
+    navigator.mediaSession.setActionHandler('previoustrack', handlePrevious);
+    navigator.mediaSession.setActionHandler('nexttrack',     handleNext);
 
-  // Add the 'seekto' action handler
-  navigator.mediaSession.setActionHandler('seekto', (event) => {
-    if (audioRef.current && event.seekTime !== undefined) {
-      console.log('MediaSession: seekto', event.seekTime);
-      audioRef.current.currentTime = event.seekTime;
-      setProgress(event.seekTime); // Update React state immediately
-    }
-  });
-
-  // Add 'seekforward' and 'seekbackward' for completeness, though less critical for progress bar visual
-  navigator.mediaSession.setActionHandler('seekforward', (event) => {
-    if (audioRef.current && event.seekOffset !== undefined) {
-      console.log('MediaSession: seekforward', event.seekOffset);
-      audioRef.current.currentTime = Math.min(audioRef.current.currentTime + event.seekOffset, duration);
-      setProgress(audioRef.current.currentTime);
-    }
-  });
-
-  navigator.mediaSession.setActionHandler('seekbackward', (event) => {
-    if (audioRef.current && event.seekOffset !== undefined) {
-      console.log('MediaSession: seekbackward', event.seekOffset);
-      audioRef.current.currentTime = Math.max(audioRef.current.currentTime - event.seekOffset, 0);
-      setProgress(audioRef.current.currentTime);
-    }
-  });
-
-  navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
-}, [currentSong, isPlaying, handleNext, handlePrevious, togglePlay, progress, duration]); // Added progress and duration as dependencies for seek handlers
+    navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
+  }, [currentSong, isPlaying, handleNext, handlePrevious, togglePlay]);
 
   // ─── update MediaSession playback position ───────────────────────────────
   useEffect(() => {
