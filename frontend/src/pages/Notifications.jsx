@@ -37,29 +37,38 @@ function Notifications() {
   const [showResetPrompt, setShowResetPrompt] = useState(false);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    try {
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker
-          .register('/sw.js')
-          .then(registerServiceWorker)
-          .catch((error) => console.error('Service Worker Error:', error));
-      }
-      getSubscription();
-    } catch (err) {
-      console.error('Initialization Error:', err);
-      setError(err.message);
+useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker
+        .register('/sw.js')
+        .then(registerServiceWorker)
+        .catch((error) => console.error('Service Worker Error:', error));
     }
 
-    const handleVisibilityChange = () => {
-      if (typeof Notification !== 'undefined') {
+    const checkPermissionAndSubscribe = async () => {
+      const registration = await navigator.serviceWorker.ready;
+
+      // Check existing subscription
+      const existingSubscription = await registration.pushManager.getSubscription();
+
+      if (Notification.permission === 'granted') {
+        setPermissionStatus('granted');
+        if (!existingSubscription) {
+          await subscribeUser(registration); 
+        } else {
+          setSubscription(existingSubscription);
+        }
+      } else {
         setPermissionStatus(Notification.permission);
+        setSubscription(existingSubscription);
+      }
+
+      if (Notification.permission === 'denied') {
+        setShowResetPrompt(true);
       }
     };
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
+
+    checkPermissionAndSubscribe();
   }, []);
 
   const registerServiceWorker = async (registration) => {
