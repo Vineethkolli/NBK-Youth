@@ -4,7 +4,6 @@ import { Menu, Home, BarChart2, IndianRupee, DollarSign, Wallet } from 'lucide-r
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
 import InstallApp from '../components/home/InstallApp';
-import NotificationPrompt from '../components/home/NotificationPrompt';
 
 function DashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -44,7 +43,6 @@ function DashboardLayout() {
     <div className="flex h-screen bg-gray-100 relative">
       {/* Overlay Install Prompt */}
       <InstallApp />
-      <NotificationPrompt />
       <Header toggleSidebar={toggleSidebar} />
       <Sidebar isOpen={sidebarOpen} onNavigate={closeSidebar} />
 
