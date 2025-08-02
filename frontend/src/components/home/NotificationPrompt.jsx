@@ -57,7 +57,8 @@ function NotificationPrompt() {
       onClick={(e) => e.stopPropagation()}
     >
       <div>
-        <h3 className="text-lg font-medium">Allow Notifications</h3>
+        <h3 className="text-lg font-medium">Enable Notifications</h3>
+        <p className="text-sm">Stay updated with important alerts.</p>
       </div>
       <div className="flex items-center space-x-2">
         <button
@@ -76,4 +77,3 @@ function NotificationPrompt() {
 }
 
 export default NotificationPrompt;
-
