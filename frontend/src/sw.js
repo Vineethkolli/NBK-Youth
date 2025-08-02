@@ -27,3 +27,27 @@ self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   event.waitUntil(clients.openWindow('/notifications'));
 });
+
+
+self.addEventListener('message', (event) => {
+  try {
+    if (event.data && event.data.type === 'MEDIA_SESSION_ACTION' && event.data.action) {
+      event.waitUntil(
+        clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+          if (clientList.length > 0) {
+            const client = clientList[0];
+            client.focus();
+            client.postMessage({
+              type: 'NAVIGATE_TO_VIBE',
+              action: event.data.action
+            });
+          } else {
+            return clients.openWindow('/vibe');
+          }
+        })
+      );
+    }
+  } catch (err) {
+    console.error('[SW] Error in message event:', err);
+  }
+});
