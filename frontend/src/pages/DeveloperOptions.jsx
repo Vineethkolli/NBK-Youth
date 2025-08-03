@@ -14,7 +14,7 @@ function DeveloperOptions() {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white border border-blue-200 rounded-xl shadow-md p-6 flex items-center justify-between">
+      <div className="bg-white border border-blue-200 rounded-xl shadow-md p-4 flex items-center justify-between">
         <div>
           <h2 className="text-xl font-semibold text-blue-800 mb-1">Backend Health Monitor</h2>
         </div>

@@ -252,6 +252,9 @@ function Committee() {
           </div>
         </div>
       )}
+      <p className="text-sm text-gray-600 text-center mt-6">
+          Name and Image are fetched from your profile </p>
+
     </div>
   );
 }
