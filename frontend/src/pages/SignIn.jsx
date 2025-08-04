@@ -6,6 +6,7 @@ import ForgotPassword from '../components/auth/ForgotPassword';
 import OTPVerification from '../components/auth/OTPVerification';
 import ResetPassword from '../components/auth/ResetPassword';
 import LanguageToggle from '../components/auth/LanguageToggle';
+import InstallApp from '../components/auth/InstallApp';
 
 function SignIn() {
   const [identifier, setIdentifier] = useState('');
@@ -159,6 +160,7 @@ function SignIn() {
           Crafted with ❤️ Love
         </p>
       </div>
+      <InstallApp />
     </>
   );
 }
