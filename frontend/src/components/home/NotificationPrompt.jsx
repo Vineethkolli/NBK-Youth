@@ -1,10 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { Bell, X } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { API_URL } from '../../utils/config';
-import { urlBase64ToUint8Array } from '../../utils/vapidKeys';
-import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
+import { getSubscription, subscribeToPush } from '../../utils/notifications';
 
 function NotificationPrompt() {
   const { user } = useAuth();
@@ -24,7 +22,7 @@ function NotificationPrompt() {
     };
 
     checkInstalled();
-    getSubscription();
+    getSubscription().then(setSubscription);
 
     let timer;
     const alreadyShown = sessionStorage.getItem('notifPromptShown');
@@ -47,45 +45,19 @@ function NotificationPrompt() {
     };
   }, [isInstalled]);
 
-  const getSubscription = async () => {
-    try {
-      const registration = await navigator.serviceWorker.ready;
-      const existing = await registration.pushManager.getSubscription();
-      setSubscription(existing);
-    } catch (error) {
-      console.error('Error getting subscription:', error);
-    }
-  };
-
   const askPermission = async () => {
     try {
-      const permissionResult = await Notification.requestPermission();
-      if (permissionResult !== 'granted') {
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') {
         toast.error('Notification permission denied');
         return;
       }
-
-      const registration = await navigator.serviceWorker.ready;
-      const res = await axios.get(`${API_URL}/api/notifications/publicKey`);
-      const publicVapidKey = res.data.publicKey;
-      const converted = urlBase64ToUint8Array(publicVapidKey);
-
-      const newSub = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: converted,
-      });
-
-      await axios.post(`${API_URL}/api/notifications/subscribe`, {
-        registerId: user?.registerId,
-        subscription: newSub,
-      });
-
+      const sub = await subscribeToPush(user?.registerId);
+      setSubscription(sub);
       toast.success('Notifications enabled!');
-      setSubscription(newSub);
       setShowPrompt(false);
-    } catch (error) {
-      console.error(error);
-      toast.error('Failed to subscribe to notifications');
+    } catch (err) {
+      toast.error('Failed to subscribe: ' + err.message);
     }
   };
 
@@ -109,8 +81,7 @@ function NotificationPrompt() {
           onClick={askPermission}
           className="px-4 py-2 bg-indigo-700 text-white rounded-md hover:bg-indigo-800 flex items-center transition-colors"
         >
-          <Bell className="h-4 w-4 mr-2" />
-          Allow
+          <Bell className="h-4 w-4 mr-2" /> Allow
         </button>
         <button onClick={() => setShowPrompt(false)}>
           <X className="h-6 w-6" />
