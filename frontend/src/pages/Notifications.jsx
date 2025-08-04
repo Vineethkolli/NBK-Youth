@@ -5,7 +5,7 @@ import NotificationHistory from '../components/notifications/NotificationHistory
 
 function Notifications() {
   return (
-    <div className="max-w-1xl mx-auto space-y-8">
+    <div className="max-w-1xl mx-auto space-y-6">
       <NotificationSettings />
       <NotificationForm />
       <NotificationHistory />
