@@ -1,46 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import React from 'react';
 import Linkify from 'react-linkify';
-import { API_URL } from '../../utils/config';
-import { useAuth } from '../../context/AuthContext';
 import { ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
 
-const NotificationHistory = () => {
-  const { user } = useAuth();
-  const [history, setHistory] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-
-  const fetchHistory = async () => {
-    if (!user?.registerId) return;
-    setLoading(true);
-    try {
-      const response = await axios.get(`${API_URL}/api/notifications/history`, {
-        params: { registerId: user.registerId },
-      });
-      setHistory(response.data);
-    } catch (err) {
-      console.error(err);
-      setError('Failed to fetch notification history');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchHistory();
-  }, [user]);
-
-  if (!user) {
-    return <div>Please log in to see your notification history.</div>;
-  }
-
-  // Custom link component to render links as styled button
+function NotificationHistory({ history, loading }) {
   const linkDecorator = (href, text, key) => (
     <button
       key={key}
       onClick={() => window.open(href, '_blank')}
-      className="flex items-center text-white bg-indigo-600 hover:bg-indigo-700  font-medium rounded-lg text-sm px-2 py-1 text-center mr-2 mb-2"
+      className="flex items-center text-white bg-indigo-600 hover:bg-indigo-700 font-medium rounded-lg text-sm px-2 py-1 text-center mr-2 mb-2"
       aria-label={`Open link to ${href}`}
     >
       Open Link
@@ -53,8 +20,6 @@ const NotificationHistory = () => {
       <h2 className="text-lg font-semibold mb-4">Notification History</h2>
       {loading ? (
         <div>Loading...</div>
-      ) : error ? (
-        <div className="text-red-600">{error}</div>
       ) : history.length === 0 ? (
         <div>No notifications found.</div>
       ) : (
@@ -66,9 +31,7 @@ const NotificationHistory = () => {
             >
               <h4 className="font-medium text-lg">{notif.title}</h4>
               <p className="text-gray-600 mt-1">
-                <Linkify componentDecorator={linkDecorator}>
-                  {notif.body}
-                </Linkify>
+                <Linkify componentDecorator={linkDecorator}>{notif.body}</Linkify>
               </p>
               <div className="mt-2 text-sm text-gray-500 flex items-center justify-between">
                 <span>{new Date(notif.createdAt).toLocaleString()}</span>
@@ -80,6 +43,6 @@ const NotificationHistory = () => {
       )}
     </div>
   );
-};
+}
 
 export default NotificationHistory;

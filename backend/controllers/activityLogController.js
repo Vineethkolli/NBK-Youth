@@ -28,9 +28,14 @@ export const activityLogController = {
       }
 
       // Filter by action
-      if (action) {
-        query.action = action;
-      }
+      // Filter by action (multi-select support)
+if (action) {
+  const actionsArray = action.split(',').filter(Boolean); // removes empty strings
+  if (actionsArray.length > 0) {
+    query.action = { $in: actionsArray };
+  }
+}
+
 
       // Filter by entity type
       if (entityType) {

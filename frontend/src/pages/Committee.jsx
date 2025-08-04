@@ -124,7 +124,7 @@ function Committee() {
               className={`btn-secondary ${isEditMode ? 'bg-red-100' : ''}`}
               disabled={showAddDialog}
             >
-              <Edit2 className="h-4 w-4 mr-2" /> {isEditMode ? 'Done Editing' : 'Edit'}
+              <Edit2 className="h-4 w-4 mr-2" /> {isEditMode ? 'Done' : 'Edit'}
             </button>
           </div>
         )}

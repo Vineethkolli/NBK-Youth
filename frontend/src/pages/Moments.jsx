@@ -103,7 +103,7 @@ const handleTogglePin = async (momentId) => {
               className={`btn-secondary ${isEditMode ? 'bg-red-100' : ''}`}
             >
               <Edit2 className="h-4 w-4 mr-2" />
-              {isEditMode ? 'Done Editing' : 'Edit'}
+              {isEditMode ? 'Done' : 'Edit'}
             </button>
           </div>
         </div>
