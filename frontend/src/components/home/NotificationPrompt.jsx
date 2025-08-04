@@ -15,23 +15,31 @@ function NotificationPrompt() {
 
   useEffect(() => {
     const checkInstalled = () => {
-      if (
-        window.matchMedia('(display-mode: standalone)').matches ||
-        window.navigator.standalone === true
-      ) {
-        setIsInstalled(true);
+      try {
+        const isStandalone =
+          window.matchMedia?.('(display-mode: standalone)').matches ||
+          window.navigator.standalone === true;
+        setIsInstalled(isStandalone);
+      } catch (err) {
+        console.warn('Install detection failed:', err);
+        setIsInstalled(false);
       }
     };
 
     checkInstalled();
-    getSubscription();
+    getSubscriptionSafe();
 
     let timer;
     const alreadyShown = sessionStorage.getItem('notifPromptShown');
-    if (isInstalled && !alreadyShown && Notification.permission !== 'granted') {
+    if (
+      isInstalled &&
+      !alreadyShown &&
+      'Notification' in window &&
+      Notification.permission !== 'granted'
+    ) {
       setShowPrompt(true);
       sessionStorage.setItem('notifPromptShown', 'true');
-      timer = setTimeout(() => setShowPrompt(false), 4000);
+      timer = setTimeout(() => setShowPrompt(false), 5000);
     }
 
     const handleClickOutside = (event) => {
@@ -47,7 +55,12 @@ function NotificationPrompt() {
     };
   }, [isInstalled]);
 
-  const getSubscription = async () => {
+  const getSubscriptionSafe = async () => {
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+      console.warn('Push notifications not supported in this browser');
+      return;
+    }
+
     try {
       const registration = await navigator.serviceWorker.ready;
       const existing = await registration.pushManager.getSubscription();
@@ -58,6 +71,11 @@ function NotificationPrompt() {
   };
 
   const askPermission = async () => {
+    if (!('Notification' in window) || !('PushManager' in window)) {
+      toast.error('Notifications not supported on this device');
+      return;
+    }
+
     try {
       const permissionResult = await Notification.requestPermission();
       if (permissionResult !== 'granted') {
@@ -65,7 +83,13 @@ function NotificationPrompt() {
         return;
       }
 
+      if (!('serviceWorker' in navigator)) {
+        toast.error('Service Worker not supported');
+        return;
+      }
+
       const registration = await navigator.serviceWorker.ready;
+
       const res = await axios.get(`${API_URL}/api/notifications/publicKey`);
       const publicVapidKey = res.data.publicKey;
       const converted = urlBase64ToUint8Array(publicVapidKey);
@@ -84,12 +108,17 @@ function NotificationPrompt() {
       setSubscription(newSub);
       setShowPrompt(false);
     } catch (error) {
-      console.error(error);
+      console.error('Subscription error:', error);
       toast.error('Failed to subscribe to notifications');
     }
   };
 
-  if (!isInstalled || subscription || !showPrompt || Notification.permission === 'granted') {
+  if (
+    !isInstalled ||
+    subscription ||
+    !showPrompt ||
+    Notification.permission === 'granted'
+  ) {
     return null;
   }
 
