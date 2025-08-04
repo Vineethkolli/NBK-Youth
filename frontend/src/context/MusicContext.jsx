@@ -53,7 +53,12 @@ export function MusicProvider({ children }) {
     setCurrentSongIndex(0);
     setProgress(0);
     setDuration(0);
-  };
+
+    if ('mediaSession' in navigator) {
+    navigator.mediaSession.metadata = null;
+    navigator.mediaSession.playbackState = 'none';
+  }
+};
 
   // ─── sync <audio> element when song or play/pause changes ───────────────
   useEffect(() => {
@@ -88,31 +93,29 @@ export function MusicProvider({ children }) {
 
   // ─── setup MediaSession metadata & action handlers ──────────────────────
   useEffect(() => {
-    if (!('mediaSession' in navigator) || !currentSong) {
-      if ('mediaSession' in navigator) {
-        navigator.mediaSession.metadata = null;
-        navigator.mediaSession.playbackState = 'none';
-      }
-      return;
-    }
+    if (!('mediaSession' in navigator)) return;
 
-    navigator.mediaSession.metadata = new MediaMetadata({
-      title: currentSong.name,
-      artist: currentSong.collectionName,
-      album: currentSong.collectionName,
-      artwork: [
-        { src: '/logo/96.png',  sizes: '96x96',  type: 'image/png' },
-        { src: '/logo/128.png',sizes: '128x128',type: 'image/png' },
-        { src: '/logo/192.png',sizes: '192x192',type: 'image/png' },
-        { src: '/logo/384.png',sizes: '384x384',type: 'image/png' },
-        { src: '/logo/512.png',sizes: '512x512',type: 'image/png' }
-      ]
-    });
+if (currentSong) {
+  navigator.mediaSession.metadata = new MediaMetadata({
+    title: currentSong.name,
+    artist: currentSong.collectionName,
+    album: currentSong.collectionName,
+    artwork: [
+      { src: '/logo/96.png',  sizes: '96x96',  type: 'image/png' },
+      { src: '/logo/128.png',sizes: '128x128',type: 'image/png' },
+      { src: '/logo/192.png',sizes: '192x192',type: 'image/png' },
+      { src: '/logo/384.png',sizes: '384x384',type: 'image/png' },
+      { src: '/logo/512.png',sizes: '512x512',type: 'image/png' }
+    ]
+  });
 
-    navigator.mediaSession.setActionHandler('play',    () => { if (!isPlaying) togglePlay(); });
-    navigator.mediaSession.setActionHandler('pause',   () => { if (isPlaying)  togglePlay(); });
-    navigator.mediaSession.setActionHandler('previoustrack', handlePrevious);
-    navigator.mediaSession.setActionHandler('nexttrack',     handleNext);
+  navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
+
+  navigator.mediaSession.setActionHandler('play',    () => { if (!isPlaying) togglePlay(); });
+  navigator.mediaSession.setActionHandler('pause',   () => { if (isPlaying)  togglePlay(); });
+  navigator.mediaSession.setActionHandler('previoustrack', handlePrevious);
+  navigator.mediaSession.setActionHandler('nexttrack',     handleNext);
+}
 
     navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
   }, [currentSong, isPlaying, handleNext, handlePrevious, togglePlay]);
@@ -146,6 +149,17 @@ export function MusicProvider({ children }) {
     document.addEventListener('visibilitychange', onVisChange);
     return () => document.removeEventListener('visibilitychange', onVisChange);
   }, [currentSong, isPlaying]);
+
+  // ─── restore playbackState when window is focused ─────────────────────────
+useEffect(() => {
+  const handleFocus = () => {
+    if (currentSong && 'mediaSession' in navigator) {
+      navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
+    }
+  };
+  window.addEventListener('focus', handleFocus);
+  return () => window.removeEventListener('focus', handleFocus);
+}, [currentSong, isPlaying]);
 
   return (
     <MusicContext.Provider value={{
