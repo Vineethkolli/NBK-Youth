@@ -5,14 +5,14 @@ export const useMusicPlayer = () => useContext(MusicContext);
 
 export function MusicProvider({ children }) {
   const audioRef = useRef(new Audio());
-  const [currentSong, setCurrentSong] = useState(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [songQueue, setSongQueue] = useState([]);
+  const [currentSong, setCurrentSong]     = useState(null);
+  const [isPlaying, setIsPlaying]         = useState(false);
+  const [songQueue, setSongQueue]         = useState([]);
   const [currentSongIndex, setCurrentSongIndex] = useState(0);
-  const [progress, setProgress] = useState(0);
-  const [duration, setDuration] = useState(0);
+  const [progress, setProgress]           = useState(0);
+  const [duration, setDuration]           = useState(0);
 
-  // ─── Playback Controls ───────────────────────────────
+  // ─── playback controls ────────────────────────────────────────────────────
   const handleSongSelect = (song, queue) => {
     const idx = queue.findIndex(s => s._id === song._id);
     if (idx < 0) return;
@@ -55,12 +55,12 @@ export function MusicProvider({ children }) {
     setDuration(0);
 
     if ('mediaSession' in navigator) {
-      navigator.mediaSession.metadata = null;
-      navigator.mediaSession.playbackState = 'none';
-    }
-  };
+    navigator.mediaSession.metadata = null;
+    navigator.mediaSession.playbackState = 'none';
+  }
+};
 
-  // ─── Sync <audio> with song & playback state ─────────────
+  // ─── sync <audio> element when song or play/pause changes ───────────────
   useEffect(() => {
     const audio = audioRef.current;
 
@@ -76,52 +76,51 @@ export function MusicProvider({ children }) {
 
     isPlaying ? audio.play() : audio.pause();
 
-    const onTimeUpdate = () => setProgress(audio.currentTime);
-    const onLoadedMeta = () => setDuration(audio.duration);
-    const onEnded = () => handleNext();
+    const onTimeUpdate    = () => setProgress(audio.currentTime);
+    const onLoadedMeta    = () => setDuration(audio.duration);
+    const onEnded         = () => handleNext();
 
-    audio.addEventListener('timeupdate', onTimeUpdate);
+    audio.addEventListener('timeupdate',    onTimeUpdate);
     audio.addEventListener('loadedmetadata', onLoadedMeta);
-    audio.addEventListener('ended', onEnded);
+    audio.addEventListener('ended',          onEnded);
 
     return () => {
-      audio.removeEventListener('timeupdate', onTimeUpdate);
+      audio.removeEventListener('timeupdate',    onTimeUpdate);
       audio.removeEventListener('loadedmetadata', onLoadedMeta);
-      audio.removeEventListener('ended', onEnded);
+      audio.removeEventListener('ended',          onEnded);
     };
-  }, [currentSong, isPlaying]);
+  }, [currentSong, isPlaying, handleNext]);
 
-  // ─── Media Session Metadata & Controls ─────────────
+  // ─── setup MediaSession metadata & action handlers ──────────────────────
   useEffect(() => {
     if (!('mediaSession' in navigator)) return;
-    if (!currentSong) return;
 
-    navigator.mediaSession.metadata = new MediaMetadata({
-      title: currentSong.name,
-      artist: currentSong.collectionName,
-      album: currentSong.collectionName,
-      artwork: [
-        { src: '/logo/96.png', sizes: '96x96', type: 'image/png' },
-        { src: '/logo/128.png', sizes: '128x128', type: 'image/png' },
-        { src: '/logo/192.png', sizes: '192x192', type: 'image/png' },
-        { src: '/logo/384.png', sizes: '384x384', type: 'image/png' },
-        { src: '/logo/512.png', sizes: '512x512', type: 'image/png' }
-      ]
-    });
+if (currentSong) {
+  navigator.mediaSession.metadata = new MediaMetadata({
+    title: currentSong.name,
+    artist: currentSong.collectionName,
+    album: currentSong.collectionName,
+    artwork: [
+      { src: '/logo/96.png',  sizes: '96x96',  type: 'image/png' },
+      { src: '/logo/128.png',sizes: '128x128',type: 'image/png' },
+      { src: '/logo/192.png',sizes: '192x192',type: 'image/png' },
+      { src: '/logo/384.png',sizes: '384x384',type: 'image/png' },
+      { src: '/logo/512.png',sizes: '512x512',type: 'image/png' }
+    ]
+  });
+
+  navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
+
+  navigator.mediaSession.setActionHandler('play',    () => { if (!isPlaying) togglePlay(); });
+  navigator.mediaSession.setActionHandler('pause',   () => { if (isPlaying)  togglePlay(); });
+  navigator.mediaSession.setActionHandler('previoustrack', handlePrevious);
+  navigator.mediaSession.setActionHandler('nexttrack',     handleNext);
+}
 
     navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
-
-    navigator.mediaSession.setActionHandler('play', () => {
-      if (!isPlaying) togglePlay();
-    });
-    navigator.mediaSession.setActionHandler('pause', () => {
-      if (isPlaying) togglePlay();
-    });
-    navigator.mediaSession.setActionHandler('previoustrack', handlePrevious);
-    navigator.mediaSession.setActionHandler('nexttrack', handleNext);
   }, [currentSong, isPlaying, handleNext, handlePrevious, togglePlay]);
 
-  // ─── Update MediaSession playback position ─────────────
+  // ─── update MediaSession playback position ───────────────────────────────
   useEffect(() => {
     if (
       'mediaSession' in navigator &&
@@ -140,31 +139,7 @@ export function MusicProvider({ children }) {
     }
   }, [progress, duration, currentSong]);
 
-  // ─── Keep MediaSession alive when paused ─────────────
-  useEffect(() => {
-    if (!('mediaSession' in navigator)) return;
-    if (!currentSong || !duration) return;
-
-    let intervalId;
-
-    if (!isPlaying) {
-      intervalId = setInterval(() => {
-        try {
-          navigator.mediaSession.setPositionState({
-            duration,
-            playbackRate: 0,
-            position: Math.min(progress, duration),
-          });
-        } catch (err) {
-          console.warn('Failed to set paused media session state:', err);
-        }
-      }, 5000);
-    }
-
-    return () => clearInterval(intervalId);
-  }, [isPlaying, progress, duration, currentSong]);
-
-  // ─── Update playbackState on tab visibility change ─────────────
+  // ─── keep playbackState alive on visibility change ───────────────────────
   useEffect(() => {
     const onVisChange = () => {
       if (document.hidden && currentSong && 'mediaSession' in navigator) {
@@ -175,16 +150,16 @@ export function MusicProvider({ children }) {
     return () => document.removeEventListener('visibilitychange', onVisChange);
   }, [currentSong, isPlaying]);
 
-  // ─── Restore playbackState when window is focused ─────────────
-  useEffect(() => {
-    const handleFocus = () => {
-      if (currentSong && 'mediaSession' in navigator) {
-        navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
-      }
-    };
-    window.addEventListener('focus', handleFocus);
-    return () => window.removeEventListener('focus', handleFocus);
-  }, [currentSong, isPlaying]);
+  // ─── restore playbackState when window is focused ─────────────────────────
+useEffect(() => {
+  const handleFocus = () => {
+    if (currentSong && 'mediaSession' in navigator) {
+      navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
+    }
+  };
+  window.addEventListener('focus', handleFocus);
+  return () => window.removeEventListener('focus', handleFocus);
+}, [currentSong, isPlaying]);
 
   return (
     <MusicContext.Provider value={{
