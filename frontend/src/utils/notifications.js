@@ -18,13 +18,16 @@ export const registerServiceWorker = async () => {
   }
 };
 
+
 export const getSubscription = async () => {
   const registration = await navigator.serviceWorker.ready;
   return await registration.pushManager.getSubscription();
 };
 
+
 export const subscribeToPush = async (registerId) => {
   const registration = await navigator.serviceWorker.ready;
+
   const response = await axios.get(`${API_URL}/api/notifications/publicKey`);
   const publicVapidKey = response.data.publicKey;
   const converted = urlBase64ToUint8Array(publicVapidKey);
@@ -42,11 +45,12 @@ export const subscribeToPush = async (registerId) => {
   return subscription;
 };
 
+
 export const isIos = () => {
   const userAgent = window.navigator.userAgent.toLowerCase();
   return /iphone|ipad|ipod/.test(userAgent);
 };
 
-export const isInStandaloneMode = () => (
-  'standalone' in window.navigator && window.navigator.standalone
-);
+
+export const isInStandaloneMode = () =>
+  'standalone' in window.navigator && window.navigator.standalone;

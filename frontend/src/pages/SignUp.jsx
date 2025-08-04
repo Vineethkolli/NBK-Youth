@@ -8,7 +8,7 @@ import LanguageToggle from '../components/auth/LanguageToggle';
 
 function SignUp() {
   const { signup } = useAuth();
-  const { language } = useLanguage(); // Retrieve current language from context
+  const { language } = useLanguage(); 
   const [formData, setFormData] = useState({
     name: '',
     email: '',
