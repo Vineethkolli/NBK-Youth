@@ -5,7 +5,7 @@ export const incomeController = {
   // Get all incomes with filters
   getIncomes: async (req, res) => {
     try {
-      const { search, status, paymentMode, belongsTo, verifyLog } = req.query;
+      const { search, status, paymentMode, belongsTo, verifyLog, startDate, endDate } = req.query;
       let query = { isDeleted: false };
 
       if (search) {
@@ -23,6 +23,17 @@ export const incomeController = {
       if (paymentMode) query.paymentMode = paymentMode;
       if (belongsTo) query.belongsTo = belongsTo;
       if (verifyLog) query.verifyLog = verifyLog;
+
+      // Date range filter
+      if (startDate || endDate) {
+        query.createdAt = {};
+        if (startDate) {
+          query.createdAt.$gte = new Date(startDate);
+        }
+        if (endDate) {
+          query.createdAt.$lte = new Date(endDate);
+        }
+      }
 
       const incomes = await Income.find(query).sort({ createdAt: -1 });
       res.json(incomes);

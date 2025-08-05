@@ -38,6 +38,17 @@ function LogFilters({ filters, onChange }) {
     }
   };
 
+  const formatDateForDisplay = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    return `${day}/${month}/${year}, ${hours}:${minutes}`;
+  };
+
   return (
     <div className="flex flex-wrap items-center gap-2 sm:gap-4 relative">
       <div className="flex items-center">
@@ -126,7 +137,7 @@ function LogFilters({ filters, onChange }) {
         />
         <span className="text-sm">
           {filters.startDate
-            ? new Date(filters.startDate).toLocaleString()
+            ? formatDateForDisplay(filters.startDate)
             : 'Start Date & Time'}
         </span>
       </div>
@@ -147,7 +158,7 @@ function LogFilters({ filters, onChange }) {
         />
         <span className="text-sm">
           {filters.endDate
-            ? new Date(filters.endDate).toLocaleString()
+            ? formatDateForDisplay(filters.endDate)
             : 'End Date & Time'}
         </span>
       </div>

@@ -7,7 +7,7 @@ export const expenseController = {
   // Get all expenses with filters
   getExpenses: async (req, res) => {
     try {
-      const { search, paymentMode, verifyLog } = req.query;
+      const { search, paymentMode, verifyLog, startDate, endDate } = req.query;
       let query = { isDeleted: false };
 
       if (search) {
@@ -21,6 +21,17 @@ export const expenseController = {
 
       if (paymentMode) query.paymentMode = paymentMode;
       if (verifyLog) query.verifyLog = verifyLog;
+
+      // Date range filter
+      if (startDate || endDate) {
+        query.createdAt = {};
+        if (startDate) {
+          query.createdAt.$gte = new Date(startDate);
+        }
+        if (endDate) {
+          query.createdAt.$lte = new Date(endDate);
+        }
+      }
 
       const expenses = await Expense.find(query).sort({ createdAt: -1 });
       res.json(expenses);

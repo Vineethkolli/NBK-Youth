@@ -7,6 +7,16 @@ function ExpensePrint({ expenses, visibleColumns, userRole }) {
   const { hiddenProfiles } = useHiddenProfiles();
 
   const formatDate = (dateString) => new Date(dateString).toLocaleString();
+  const formatDateConsistent = (dateString) => {
+    const date = new Date(dateString);
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    const seconds = date.getSeconds().toString().padStart(2, '0');
+    return `${day}/${month}/${year}, ${hours}:${minutes}:${seconds}`;
+  };
 
   const handlePrint = () => {
     const content = printRef.current.innerHTML;
@@ -65,6 +75,7 @@ function ExpensePrint({ expenses, visibleColumns, userRole }) {
                   {columns.includes('expenseId') && (
                     <td><span translate="no">{expense.expenseId}</span></td> )}
                   {columns.includes('dateTime') && <td>{formatDate(expense.createdAt)}</td>}
+                  {columns.includes('dateTime') && <td>{formatDateConsistent(expense.createdAt)}</td>}
                   {columns.includes('purpose') && <td>{expense.purpose}</td>}
                   {columns.includes('spenderName') && (
                     <td>{isHidden ? 'Spender' : expense.name}</td> )}
