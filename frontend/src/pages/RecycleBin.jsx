@@ -3,6 +3,7 @@ import { Trash2, RefreshCw } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { API_URL } from '../utils/config';
+import { formatDateTime } from '../utils/dateTime';
 
 function RecycleBin() {
   const [deletedIncomes, setDeletedIncomes] = useState([]);
@@ -67,21 +68,6 @@ function RecycleBin() {
     }
   };
 
-  const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
-    try {
-      const date = new Date(dateString);
-      const day = date.getDate().toString().padStart(2, '0');
-      const month = (date.getMonth() + 1).toString().padStart(2, '0');
-      const year = date.getFullYear();
-      const hours = date.getHours().toString().padStart(2, '0');
-      const minutes = date.getMinutes().toString().padStart(2, '0');
-      const seconds = date.getSeconds().toString().padStart(2, '0');
-      return `${day}/${month}/${year}, ${hours}:${minutes}:${seconds}`;
-    } catch (error) {
-      return 'Invalid Date';
-    }
-  };
 
   return (
     <div className="space-y-8 p-0">
@@ -126,7 +112,7 @@ function RecycleBin() {
                   <td className="px-6 py-4 whitespace-nowrap text-sm">{item.belongsTo}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">{item.verifyLog}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    {formatDate(item.deletedAt)}
+                    {formatDateTime(item.deletedAt)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
                     <div className="flex space-x-3">
@@ -214,7 +200,7 @@ function RecycleBin() {
             </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">{item.verifyLog}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    {formatDate(item.deletedAt)}
+                    {formatDateTime(item.deletedAt)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
                     <div className="flex space-x-3">

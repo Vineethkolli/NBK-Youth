@@ -2,6 +2,7 @@ import { Eye, EyeOff, Edit2, Trash2 } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa';
 import { useHiddenProfiles } from '../../context/HiddenProfileContext';
 import { useAuth } from '../../context/AuthContext';
+import { formatDateTime } from '../../utils/dateTime';
 
 function IncomeTable({
   incomes,
@@ -13,17 +14,6 @@ function IncomeTable({
 }) {
   const { hiddenProfiles, toggleProfileHidden } = useHiddenProfiles();
   const { user } = useAuth();
-
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    const day = date.getDate().toString().padStart(2, '0');
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const year = date.getFullYear();
-    const hours = date.getHours().toString().padStart(2, '0');
-    const minutes = date.getMinutes().toString().padStart(2, '0');
-    const seconds = date.getSeconds().toString().padStart(2, '0');
-    return `${day}/${month}/${year}, ${hours}:${minutes}:${seconds}`;
-  };
 
   const canViewPhoneNumber = ['developer', 'financier', 'admin'].includes(userRole);
   const canToggleHidden = ['developer', 'financier', 'admin'].includes(userRole);
@@ -38,7 +28,7 @@ function IncomeTable({
     const countryCode = '+91'; 
     const phoneNumber = income.phoneNumber;
     const name = income.name;
-    const formattedDate = new Date(income.createdAt).toLocaleString();
+    const formattedDate = formatDateTime(income.createdAt);
     let message;
 
     if (income.status === 'paid') {
@@ -141,7 +131,7 @@ function IncomeTable({
                 )}
                 {visibleColumns.dateTime && (
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    {formatDate(income.createdAt)}
+                    {formatDateTime(income.createdAt)}
                   </td>
                 )}
                 {visibleColumns.name && (

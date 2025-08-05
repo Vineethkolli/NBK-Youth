@@ -1,19 +1,9 @@
 import React, { useRef } from 'react';
 import { Printer } from 'lucide-react';
+import { formatDateTime } from '../../utils/dateTime';
 
 function IncomePrint({ incomes, visibleColumns }) {
   const printRef = useRef();
-
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    const day = date.getDate().toString().padStart(2, '0');
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const year = date.getFullYear();
-    const hours = date.getHours().toString().padStart(2, '0');
-    const minutes = date.getMinutes().toString().padStart(2, '0');
-    const seconds = date.getSeconds().toString().padStart(2, '0');
-    return `${day}/${month}/${year}, ${hours}:${minutes}:${seconds}`;
-  };
 
   const handlePrint = () => {
     const content = printRef.current.innerHTML;
@@ -58,7 +48,7 @@ function IncomePrint({ incomes, visibleColumns }) {
                 <td><span translate="no">{index + 1}</span></td>
                 {visibleColumns.registerId && <td><span translate="no">{income.registerId}</span></td>}
                 {visibleColumns.incomeId && <td><span translate="no">{income.incomeId}</span></td>}
-                {visibleColumns.dateTime && <td><span translate="no">{formatDate(income.createdAt)}</span></td>}
+                {visibleColumns.dateTime && <td><span translate="no">{formatDateTime(income.createdAt)}</span></td>}
                 {visibleColumns.name && <td>{income.name}</td>}
                 {visibleColumns.email && <td><span translate="no">{income.email}</span></td>}
                 {visibleColumns.phoneNumber && <td><span translate="no">{income.phoneNumber}</span></td>}

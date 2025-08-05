@@ -1,5 +1,6 @@
 import { Filter, ArrowDown, ArrowUp, Calendar } from 'lucide-react';
 import { useRef } from 'react';
+import { formatDateTime } from '../../utils/dateTime';
 
 function IncomeFilters({ filters, onChange }) {
   const startRef = useRef(null);
@@ -22,16 +23,6 @@ function IncomeFilters({ filters, onChange }) {
     }
   };
 
-  const formatDateForDisplay = (dateString) => {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    const day = date.getDate().toString().padStart(2, '0');
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const year = date.getFullYear();
-    const hours = date.getHours().toString().padStart(2, '0');
-    const minutes = date.getMinutes().toString().padStart(2, '0');
-    return `${day}/${month}/${year}, ${hours}:${minutes}`;
-  };
 
   return (
     <div className="flex flex-wrap items-center gap-2 sm:gap-4 ">
@@ -108,7 +99,7 @@ function IncomeFilters({ filters, onChange }) {
         />
         <span className="text-sm">
           {filters.startDate
-            ? formatDateForDisplay(filters.startDate)
+            ? formatDateTime(filters.startDate)
             : 'Start Date & Time'}
         </span>
       </div>
@@ -129,7 +120,7 @@ function IncomeFilters({ filters, onChange }) {
         />
         <span className="text-sm">
           {filters.endDate
-            ? formatDateForDisplay(filters.endDate)
+            ? formatDateTime(filters.endDate)
             : 'End Date & Time'}
         </span>
       </div>

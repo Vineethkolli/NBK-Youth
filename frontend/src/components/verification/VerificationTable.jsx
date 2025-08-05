@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { CheckCircle, XCircle, AlertCircle, Edit2, Save } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
+import { formatDateTime } from '../../utils/dateTime';
 
 function VerificationTable({ data, type, onVerifyLogUpdate, onUpdatePayment }) {
   const [expandedRow, setExpandedRow] = useState(null);
@@ -11,16 +12,6 @@ function VerificationTable({ data, type, onVerifyLogUpdate, onUpdatePayment }) {
     belongsTo: ''
   });
 
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    const day = date.getDate().toString().padStart(2, '0');
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const year = date.getFullYear();
-    const hours = date.getHours().toString().padStart(2, '0');
-    const minutes = date.getMinutes().toString().padStart(2, '0');
-    const seconds = date.getSeconds().toString().padStart(2, '0');
-    return `${day}/${month}/${year}, ${hours}:${minutes}:${seconds}`;
-  };
 
   const getVerifyLogColor = (status) => {
     switch (status) {
@@ -40,9 +31,9 @@ function VerificationTable({ data, type, onVerifyLogUpdate, onUpdatePayment }) {
     let message;
 
     if (payment.verifyLog === 'verified') {
-      message = `Dear ${name},\n\nYour payment has been verified successfully!\n\nPayment Details:\n- Payment Id: ${payment.paymentId}\n- Amount: ₹${payment.amount}\n- Date: ${formatDate(payment.createdAt)}\n- Transaction Status: ${payment.transactionStatus}\n- Payment Mode: Web App\n- Verification Status: ${payment.verifyLog}\n\nThank you for your contribution!\n\nBest regards,\nNBK Youth`;
+      message = `Dear ${name},\n\nYour payment has been verified successfully!\n\nPayment Details:\n- Payment Id: ${payment.paymentId}\n- Amount: ₹${payment.amount}\n- Date: ${formatDateTime(payment.createdAt)}\n- Transaction Status: ${payment.transactionStatus}\n- Payment Mode: Web App\n- Verification Status: ${payment.verifyLog}\n\nThank you for your contribution!\n\nBest regards,\nNBK Youth`;
     } else if (payment.verifyLog === 'rejected') {
-      message = `Dear ${name},\n\nWe regret to inform you that your payment has been rejected.\n\nPayment Details:\n- Payment Id: ${payment.paymentId}\n- Amount: ₹${payment.amount}\n- Date: ${formatDate(payment.createdAt)}\n- Transaction Status: ${payment.transactionStatus}\n- Payment Mode: Web App\n- Verification Status: ${payment.verifyLog}\n\nPlease contact the administrator for more details.\n\nBest regards,\nNBK Youth`;
+      message = `Dear ${name},\n\nWe regret to inform you that your payment has been rejected.\n\nPayment Details:\n- Payment Id: ${payment.paymentId}\n- Amount: ₹${payment.amount}\n- Date: ${formatDateTime(payment.createdAt)}\n- Transaction Status: ${payment.transactionStatus}\n- Payment Mode: Web App\n- Verification Status: ${payment.verifyLog}\n\nPlease contact the administrator for more details.\n\nBest regards,\nNBK Youth`;
     }
 
     const url = `https://wa.me/${countryCode}${phoneNumber}?text=${encodeURIComponent(message)}`;
@@ -267,7 +258,7 @@ function VerificationTable({ data, type, onVerifyLogUpdate, onUpdatePayment }) {
               {type === 'expense' && renderExpenseColumns(item)}
               {type === 'payment' && renderPaymentColumns(item)}
               <td className="px-6 py-4 whitespace-nowrap text-sm">
-                {formatDate(item.createdAt)}
+                {formatDateTime(item.createdAt)}
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
               <div className="flex items-center space-x-2">

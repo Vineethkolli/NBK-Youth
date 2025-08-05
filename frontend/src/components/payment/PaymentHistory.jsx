@@ -1,18 +1,9 @@
 import { toast } from 'react-hot-toast';
 import { Download } from 'lucide-react';
 import { generatePaymentReceipt } from '../../utils/paymentReceipt';
+import { formatDateTime } from '../../utils/dateTime';
 
 function PaymentHistory({ payments }) {
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    const day = date.getDate().toString().padStart(2, '0');
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const year = date.getFullYear();
-    const hours = date.getHours().toString().padStart(2, '0');
-    const minutes = date.getMinutes().toString().padStart(2, '0');
-    const seconds = date.getSeconds().toString().padStart(2, '0');
-    return `${day}/${month}/${year}, ${hours}:${minutes}:${seconds}`;
-  };
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -74,7 +65,7 @@ function PaymentHistory({ payments }) {
                     {payment.paymentId}
                   </td>
                   <td className="px-6 py-4 text-sm whitespace-nowrap">
-                    {formatDate(payment.createdAt)}
+                    {formatDateTime(payment.createdAt)}
                   </td>
                   <td className="px-6 py-4 text-sm whitespace-nowrap">
                     {payment.name}
