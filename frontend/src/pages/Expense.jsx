@@ -144,7 +144,7 @@ const fetchExpenses = async () => {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
             <input
               type="text"
-              placeholder="Search by ID, name, amount, or purpose..."
+              placeholder="Search by ID, name, amount, purpose..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-10 pr-4 py-2 w-full border rounded-lg"
