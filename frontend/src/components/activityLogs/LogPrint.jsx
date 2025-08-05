@@ -5,6 +5,7 @@ import { Printer } from 'lucide-react';
 import axios from 'axios';
 import { API_URL } from '../../utils/config';
 import { toast } from 'react-hot-toast';
+import { formatDateTime } from '../../utils/dateTime'; 
 
 const ActivityLogPrint = ({ filters, search }) => {
   const handlePrint = async () => {
@@ -12,7 +13,7 @@ const ActivityLogPrint = ({ filters, search }) => {
       const params = new URLSearchParams({
         search,
         ...filters,
-        limit: 10000, 
+        limit: 10000,
         page: 1,
       });
 
@@ -38,16 +39,7 @@ const ActivityLogPrint = ({ filters, search }) => {
         const entityLabel = `${log.entityType} (${log.entityId})`;
         const mainRow = [
           idx + 1,
-          (() => {
-            const date = new Date(log.createdAt);
-            const day = date.getDate().toString().padStart(2, '0');
-            const month = (date.getMonth() + 1).toString().padStart(2, '0');
-            const year = date.getFullYear();
-            const hours = date.getHours().toString().padStart(2, '0');
-            const minutes = date.getMinutes().toString().padStart(2, '0');
-            const seconds = date.getSeconds().toString().padStart(2, '0');
-            return `${day}/${month}/${year}, ${hours}:${minutes}:${seconds}`;
-          })(),
+          formatDateTime(log.createdAt), 
           userLabel,
           log.action,
           entityLabel,
@@ -82,22 +74,32 @@ const ActivityLogPrint = ({ filters, search }) => {
         return [
           mainRow,
           [
-            { colSpan: halfCols, content: beforeText, styles: { fontSize: 9, textColor: 80 } },
-            { colSpan: headers.length - halfCols, content: afterText, styles: { fontSize: 9, textColor: 80 } },
+            {
+              colSpan: halfCols,
+              content: beforeText,
+              styles: { fontSize: 9, textColor: 80 },
+            },
+            {
+              colSpan: headers.length - halfCols,
+              content: afterText,
+              styles: { fontSize: 9, textColor: 80 },
+            },
           ],
         ];
       });
 
       // Title
       doc.setFontSize(16);
-      doc.text(title, doc.internal.pageSize.getWidth() / 2, 15, { align: 'center' });
+      doc.text(title, doc.internal.pageSize.getWidth() / 2, 15, {
+        align: 'center',
+      });
 
-    autoTable(doc, {
+      autoTable(doc, {
         head: [headers],
         body: rows,
         startY: 25,
         styles: { fontSize: 10 },
-        didDrawPage: data => {
+        didDrawPage: (data) => {
           const pageCount = doc.internal.getNumberOfPages();
           const pageNum = doc.internal.getCurrentPageInfo().pageNumber;
           const pageWidth = doc.internal.pageSize.getWidth();
@@ -105,8 +107,10 @@ const ActivityLogPrint = ({ filters, search }) => {
 
           doc.setFontSize(9);
           doc.text(`Generated: ${timestamp}`, data.settings.margin.left, pageHeight - 10);
-          doc.text(`Page ${pageNum}/${pageCount}`, pageWidth - data.settings.margin.right, pageHeight - 10, { align: 'right' });
-        }
+          doc.text(`Page ${pageNum}/${pageCount}`, pageWidth - data.settings.margin.right, pageHeight - 10, {
+            align: 'right',
+          });
+        },
       });
 
       doc.save('Activity_Logs_Report.pdf');

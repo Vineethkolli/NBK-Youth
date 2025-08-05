@@ -3,6 +3,7 @@ import { Plus, Trash2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { API_URL } from '../../utils/config';
+import { formatDateTime } from '../../utils/dateTime';
 
 function Timeline({ events, isEditing, onUpdate }) {
   const [showForm, setShowForm] = useState(false);
@@ -39,21 +40,6 @@ function Timeline({ events, isEditing, onUpdate }) {
     }
   };
 
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    
-    const day = date.getDate().toString().padStart(2, '0');
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const year = date.getFullYear();
-    
-    let hours = date.getHours();
-    const minutes = date.getMinutes().toString().padStart(2, '0');
-    const ampm = hours >= 12 ? 'PM' : 'AM';
-    hours = hours % 12;
-    hours = hours ? hours : 12;
-    
-    return `${day}/${month}/${year}, ${hours}:${minutes} ${ampm}`;
-  };
 
   return (
     <div className="space-y-4">
@@ -133,7 +119,7 @@ function Timeline({ events, isEditing, onUpdate }) {
                     <div>
                       <h3 className="font-medium">{event.name}</h3>
                       <p className="text-sm text-gray-500">
-                        {formatDate(event.dateTime)}
+                        {formatDateTime(event.dateTime)}
                       </p>
                     </div>
                     {isEditing && (

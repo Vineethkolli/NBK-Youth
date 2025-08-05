@@ -1,5 +1,6 @@
 import { useRef, useState, useEffect } from 'react';
 import { Filter, Calendar, ChevronDown } from 'lucide-react';
+import { formatDateTime } from '../../utils/dateTime'; 
 
 const ACTION_OPTIONS = ['CREATE', 'UPDATE', 'DELETE', 'VERIFY', 'RESTORE'];
 
@@ -36,17 +37,6 @@ function LogFilters({ filters, onChange }) {
         ref.current.focus();
       }
     }
-  };
-
-  const formatDateForDisplay = (dateString) => {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    const day = date.getDate().toString().padStart(2, '0');
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const year = date.getFullYear();
-    const hours = date.getHours().toString().padStart(2, '0');
-    const minutes = date.getMinutes().toString().padStart(2, '0');
-    return `${day}/${month}/${year}, ${hours}:${minutes}`;
   };
 
   return (
@@ -137,7 +127,7 @@ function LogFilters({ filters, onChange }) {
         />
         <span className="text-sm">
           {filters.startDate
-            ? formatDateForDisplay(filters.startDate)
+            ? formatDateTime(filters.startDate)
             : 'Start Date & Time'}
         </span>
       </div>
@@ -158,7 +148,7 @@ function LogFilters({ filters, onChange }) {
         />
         <span className="text-sm">
           {filters.endDate
-            ? formatDateForDisplay(filters.endDate)
+            ? formatDateTime(filters.endDate)
             : 'End Date & Time'}
         </span>
       </div>

@@ -1,20 +1,9 @@
-// src/components/activityLogs/LogTable.jsx
 import { Fragment, useState } from 'react';
 import { ChevronLeft, ChevronRight, Eye, EyeOff } from 'lucide-react';
+import { formatDateTime } from '../../utils/dateTime';
 
 function LogTable({ logs, loading, pagination, onPageChange }) {
   const [expandedRows, setExpandedRows] = useState(new Set());
-
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    const day = date.getDate().toString().padStart(2, '0');
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const year = date.getFullYear();
-    const hours = date.getHours().toString().padStart(2, '0');
-    const minutes = date.getMinutes().toString().padStart(2, '0');
-    const seconds = date.getSeconds().toString().padStart(2, '0');
-    return `${day}/${month}/${year}, ${hours}:${minutes}:${seconds}`;
-  };
 
   const getActionColor = (action) => {
     switch (action) {
@@ -106,7 +95,7 @@ function LogTable({ logs, loading, pagination, onPageChange }) {
               <Fragment key={log._id}>
                 <tr className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    {formatDate(log.createdAt)}
+                    {formatDateTime(log.createdAt)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
                     <div>
