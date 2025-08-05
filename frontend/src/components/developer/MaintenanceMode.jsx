@@ -3,27 +3,46 @@ import { toast } from 'react-hot-toast';
 import { Settings, Laptop2Icon } from 'lucide-react';
 import { useMaintenanceMode } from '../../context/MaintenanceModeContext';
 
+// Utility to convert local datetime string (from <input type="datetime-local">) to UTC ISO string
+function localDateTimeToUTCString(localDateTimeStr) {
+  if (!localDateTimeStr) return null;
+
+  const [date, time] = localDateTimeStr.split('T');
+  const [year, month, day] = date.split('-').map(Number);
+  const [hour, minute] = time.split(':').map(Number);
+
+  const localDate = new Date();
+  localDate.setFullYear(year);
+  localDate.setMonth(month - 1); // Month is 0-indexed
+  localDate.setDate(day);
+  localDate.setHours(hour);
+  localDate.setMinutes(minute);
+  localDate.setSeconds(0);
+  localDate.setMilliseconds(0);
+
+  return localDate.toISOString();
+}
+
 function MaintenanceMode() {
   const { isMaintenanceMode, expectedBackAt, toggleMaintenanceMode } = useMaintenanceMode();
   const [localExpectedBackAt, setLocalExpectedBackAt] = useState(expectedBackAt || '');
-
 
   useEffect(() => {
     setLocalExpectedBackAt(expectedBackAt || '');
   }, [expectedBackAt]);
 
-const handleToggle = async () => {
-  try {
-    const expectedBackAtUTC = !isMaintenanceMode && localExpectedBackAt
-      ? new Date(localExpectedBackAt).toISOString()
-      : null;
+  const handleToggle = async () => {
+    try {
+      const expectedBackAtUTC = !isMaintenanceMode && localExpectedBackAt
+        ? localDateTimeToUTCString(localExpectedBackAt)
+        : null;
 
-    await toggleMaintenanceMode(!isMaintenanceMode, expectedBackAtUTC);
-    toast.success(`Maintenance mode ${!isMaintenanceMode ? 'enabled' : 'disabled'}`);
-  } catch (error) {
-    toast.error('Failed to toggle maintenance mode');
-  }
-};
+      await toggleMaintenanceMode(!isMaintenanceMode, expectedBackAtUTC);
+      toast.success(`Maintenance mode ${!isMaintenanceMode ? 'enabled' : 'disabled'}`);
+    } catch (error) {
+      toast.error('Failed to toggle maintenance mode');
+    }
+  };
 
   return (
     <div className="bg-white rounded-lg shadow p-6 mb-6">
