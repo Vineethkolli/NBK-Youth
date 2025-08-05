@@ -70,7 +70,6 @@ function ExpenseFilters({ filters, onChange }) {
 
       {/* Date Range Filters */}
       <div className="flex flex-wrap items-center gap-2 sm:gap-4">
-        <span className="text-sm font-medium text-gray-600">Date Range:</span>
         
         {/* Start Date Picker */}
         <div className="flex items-center">
