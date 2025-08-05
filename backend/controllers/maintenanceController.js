@@ -25,16 +25,7 @@ export const maintenanceController = {
           isEnabled,
           enabledBy: registerId,
           enabledAt: new Date(),
-          expectedBackAt: expectedBackAt
-  ? new Date(
-      new Date(expectedBackAt).getFullYear(),
-      new Date(expectedBackAt).getMonth(),
-      new Date(expectedBackAt).getDate(),
-      new Date(expectedBackAt).getHours(),
-      new Date(expectedBackAt).getMinutes()
-    )
-  : null,
-
+          expectedBackAt: expectedBackAt ? new Date(expectedBackAt) : null
         },
         { upsert: true, new: true }
       );
