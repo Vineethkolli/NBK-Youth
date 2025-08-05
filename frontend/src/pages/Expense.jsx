@@ -19,6 +19,8 @@ function Expense() {
     paymentMode: '',
     verifyLog: '',
     sort: '',
+    startDate: '',
+    endDate: ''
   });
   const [visibleColumns, setVisibleColumns] = useState({
     registerId: false,

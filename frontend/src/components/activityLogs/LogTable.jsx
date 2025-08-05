@@ -5,8 +5,16 @@ import { ChevronLeft, ChevronRight, Eye, EyeOff } from 'lucide-react';
 function LogTable({ logs, loading, pagination, onPageChange }) {
   const [expandedRows, setExpandedRows] = useState(new Set());
 
-  const formatDate = (dateString) =>
-    new Date(dateString).toLocaleString();
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    const seconds = date.getSeconds().toString().padStart(2, '0');
+    return `${day}/${month}/${year}, ${hours}:${minutes}:${seconds}`;
+  };
 
   const getActionColor = (action) => {
     switch (action) {

@@ -20,7 +20,9 @@ function Income() {
     paymentMode: '',
     belongsTo: '',
     verifyLog: '',
-    sort: ''
+    sort: '',
+    startDate: '',
+    endDate: ''
   });
   const [visibleColumns, setVisibleColumns] = useState({
     incomeId: false,
