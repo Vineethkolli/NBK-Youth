@@ -7,19 +7,23 @@ function MaintenanceMode() {
   const { isMaintenanceMode, expectedBackAt, toggleMaintenanceMode } = useMaintenanceMode();
   const [localExpectedBackAt, setLocalExpectedBackAt] = useState(expectedBackAt || '');
 
-  // Keep local input in sync with the context value
+
   useEffect(() => {
     setLocalExpectedBackAt(expectedBackAt || '');
   }, [expectedBackAt]);
 
-  const handleToggle = async () => {
-    try {
-      await toggleMaintenanceMode(!isMaintenanceMode, !isMaintenanceMode ? localExpectedBackAt : null);
-      toast.success(`Maintenance mode ${!isMaintenanceMode ? 'enabled' : 'disabled'}`);
-    } catch (error) {
-      toast.error('Failed to toggle maintenance mode');
-    }
-  };
+const handleToggle = async () => {
+  try {
+    const expectedBackAtUTC = !isMaintenanceMode && localExpectedBackAt
+      ? new Date(localExpectedBackAt).toISOString()
+      : null;
+
+    await toggleMaintenanceMode(!isMaintenanceMode, expectedBackAtUTC);
+    toast.success(`Maintenance mode ${!isMaintenanceMode ? 'enabled' : 'disabled'}`);
+  } catch (error) {
+    toast.error('Failed to toggle maintenance mode');
+  }
+};
 
   return (
     <div className="bg-white rounded-lg shadow p-6 mb-6">
