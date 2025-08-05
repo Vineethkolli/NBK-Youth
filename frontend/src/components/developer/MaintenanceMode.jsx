@@ -14,7 +14,11 @@ function MaintenanceMode() {
 
   const handleToggle = async () => {
     try {
-      await toggleMaintenanceMode(!isMaintenanceMode, !isMaintenanceMode ? localExpectedBackAt : null);
+      // Convert local datetime to ISO string for backend (same as events)
+      const expectedBackAtISO = !isMaintenanceMode && localExpectedBackAt 
+        ? new Date(localExpectedBackAt).toISOString() 
+        : null;
+      await toggleMaintenanceMode(!isMaintenanceMode, expectedBackAtISO);
       toast.success(`Maintenance mode ${!isMaintenanceMode ? 'enabled' : 'disabled'}`);
     } catch (error) {
       toast.error('Failed to toggle maintenance mode');
