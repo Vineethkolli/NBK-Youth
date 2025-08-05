@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { AlertTriangle, Wrench, Settings } from 'lucide-react';
 import { API_URL } from '../utils/config';
-import { formatDateTime } from '../utils/dateTime';
 
 function MaintenancePage() {
   const [maintenanceData, setMaintenanceData] = useState(null);
