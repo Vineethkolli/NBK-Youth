@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from 'react';
-import { Filter, Calendar, ChevronDown, X } from 'lucide-react'; 
+import { Filter, Calendar, ChevronDown } from 'lucide-react';
 import { formatDateTime } from '../../utils/dateTime'; 
 
 const ACTION_OPTIONS = ['CREATE', 'UPDATE', 'DELETE', 'VERIFY', 'RESTORE'];
@@ -16,7 +16,9 @@ function LogFilters({ filters, onChange }) {
 
   const toggleAction = (action) => {
     setSelectedActions((prev) =>
-       prev.includes(action) ? prev.filter((a) => a !== action) : [...prev, action]
+      prev.includes(action)
+        ? prev.filter((a) => a !== action)
+        : [...prev, action]
     );
   };
 
@@ -36,10 +38,6 @@ function LogFilters({ filters, onChange }) {
     }
   };
 
-    const clearDateFilter = (field) => {
-    onChange({ ...filters, [field]: '' });
-  };
-
   return (
     <div className="flex flex-wrap items-center gap-2 sm:gap-4 relative">
       <div className="flex items-center">
@@ -47,7 +45,7 @@ function LogFilters({ filters, onChange }) {
         <span className="text-sm font-medium">Filters:</span>
       </div>
 
-      {/* Actions Dropdown with Checkboxes */}
+      {/* Action Checkboxes */}
       <div className="relative">
         <button
           onClick={() => setShowActionDropdown((prev) => !prev)}
@@ -85,7 +83,7 @@ function LogFilters({ filters, onChange }) {
         )}
       </div>
 
-      {/* Entity Type */}
+      {/* Entity Filter */}
       <select
         value={filters.entityType}
         onChange={(e) => onChange({ ...filters, entityType: e.target.value })}
@@ -114,29 +112,23 @@ function LogFilters({ filters, onChange }) {
       </select>
 
       {/* Start Date Picker */}
-     <div className="flex items-center">
-        <div className="flex items-center cursor-pointer" onClick={() => openPicker(startRef)}>
-          <Calendar className="h-5 w-5 text-gray-400 mr-2" />
-          <input
-            ref={startRef}
-            type="datetime-local"
-            value={filters.startDate}
-            onChange={(e) => onChange({ ...filters, startDate: e.target.value })}
-            className="form-select absolute w-0 opacity-0"
-          />
-          <span className="text-sm">
-            {filters.startDate ? formatDateTime(filters.startDate) : 'Start Date & Time'}
-          </span>
-        </div>
-        {filters.startDate && (
-          <button
-            onClick={() => clearDateFilter('startDate')}
-            className="ml-2 text-gray-400 hover:text-gray-600"
-            title="Clear start date"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        )}
+      <div
+        className="flex items-center cursor-pointer"
+        onClick={() => openPicker(startRef)}
+      >
+        <Calendar className="h-5 w-5 text-gray-400 mr-2" />
+        <input
+          ref={startRef}
+          type="datetime-local"
+          value={filters.startDate}
+          onChange={(e) => onChange({ ...filters, startDate: e.target.value })}
+          className="form-select absolute w-0"
+        />
+        <span className="text-sm">
+          {filters.startDate
+            ? formatDateTime(filters.startDate)
+            : 'Start Date & Time'}
+        </span>
       </div>
 
       {/* End Date Picker */}
