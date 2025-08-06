@@ -1,11 +1,16 @@
+
 import express from 'express';
 import { auth, checkRole } from '../middleware/auth.js';
 import { updateProfileImage, deleteProfileImage, getAllUsers, updateProfile, updateUserCategory, deleteUser, updateUserRole, getProfile, updateLanguage } from '../controllers/usersController.js';
+import multer from 'multer';
+
+// Configure multer for file uploads (disk storage, temp folder)
+const upload = multer({ dest: 'uploads/' });
 
 const router = express.Router();
 
-// Update profile image
-router.post('/profile/image', auth, updateProfileImage);
+// Update profile image (expects image as file)
+router.post('/profile/image', auth, upload.single('image'), updateProfileImage);
 
 // Delete profile image
 router.delete('/profile/image', auth, deleteProfileImage);

@@ -90,10 +90,12 @@ function Profile() {
         updateUserData({ ...user, profileImage: null });
         toast.success('Profile image deleted successfully');
       } else {
-        // Handle upload/update
-        const { data } = await axios.post(`${API_URL}/api/users/profile/image`, {
-          image: imageData
-        });
+        // Handle upload/update (imageData is FormData)
+        const { data } = await axios.post(
+          `${API_URL}/api/users/profile/image`,
+          imageData,
+          { headers: { 'Content-Type': 'multipart/form-data' } }
+        );
         setUserData({ ...userData, profileImage: data.profileImage });
         updateUserData({ ...user, profileImage: data.profileImage });
         toast.success('Profile image updated successfully');

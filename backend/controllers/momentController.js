@@ -69,14 +69,27 @@ export const momentController = {
 
   uploadMediaMoment: async (req, res) => {
     try {
-      const { title, file, isPinned } = req.body;
+      const { title, isPinned } = req.body;
 
-      // Convert base64 to buffer
-      const buffer = Buffer.from(file.split(',')[1], 'base64');
-      const stream = Readable.from(buffer);
-      const mimeType = file.match(/^data:(.*);base64/)[1];
+      // Use multer: req.file (field name 'file')
+      if (!req.file) {
+        return res.status(400).json({ message: 'No file uploaded' });
+      }
 
-      // Upload to Google Drive
+      const mimeType = req.file.mimetype;
+      let stream;
+      // Support both buffer (memoryStorage) and path (diskStorage)
+      if (req.file.buffer) {
+        stream = Readable.from(req.file.buffer);
+      } else if (req.file.path) {
+        // Fallback: create a stream from file path
+        const fs = await import('fs');
+        stream = fs.createReadStream(req.file.path);
+      } else {
+        return res.status(400).json({ message: 'Invalid file upload' });
+      }
+
+      // Upload to Google Drive (chunked streaming)
       const driveResponse = await drive.files.create({
         requestBody: {
           name: `${title || 'untitled'}-${Date.now()}`,

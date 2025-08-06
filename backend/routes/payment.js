@@ -1,6 +1,11 @@
+
 import express from 'express';
 import PaymentController from '../controllers/paymentController.js';
 import { auth, checkRole } from '../middleware/auth.js';
+import multer from 'multer';
+
+// Configure multer for file uploads (disk storage, temp folder)
+const upload = multer({ dest: 'uploads/' });
 
 const router = express.Router();
 
@@ -17,8 +22,8 @@ router.get('/verification/data',
   PaymentController.getVerificationData
 );
 
-// Route to create a new payment
-router.post('/', PaymentController.createPayment);
+// Route to create a new payment (expects screenshot as file)
+router.post('/', upload.single('screenshot'), PaymentController.createPayment);
 
 // Route to update payment details
 router.put('/:id',

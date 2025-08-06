@@ -1,12 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import {
-  Plus,
-  Trash2,
-  ArrowLeft,
-  ArrowRight,
-  Loader2,
-  GripHorizontal,
-} from 'lucide-react';
+import { Plus, Trash2, ArrowLeft, ArrowRight, Loader2, GripHorizontal } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { API_URL } from '../../utils/config';
@@ -76,16 +69,6 @@ function Slideshow({ isEditing }) {
     }
   }
 
-  // Utility to convert File -> base64
-  function toBase64(file) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = () => reject('File read error');
-    });
-  }
-
   const handleFileUpload = async e => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -99,10 +82,11 @@ function Slideshow({ isEditing }) {
     setIsUploading(true);
 
     try {
-      const base64 = await toBase64(file);
-      await axios.post(`${API_URL}/api/homepage/slides`, {
-        file: base64,
-        type,
+      const data = new FormData();
+      data.append('file', file);
+      data.append('type', type);
+      await axios.post(`${API_URL}/api/homepage/slides`, data, {
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
       toast.success('Slide added successfully');
       await fetchSlides();

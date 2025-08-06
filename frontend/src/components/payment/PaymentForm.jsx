@@ -17,6 +17,7 @@ function PaymentForm({ onSubmit }) {
   const [showPaymentOptions, setShowPaymentOptions] = useState(false);
   const [selectedOption, setSelectedOption] = useState(null);
   const [screenshot, setScreenshot] = useState(null);
+  const [screenshotPreview, setScreenshotPreview] = useState(null);
   const [belongsTo, setBelongsTo] = useState('youth');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [copiedDetails, setCopiedDetails] = useState({
@@ -73,11 +74,8 @@ function PaymentForm({ onSubmit }) {
       return;
     }
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setScreenshot(reader.result);
-    };
-    reader.readAsDataURL(file);
+    setScreenshot(file);
+    setScreenshotPreview(URL.createObjectURL(file));
   };
 
   const handleSubmit = async () => {
@@ -89,21 +87,22 @@ function PaymentForm({ onSubmit }) {
     setIsSubmitting(true);
 
     try {
-      await onSubmit({ 
-        amount: Number(amount), 
-        screenshot, 
-        belongsTo,
-        name: user.name,
-        email: user.email,
-        phoneNumber: user.phoneNumber,
-        registerId: user.registerId
-      });
-      
+      const data = new FormData();
+      data.append('amount', Number(amount));
+      data.append('screenshot', screenshot);
+      data.append('belongsTo', belongsTo);
+      data.append('name', user.name);
+      data.append('email', user.email);
+      data.append('phoneNumber', user.phoneNumber);
+      data.append('registerId', user.registerId);
+
+      await onSubmit(data);
+
       setAmount('');
       setScreenshot(null);
       setShowPaymentOptions(false);
       setSelectedOption(null);
-      
+
       toast.success('Payment submitted successfully. We will verify and confirm payment in 4 hours. Thank you for your patience.', {
         duration: 5000
       });
@@ -257,12 +256,24 @@ function PaymentForm({ onSubmit }) {
                   hover:file:bg-indigo-100"
               />
               
-              {screenshot && (
-                <img
-                  src={screenshot}
-                  alt="Payment Screenshot"
-                  className="max-w-xs rounded-lg shadow-md"
-                />
+              {screenshotPreview && (
+                <div className="mt-2 relative h-32 w-48">
+                  <img
+                    src={screenshotPreview}
+                    alt="Screenshot Preview"
+                    className="h-full w-full object-contain border rounded"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setScreenshot(null);
+                      setScreenshotPreview(null);
+                    }}
+                    className="absolute top-0 right-0 bg-black bg-opacity-50 text-white p-1 rounded-full"
+                  >
+                    ×
+                  </button>
+                </div>
               )}
             </div>
 

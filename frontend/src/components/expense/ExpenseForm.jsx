@@ -75,26 +75,22 @@ function ExpenseForm({ expense, onClose, onSuccess }) {
     setFormData({ ...formData, subExpenses: updatedSubExpenses });
   };
 
-  const handleBillUpload = async (index, file) => {
+  const handleBillUpload = (index, file) => {
     if (!file) return;
-
     if (file.size > 15 * 1024 * 1024) {
       return toast.error('File size should be less than 15MB');
     }
-
     if (!file.type.startsWith('image/')) {
       return toast.error('Only image files are allowed');
     }
-
-    try {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => {
-        handleSubExpenseChange(index, 'billImage', reader.result);
-      };
-    } catch (error) {
-      toast.error('Failed to upload bill image');
-    }
+    // Store the File object and preview URL
+    const updatedSubExpenses = [...formData.subExpenses];
+    updatedSubExpenses[index] = {
+      ...updatedSubExpenses[index],
+      billImage: file,
+      billImagePreview: URL.createObjectURL(file)
+    };
+    setFormData({ ...formData, subExpenses: updatedSubExpenses });
   };
 
   const validateInitialForm = () => {
@@ -127,23 +123,42 @@ function ExpenseForm({ expense, onClose, onSuccess }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (isSubmitting) return; 
+    if (isSubmitting) return;
     setIsSubmitting(true);
 
     try {
       if (!expense && !validateInitialForm()) throw new Error('Validation failed');
       if (expense && !validateFullForm()) throw new Error('Validation failed');
 
+      // Prepare FormData for multipart/form-data
+      const data = new FormData();
+      data.append('name', formData.name);
+      data.append('phoneNumber', formData.phoneNumber);
+      data.append('amount', formData.amount);
+      data.append('purpose', formData.purpose);
+      data.append('paymentMode', formData.paymentMode);
+      data.append('amountReturned', formData.amountReturned);
+      data.append('registerId', user.registerId);
+
+      // Prepare subExpenses array and bill images
+      const subExpensesArr = formData.subExpenses.map((sub, idx) => {
+        // If billImage is a File, attach it as billImage{idx}
+        if (sub.billImage instanceof File) {
+          data.append(`billImage${idx}`, sub.billImage);
+          return { ...sub, billImage: '' };
+        }
+        return sub;
+      });
+      data.append('subExpenses', JSON.stringify(subExpensesArr));
+
       if (expense) {
-        await axios.put(`${API_URL}/api/expenses/${expense._id}`, {
-          ...formData,
-          registerId: user.registerId,
+        await axios.put(`${API_URL}/api/expenses/${expense._id}`, data, {
+          headers: { 'Content-Type': 'multipart/form-data' },
         });
         toast.success('Expense updated successfully');
       } else {
-        await axios.post(`${API_URL}/api/expenses`, {
-          ...formData,
-          registerId: user.registerId,
+        await axios.post(`${API_URL}/api/expenses`, data, {
+          headers: { 'Content-Type': 'multipart/form-data' },
         });
         toast.success('Expense added successfully');
       }
@@ -151,7 +166,7 @@ function ExpenseForm({ expense, onClose, onSuccess }) {
     } catch (error) {
       toast.error(error.response?.data?.message || 'Operation failed');
     } finally {
-      setIsSubmitting(false); 
+      setIsSubmitting(false);
     }
   };
 
@@ -298,12 +313,25 @@ function ExpenseForm({ expense, onClose, onSuccess }) {
                         onChange={(e) => handleBillUpload(index, e.target.files[0])}
                         className="mt-1 block w-full"
                       />
-                      {subExpense.billImage && (
-                        <img
-                          src={subExpense.billImage}
-                          alt="Uploaded Bill"
-                          className="mt-2 h-16 w-16 object-cover rounded-md"
-                        />
+                      {subExpense.billImagePreview && (
+                        <div className="mt-2 relative h-16 w-24">
+                          <img
+                            src={subExpense.billImagePreview}
+                            alt="Bill Preview"
+                            className="h-full w-full object-contain border rounded"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const updated = [...formData.subExpenses];
+                              updated[index] = { ...updated[index], billImage: '', billImagePreview: '' };
+                              setFormData({ ...formData, subExpenses: updated });
+                            }}
+                            className="absolute top-0 right-0 bg-black bg-opacity-50 text-white p-1 rounded-full"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        </div>
                       )}
                     </div>
                     <div className="col-span-3 text-right">

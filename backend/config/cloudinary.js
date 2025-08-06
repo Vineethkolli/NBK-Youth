@@ -9,32 +9,45 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-export const uploadToCloudinary = async (file, folder = 'PaymentScreenshots') => {
+
+export const uploadToCloudinary = async (file, folder = 'PaymentScreenshots', type = null) => {
   try {
-    // Remove the data:[content-type];base64, prefix
-    const base64Data = file.replace(/^data:([^;]+);base64,/, '');
-    
+    // file: should be a file path or a readable stream
     const options = {
       folder,
       resource_type: 'auto',
-      quality: 'auto:good'
+      quality: 'auto:good',
     };
 
-    // Add specific options based on folder type
-    if (folder === 'PaymentScreenshots' || folder === 'ExpenseBills') {
-      options.format = 'jpg';
+    // Set resource_type based on folder logic and type
+    if ([
+      'PaymentScreenshots',
+      'ExpenseBills',
+      'ProfileImages'
+    ].includes(folder)) {
       options.resource_type = 'image';
     } else if (folder === 'Vibe') {
-      options.format = 'mp3';
-      options.resource_type = 'video'; 
+      // Cloudinary treats audio as 'video' resource_type
+      options.resource_type = 'video';
+    } else if (folder === 'Banners' || folder === 'HomepageSlides') {
+      // For Banners and HomepageSlides, support both image and video uploads
+      // The actual resource_type should be set by the route/controller based on file type, but default to 'auto' here
+      if (type === 'video') {
+        options.resource_type = 'video';
+      } else if (type === 'image') {
+        options.resource_type = 'image';
+      } else {
+        options.resource_type = 'auto';
+      }
     }
 
-    // Upload to Cloudinary
-    const result = await cloudinary.uploader.upload(
-      `data:${options.resource_type === 'image' ? 'image/png' : 'audio/mpeg'};base64,${base64Data}`,
-      options
-    );
+    // If resource_type is video (for large videos), set eager_async and eager transformation
+    if (options.resource_type === 'video') {
+      options.eager_async = true;
+      options.eager = [{ format: 'mp4' }]; // You can add width/height/crop if needed
+    }
 
+    const result = await cloudinary.uploader.upload(file, options);
     return result.secure_url;
   } catch (error) {
     console.error('Cloudinary upload error:', error);

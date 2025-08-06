@@ -120,7 +120,13 @@ const CollectionController = {
         return res.status(404).json({ message: 'Collection not found' });
       }
 
-      const url = await uploadToCloudinary(req.body.file, 'Vibe');
+      // Use multer: req.file (field name 'file')
+      let url = undefined;
+      if (req.file) {
+        url = await uploadToCloudinary(req.file.path, 'Vibe');
+      } else {
+        return res.status(400).json({ message: 'No file uploaded' });
+      }
 
       collection.songs.push({
         name: req.body.name,
@@ -159,13 +165,13 @@ const CollectionController = {
       }
 
       // If a new file is provided, delete the old one and upload the new one
-      if (req.body.file) {
+      if (req.file) {
         // Delete old file from Cloudinary
         const oldPublicId = extractPublicId(song.url);
         await cloudinary.uploader.destroy(oldPublicId, { resource_type: 'video' });
 
         // Upload new file
-        const newUrl = await uploadToCloudinary(req.body.file, 'Vibe');
+        const newUrl = await uploadToCloudinary(req.file.path, 'Vibe');
         song.url = newUrl;
       }
 

@@ -17,12 +17,19 @@ export const homepageController = {
 
   addSlide: async (req, res) => {
     try {
-      const { file, type } = req.body;
+      const { type } = req.body;
       const maxOrder = await Slide.findOne().sort('-order');
       const order = maxOrder ? maxOrder.order + 1 : 0;
 
-      // Upload to Cloudinary
-      const url = await uploadToCloudinary(file, 'HomepageSlides');
+
+      // Use multer: req.file (field name 'file')
+      let url = undefined;
+      if (req.file) {
+        // Pass type to uploadToCloudinary for correct resource_type/eager options
+        url = await uploadToCloudinary(req.file.path, 'HomepageSlides', req.body.type);
+      } else {
+        return res.status(400).json({ message: 'No file uploaded' });
+      }
 
       const slide = await Slide.create({
         url,

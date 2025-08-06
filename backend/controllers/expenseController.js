@@ -56,14 +56,17 @@ export const expenseController = {
   createExpense: async (req, res) => {
     try {
       const { subExpenses, ...expenseData } = req.body;
+      // subExpenses is expected as JSON string if sent as multipart/form-data
+      const parsedSubExpenses = typeof subExpenses === 'string' ? JSON.parse(subExpenses) : subExpenses;
 
       // Process and upload bill images for each sub-expense
       const processedSubExpenses = await Promise.all(
-        subExpenses.map(async (subExpense) => {
+        parsedSubExpenses.map(async (subExpense, idx) => {
           let billImageUrl = null;
-          if (subExpense.billImage) {
+          // billImage file should be uploaded as req.files[`billImage${idx}`][0]
+          if (req.files && req.files[`billImage${idx}`] && req.files[`billImage${idx}`][0]) {
             try {
-              billImageUrl = await uploadToCloudinary(subExpense.billImage, 'ExpenseBills');
+              billImageUrl = await uploadToCloudinary(req.files[`billImage${idx}`][0].path, 'ExpenseBills');
             } catch (uploadError) {
               console.error('Failed to upload bill image:', uploadError);
             }
@@ -108,28 +111,26 @@ export const expenseController = {
 
       const originalData = expense.toObject();
       const { subExpenses, ...expenseData } = req.body;
+      const parsedSubExpenses = typeof subExpenses === 'string' ? JSON.parse(subExpenses) : subExpenses;
 
       // Process and upload new bill images
       const processedSubExpenses = await Promise.all(
-        subExpenses.map(async (subExpense) => {
+        parsedSubExpenses.map(async (subExpense, idx) => {
           let billImageUrl = subExpense.billImage;
-
-          // Only upload if it's a new base64 image
-          if (subExpense.billImage && subExpense.billImage.startsWith('data:image')) {
+          // If a new file is uploaded, use it
+          if (req.files && req.files[`billImage${idx}`] && req.files[`billImage${idx}`][0]) {
             try {
-              billImageUrl = await uploadToCloudinary(subExpense.billImage, 'ExpenseBills');
+              billImageUrl = await uploadToCloudinary(req.files[`billImage${idx}`][0].path, 'ExpenseBills');
             } catch (uploadError) {
               console.error('Failed to upload bill image:', uploadError);
             }
           }
-
           return {
             ...subExpense,
             billImage: billImageUrl
           };
         })
       );
-
 
       // Update expense
       const updatedExpense = await Expense.findByIdAndUpdate(

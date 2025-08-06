@@ -54,19 +54,19 @@ export default function BannerManager() {
     }
   };
 
-  const handleFileChange = async (e, type) => {
+  const handleFileChange = (e, type) => {
     const file = e.target.files[0];
     if (!file) return;
     if (file.size > 200 * 1024 * 1024) {
       toast.error('File size should be less than 200MB');
       return;
     }
-
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => {
-      setFormData(f => ({ ...f, [type]: reader.result }));
-    };
+    // For preview, create object URL
+    setFormData(f => ({
+      ...f,
+      [type]: file,
+      [`${type}Preview`]: URL.createObjectURL(file)
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -75,11 +75,28 @@ export default function BannerManager() {
     setSubmitting(true);
 
     try {
+      const data = new FormData();
+      data.append('title', formData.title);
+      data.append('message', formData.message);
+      data.append('status', formData.status);
+      data.append('periodicity', formData.periodicity);
+      data.append('duration', formData.duration);
+      if (formData.image instanceof File) {
+        data.append('image', formData.image);
+      }
+      if (formData.video instanceof File) {
+        data.append('video', formData.video);
+      }
+
       if (formData._id) {
-        await axios.put(`${API_URL}/api/banners/${formData._id}`, formData);
+        await axios.put(`${API_URL}/api/banners/${formData._id}`, data, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
         toast.success('Banner updated successfully');
       } else {
-        await axios.post(`${API_URL}/api/banners`, formData);
+        await axios.post(`${API_URL}/api/banners`, data, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
         toast.success('Banner created successfully');
       }
       setShowForm(false);
@@ -302,16 +319,17 @@ export default function BannerManager() {
                   onChange={(e) => handleFileChange(e, 'image')}
                   className="mt-1 block w-full"
                 />
-                {formData.image && (
+                {(formData.imagePreview || (formData.image && typeof formData.image === 'string')) && (
                   <div className="relative mt-2 h-32 w-full">
                     <img
-                      src={formData.image}
+                      src={formData.imagePreview || formData.image}
                       alt="Preview"
                       className="h-full object-contain"
                     />
                     <button
+                      type="button"
                       onClick={() =>
-                        setFormData(f => ({ ...f, image: '' }))
+                        setFormData(f => ({ ...f, image: '', imagePreview: '' }))
                       }
                       className="absolute top-0 right-0 bg-black bg-opacity-50 text-white p-1 rounded-full"
                     >
@@ -332,16 +350,17 @@ export default function BannerManager() {
                   onChange={(e) => handleFileChange(e, 'video')}
                   className="mt-1 block w-full"
                 />
-                {formData.video && (
+                {(formData.videoPreview || (formData.video && typeof formData.video === 'string')) && (
                   <div className="relative mt-2 h-32 w-full">
                     <video
-                      src={formData.video}
+                      src={formData.videoPreview || formData.video}
                       controls
                       className="h-full object-contain"
                     />
                     <button
+                      type="button"
                       onClick={() =>
-                        setFormData(f => ({ ...f, video: '' }))
+                        setFormData(f => ({ ...f, video: '', videoPreview: '' }))
                       }
                       className="absolute top-0 right-0 bg-black bg-opacity-50 text-white p-1 rounded-full"
                     >

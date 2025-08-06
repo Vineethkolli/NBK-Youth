@@ -41,10 +41,16 @@ const PaymentController = {
   // Create a new payment
   async createPayment(req, res) {
     try {
-      const { paymentId, registerId, name, email, phoneNumber, amount, belongsTo, screenshot } = req.body;
-    
-      const screenshotUrl = await uploadToCloudinary(screenshot, 'PaymentScreenshots');
-    
+      const { paymentId, registerId, name, email, phoneNumber, amount, belongsTo } = req.body;
+
+      // Use multer: req.file (field name 'screenshot')
+      let screenshotUrl = undefined;
+      if (req.file) {
+        screenshotUrl = await uploadToCloudinary(req.file.path, 'PaymentScreenshots');
+      } else {
+        return res.status(400).json({ message: 'No screenshot uploaded' });
+      }
+
       const newPayment = new Payment({
         paymentId,
         registerId,
