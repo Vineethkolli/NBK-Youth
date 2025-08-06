@@ -23,7 +23,12 @@ export const updateProfileImage = async (req, res) => {
     }
 
     // Upload new image to Cloudinary
-    const imageUrl = await uploadToCloudinary(req.body.image, 'ProfileImages');
+    let imageUrl = undefined;
+    if (req.file) {
+      imageUrl = await uploadToCloudinary(req.file.path, 'ProfileImages');
+    } else {
+      return res.status(400).json({ message: 'No image uploaded' });
+    }
 
     // Update user profile image
     user.profileImage = imageUrl;

@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { X, Upload, Camera, Trash2 } from 'lucide-react';
 
+
 function ProfileImageDialog({ image, onClose, onUpload }) {
   const [isUploading, setIsUploading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
 
   const handleFileSelect = (e) => {
     const file = e.target.files[0];
@@ -15,17 +17,14 @@ function ProfileImageDialog({ image, onClose, onUpload }) {
       return;
     }
 
-    // Validate file size (5MB)
+    // Validate file size (15MB)
     if (file.size > 15 * 1024 * 1024) {
       alert('Please upload an image less than 15MB');
       return;
     }
 
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => {
-      setSelectedImage(reader.result);
-    };
+    setSelectedImage(file);
+    setPreviewUrl(URL.createObjectURL(file));
   };
 
   const handleUpload = async () => {
@@ -33,7 +32,9 @@ function ProfileImageDialog({ image, onClose, onUpload }) {
 
     setIsUploading(true);
     try {
-      await onUpload(selectedImage);
+      const data = new FormData();
+      data.append('image', selectedImage);
+      await onUpload(data);
     } catch (error) {
       console.error('Error uploading image:', error);
       alert('Failed to upload image');
@@ -71,14 +72,31 @@ function ProfileImageDialog({ image, onClose, onUpload }) {
 
         <div className="space-y-4">
           <div className="aspect-square max-h-[400px] overflow-hidden rounded-lg relative">
-            {selectedImage || image ? (
+            {previewUrl || image ? (
               <>
-                <img
-                  src={selectedImage || image}
-                  alt="Profile"
-                  className="w-full h-full object-contain"
-                />
-                {image && !selectedImage && (
+                {previewUrl ? (
+                  <div className="relative h-full w-full">
+                    <img
+                      src={previewUrl}
+                      alt="Profile Preview"
+                      className="w-full h-full object-contain"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => { setSelectedImage(null); setPreviewUrl(null); }}
+                      className="absolute top-2 right-2 bg-black bg-opacity-50 text-white p-1 rounded-full"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <img
+                    src={image}
+                    alt="Profile"
+                    className="w-full h-full object-contain"
+                  />
+                )}
+                {image && !previewUrl && (
                   <button
                     onClick={handleDelete}
                     disabled={isDeleting}

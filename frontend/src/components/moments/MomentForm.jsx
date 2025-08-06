@@ -7,10 +7,12 @@ function MomentForm({ type, onClose, onSubmit }) {
     title: '',
     url: '',
     file: null,
+    filePreview: null,
     isPinned: false
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [fileInputKey, setFileInputKey] = useState(Date.now());
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -19,14 +21,23 @@ function MomentForm({ type, onClose, onSubmit }) {
     setIsSubmitting(true);
     try {
       if (
-        type === 'youtube' && 
-        !formData.url.includes('youtube.com') && 
+        type === 'youtube' &&
+        !formData.url.includes('youtube.com') &&
         !formData.url.includes('youtu.be')
       ) {
         throw new Error('Please enter a valid YouTube URL');
-      }    
+      }
 
-      await onSubmit(formData, setUploadProgress);
+      if (type === 'media') {
+        // Build FormData for file upload
+        const data = new FormData();
+        data.append('title', formData.title);
+        data.append('isPinned', formData.isPinned);
+        data.append('file', formData.file);
+        await onSubmit(data, setUploadProgress);
+      } else {
+        await onSubmit(formData, setUploadProgress);
+      }
       onClose();
     } catch (error) {
       toast.error(error.message || 'Failed to add moment');
@@ -38,17 +49,15 @@ function MomentForm({ type, onClose, onSubmit }) {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
     if (file.size > 1024 * 1024 * 1024) {
       toast.error('File size should be less than 1GB');
       return;
     }
-
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => {
-      setFormData({ ...formData, file: reader.result });
-    };
+    setFormData({
+      ...formData,
+      file,
+      filePreview: URL.createObjectURL(file)
+    });
   };
 
   return (
@@ -99,12 +108,40 @@ function MomentForm({ type, onClose, onSubmit }) {
             <div>
               <label className="block text-sm font-medium text-gray-700">Upload File</label>
               <input
+                key={fileInputKey}
                 type="file"
                 required
                 accept="image/*,video/*"
                 onChange={handleFileChange}
                 className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
               />
+              {formData.filePreview && (
+                <div className="mt-2 relative">
+                  {formData.file && formData.file.type.startsWith('image/') ? (
+                    <img
+                      src={formData.filePreview}
+                      alt="Preview"
+                      className="max-h-40 object-contain border rounded"
+                    />
+                  ) : (
+                    <video
+                      src={formData.filePreview}
+                      controls
+                      className="max-h-40 object-contain border rounded"
+                    />
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setFormData({ ...formData, file: null, filePreview: null });
+                      setFileInputKey(Date.now());
+                    }}
+                    className="absolute top-0 right-0 bg-black bg-opacity-50 text-white p-1 rounded-full"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              )}
               {uploadProgress > 0 && uploadProgress < 100 && (
                 <div className="mt-2">
                   <div className="bg-gray-200 rounded-full h-2.5">

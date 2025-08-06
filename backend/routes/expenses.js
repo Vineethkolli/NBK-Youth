@@ -1,6 +1,11 @@
+
 import express from 'express';
 import { auth, checkPermission } from '../middleware/auth.js';
 import { expenseController } from '../controllers/expenseController.js';
+import multer from 'multer';
+
+// Configure multer for file uploads (disk storage, temp folder)
+const upload = multer({ dest: 'uploads/' });
 
 const router = express.Router();
 
@@ -15,16 +20,22 @@ router.get('/verification',
 );
 
 // Add new expense (admin, developer, financier only)
-router.post('/', 
-  auth, 
+// Accepts multiple bill images: billImage0, billImage1, ...
+router.post(
+  '/',
+  auth,
   checkPermission('MANAGE_EXPENSE'),
+  upload.fields(Array.from({ length: 20 }, (_, i) => ({ name: `billImage${i}`, maxCount: 1 }))),
   expenseController.createExpense
 );
 
 // Update expense
-router.put('/:id', 
-  auth, 
+// Accepts multiple bill images: billImage0, billImage1, ...
+router.put(
+  '/:id',
+  auth,
   checkPermission('MANAGE_EXPENSE'),
+  upload.fields(Array.from({ length: 20 }, (_, i) => ({ name: `billImage${i}`, maxCount: 1 }))),
   expenseController.updateExpense
 );
 

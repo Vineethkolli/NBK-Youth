@@ -1,3 +1,4 @@
+
 import Banner from '../models/Banner.js';
 import { uploadToCloudinary } from '../config/cloudinary.js';
 import cloudinary from '../config/cloudinary.js';
@@ -15,7 +16,7 @@ export const bannerController = {
 
   createBanner: async (req, res) => {
     try {
-      const { title, message, image, video, periodicity, duration, status } = req.body;
+      const { title, message, periodicity, duration, status } = req.body;
 
       // If trying to enable this banner, check if any other banner is enabled
       if (status === 'enabled') {
@@ -27,15 +28,15 @@ export const bannerController = {
         }
       }
 
-      let imageUrl = image;
-      let videoUrl = video;
+      let imageUrl = undefined;
+      let videoUrl = undefined;
 
-      // Handle file uploads if present
-      if (image && image.startsWith('data:')) {
-        imageUrl = await uploadToCloudinary(image, 'Banners');
+      // Use multer: req.files.image and req.files.video (field names must match in frontend)
+      if (req.files && req.files.image && req.files.image[0]) {
+        imageUrl = await uploadToCloudinary(req.files.image[0].path, 'Banners');
       }
-      if (video && video.startsWith('data:')) {
-        videoUrl = await uploadToCloudinary(video, 'Banners');
+      if (req.files && req.files.video && req.files.video[0]) {
+        videoUrl = await uploadToCloudinary(req.files.video[0].path, 'Banners');
       }
 
       const banner = await Banner.create({
@@ -67,7 +68,7 @@ export const bannerController = {
 
   updateBanner: async (req, res) => {
     try {
-      const { title, message, image, video, periodicity, duration, status } = req.body;
+      const { title, message, periodicity, duration, status } = req.body;
 
       const originalBanner = await Banner.findById(req.params.id);
       if (!originalBanner) {
@@ -87,15 +88,15 @@ export const bannerController = {
         }
       }
 
-      let imageUrl = image;
-      let videoUrl = video;
+      let imageUrl = originalBanner.image;
+      let videoUrl = originalBanner.video;
 
-      // Handle file uploads if present
-      if (image && image.startsWith('data:')) {
-        imageUrl = await uploadToCloudinary(image, 'Banners');
+      // Use multer: req.files.image and req.files.video (field names must match in frontend)
+      if (req.files && req.files.image && req.files.image[0]) {
+        imageUrl = await uploadToCloudinary(req.files.image[0].path, 'Banners');
       }
-      if (video && video.startsWith('data:')) {
-        videoUrl = await uploadToCloudinary(video, 'Banners');
+      if (req.files && req.files.video && req.files.video[0]) {
+        videoUrl = await uploadToCloudinary(req.files.video[0].path, 'Banners');
       }
 
       const originalData = originalBanner.toObject();
