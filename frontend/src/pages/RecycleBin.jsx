@@ -8,6 +8,8 @@ import { formatDateTime } from '../utils/dateTime';
 function RecycleBin() {
   const [deletedIncomes, setDeletedIncomes] = useState([]);
   const [deletedExpenses, setDeletedExpenses] = useState([]);
+  const [loadingIncomeId, setLoadingIncomeId] = useState(null);
+  const [loadingExpenseId, setLoadingExpenseId] = useState(null);
 
   useEffect(() => {
     fetchDeletedItems();
@@ -27,44 +29,56 @@ function RecycleBin() {
   };
 
   const handleRestoreIncome = async (id) => {
+    setLoadingIncomeId(id);
     try {
       await axios.post(`${API_URL}/api/incomes/restore/${id}`);
       toast.success('Income restored successfully');
       fetchDeletedItems();
     } catch (error) {
       toast.error('Failed to restore income');
+    } finally {
+      setLoadingIncomeId(null);
     }
   };
 
   const handlePermanentDeleteIncome = async (id) => {
     if (!window.confirm('Are you sure? This action cannot be undone!')) return;
+    setLoadingIncomeId(id);
     try {
       await axios.delete(`${API_URL}/api/incomes/permanent/${id}`);
       toast.success('Income permanently deleted');
       fetchDeletedItems();
     } catch (error) {
       toast.error('Failed to delete income permanently');
+    } finally {
+      setLoadingIncomeId(null);
     }
   };
 
   const handleRestoreExpense = async (id) => {
+    setLoadingExpenseId(id);
     try {
       await axios.post(`${API_URL}/api/expenses/restore/${id}`);
       toast.success('Expense restored successfully');
       fetchDeletedItems();
     } catch (error) {
       toast.error('Failed to restore expense');
+    } finally {
+      setLoadingExpenseId(null);
     }
   };
 
   const handlePermanentDeleteExpense = async (id) => {
     if (!window.confirm('Are you sure? This action cannot be undone!')) return;
+    setLoadingExpenseId(id);
     try {
       await axios.delete(`${API_URL}/api/expenses/permanent/${id}`);
       toast.success('Expense permanently deleted');
       fetchDeletedItems();
     } catch (error) {
       toast.error('Failed to delete expense permanently');
+    } finally {
+      setLoadingExpenseId(null);
     }
   };
 
@@ -96,10 +110,10 @@ function RecycleBin() {
               {deletedIncomes.map((item) => (
                 <tr key={item._id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap text-sm">{item.incomeId}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">{item.registerId || 'N/A'}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">{item.registerId}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">{item.name}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">{item.email || '-'}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">{item.phoneNumber || '-'}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">{item.email}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">{item.phoneNumber}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">{item.amount}</td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`px-2 inline-flex text-xs font-semibold rounded-full ${
@@ -118,13 +132,15 @@ function RecycleBin() {
                     <div className="flex space-x-3">
                       <button
                         onClick={() => handleRestoreIncome(item._id)}
-                        className="text-indigo-600 hover:text-indigo-900"
+                        className={`text-indigo-600 hover:text-indigo-900 ${loadingIncomeId === item._id ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        disabled={loadingIncomeId === item._id}
                       >
                         <RefreshCw className="h-5 w-5" />
                       </button>
                       <button
                         onClick={() => handlePermanentDeleteIncome(item._id)}
-                        className="text-red-600 hover:text-red-900"
+                        className={`text-red-600 hover:text-red-900 ${loadingIncomeId === item._id ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        disabled={loadingIncomeId === item._id}
                       >
                         <Trash2 className="h-5 w-5" />
                       </button>
@@ -150,11 +166,8 @@ function RecycleBin() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Phone Number</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Purpose</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Sub Purposes</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Sub Amounts</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount Returned</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Payment Mode</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Image Bill</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Bill Image</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Verify Log</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Deleted At</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
@@ -164,48 +177,26 @@ function RecycleBin() {
               {deletedExpenses.map((item) => (
                 <tr key={item._id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap text-sm">{item.expenseId}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">{item.registerId || 'N/A'}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">{item.registerId}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">{item.name}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">{item.phoneNumber || '-'}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">{item.phoneNumber}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">{item.amount}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">{item.purpose}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    <ul className="list-disc list-inside">
-                      {item.subExpenses.map((sub, idx) => (
-                        <li key={idx}>{sub.subPurpose}</li>
-                      ))}
-                    </ul>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    <ul className="list-inside">
-                      {item.subExpenses.map((sub, idx) => (
-                        <li key={idx}>{sub.subAmount}</li>
-                      ))}
-                    </ul>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">{item.amountReturned || 0}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">{item.paymentMode}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
-              {item.subExpenses && item.subExpenses.some(sub => typeof sub.billImage === 'string' && sub.billImage.includes('cloudinary.com')) ? (
-                <div className="flex flex-wrap">
-                  {item.subExpenses.map((sub, idx) => (
-                    typeof sub.billImage === 'string' && sub.billImage.includes('cloudinary.com') ? (
+                    {item.billImage ? (
                       <a
-                        key={idx}
-                        href={sub.billImage}
+                        href={item.billImage}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-blue-600 hover:text-blue-800"
                       >
                         View Bill
                       </a>
-                    ) : null
-                  ))}
-                </div>
-              ) : (
-                'No Image'
-              )}
-            </td>
+                    ) : (
+                      'No Image'
+                    )}
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">{item.verifyLog}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
                     {formatDateTime(item.deletedAt)}
@@ -214,13 +205,15 @@ function RecycleBin() {
                     <div className="flex space-x-3">
                       <button
                         onClick={() => handleRestoreExpense(item._id)}
-                        className="text-indigo-600 hover:text-indigo-900"
+                        className={`text-indigo-600 hover:text-indigo-900 ${loadingExpenseId === item._id ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        disabled={loadingExpenseId === item._id}
                       >
                         <RefreshCw className="h-5 w-5" />
                       </button>
                       <button
                         onClick={() => handlePermanentDeleteExpense(item._id)}
-                        className="text-red-600 hover:text-red-900"
+                        className={`text-red-600 hover:text-red-900 ${loadingExpenseId === item._id ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        disabled={loadingExpenseId === item._id}
                       >
                         <Trash2 className="h-5 w-5" />
                       </button>

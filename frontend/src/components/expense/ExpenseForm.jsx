@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Plus, Trash2, Upload } from 'lucide-react';
+import { X } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
@@ -8,160 +8,104 @@ import { API_URL } from '../../utils/config';
 function ExpenseForm({ expense, onClose, onSuccess }) {
   const { user } = useAuth();
   const [formData, setFormData] = useState({
+    purpose: '',
+    amount: '',
+    paymentMode: 'cash',
     name: '',
     phoneNumber: '',
-    amount: '',
-    purpose: '',
-    paymentMode: 'cash',
-    amountReturned: '0',
-    subExpenses: []
+    billImage: null,
+    billImagePreview: null
   });
 
-  const [isSubmitting, setIsSubmitting] = useState(false); 
-  const [isBalanced, setIsBalanced] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [fileInputKey, setFileInputKey] = useState(Date.now());
 
   useEffect(() => {
     if (expense) {
       setFormData({
+        purpose: expense.purpose,
+        amount: String(expense.amount),
+        paymentMode: expense.paymentMode,
         name: expense.name,
         phoneNumber: expense.phoneNumber || '',
-        amount: expense.amount,
-        purpose: expense.purpose,
-        paymentMode: expense.paymentMode,
-        amountReturned: expense.amountReturned || '0',
-        subExpenses: expense.subExpenses?.length > 0 
-          ? expense.subExpenses 
-          : []
+        billImage: null,
+        billImagePreview: expense.billImage || null,
+        billImageCloudinary: expense.billImage || null // track original image
       });
     }
   }, [expense]);
 
-  useEffect(() => {
-    if (expense) {
-      checkBalance();
-    }
-  }, [formData.subExpenses, formData.amount, formData.amountReturned]);
-
-  const checkBalance = () => {
-    const subExpensesTotal = formData.subExpenses.reduce(
-      (sum, item) => sum + Number(item.subAmount || 0),
-      0
-    );
-    const netAmount = Number(formData.amount) - Number(formData.amountReturned);
-    setIsBalanced(Math.abs(subExpensesTotal - netAmount) <= 0.01);
-  };
-
-  const handleSubExpenseChange = (index, field, value) => {
-    const updatedSubExpenses = [...formData.subExpenses];
-    updatedSubExpenses[index] = {
-      ...updatedSubExpenses[index],
-      [field]: value
-    };
-    setFormData({ ...formData, subExpenses: updatedSubExpenses });
-  };
-
-  const handleAddSubExpense = () => {
-    setFormData({
-      ...formData,
-      subExpenses: [
-        ...formData.subExpenses,
-        { subPurpose: '', subAmount: '', billImage: '' }
-      ]
-    });
-  };
-
-  const handleRemoveSubExpense = (index) => {
-    const updatedSubExpenses = formData.subExpenses.filter((_, i) => i !== index);
-    setFormData({ ...formData, subExpenses: updatedSubExpenses });
-  };
-
-  const handleBillUpload = (index, file) => {
+  const handleBillUpload = (file) => {
     if (!file) return;
+    
     if (file.size > 15 * 1024 * 1024) {
-      return toast.error('File size should be less than 15MB');
+      toast.error('File must be less than 15MB');
+      return;
     }
+    
     if (!file.type.startsWith('image/')) {
-      return toast.error('Only image files are allowed');
+      toast.error('Only images are allowed');
+      return;
     }
-    // Store the File object and preview URL
-    const updatedSubExpenses = [...formData.subExpenses];
-    updatedSubExpenses[index] = {
-      ...updatedSubExpenses[index],
+
+    setFormData(prev => ({
+      ...prev,
       billImage: file,
       billImagePreview: URL.createObjectURL(file)
-    };
-    setFormData({ ...formData, subExpenses: updatedSubExpenses });
+    }));
   };
 
-  const validateInitialForm = () => {
-    if (Number(formData.amount) <= 0) {
-      toast.error('Amount taken must be greater than 0');
-      return false;
-    }
-    return true;
-  };
-
-  const validateFullForm = () => {
-    if (Number(formData.amountReturned) < 0) {
-      toast.error('Amount returned cannot be negative');
-      return false;
-    }
-
-    if (Number(formData.amountReturned) > Number(formData.amount)) {
-      toast.error('Amount returned cannot be greater than amount taken');
-      return false;
-    }
-
-    if (!isBalanced) {
-      toast.error('Sum of sub-expenses must equal total amount minus returned amount');
-      return false;
-    }
-
-    return true;
+  const clearBillImage = () => {
+    setFormData(prev => ({
+      ...prev,
+      billImage: null,
+      billImagePreview: null,
+      billImageCloudinary: null // mark for deletion in backend
+    }));
+    setFileInputKey(Date.now());
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (isSubmitting) return;
+
+    if (Number(formData.amount) <= 0) {
+      toast.error('Amount must be greater than 0');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      if (!expense && !validateInitialForm()) throw new Error('Validation failed');
-      if (expense && !validateFullForm()) throw new Error('Validation failed');
-
-      // Prepare FormData for multipart/form-data
       const data = new FormData();
+      data.append('purpose', formData.purpose);
+      data.append('amount', formData.amount);
+      data.append('paymentMode', formData.paymentMode);
       data.append('name', formData.name);
       data.append('phoneNumber', formData.phoneNumber);
-      data.append('amount', formData.amount);
-      data.append('purpose', formData.purpose);
-      data.append('paymentMode', formData.paymentMode);
-      data.append('amountReturned', formData.amountReturned);
       data.append('registerId', user.registerId);
 
-      // Prepare subExpenses array and bill images
-      const subExpensesArr = formData.subExpenses.map((sub, idx) => {
-        // If billImage is a File, attach it as billImage{idx}
-        if (sub.billImage instanceof File) {
-          data.append(`billImage${idx}`, sub.billImage);
-          return { ...sub, billImage: '' };
-        }
-        return sub;
-      });
-      data.append('subExpenses', JSON.stringify(subExpensesArr));
+      if (formData.billImage instanceof File) {
+        data.append('billImage', formData.billImage);
+      }
+      // If user removed the original image, send a flag to backend
+      if (!formData.billImagePreview && expense && expense.billImage) {
+        data.append('deleteBillImage', 'true');
+      }
 
       if (expense) {
         await axios.put(`${API_URL}/api/expenses/${expense._id}`, data, {
-          headers: { 'Content-Type': 'multipart/form-data' },
+          headers: { 'Content-Type': 'multipart/form-data' }
         });
         toast.success('Expense updated successfully');
       } else {
         await axios.post(`${API_URL}/api/expenses`, data, {
-          headers: { 'Content-Type': 'multipart/form-data' },
+          headers: { 'Content-Type': 'multipart/form-data' }
         });
         toast.success('Expense added successfully');
       }
+
       onSuccess();
     } catch (error) {
       toast.error(error.response?.data?.message || 'Operation failed');
@@ -170,9 +114,23 @@ function ExpenseForm({ expense, onClose, onSuccess }) {
     }
   };
 
+  const handleDelete = async () => {
+    if (isDeleting) return;
+    setIsDeleting(true);
+    try {
+      await axios.delete(`${API_URL}/api/expenses/${expense._id}`);
+      toast.success('Expense moved to recycle bin');
+      onSuccess();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Delete failed');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-auto">
+      <div className="bg-white rounded-lg p-6 w-full max-w-md">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">
             {expense ? 'Update Expense' : 'Add New Expense'}
@@ -182,189 +140,113 @@ function ExpenseForm({ expense, onClose, onSuccess }) {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Spender Name *</label>
-              <input
-                type="text"
-                required
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-              />
-            </div>
-
-          {/*  <div>
-              <label className="block text-sm font-medium text-gray-700">Phone Number</label>
-              <input
-                type="tel"
-                pattern="^[\+\-\d\s\(\)]*$"  
-                value={formData.phoneNumber}
-                onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-              />
-            </div> */}
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Amount Taken *</label>
-              <input
-                type="number"
-                required
-                min="0"
-                step="0.01"
-                value={formData.amount}
-                onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Purpose *</label>
-              <input
-                type="text"
-                required
-                value={formData.purpose}
-                onChange={(e) => setFormData({ ...formData, purpose: e.target.value })}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Payment Mode</label>
-              <select
-                value={formData.paymentMode}
-                onChange={(e) => setFormData({ ...formData, paymentMode: e.target.value })}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-              >
-                <option value="cash">Cash</option>
-                <option value="online">Online</option>
-              </select>
-            </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Purpose *</label>
+            <input
+              type="text"
+              required
+              value={formData.purpose}
+              onChange={(e) => setFormData({ ...formData, purpose: e.target.value })}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+            />
           </div>
 
-          {expense && (
-            <>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Amount Returned</label>
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={formData.amountReturned}
-                    onChange={(e) => setFormData({ ...formData, amountReturned: e.target.value })}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                  />
-                </div>
-                <div className="flex items-center">
-                  <span className={`text-sm font-medium ${isBalanced ? 'text-green-600' : 'text-red-600'}`}>
-                    {isBalanced ? 'Balanced' : 'Not Balanced'}
-                  </span>
-                </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Amount *</label>
+            <input
+              type="number"
+              required
+              min="0"
+              step="0.01"
+              value={formData.amount}
+              onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Payment Mode *</label>
+            <select
+              required
+              value={formData.paymentMode}
+              onChange={(e) => setFormData({ ...formData, paymentMode: e.target.value })}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+            >
+              <option value="cash">Cash</option>
+              <option value="online">Online</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Spender Name *</label>
+            <input
+              type="text"
+              required
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+            />
+          </div>
+{/*
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Phone Number</label>
+            <input
+              type="tel"
+              value={formData.phoneNumber}
+              onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+            />
+          </div>
+*/}
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Bill</label>
+            <input
+              key={fileInputKey}
+              type="file"
+              accept="image/*"
+              onChange={(e) => handleBillUpload(e.target.files[0])}
+              className="mt-1 block w-full text-sm text-gray-500
+                file:mr-4 file:py-2 file:px-4
+                file:rounded-full file:border-0
+                file:text-sm file:font-semibold
+                file:bg-indigo-50 file:text-indigo-700
+                hover:file:bg-indigo-100"
+            />
+            {formData.billImagePreview && (
+              <div className="mt-2 relative inline-block">
+                <img
+                  src={formData.billImagePreview}
+                  alt="Bill Preview"
+                  className="h-20 w-20 object-cover border rounded"
+                />
+                <button
+                  type="button"
+                  onClick={clearBillImage}
+                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                >
+                  <X className="h-3 w-3" />
+                </button>
               </div>
+            )}
+          </div>
 
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <h3 className="text-lg font-medium">Sub Expenses</h3>
-                  <button
-                    type="button"
-                    onClick={handleAddSubExpense}
-                    className="bg-indigo-500 text-white px-4 py-2 rounded-md"
-                  >
-                    Add Sub Expense
-                  </button>
-                </div>
-
-                {formData.subExpenses.map((subExpense, index) => (
-                  <div
-                    key={index}
-                    className="grid grid-cols-3 gap-4 items-center border p-4 rounded-md"
-                  >
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Sub Purpose</label>
-                      <input
-                        type="text"
-                        value={subExpense.subPurpose}
-                        onChange={(e) =>
-                          handleSubExpenseChange(index, 'subPurpose', e.target.value)
-                        }
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Sub Amount</label>
-                      <input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        value={subExpense.subAmount}
-                        onChange={(e) =>
-                          handleSubExpenseChange(index, 'subAmount', e.target.value)
-                        }
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Bill Image</label>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => handleBillUpload(index, e.target.files[0])}
-                        className="mt-1 block w-full"
-                      />
-                      {subExpense.billImagePreview && (
-                        <div className="mt-2 relative h-16 w-24">
-                          <img
-                            src={subExpense.billImagePreview}
-                            alt="Bill Preview"
-                            className="h-full w-full object-contain border rounded"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const updated = [...formData.subExpenses];
-                              updated[index] = { ...updated[index], billImage: '', billImagePreview: '' };
-                              setFormData({ ...formData, subExpenses: updated });
-                            }}
-                            className="absolute top-0 right-0 bg-black bg-opacity-50 text-white p-1 rounded-full"
-                          >
-                            <X className="h-4 w-4" />
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                    <div className="col-span-3 text-right">
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveSubExpense(index)}
-                        className="bg-red-500 text-white px-4 py-2 rounded-md"
-                      >
-                        <Trash2 className="h-5 w-5 inline-block" />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
-
-            <div className="space-x-2 text-right">
+          <div className="flex justify-end space-x-2">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-gray-300  hover:bg-gray-50"
+              className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className={`bg-indigo-500 text-white px-6 py-2 rounded-md ${
+              className={`px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 ${
                 isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
               }`}
             >
-              {isSubmitting ? 'Submitting...' : expense ? 'Update' : 'Add'}
+              {isSubmitting ? (expense ? 'Updating...' : 'Adding...') : (expense ? 'Update' : 'Add')}
             </button>
           </div>
         </form>

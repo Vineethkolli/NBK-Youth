@@ -1,20 +1,5 @@
 import mongoose from 'mongoose';
 
-const subExpenseSchema = new mongoose.Schema({
-  subPurpose: {
-    type: String,
-    required: true
-  },
-  subAmount: {
-    type: Number,
-    required: true,
-    min: [0, 'Sub amount must be a positive number']
-  },
-  billImage: {
-    type: String  // URL of the bill image
-  }
-});
-
 const expenseSchema = new mongoose.Schema({
   expenseId: {
     type: String,
@@ -24,6 +9,20 @@ const expenseSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  purpose: {
+    type: String,
+    required: true
+  },
+  amount: {
+    type: Number,
+    required: true,
+    min: [0, 'Amount must be a positive number']
+  },
+  paymentMode: {
+    type: String,
+    enum: ['cash', 'online'],
+    required: true
+  },
   name: {
     type: String,
     required: true
@@ -31,26 +30,9 @@ const expenseSchema = new mongoose.Schema({
   phoneNumber: {
     type: String,
   },
-  amount: {
-    type: Number,
-    required: true,
-    min: [0, 'Amount must be a positive number']
+  billImage: {
+    type: String  // URL of the bill image
   },
-  amountReturned: {
-    type: Number,
-    default: 0,
-    min: [0, 'Returned amount must be a positive number']
-  },
-  paymentMode: {
-    type: String,
-    enum: ['cash', 'online'],
-    required: true
-  },
-  purpose: {
-    type: String,
-    required: true
-  },
-  subExpenses: [subExpenseSchema],
   verifyLog: {
     type: String,
     enum: ['verified', 'pending', 'not verified', 'rejected'],

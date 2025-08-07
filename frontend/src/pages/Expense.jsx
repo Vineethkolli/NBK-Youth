@@ -23,19 +23,15 @@ function Expense() {
     endDate: ''
   });
   const [visibleColumns, setVisibleColumns] = useState({
-    registerId: false,
     expenseId: false,
+    registerId: false,
     dateTime: false,
     purpose: true,
-    spenderName: false,
-    phoneNumber: false, 
-    amountTaken: false,
-    totalSpent: true,
-    subPurpose: true,
-    subAmount: true,
-    amountReturned: false,
-    bill: false,
+    amount: true,
     paymentMode: false,
+    bill: false,
+    name: false,
+    phoneNumber: false, 
     verifyLog: false
   });
   
@@ -166,11 +162,9 @@ const fetchExpenses = async () => {
           <h2 className="font-medium">Visible Columns</h2>
           <div className="mt-2 flex flex-wrap gap-2">
             {Object.entries(visibleColumns).map(([column, isVisible]) => {
-              // Show registerId checkbox for admin, developer, or financier roles
               if (column === 'registerId' && !['developer', 'financier'].includes(user?.role)) {
                 return null;
               }
-              // Show phoneNumber checkbox for admin, developer, or financier roles
               if (column === 'phoneNumber' && !['admin', 'developer', 'financier'].includes(user?.role)) {
                 return null;
               }

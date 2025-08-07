@@ -39,12 +39,11 @@ export const statsController = {
       // Calculate total expenses with online/offline breakdown
       const totalExpenses = {
         count: expenses.length,
-        amount: roundNumber(expenses.reduce((sum, expense) => 
-          sum + expense.subExpenses.reduce((subSum, sub) => subSum + sub.subAmount, 0), 0)),
+        amount: roundNumber(expenses.reduce((sum, expense) => sum + expense.amount, 0)),
         onlineAmount: roundNumber(expenses.filter(expense => expense.paymentMode === 'online')
-          .reduce((sum, expense) => sum + expense.subExpenses.reduce((subSum, sub) => subSum + sub.subAmount, 0), 0)),
+          .reduce((sum, expense) => sum + expense.amount, 0)),
         cashAmount: roundNumber(expenses.filter(expense => expense.paymentMode === 'cash')
-          .reduce((sum, expense) => sum + expense.subExpenses.reduce((subSum, sub) => subSum + sub.subAmount, 0), 0))
+          .reduce((sum, expense) => sum + expense.amount, 0))
       };
 
       // Calculate online/offline amounts (only paid incomes)

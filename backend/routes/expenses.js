@@ -1,11 +1,10 @@
-
 import express from 'express';
 import { auth, checkPermission } from '../middleware/auth.js';
 import { expenseController } from '../controllers/expenseController.js';
 import multer from 'multer';
 
-// Configure multer for file uploads (disk storage, temp folder)
-const upload = multer({ dest: 'uploads/' });
+// Configure multer for file uploads (in-memory storage)
+const upload = multer({ storage: multer.memoryStorage() });
 
 const router = express.Router();
 
@@ -20,22 +19,20 @@ router.get('/verification',
 );
 
 // Add new expense (admin, developer, financier only)
-// Accepts multiple bill images: billImage0, billImage1, ...
 router.post(
   '/',
   auth,
   checkPermission('MANAGE_EXPENSE'),
-  upload.fields(Array.from({ length: 20 }, (_, i) => ({ name: `billImage${i}`, maxCount: 1 }))),
+  upload.single('billImage'),
   expenseController.createExpense
 );
 
 // Update expense
-// Accepts multiple bill images: billImage0, billImage1, ...
 router.put(
   '/:id',
   auth,
   checkPermission('MANAGE_EXPENSE'),
-  upload.fields(Array.from({ length: 20 }, (_, i) => ({ name: `billImage${i}`, maxCount: 1 }))),
+  upload.single('billImage'),
   expenseController.updateExpense
 );
 
@@ -45,7 +42,6 @@ router.patch('/:id/verify',
   checkPermission('ACCESS_LOGS'),
   expenseController.updateVerificationStatus
 );
-
 
 // Soft delete expense (move to recycle bin)
 router.delete('/:id', 
