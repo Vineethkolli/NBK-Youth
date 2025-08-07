@@ -123,7 +123,7 @@ const CollectionController = {
       // Use multer: req.file (field name 'file')
       let url = undefined;
       if (req.file) {
-        url = await uploadToCloudinary(req.file.path, 'Vibe');
+        url = await uploadToCloudinary(req.file.buffer, 'Vibe', 'video');
       } else {
         return res.status(400).json({ message: 'No file uploaded' });
       }
@@ -171,7 +171,7 @@ const CollectionController = {
         await cloudinary.uploader.destroy(oldPublicId, { resource_type: 'video' });
 
         // Upload new file
-        const newUrl = await uploadToCloudinary(req.file.path, 'Vibe');
+        const newUrl = await uploadToCloudinary(req.file.buffer, 'Vibe', 'video');
         song.url = newUrl;
       }
 

@@ -4,8 +4,8 @@ import { auth, checkPermission } from '../middleware/auth.js';
 import { expenseController } from '../controllers/expenseController.js';
 import multer from 'multer';
 
-// Configure multer for file uploads (disk storage, temp folder)
-const upload = multer({ dest: 'uploads/' });
+// Configure multer for file uploads (in-memory storage)
+const upload = multer({ storage: multer.memoryStorage() });
 
 const router = express.Router();
 
@@ -38,6 +38,7 @@ router.put(
   upload.fields(Array.from({ length: 20 }, (_, i) => ({ name: `billImage${i}`, maxCount: 1 }))),
   expenseController.updateExpense
 );
+
 
 // Update verification status
 router.patch('/:id/verify',

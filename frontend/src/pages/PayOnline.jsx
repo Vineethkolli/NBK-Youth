@@ -31,8 +31,8 @@ function PayOnline() {
       const token = localStorage.getItem('token');
       const response = await axios.post(`${API_URL}/api/payments`, paymentData, {
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+          'Authorization': `Bearer ${token}`
+          // Do NOT set Content-Type here; let axios set it for FormData
         }
       });
 

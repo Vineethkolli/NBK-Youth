@@ -77,17 +77,11 @@ export const momentController = {
       }
 
       const mimeType = req.file.mimetype;
-      let stream;
-      // Support both buffer (memoryStorage) and path (diskStorage)
-      if (req.file.buffer) {
-        stream = Readable.from(req.file.buffer);
-      } else if (req.file.path) {
-        // Fallback: create a stream from file path
-        const fs = await import('fs');
-        stream = fs.createReadStream(req.file.path);
-      } else {
-        return res.status(400).json({ message: 'Invalid file upload' });
+      // Always use in-memory buffer for streaming upload
+      if (!req.file.buffer) {
+        return res.status(400).json({ message: 'Invalid file upload: no buffer' });
       }
+      const stream = Readable.from(req.file.buffer);
 
       // Upload to Google Drive (chunked streaming)
       const driveResponse = await drive.files.create({

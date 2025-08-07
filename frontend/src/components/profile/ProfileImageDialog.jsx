@@ -7,6 +7,7 @@ function ProfileImageDialog({ image, onClose, onUpload }) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
+  const [fileInputKey, setFileInputKey] = useState(Date.now());
 
   const handleFileSelect = (e) => {
     const file = e.target.files[0];
@@ -83,7 +84,11 @@ function ProfileImageDialog({ image, onClose, onUpload }) {
                     />
                     <button
                       type="button"
-                      onClick={() => { setSelectedImage(null); setPreviewUrl(null); }}
+                      onClick={() => {
+                        setSelectedImage(null);
+                        setPreviewUrl(null);
+                        setFileInputKey(Date.now());
+                      }}
                       className="absolute top-2 right-2 bg-black bg-opacity-50 text-white p-1 rounded-full"
                     >
                       <X className="h-4 w-4" />
@@ -119,9 +124,10 @@ function ProfileImageDialog({ image, onClose, onUpload }) {
           </div>
 
           <div className="flex items-center space-x-4">
-            <label className="flex-1">
+            <div className="flex-1 relative">
               <span className="sr-only">Choose new image</span>
               <input
+                key={fileInputKey}
                 type="file"
                 accept="image/*"
                 onChange={handleFileSelect}
@@ -132,9 +138,10 @@ function ProfileImageDialog({ image, onClose, onUpload }) {
                   file:text-sm file:font-semibold
                   file:bg-indigo-50 file:text-indigo-700
                   hover:file:bg-indigo-100
-                  disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled:opacity-50 disabled:cursor-not-allowed pr-32"
+                style={{ zIndex: 2 }}
               />
-            </label>
+            </div>
 
             {selectedImage && (
               <button

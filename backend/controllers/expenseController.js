@@ -59,14 +59,14 @@ export const expenseController = {
       // subExpenses is expected as JSON string if sent as multipart/form-data
       const parsedSubExpenses = typeof subExpenses === 'string' ? JSON.parse(subExpenses) : subExpenses;
 
-      // Process and upload bill images for each sub-expense
+      // Process and upload bill images for each sub-expense (use buffer)
       const processedSubExpenses = await Promise.all(
         parsedSubExpenses.map(async (subExpense, idx) => {
           let billImageUrl = null;
           // billImage file should be uploaded as req.files[`billImage${idx}`][0]
           if (req.files && req.files[`billImage${idx}`] && req.files[`billImage${idx}`][0]) {
             try {
-              billImageUrl = await uploadToCloudinary(req.files[`billImage${idx}`][0].path, 'ExpenseBills');
+              billImageUrl = await uploadToCloudinary(req.files[`billImage${idx}`][0].buffer, 'ExpenseBills', 'image');
             } catch (uploadError) {
               console.error('Failed to upload bill image:', uploadError);
             }
@@ -110,20 +110,48 @@ export const expenseController = {
       }
 
       const originalData = expense.toObject();
-      const { subExpenses, ...expenseData } = req.body;
+      const { subExpenses, deletedSubExpenses, ...expenseData } = req.body;
       const parsedSubExpenses = typeof subExpenses === 'string' ? JSON.parse(subExpenses) : subExpenses;
+      const parsedDeletedSubExpenses = typeof deletedSubExpenses === 'string' ? JSON.parse(deletedSubExpenses) : (deletedSubExpenses || []);
 
-      // Process and upload new bill images
+      // Delete bill images for sub-expenses marked for deletion
+      const oldSubExpenses = Array.isArray(expense.subExpenses) ? expense.subExpenses : [];
+      for (const oldSubExpense of oldSubExpenses) {
+        if (oldSubExpense && oldSubExpense._id && parsedDeletedSubExpenses.includes(String(oldSubExpense._id))) {
+          if (oldSubExpense.billImage && typeof oldSubExpense.billImage === 'string' && oldSubExpense.billImage.includes('cloudinary.com')) {
+            try {
+              const publicId = oldSubExpense.billImage.split('/').pop().split('.')[0];
+              await cloudinary.uploader.destroy(`ExpenseBills/${publicId}`, { resource_type: 'image' });
+            } catch (err) {
+              console.warn('Failed to delete bill image from Cloudinary:', err);
+            }
+          }
+        }
+      }
+
+      // Process and upload new bill images, delete old ones if replaced
       const processedSubExpenses = await Promise.all(
         parsedSubExpenses.map(async (subExpense, idx) => {
-          let billImageUrl = subExpense.billImage;
-          // If a new file is uploaded, use it
+          let billImageUrl;
+          // If a new file is uploaded for this subExpense, delete old and upload new
           if (req.files && req.files[`billImage${idx}`] && req.files[`billImage${idx}`][0]) {
+            // Delete old image from Cloudinary if present and is a Cloudinary URL
+            if (oldSubExpenses && oldSubExpenses[idx] && typeof oldSubExpenses[idx].billImage === 'string' && oldSubExpenses[idx].billImage.includes('cloudinary.com')) {
+              try {
+                const publicId = oldSubExpenses[idx].billImage.split('/').pop().split('.')[0];
+                await cloudinary.uploader.destroy(`ExpenseBills/${publicId}`, { resource_type: 'image' });
+              } catch (err) {
+                console.warn('Failed to delete old bill image from Cloudinary:', err);
+              }
+            }
             try {
-              billImageUrl = await uploadToCloudinary(req.files[`billImage${idx}`][0].path, 'ExpenseBills');
+              billImageUrl = await uploadToCloudinary(req.files[`billImage${idx}`][0].buffer, 'ExpenseBills', 'image');
             } catch (uploadError) {
               console.error('Failed to upload bill image:', uploadError);
             }
+          } else {
+            // No new file: keep the original billImage from the database
+            billImageUrl = oldSubExpenses && oldSubExpenses[idx] ? oldSubExpenses[idx].billImage : subExpense.billImage;
           }
           return {
             ...subExpense,
@@ -211,24 +239,18 @@ export const expenseController = {
 
       const originalData = expense.toObject();
 
-      // Delete bill images from Cloudinary
-      for (const subExpense of expense.subExpenses) {
-        if (subExpense.billImage && subExpense.billImage.includes('cloudinary.com')) {
+      // Guarantee subExpenses is always an array
+      const subExpensesArr = Array.isArray(expense.subExpenses) ? expense.subExpenses : [];
+      for (const subExpense of subExpensesArr) {
+        if (
+          subExpense &&
+          typeof subExpense.billImage === 'string' &&
+          subExpense.billImage.length > 0 &&
+          subExpense.billImage.includes('cloudinary.com')
+        ) {
           try {
             const publicId = subExpense.billImage.split('/').pop().split('.')[0];
-            await cloudinary.uploader.destroy(`ExpenseBills/${publicId}`);
-          } catch (err) {
-            console.warn('Failed to delete bill image from Cloudinary:', err);
-          }
-        }
-      }
-
-      // Delete bill images from Cloudinary
-      for (const subExpense of expense.subExpenses) {
-        if (subExpense.billImage && subExpense.billImage.includes('cloudinary.com')) {
-          try {
-            const publicId = subExpense.billImage.split('/').pop().split('.')[0];
-            await cloudinary.uploader.destroy(`ExpenseBills/${publicId}`);
+            await cloudinary.uploader.destroy(`ExpenseBills/${publicId}`, { resource_type: 'image' });
           } catch (err) {
             console.warn('Failed to delete bill image from Cloudinary:', err);
           }
@@ -238,7 +260,8 @@ export const expenseController = {
       expense.isDeleted = true;
       expense.deletedAt = new Date();
       expense.deletedBy = req.user.registerId;
-      await expense.save();
+      // Disable validation for soft delete
+      await expense.save({ validateBeforeSave: false });
 
       // Log expense deletion
       await logActivity(
@@ -252,7 +275,8 @@ export const expenseController = {
 
       res.json({ message: 'Expense moved to recycle bin' });
     } catch (error) {
-      res.status(500).json({ message: 'Failed to delete expense' });
+      console.error('Delete expense error:', error);
+      res.status(500).json({ message: 'Failed to delete expense', error: error.message });
     }
   },
 
@@ -278,7 +302,7 @@ export const expenseController = {
       const originalData = expense.toObject();
 
       expense.isDeleted = false;
-      await expense.save();
+      await expense.save({ validateBeforeSave: false });
 
       // Log expense restoration
       await logActivity(
@@ -306,12 +330,12 @@ export const expenseController = {
 
       const originalData = expense.toObject();
 
-      // Delete bill images from Cloudinary
+      // Delete bill images from Cloudinary (permanent delete)
       for (const subExpense of expense.subExpenses) {
-        if (subExpense.billImage && subExpense.billImage.includes('cloudinary.com')) {
+        if (subExpense.billImage && typeof subExpense.billImage === 'string' && subExpense.billImage.includes('cloudinary.com')) {
           try {
             const publicId = subExpense.billImage.split('/').pop().split('.')[0];
-            await cloudinary.uploader.destroy(`ExpenseBills/${publicId}`);
+            await cloudinary.uploader.destroy(`ExpenseBills/${publicId}`, { resource_type: 'image' });
           } catch (err) {
             console.warn('Failed to delete bill image from Cloudinary:', err);
           }

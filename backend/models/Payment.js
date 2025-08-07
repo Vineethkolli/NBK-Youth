@@ -50,10 +50,16 @@ const paymentSchema = new mongoose.Schema(
 );
 
 // Generate paymentId as P0, P1, P2, ...
+// Always assign paymentId as P{max+1}, never reuse deleted IDs
 paymentSchema.pre('save', async function (next) {
   if (!this.paymentId) {
-    const count = await mongoose.model('Payment').countDocuments();
-    this.paymentId = `P${count}`;
+    // Find the highest paymentId number
+    const lastPayment = await mongoose.model('Payment').findOne({}).sort({ paymentId: -1 });
+    let nextId = 0;
+    if (lastPayment && lastPayment.paymentId && /^P\d+$/.test(lastPayment.paymentId)) {
+      nextId = parseInt(lastPayment.paymentId.slice(1)) + 1;
+    }
+    this.paymentId = `P${nextId}`;
   }
   next();
 });

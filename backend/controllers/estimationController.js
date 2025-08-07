@@ -35,10 +35,18 @@ export const estimationController = {
         return res.status(400).json({ message: 'Name already exists' });
       }
 
-      const count = await EstimatedIncome.countDocuments();
+      // Always assign EIID as EI{max+1}, never reuse deleted IDs
+      const lastIncome = await EstimatedIncome.findOne({}).sort({ EIID: -1 });
+      let nextId = 1;
+      if (lastIncome && lastIncome.EIID && /^EI\d+$/.test(lastIncome.EIID)) {
+        nextId = parseInt(lastIncome.EIID.slice(2)) + 1;
+      }
+      if (!req.body.registerId) {
+        return res.status(400).json({ message: 'registerId is required' });
+      }
       const income = await EstimatedIncome.create({
         ...req.body,
-        EIID: `EI${count + 1}`
+        EIID: `EI${nextId}`
       });
 
       await logActivity(
@@ -130,10 +138,18 @@ export const estimationController = {
 
   createEstimatedExpense: async (req, res) => {
     try {
-      const count = await EstimatedExpense.countDocuments();
+      // Always assign EEID as EE{max+1}, never reuse deleted IDs
+      const lastExpense = await EstimatedExpense.findOne({}).sort({ EEID: -1 });
+      let nextId = 1;
+      if (lastExpense && lastExpense.EEID && /^EE\d+$/.test(lastExpense.EEID)) {
+        nextId = parseInt(lastExpense.EEID.slice(2)) + 1;
+      }
+      if (!req.body.registerId) {
+        return res.status(400).json({ message: 'registerId is required' });
+      }
       const expense = await EstimatedExpense.create({
         ...req.body,
-        EEID: `EE${count + 1}`
+        EEID: `EE${nextId}`
       });
 
       await logActivity(
