@@ -35,6 +35,9 @@ function MomentForm({ type, onClose, onSubmit }) {
         data.append('isPinned', formData.isPinned);
         data.append('file', formData.file);
         await onSubmit(data, setUploadProgress);
+        if (formData.file && formData.file.type.startsWith('video/')) {
+          toast.success('Video uploaded! Drive will process and show it shortly.', { duration: 4000 });
+        }
       } else {
         await onSubmit(formData, setUploadProgress);
       }

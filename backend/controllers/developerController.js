@@ -6,8 +6,10 @@ import EstimatedExpense from '../models/EstimatedExpense.js';
 import Game from '../models/Game.js';
 import ActivityLog from '../models/ActivityLog.js';
 import Event from '../models/Event.js';
-import { logActivity } from '../middleware/activityLogger.js'; 
-import User from '../models/User.js'; 
+import { logActivity } from '../middleware/activityLogger.js';
+import User from '../models/User.js';
+import Payment from '../models/Payment.js';
+import cloudinary from '../config/cloudinary.js'; // ✅ Import cloudinary
 
 export const developerController = {
   clearData: async (req, res) => {
@@ -26,6 +28,9 @@ export const developerController = {
         case 'expense':
           await Expense.deleteMany({});
           description = 'Cleared all expense records';
+
+          // ✅ Delete all Cloudinary files in 'ExpenseBills' folder
+          await deleteCloudinaryFolder('ExpenseBills');
           break;
 
         case 'notifications':
@@ -45,7 +50,7 @@ export const developerController = {
 
         case 'letsPlay':
           await Game.deleteMany({});
-          description = 'Cleared all game data (letsPlay)';
+          description = 'Cleared all activities records';
           break;
 
         case 'activityLog':
@@ -55,7 +60,15 @@ export const developerController = {
 
         case 'events':
           await Event.deleteMany({});
-          description = 'Cleared all events';
+          description = 'Cleared all events records';
+          break;
+
+        case 'payment':
+          await Payment.deleteMany({});
+          description = 'Cleared all payment records';
+
+          // ✅ Delete all Cloudinary files in 'PaymentScreenshots' folder
+          await deleteCloudinaryFolder('PaymentScreenshots');
           break;
 
         case 'resetRoles':
@@ -85,5 +98,26 @@ export const developerController = {
       console.error('Clear data error:', error);
       res.status(500).json({ message: `Failed to process ${type} action` });
     }
+  }
+};
+
+// ✅ Utility function to delete all files in a Cloudinary folder
+const deleteCloudinaryFolder = async (folder) => {
+  try {
+    const { resources } = await cloudinary.api.resources({
+      type: 'upload',
+      prefix: `${folder}/`,
+      max_results: 500,
+    });
+
+    const publicIds = resources.map((r) => r.public_id);
+    if (publicIds.length > 0) {
+      await cloudinary.api.delete_resources(publicIds);
+      console.log(`Deleted ${publicIds.length} files from Cloudinary folder: ${folder}`);
+    } else {
+      console.log(`No files found in Cloudinary folder: ${folder}`);
+    }
+  } catch (error) {
+    console.error(`Error deleting Cloudinary folder ${folder}:`, error);
   }
 };
