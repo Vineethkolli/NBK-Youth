@@ -11,7 +11,6 @@ const ExpensePrint = ({ expenses, visibleColumns, userRole }) => {
     const body = [];
 
     const title = "Expense Report";
-
     const timestamp = new Date().toLocaleString();
 
     // Dynamically generate headers based on visibleColumns
@@ -22,11 +21,11 @@ const ExpensePrint = ({ expenses, visibleColumns, userRole }) => {
 
     columns.forEach(column => {
       switch (column) {
-        case 'registerId':
-          headers.push('Register ID');
-          break;
         case 'expenseId':
           headers.push('Expense ID');
+          break;
+        case 'registerId':
+          headers.push('Register ID');
           break;
         case 'dateTime':
           headers.push('Date & Time');
@@ -34,32 +33,20 @@ const ExpensePrint = ({ expenses, visibleColumns, userRole }) => {
         case 'purpose':
           headers.push('Purpose');
           break;
-        case 'spenderName':
-          headers.push('Spender Name');
+        case 'amount':
+          headers.push('Amount');
           break;
-        case 'phoneNumber':
-          headers.push('Phone Number');
-          break;
-        case 'amountTaken':
-          headers.push('Amount Taken');
-          break;
-        case 'totalSpent':
-          headers.push('Total Amount Spent');
-          break;
-        case 'subPurpose':
-          headers.push('Sub Purpose');
-          break;
-        case 'subAmount':
-          headers.push('Sub Amount');
-          break;
-        case 'amountReturned':
-          headers.push('Amount Returned');
+        case 'paymentMode':
+          headers.push('Payment Mode');
           break;
         case 'bill':
           headers.push('Bill');
           break;
-        case 'paymentMode':
-          headers.push('Payment Mode');
+        case 'name':
+          headers.push('Spender Name');
+          break;
+        case 'phoneNumber':
+          headers.push('Phone Number');
           break;
         case 'verifyLog':
           headers.push('Verify Log');
@@ -75,44 +62,32 @@ const ExpensePrint = ({ expenses, visibleColumns, userRole }) => {
 
       columns.forEach(column => {
         switch (column) {
-          case 'registerId':
-            row.push(expense.registerId);
-            break;
           case 'expenseId':
             row.push(expense.expenseId);
             break;
+          case 'registerId':
+            row.push(expense.registerId);
+            break;
           case 'dateTime':
-  row.push(formatDateTime(expense.createdAt));
-  break;
+            row.push(formatDateTime(expense.createdAt));
+            break;
           case 'purpose':
             row.push(expense.purpose);
+            break
+          case 'amount':
+            row.push(expense.amount);
             break;
-          case 'spenderName':
+          case 'paymentMode':
+            row.push(expense.paymentMode);
+            break;
+          case 'bill':
+            row.push(expense.billImage ? 'Available' : 'No Bill');
+            break;
+          case 'name':
             row.push(expense.name);
             break;
           case 'phoneNumber':
             row.push(expense.phoneNumber || 'N/A');
-            break;
-          case 'amountTaken':
-            row.push(expense.amount);
-            break;
-          case 'totalSpent':
-            row.push(expense.subExpenses.reduce((sum, sub) => sum + Number(sub.subAmount), 0));
-            break;
-          case 'subPurpose':
-            row.push(expense.subExpenses.map(sub => sub.subPurpose).join('\n'));
-            break;
-          case 'subAmount':
-            row.push(expense.subExpenses.map(sub => sub.subAmount).join('\n'));
-            break;
-          case 'amountReturned':
-            row.push(expense.amountReturned || 0);
-            break;
-          case 'bill':
-            row.push(expense.subExpenses.map(sub => sub.billImage ? 'Available' : 'No Bill').join('\n'));
-            break;
-          case 'paymentMode':
-            row.push(expense.paymentMode);
             break;
           case 'verifyLog':
             row.push(expense.verifyLog);

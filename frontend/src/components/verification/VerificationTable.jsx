@@ -106,31 +106,19 @@ function VerificationTable({ data, type, onVerifyLogUpdate, onUpdatePayment }) {
       <td className="px-6 py-4 whitespace-nowrap text-sm">{item.amount}</td>
       <td className="px-6 py-4 whitespace-nowrap text-sm">{item.purpose}</td>
       <td className="px-6 py-4">
-        <button
-          onClick={() => setExpandedRow(expandedRow === item._id ? null : item._id)}
-          className="text-indigo-600 hover:text-indigo-900"
-        >
-          {expandedRow === item._id ? 'Hide' : 'Show'} Details
-        </button>
-        {expandedRow === item._id && (
-          <div className="mt-2 space-y-2">
-            {item.subExpenses.map((sub, idx) => (
-              <div key={idx} className="text-sm">
-                <div>Purpose: {sub.subPurpose}</div>
-                <div>Amount: {sub.subAmount}</div>
-                {sub.billImage && (
-                  <img
-                    src={sub.billImage}
-                    alt="Bill"
-                    className="h-16 w-16 object-cover rounded mt-1"
-                  />
-                )}
-              </div>
-            ))}
-          </div>
+        {item.billImage ? (
+          <a
+            href={item.billImage}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 hover:text-blue-800"
+          >
+            View Bill
+          </a>
+        ) : (
+          'No Bill'
         )}
       </td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm">{item.amountReturned || 0}</td>
       <td className="px-6 py-4 whitespace-nowrap text-sm">{item.paymentMode}</td>
     </>
   );
@@ -217,8 +205,7 @@ function VerificationTable({ data, type, onVerifyLogUpdate, onUpdatePayment }) {
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Phone</th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Purpose</th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Sub Expenses</th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount Returned</th>
+          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Bill</th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Payment Mode</th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Created At</th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Verify Log</th>
@@ -255,7 +242,31 @@ function VerificationTable({ data, type, onVerifyLogUpdate, onUpdatePayment }) {
           {data.map((item) => (
             <tr key={item._id} className="hover:bg-gray-50">
               {type === 'income' && renderIncomeColumns(item)}
-              {type === 'expense' && renderExpenseColumns(item)}
+              {type === 'expense' && (
+                <>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">{item.expenseId}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">{item.registerId}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">{item.name}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">{item.phoneNumber || '-'}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">{item.amount}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">{item.purpose}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    {item.billImage ? (
+                      <a
+                        href={item.billImage}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:text-blue-800"
+                      >
+                        View Bill
+                      </a>
+                    ) : (
+                      'No Bill'
+                    )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">{item.paymentMode}</td>
+                </>
+              )}
               {type === 'payment' && renderPaymentColumns(item)}
               <td className="px-6 py-4 whitespace-nowrap text-sm">
                 {formatDateTime(item.createdAt)}

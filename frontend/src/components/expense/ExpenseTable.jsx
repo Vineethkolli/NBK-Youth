@@ -7,15 +7,8 @@ function ExpenseTable({
   onEdit,
   onDelete,
   isPrivilegedUser,
-  userRole,
-  onUpdate
+  userRole
 }) {
-
-
-  const calculateTotalSpent = (subExpenses) => {
-    return subExpenses.reduce((sum, sub) => sum + Number(sub.subAmount), 0);
-  };
-
   const canViewPhoneNumber = ['developer', 'financier', 'admin'].includes(userRole);
 
   return (
@@ -26,14 +19,14 @@ function ExpenseTable({
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
               S.No
             </th>
-            {(userRole === 'developer' || userRole === 'financier') && visibleColumns.registerId && (
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Register ID
-              </th>
-            )}
             {visibleColumns.expenseId && (
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                 Expense ID
+              </th>
+            )}
+            {(userRole === 'developer' || userRole === 'financier') && visibleColumns.registerId && (
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                Register ID
               </th>
             )}
             {visibleColumns.dateTime && (
@@ -46,39 +39,9 @@ function ExpenseTable({
                 Purpose
               </th>
             )}
-            {visibleColumns.spenderName && (
+            {visibleColumns.amount && (
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Spender Name
-              </th>
-            )}
-            {canViewPhoneNumber && visibleColumns.phoneNumber && (
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Phone Number
-              </th>
-            )}
-            {visibleColumns.amountTaken && (
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Amount Taken
-              </th>
-            )}
-            {visibleColumns.totalSpent && (
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Total Amount Spent
-              </th>
-            )}
-            {visibleColumns.subPurpose && (
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Sub Purpose
-              </th>
-            )}
-            {visibleColumns.subAmount && (
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Sub Amount
-              </th>
-            )}
-            {visibleColumns.amountReturned && (
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Amount Returned
+                Amount
               </th>
             )}
             {visibleColumns.bill && (
@@ -95,6 +58,16 @@ function ExpenseTable({
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                 Verify Log
               </th>
+            )} 
+            {visibleColumns.name && (
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                Spender Name
+              </th>
+            )} 
+            {canViewPhoneNumber && visibleColumns.phoneNumber && (
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                Phone Number
+              </th>
             )}
             {isPrivilegedUser && (
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
@@ -107,11 +80,11 @@ function ExpenseTable({
           {expenses.map((expense, index) => (
             <tr key={expense._id}>
               <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{index + 1}</td>
-              {(userRole === 'developer' || userRole === 'financier') && visibleColumns.registerId && (
-                <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{expense.registerId}</td>
-              )}
               {visibleColumns.expenseId && (
                 <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{expense.expenseId}</td>
+              )}
+              {(userRole === 'developer' || userRole === 'financier') && visibleColumns.registerId && (
+                <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{expense.registerId}</td>
               )}
               {visibleColumns.dateTime && (
                 <td className="px-6 py-4 whitespace-nowrap text-sm">
@@ -121,63 +94,23 @@ function ExpenseTable({
               {visibleColumns.purpose && (
                 <td className="px-6 py-4 whitespace-nowrap text-sm">{expense.purpose}</td>
               )}
-              {visibleColumns.spenderName && (
-                <td className="px-6 py-4 whitespace-nowrap text-sm">{expense.name}</td>
-              )}
-              {canViewPhoneNumber && visibleColumns.phoneNumber && (
-                <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{expense.phoneNumber}</td>
-              )}
-              {visibleColumns.amountTaken && (
+              {visibleColumns.amount && (
                 <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{expense.amount}</td>
-              )}
-              {visibleColumns.totalSpent && (
-                <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">
-                  {calculateTotalSpent(expense.subExpenses)}
-                </td>
-              )}
-              {visibleColumns.subPurpose && (
-                <td className="px-6 py-4 whitespace-nowrap text-sm">
-                  <ul className="list-disc list-inside">
-                    {expense.subExpenses.map((sub, idx) => (
-                      <li key={idx}>{sub.subPurpose}</li>
-                    ))}
-                  </ul>
-                </td>
-              )}
-              {visibleColumns.subAmount && (
-                <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">
-                  <ul className="list-inside">
-                    {expense.subExpenses.map((sub, idx) => (
-                      <li key={idx}>{sub.subAmount}</li>
-                    ))}
-                  </ul>
-                </td>
-              )}
-              {visibleColumns.amountReturned && (
-                <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">
-                  {expense.amountReturned || 0}
-                </td>
               )}
               {visibleColumns.bill && (
                 <td className="px-6 py-4 whitespace-nowrap text-sm">
-                  <ul className="list-inside">
-                    {expense.subExpenses.map((sub, idx) => (
-                      <li key={idx}>
-                        {sub.billImage ? (
-                          <a
-                            href={sub.billImage}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 hover:text-blue-800"
-                          >
-                            View Bill
-                          </a>
-                        ) : (
-                          'No Bill'
-                        )}
-                      </li>
-                    ))}
-                  </ul>
+                  {expense.billImage ? (
+                    <a
+                      href={expense.billImage}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:text-blue-800"
+                    >
+                      View Bill
+                    </a>
+                  ) : (
+                    'No Bill'
+                  )}
                 </td>
               )}
               {visibleColumns.paymentMode && (
@@ -193,14 +126,18 @@ function ExpenseTable({
                         ? 'bg-green-100 text-green-800'
                         : expense.verifyLog === 'rejected'
                         ? 'bg-red-100 text-red-800'
-                        : expense.verifyLog === 'pending'
-                        ? 'bg-yellow-100 text-yellow-800'
-                        : 'bg-gray-100 text-gray-800'
+                        : 'bg-yellow-100 text-yellow-800'
                     }`}
                   >
                     {expense.verifyLog}
                   </span>
                 </td>
+              )}
+              {visibleColumns.name && (
+                <td className="px-6 py-4 whitespace-nowrap text-sm">{expense.name}</td>
+              )} 
+              {canViewPhoneNumber && visibleColumns.phoneNumber && (
+                <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{expense.phoneNumber}</td>
               )}
               {isPrivilegedUser && (
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
