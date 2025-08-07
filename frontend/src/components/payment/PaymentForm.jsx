@@ -18,6 +18,7 @@ function PaymentForm({ onSubmit }) {
   const [selectedOption, setSelectedOption] = useState(null);
   const [screenshot, setScreenshot] = useState(null);
   const [screenshotPreview, setScreenshotPreview] = useState(null);
+  const [screenshotInputKey, setScreenshotInputKey] = useState(Date.now());
   const [belongsTo, setBelongsTo] = useState('youth');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [copiedDetails, setCopiedDetails] = useState({
@@ -244,18 +245,21 @@ function PaymentForm({ onSubmit }) {
             </p>
             
             <div className="flex flex-col items-center space-y-4">
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleScreenshotUpload}
-                className="block w-full text-sm text-gray-500
-                  file:mr-4 file:py-2 file:px-4
-                  file:rounded-md file:border-0
-                  file:text-sm file:font-semibold
-                  file:bg-indigo-50 file:text-indigo-700
-                  hover:file:bg-indigo-100"
-              />
-              
+              <div className="relative w-full">
+                <input
+                  key={screenshotInputKey}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleScreenshotUpload}
+                  className="block w-full text-sm text-gray-500
+                    file:mr-4 file:py-2 file:px-4
+                    file:rounded-md file:border-0
+                    file:text-sm file:font-semibold
+                    file:bg-indigo-50 file:text-indigo-700
+                    hover:file:bg-indigo-100 pr-32"
+                  style={{ zIndex: 2 }}
+                />
+              </div>
               {screenshotPreview && (
                 <div className="mt-2 relative h-32 w-48">
                   <img
@@ -268,6 +272,7 @@ function PaymentForm({ onSubmit }) {
                     onClick={() => {
                       setScreenshot(null);
                       setScreenshotPreview(null);
+                      setScreenshotInputKey(Date.now());
                     }}
                     className="absolute top-0 right-0 bg-black bg-opacity-50 text-white p-1 rounded-full"
                   >

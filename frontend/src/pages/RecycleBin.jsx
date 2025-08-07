@@ -186,14 +186,22 @@ function RecycleBin() {
                   <td className="px-6 py-4 whitespace-nowrap text-sm">{item.amountReturned || 0}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">{item.paymentMode}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
-              {item.billImage ? (
-                <a href={item.billImage} target="_blank" rel="noopener noreferrer">
-                  <img
-                    src={item.billImage}
-                    alt="Bill"
-                    className="h-16 w-16 object-cover border rounded shadow"
-                  />
-                </a>
+              {item.subExpenses && item.subExpenses.some(sub => typeof sub.billImage === 'string' && sub.billImage.includes('cloudinary.com')) ? (
+                <div className="flex flex-wrap">
+                  {item.subExpenses.map((sub, idx) => (
+                    typeof sub.billImage === 'string' && sub.billImage.includes('cloudinary.com') ? (
+                      <a
+                        key={idx}
+                        href={sub.billImage}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:text-blue-800"
+                      >
+                        View Bill
+                      </a>
+                    ) : null
+                  ))}
+                </div>
               ) : (
                 'No Image'
               )}

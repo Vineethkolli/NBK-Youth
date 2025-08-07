@@ -1,6 +1,10 @@
 import mongoose from 'mongoose';
 
 const estimatedExpenseSchema = new mongoose.Schema({
+  registerId: {
+    type: String,
+    required: true
+  },
   purpose: {
     type: String,
     required: true

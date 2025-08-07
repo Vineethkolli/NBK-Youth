@@ -26,7 +26,7 @@ export const homepageController = {
       let url = undefined;
       if (req.file) {
         // Pass type to uploadToCloudinary for correct resource_type/eager options
-        url = await uploadToCloudinary(req.file.path, 'HomepageSlides', req.body.type);
+        url = await uploadToCloudinary(req.file.buffer, 'HomepageSlides', req.body.type);
       } else {
         return res.status(400).json({ message: 'No file uploaded' });
       }
@@ -65,7 +65,9 @@ export const homepageController = {
 
       // Delete from Cloudinary
       const publicId = slide.url.split('/').pop().split('.')[0];
-      await cloudinary.uploader.destroy(`HomepageSlides/${publicId}`);
+      // Use resource_type: 'video' for videos
+      const resourceType = slide.type === 'video' ? 'video' : 'image';
+      await cloudinary.uploader.destroy(`HomepageSlides/${publicId}`, { resource_type: resourceType });
 
       // Log slide deletion
       await logActivity(

@@ -1,6 +1,10 @@
 import mongoose from 'mongoose';
 
 const estimatedIncomeSchema = new mongoose.Schema({
+  registerId: {
+    type: String,
+    required: true
+  },
   name: {
     type: String,
     required: true,

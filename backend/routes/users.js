@@ -4,8 +4,8 @@ import { auth, checkRole } from '../middleware/auth.js';
 import { updateProfileImage, deleteProfileImage, getAllUsers, updateProfile, updateUserCategory, deleteUser, updateUserRole, getProfile, updateLanguage } from '../controllers/usersController.js';
 import multer from 'multer';
 
-// Configure multer for file uploads (disk storage, temp folder)
-const upload = multer({ dest: 'uploads/' });
+// Configure multer for file uploads (in-memory storage)
+const upload = multer({ storage: multer.memoryStorage() });
 
 const router = express.Router();
 

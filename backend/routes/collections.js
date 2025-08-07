@@ -4,8 +4,7 @@ import { auth, checkRole } from '../middleware/auth.js';
 import CollectionController from '../controllers/collectionController.js';
 import multer from 'multer';
 
-// Configure multer for file uploads (disk storage, temp folder)
-const upload = multer({ dest: 'uploads/' });
+const upload = multer({ storage: multer.memoryStorage() });
 
 const router = express.Router();
 
