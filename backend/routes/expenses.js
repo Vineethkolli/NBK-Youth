@@ -20,22 +20,22 @@ router.get('/verification',
 );
 
 // Add new expense (admin, developer, financier only)
-// Accepts multiple bill images: billImage0, billImage1, ...
+// Accepts multiple bill images: billImage_tempId1, billImage_tempId2, ...
 router.post(
   '/',
   auth,
   checkPermission('MANAGE_EXPENSE'),
-  upload.fields(Array.from({ length: 20 }, (_, i) => ({ name: `billImage${i}`, maxCount: 1 }))),
+  upload.any(),
   expenseController.createExpense
 );
 
 // Update expense
-// Accepts multiple bill images: billImage0, billImage1, ...
+// Accepts multiple bill images: billImage_tempId1, billImage_tempId2, ...
 router.put(
   '/:id',
   auth,
   checkPermission('MANAGE_EXPENSE'),
-  upload.fields(Array.from({ length: 20 }, (_, i) => ({ name: `billImage${i}`, maxCount: 1 }))),
+  upload.any(),
   expenseController.updateExpense
 );
 
