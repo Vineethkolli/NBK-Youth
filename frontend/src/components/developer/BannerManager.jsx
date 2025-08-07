@@ -40,6 +40,8 @@ const videoInputRef = useRef(null);
     message: '',
     image: '',
     video: '',
+    imageCloudinary: '',
+    videoCloudinary: '',
     status: 'disabled',
     periodicity: 1,
     duration: 0,
@@ -72,12 +74,25 @@ const videoInputRef = useRef(null);
       if (type === 'video' && videoInputRef.current) videoInputRef.current.value = '';
       return;
     }
-    // For preview, create object URL
-    setFormData(f => ({
-      ...f,
-      [type]: file,
-      [`${type}Preview`]: URL.createObjectURL(file)
-    }));
+    let newForm = { ...formData };
+    if (type === 'image' && formData.imageCloudinary) {
+      newForm.deleteImageCloudinary = true;
+      newForm.imageCloudinary = '';
+    }
+    if (type === 'video' && formData.videoCloudinary) {
+      newForm.deleteVideoCloudinary = true;
+      newForm.videoCloudinary = '';
+    }
+    newForm[type] = file;
+    newForm[`${type}Preview`] = URL.createObjectURL(file);
+    if (type === 'image') {
+      newForm.video = '';
+      newForm.videoPreview = undefined;
+    } else {
+      newForm.image = '';
+      newForm.imagePreview = undefined;
+    }
+    setFormData(newForm);
   };
 
   const handleSubmit = async (e) => {
@@ -98,21 +113,29 @@ const videoInputRef = useRef(null);
       if (formData.video instanceof File) {
         data.append('video', formData.video);
       }
+      if (formData.deleteImageCloudinary) {
+        data.append('deleteImageCloudinary', 'true');
+      }
+      if (formData.deleteVideoCloudinary) {
+        data.append('deleteVideoCloudinary', 'true');
+      }
 
+      let response;
       if (formData._id) {
-        await axios.put(`${API_URL}/api/banners/${formData._id}`, data, {
+        response = await axios.put(`${API_URL}/api/banners/${formData._id}`, data, {
           headers: { 'Content-Type': 'multipart/form-data' },
         });
         toast.success('Banner updated successfully');
       } else {
-        await axios.post(`${API_URL}/api/banners`, data, {
+        response = await axios.post(`${API_URL}/api/banners`, data, {
           headers: { 'Content-Type': 'multipart/form-data' },
         });
         toast.success('Banner created successfully');
       }
+      await fetchBanners();
       setShowForm(false);
       resetForm();
-      fetchBanners();
+      // No need to setFormData after update, banners are refetched and modal is closed
     } catch (err) {
       toast.error(err.response?.data?.message || 'Operation failed');
     } finally {
@@ -121,13 +144,17 @@ const videoInputRef = useRef(null);
   };
 
   const handleEdit = (banner) => {
-    // Only allow one file: if both image and video exist, clear video
     let editData = { ...banner };
     if (editData.image && editData.video) {
-      // Prefer image, clear video
       editData.video = '';
     }
-    setFormData(editData);
+    setFormData({
+      ...editData,
+      imageCloudinary: editData.image || '',
+      videoCloudinary: editData.video || '',
+      imagePreview: undefined,
+      videoPreview: undefined
+    });
     setShowForm(true);
   };
 
@@ -272,6 +299,7 @@ const videoInputRef = useRef(null);
                   onClick={() => handleDelete(banner._id)}
                   className={`text-red-600 hover:text-red-800 ${deletingId === banner._id ? 'opacity-50 cursor-not-allowed' : ''}`}
                   disabled={deletingId === banner._id}
+                  style={deletingId === banner._id ? { pointerEvents: 'none', opacity: 0.5 } : {}}
                 >
                   <Trash2 className="h-5 w-5" />
                 </button>
@@ -352,7 +380,13 @@ const videoInputRef = useRef(null);
                 <button
                   type="button"
                   onClick={() => {
-                    setFormData(f => ({ ...f, image: '', imagePreview: undefined }));
+                    setFormData(f => ({
+                      ...f,
+                      image: '',
+                      imagePreview: undefined,
+                      imageCloudinary: '',
+                      deleteImageCloudinary: f.imageCloudinary ? true : false
+                    }));
                     if (imageInputRef.current) imageInputRef.current.value = '';
                   }}
                   className="absolute top-0 right-0 bg-black bg-opacity-50 text-white p-1 rounded-full"
@@ -386,7 +420,13 @@ const videoInputRef = useRef(null);
                 <button
                   type="button"
                   onClick={() => {
-                    setFormData(f => ({ ...f, video: '', videoPreview: undefined }));
+                    setFormData(f => ({
+                      ...f,
+                      video: '',
+                      videoPreview: undefined,
+                      videoCloudinary: '',
+                      deleteVideoCloudinary: f.videoCloudinary ? true : false
+                    }));
                     if (videoInputRef.current) videoInputRef.current.value = '';
                   }}
                   className="absolute top-0 right-0 bg-black bg-opacity-50 text-white p-1 rounded-full"
