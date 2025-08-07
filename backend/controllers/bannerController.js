@@ -68,12 +68,13 @@ export const bannerController = {
 
   updateBanner: async (req, res) => {
     try {
-      const { title, message, periodicity, duration, status, deleteImage, deleteVideo } = req.body;
+      const { title, message, periodicity, duration, status, deleteImage, deleteVideo, deleteImageCloudinary, deleteVideoCloudinary } = req.body;
 
       const originalBanner = await Banner.findById(req.params.id);
       if (!originalBanner) {
         return res.status(404).json({ message: 'Banner not found' });
       }
+      const originalData = originalBanner.toObject();
 
       // If trying to enable this banner, check if any other banner is enabled
       if (status === 'enabled') {
@@ -91,8 +92,8 @@ export const bannerController = {
       let imageUrl = originalBanner.image;
       let videoUrl = originalBanner.video;
 
-      // Handle Cloudinary deletion if requested
-      if (deleteImage === 'true' && originalBanner.image && originalBanner.image.includes('cloudinary.com')) {
+      // Handle Cloudinary deletion if requested (support both old and new flags)
+      if ((deleteImage === 'true' || deleteImageCloudinary === 'true') && originalBanner.image && originalBanner.image.includes('cloudinary.com')) {
         try {
           const publicId = originalBanner.image.split('/').pop().split('.')[0];
           await cloudinary.uploader.destroy(`Banners/${publicId}`);
@@ -101,7 +102,7 @@ export const bannerController = {
           console.warn('Failed to delete banner image from Cloudinary:', err);
         }
       }
-      if (deleteVideo === 'true' && originalBanner.video && originalBanner.video.includes('cloudinary.com')) {
+      if ((deleteVideo === 'true' || deleteVideoCloudinary === 'true') && originalBanner.video && originalBanner.video.includes('cloudinary.com')) {
         try {
           const publicId = originalBanner.video.split('/').pop().split('.')[0];
           await cloudinary.uploader.destroy(`Banners/${publicId}`, { resource_type: 'video' });
@@ -111,27 +112,33 @@ export const bannerController = {
         }
       }
 
-      // Use multer: req.files.image and req.files.video (field names must match in frontend)
-      if (req.files && req.files.image && req.files.image[0]) {
-        imageUrl = await uploadToCloudinary(req.files.image[0].buffer, 'Banners', 'image');
+      // Build an explicit $set / $unset update object
+      const updateOps = {
+        $set: { title, message, periodicity, duration, status },
+      };
+
+      // if user requested image deletion:
+      if (deleteImage === 'true' || deleteImageCloudinary === 'true') {
+        updateOps.$unset = { ...(updateOps.$unset || {}), image: "" };
       }
-      if (req.files && req.files.video && req.files.video[0]) {
-        videoUrl = await uploadToCloudinary(req.files.video[0].buffer, 'Banners', 'video');
+      // if user uploaded a new image:
+      else if (req.files?.image?.[0]) {
+        imageUrl = await uploadToCloudinary(req.files.image[0].buffer, 'Banners', 'image');
+        updateOps.$set.image = imageUrl;
       }
 
-      const originalData = originalBanner.toObject();
+      // same pattern for video
+      if (deleteVideo === 'true' || deleteVideoCloudinary === 'true') {
+        updateOps.$unset = { ...(updateOps.$unset || {}), video: "" };
+      }
+      else if (req.files?.video?.[0]) {
+        videoUrl = await uploadToCloudinary(req.files.video[0].buffer, 'Banners', 'video');
+        updateOps.$set.video = videoUrl;
+      }
 
       const banner = await Banner.findByIdAndUpdate(
         req.params.id,
-        {
-          title,
-          message,
-          image: imageUrl,
-          video: videoUrl,
-          periodicity,
-          duration,
-          status
-        },
+        updateOps,
         { new: true }
       );
 
