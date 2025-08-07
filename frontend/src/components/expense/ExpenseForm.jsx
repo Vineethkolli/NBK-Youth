@@ -4,9 +4,10 @@ import { useAuth } from '../../context/AuthContext';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { API_URL } from '../../utils/config';
+import { nanoid } from 'nanoid';
 
 // Generate unique IDs for temporary sub-expenses
-const generateTempId = () => `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+const generateTempId = () => nanoid();
 
 function ExpenseForm({ expense, onClose, onSuccess }) {
   const { user } = useAuth();
