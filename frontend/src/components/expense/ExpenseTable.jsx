@@ -8,12 +8,12 @@ function ExpenseTable({
   onDelete,
   isPrivilegedUser,
   userRole,
+  onUpdate
 }) {
 
 
   const calculateTotalSpent = (subExpenses) => {
-    if (!Array.isArray(subExpenses)) return 0;
-    return subExpenses.reduce((sum, sub) => sum + Number(sub.subAmount || 0), 0);
+    return subExpenses.reduce((sum, sub) => sum + Number(sub.subAmount), 0);
   };
 
   const canViewPhoneNumber = ['developer', 'financier', 'admin'].includes(userRole);
@@ -138,7 +138,7 @@ function ExpenseTable({
               {visibleColumns.subPurpose && (
                 <td className="px-6 py-4 whitespace-nowrap text-sm">
                   <ul className="list-disc list-inside">
-                    {(expense.subExpenses || []).map((sub, idx) => (
+                    {expense.subExpenses.map((sub, idx) => (
                       <li key={idx}>{sub.subPurpose}</li>
                     ))}
                   </ul>
@@ -147,7 +147,7 @@ function ExpenseTable({
               {visibleColumns.subAmount && (
                 <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">
                   <ul className="list-inside">
-                    {(expense.subExpenses || []).map((sub, idx) => (
+                    {expense.subExpenses.map((sub, idx) => (
                       <li key={idx}>{sub.subAmount}</li>
                     ))}
                   </ul>
@@ -161,7 +161,7 @@ function ExpenseTable({
               {visibleColumns.bill && (
                 <td className="px-6 py-4 whitespace-nowrap text-sm">
                   <ul className="list-inside">
-                    {(expense.subExpenses || []).map((sub, idx) => (
+                    {expense.subExpenses.map((sub, idx) => (
                       <li key={idx}>
                         {sub.billImage ? (
                           <a

@@ -65,23 +65,13 @@ const videoInputRef = useRef(null);
       toast.error('File size should be less than 200MB');
       return;
     }
-    
-    // Check if user is trying to upload when another type already exists
-    const hasExistingImage = formData.image instanceof File || (typeof formData.image === 'string' && formData.image) || formData.imagePreview;
-    const hasExistingVideo = formData.video instanceof File || (typeof formData.video === 'string' && formData.video) || formData.videoPreview;
-    
-    if (type === 'image' && hasExistingVideo) {
-      toast.error('Only one file can be uploaded (image or video). Please remove the video first.');
-      if (imageInputRef.current) imageInputRef.current.value = '';
+    // Only allow one of image or video at a time (including preview)
+    if ((type === 'image' && (formData.video || formData.videoPreview)) || (type === 'video' && (formData.image || formData.imagePreview))) {
+      toast.error('You can only select either an image or a video, not both.');
+      if (type === 'image' && imageInputRef.current) imageInputRef.current.value = '';
+      if (type === 'video' && videoInputRef.current) videoInputRef.current.value = '';
       return;
     }
-    
-    if (type === 'video' && hasExistingImage) {
-      toast.error('Only one file can be uploaded (image or video). Please remove the image first.');
-      if (videoInputRef.current) videoInputRef.current.value = '';
-      return;
-    }
-    
     // For preview, create object URL
     setFormData(f => ({
       ...f,
@@ -90,21 +80,6 @@ const videoInputRef = useRef(null);
     }));
   };
 
-  const handleRemoveFile = (type) => {
-    setFormData(f => ({
-      ...f,
-      [type]: '',
-      [`${type}Preview`]: undefined
-    }));
-    
-    // Clear file input
-    if (type === 'image' && imageInputRef.current) {
-      imageInputRef.current.value = '';
-    }
-    if (type === 'video' && videoInputRef.current) {
-      videoInputRef.current.value = '';
-    }
-  };
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (submitting) return;
@@ -117,18 +92,6 @@ const videoInputRef = useRef(null);
       data.append('status', formData.status);
       data.append('periodicity', formData.periodicity);
       data.append('duration', formData.duration);
-      
-      // Handle file deletion flags
-      if (formData._id) {
-        // If editing and user removed existing files
-        if (typeof formData.image === 'string' && !formData.imagePreview && !(formData.image instanceof File)) {
-          data.append('deleteImage', 'true');
-        }
-        if (typeof formData.video === 'string' && !formData.videoPreview && !(formData.video instanceof File)) {
-          data.append('deleteVideo', 'true');
-        }
-      }
-      
       if (formData.image instanceof File) {
         data.append('image', formData.image);
       }
@@ -158,11 +121,13 @@ const videoInputRef = useRef(null);
   };
 
   const handleEdit = (banner) => {
-    setFormData({
-      ...banner,
-      imagePreview: banner.image || undefined,
-      videoPreview: banner.video || undefined
-    });
+    // Only allow one file: if both image and video exist, clear video
+    let editData = { ...banner };
+    if (editData.image && editData.video) {
+      // Prefer image, clear video
+      editData.video = '';
+    }
+    setFormData(editData);
     setShowForm(true);
   };
 
@@ -229,13 +194,7 @@ const videoInputRef = useRef(null);
       status: 'disabled',
       periodicity: 1,
       duration: 0,
-      imagePreview: undefined,
-      videoPreview: undefined
     });
-    
-    // Clear file inputs
-    if (imageInputRef.current) imageInputRef.current.value = '';
-    if (videoInputRef.current) videoInputRef.current.value = '';
   };
 
   return (
@@ -376,27 +335,30 @@ const videoInputRef = useRef(null);
                   Image
                 </label>
                 <input
-                  type="file"
-                  accept="image/*"
-                  ref={imageInputRef}
-                  onChange={(e) => handleFileChange(e, 'image')}
-                  className="mt-1 block w-full"
-                />
-                {/* Show image preview */}
-                {(formData.imagePreview || (formData.image && typeof formData.image === 'string')) && (
+  type="file"
+  accept="image/*"
+  ref={imageInputRef}
+  onChange={(e) => handleFileChange(e, 'image')}
+  className="mt-1 block w-full"
+/>
+                {/* Show image preview only if no video is selected */}
+                {(!formData.video && (formData.imagePreview || (formData.image && typeof formData.image === 'string'))) && (
                   <div className="relative mt-2 h-32 w-full">
                     <img
                       src={formData.imagePreview || formData.image}
                       alt="Preview"
                       className="h-full object-contain"
                     />
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveFile('image')}
-                      className="absolute top-0 right-0 bg-black bg-opacity-50 text-white p-1 rounded-full hover:bg-opacity-75"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFormData(f => ({ ...f, image: '', imagePreview: undefined }));
+                    if (imageInputRef.current) imageInputRef.current.value = '';
+                  }}
+                  className="absolute top-0 right-0 bg-black bg-opacity-50 text-white p-1 rounded-full"
+                >
+                  <X className="h-4 w-4" />
+                </button>
                   </div>
                 )}
               </div>
@@ -407,27 +369,30 @@ const videoInputRef = useRef(null);
                   Video
                 </label>
                 <input
-                  type="file"
-                  accept="video/*"
-                  ref={videoInputRef}
-                  onChange={(e) => handleFileChange(e, 'video')}
-                  className="mt-1 block w-full"
-                />
-                {/* Show video preview */}
-                {(formData.videoPreview || (formData.video && typeof formData.video === 'string')) && (
+  type="file"
+  accept="video/*"
+  ref={videoInputRef}
+  onChange={(e) => handleFileChange(e, 'video')}
+  className="mt-1 block w-full"
+/>
+                {/* Show video preview only if no image is selected */}
+                {(!formData.image && (formData.videoPreview || (formData.video && typeof formData.video === 'string'))) && (
                   <div className="relative mt-2 h-32 w-full">
                     <video
                       src={formData.videoPreview || formData.video}
                       controls
                       className="h-full object-contain"
                     />
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveFile('video')}
-                      className="absolute top-0 right-0 bg-black bg-opacity-50 text-white p-1 rounded-full hover:bg-opacity-75"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFormData(f => ({ ...f, video: '', videoPreview: undefined }));
+                    if (videoInputRef.current) videoInputRef.current.value = '';
+                  }}
+                  className="absolute top-0 right-0 bg-black bg-opacity-50 text-white p-1 rounded-full"
+                >
+                  <X className="h-4 w-4" />
+                </button>
                   </div>
                 )}
               </div>

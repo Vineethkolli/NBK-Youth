@@ -192,6 +192,8 @@ const fetchExpenses = async () => {
         <ExpenseTable
           expenses={expenses}
           visibleColumns={visibleColumns}
+          hiddenProfiles={hiddenProfiles}
+          onPrivacyToggle={handlePrivacyToggle}
           onEdit={handleEdit}
           onDelete={handleDelete}
           isPrivilegedUser={['developer', 'financier'].includes(user?.role)}
