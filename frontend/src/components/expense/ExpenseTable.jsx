@@ -7,7 +7,8 @@ function ExpenseTable({
   onEdit,
   onDelete,
   isPrivilegedUser,
-  userRole
+  userRole,
+  isLocked = false
 }) {
   const canViewPhoneNumber = ['developer', 'financier', 'admin'].includes(userRole);
 
@@ -16,63 +17,39 @@ function ExpenseTable({
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-              S.No
-            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">S.No</th>
             {visibleColumns.expenseId && (
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Expense ID
-              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Expense ID</th>
             )}
             {(userRole === 'developer' || userRole === 'financier') && visibleColumns.registerId && (
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Register ID
-              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Register ID</th>
             )}
             {visibleColumns.dateTime && (
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Date & Time
-              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date & Time</th>
             )}
             {visibleColumns.purpose && (
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Purpose
-              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Purpose</th>
             )}
             {visibleColumns.amount && (
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Amount
-              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
             )}
             {visibleColumns.bill && (
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Bill
-              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Bill</th>
             )}
             {visibleColumns.paymentMode && (
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Payment Mode
-              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Payment Mode</th>
             )}
             {visibleColumns.verifyLog && (
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Verify Log
-              </th>
-            )} 
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Verify Log</th>
+            )}
             {visibleColumns.name && (
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Spender Name
-              </th>
-            )} 
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Spender Name</th>
+            )}
             {canViewPhoneNumber && visibleColumns.phoneNumber && (
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Phone Number
-              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Phone Number</th>
             )}
             {isPrivilegedUser && (
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Actions
-              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
             )}
           </tr>
         </thead>
@@ -87,9 +64,7 @@ function ExpenseTable({
                 <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{expense.registerId}</td>
               )}
               {visibleColumns.dateTime && (
-                <td className="px-6 py-4 whitespace-nowrap text-sm">
-                  {formatDateTime(expense.createdAt)}
-                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm">{formatDateTime(expense.createdAt)}</td>
               )}
               {visibleColumns.purpose && (
                 <td className="px-6 py-4 whitespace-nowrap text-sm">{expense.purpose}</td>
@@ -114,9 +89,7 @@ function ExpenseTable({
                 </td>
               )}
               {visibleColumns.paymentMode && (
-                <td className="px-6 py-4 whitespace-nowrap text-sm">
-                  {expense.paymentMode}
-                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm">{expense.paymentMode}</td>
               )}
               {visibleColumns.verifyLog && (
                 <td className="px-6 py-4 whitespace-nowrap">
@@ -135,7 +108,7 @@ function ExpenseTable({
               )}
               {visibleColumns.name && (
                 <td className="px-6 py-4 whitespace-nowrap text-sm">{expense.name}</td>
-              )} 
+              )}
               {canViewPhoneNumber && visibleColumns.phoneNumber && (
                 <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{expense.phoneNumber}</td>
               )}
@@ -144,13 +117,17 @@ function ExpenseTable({
                   <div className="flex space-x-2">
                     <button
                       onClick={() => onEdit(expense)}
-                      className="text-indigo-600 hover:text-indigo-900"
+                      disabled={isLocked}
+                      className={`text-indigo-600 ${isLocked ? 'opacity-50 cursor-not-allowed' : 'hover:text-indigo-900'}`}
+                      title={isLocked ? 'Locked' : 'Edit'}
                     >
                       <Edit2 className="h-5 w-5" />
                     </button>
                     <button
                       onClick={() => onDelete(expense._id)}
-                      className="text-red-600 hover:text-red-900"
+                      disabled={isLocked}
+                      className={`text-red-600 ${isLocked ? 'opacity-50 cursor-not-allowed' : 'hover:text-red-900'}`}
+                      title={isLocked ? 'Locked' : 'Delete'}
                     >
                       <Trash2 className="h-5 w-5" />
                     </button>
