@@ -4,8 +4,12 @@ import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { API_URL } from '../utils/config';
 import { formatDateTime } from '../utils/dateTime';
+import EventLabelDisplay from '../components/common/EventLabelDisplay';
+import LockIndicator from '../components/common/LockIndicator';
+import { useLockSettings } from '../context/LockContext';
 
 function RecycleBin() {
+  const { lockSettings } = useLockSettings();
   const [deletedIncomes, setDeletedIncomes] = useState([]);
   const [deletedExpenses, setDeletedExpenses] = useState([]);
   const [loadingIncomeId, setLoadingIncomeId] = useState(null);
@@ -19,7 +23,7 @@ function RecycleBin() {
     try {
       const [incomesResponse, expensesResponse] = await Promise.all([
         axios.get(`${API_URL}/api/incomes/recycle-bin`),
-        axios.get(`${API_URL}/api/expenses/recycle-bin`)
+        axios.get(`${API_URL}/api/expenses/recycle-bin`),
       ]);
       setDeletedIncomes(incomesResponse.data);
       setDeletedExpenses(expensesResponse.data);
@@ -82,12 +86,24 @@ function RecycleBin() {
     }
   };
 
-
   return (
-    <div className="space-y-8 p-0">
+    <div className="space-y-6">
+      <div className="space-y-2">
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-semibold">Recycle Bin</h1>
+      </div>
+
+    <div className="flex items-center">
+        <LockIndicator />
+        <EventLabelDisplay />
+      </div>
+      </div>
       {/* Income Bin */}
       <div>
-        <h1 className="text-2xl font-semibold text-gray-800 mb-4">Income Bin</h1>
+        <div className="flex items-center space-x-4 mb-4">
+          <h1 className="text-2xl font-semibold text-gray-800">Income Bin</h1>
+        </div>
+
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
@@ -106,48 +122,65 @@ function RecycleBin() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
               </tr>
             </thead>
+
             <tbody className="bg-white divide-y divide-gray-200">
-              {deletedIncomes.map((item) => (
-                <tr key={item._id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">{item.incomeId}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">{item.registerId}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">{item.name}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">{item.email}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">{item.phoneNumber}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">{item.amount}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 inline-flex text-xs font-semibold rounded-full ${
-                      item.status === 'paid' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                    }`}>
-                      {item.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">{item.paymentMode}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">{item.belongsTo}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">{item.verifyLog}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    {formatDateTime(item.deletedAt)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    <div className="flex space-x-3">
-                      <button
-                        onClick={() => handleRestoreIncome(item._id)}
-                        className={`text-indigo-600 hover:text-indigo-900 ${loadingIncomeId === item._id ? 'opacity-50 cursor-not-allowed' : ''}`}
-                        disabled={loadingIncomeId === item._id}
+              {deletedIncomes.map((item) => {
+                const isLoading = loadingIncomeId === item._id;
+                return (
+                  <tr key={item._id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">{item.incomeId}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">{item.registerId}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">{item.name}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">{item.email}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">{item.phoneNumber}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">{item.amount}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span
+                        className={`px-2 inline-flex text-xs font-semibold rounded-full ${
+                          item.status === 'paid'
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-red-100 text-red-800'
+                        }`}
                       >
-                        <RefreshCw className="h-5 w-5" />
-                      </button>
-                      <button
-                        onClick={() => handlePermanentDeleteIncome(item._id)}
-                        className={`text-red-600 hover:text-red-900 ${loadingIncomeId === item._id ? 'opacity-50 cursor-not-allowed' : ''}`}
-                        disabled={loadingIncomeId === item._id}
+                        {item.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">{item.paymentMode}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">{item.belongsTo}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">{item.verifyLog}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">{formatDateTime(item.deletedAt)}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      <div
+                        className={`flex space-x-3 ${
+                          lockSettings.isLocked ? 'opacity-50 pointer-events-none' : ''
+                        }`}
                       >
-                        <Trash2 className="h-5 w-5" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                        <button
+                          onClick={() => handleRestoreIncome(item._id)}
+                          disabled={isLoading || lockSettings.isLocked}
+                          className={`text-indigo-600 hover:text-indigo-900 ${
+                            isLoading ? 'opacity-50 cursor-not-allowed' : ''
+                          }`}
+                          title={lockSettings.isLocked ? 'Locked - cannot restore' : 'Restore'}
+                        >
+                          <RefreshCw className="h-5 w-5" />
+                        </button>
+
+                        <button
+                          onClick={() => handlePermanentDeleteIncome(item._id)}
+                          disabled={isLoading || lockSettings.isLocked}
+                          className={`text-red-600 hover:text-red-900 ${
+                            isLoading ? 'opacity-50 cursor-not-allowed' : ''
+                          }`}
+                          title={lockSettings.isLocked ? 'Locked - cannot delete' : 'Delete permanently'}
+                        >
+                          <Trash2 className="h-5 w-5" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -155,7 +188,10 @@ function RecycleBin() {
 
       {/* Expense Bin */}
       <div>
-        <h1 className="text-2xl font-semibold text-gray-800 mb-4">Expense Bin</h1>
+        <div className="flex items-center space-x-4 mb-4">
+          <h1 className="text-2xl font-semibold text-gray-800">Expense Bin</h1>
+        </div>
+
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
@@ -173,54 +209,67 @@ function RecycleBin() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
               </tr>
             </thead>
+
             <tbody className="bg-white divide-y divide-gray-200">
-              {deletedExpenses.map((item) => (
-                <tr key={item._id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">{item.expenseId}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">{item.registerId}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">{item.name}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">{item.phoneNumber}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">{item.amount}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">{item.purpose}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">{item.paymentMode}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    {item.billImage ? (
-                      <a
-                        href={item.billImage}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:text-blue-800"
+              {deletedExpenses.map((item) => {
+                const isLoading = loadingExpenseId === item._id;
+                return (
+                  <tr key={item._id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">{item.expenseId}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">{item.registerId}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">{item.name}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">{item.phoneNumber}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">{item.amount}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">{item.purpose}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">{item.paymentMode}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      {item.billImage ? (
+                        <a
+                          href={item.billImage}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:text-blue-800"
+                        >
+                          View Bill
+                        </a>
+                      ) : (
+                        'No Image'
+                      )}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">{item.verifyLog}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">{formatDateTime(item.deletedAt)}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      <div
+                        className={`flex space-x-3 ${
+                          lockSettings.isLocked ? 'opacity-50 pointer-events-none' : ''
+                        }`}
                       >
-                        View Bill
-                      </a>
-                    ) : (
-                      'No Image'
-                    )}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">{item.verifyLog}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    {formatDateTime(item.deletedAt)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    <div className="flex space-x-3">
-                      <button
-                        onClick={() => handleRestoreExpense(item._id)}
-                        className={`text-indigo-600 hover:text-indigo-900 ${loadingExpenseId === item._id ? 'opacity-50 cursor-not-allowed' : ''}`}
-                        disabled={loadingExpenseId === item._id}
-                      >
-                        <RefreshCw className="h-5 w-5" />
-                      </button>
-                      <button
-                        onClick={() => handlePermanentDeleteExpense(item._id)}
-                        className={`text-red-600 hover:text-red-900 ${loadingExpenseId === item._id ? 'opacity-50 cursor-not-allowed' : ''}`}
-                        disabled={loadingExpenseId === item._id}
-                      >
-                        <Trash2 className="h-5 w-5" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                        <button
+                          onClick={() => handleRestoreExpense(item._id)}
+                          disabled={isLoading || lockSettings.isLocked}
+                          className={`text-indigo-600 hover:text-indigo-900 ${
+                            isLoading ? 'opacity-50 cursor-not-allowed' : ''
+                          }`}
+                          title={lockSettings.isLocked ? 'Locked - cannot restore' : 'Restore'}
+                        >
+                          <RefreshCw className="h-5 w-5" />
+                        </button>
+
+                        <button
+                          onClick={() => handlePermanentDeleteExpense(item._id)}
+                          disabled={isLoading || lockSettings.isLocked}
+                          className={`text-red-600 hover:text-red-900 ${
+                            isLoading ? 'opacity-50 cursor-not-allowed' : ''
+                          }`}
+                          title={lockSettings.isLocked ? 'Locked - cannot delete' : 'Delete permanently'}
+                        >
+                          <Trash2 className="h-5 w-5" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

@@ -6,6 +6,7 @@ import EstimationStats from '../components/estimation/Stats';
 import IncomeSection from '../components/estimation/IncomeSection';
 import ExpenseSection from '../components/estimation/ExpenseSection';
 import { useAuth } from '../context/AuthContext';
+import EventLabelDisplay from '../components/common/EventLabelDisplay';
 
 function Estimation() {
   const { user } = useAuth();
@@ -35,6 +36,8 @@ function Estimation() {
 
   return (
     <div className="space-y-6">
+      <EventLabelDisplay />
+      
       {/* Tab Buttons */}
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-semibold">Estimation Management</h1>

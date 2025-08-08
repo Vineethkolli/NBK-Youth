@@ -4,6 +4,7 @@ import { toast } from 'react-hot-toast';
 import PaymentForm from '../components/payment/PaymentForm';
 import PaymentHistory from '../components/payment/PaymentHistory';
 import { API_URL } from '../utils/config';
+import EventLabelDisplay from '../components/common/EventLabelDisplay';
 
 function PayOnline() {
   const [payments, setPayments] = useState([]);
@@ -45,14 +46,22 @@ function PayOnline() {
       throw error;
     }
   };
+return (
+  <div className="space-y-6">
+    <div className="space-y-2">
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-semibold">Pay Online</h1>
+      </div>
 
-  return (
-    <div className="space-y-8">
-      <h1 className="text-2xl font-semibold">Pay Online</h1>
-      <PaymentForm onSubmit={handlePaymentSubmit} />
-      <PaymentHistory payments={payments} />
-    </div>
-  );
+    <div className="flex items-center">
+        <EventLabelDisplay />
+      </div>
+      </div>
+    <PaymentForm onSubmit={handlePaymentSubmit} />
+    <PaymentHistory payments={payments} />
+  </div>
+);
+
 }
 
 export default PayOnline;

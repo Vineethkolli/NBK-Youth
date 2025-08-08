@@ -3,6 +3,8 @@ import PaymentDetails from '../components/developer/PaymentDetails';
 import MaintenanceMode from '../components/developer/MaintenanceMode';
 import RoleStatistics from '../components/developer/Stats';
 import BannerManager from '../components/developer/BannerManager';
+import EventLabelManager from '../components/developer/EventLabelManager';
+import LockManager from '../components/developer/LockManager';
 import { useState } from 'react';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
@@ -34,6 +36,12 @@ function AdminPanel() {
   
     return (
       <div className="max-w-7xl mx-auto space-y-6">
+        
+        {/* Event Label Manager */}
+        <EventLabelManager />
+        
+        {/* Lock Manager */}
+        <LockManager />
         
         {/* Banner Manager */}
         <BannerManager />

@@ -26,6 +26,8 @@ import estimationRoutes from './routes/estimation.js';
 import bannerRoutes from './routes/banners.js';
 import activityLogRoutes from './routes/activityLogs.js';
 import committeeRoutes from './routes/committee.js';
+import eventLabelRoutes from './routes/eventLabel.js';
+import lockSettingsRoutes from './routes/lockSettings.js';
 
 dotenv.config();
 
@@ -77,6 +79,8 @@ app.use('/api/estimation', estimationRoutes);
 app.use('/api/banners', bannerRoutes);
 app.use('/api/activity-logs', activityLogRoutes);
 app.use('/api/committee', committeeRoutes);
+app.use('/api/event-label', eventLabelRoutes);
+app.use('/api/lock-settings', lockSettingsRoutes);
 
 // Health check endpoint
 app.get('/', (req, res) => {
