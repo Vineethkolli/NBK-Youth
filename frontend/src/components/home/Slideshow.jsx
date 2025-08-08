@@ -40,33 +40,46 @@ function Slideshow({ isEditing }) {
   }, [slides, currentSlide]);
 
   // Auto-advance logic
-  useEffect(() => {
-    let timeout;
-    const slide = slides[currentSlide];
-    if (!slide || isEditingOrder) return;
+useEffect(() => {
+  let timeout;
+  const slide = slides[currentSlide];
+  if (!slide || isEditingOrder) return;
 
-    if (!isEditing) {
-      if (slide.type === 'image') {
-        timeout = setTimeout(nextSlide, 3000);
-      } else if (slide.type === 'video') {
-        const video = videoRef.current;
-        if (video) {
-          video.muted = isMuted;
-          video.autoplay = true;
-          video.playsInline = true;
-          video.play().catch(() => {});
-          video.onended = nextSlide;
-        }
+  if (!isEditing) {
+    if (slide.type === 'image') {
+      timeout = setTimeout(nextSlide, 3000);
+    } else if (slide.type === 'video') {
+      const video = videoRef.current;
+      if (video) {
+        video.autoplay = true;
+        video.playsInline = true;
+
+        // Try autoplay with sound first
+        video.muted = false;
+        video.play()
+          .then(() => {
+            setIsMuted(false); // Update UI
+          })
+          .catch(() => {
+            // If blocked, fallback to muted autoplay
+            video.muted = true;
+            setIsMuted(true);
+            video.play().catch(() => {});
+          });
+
+        video.onended = nextSlide;
       }
     }
+  }
 
-    return () => {
-      clearTimeout(timeout);
-      if (videoRef.current) {
-        videoRef.current.onended = null;
-      }
-    };
-  }, [currentSlide, slides, isEditing, isMuted, isEditingOrder]);
+  return () => {
+    clearTimeout(timeout);
+    if (videoRef.current) {
+      videoRef.current.onended = null;
+    }
+  };
+}, [currentSlide, slides, isEditing, isEditingOrder]);
+
 
   async function fetchSlides() {
     try {
