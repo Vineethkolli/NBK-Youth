@@ -13,18 +13,19 @@ function Slideshow({ isEditing }) {
   const [isDeleting, setIsDeleting] = useState(null);
   const [isEditingOrder, setIsEditingOrder] = useState(false);
 
-  // Playback state
   const [isMuted, setIsMuted] = useState(true);
   const [isPlaying, setIsPlaying] = useState(true);
 
   const videoRef = useRef(null);
+  const pauseTimeoutRef = useRef(null);
 
   // Touch tracking
   const touchStartX = useRef(0);
   const touchStartY = useRef(0);
   const touchEndX = useRef(0);
   const swipeThreshold = 50;
-  const tapThreshold = 10; // px movement allowed for tap
+  const tapThreshold = 10;
+
   const { user } = useAuth();
 
   useEffect(() => {
@@ -39,47 +40,59 @@ function Slideshow({ isEditing }) {
     }
   }, [slides, currentSlide]);
 
-  // Auto-advance logic
-useEffect(() => {
-  let timeout;
-  const slide = slides[currentSlide];
-  if (!slide || isEditingOrder) return;
+  // Auto-advance logic with autoplay sound fallback
+  useEffect(() => {
+    let timeout;
+    const slide = slides[currentSlide];
+    if (!slide || isEditingOrder) return;
 
-  if (!isEditing) {
-    if (slide.type === 'image') {
-      timeout = setTimeout(nextSlide, 3000);
-    } else if (slide.type === 'video') {
-      const video = videoRef.current;
-      if (video) {
-        video.autoplay = true;
-        video.playsInline = true;
+    if (!isEditing) {
+      if (slide.type === 'image') {
+        timeout = setTimeout(nextSlide, 3000);
+      } else if (slide.type === 'video') {
+        const video = videoRef.current;
+        if (video) {
+          video.autoplay = true;
+          video.playsInline = true;
 
-        // Try autoplay with sound first
-        video.muted = false;
-        video.play()
-          .then(() => {
-            setIsMuted(false); // Update UI
-          })
-          .catch(() => {
-            // If blocked, fallback to muted autoplay
-            video.muted = true;
-            setIsMuted(true);
-            video.play().catch(() => {});
-          });
+          // Try autoplay with sound first
+          video.muted = false;
+          video.play()
+            .then(() => setIsMuted(false))
+            .catch(() => {
+              video.muted = true;
+              setIsMuted(true);
+              video.play().catch(() => {});
+            });
 
-        video.onended = nextSlide;
+          video.onended = nextSlide;
+
+          // Desktop + mobile pause detection
+          video.onpause = () => {
+            if (!video.ended) {
+              clearTimeout(pauseTimeoutRef.current);
+              pauseTimeoutRef.current = setTimeout(() => {
+                nextSlide();
+              }, 3000);
+            }
+          };
+          video.onplay = () => {
+            clearTimeout(pauseTimeoutRef.current);
+          };
+        }
       }
     }
-  }
 
-  return () => {
-    clearTimeout(timeout);
-    if (videoRef.current) {
-      videoRef.current.onended = null;
-    }
-  };
-}, [currentSlide, slides, isEditing, isEditingOrder]);
-
+    return () => {
+      clearTimeout(timeout);
+      clearTimeout(pauseTimeoutRef.current);
+      if (videoRef.current) {
+        videoRef.current.onended = null;
+        videoRef.current.onpause = null;
+        videoRef.current.onplay = null;
+      }
+    };
+  }, [currentSlide, slides, isEditing, isEditingOrder]);
 
   async function fetchSlides() {
     try {
@@ -138,7 +151,7 @@ useEffect(() => {
   const previousSlide = () =>
     setCurrentSlide(prev => (prev - 1 + slides.length) % slides.length);
 
-  // Touch handlers
+  // Touch handlers for mobile
   const handleTouchStart = e => {
     touchStartX.current = e.touches[0].clientX;
     touchStartY.current = e.touches[0].clientY;
@@ -149,24 +162,28 @@ useEffect(() => {
     touchEndX.current = e.touches[0].clientX;
   };
 
- const handleTouchEnd = (e) => {
-  // If user tapped a control button, ignore
-  if (e.target.closest('button')) return;
+  const handleTouchEnd = (e) => {
+    if (e.target.closest('button')) return;
 
-  const deltaX = touchStartX.current - touchEndX.current;
+    const deltaX = touchStartX.current - touchEndX.current;
 
-  if (Math.abs(deltaX) < tapThreshold) {
-    const slide = slides[currentSlide];
-    if (slide.type === 'video') {
-      togglePlay();
+    if (Math.abs(deltaX) < tapThreshold) {
+      const slide = slides[currentSlide];
+      if (slide.type === 'video') togglePlay();
+      return;
     }
-    return;
-  }
 
-  if (Math.abs(deltaX) > swipeThreshold) {
-    deltaX > 0 ? nextSlide() : previousSlide();
-  }
-};
+    if (Math.abs(deltaX) > swipeThreshold) {
+      deltaX > 0 ? nextSlide() : previousSlide();
+    }
+  };
+
+  // Click handler for desktop pause/play toggle
+  const handleClick = (e) => {
+    if (e.target.closest('button')) return;
+    const slide = slides[currentSlide];
+    if (slide.type === 'video') togglePlay();
+  };
 
   const toggleMute = () => {
     setIsMuted(m => !m);
@@ -229,6 +246,7 @@ useEffect(() => {
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
+      onClick={handleClick} // Desktop click-to-pause/play
     >
       {slide.type === 'image' ? (
         <img
@@ -249,42 +267,36 @@ useEffect(() => {
         />
       )}
 
-{!isEditing && slide.type === 'video' && (
-  <div className="absolute bottom-3 right-3 flex space-x-2 bg-black/30 backdrop-blur-md p-1 rounded-full shadow-lg">
-    
-    {/* Mute Button */}
-    <button
-      onClick={(e) => {
-        e.stopPropagation();
-        toggleMute();
-      }}
-      className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-all duration-200 text-white shadow-md active:scale-95"
-    >
-      {isMuted ? (
-        <VolumeX className="h-5 w-5" strokeWidth={2.5} />
-      ) : (
-        <Volume2 className="h-5 w-5" strokeWidth={2.5} />
+      {!isEditing && slide.type === 'video' && (
+        <div className="absolute bottom-3 right-3 flex space-x-2 bg-black/30 backdrop-blur-md p-1 rounded-full shadow-lg">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleMute();
+            }}
+            className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-all duration-200 text-white shadow-md active:scale-95"
+          >
+            {isMuted ? (
+              <VolumeX className="h-5 w-5" strokeWidth={2.5} />
+            ) : (
+              <Volume2 className="h-5 w-5" strokeWidth={2.5} />
+            )}
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              togglePlay();
+            }}
+            className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-all duration-200 text-white shadow-md active:scale-95"
+          >
+            {isPlaying ? (
+              <Pause className="h-5 w-5" strokeWidth={2.5} />
+            ) : (
+              <Play className="h-5 w-5" strokeWidth={2.5} />
+            )}
+          </button>
+        </div>
       )}
-    </button>
-
-    {/* Play/Pause Button */}
-    <button
-      onClick={(e) => {
-        e.stopPropagation();
-        togglePlay();
-      }}
-      className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-all duration-200 text-white shadow-md active:scale-95"
-    >
-      {isPlaying ? (
-        <Pause className="h-5 w-5" strokeWidth={2.5} />
-      ) : (
-        <Play className="h-5 w-5" strokeWidth={2.5} />
-      )}
-    </button>
-
-  </div>
-)}
-
 
       {isEditing && (
         <div
@@ -315,7 +327,6 @@ useEffect(() => {
             <GripHorizontal className="h-4 w-4 mr-1" />
             {isEditingOrder ? 'Ordering...' : 'Reorder'}
           </button>
-
           <button
             onClick={() => handleDelete(slide._id)}
             className={`inline-flex items-center px-2 py-1 rounded-md shadow-sm bg-red-600 text-white ${isDeleting === currentSlide ? 'cursor-not-allowed opacity-50' : ''}`}
