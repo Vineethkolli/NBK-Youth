@@ -17,14 +17,7 @@ function Slideshow({ isEditing }) {
   const [isPlaying, setIsPlaying] = useState(true);
 
   const videoRef = useRef(null);
-  const pauseTimeoutRef = useRef(null);
-
-  // Touch tracking
-  const touchStartX = useRef(0);
-  const touchStartY = useRef(0);
-  const touchEndX = useRef(0);
-  const swipeThreshold = 50;
-  const tapThreshold = 10;
+  const pauseTimerRef = useRef(null);
 
   const { user } = useAuth();
 
@@ -40,7 +33,7 @@ function Slideshow({ isEditing }) {
     }
   }, [slides, currentSlide]);
 
-  // Auto-advance logic with autoplay sound fallback
+  // Auto-advance logic
   useEffect(() => {
     let timeout;
     const slide = slides[currentSlide];
@@ -55,7 +48,6 @@ function Slideshow({ isEditing }) {
           video.autoplay = true;
           video.playsInline = true;
 
-          // Try autoplay with sound first
           video.muted = false;
           video.play()
             .then(() => setIsMuted(false))
@@ -67,17 +59,16 @@ function Slideshow({ isEditing }) {
 
           video.onended = nextSlide;
 
-          // Desktop + mobile pause detection
+          // Pause detection for 3 sec -> move to next slide
           video.onpause = () => {
-            if (!video.ended) {
-              clearTimeout(pauseTimeoutRef.current);
-              pauseTimeoutRef.current = setTimeout(() => {
-                nextSlide();
-              }, 3000);
-            }
+            clearTimeout(pauseTimerRef.current);
+            pauseTimerRef.current = setTimeout(() => {
+              if (video.paused) nextSlide();
+            }, 3000);
           };
+
           video.onplay = () => {
-            clearTimeout(pauseTimeoutRef.current);
+            clearTimeout(pauseTimerRef.current);
           };
         }
       }
@@ -85,7 +76,7 @@ function Slideshow({ isEditing }) {
 
     return () => {
       clearTimeout(timeout);
-      clearTimeout(pauseTimeoutRef.current);
+      clearTimeout(pauseTimerRef.current);
       if (videoRef.current) {
         videoRef.current.onended = null;
         videoRef.current.onpause = null;
@@ -151,40 +142,6 @@ function Slideshow({ isEditing }) {
   const previousSlide = () =>
     setCurrentSlide(prev => (prev - 1 + slides.length) % slides.length);
 
-  // Touch handlers for mobile
-  const handleTouchStart = e => {
-    touchStartX.current = e.touches[0].clientX;
-    touchStartY.current = e.touches[0].clientY;
-    touchEndX.current = e.touches[0].clientX;
-  };
-
-  const handleTouchMove = e => {
-    touchEndX.current = e.touches[0].clientX;
-  };
-
-  const handleTouchEnd = (e) => {
-    if (e.target.closest('button')) return;
-
-    const deltaX = touchStartX.current - touchEndX.current;
-
-    if (Math.abs(deltaX) < tapThreshold) {
-      const slide = slides[currentSlide];
-      if (slide.type === 'video') togglePlay();
-      return;
-    }
-
-    if (Math.abs(deltaX) > swipeThreshold) {
-      deltaX > 0 ? nextSlide() : previousSlide();
-    }
-  };
-
-  // Click handler for desktop pause/play toggle
-  const handleClick = (e) => {
-    if (e.target.closest('button')) return;
-    const slide = slides[currentSlide];
-    if (slide.type === 'video') togglePlay();
-  };
-
   const toggleMute = () => {
     setIsMuted(m => !m);
     if (videoRef.current) {
@@ -241,13 +198,7 @@ function Slideshow({ isEditing }) {
   const slide = slides[currentSlide];
 
   return (
-    <div
-      className="relative h-96 bg-black rounded-lg overflow-hidden group"
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
-      onClick={handleClick} // Desktop click-to-pause/play
-    >
+    <div className="relative h-96 bg-black rounded-lg overflow-hidden group">
       {slide.type === 'image' ? (
         <img
           src={slide.url}
@@ -269,6 +220,7 @@ function Slideshow({ isEditing }) {
 
       {!isEditing && slide.type === 'video' && (
         <div className="absolute bottom-3 right-3 flex space-x-2 bg-black/30 backdrop-blur-md p-1 rounded-full shadow-lg">
+          {/* Mute Button */}
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -282,6 +234,8 @@ function Slideshow({ isEditing }) {
               <Volume2 className="h-5 w-5" strokeWidth={2.5} />
             )}
           </button>
+
+          {/* Play/Pause Button */}
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -299,12 +253,7 @@ function Slideshow({ isEditing }) {
       )}
 
       {isEditing && (
-        <div
-          className="absolute top-2 right-2 space-x-2"
-          onTouchStart={e => e.stopPropagation()}
-          onTouchMove={e => e.stopPropagation()}
-          onTouchEnd={e => e.stopPropagation()}
-        >
+        <div className="absolute top-2 right-2 space-x-2">
           <input
             type="file"
             accept="image/*,video/*"
