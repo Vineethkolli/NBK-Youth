@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Plus, Trash2, ArrowLeft, ArrowRight, Loader2, GripHorizontal } from 'lucide-react';
+import { Plus, Trash2, ArrowLeft, ArrowRight, Loader2, GripHorizontal, VolumeX, Volume2, Pause, Play } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { API_URL } from '../../utils/config';
@@ -13,18 +13,24 @@ function Slideshow({ isEditing }) {
   const [isDeleting, setIsDeleting] = useState(null);
   const [isEditingOrder, setIsEditingOrder] = useState(false);
 
+  // Playback state
+  const [isMuted, setIsMuted] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(true);
+
   const videoRef = useRef(null);
+
+  // Touch tracking
   const touchStartX = useRef(0);
+  const touchStartY = useRef(0);
   const touchEndX = useRef(0);
   const swipeThreshold = 50;
+  const tapThreshold = 10; // px movement allowed for tap
   const { user } = useAuth();
 
-  // Fetch slides on mount
   useEffect(() => {
     fetchSlides();
   }, []);
 
-  // Clamp currentSlide whenever slides change
   useEffect(() => {
     if (slides.length === 0) {
       setCurrentSlide(0);
@@ -36,9 +42,8 @@ function Slideshow({ isEditing }) {
   // Auto-advance logic
   useEffect(() => {
     let timeout;
-
     const slide = slides[currentSlide];
-    if (!slide) return;
+    if (!slide || isEditingOrder) return;
 
     if (!isEditing) {
       if (slide.type === 'image') {
@@ -46,7 +51,10 @@ function Slideshow({ isEditing }) {
       } else if (slide.type === 'video') {
         const video = videoRef.current;
         if (video) {
-          video.play();
+          video.muted = isMuted;
+          video.autoplay = true;
+          video.playsInline = true;
+          video.play().catch(() => {});
           video.onended = nextSlide;
         }
       }
@@ -58,13 +66,13 @@ function Slideshow({ isEditing }) {
         videoRef.current.onended = null;
       }
     };
-  }, [currentSlide, slides, isEditing]);
+  }, [currentSlide, slides, isEditing, isMuted, isEditingOrder]);
 
   async function fetchSlides() {
     try {
       const { data } = await axios.get(`${API_URL}/api/homepage/slides`);
       setSlides(data);
-    } catch (err) {
+    } catch {
       toast.error('Failed to fetch slides');
     }
   }
@@ -90,7 +98,7 @@ function Slideshow({ isEditing }) {
       });
       toast.success('Slide added successfully');
       await fetchSlides();
-    } catch (err) {
+    } catch {
       toast.error('Failed to upload slide');
     } finally {
       setIsUploading(false);
@@ -117,18 +125,57 @@ function Slideshow({ isEditing }) {
   const previousSlide = () =>
     setCurrentSlide(prev => (prev - 1 + slides.length) % slides.length);
 
-  const handleTouchStart = e =>
-    (touchStartX.current = e.touches[0].clientX);
-  const handleTouchMove = e =>
-    (touchEndX.current = e.touches[0].clientX);
-  const handleTouchEnd = () => {
-    const delta = touchStartX.current - touchEndX.current;
-    if (Math.abs(delta) > swipeThreshold) {
-      delta > 0 ? nextSlide() : previousSlide();
+  // Touch handlers
+  const handleTouchStart = e => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+    touchEndX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchMove = e => {
+    touchEndX.current = e.touches[0].clientX;
+  };
+
+ const handleTouchEnd = (e) => {
+  // If user tapped a control button, ignore
+  if (e.target.closest('button')) return;
+
+  const deltaX = touchStartX.current - touchEndX.current;
+
+  if (Math.abs(deltaX) < tapThreshold) {
+    const slide = slides[currentSlide];
+    if (slide.type === 'video') {
+      togglePlay();
+    }
+    return;
+  }
+
+  if (Math.abs(deltaX) > swipeThreshold) {
+    deltaX > 0 ? nextSlide() : previousSlide();
+  }
+};
+
+  const toggleMute = () => {
+    setIsMuted(m => !m);
+    if (videoRef.current) {
+      videoRef.current.muted = !videoRef.current.muted;
     }
   };
 
-  // No slides or loading state
+  const togglePlay = () => {
+    setIsPlaying(p => {
+      const video = videoRef.current;
+      if (video) {
+        if (p) {
+          video.pause();
+        } else {
+          video.play().catch(() => {});
+        }
+      }
+      return !p;
+    });
+  };
+
   if (slides.length === 0 || !slides[currentSlide]) {
     return (
       <div className="h-96 bg-gray-100 rounded-lg flex items-center justify-center">
@@ -181,20 +228,58 @@ function Slideshow({ isEditing }) {
           ref={videoRef}
           src={slide.url}
           className="w-full h-full object-cover"
+          muted={isMuted}
+          autoPlay={!isEditing}
+          loop={false}
+          playsInline
           controls={isEditing}
-          muted={false}
         />
       )}
 
+{!isEditing && slide.type === 'video' && (
+  <div className="absolute bottom-3 right-3 flex space-x-2 bg-black/30 backdrop-blur-md p-1 rounded-full shadow-lg">
+    
+    {/* Mute Button */}
+    <button
+      onClick={(e) => {
+        e.stopPropagation();
+        toggleMute();
+      }}
+      className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-all duration-200 text-white shadow-md active:scale-95"
+    >
+      {isMuted ? (
+        <VolumeX className="h-5 w-5" strokeWidth={2.5} />
+      ) : (
+        <Volume2 className="h-5 w-5" strokeWidth={2.5} />
+      )}
+    </button>
+
+    {/* Play/Pause Button */}
+    <button
+      onClick={(e) => {
+        e.stopPropagation();
+        togglePlay();
+      }}
+      className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-all duration-200 text-white shadow-md active:scale-95"
+    >
+      {isPlaying ? (
+        <Pause className="h-5 w-5" strokeWidth={2.5} />
+      ) : (
+        <Play className="h-5 w-5" strokeWidth={2.5} />
+      )}
+    </button>
+
+  </div>
+)}
+
+
       {isEditing && (
-        // <-- Added touch-stop-propagation here
         <div
           className="absolute top-2 right-2 space-x-2"
           onTouchStart={e => e.stopPropagation()}
           onTouchMove={e => e.stopPropagation()}
           onTouchEnd={e => e.stopPropagation()}
         >
-          
           <input
             type="file"
             accept="image/*,video/*"
@@ -205,26 +290,14 @@ function Slideshow({ isEditing }) {
           />
           <label
             htmlFor="slide-upload"
-            className={`inline-flex items-center px-2 py-1 rounded-md shadow-sm bg-white ${
-              isUploading
-                ? 'cursor-not-allowed opacity-50'
-                : 'cursor-pointer'
-            }`}
+            className={`inline-flex items-center px-2 py-1 rounded-md shadow-sm bg-white ${isUploading ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
           >
-            {isUploading ? (
-              <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-            ) : (
-              <Plus className="h-4 w-4 mr-1" />
-            )}
+            {isUploading ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Plus className="h-4 w-4 mr-1" />}
             {isUploading ? 'Adding...' : 'Add'}
           </label>
           <button
             onClick={() => setIsEditingOrder(!isEditingOrder)}
-            className={`inline-flex items-center px-2 py-1 rounded-md shadow-sm transition-colors ${
-              isEditingOrder
-                ? 'bg-blue-600 text-white hover:bg-blue-700'
-                : 'bg-white text-gray-800 hover:bg-gray-50'
-            }`}
+            className={`inline-flex items-center px-2 py-1 rounded-md shadow-sm transition-colors ${isEditingOrder ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-white text-gray-800 hover:bg-gray-50'}`}
           >
             <GripHorizontal className="h-4 w-4 mr-1" />
             {isEditingOrder ? 'Ordering...' : 'Reorder'}
@@ -232,21 +305,11 @@ function Slideshow({ isEditing }) {
 
           <button
             onClick={() => handleDelete(slide._id)}
-            className={`inline-flex items-center px-2 py-1 rounded-md shadow-sm bg-red-600 text-white ${
-              isDeleting === currentSlide
-                ? 'cursor-not-allowed opacity-50'
-                : ''
-            }`}
+            className={`inline-flex items-center px-2 py-1 rounded-md shadow-sm bg-red-600 text-white ${isDeleting === currentSlide ? 'cursor-not-allowed opacity-50' : ''}`}
             disabled={isDeleting === currentSlide}
           >
-            {isDeleting === currentSlide ? (
-              <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-            ) : (
-              <Trash2 className="h-4 w-4 mr-1" />
-            )}
-            {isDeleting === currentSlide
-              ? 'Deleting...'
-              : 'Delete'}
+            {isDeleting === currentSlide ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Trash2 className="h-4 w-4 mr-1" />}
+            {isDeleting === currentSlide ? 'Deleting...' : 'Delete'}
           </button>
         </div>
       )}
@@ -281,11 +344,7 @@ function Slideshow({ isEditing }) {
             <button
               key={idx}
               onClick={() => setCurrentSlide(idx)}
-              className={`w-2 h-2 rounded-full ${
-                idx === currentSlide
-                  ? 'bg-white'
-                  : 'bg-white/50'
-              }`}
+              className={`w-2 h-2 rounded-full ${idx === currentSlide ? 'bg-white' : 'bg-white/50'}`}
             />
           ))}
         </div>
