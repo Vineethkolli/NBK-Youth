@@ -13,12 +13,17 @@ function Slideshow({ isEditing }) {
   const [isDeleting, setIsDeleting] = useState(null);
   const [isEditingOrder, setIsEditingOrder] = useState(false);
 
+  // Playback state
   const [isMuted, setIsMuted] = useState(true);
   const [isPlaying, setIsPlaying] = useState(true);
 
   const videoRef = useRef(null);
-  const pauseTimerRef = useRef(null);
 
+  // Touch tracking
+  const touchStartX = useRef(0);
+  const touchStartY = useRef(0);
+  const touchEndX = useRef(0);
+  const swipeThreshold = 50;
   const { user } = useAuth();
 
   useEffect(() => {
@@ -48,9 +53,13 @@ function Slideshow({ isEditing }) {
           video.autoplay = true;
           video.playsInline = true;
 
+          // Try autoplay with sound first
           video.muted = false;
           video.play()
-            .then(() => setIsMuted(false))
+            .then(() => {
+              setIsMuted(false);
+              setIsPlaying(true);
+            })
             .catch(() => {
               video.muted = true;
               setIsMuted(true);
@@ -59,16 +68,27 @@ function Slideshow({ isEditing }) {
 
           video.onended = nextSlide;
 
-          // Pause detection for 3 sec -> move to next slide
-          video.onpause = () => {
-            clearTimeout(pauseTimerRef.current);
-            pauseTimerRef.current = setTimeout(() => {
-              if (video.paused) nextSlide();
+          // Detect pause → change slide after 3s
+          const handlePause = () => {
+            setIsPlaying(false);
+            timeout = setTimeout(() => {
+              if (video.paused) {
+                nextSlide();
+              }
             }, 3000);
           };
 
-          video.onplay = () => {
-            clearTimeout(pauseTimerRef.current);
+          const handlePlay = () => {
+            setIsPlaying(true);
+            clearTimeout(timeout);
+          };
+
+          video.addEventListener('pause', handlePause);
+          video.addEventListener('play', handlePlay);
+
+          return () => {
+            video.removeEventListener('pause', handlePause);
+            video.removeEventListener('play', handlePlay);
           };
         }
       }
@@ -76,11 +96,8 @@ function Slideshow({ isEditing }) {
 
     return () => {
       clearTimeout(timeout);
-      clearTimeout(pauseTimerRef.current);
       if (videoRef.current) {
         videoRef.current.onended = null;
-        videoRef.current.onpause = null;
-        videoRef.current.onplay = null;
       }
     };
   }, [currentSlide, slides, isEditing, isEditingOrder]);
@@ -142,6 +159,25 @@ function Slideshow({ isEditing }) {
   const previousSlide = () =>
     setCurrentSlide(prev => (prev - 1 + slides.length) % slides.length);
 
+  // Touch handlers
+  const handleTouchStart = e => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+    touchEndX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchMove = e => {
+    touchEndX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = () => {
+    const deltaX = touchStartX.current - touchEndX.current;
+
+    if (Math.abs(deltaX) > swipeThreshold) {
+      deltaX > 0 ? nextSlide() : previousSlide();
+    }
+  };
+
   const toggleMute = () => {
     setIsMuted(m => !m);
     if (videoRef.current) {
@@ -198,7 +234,12 @@ function Slideshow({ isEditing }) {
   const slide = slides[currentSlide];
 
   return (
-    <div className="relative h-96 bg-black rounded-lg overflow-hidden group">
+    <div
+      className="relative h-96 bg-black rounded-lg overflow-hidden group"
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+    >
       {slide.type === 'image' ? (
         <img
           src={slide.url}
@@ -253,7 +294,12 @@ function Slideshow({ isEditing }) {
       )}
 
       {isEditing && (
-        <div className="absolute top-2 right-2 space-x-2">
+        <div
+          className="absolute top-2 right-2 space-x-2"
+          onTouchStart={e => e.stopPropagation()}
+          onTouchMove={e => e.stopPropagation()}
+          onTouchEnd={e => e.stopPropagation()}
+        >
           <input
             type="file"
             accept="image/*,video/*"
@@ -276,6 +322,7 @@ function Slideshow({ isEditing }) {
             <GripHorizontal className="h-4 w-4 mr-1" />
             {isEditingOrder ? 'Ordering...' : 'Reorder'}
           </button>
+
           <button
             onClick={() => handleDelete(slide._id)}
             className={`inline-flex items-center px-2 py-1 rounded-md shadow-sm bg-red-600 text-white ${isDeleting === currentSlide ? 'cursor-not-allowed opacity-50' : ''}`}
