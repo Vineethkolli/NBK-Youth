@@ -2,7 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import { useAuth } from '../../context/AuthContext';
 import { Bell } from 'lucide-react';
-import { getSubscription, subscribeToPush, isIos, isInStandaloneMode, registerServiceWorker } from '../../utils/notifications';
+import {
+  getSubscription,
+  subscribeToPush,
+  isIos,
+  isInStandaloneMode,
+  registerServiceWorker
+} from '../../utils/notifications';
 
 const NotificationSettings = () => {
   const { user } = useAuth();
@@ -11,7 +17,7 @@ const NotificationSettings = () => {
   const [showResetPrompt, setShowResetPrompt] = useState(false);
 
   useEffect(() => {
-    // On iOS, only register service worker if in standalone mode (added to homescreen)
+    // Skip service worker registration if iOS not in standalone mode
     if (isIos() && !isInStandaloneMode()) return;
 
     registerServiceWorker()
@@ -28,6 +34,7 @@ const NotificationSettings = () => {
         setShowResetPrompt(true);
         throw new Error('Permission denied');
       }
+
       setShowResetPrompt(false);
 
       const sub = await subscribeToPush(user?.registerId);
@@ -38,24 +45,23 @@ const NotificationSettings = () => {
     }
   };
 
-  // If on iOS and NOT in standalone mode (not added to homescreen), show install instructions
+  // Show iOS install prompt if not standalone
   if (isIos() && !isInStandaloneMode()) {
     return (
       <div className="bg-white rounded-lg shadow p-6">
         <h3 className="text-lg font-medium mb-2">Add to Home Screen</h3>
         <p className="text-sm text-gray-500 mb-4">
-          To receive notifications and access the app easily, please add this website to your home screen.
+          To receive notifications, please add this app to your Home Screen:
         </p>
         <ol className="list-decimal list-inside text-sm text-gray-600">
-          <li>Tap the Share button <span role="img" aria-label="share">📤</span> in Safari's toolbar.</li>
-          <li>Scroll down and select "Add to Home Screen".</li>
-          <li>Confirm by tapping "Add" in the top-right corner.</li>
+          <li>Tap the Share button <span role="img" aria-label="share">📤</span> in Safari.</li>
+          <li>Select "Add to Home Screen".</li>
+          <li>Tap "Add" in the top-right corner.</li>
         </ol>
       </div>
     );
   }
 
-  // For other cases (including iOS in standalone mode), show notification permission UI
   return (
     <div className="bg-white rounded-lg shadow p-6 space-y-4">
       <div className="flex items-center justify-between">
@@ -66,7 +72,7 @@ const NotificationSettings = () => {
           </p>
           {showResetPrompt && (
             <p className="mt-2 text-sm text-red-600">
-              Notifications are blocked. Reset permissions by clearing the app data in your settings or clicking the info "i" icon near the URL bar.
+              Notifications are blocked. Reset permissions in your browser/app settings.
             </p>
           )}
         </div>
