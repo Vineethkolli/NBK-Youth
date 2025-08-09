@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { toast } from 'react-hot-toast';
+import { API_URL } from '../../utils/config';
+import { urlBase64ToUint8Array } from '../../utils/vapidKeys';
 import { useAuth } from '../../context/AuthContext';
 import { Bell } from 'lucide-react';
-import { getSubscription, subscribeToPush, registerServiceWorker } from '../../utils/notifications';
 
 // Helper function to detect iOS devices.
 const isIos = () => {
@@ -15,40 +17,7 @@ const isInStandaloneMode = () =>
   ('standalone' in window.navigator) && window.navigator.standalone;
 
 const NotificationSettings = () => {
-  const { user } = useAuth();
-  const [subscription, setSubscription] = useState(null);
-  const [permissionStatus, setPermissionStatus] = useState(Notification.permission);
-  const [showResetPrompt, setShowResetPrompt] = useState(false);
-
-  useEffect(() => {
-    // On iOS, only register service worker if in standalone mode
-    if (isIos() && !isInStandaloneMode()) return;
-
-    registerServiceWorker()
-      .then(() => getSubscription().then(setSubscription))
-      .catch((error) => console.error('Service Worker Error:', error));
-  }, []);
-
-  const askPermission = async () => {
-    try {
-      const permission = await Notification.requestPermission();
-      setPermissionStatus(permission);
-
-      if (permission !== 'granted') {
-        setShowResetPrompt(true);
-        throw new Error('Permission denied');
-      }
-      setShowResetPrompt(false);
-
-      const sub = await subscribeToPush(user?.registerId);
-      setSubscription(sub);
-      toast.success('Notifications enabled successfully');
-    } catch (error) {
-      toast.error('Failed to enable notifications: ' + error.message);
-    }
-  };
-
-  // If running on iOS browser (not standalone), prompt the user to install the app
+  // If running on iOS browser (not standalone), prompt the user to install the app.
   if (isIos() && !isInStandaloneMode()) {
     return (
       <div className="bg-white rounded-lg shadow p-6">
@@ -59,6 +28,77 @@ const NotificationSettings = () => {
       </div>
     );
   }
+
+  const { user } = useAuth();
+  const [subscription, setSubscription] = useState(null);
+  const [permissionStatus, setPermissionStatus] = useState(Notification.permission);
+  const [showResetPrompt, setShowResetPrompt] = useState(false);
+
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker
+        .register('/sw.js')
+        .then(registerServiceWorker)
+        .catch((error) => console.error('Service Worker Error:', error));
+    }
+    getSubscription();
+  }, []);
+
+  const registerServiceWorker = async (registration) => {
+    console.log('Service Worker registered:', registration);
+  };
+
+  const askPermission = async () => {
+    try {
+      const permissionResult = await Notification.requestPermission();
+      setPermissionStatus(permissionResult);
+      if (permissionResult !== 'granted') {
+        setShowResetPrompt(true);
+        throw new Error('Permission denied');
+      }
+      setShowResetPrompt(false);
+      await subscribeUser();
+    } catch (error) {
+      console.error('Permission error:', error);
+      toast.error('Failed to enable notifications: ' + error.message);
+    }
+  };
+
+  const subscribeUser = async () => {
+    try {
+      if (!user?.registerId) {
+        toast.error('User is not logged in or registerId is missing');
+        return;
+      }
+
+      const registration = await navigator.serviceWorker.ready;
+      const response = await axios.get(`${API_URL}/api/notifications/publicKey`);
+      const publicVapidKey = response.data.publicKey;
+      const convertedVapidKey = urlBase64ToUint8Array(publicVapidKey);
+
+      const subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: convertedVapidKey,
+      });
+
+      await axios.post(`${API_URL}/api/notifications/subscribe`, {
+        registerId: user.registerId,
+        subscription,
+      });
+
+      setSubscription(subscription);
+      toast.success('Notifications enabled successfully');
+    } catch (error) {
+      console.error('Subscription error:', error);
+      toast.error('Failed to subscribe for notifications');
+    }
+  };
+
+  const getSubscription = async () => {
+    const registration = await navigator.serviceWorker.ready;
+    const existingSubscription = await registration.pushManager.getSubscription();
+    setSubscription(existingSubscription);
+  };
 
   return (
     <div className="bg-white rounded-lg shadow p-6 space-y-4">
