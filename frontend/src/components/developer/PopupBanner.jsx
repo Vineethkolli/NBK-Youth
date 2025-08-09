@@ -83,23 +83,20 @@ function PopupBanner() {
     return null;
   }
 
-  const renderMessageWithLinks = (text) => {
-  if (typeof text !== "string") return null; // guard
-  return text.split(/(https?:\/\/[^\s]+)/g).map((part, idx) =>
-    /https?:\/\//.test(part) ? (
-      <button
-        key={idx}
-        onClick={() => window.open(part, '_blank')}
-        className="inline-flex items-center px-1 py-0.5 bg-blue-100 text-blue-600 rounded hover:bg-blue-200"
-      >
-        Open <ExternalLink className="w-4 h-4" />
-      </button>
-    ) : (
-      <span key={idx}>{part}</span>
-    )
-  );
-};
-
+  const renderMessageWithLinks = (text) =>
+    text.split(/(https?:\/\/[^\s]+)/g).map((part, idx) =>
+      /https?:\/\//.test(part) ? (
+        <button
+          key={idx}
+          onClick={() => window.open(part, '_blank')}
+          className="inline-flex items-center px-1 py-0.5 bg-blue-100 text-blue-600 rounded hover:bg-blue-200"
+        >
+          Open <ExternalLink className="w-4 h-4" />
+        </button>
+      ) : (
+        <span key={idx}>{part}</span>
+      )
+    );
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">

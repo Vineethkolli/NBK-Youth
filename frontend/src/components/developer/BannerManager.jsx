@@ -197,23 +197,20 @@ const videoInputRef = useRef(null);
   };
   
   // Render message text, replacing URLs with an "Open" button
-  const renderMessageWithLinks = (text) => {
-  if (!text) return null; // Prevent .split() on undefined
-  return text.split(/(https?:\/\/[^\s]+)/g).map((part, idx) =>
-    /https?:\/\//.test(part) ? (
-      <button
-        key={idx}
-        onClick={() => window.open(part, '_blank')}
-        className="inline-flex items-center px-1 py-0.5 bg-blue-100 text-blue-600 rounded hover:bg-blue-200"
-      >
-        Open <ExternalLink className="w-4 h-4 ml-1" />
-      </button>
-    ) : (
-      <span key={idx}>{part}</span>
-    )
-  );
-};
-
+  const renderMessageWithLinks = (text) =>
+    text.split(/(https?:\/\/[^\s]+)/g).map((part, idx) =>
+      /https?:\/\//.test(part) ? (
+        <button
+          key={idx}
+          onClick={() => window.open(part, '_blank')}
+          className="inline-flex items-center px-1 py-0.5 bg-blue-100 text-blue-600 rounded hover:bg-blue-200"
+        >
+          Open <ExternalLink className="w-4 h-4 ml-1" />
+        </button>
+      ) : (
+        <span key={idx}>{part}</span>
+      )
+    );
 
   const resetForm = () => {
     setFormData({
