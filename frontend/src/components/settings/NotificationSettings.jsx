@@ -2,13 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import { useAuth } from '../../context/AuthContext';
 import { Bell } from 'lucide-react';
-import {
-  getSubscription,
-  subscribeToPush,
-  isIos,
-  isInStandaloneMode,
-  registerServiceWorker
-} from '../../utils/notifications';
+import { getSubscription, subscribeToPush, registerServiceWorker } from '../../utils/notifications';
+
+// Helper function to detect iOS devices.
+const isIos = () => {
+  const userAgent = window.navigator.userAgent.toLowerCase();
+  return /iphone|ipad|ipod/.test(userAgent);
+};
+
+// Check if the app is running in standalone mode (PWA)
+const isInStandaloneMode = () =>
+  ('standalone' in window.navigator) && window.navigator.standalone;
 
 const NotificationSettings = () => {
   const { user } = useAuth();
@@ -17,7 +21,7 @@ const NotificationSettings = () => {
   const [showResetPrompt, setShowResetPrompt] = useState(false);
 
   useEffect(() => {
-    // Skip service worker registration if iOS not in standalone mode
+    // On iOS, only register service worker if in standalone mode
     if (isIos() && !isInStandaloneMode()) return;
 
     registerServiceWorker()
@@ -34,7 +38,6 @@ const NotificationSettings = () => {
         setShowResetPrompt(true);
         throw new Error('Permission denied');
       }
-
       setShowResetPrompt(false);
 
       const sub = await subscribeToPush(user?.registerId);
@@ -45,19 +48,14 @@ const NotificationSettings = () => {
     }
   };
 
-  // Show iOS install prompt if not standalone
+  // If running on iOS browser (not standalone), prompt the user to install the app
   if (isIos() && !isInStandaloneMode()) {
     return (
       <div className="bg-white rounded-lg shadow p-6">
-        <h3 className="text-lg font-medium mb-2">Add to Home Screen</h3>
-        <p className="text-sm text-gray-500 mb-4">
-          To receive notifications, please add this app to your Home Screen:
+        <h3 className="text-lg font-medium">Notifications Permission</h3>
+        <p className="text-sm text-gray-500">
+          To allow notifications, please download the app.
         </p>
-        <ol className="list-decimal list-inside text-sm text-gray-600">
-          <li>Tap the Share button <span role="img" aria-label="share">📤</span> in Safari.</li>
-          <li>Select "Add to Home Screen".</li>
-          <li>Tap "Add" in the top-right corner.</li>
-        </ol>
       </div>
     );
   }
@@ -68,11 +66,11 @@ const NotificationSettings = () => {
         <div>
           <h3 className="text-lg font-medium">Notifications Permission</h3>
           <p className="text-sm text-gray-500">
-            Click "Allow" to receive real-time updates.
+            Click "Allow Notifications" to receive real-time updates.
           </p>
           {showResetPrompt && (
             <p className="mt-2 text-sm text-red-600">
-              Notifications are blocked. Reset permissions in your browser/app settings.
+              Notifications are blocked. Reset permissions by clearing the app data in your settings or clicking the info "i" icon near the URL bar.
             </p>
           )}
         </div>
@@ -81,11 +79,11 @@ const NotificationSettings = () => {
             onClick={askPermission}
             className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
           >
-            <Bell className="mr-2 h-5 w-5" /> Allow
+            <Bell className="mr-2 h-5 w-5" /> Allow Notifications
           </button>
         ) : (
           <div className="flex items-center text-green-600">
-            <Bell className="mr-2 h-5 w-5" /> Allowed
+            <Bell className="mr-2 h-5 w-5" /> Notifications Allowed
           </div>
         )}
       </div>
