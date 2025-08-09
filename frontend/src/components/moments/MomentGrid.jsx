@@ -10,7 +10,6 @@ function MomentGrid({ moments, isEditMode, onDelete, onTogglePin, onUpdateTitle 
 
   const [editingTitleId, setEditingTitleId] = useState(null);
   const [tempTitle, setTempTitle] = useState('');
-  const [deletingId, setDeletingId] = useState(null);
 
   const handleEditTitle = (id, currentTitle) => {
     setEditingTitleId(id);
@@ -20,12 +19,6 @@ function MomentGrid({ moments, isEditMode, onDelete, onTogglePin, onUpdateTitle 
   const handleSaveTitle = (id) => {
     onUpdateTitle(id, tempTitle);
     setEditingTitleId(null);
-  };
-
-  const handleDeleteClick = async (id) => {
-    setDeletingId(id);
-    await onDelete(id);
-    setTimeout(() => setDeletingId(null), 600); // block for 0.6s for feedback
   };
 
   return (
@@ -58,10 +51,8 @@ function MomentGrid({ moments, isEditMode, onDelete, onTogglePin, onUpdateTitle 
                   <Pin className="h-4 w-4" />
                 </button>
                 <button
-                  onClick={() => handleDeleteClick(moment._id)}
-                  className={`p-1 bg-red-600 text-white rounded-full hover:bg-red-700 transition-colors ${deletingId === moment._id ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  disabled={deletingId === moment._id}
-                  style={deletingId === moment._id ? { pointerEvents: 'none', opacity: 0.5 } : {}}
+                  onClick={() => onDelete(moment._id)}
+                  className="p-1 bg-red-600 text-white rounded-full hover:bg-red-700 transition-colors"
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>

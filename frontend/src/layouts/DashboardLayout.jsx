@@ -5,7 +5,6 @@ import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
 import InstallApp from '../components/home/InstallApp';
 import NotificationPrompt from '../components/home/NotificationPrompt';
-import NotificationAutoRegister from '../components/notifications/NotificationAutoRegister';
 
 function DashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -46,8 +45,6 @@ function DashboardLayout() {
       {/* Overlay Install Prompt */}
       <InstallApp />
       <NotificationPrompt />
-      <NotificationAutoRegister />
-
       <Header toggleSidebar={toggleSidebar} />
       <Sidebar isOpen={sidebarOpen} onNavigate={closeSidebar} />
 

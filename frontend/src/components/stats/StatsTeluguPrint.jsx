@@ -1,10 +1,8 @@
 import React, { useRef } from 'react';
 import { Printer } from 'lucide-react';
-import { useEventLabel } from '../../context/EventLabelContext';
 
 const StatsPrint = ({ stats }) => {
   const printRef = useRef();
-  const { eventLabel } = useEventLabel();
 
 const formatAmount = (amount) =>
   `<span translate="no">${new Intl.NumberFormat('en-IN', {
@@ -32,9 +30,6 @@ const displayAmountWithShortage = (amount) =>
     `);
     printWindow.document.write('</head><body>');
     printWindow.document.write('<h2><span translate="no">NBK యూత్ స్టాటిస్టిక్స్ రిపోర్ట్</span></h2>');
-    if (eventLabel) {
-      printWindow.document.write(`<div style="text-align: center; margin-bottom: 15px; color: #666; font-size: 14px;"><span translate="no">${eventLabel.label}</span></div>`);
-    }
     printWindow.document.write(content);
     printWindow.document.write('</body></html>');
     printWindow.document.close();

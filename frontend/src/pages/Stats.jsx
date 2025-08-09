@@ -8,14 +8,10 @@ import Footer from '../components/Footer';
 import TeluguPrint from '../components/stats/StatsTeluguPrint';
 import EnglishPrint from '../components/stats/StatsEnglishPrint';
 import { useLanguage } from '../context/LanguageContext';
-import EventLabelDisplay from '../components/common/EventLabelDisplay';
-import LockIndicator from '../components/common/LockIndicator';
-import { useLockSettings } from '../context/LockContext';
 
 function Stats() {
   const { user } = useAuth();
   const { language } = useLanguage();
-    const { lockSettings } = useLockSettings(); 
   const PrintComponent = language === 'te' ? TeluguPrint : EnglishPrint;
   const [stats, setStats] = useState({
     budgetStats: {
@@ -97,21 +93,11 @@ function Stats() {
 
   return (
     <div className="space-y-6">
-      {/* Header block */}
-      <div className="space-y-2">
-        <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-semibold">Statistics</h1>
-          <PrintComponent stats={stats} />
-        </div>
-
-        {/* Lock + Event Label row */}
-        <div className="flex items-center">
-          <LockIndicator />
-          <EventLabelDisplay />
-        </div>
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-semibold">Statistics</h1>
+        <PrintComponent stats={stats} />
       </div>
 
-      {/* Content */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Budget Stats */}
         <div className="bg-white rounded-lg shadow p-6">
@@ -160,7 +146,6 @@ function Stats() {
                   {formatAmount(stats.budgetStats.totalExpenses.amount)}
                 </p>
               </div>
-              {/* Previous Year Amount */}
               <div>
                 <p className="font-semibold">Previous Year Amount</p>
                 {(user?.role === 'developer' || user?.role === 'financier') && isEditingPreviousYear ? (
@@ -170,20 +155,16 @@ function Stats() {
                       value={previousYearAmount}
                       onChange={(e) => setPreviousYearAmount(Number(e.target.value))}
                       className="w-full rounded border-gray-300"
-                      disabled={lockSettings.isLocked}
                     />
                     <button
                       onClick={handlePreviousYearUpdate}
-                      className={`px-2 py-1 bg-green-500 text-white rounded ${
-                        lockSettings.isLocked ? 'opacity-100 cursor-not-allowed' : ''
-                      }`}
-                      disabled={lockSettings.isLocked}
+                      className="px-2 py-1 bg-green-500 text-white rounded"
                     >
                       Save
                     </button>
                   </div>
                 ) : (
-                  <div className={`flex items-center space-x-2 ${lockSettings.isLocked ? ' pointer-events-none' : ''}`}>
+                  <div className="flex items-center space-x-2">
                     <p className="text-lg font-bold">
                       {formatAmount(stats.budgetStats.previousYearAmount.amount)}
                     </p>
@@ -191,7 +172,6 @@ function Stats() {
                       <button
                         onClick={() => setIsEditingPreviousYear(true)}
                         className="text-gray-500 hover:text-gray-700"
-                        disabled={lockSettings.isLocked}
                       >
                         <Edit2 className="h-4 w-4" />
                       </button>
