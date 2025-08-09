@@ -13,8 +13,10 @@ function CollectionManager({ collections, onUpdate, isEditMode, onEditModeToggle
   const [formData, setFormData] = useState({
     name: '',
     collectionId: '',
-    file: null
+    file: null,
+    filePreview: null
   });
+  const [fileInputKey, setFileInputKey] = useState(Date.now());
 
   const isPrivilegedUser = ['developer', 'financier', 'admin'].includes(user?.role);
 
@@ -36,27 +38,29 @@ function CollectionManager({ collections, onUpdate, isEditMode, onEditModeToggle
     if (!formData.file || isUploading) return;
 
     setIsUploading(true);
-    const reader = new FileReader();
-    reader.readAsDataURL(formData.file);
-    reader.onload = async () => {
-      try {
-        await axios.post(
-          `${API_URL}/api/collections/${formData.collectionId}/songs`,
-          {
-            name: formData.name,
-            file: reader.result
-          }
-        );
-        toast.success('Song uploaded successfully');
-        setShowUploadSong(false);
-        setFormData({ name: '', collectionId: '', file: null });
-        onUpdate();
-      } catch (error) {
-        toast.error('Failed to upload song');
-      } finally {
-        setIsUploading(false);
-      }
-    };
+    const data = new FormData();
+    data.append('name', formData.name);
+    data.append('file', formData.file);
+
+    try {
+      await axios.post(
+        `${API_URL}/api/collections/${formData.collectionId}/songs`,
+        data,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+      toast.success('Song uploaded successfully');
+      setShowUploadSong(false);
+      setFormData({ name: '', collectionId: '', file: null });
+      onUpdate();
+    } catch (error) {
+      toast.error('Failed to upload song');
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   return (
@@ -80,7 +84,11 @@ function CollectionManager({ collections, onUpdate, isEditMode, onEditModeToggle
             </button>
           
             <button
-              onClick={() => setShowUploadSong(true)}
+              onClick={() => {
+                setFormData({ name: '', collectionId: '', file: null, filePreview: null });
+                setFileInputKey(Date.now());
+                setShowUploadSong(true);
+              }}
               className="btn-primary"
               disabled={isUploading}
             >
@@ -124,7 +132,11 @@ function CollectionManager({ collections, onUpdate, isEditMode, onEditModeToggle
           <div className="bg-white rounded-lg p-6 w-96">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-medium">Upload Song</h3>
-              <button onClick={() => setShowUploadSong(false)}>
+              <button onClick={() => {
+                setShowUploadSong(false);
+                setFormData({ name: '', collectionId: '', file: null, filePreview: null });
+                setFileInputKey(Date.now());
+              }}>
                 <X className="h-6 w-6" />
               </button>
             </div>
@@ -151,12 +163,38 @@ function CollectionManager({ collections, onUpdate, isEditMode, onEditModeToggle
                 className="w-full border rounded-md p-2 mb-4"
               />
               <input
+                key={fileInputKey}
                 type="file"
                 required
                 accept="audio/*"
-                onChange={(e) => setFormData({ ...formData, file: e.target.files[0] })}
-                className="w-full mb-4"
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  setFormData(f => ({
+                    ...f,
+                    file,
+                    filePreview: file ? URL.createObjectURL(file) : null
+                  }));
+                }}
+                className="w-full mb-2"
               />
+              {formData.filePreview && (
+                <div className="mb-4 relative">
+                  <audio controls src={formData.filePreview} className="w-full">
+                    Your browser does not support the audio element.
+                  </audio>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setFormData(f => ({ ...f, file: null, filePreview: null, name: '' }));
+                      setFileInputKey(Date.now());
+                    }}
+                    className="absolute top-0 right-0 bg-black bg-opacity-50 text-white p-1 rounded-full"
+                    title="Remove audio"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              )}
               <button 
                 type="submit" 
                 className="btn-primary w-full"

@@ -14,18 +14,31 @@ function ExpenseSection({ refreshStats }) {
     sortField: 'presentAmount',
     sortOrder: ''
   });
-  const [expenseColumns, setExpenseColumns] = useState({
-    sno: true,
-    purpose: true,
-    previousAmount: false,
-    presentAmount: true,
-    others: false
-  });
+
+const { user } = useAuth(); // Moved above the state
+
+const [expenseColumns, setExpenseColumns] = useState({
+  sno: true,
+  registerId: false, // Default to false
+  purpose: true,
+  previousAmount: false,
+  presentAmount: true,
+  others: false,
+});
+
+useEffect(() => {
+  if (user?.role && ['developer', 'financier', 'admin'].includes(user.role)) {
+    setExpenseColumns(prev => ({
+      ...prev,
+      registerId: false,
+    }));
+  }
+}, [user?.role]);
+
 
   const [showForm, setShowForm] = useState(false);
   const [formMode, setFormMode] = useState('add'); 
   const [currentRecord, setCurrentRecord] = useState(null);
-    const { user } = useAuth();
 
   useEffect(() => {
     fetchExpenses();
@@ -82,11 +95,13 @@ function ExpenseSection({ refreshStats }) {
 
   const handleFormSubmit = async (formData) => {
     try {
+      // Always send registerId
+      const payload = { ...formData, registerId: user.registerId };
       if (formMode === 'add') {
-        const { data } = await axios.post(`${API_URL}/api/estimation/expense`, formData);
+        const { data } = await axios.post(`${API_URL}/api/estimation/expense`, payload);
         setExpenses([data, ...expenses]);
       } else if (formMode === 'edit') {
-        const { data } = await axios.put(`${API_URL}/api/estimation/expense/${currentRecord._id}`, formData);
+        const { data } = await axios.put(`${API_URL}/api/estimation/expense/${currentRecord._id}`, payload);
         setExpenses(expenses.map(expense => expense._id === currentRecord._id ? data : expense));
       }
       setShowForm(false);
@@ -128,17 +143,31 @@ function ExpenseSection({ refreshStats }) {
         <div className="p-4 border-b">
           <h2 className="font-medium">Visible Columns</h2>
           <div className="mt-2 flex flex-wrap gap-2">
-            {Object.entries(expenseColumns).map(([column, isVisible]) => (
-              <label key={column} className="inline-flex items-center">
-                <input
-                  type="checkbox"
-                  checked={isVisible}
-                  onChange={() => setExpenseColumns({ ...expenseColumns, [column]: !isVisible })}
-                  className="form-checkbox"
-                />
-                <span className="ml-2 text-sm">{column}</span>
-              </label>
-            ))}
+           {Object.entries(expenseColumns).map(([column, isVisible]) => {
+  if (column === 'sno') return null; // Always hide 'sno' from the column filter
+
+  // Show registerId filter only to allowed roles
+  if (
+    column === 'registerId' &&
+    !['developer', 'financier', 'admin'].includes(user?.role)
+  ) {
+    return null;
+  }
+
+  return (
+    <label key={column} className="inline-flex items-center">
+      <input
+        type="checkbox"
+        checked={isVisible}
+        onChange={() =>
+          setExpenseColumns({ ...expenseColumns, [column]: !isVisible })
+        }
+        className="form-checkbox"
+      />
+      <span className="ml-2 text-sm">{column}</span>
+    </label>
+  );
+})}
           </div>
         </div>
 

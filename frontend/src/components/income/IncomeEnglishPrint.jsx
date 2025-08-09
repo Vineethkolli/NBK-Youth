@@ -4,9 +4,11 @@ import autoTable from 'jspdf-autotable';
 import { Printer } from 'lucide-react';
 import { useHiddenProfiles } from '../../context/HiddenProfileContext';
 import { formatDateTime } from '../../utils/dateTime';
+import { useEventLabel } from '../../context/EventLabelContext';
 
 const IncomePrint = ({ incomes, visibleColumns, userRole }) => {
   const { hiddenProfiles } = useHiddenProfiles();
+  const { eventLabel } = useEventLabel();
 
   const handlePrint = () => {
     const doc = new jsPDF();
@@ -109,11 +111,17 @@ const IncomePrint = ({ incomes, visibleColumns, userRole }) => {
     doc.setFontSize(16);
     doc.text(title, 105, 15, { align: 'center' }); 
 
+    // Add event label if it exists
+    if (eventLabel) {
+      doc.setFontSize(12);
+      doc.setTextColor(100, 100, 100);
+      doc.text(eventLabel.label, 105, 22, { align: 'center' });
+    }
     // Generate PDF with the filtered columns and serial number
     autoTable(doc, {
       head: [headers],
       body: body,
-      startY: 25, 
+      startY: eventLabel ? 30 : 25, 
       margin: { top: 10 },
       didDrawPage: (data) => {
         // Footer with timestamp and page number

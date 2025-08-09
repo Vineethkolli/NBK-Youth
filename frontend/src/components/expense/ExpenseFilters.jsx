@@ -62,7 +62,6 @@ function ExpenseFilters({ filters, onChange }) {
         >
           <option value="">Verify Log</option>
           <option value="verified">Verified</option>
-          <option value="pending">Pending</option>
           <option value="not verified">Not Verified</option>
           <option value="rejected">Rejected</option>
         </select>
