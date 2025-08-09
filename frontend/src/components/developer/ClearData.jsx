@@ -7,7 +7,6 @@ import { API_URL } from '../../utils/config';
 function ClearData() {
   const [isConfirmVisible, setIsConfirmVisible] = useState(false);
   const [confirmAction, setConfirmAction] = useState('');
-  const [isClearing, setIsClearing] = useState(false);
 
   const openConfirmDialog = (type) => {
     setConfirmAction(type);
@@ -16,7 +15,6 @@ function ClearData() {
 
   // Handle final confirmation to clear data
   const handleConfirmClearData = async () => {
-    setIsClearing(true);
     try {
       await axios.delete(`${API_URL}/api/developer/clear/${confirmAction}`);
       toast.success(`${confirmAction} data cleared successfully`);
@@ -24,29 +22,26 @@ function ClearData() {
       toast.error(`Failed to clear ${confirmAction} data`);
     }
     closeDialog();
-    setIsClearing(false);
   };
 
   const closeDialog = () => {
     setIsConfirmVisible(false);
     setConfirmAction('');
-    setIsClearing(false);
   };
 
   return (
     <div className="bg-white rounded-lg shadow p-4">
       <h2 className="text-2xl font-semibold mb-4">Clear Data</h2>
       <div className="space-y-4">
-        { [
-          { name: 'Incomes', type: 'income' },
-          { name: 'Expenses', type: 'expense' },
-          { name: 'Estimated Incomes', type: 'estimatedIncome' },
-          { name: 'Estimated Expenses', type: 'estimatedExpense' },
-          { name: 'Notifications', type: 'notifications' },
+        {[
+          { name: 'Income', type: 'income' },
+          { name: 'Expense', type: 'expense' },
+          { name: 'Estimated Income', type: 'estimatedIncome' },
+          { name: 'Estimated Expense', type: 'estimatedExpense' },
+          { name: 'Notification', type: 'notifications' },
           { name: 'Events', type: 'events' },
-          { name: "Activities", type: 'letsPlay' },
-          { name: 'User Payments', type: 'payment' },
-          { name: 'Activity Logs', type: 'activityLog'},
+          { name: "Let's Play", type: 'letsPlay' },
+          { name: 'Activity Log', type: 'activityLog'},
         ].map(({ name, type, description }) => (
           <div key={type} className="flex items-center justify-between">
             <div>
@@ -58,10 +53,10 @@ function ClearData() {
               className="flex items-center px-4 py-2 text-red-600 hover:bg-red-50 rounded-md"
             >
               <Trash2 className="h-5 w-5 mr-2" />
-              Delete All {name}
+              Delete {name}
             </button>
           </div>
-        )) }
+        ))}
       </div>
 
       {/* Warning Section */}
@@ -87,23 +82,13 @@ function ClearData() {
             <div className="flex justify-end space-x-2">
               <button
                 onClick={handleConfirmClearData}
-                className={`px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 flex items-center ${isClearing ? 'opacity-50 cursor-not-allowed' : ''}`}
-                disabled={isClearing}
-                style={isClearing ? { pointerEvents: 'none', opacity: 0.5 } : {}}
+                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
               >
-                {isClearing && (
-                  <svg className="animate-spin h-5 w-5 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
-                  </svg>
-                )}
-                {isClearing ? 'Clearing...' : 'Confirm'}
+                Confirm
               </button>
               <button
                 onClick={closeDialog}
                 className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
-                disabled={isClearing}
-                style={isClearing ? { pointerEvents: 'none', opacity: 0.5 } : {}}
               >
                 Cancel
               </button>

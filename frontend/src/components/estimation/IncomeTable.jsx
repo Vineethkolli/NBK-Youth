@@ -17,9 +17,6 @@ function EstimatedIncomeTable({
                 S.No
               </th>
             )}
-            {visibleColumns.registerId && (
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Register ID</th>
-            )}
             {visibleColumns.name && (
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                 Name
@@ -62,9 +59,6 @@ function EstimatedIncomeTable({
                 <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">
                   {index + 1}
                 </td>
-              )}
-              {visibleColumns.registerId && (
-                <td className="px-6 py-4 whitespace-nowrap text-sm">{income.registerId}</td>
               )}
               {visibleColumns.name && (
                 <td className="px-6 py-4 whitespace-nowrap text-sm">

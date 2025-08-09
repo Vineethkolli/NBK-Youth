@@ -29,8 +29,6 @@ import { HiddenProfileProvider } from './context/HiddenProfileContext';
 import { LanguageProvider } from './context/LanguageContext';
 import { MaintenanceModeProvider, useMaintenanceMode } from './context/MaintenanceModeContext';
 import { MusicProvider } from './context/MusicContext';
-import { EventLabelProvider } from './context/EventLabelContext';
-import { LockProvider } from './context/LockContext';
 import FloatingMusicIcon from './components/vibe/FloatingMusicIcon';
 import TechStack from './pages/TechStack'
 import PopupBanner from './components/developer/PopupBanner';
@@ -108,15 +106,11 @@ function App() {
       <LanguageProvider>
         <HiddenProfileProvider>
           <MaintenanceModeProvider>
-            <EventLabelProvider>
-              <LockProvider>
-                <MusicProvider>
-                  <Router>
-                    <AppContent />
-                  </Router>
-                </MusicProvider>
-              </LockProvider>
-            </EventLabelProvider>
+            <MusicProvider>
+              <Router>
+                <AppContent />
+              </Router>
+            </MusicProvider>
           </MaintenanceModeProvider>
         </HiddenProfileProvider>
       </LanguageProvider>

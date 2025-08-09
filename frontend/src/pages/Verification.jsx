@@ -5,13 +5,9 @@ import axios from 'axios';
 import VerificationTable from '../components/verification/VerificationTable';
 import VerificationFilters from '../components/verification/VerificationFilters';
 import { API_URL } from '../utils/config';
-import EventLabelDisplay from '../components/common/EventLabelDisplay';
-import LockIndicator from '../components/common/LockIndicator';
-import { useLockSettings } from '../context/LockContext';
 
 function Verification() {
   const { user } = useAuth();
-  const { lockSettings } = useLockSettings();
   const [activeTab, setActiveTab] = useState('income');
   const [incomeData, setIncomeData] = useState([]);
   const [expenseData, setExpenseData] = useState([]);
@@ -96,56 +92,50 @@ function Verification() {
 
   return (
     <div className="space-y-6">
-      {/* Title and Lock Indicator */}
-      {/* Top row: heading left, buttons right */}<div className="space-y-2">
-  {/* Container for heading + tabs */}
-  <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-    <h1 className="text-2xl font-semibold mb-2 lg:mb-0">Verification Management</h1>
-      {/* Lock indicator and event label below */}
-  <div className="flex items-center mb-6 lg:mb-0">
-  <LockIndicator />
-  <EventLabelDisplay />
-</div>
-
-    
-    {/* Tabs container */}
-    <div className="flex space-x-6 ">
-      {['income', 'expense', 'payment'].map((tab) => (
-        <button
-          key={tab}
-          onClick={() => setActiveTab(tab)}
-          className={`px-4 py-2 rounded-md font-semibold ${
-            activeTab === tab
-              ? 'bg-indigo-600 text-white'
-              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-          }`}
-        >
-          {tab.charAt(0).toUpperCase() + tab.slice(1)}
-        </button>
-      ))}
-    </div>
-  </div>
-</div>
-
-      {/* Filters */}
-      <div className="my-4">
-        <VerificationFilters filters={filters} onChange={setFilters} />
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-semibold">Verification Management</h1>
+        <div className="space-x-2">
+          <button
+            onClick={() => setActiveTab('income')}
+            className={`px-4 py-2 rounded-md ${
+              activeTab === 'income'
+                ? 'bg-indigo-600 text-white'
+                : 'bg-gray-200 text-gray-700'
+            }`}
+          >
+            Income
+          </button>
+          <button
+            onClick={() => setActiveTab('expense')}
+            className={`px-4 py-2 rounded-md ${
+              activeTab === 'expense'
+                ? 'bg-indigo-600 text-white'
+                : 'bg-gray-200 text-gray-700'
+            }`}
+          >
+            Expense
+          </button>
+          <button
+            onClick={() => setActiveTab('payment')}
+            className={`px-4 py-2 rounded-md ${
+              activeTab === 'payment'
+                ? 'bg-indigo-600 text-white'
+                : 'bg-gray-200 text-gray-700'
+            }`}
+          >
+            Payment
+          </button>
+        </div>
       </div>
 
-      {/* Data Table */}
+      <VerificationFilters filters={filters} onChange={setFilters} />
+
       <div className="bg-white rounded-lg shadow">
         <VerificationTable
-          data={
-            activeTab === 'income'
-              ? incomeData
-              : activeTab === 'expense'
-              ? expenseData
-              : paymentData
-          }
+          data={activeTab === 'income' ? incomeData : activeTab === 'expense' ? expenseData : paymentData}
           type={activeTab}
           onVerifyLogUpdate={handleVerifyLogUpdate}
           onUpdatePayment={handleUpdatePayment}
-          isLocked={lockSettings.isLocked} // pass isLocked prop here
         />
       </div>
     </div>

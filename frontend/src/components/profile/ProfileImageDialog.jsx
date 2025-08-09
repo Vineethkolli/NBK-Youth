@@ -1,13 +1,10 @@
 import { useState } from 'react';
 import { X, Upload, Camera, Trash2 } from 'lucide-react';
 
-
 function ProfileImageDialog({ image, onClose, onUpload }) {
   const [isUploading, setIsUploading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
-  const [previewUrl, setPreviewUrl] = useState(null);
-  const [fileInputKey, setFileInputKey] = useState(Date.now());
 
   const handleFileSelect = (e) => {
     const file = e.target.files[0];
@@ -18,14 +15,17 @@ function ProfileImageDialog({ image, onClose, onUpload }) {
       return;
     }
 
-    // Validate file size (15MB)
+    // Validate file size (5MB)
     if (file.size > 15 * 1024 * 1024) {
       alert('Please upload an image less than 15MB');
       return;
     }
 
-    setSelectedImage(file);
-    setPreviewUrl(URL.createObjectURL(file));
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => {
+      setSelectedImage(reader.result);
+    };
   };
 
   const handleUpload = async () => {
@@ -33,9 +33,7 @@ function ProfileImageDialog({ image, onClose, onUpload }) {
 
     setIsUploading(true);
     try {
-      const data = new FormData();
-      data.append('image', selectedImage);
-      await onUpload(data);
+      await onUpload(selectedImage);
     } catch (error) {
       console.error('Error uploading image:', error);
       alert('Failed to upload image');
@@ -73,35 +71,14 @@ function ProfileImageDialog({ image, onClose, onUpload }) {
 
         <div className="space-y-4">
           <div className="aspect-square max-h-[400px] overflow-hidden rounded-lg relative">
-            {previewUrl || image ? (
+            {selectedImage || image ? (
               <>
-                {previewUrl ? (
-                  <div className="relative h-full w-full">
-                    <img
-                      src={previewUrl}
-                      alt="Profile Preview"
-                      className="w-full h-full object-contain"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSelectedImage(null);
-                        setPreviewUrl(null);
-                        setFileInputKey(Date.now());
-                      }}
-                      className="absolute top-2 right-2 bg-black bg-opacity-50 text-white p-1 rounded-full"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  </div>
-                ) : (
-                  <img
-                    src={image}
-                    alt="Profile"
-                    className="w-full h-full object-contain"
-                  />
-                )}
-                {image && !previewUrl && (
+                <img
+                  src={selectedImage || image}
+                  alt="Profile"
+                  className="w-full h-full object-contain"
+                />
+                {image && !selectedImage && (
                   <button
                     onClick={handleDelete}
                     disabled={isDeleting}
@@ -124,10 +101,9 @@ function ProfileImageDialog({ image, onClose, onUpload }) {
           </div>
 
           <div className="flex items-center space-x-4">
-            <div className="flex-1 relative">
+            <label className="flex-1">
               <span className="sr-only">Choose new image</span>
               <input
-                key={fileInputKey}
                 type="file"
                 accept="image/*"
                 onChange={handleFileSelect}
@@ -138,10 +114,9 @@ function ProfileImageDialog({ image, onClose, onUpload }) {
                   file:text-sm file:font-semibold
                   file:bg-indigo-50 file:text-indigo-700
                   hover:file:bg-indigo-100
-                  disabled:opacity-50 disabled:cursor-not-allowed pr-32"
-                style={{ zIndex: 2 }}
+                  disabled:opacity-50 disabled:cursor-not-allowed"
               />
-            </div>
+            </label>
 
             {selectedImage && (
               <button

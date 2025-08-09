@@ -2,11 +2,8 @@ import React from 'react';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { Printer } from 'lucide-react';
-import { useEventLabel } from '../../context/EventLabelContext';
 
 const StatsPrint = ({ stats }) => {
-  const { eventLabel } = useEventLabel();
-
   // Format numbers as per Indian numbering
   const formatAmount = (amount) => {
     return new Intl.NumberFormat('en-IN', {
@@ -52,17 +49,8 @@ const StatsPrint = ({ stats }) => {
     const xPos = (doc.internal.pageSize.width - titleWidth) / 2;
     doc.text(title, xPos, yPos);
 
-    yPos += 10;
+    yPos += 20;
 
-    // Add event label if it exists
-    if (eventLabel) {
-      doc.setFontSize(12);
-      doc.setTextColor(100, 100, 100);
-      doc.text(eventLabel.label, 105, yPos, { align: 'center' });
-      yPos += 15;
-    } else {
-      yPos += 10;
-    }
     // Estimation Overview
     doc.setFontSize(14);
     doc.setTextColor(0, 0, 0);

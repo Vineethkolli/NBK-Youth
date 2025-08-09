@@ -1,9 +1,8 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, X, ExternalLink} from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { API_URL } from '../../utils/config';
-
 
 function StatusToggle({ banner, onToggle }) {
   const isEnabled = banner.status === 'enabled';
@@ -32,16 +31,11 @@ export default function BannerManager() {
   const [showForm, setShowForm] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [deletingId, setDeletingId] = useState(null);
-const imageInputRef = useRef(null);
-const videoInputRef = useRef(null);
   const [formData, setFormData] = useState({
     title: '',
     message: '',
     image: '',
     video: '',
-    imageCloudinary: '',
-    videoCloudinary: '',
     status: 'disabled',
     periodicity: 1,
     duration: 0,
@@ -60,39 +54,19 @@ const videoInputRef = useRef(null);
     }
   };
 
-  const handleFileChange = (e, type) => {
+  const handleFileChange = async (e, type) => {
     const file = e.target.files[0];
     if (!file) return;
     if (file.size > 200 * 1024 * 1024) {
       toast.error('File size should be less than 200MB');
       return;
     }
-    // Only allow one of image or video at a time (including preview)
-    if ((type === 'image' && (formData.video || formData.videoPreview)) || (type === 'video' && (formData.image || formData.imagePreview))) {
-      toast.error('You can only select either an image or a video, not both.');
-      if (type === 'image' && imageInputRef.current) imageInputRef.current.value = '';
-      if (type === 'video' && videoInputRef.current) videoInputRef.current.value = '';
-      return;
-    }
-    let newForm = { ...formData };
-    if (type === 'image' && formData.imageCloudinary) {
-      newForm.deleteImageCloudinary = true;
-      newForm.imageCloudinary = '';
-    }
-    if (type === 'video' && formData.videoCloudinary) {
-      newForm.deleteVideoCloudinary = true;
-      newForm.videoCloudinary = '';
-    }
-    newForm[type] = file;
-    newForm[`${type}Preview`] = URL.createObjectURL(file);
-    if (type === 'image') {
-      newForm.video = '';
-      newForm.videoPreview = undefined;
-    } else {
-      newForm.image = '';
-      newForm.imagePreview = undefined;
-    }
-    setFormData(newForm);
+
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => {
+      setFormData(f => ({ ...f, [type]: reader.result }));
+    };
   };
 
   const handleSubmit = async (e) => {
@@ -101,41 +75,16 @@ const videoInputRef = useRef(null);
     setSubmitting(true);
 
     try {
-      const data = new FormData();
-      data.append('title', formData.title);
-      data.append('message', formData.message);
-      data.append('status', formData.status);
-      data.append('periodicity', formData.periodicity);
-      data.append('duration', formData.duration);
-      if (formData.image instanceof File) {
-        data.append('image', formData.image);
-      }
-      if (formData.video instanceof File) {
-        data.append('video', formData.video);
-      }
-      if (formData.deleteImageCloudinary) {
-        data.append('deleteImageCloudinary', 'true');
-      }
-      if (formData.deleteVideoCloudinary) {
-        data.append('deleteVideoCloudinary', 'true');
-      }
-
-      let response;
       if (formData._id) {
-        response = await axios.put(`${API_URL}/api/banners/${formData._id}`, data, {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        });
+        await axios.put(`${API_URL}/api/banners/${formData._id}`, formData);
         toast.success('Banner updated successfully');
       } else {
-        response = await axios.post(`${API_URL}/api/banners`, data, {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        });
+        await axios.post(`${API_URL}/api/banners`, formData);
         toast.success('Banner created successfully');
       }
-      await fetchBanners();
       setShowForm(false);
       resetForm();
-      // No need to setFormData after update, banners are refetched and modal is closed
+      fetchBanners();
     } catch (err) {
       toast.error(err.response?.data?.message || 'Operation failed');
     } finally {
@@ -144,31 +93,18 @@ const videoInputRef = useRef(null);
   };
 
   const handleEdit = (banner) => {
-    let editData = { ...banner };
-    if (editData.image && editData.video) {
-      editData.video = '';
-    }
-    setFormData({
-      ...editData,
-      imageCloudinary: editData.image || '',
-      videoCloudinary: editData.video || '',
-      imagePreview: undefined,
-      videoPreview: undefined
-    });
+    setFormData(banner);
     setShowForm(true);
   };
 
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this banner?')) return;
-    setDeletingId(id);
     try {
       await axios.delete(`${API_URL}/api/banners/${id}`);
       toast.success('Banner deleted successfully');
       fetchBanners();
     } catch {
       toast.error('Failed to delete banner');
-    } finally {
-      setDeletingId(null);
     }
   };
 
@@ -297,9 +233,7 @@ const videoInputRef = useRef(null);
                 </button>
                 <button
                   onClick={() => handleDelete(banner._id)}
-                  className={`text-red-600 hover:text-red-800 ${deletingId === banner._id ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  disabled={deletingId === banner._id}
-                  style={deletingId === banner._id ? { pointerEvents: 'none', opacity: 0.5 } : {}}
+                  className="text-red-600 hover:text-red-800"
                 >
                   <Trash2 className="h-5 w-5" />
                 </button>
@@ -363,36 +297,26 @@ const videoInputRef = useRef(null);
                   Image
                 </label>
                 <input
-  type="file"
-  accept="image/*"
-  ref={imageInputRef}
-  onChange={(e) => handleFileChange(e, 'image')}
-  className="mt-1 block w-full"
-/>
-                {/* Show image preview only if no video is selected */}
-                {(!formData.video && (formData.imagePreview || (formData.image && typeof formData.image === 'string'))) && (
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleFileChange(e, 'image')}
+                  className="mt-1 block w-full"
+                />
+                {formData.image && (
                   <div className="relative mt-2 h-32 w-full">
                     <img
-                      src={formData.imagePreview || formData.image}
+                      src={formData.image}
                       alt="Preview"
                       className="h-full object-contain"
                     />
-                <button
-                  type="button"
-                  onClick={() => {
-                    setFormData(f => ({
-                      ...f,
-                      image: '',
-                      imagePreview: undefined,
-                      imageCloudinary: '',
-                      deleteImageCloudinary: f.imageCloudinary ? true : false
-                    }));
-                    if (imageInputRef.current) imageInputRef.current.value = '';
-                  }}
-                  className="absolute top-0 right-0 bg-black bg-opacity-50 text-white p-1 rounded-full"
-                >
-                  <X className="h-4 w-4" />
-                </button>
+                    <button
+                      onClick={() =>
+                        setFormData(f => ({ ...f, image: '' }))
+                      }
+                      className="absolute top-0 right-0 bg-black bg-opacity-50 text-white p-1 rounded-full"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
                   </div>
                 )}
               </div>
@@ -403,36 +327,26 @@ const videoInputRef = useRef(null);
                   Video
                 </label>
                 <input
-  type="file"
-  accept="video/*"
-  ref={videoInputRef}
-  onChange={(e) => handleFileChange(e, 'video')}
-  className="mt-1 block w-full"
-/>
-                {/* Show video preview only if no image is selected */}
-                {(!formData.image && (formData.videoPreview || (formData.video && typeof formData.video === 'string'))) && (
+                  type="file"
+                  accept="video/*"
+                  onChange={(e) => handleFileChange(e, 'video')}
+                  className="mt-1 block w-full"
+                />
+                {formData.video && (
                   <div className="relative mt-2 h-32 w-full">
                     <video
-                      src={formData.videoPreview || formData.video}
+                      src={formData.video}
                       controls
                       className="h-full object-contain"
                     />
-                <button
-                  type="button"
-                  onClick={() => {
-                    setFormData(f => ({
-                      ...f,
-                      video: '',
-                      videoPreview: undefined,
-                      videoCloudinary: '',
-                      deleteVideoCloudinary: f.videoCloudinary ? true : false
-                    }));
-                    if (videoInputRef.current) videoInputRef.current.value = '';
-                  }}
-                  className="absolute top-0 right-0 bg-black bg-opacity-50 text-white p-1 rounded-full"
-                >
-                  <X className="h-4 w-4" />
-                </button>
+                    <button
+                      onClick={() =>
+                        setFormData(f => ({ ...f, video: '' }))
+                      }
+                      className="absolute top-0 right-0 bg-black bg-opacity-50 text-white p-1 rounded-full"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
                   </div>
                 )}
               </div>
@@ -495,9 +409,7 @@ const videoInputRef = useRef(null);
                       : 'bg-indigo-600 text-white hover:bg-indigo-700'
                   }`}
                 >
-                  {submitting
-                    ? (formData._id ? 'Updating...' : 'Creating...')
-                    : (formData._id ? 'Update' : 'Create')}
+                  {formData._id ? 'Update' : 'Create'}
                 </button>
               </div>
             </form>

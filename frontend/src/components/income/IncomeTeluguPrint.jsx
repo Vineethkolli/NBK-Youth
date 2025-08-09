@@ -1,11 +1,9 @@
 import React, { useRef } from 'react';
 import { Printer } from 'lucide-react';
 import { formatDateTime } from '../../utils/dateTime';
-import { useEventLabel } from '../../context/EventLabelContext';
 
 function IncomePrint({ incomes, visibleColumns }) {
   const printRef = useRef();
-  const { eventLabel } = useEventLabel();
 
   const handlePrint = () => {
     const content = printRef.current.innerHTML;
@@ -13,9 +11,6 @@ function IncomePrint({ incomes, visibleColumns }) {
     printWindow.document.write('<style>table { width: 100%; border-collapse: collapse; } th, td { border: 1px solid #ccc; padding: 8px; text-align: left; font-size: 12px; } th { background: #f4f4f4; }</style>');
     printWindow.document.write('</head><body>');
     printWindow.document.write('<div style="text-align: center;"><h2><span translate="no">ఆదాయ నిర్వహణ</span></h2></div>');
-    if (eventLabel) {
-      printWindow.document.write(`<div style="text-align: center; margin-bottom: 10px; color: #666;"><span translate="no">${eventLabel.label}</span></div>`);
-    }
     printWindow.document.write(content);
     printWindow.document.write('</body></html>');
     printWindow.document.close();
