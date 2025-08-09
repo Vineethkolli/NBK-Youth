@@ -148,7 +148,7 @@ function EventLabelManager() {
                 required
                 value={formData.label}
                 onChange={(e) => setFormData({ label: e.target.value })}
-                placeholder="e.g., Sankranti 2024, Ganesh Chaturthi 2024"
+                placeholder="e.g., Sankranti 2025, Ganesh Chaturthi 2025"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
               />
             </div>
