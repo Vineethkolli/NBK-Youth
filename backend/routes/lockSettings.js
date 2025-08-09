@@ -10,7 +10,7 @@ router.get('/', lockSettingsController.getLockStatus);
 // Toggle lock status (admin only)
 router.post('/toggle', 
   auth, 
-  checkRole(['developer', 'financier', 'admin']),
+  checkRole(['developer']),
   lockSettingsController.toggleLockStatus
 );
 

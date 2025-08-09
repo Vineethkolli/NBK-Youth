@@ -177,12 +177,32 @@ return (
     </div>
 
     <div className="bg-white rounded-lg shadow">
-      <div className="p-4 border-b">
-        <h2 className="font-medium">Visible Columns</h2>
-        <div className="mt-2 flex flex-wrap gap-2">
-          {/* columns checkboxes */}
+        <div className="p-4 border-b">
+          <h2 className="font-medium">Visible Columns</h2>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {Object.entries(visibleColumns).map(([column, isVisible]) => {
+              // Check visibility for specific columns based on user role
+              if (
+                (column === 'registerId' && !['developer', 'financier'].includes(user?.role)) ||
+                (column === 'email' && !['admin', 'developer', 'financier'].includes(user?.role)) ||
+                (column === 'phoneNumber' && !['admin', 'developer', 'financier'].includes(user?.role))
+              ) {
+                return null;
+              }
+              return (
+                <label key={column} className="inline-flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={isVisible}
+                    onChange={() => handleColumnToggle(column)}
+                    className="form-checkbox"
+                  />
+                  <span className="ml-2 text-sm">{column}</span>
+                </label>
+              );
+            })}
+          </div>
         </div>
-      </div>
 
       <IncomeTable
         incomes={incomes}

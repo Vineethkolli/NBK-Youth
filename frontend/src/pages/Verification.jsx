@@ -102,13 +102,14 @@ function Verification() {
   <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
     <h1 className="text-2xl font-semibold mb-2 lg:mb-0">Verification Management</h1>
       {/* Lock indicator and event label below */}
-  <div className="flex items-center space-x-4">
-    <LockIndicator />
-    <EventLabelDisplay />
-  </div>
+  <div className="flex items-center mb-6 lg:mb-0">
+  <LockIndicator />
+  <EventLabelDisplay />
+</div>
+
     
     {/* Tabs container */}
-    <div className="flex space-x-2">
+    <div className="flex space-x-6 ">
       {['income', 'expense', 'payment'].map((tab) => (
         <button
           key={tab}

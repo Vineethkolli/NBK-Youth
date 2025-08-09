@@ -14,6 +14,7 @@ function RecycleBin() {
   const [deletedExpenses, setDeletedExpenses] = useState([]);
   const [loadingIncomeId, setLoadingIncomeId] = useState(null);
   const [loadingExpenseId, setLoadingExpenseId] = useState(null);
+  const [activeBin, setActiveBin] = useState('income'); // New state for active bin view
 
   useEffect(() => {
     fetchDeletedItems();
@@ -88,22 +89,42 @@ function RecycleBin() {
 
   return (
     <div className="space-y-6">
+      {/* Header with LockIndicator, EventLabelDisplay, and bin toggle buttons */}
       <div className="space-y-2">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-semibold">Recycle Bin</h1>
-      </div>
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+          <h1 className="text-2xl font-semibold mb-2 lg:mb-0">Recycle Bin</h1>
+          <div className="flex items-center mb-6 lg:mb-0 ">
+            <LockIndicator />
+            <EventLabelDisplay />
+          </div>
 
-    <div className="flex items-center">
-        <LockIndicator />
-        <EventLabelDisplay />
-      </div>
-      </div>
-      {/* Income Bin */}
-      <div>
-        <div className="flex items-center space-x-4 mb-4">
-          <h1 className="text-2xl font-semibold text-gray-800">Income Bin</h1>
+          <div className="flex space-x-6">
+            <button
+              onClick={() => setActiveBin('income')}
+              className={`px-4 py-2 rounded-md font-semibold ${
+                activeBin === 'income'
+                  ? 'bg-indigo-600 text-white'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              Income
+            </button>
+            <button
+              onClick={() => setActiveBin('expense')}
+              className={`px-4 py-2 rounded-md font-semibold ${
+                activeBin === 'expense'
+                  ? 'bg-indigo-600 text-white'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              Expense
+            </button>
+          </div>
         </div>
+      </div>
 
+      {/* Income Bin Table */}
+      {activeBin === 'income' && (
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
@@ -184,14 +205,10 @@ function RecycleBin() {
             </tbody>
           </table>
         </div>
-      </div>
+      )}
 
-      {/* Expense Bin */}
-      <div>
-        <div className="flex items-center space-x-4 mb-4">
-          <h1 className="text-2xl font-semibold text-gray-800">Expense Bin</h1>
-        </div>
-
+      {/* Expense Bin Table */}
+      {activeBin === 'expense' && (
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
@@ -273,7 +290,7 @@ function RecycleBin() {
             </tbody>
           </table>
         </div>
-      </div>
+      )}
     </div>
   );
 }
