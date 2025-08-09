@@ -15,6 +15,7 @@ const ExpensePrint = ({ expenses, visibleColumns }) => {
     // Prepare table columns based on the visibleColumns settings
     const tableColumns = [];
     if (visibleColumns.sno) tableColumns.push("S.No");
+    if (visibleColumns.registerId) tableColumns.push("Register ID");
     if (visibleColumns.purpose) tableColumns.push("Purpose");
     if (visibleColumns.previousAmount) tableColumns.push("Previous Amount");
     if (visibleColumns.presentAmount) tableColumns.push("Present Amount");
@@ -24,6 +25,7 @@ const ExpensePrint = ({ expenses, visibleColumns }) => {
     const tableRows = expenses.map((expense, index) => {
       const row = [];
       if (visibleColumns.sno) row.push(index + 1);
+      if (visibleColumns.registerId) row.push(expense.registerId);
       if (visibleColumns.purpose) row.push(expense.purpose);
       if (visibleColumns.previousAmount) row.push(expense.previousAmount);
       if (visibleColumns.presentAmount) row.push(expense.presentAmount);

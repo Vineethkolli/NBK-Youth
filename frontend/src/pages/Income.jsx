@@ -10,9 +10,13 @@ import EnglishPrint from '../components/income/IncomeEnglishPrint';
 import TeluguPrint from '../components/income/IncomeTeluguPrint';
 import { API_URL } from '../utils/config';
 import { useLanguage } from '../context/LanguageContext';
+import EventLabelDisplay from '../components/common/EventLabelDisplay';
+import LockIndicator from '../components/common/LockIndicator';
+import { useLockSettings } from '../context/LockContext';
 
 function Income() {
   const { user } = useAuth();
+  const { lockSettings } = useLockSettings();
   const [incomes, setIncomes] = useState([]);
   const [search, setSearch] = useState('');
   const [filters, setFilters] = useState({
@@ -115,47 +119,64 @@ function Income() {
     }
   };
 
-  return (
-    <div className="space-y-6">
+
+return (
+  <div className="space-y-6">
+    {/* Top row: heading left, buttons right */}
+    <div className="space-y-2">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-semibold">Income Management</h1>
+        <h1 className="text-2xl font-semibold">Income</h1>
+
         <div className="flex items-center space-x-3">
           {['developer', 'admin', 'financier'].includes(user?.role) && (
             <button
               onClick={() => setShowForm(!showForm)}
-              className="btn-secondary flex items-center"
+              disabled={lockSettings.isLocked} // disabled if locked
+              className={`btn-secondary flex items-center ${
+                lockSettings.isLocked ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
+              title={lockSettings.isLocked ? 'Locked - cannot add' : ''}
             >
               <Plus className="h-4 w-4 mr-1 inline" />
               Add
             </button>
           )}
           <PrintComponent incomes={incomes} visibleColumns={visibleColumns} />
-          
         </div>
       </div>
 
-      <div className="space-y-3">
-        <div className="flex-1">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search by ID, name, amount..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-10 pr-4 py-2 w-full border rounded-lg"
-            />
-          </div>
-        </div>
-        <IncomeFilters
-          filters={filters}
-          visibleColumns={visibleColumns}
-          onChange={handleFilterChange}
-          onColumnToggle={handleColumnToggle}
-        />
+      {/* Below heading: lock indicator + event label side by side */}
+      <div className="flex items-center">
+        <LockIndicator />
+        <EventLabelDisplay />
       </div>
+    </div>
 
-      <div className="bg-white rounded-lg shadow">
+    {/* Start vertical spacing from here onwards */}
+
+    {/* Search and filters */}
+    <div className="space-y-3">
+      <div className="flex-1">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Search by ID, name, amount..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-10 pr-4 py-2 w-full border rounded-lg"
+          />
+        </div>
+      </div>
+      <IncomeFilters
+        filters={filters}
+        visibleColumns={visibleColumns}
+        onChange={handleFilterChange}
+        onColumnToggle={handleColumnToggle}
+      />
+    </div>
+
+    <div className="bg-white rounded-lg shadow">
         <div className="p-4 border-b">
           <h2 className="font-medium">Visible Columns</h2>
           <div className="mt-2 flex flex-wrap gap-2">
@@ -183,35 +204,37 @@ function Income() {
           </div>
         </div>
 
-        <IncomeTable
-          incomes={incomes}
-          visibleColumns={visibleColumns}
-          hiddenProfiles={hiddenProfiles}
-          onPrivacyToggle={handlePrivacyToggle}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-          isPrivilegedUser={true}
-          userRole={user?.role}
-        />
-      </div>
-
-      {showForm && (
-        <IncomeForm
-          income={editingIncome}
-          onClose={() => {
-            setShowForm(false);
-            setEditingIncome(null);
-          }}
-          onSuccess={() => {
-            fetchIncomes();
-            setShowForm(false);
-            setEditingIncome(null);
-          }}
-        />
-      )}
-
+      <IncomeTable
+        incomes={incomes}
+        visibleColumns={visibleColumns}
+        hiddenProfiles={hiddenProfiles}
+        onPrivacyToggle={handlePrivacyToggle}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        isPrivilegedUser={true}
+        userRole={user?.role}
+        isLocked={lockSettings.isLocked}
+      />
     </div>
-  );
+
+    {showForm && !lockSettings.isLocked && (
+      <IncomeForm
+        income={editingIncome}
+        onClose={() => {
+          setShowForm(false);
+          setEditingIncome(null);
+        }}
+        onSuccess={() => {
+          fetchIncomes();
+          setShowForm(false);
+          setEditingIncome(null);
+        }}
+      />
+    )}
+  </div>
+);
+
+
 }
 
 export default Income;

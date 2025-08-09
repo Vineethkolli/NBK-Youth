@@ -16,8 +16,12 @@ function IncomeSection({ refreshStats }) {
     sortField: 'presentAmount',
     sortOrder: ''
   });
+
+    const { user } = useAuth();
+    
   const [incomeColumns, setIncomeColumns] = useState({
     sno: true,
+    registerId: false,
     name: true,
     previousAmount: false,
     presentAmount: true,
@@ -26,10 +30,19 @@ function IncomeSection({ refreshStats }) {
     others: false
   });
 
+  useEffect(() => {
+  if (user?.role && ['developer', 'financier', 'admin'].includes(user.role)) {
+    setIncomeColumns(prev => ({
+      ...prev,
+      registerId: false,
+    }));
+  }
+}, [user?.role]);
+
+
   const [showForm, setShowForm] = useState(false);
   const [formMode, setFormMode] = useState('add'); 
   const [currentRecord, setCurrentRecord] = useState(null);
-  const { user } = useAuth();
 
   useEffect(() => {
     fetchIncomes();
@@ -73,8 +86,9 @@ function IncomeSection({ refreshStats }) {
 
   const handleFormSubmit = async (formData) => {
     try {
+      const payload = { ...formData, registerId: user?.registerId };
       if (formMode === 'add') {
-        const { data } = await axios.post(`${API_URL}/api/estimation/income`, formData);
+        const { data } = await axios.post(`${API_URL}/api/estimation/income`, payload);
         setIncomes([data, ...incomes]);
       } else if (formMode === 'edit') {
         const { data } = await axios.put(`${API_URL}/api/estimation/income/${currentRecord._id}`, formData);
@@ -146,17 +160,32 @@ function IncomeSection({ refreshStats }) {
         <div className="p-4 border-b">
           <h2 className="font-medium">Visible Columns</h2>
           <div className="mt-2 flex flex-wrap gap-2">
-            {Object.entries(incomeColumns).map(([column, isVisible]) => (
-              <label key={column} className="inline-flex items-center">
-                <input
-                  type="checkbox"
-                  checked={isVisible}
-                  onChange={() => setIncomeColumns({ ...incomeColumns, [column]: !isVisible })}
-                  className="form-checkbox"
-                />
-                <span className="ml-2 text-sm">{column}</span>
-              </label>
-            ))}
+            {Object.entries(incomeColumns).map(([column, isVisible]) => {
+  if (column === 'sno') return null; // Hide sno from the toggles
+
+  // Only allow registerId column toggle for certain roles
+  if (
+    column === 'registerId' &&
+    !['developer', 'financier', 'admin'].includes(user?.role)
+  ) {
+    return null;
+  }
+
+  return (
+    <label key={column} className="inline-flex items-center">
+      <input
+        type="checkbox"
+        checked={isVisible}
+        onChange={() =>
+          setIncomeColumns({ ...incomeColumns, [column]: !isVisible })
+        }
+        className="form-checkbox"
+      />
+      <span className="ml-2 text-sm">{column}</span>
+    </label>
+  );
+})}
+
           </div>
         </div>
 

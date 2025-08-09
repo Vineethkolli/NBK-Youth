@@ -35,39 +35,41 @@ function Estimation() {
 
   return (
     <div className="space-y-6">
-      {/* Tab Buttons */}
-      <div className="flex justify-between items-center">
+      {/* Header and Tabs */}
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-3 lg:space-y-0">
         <h1 className="text-2xl font-semibold">Estimation Management</h1>
-        <div className="space-x-2">
+
+        <div className="flex space-x-6">
           <button
             onClick={() => setActiveTab('stats')}
-            className={`px-4 py-2 rounded-md ${
+            className={`px-4 py-2 rounded-md font-semibold ${
               activeTab === 'stats'
                 ? 'bg-indigo-600 text-white'
-                : 'bg-gray-200 text-gray-700'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
             }`}
           >
             Stats
           </button>
-          {/* Render Income and Expense buttons only if the user's role is not "user" */}
-          {user?.category == 'youth' && (
+
+          {/* Render Income and Expense buttons only if the user's category is 'youth' */}
+          {user?.category === 'youth' && (
             <>
               <button
                 onClick={() => setActiveTab('income')}
-                className={`px-4 py-2 rounded-md ${
+                className={`px-4 py-2 rounded-md font-semibold ${
                   activeTab === 'income'
                     ? 'bg-indigo-600 text-white'
-                    : 'bg-gray-200 text-gray-700'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                 }`}
               >
                 Income
               </button>
               <button
                 onClick={() => setActiveTab('expense')}
-                className={`px-4 py-2 rounded-md ${
+                className={`px-4 py-2 rounded-md font-semibold ${
                   activeTab === 'expense'
                     ? 'bg-indigo-600 text-white'
-                    : 'bg-gray-200 text-gray-700'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                 }`}
               >
                 Expense
@@ -77,16 +79,14 @@ function Estimation() {
         </div>
       </div>
 
-      {/* Render content based on active tab */}
-      {activeTab === 'stats' && (
-        <EstimationStats stats={stats} />
-      )}
+      {/* Tab content */}
+      {activeTab === 'stats' && <EstimationStats stats={stats} />}
 
-      {activeTab === 'income' && user?.category == 'youth' && (
+      {activeTab === 'income' && user?.category === 'youth' && (
         <IncomeSection refreshStats={fetchStats} />
       )}
 
-      {activeTab === 'expense' && user?.category == 'youth' && (
+      {activeTab === 'expense' && user?.category === 'youth' && (
         <ExpenseSection refreshStats={fetchStats} />
       )}
     </div>

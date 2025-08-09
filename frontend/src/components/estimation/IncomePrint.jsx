@@ -28,17 +28,19 @@ const IncomePrint = ({ incomes, visibleColumns, incomeFilters }) => {
     // Prepare table header based on visible columns
     const tableColumns = [];
     if (visibleColumns.sno) tableColumns.push("S.No");
+    if (visibleColumns.registerId) tableColumns.push("Register ID");
     if (visibleColumns.name) tableColumns.push("Name");
     if (visibleColumns.previousAmount) tableColumns.push("Previous Amount");
     if (visibleColumns.presentAmount) tableColumns.push("Present Amount");
     if (visibleColumns.belongsTo) tableColumns.push("Belongs To");
     if (visibleColumns.status) tableColumns.push("Status");
     if (visibleColumns.others) tableColumns.push("Others");
-    
+
     // Prepare table rows dynamically from sorted incomes
     const tableRows = sortedIncomes.map((income, index) => {
       const row = [];
       if (visibleColumns.sno) row.push(index + 1);
+      if (visibleColumns.registerId) row.push(income.registerId);
       if (visibleColumns.name) row.push(income.name);
       if (visibleColumns.previousAmount) row.push(income.previousAmount);
       if (visibleColumns.presentAmount) row.push(income.presentAmount);
