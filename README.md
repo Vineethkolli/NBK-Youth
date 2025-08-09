@@ -82,7 +82,7 @@ NBK-Youth is designed to streamline content, finance, and user management in a u
 - **Tailwind CSS**
 - **React Router**
 - **PWA plugin**
-- **JS libraries**: `react-ga4`, `jspdf`, `heroicons`, `lucide-react`, `axios`, `react-toastify`
+- **JS libraries**
 
 ### Backend:
 - **Node.js + Express**
@@ -147,5 +147,5 @@ Visit: [http://localhost:5173](http://localhost:5173)
 
 ## 🙋‍♂️ Credits / Contact
 
-This project was developed by **Vineeth Kolli**  
+This project was developed by **Kolli Vineeth**  
 🔗 GitHub: [@Vineethkolli](https://github.com/Vineethkolli)
