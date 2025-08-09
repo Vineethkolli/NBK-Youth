@@ -8,12 +8,12 @@ function LockIndicator({ className = "" }) {
     <div className={`flex items-center ${className}`}>
       {lockSettings.isLocked ? (
         <>
-          <Lock className="h-5 w-5 text-red-600 mr-2" />
+          <Lock className="h-4 w-4 text-red-600 mr-2" />
           <span className="text-red-600 font-medium"></span>
         </>
       ) : (
         <>
-          <Unlock className="h-5 w-5 text-green-600 mr-2" />
+          <Unlock className="h-4 w-4 text-green-600 mr-2" />
           <span className="text-green-600 font-medium"></span>
         </>
       )}

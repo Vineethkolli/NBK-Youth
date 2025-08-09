@@ -68,6 +68,8 @@ function EventLabelManager() {
       toast.success('Event label deleted successfully');
       setEventLabel(null);
       setIsEditing(false);
+      setShowForm(false);           
+    setFormData({ label: '' }); 
     } catch (error) {
       toast.error('Failed to delete event label');
     }
@@ -109,7 +111,7 @@ function EventLabelManager() {
           ) : (
             <button
               onClick={handleAdd}
-              className="flex items-center px-3 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+              className="flex items-center px-3 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
             >
               <Plus className="h-4 w-4 mr-2" />
               Add
@@ -128,10 +130,9 @@ function EventLabelManager() {
       )}
 
       {!eventLabel && !showForm && (
-        <div className="text-center text-gray-500 py-8">
-          <Tag className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+        <div className="text-center text-gray-500 py-4">
           <p>No event label set</p>
-          <p className="text-sm">Add an event label to describe the current batch of records</p>
+          <p className="text-sm">Add an event label to describe the current batch of budget records</p>
         </div>
       )}
 

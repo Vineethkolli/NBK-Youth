@@ -175,7 +175,7 @@ function Stats() {
                     <button
                       onClick={handlePreviousYearUpdate}
                       className={`px-2 py-1 bg-green-500 text-white rounded ${
-                        lockSettings.isLocked ? 'opacity-50 cursor-not-allowed' : ''
+                        lockSettings.isLocked ? 'opacity-100 cursor-not-allowed' : ''
                       }`}
                       disabled={lockSettings.isLocked}
                     >
@@ -183,7 +183,7 @@ function Stats() {
                     </button>
                   </div>
                 ) : (
-                  <div className={`flex items-center space-x-2 ${lockSettings.isLocked ? 'opacity-50 pointer-events-none' : ''}`}>
+                  <div className={`flex items-center space-x-2 ${lockSettings.isLocked ? ' pointer-events-none' : ''}`}>
                     <p className="text-lg font-bold">
                       {formatAmount(stats.budgetStats.previousYearAmount.amount)}
                     </p>

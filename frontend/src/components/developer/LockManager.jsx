@@ -37,23 +37,28 @@ function LockManager() {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow p-6">
-      <div className="flex justify-between items-center">
-        <div className="flex items-center">
-          <Shield className="h-5 w-5 mr-2 text-gray-600" />
+    <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+        {/* Title + Description */}
+        <div className="flex items-start sm:items-center">
+          <Shield className="h-6 w-6 mr-2 text-gray-600 flex-shrink-0" />
           <div>
-            <h2 className="text-xl font-semibold">Editing Controls</h2>
+            <h2 className="text-lg sm:text-xl font-semibold">Editing Controls</h2>
             <p className="text-sm text-gray-500">
               Control editing permissions for Income, Expense, Verification, and Recycle Bin pages
             </p>
           </div>
         </div>
-        <div className="flex items-center space-x-4">
-          <div className={`flex items-center px-3 py-2 rounded-full text-sm font-medium ${
-            lockSettings.isLocked 
-              ? 'bg-red-100 text-red-800' 
-              : 'bg-green-100 text-green-800'
-          }`}>
+
+        {/* Status + Button side by side */}
+        <div className="flex items-center justify-center flex-wrap gap-3 space-x-6">
+          <div
+            className={`flex items-center px-3 py-2 rounded-full text-sm font-medium ${
+              lockSettings.isLocked 
+                ? 'bg-red-100 text-red-800' 
+                : 'bg-green-100 text-green-800'
+            }`}
+          >
             {lockSettings.isLocked ? (
               <>
                 <Lock className="h-4 w-4 mr-2" />
@@ -66,10 +71,11 @@ function LockManager() {
               </>
             )}
           </div>
+
           <button
             onClick={handleToggle}
             disabled={isToggling}
-            className={`flex items-center px-4 py-2 rounded-md text-white font-medium ${
+            className={`flex items-center justify-center px-3 py-2 rounded-md text-white font-medium shadow-sm ${
               lockSettings.isLocked
                 ? 'bg-green-600 hover:bg-green-700'
                 : 'bg-red-600 hover:bg-red-700'
