@@ -10,6 +10,7 @@ function EventLabelManager() {
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({ label: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     fetchEventLabel();
@@ -21,6 +22,8 @@ function EventLabelManager() {
       setEventLabel(data);
     } catch (error) {
       console.error('Failed to fetch event label:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -34,15 +37,13 @@ function EventLabelManager() {
     setIsSubmitting(true);
     try {
       if (eventLabel) {
-        // Update existing
-        await axios.put(`${API_URL}/api/event-label/${eventLabel._id}`, formData);
+        await axios.put(`${API_URL}/api/event-label/${eventLabel?._id}`, formData);
         toast.success('Event label updated successfully');
       } else {
-        // Create new
         await axios.post(`${API_URL}/api/event-label`, formData);
         toast.success('Event label created successfully');
       }
-      
+
       setShowForm(false);
       setIsEditing(false);
       setFormData({ label: '' });
@@ -55,21 +56,23 @@ function EventLabelManager() {
   };
 
   const handleEdit = () => {
+    if (!eventLabel) return;
     setFormData({ label: eventLabel.label });
     setIsEditing(true);
     setShowForm(true);
   };
 
   const handleDelete = async () => {
+    if (!eventLabel) return;
     if (!window.confirm('Are you sure you want to delete this event label?')) return;
 
     try {
-      await axios.delete(`${API_URL}/api/event-label/${eventLabel._id}`);
+      await axios.delete(`${API_URL}/api/event-label/${eventLabel?._id}`);
       toast.success('Event label deleted successfully');
       setEventLabel(null);
       setIsEditing(false);
-      setShowForm(false);           
-    setFormData({ label: '' }); 
+      setShowForm(false);
+      setFormData({ label: '' });
     } catch (error) {
       toast.error('Failed to delete event label');
     }
@@ -80,6 +83,14 @@ function EventLabelManager() {
     setIsEditing(false);
     setShowForm(true);
   };
+
+  if (isLoading) {
+    return (
+      <div className="bg-white rounded-lg shadow p-6">
+        <p className="text-gray-500">Loading event label...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white rounded-lg shadow p-6">
