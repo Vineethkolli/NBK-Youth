@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import { useAuth } from '../../context/AuthContext';
 import { Bell } from 'lucide-react';
-import { getSubscription,subscribeToPush, isIos, isInStandaloneMode, registerServiceWorker } from '../../utils/notifications';
+import { getSubscription, subscribeToPush, isIos, isInStandaloneMode, registerServiceWorker } from '../../utils/notifications';
 
 const NotificationSettings = () => {
   const { user } = useAuth();
@@ -11,6 +11,9 @@ const NotificationSettings = () => {
   const [showResetPrompt, setShowResetPrompt] = useState(false);
 
   useEffect(() => {
+    // On iOS, only register service worker if in standalone mode (added to homescreen)
+    if (isIos() && !isInStandaloneMode()) return;
+
     registerServiceWorker()
       .then(() => getSubscription().then(setSubscription))
       .catch((error) => console.error('Service Worker Error:', error));
@@ -35,17 +38,24 @@ const NotificationSettings = () => {
     }
   };
 
+  // If on iOS and NOT in standalone mode (not added to homescreen), show install instructions
   if (isIos() && !isInStandaloneMode()) {
     return (
       <div className="bg-white rounded-lg shadow p-6">
-        <h3 className="text-lg font-medium">Notifications Permission</h3>
-        <p className="text-sm text-gray-500">
-          To allow notifications, please download the app.
+        <h3 className="text-lg font-medium mb-2">Add to Home Screen</h3>
+        <p className="text-sm text-gray-500 mb-4">
+          To receive notifications and access the app easily, please add this website to your home screen.
         </p>
+        <ol className="list-decimal list-inside text-sm text-gray-600">
+          <li>Tap the Share button <span role="img" aria-label="share">📤</span> in Safari's toolbar.</li>
+          <li>Scroll down and select "Add to Home Screen".</li>
+          <li>Confirm by tapping "Add" in the top-right corner.</li>
+        </ol>
       </div>
     );
   }
 
+  // For other cases (including iOS in standalone mode), show notification permission UI
   return (
     <div className="bg-white rounded-lg shadow p-6 space-y-4">
       <div className="flex items-center justify-between">
