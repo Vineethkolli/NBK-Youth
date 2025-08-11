@@ -3,6 +3,7 @@ import { toast } from 'react-hot-toast';
 import { API_URL } from './config';
 import { urlBase64ToUint8Array } from './vapidKeys';
 
+// Register Service Worker
 export const registerServiceWorker = async () => {
   if ('serviceWorker' in navigator) {
     try {
@@ -18,13 +19,13 @@ export const registerServiceWorker = async () => {
   }
 };
 
-
+// Get current push subscription
 export const getSubscription = async () => {
   const registration = await navigator.serviceWorker.ready;
   return await registration.pushManager.getSubscription();
 };
 
-
+// Subscribe user to push
 export const subscribeToPush = async (registerId) => {
   const registration = await navigator.serviceWorker.ready;
 
@@ -45,12 +46,12 @@ export const subscribeToPush = async (registerId) => {
   return subscription;
 };
 
-
+// Detect iOS devices (copied from previous file)
 export const isIos = () => {
   const userAgent = window.navigator.userAgent.toLowerCase();
   return /iphone|ipad|ipod/.test(userAgent);
 };
 
-
+// Check if PWA is in standalone mode (copied from previous file)
 export const isInStandaloneMode = () =>
-  'standalone' in window.navigator && window.navigator.standalone;
+  ('standalone' in window.navigator) && window.navigator.standalone;
