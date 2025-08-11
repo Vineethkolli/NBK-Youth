@@ -35,7 +35,7 @@ function Expense() {
     paymentMode: false,
     bill: false,
     name: false,
-    phoneNumber: false,
+    //phoneNumber: false,
     verifyLog: false
   });
 
