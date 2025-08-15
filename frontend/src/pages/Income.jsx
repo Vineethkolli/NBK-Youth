@@ -33,13 +33,8 @@ function Income() {
     registerId: false,
     dateTime: false,
     name: true,
-<<<<<<< HEAD
   //email: false,
   //phoneNumber: false,
-=======
-    email: false,
-    phoneNumber: false,
->>>>>>> 735f109 (ui)
     amount: true,
     status: true,
     paymentMode: false,
