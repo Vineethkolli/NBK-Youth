@@ -23,9 +23,13 @@ function PaymentHistory({ payments }) {
 
   const handleDownloadReceipt = (payment) => {
     try {
-      const doc = generatePaymentReceipt(payment);
-      doc.save(`NBK_Youth_Payment_${payment.paymentId}.pdf`);
-      toast.success('Receipt downloaded successfully');
+      generatePaymentReceipt(payment).then((doc) => {
+        doc.save(`NBK_Youth_Payment_${payment.paymentId}.pdf`);
+        toast.success('Receipt downloaded successfully');
+      }).catch((error) => {
+        console.error('Failed to generate receipt:', error);
+        toast.error('Failed to download receipt');
+      });
     } catch (error) {
       console.error('Failed to generate receipt:', error);
       toast.error('Failed to download receipt');

@@ -1,8 +1,19 @@
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
+import axios from 'axios';
+import { API_URL } from './config';
 
-export const generatePaymentReceipt = (payment) => {
+export const generatePaymentReceipt = async (payment) => {
   const doc = new jsPDF();
+
+  // Fetch event label
+  let eventLabel = null;
+  try {
+    const { data } = await axios.get(`${API_URL}/api/event-label`);
+    eventLabel = data;
+  } catch (error) {
+    console.error('Failed to fetch event label:', error);
+  }
 
   // Add logo
   const logoUrl = '/logo/192.png'; 
@@ -17,8 +28,15 @@ export const generatePaymentReceipt = (payment) => {
   doc.setTextColor(50, 50, 50);
   doc.text('Payment Receipt', 105, 40, { align: 'center' });
 
+  // Add event label if it exists
+  if (eventLabel) {
+    doc.setFontSize(12);
+    doc.setTextColor(100, 100, 100);
+    doc.text(eventLabel.label, 105, 48, { align: 'center' });
+  }
+
   // Add horizontal divider
-  const lineYPosition = 50;
+  const lineYPosition = eventLabel ? 55 : 50;
   doc.setDrawColor(200, 200, 200); 
   doc.setLineWidth(0.5);
   doc.line(20, lineYPosition, 190, lineYPosition);
