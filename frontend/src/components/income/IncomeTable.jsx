@@ -60,8 +60,11 @@ function IncomeTable({
             {visibleColumns.incomeId && (
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Income ID</th>
             )}
-            {visibleColumns.dateTime && (
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date & Time</th>
+            {visibleColumns.entryDate && (
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Entry Date</th>
+            )}
+            {visibleColumns.paidDate && (
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Paid Date</th>
             )}
             {visibleColumns.name && (
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
@@ -105,8 +108,13 @@ function IncomeTable({
                 {visibleColumns.incomeId && (
                   <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{income.incomeId}</td>
                 )}
-                {visibleColumns.dateTime && (
+                {visibleColumns.entryDate && (
                   <td className="px-6 py-4 whitespace-nowrap text-sm">{formatDateTime(income.createdAt)}</td>
+                )}
+                {visibleColumns.paidDate && (
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    {income.paidDate ? formatDateTime(income.paidDate) : '-'}
+                  </td>
                 )}
                 {visibleColumns.name && (
                   <td className="px-6 py-4 whitespace-nowrap text-sm">

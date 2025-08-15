@@ -6,17 +6,16 @@ const StatsPrint = ({ stats }) => {
   const printRef = useRef();
   const { eventLabel } = useEventLabel();
 
-const formatAmount = (amount) =>
-  `<span translate="no">${new Intl.NumberFormat('en-IN', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount)}</span>`;
+  const formatAmount = (amount) =>
+    `<span translate="no">${new Intl.NumberFormat('en-IN', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount)}</span>`;
 
-const displayAmountWithShortage = (amount) =>
-  amount < 0
-    ? `<span translate="no">${formatAmount(amount)} (Shortage)</span>`
-    : formatAmount(amount);
-
+  const displayAmountWithShortage = (amount) =>
+    amount < 0
+      ? `<span translate="no">${formatAmount(amount)} (Shortage)</span>`
+      : formatAmount(amount);
 
   const handlePrint = () => {
     const renderedLabel = document.getElementById('event-label-display')?.innerText?.trim();
@@ -29,6 +28,7 @@ const displayAmountWithShortage = (amount) =>
         table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; }
         th, td { border: 1px solid #ccc; padding: 6px; font-size: 12px; text-align: center; }
         th { background: #f4f4f4; }
+        .page-break { page-break-before: always; }
       </style>
     `);
     printWindow.document.write('</head><body>');
@@ -136,6 +136,27 @@ const displayAmountWithShortage = (amount) =>
 
         <h3>{youthSection.title}</h3>
         <div dangerouslySetInnerHTML={{ __html: youthSection.html }} />
+
+        {stats.dateWiseStats && stats.dateWiseStats.length > 0 && (
+          <>
+            <div className="page-break"></div> {/* ✅ Force new page */}
+            <h3>Date-wise Statistics</h3>
+            {(() => {
+              const dateWiseCols = ['Date', 'Total Income', 'Amount Received', 'Total Expenses'];
+              const dateWiseRows = stats.dateWiseStats.map(dayStat => [
+                new Date(dayStat.date).toLocaleDateString('en-GB', {
+                  day: 'numeric',
+                  month: 'numeric',
+                  year: 'numeric'
+                }),
+                `${formatAmount(dayStat.totalIncome)} (${dayStat.totalIncomeEntries} entries)`,
+                `${formatAmount(dayStat.amountReceived)} (${dayStat.amountReceivedEntries} entries)`,
+                `${formatAmount(dayStat.totalExpenses)} (${dayStat.totalExpenseEntries} entries)`
+              ]);
+              return <div dangerouslySetInnerHTML={{ __html: renderTable(dateWiseCols, dateWiseRows) }} />;
+            })()}
+          </>
+        )}
       </div>
     </>
   );

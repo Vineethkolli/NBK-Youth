@@ -5,7 +5,7 @@ export const incomeController = {
   // Get all incomes with filters
   getIncomes: async (req, res) => {
     try {
-      const { search, status, paymentMode, belongsTo, verifyLog, startDate, endDate } = req.query;
+      const { search, status, paymentMode, belongsTo, verifyLog, startDate, endDate, dateFilter } = req.query;
       let query = { isDeleted: false };
 
       if (search) {
@@ -26,12 +26,17 @@ export const incomeController = {
 
       // Date range filter
       if (startDate || endDate) {
-        query.createdAt = {};
+        const dateField = dateFilter === 'paidDate' ? 'paidDate' : 'createdAt';
+        query[dateField] = {};
         if (startDate) {
-          query.createdAt.$gte = new Date(startDate);
+          query[dateField].$gte = new Date(startDate);
         }
         if (endDate) {
-          query.createdAt.$lte = new Date(endDate);
+          query[dateField].$lte = new Date(endDate);
+        }
+        // For paidDate filter, also ensure paidDate is not null
+        if (dateFilter === 'paidDate') {
+          query.paidDate = { ...query.paidDate, $ne: null };
         }
       }
 
@@ -56,7 +61,7 @@ export const incomeController = {
   // Create new income (case-insensitive name uniqueness)
   createIncome: async (req, res) => {
     try {
-      const { name } = req.body;
+      const { name, status } = req.body;
 
       // Check for existing name case-insensitively
       const existingIncome = await Income.findOne({ name: { $regex: `^${name}$`, $options: 'i' } });
@@ -64,10 +69,16 @@ export const incomeController = {
         return res.status(400).json({ message: 'Name already exists' });
       }
 
-      const income = await Income.create({
+      // Set paidDate if status is paid
+      const incomeData = {
         ...req.body,
         verifyLog: 'not verified'
-      });
+      };
+      
+      if (status === 'paid') {
+        incomeData.paidDate = new Date();
+      }
+      const income = await Income.create(incomeData);
 
       await logActivity(
         req,
@@ -87,7 +98,7 @@ export const incomeController = {
   // Update income (case-insensitive name check)
   updateIncome: async (req, res) => {
     try {
-      const { name } = req.body;
+      const { name, status } = req.body;
       const income = await Income.findById(req.params.id);
       if (!income) {
         return res.status(404).json({ message: 'Income not found' });
@@ -106,9 +117,18 @@ export const incomeController = {
 
       const originalData = income.toObject();
 
+      // Handle paidDate based on status change
+      let updateData = { ...req.body, verifyLog: 'not verified' };
+      if (status === 'paid' && income.status !== 'paid') {
+        // Status changed from not paid to paid
+        updateData.paidDate = new Date();
+      } else if (status === 'not paid' && income.status === 'paid') {
+        // Status changed from paid to not paid
+        updateData.paidDate = null;
+      }
       const updatedIncome = await Income.findByIdAndUpdate(
         req.params.id,
-        { ...req.body, verifyLog: 'not verified' },
+        updateData,
         { new: true }
       );
 

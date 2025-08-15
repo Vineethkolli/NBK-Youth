@@ -313,6 +313,59 @@ function Stats() {
         </div>
       </div>
       
+      {/* Date-wise Statistics */}
+      <div className="bg-white rounded-lg shadow p-6">
+        <h2 className="text-xl font-semibold mb-4">Date-wise Stats</h2>
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total Income</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount Received</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total Expenses</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {stats.dateWiseStats?.slice(0, 10).map((dayStat, index) => (
+                <tr key={index}>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+  {new Date(dayStat.date).toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'numeric',
+    year: 'numeric'
+  })}
+</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    <div>
+                      <div className="font-semibold">{formatAmount(dayStat.totalIncome)}</div>
+                      <div className="text-xs text-gray-500">{formatNumber(dayStat.totalIncomeEntries)} entries</div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    <div>
+                      <div className="font-semibold">{formatAmount(dayStat.amountReceived)}</div>
+                      <div className="text-xs text-gray-500">{formatNumber(dayStat.amountReceivedEntries)} entries</div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    <div>
+                      <div className="font-semibold">{formatAmount(dayStat.totalExpenses)}</div>
+                      <div className="text-xs text-gray-500">{formatNumber(dayStat.totalExpenseEntries)} entries</div>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {stats.dateWiseStats?.length > 10 && (
+            <div className="text-center py-2 text-sm text-gray-500">
+              Showing latest 10 days. Total: {formatNumber(stats.dateWiseStats.length)} days
+            </div>
+          )}
+        </div>
+      </div>
+
       {/* Footer */}
       <Footer />
     </div>
