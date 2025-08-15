@@ -35,7 +35,11 @@ function Expense() {
     paymentMode: false,
     bill: false,
     name: false,
+<<<<<<< HEAD
     //phoneNumber: false,
+=======
+    phoneNumber: false,
+>>>>>>> 735f109 (ui)
     verifyLog: false
   });
 
