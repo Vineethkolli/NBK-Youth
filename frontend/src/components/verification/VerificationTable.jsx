@@ -91,7 +91,6 @@ function VerificationTable({ data, type, onVerifyLogUpdate, onUpdatePayment, isL
     <>
       <td className="px-6 py-4 whitespace-nowrap text-sm">{item.incomeId}</td>
       <td className="px-6 py-4 whitespace-nowrap text-sm">{item.registerId}</td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm">{formatDateTime(item.createdAt)}</td>
       <td className="px-6 py-4 whitespace-nowrap text-sm">
         {item.paidDate ? formatDateTime(item.paidDate) : '-'}
       </td>
@@ -198,7 +197,6 @@ function VerificationTable({ data, type, onVerifyLogUpdate, onUpdatePayment, isL
         <tr>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Income ID</th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Register ID</th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Entry Date</th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Paid Date</th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>

@@ -327,7 +327,7 @@ function Stats() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {stats.dateWiseStats?.slice(0, 10).map((dayStat, index) => (
+              {stats.dateWiseStats?.map((dayStat, index) => (
                 <tr key={index}>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
   {new Date(dayStat.date).toLocaleDateString('en-GB', {
@@ -358,9 +358,9 @@ function Stats() {
               ))}
             </tbody>
           </table>
-          {stats.dateWiseStats?.length > 10 && (
+          {stats.dateWiseStats?.length > 0 && (
             <div className="text-center py-2 text-sm text-gray-500">
-              Showing latest 10 days. Total: {formatNumber(stats.dateWiseStats.length)} days
+              Total: {formatNumber(stats.dateWiseStats.length)} days
             </div>
           )}
         </div>
