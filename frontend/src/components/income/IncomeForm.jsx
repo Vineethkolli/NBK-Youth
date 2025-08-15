@@ -48,6 +48,9 @@ function IncomeForm({ income, onClose, onSuccess }) {
     }
   };
 
+  const handleStatusChange = (newStatus) => {
+    setFormData({ ...formData, status: newStatus });
+  };
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (nameError) {
@@ -64,6 +67,7 @@ function IncomeForm({ income, onClose, onSuccess }) {
         });
         toast.success('Income updated successfully');
       } else {
+        // For new income, if status is paid, backend will automatically set paidDate
         await axios.post(`${API_URL}/api/incomes`, {
           ...formData,
           registerId: user.registerId,
@@ -151,7 +155,7 @@ function IncomeForm({ income, onClose, onSuccess }) {
             <select
               required
               value={formData.status}
-              onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+              onChange={(e) => handleStatusChange(e.target.value)}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
             >
               <option value="paid">Paid</option>

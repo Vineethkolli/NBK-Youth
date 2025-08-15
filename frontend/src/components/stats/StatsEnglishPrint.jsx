@@ -151,6 +151,35 @@ const StatsPrint = ({ stats }) => {
       styles: { fontSize: 10, cellPadding: 2, rowHeight: 7, halign: 'center' }
     });
 
+    yPos = doc.lastAutoTable.finalY + 12;
+
+// Date-wise Statistics (show latest 10 days)
+if (stats.dateWiseStats && stats.dateWiseStats.length > 0) {
+  doc.addPage(); // <-- start on a new page
+  yPos = 20;
+
+  doc.setFontSize(14);
+  doc.text('Date-wise Statistics', 15, yPos);
+  yPos += 4;
+  
+  const dateWiseHead = ['Date', 'Total Income', 'Amount Received', 'Total Expenses'];
+  const dateWiseBody = stats.dateWiseStats.map(dayStat => [
+    new Date(dayStat.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'numeric', year: 'numeric' }),
+    `${formatAmount(dayStat.totalIncome)} (${dayStat.totalIncomeEntries} entries)`,
+    `${formatAmount(dayStat.amountReceived)} (${dayStat.amountReceivedEntries} entries)`,
+    `${formatAmount(dayStat.totalExpenses)} (${dayStat.totalExpenseEntries} entries)`
+  ]);
+
+  autoTable(doc, {
+    startY: yPos,
+    head: [dateWiseHead],
+    body: dateWiseBody,
+    theme: 'grid',
+    headStyles: { fillColor: [33, 115, 175], textColor: [255, 255, 255] },
+    styles: { fontSize: 10, cellPadding: 2, rowHeight: 7, halign: 'center' }
+  });
+}
+
     // Footer: timestamp + page numbers
     const pageCount = doc.internal.getNumberOfPages();
     for (let i = 1; i <= pageCount; i++) {

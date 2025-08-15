@@ -1,4 +1,3 @@
-// src/components/common/EventLabelDisplay.jsx
 import { useEventLabel } from '../../context/EventLabelContext';
 
 function EventLabelDisplay({ className = "" }) {

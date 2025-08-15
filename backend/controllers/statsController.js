@@ -15,6 +15,8 @@ export const statsController = {
       const successfulPayments = await Payment.find({ transactionStatus: 'successful' });
       const previousYear = await PreviousYear.findOne() || { amount: 0 };
 
+      // Calculate date-wise stats
+      const dateWiseStats = await calculateDateWiseStats(incomes, expenses);
       // Round numbers and remove decimals
       const roundNumber = (num) => Math.round(num);
 
@@ -115,7 +117,8 @@ export const statsController = {
           successfulPayments: successfulPayments.length
         },
         villagers: calculateGroupStats('villagers'),
-        youth: calculateGroupStats('youth')
+        youth: calculateGroupStats('youth'),
+        dateWiseStats
       };
 
       res.json(stats);
@@ -151,4 +154,62 @@ export const statsController = {
       res.status(500).json({ message: 'Failed to update previous year amount' });
     }
   }
+};
+
+// Helper function to calculate date-wise statistics
+const calculateDateWiseStats = async (incomes, expenses) => {
+  const dateMap = new Map();
+
+  // Process incomes by entry date (createdAt)
+  incomes.forEach(income => {
+    const dateKey = new Date(income.createdAt).toDateString();
+    if (!dateMap.has(dateKey)) {
+      dateMap.set(dateKey, {
+        date: dateKey,
+        totalIncome: 0,
+        totalIncomeEntries: 0,
+        amountReceived: 0,
+        amountReceivedEntries: 0,
+        totalExpenses: 0,
+        totalExpenseEntries: 0
+      });
+    }
+    const dayStats = dateMap.get(dateKey);
+    dayStats.totalIncome += income.amount;
+    dayStats.totalIncomeEntries += 1;
+    
+    if (income.status === 'paid') {
+      dayStats.amountReceived += income.amount;
+      dayStats.amountReceivedEntries += 1;
+    }
+  });
+
+  // Process expenses by entry date (createdAt)
+  expenses.forEach(expense => {
+    const dateKey = new Date(expense.createdAt).toDateString();
+    if (!dateMap.has(dateKey)) {
+      dateMap.set(dateKey, {
+        date: dateKey,
+        totalIncome: 0,
+        totalIncomeEntries: 0,
+        amountReceived: 0,
+        amountReceivedEntries: 0,
+        totalExpenses: 0,
+        totalExpenseEntries: 0
+      });
+    }
+    const dayStats = dateMap.get(dateKey);
+    dayStats.totalExpenses += expense.amount;
+    dayStats.totalExpenseEntries += 1;
+  });
+
+  // Convert to array and sort by date (newest first)
+  return Array.from(dateMap.values())
+    .sort((a, b) => new Date(b.date) - new Date(a.date))
+    .map(stat => ({
+      ...stat,
+      totalIncome: Math.round(stat.totalIncome),
+      amountReceived: Math.round(stat.amountReceived),
+      totalExpenses: Math.round(stat.totalExpenses)
+    }));
 };

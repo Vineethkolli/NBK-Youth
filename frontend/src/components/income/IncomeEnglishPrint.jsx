@@ -30,8 +30,11 @@ const IncomePrint = ({ incomes, visibleColumns, userRole }) => {
         case 'incomeId':
           headers.push('Income ID');
           break;
-        case 'dateTime':
-          headers.push('Date & Time');
+        case 'entryDate':
+          headers.push('Entry Date');
+          break;
+        case 'paidDate':
+          headers.push('Paid Date');
           break;
         case 'name':
           headers.push('Name');
@@ -74,9 +77,12 @@ const IncomePrint = ({ incomes, visibleColumns, userRole }) => {
           case 'incomeId':
             row.push(income.incomeId);
             break;
-          case 'dateTime':
-  row.push(formatDateTime(income.createdAt));
-  break;
+          case 'entryDate':
+            row.push(formatDateTime(income.createdAt));
+            break;
+          case 'paidDate':
+            row.push(income.paidDate ? formatDateTime(income.paidDate) : '-');
+            break;
           case 'name':
             row.push(isHidden ? 'Donor' : income.name);
             break;

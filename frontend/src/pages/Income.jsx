@@ -26,12 +26,14 @@ function Income() {
     verifyLog: '',
     sort: '',
     startDate: '',
-    endDate: ''
+    endDate: '',
+    dateFilter: 'entryDate'
   });
   const [visibleColumns, setVisibleColumns] = useState({
     incomeId: false,
     registerId: false,
-    dateTime: false,
+    entryDate: false,
+    paidDate: false,
     name: true,
   //email: false,
   //phoneNumber: false,

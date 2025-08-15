@@ -35,6 +35,10 @@ const incomeSchema = new mongoose.Schema({
     enum: ['paid', 'not paid'],
     default: 'not paid',
   },
+  paidDate: {
+    type: Date,
+    default: null,
+  },
   paymentMode: {
     type: String,
     enum: ['cash', 'online', 'web app'],

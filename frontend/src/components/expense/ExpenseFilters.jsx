@@ -87,7 +87,7 @@ function ExpenseFilters({ filters, onChange }) {
             <span className="text-sm">
               {filters.startDate
                 ? formatDateTime(filters.startDate)
-                : 'Start Date & Time'}
+                : 'Start DateTime'}
             </span>
           </div>
           {filters.startDate && (
@@ -119,7 +119,7 @@ function ExpenseFilters({ filters, onChange }) {
             <span className="text-sm">
               {filters.endDate
                 ? formatDateTime(filters.endDate)
-                : 'End Date & Time'}
+                : 'End DateTime'}
             </span>
           </div>
           {filters.endDate && (

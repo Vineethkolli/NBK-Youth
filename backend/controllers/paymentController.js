@@ -166,6 +166,7 @@ const PaymentController = {
           phoneNumber: payment.phoneNumber,
           amount: payment.amount,
           status: 'paid',
+          paidDate: new Date(),
           paymentMode: 'web app',
           belongsTo: payment.belongsTo,
           verifyLog: 'verified'

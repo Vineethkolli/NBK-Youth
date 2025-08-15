@@ -131,6 +131,8 @@ function RecycleBin() {
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Income ID</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Register ID</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Entry Date</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Paid Date</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Phone Number</th>
@@ -151,6 +153,10 @@ function RecycleBin() {
                   <tr key={item._id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap text-sm">{item.incomeId}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">{item.registerId}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">{formatDateTime(item.createdAt)}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      {item.paidDate ? formatDateTime(item.paidDate) : '-'}
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">{item.name}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">{item.email}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">{item.phoneNumber}</td>
@@ -215,6 +221,7 @@ function RecycleBin() {
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Expense ID</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Register ID</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Entry Date</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Phone Number</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
@@ -234,6 +241,7 @@ function RecycleBin() {
                   <tr key={item._id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap text-sm">{item.expenseId}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">{item.registerId}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">{formatDateTime(item.createdAt)}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">{item.name}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">{item.phoneNumber}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">{item.amount}</td>

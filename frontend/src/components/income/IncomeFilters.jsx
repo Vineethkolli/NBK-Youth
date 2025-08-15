@@ -86,6 +86,15 @@ function IncomeFilters({ filters, onChange }) {
           <option value="not verified">Not Verified</option>
           <option value="rejected">Rejected</option>
         </select>
+
+        <select
+          value={filters.dateFilter || 'entryDate'}
+          onChange={(e) => handleChange('dateFilter', e.target.value)}
+          className="form-select"
+        >
+          <option value="entryDate">Entry Date</option>
+          <option value="paidDate">Paid Date</option>
+        </select>
       </div>
 
       {/* Date Range Filters */}
@@ -108,7 +117,7 @@ function IncomeFilters({ filters, onChange }) {
             <span className="text-sm">
               {filters.startDate
                 ? formatDateTime(filters.startDate)
-                : 'Start Date & Time'}
+                : `Start ${filters.dateFilter === 'paidDate' ? 'Paid' : 'Entry'} DateTime`}
             </span>
           </div>
           {filters.startDate && (
@@ -140,7 +149,7 @@ function IncomeFilters({ filters, onChange }) {
             <span className="text-sm">
               {filters.endDate
                 ? formatDateTime(filters.endDate)
-                : 'End Date & Time'}
+                : `End ${filters.dateFilter === 'paidDate' ? 'Paid' : 'Entry'} DateTime`}
             </span>
           </div>
           {filters.endDate && (
