@@ -68,7 +68,7 @@ const StatsPrint = ({ stats }) => {
       styles: { fontSize: 10, cellPadding: 2, rowHeight: 7, halign: 'center' },
       columnStyles: { 0: { cellWidth: 60 }, 1: { cellWidth: 40 }, 2: { cellWidth: 60 } }
     });
-    yPos = doc.lastAutoTable.finalY + 12;
+    yPos = doc.lastAutoTable.finalY + 16;
 
     // Payment Mode Stats
     doc.setFontSize(14);
@@ -88,27 +88,7 @@ const StatsPrint = ({ stats }) => {
       headStyles: { fillColor: [33, 115, 175], textColor: [255, 255, 255] },
       styles: { fontSize: 10, cellPadding: 2, rowHeight: 7, halign: 'center' }
     });
-    yPos = doc.lastAutoTable.finalY + 12;
-
-    // User Stats
-    doc.setFontSize(14);
-    doc.text('User Statistics', 15, yPos);
-    yPos += 4;
-    const userHead = ['Category', 'Count'];
-    const userBody = [
-      ['Total Users', stats.userStats.totalUsers],
-      ['APP Payments', stats.userStats.successfulPayments]
-    ];
-
-    autoTable(doc, {
-      startY: yPos,
-      head: [userHead],
-      body: userBody,
-      theme: 'grid',
-      headStyles: { fillColor: [33, 115, 175], textColor: [255, 255, 255] },
-      styles: { fontSize: 10, cellPadding: 2, rowHeight: 7, halign: 'center' }
-    });
-    yPos = doc.lastAutoTable.finalY + 12;
+    yPos = doc.lastAutoTable.finalY + 16;
 
     // Villagers Stats
     doc.setFontSize(14);
@@ -129,7 +109,7 @@ const StatsPrint = ({ stats }) => {
       headStyles: { fillColor: [33, 115, 175], textColor: [255, 255, 255] },
       styles: { fontSize: 10, cellPadding: 2, rowHeight: 7, halign: 'center' }
     });
-    yPos = doc.lastAutoTable.finalY + 12;
+    yPos = doc.lastAutoTable.finalY + 16;
 
     // Youth Stats
     doc.setFontSize(14);
@@ -151,9 +131,9 @@ const StatsPrint = ({ stats }) => {
       styles: { fontSize: 10, cellPadding: 2, rowHeight: 7, halign: 'center' }
     });
 
-    yPos = doc.lastAutoTable.finalY + 12;
+    yPos = doc.lastAutoTable.finalY + 16;
 
-// Date-wise Statistics (show latest 10 days)
+// Date-wise Statistics
 if (stats.dateWiseStats && stats.dateWiseStats.length > 0) {
   doc.addPage(); // <-- start on a new page
   yPos = 20;
