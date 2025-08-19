@@ -14,19 +14,34 @@ import Committee from '../models/Committee.js';
 import EstimatedIncome from '../models/EstimatedIncome.js';
 import EstimatedExpense from '../models/EstimatedExpense.js';
 
+// List all models for dynamic fetching and context
+const ALL_MODELS = [
+  { name: 'incomes', model: Income },
+  { name: 'expenses', model: Expense },
+  { name: 'users', model: User },
+  { name: 'payments', model: Payment },
+  { name: 'games', model: Game },
+  { name: 'collections', model: Collection },
+  { name: 'moments', model: Moment },
+  { name: 'eventLabels', model: EventLabel },
+  { name: 'records', model: Record },
+  { name: 'committees', model: Committee },
+  { name: 'estimatedIncomes', model: EstimatedIncome },
+  { name: 'estimatedExpenses', model: EstimatedExpense },
+];
+
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 export const processViniQuery = async (query, userRegisterId) => {
   const startTime = Date.now();
-  
   try {
     // Get user info for personalization
     const user = await User.findOne({ registerId: userRegisterId });
     const userName = user?.name || 'there';
-    
+
     // Detect query type and intent
     const queryIntent = detectQueryIntent(query);
-    
+
     // Handle greetings
     if (queryIntent.type === 'greeting') {
       return {
@@ -35,7 +50,6 @@ export const processViniQuery = async (query, userRegisterId) => {
         responseTime: Date.now() - startTime
       };
     }
-    
     // Handle identity questions
     if (queryIntent.type === 'identity') {
       return {
@@ -44,7 +58,6 @@ export const processViniQuery = async (query, userRegisterId) => {
         responseTime: Date.now() - startTime
       };
     }
-    
     // Handle developer questions
     if (queryIntent.type === 'developer') {
       return {
@@ -53,7 +66,6 @@ export const processViniQuery = async (query, userRegisterId) => {
         responseTime: Date.now() - startTime
       };
     }
-    
     // Handle advice questions
     if (queryIntent.type === 'advice') {
       return {
@@ -62,61 +74,16 @@ export const processViniQuery = async (query, userRegisterId) => {
         responseTime: Date.now() - startTime
       };
     }
-    
-    // For data queries, search across all sources
-    const searchResults = await searchAllSources(query);
-    
-    // Check for direct answers from current app data
-    const directAnswer = await getDirectAnswer(query, searchResults.appData);
-    const historicalAnswer = await getHistoricalAnswer(query, searchResults.historicalData);
-    
-    // Handle comparison queries
-    if (queryIntent.type === 'comparison') {
-      const comparisonAnswer = await getComparisonAnswer(query, searchResults);
-      if (comparisonAnswer) {
-        return {
-          response: comparisonAnswer,
-          dataSource: 'mixed',
-          responseTime: Date.now() - startTime
-        };
-      }
-    }
-    
-    // Combine answers if both exist
-    if (directAnswer && historicalAnswer) {
-      return {
-        response: `${directAnswer}\n\n${historicalAnswer}`,
-        dataSource: 'mixed',
-        responseTime: Date.now() - startTime
-      };
-    }
-    
-    if (directAnswer) {
-      return {
-        response: directAnswer,
-        dataSource: 'app_data',
-        responseTime: Date.now() - startTime
-      };
-    }
-    
-    if (historicalAnswer) {
-      return {
-        response: historicalAnswer,
-        dataSource: 'historical_records',
-        responseTime: Date.now() - startTime
-      };
-    }
-    
-    // If no direct answer, use LLM with context
-    const context = formatContextForLLM(searchResults, query);
+
+    // For all app data questions, always use Gemini AI for analysis and response
+    const appData = await searchAppData();
+    const context = formatContextForLLM({ appData, historicalData: [] }, query);
     const llmResponse = await getLLMResponse(query, context, queryIntent.complexity, userName);
-    
     return {
       response: llmResponse,
-      dataSource: searchResults.historicalData.length > 0 ? 'mixed' : 'app_data',
+      dataSource: 'app_data',
       responseTime: Date.now() - startTime
     };
-    
   } catch (error) {
     console.error('VINI query processing error:', error);
     return {
@@ -218,64 +185,24 @@ const searchAllSources = async (query) => {
   return { appData, historicalData };
 };
 
-const searchAppData = async (query) => {
-  const lowerQuery = query.toLowerCase();
+// Dynamically fetch all models for maximum coverage
+const searchAppData = async () => {
   const results = {};
-  
   try {
-    // Search incomes
-    if (lowerQuery.includes('income') || lowerQuery.includes('total') || lowerQuery.includes('amount')) {
-      results.incomes = await Income.find({ isDeleted: false });
+    for (const entry of ALL_MODELS) {
+      if (entry.name === 'incomes' || entry.name === 'expenses') {
+        results[entry.name] = await entry.model.find({ isDeleted: false });
+      } else if (entry.name === 'users') {
+        results[entry.name] = await entry.model.find().select('-password');
+      } else if (entry.name === 'eventLabels') {
+        results.eventLabel = await entry.model.findOne().sort({ createdAt: -1 });
+      } else {
+        results[entry.name] = await entry.model.find();
+      }
     }
-    
-    // Search expenses
-    if (lowerQuery.includes('expense') || lowerQuery.includes('cost') || lowerQuery.includes('spent')) {
-      results.expenses = await Expense.find({ isDeleted: false });
-    }
-    
-    // Search users
-    if (lowerQuery.includes('user') || lowerQuery.includes('people') || lowerQuery.includes('member')) {
-      results.users = await User.find().select('-password');
-    }
-    
-    // Search payments
-    if (lowerQuery.includes('payment') || lowerQuery.includes('paid')) {
-      results.payments = await Payment.find();
-    }
-    
-    // Search games/activities
-    if (lowerQuery.includes('game') || lowerQuery.includes('activity') || lowerQuery.includes('play')) {
-      results.games = await Game.find();
-    }
-    
-    // Search collections/music
-    if (lowerQuery.includes('music') || lowerQuery.includes('song') || lowerQuery.includes('collection')) {
-      results.collections = await Collection.find();
-    }
-    
-    // Search moments
-    if (lowerQuery.includes('moment') || lowerQuery.includes('photo') || lowerQuery.includes('video')) {
-      results.moments = await Moment.find();
-    }
-    
-    // Search committee
-    if (lowerQuery.includes('committee') || lowerQuery.includes('member')) {
-      results.committee = await Committee.find();
-    }
-    
-    // Search estimated data
-    if (lowerQuery.includes('estimated') || lowerQuery.includes('estimation')) {
-      results.estimatedIncomes = await EstimatedIncome.find();
-      results.estimatedExpenses = await EstimatedExpense.find();
-    }
-    
-    // Get current event label
-    results.eventLabel = await EventLabel.findOne().sort({ createdAt: -1 });
-    
   } catch (error) {
     console.error('Error searching app data:', error);
   }
-  
   return results;
 };
 
@@ -319,47 +246,61 @@ const searchHistoricalData = async (queryEmbedding, query) => {
 
 const getDirectAnswer = async (query, appData) => {
   const lowerQuery = query.toLowerCase();
-  
+
   // Get current event label for context
   const currentEvent = appData.eventLabel?.label || 'current period';
-  
+
+  // Top N highest incomes (e.g., "top 5 highest incomes", "top contributors")
+  const topNMatch = lowerQuery.match(/top\s*(\d+)\s*(highest|biggest)?\s*(income|contributor|amount|donation|entries|people)?/);
+  if (topNMatch && appData.incomes && appData.incomes.length > 0) {
+    const n = parseInt(topNMatch[1]) || 5;
+    // Sort by amount descending
+    const sorted = [...appData.incomes].sort((a, b) => b.amount - a.amount).slice(0, n);
+    let table = `Here are the top ${n} highest incomes for ${currentEvent}:\n\n`;
+    table += `| Name | Amount |\n|------|--------|\n`;
+    sorted.forEach(income => {
+      table += `| ${income.name || '-'} | ₹${income.amount.toLocaleString('en-IN')} |\n`;
+    });
+    return table;
+  }
+
   // Total income queries
   if (lowerQuery.includes('total income') && !lowerQuery.includes('20')) {
     const totalIncome = appData.incomes?.reduce((sum, income) => sum + income.amount, 0) || 0;
     return `The total income for ${currentEvent} is ₹${totalIncome.toLocaleString('en-IN')}.`;
   }
-  
+
   // Total expense queries
   if (lowerQuery.includes('total expense') && !lowerQuery.includes('20')) {
     const totalExpense = appData.expenses?.reduce((sum, expense) => sum + expense.amount, 0) || 0;
     return `The total expenses for ${currentEvent} is ₹${totalExpense.toLocaleString('en-IN')}.`;
   }
-  
+
   // Count queries
   if (lowerQuery.includes('how many') && lowerQuery.includes('income')) {
     const count = appData.incomes?.length || 0;
     return `There are ${count} income entries recorded for ${currentEvent}.`;
   }
-  
+
   if (lowerQuery.includes('how many') && lowerQuery.includes('user')) {
     const count = appData.users?.length || 0;
     return `There are ${count} registered users in the system.`;
   }
-  
+
   // Payment status queries
   if (lowerQuery.includes('paid') && lowerQuery.includes('income')) {
     const paidIncomes = appData.incomes?.filter(income => income.status === 'paid') || [];
     const paidAmount = paidIncomes.reduce((sum, income) => sum + income.amount, 0);
     return `₹${paidAmount.toLocaleString('en-IN')} has been received from ${paidIncomes.length} paid entries.`;
   }
-  
+
   // High amount queries
   if (lowerQuery.includes('more than') || lowerQuery.includes('greater than')) {
     const amountMatch = lowerQuery.match(/(?:more than|greater than)\s*₹?(\d+)/);
     if (amountMatch && appData.incomes) {
       const threshold = parseInt(amountMatch[1]);
       const highAmountIncomes = appData.incomes.filter(income => income.amount > threshold);
-      
+
       if (lowerQuery.includes('table')) {
         let tableResponse = `Here are the entries with amounts more than ₹${threshold}:\n\n`;
         tableResponse += `| Name | Amount |\n|------|--------|\n`;
@@ -372,7 +313,7 @@ const getDirectAnswer = async (query, appData) => {
       }
     }
   }
-  
+
   return null;
 };
 
@@ -456,23 +397,33 @@ const getComparisonAnswer = async (query, searchResults) => {
 
 const formatContextForLLM = (searchResults, query) => {
   let context = '';
-  
-  // Add current app data context
+  // Add current event label if available
   if (searchResults.appData.eventLabel) {
     context += `Current Event: ${searchResults.appData.eventLabel.label}\n\n`;
   }
-  
-  if (searchResults.appData.incomes?.length > 0) {
-    const totalIncome = searchResults.appData.incomes.reduce((sum, income) => sum + income.amount, 0);
-    context += `Current Income Data: ${searchResults.appData.incomes.length} entries, Total: ₹${totalIncome.toLocaleString('en-IN')}\n`;
+  // Summarize all models dynamically
+  for (const entry of ALL_MODELS) {
+    const data = searchResults.appData[entry.name];
+    if (Array.isArray(data) && data.length > 0) {
+      // Show count and sample fields
+      context += `\n${entry.name.charAt(0).toUpperCase() + entry.name.slice(1)}: ${data.length} entries.`;
+      // Show totals for common fields
+      if (data[0].amount !== undefined) {
+        const total = data.reduce((sum, d) => sum + (d.amount || 0), 0);
+        context += ` Total amount: ₹${total.toLocaleString('en-IN')}.`;
+      }
+      // Show unique names/contributors if present
+      if (data[0].name) {
+        const uniqueNames = [...new Set(data.map(i => i.name).filter(Boolean))];
+        if (uniqueNames.length > 0) {
+          context += ` Names: ${uniqueNames.join(', ')}.`;
+        }
+      }
+      // Show a sample entry for Gemini to see structure
+      context += ` Example: ${JSON.stringify(data[0])}`;
+    }
   }
-  
-  if (searchResults.appData.expenses?.length > 0) {
-    const totalExpense = searchResults.appData.expenses.reduce((sum, expense) => sum + expense.amount, 0);
-    context += `Current Expense Data: ${searchResults.appData.expenses.length} entries, Total: ₹${totalExpense.toLocaleString('en-IN')}\n`;
-  }
-  
-  // Add historical data context
+  // Add historical data context if present
   if (searchResults.historicalData.length > 0) {
     context += '\nHistorical Records:\n';
     searchResults.historicalData.forEach((record, index) => {
@@ -488,17 +439,18 @@ const formatContextForLLM = (searchResults, query) => {
       }
     });
   }
-  
   return context;
 };
 
 const getLLMResponse = async (query, context, complexity = 'simple', userName) => {
   try {
-    const model = complexity === 'complex' 
-      ? genAI.getGenerativeModel({ model: "gemini-pro" })
+    // Use correct Gemini model names
+    const model = complexity === 'complex'
+      ? genAI.getGenerativeModel({ model: "gemini-1.5-pro" })
       : genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-    
-    const prompt = `You are VINI, the NBK Youth AI assistant created by Kolli Vineeth. Answer the user's question naturally and accurately based on the provided context.
+
+
+  const prompt = `You are VINI, the NBK Youth AI assistant. Answer the user's question naturally and accurately based on the provided context.
 
 Context:
 ${context}
@@ -512,7 +464,7 @@ Instructions:
 - For comparisons, show clear before/after or year-over-year data
 - Keep responses concise but informative
 - If data is not available, say so clearly
-- Always mention that you were created by Kolli Vineeth when asked about your developer
+- Only mention that you were created by Kolli Vineeth if the user asks about your developer, creator, or origin
 - For advice questions, provide practical suggestions based on the data context
 
 Response:`;
