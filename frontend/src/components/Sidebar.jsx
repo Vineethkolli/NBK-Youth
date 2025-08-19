@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Home, User, UserCog, Users, Bell, ShieldCheck, Settings, IndianRupee, DollarSign, Trash2, CheckSquare, BarChart2, Terminal, MusicIcon, CameraIcon, TrophyIcon, X, ChevronLeft, Calculator, Layers, LayoutDashboard, FileClock } from 'lucide-react';
+import { FileText } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 function Sidebar({ isOpen, onNavigate }) {
@@ -35,7 +36,8 @@ function Sidebar({ isOpen, onNavigate }) {
     ] : []),
     ...(user?.email === defaultdeveloper? [
         { to: '/developer-options', icon: Terminal, label: 'Developer Options' },
-        { to: '/activity-logs',     icon: FileClock, label: 'Activity Logs' }
+        { to: '/activity-logs',     icon: FileClock, label: 'Activity Logs' },
+        { to: '/records',          icon: FileText, label: 'Records' }
       ] : []),
     { to: '/tech-stack', icon: Layers, label: 'Tech Stack' }
   ];
@@ -72,7 +74,7 @@ function Sidebar({ isOpen, onNavigate }) {
               <Icon className="mr-3 h-6 w-6" />
               {link.label}
             </Link>
-            {isSeparator && <hr className="my-1 border-t border-gray-300" />}
+            {[3, 7, 11, 16].includes(index) && <hr className="my-1 border-t border-gray-300" />}
           </div>
         );
       })}
