@@ -37,6 +37,7 @@ import PopupBanner from './components/developer/PopupBanner';
 import { initializeAnalytics, trackPageView } from './utils/analytics';
 import ActivityLogs from './pages/ActivityLogs'; 
 import Committee from './pages/Committee';
+import ViniChatWidget from './components/vini/ViniChatWidget';
 
 function RouteTracker() {
   const location = useLocation();
@@ -88,6 +89,7 @@ function AppContent() {
         </Route>
       </Routes>
       <FloatingMusicIcon />
+      <ViniChatWidget />
     </>
   );
 }
