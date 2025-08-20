@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { MessageCircle, X, Send, Trash2, Bot } from 'lucide-react';
+import {  Cpu, X, Send, Trash2, Loader2, Pause } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { API_URL } from '../../utils/config';
@@ -12,6 +12,8 @@ function ViniChatWidget() {
   const [chatHistory, setChatHistory] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
+  const [isStopped, setIsStopped] = useState(false);
+  const abortControllerRef = useRef(null);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -26,8 +28,11 @@ function ViniChatWidget() {
   }, [chatHistory, isTyping]);
 
   useEffect(() => {
-    if (isOpen && inputRef.current) {
-      inputRef.current.focus();
+    if (isOpen) {
+      if (inputRef.current) {
+        inputRef.current.focus();
+      }
+      scrollToBottom();
     }
   }, [isOpen]);
 
@@ -52,6 +57,7 @@ function ViniChatWidget() {
     setMessage('');
     setIsLoading(true);
     setIsTyping(true);
+    setIsStopped(false);
 
     // Add user message to chat immediately
     const newUserMessage = {
@@ -62,11 +68,19 @@ function ViniChatWidget() {
     };
     setChatHistory(prev => [...prev, newUserMessage]);
 
+    // Setup abort controller
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
     try {
-      const { data } = await axios.post(`${API_URL}/api/vini/chat`, {
-        message: userMessage,
-        registerId: user.registerId
-      });
+      const { data } = await axios.post(
+        `${API_URL}/api/vini/chat`,
+        {
+          message: userMessage,
+          registerId: user.registerId
+        },
+        { signal: controller.signal }
+      );
 
       // Add VINI response
       const viniResponse = {
@@ -78,12 +92,26 @@ function ViniChatWidget() {
 
       setChatHistory(prev => [...prev.slice(0, -1), viniResponse]);
     } catch (error) {
-      toast.error('Failed to get response from VINI');
+      if (controller.signal.aborted) {
+        toast('Request stopped');
+      } else {
+        toast.error('Failed to get response from VINI');
+      }
       setChatHistory(prev => prev.slice(0, -1)); // Remove the user message if failed
     } finally {
       setIsLoading(false);
       setIsTyping(false);
+      abortControllerRef.current = null;
     }
+  };
+
+  const handleStop = () => {
+    setIsStopped(true);
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    setIsLoading(false);
+    setIsTyping(false);
   };
 
   const clearChatHistory = async () => {
@@ -190,7 +218,7 @@ function ViniChatWidget() {
       >
         <button
           onClick={() => setIsOpen(true)}
-          className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-full p-3 shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-200"
+          className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-full p-2 shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-200"
         >
           <div className="flex items-center space-x-1">
             <span className="font-medium text-sm">VINI</span>
@@ -200,14 +228,14 @@ function ViniChatWidget() {
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="fixed bottom-4 right-4 w-80 h-[500px] bg-white rounded-lg shadow-2xl border z-50 flex flex-col">
+        <div className="fixed bottom-4 right-4 left-4 md:left-auto md:w-80 w-auto max-w-full h-[500px] bg-white rounded-lg shadow-2xl border z-50 flex flex-col">
           {/* Header */}
           <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white p-4 rounded-t-lg flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <span className="font-medium">VINI</span>
-              <span className="font-medium">NBK Youth AI Assistant</span>
+            <div className="flex flex-col">
+              <span className="font-semibold text-lg leading-tight">VINI</span>
+              <span className="font-medium text-xs opacity-90">NBK Youth AI Assistant</span>
             </div>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-6">
               <button
                 onClick={clearChatHistory}
                 className="text-white hover:text-gray-200"
@@ -227,12 +255,20 @@ function ViniChatWidget() {
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-4 space-y-3">
             {chatHistory.length === 0 && (
-              <div className="text-center text-gray-500 py-8">
-                <Bot className="h-12 w-12 mx-auto mb-2 text-gray-300" />
-                <p className="text-sm">Hi! I'm VINI, your AI assistant.</p>
-                <p className="text-xs">Ask me anything about your app data!</p>
-              </div>
-            )}
+  <div className="text-center text-gray-500 py-8 space-y-2">
+    <Cpu className="h-12 w-12 mx-auto mb-2 text-gray-300" />
+    <p className="text-sm font-medium">
+      Hi! I'm <span className="text-purple-600">VINI</span>, NBK Youth AI Assistant 🤖
+    </p>
+    <p className="text-xs">
+      Currently in development stage.
+    </p>
+    <p className="text-xs mt-1">
+      Ask me anything about your app data—I’m learning fast!
+    </p>
+  </div>
+)}
+
             
             {chatHistory.map((chat, index) => (
               <div key={index} className="space-y-2">
@@ -247,7 +283,6 @@ function ViniChatWidget() {
                 <div className="flex justify-start">
                   <div className="bg-gray-100 rounded-lg px-3 py-2 max-w-xs">
                     <div className="flex items-center space-x-1 mb-1">
-                      <Bot className="h-3 w-3 text-purple-600" />
                       <span className="text-xs font-medium text-purple-600">VINI</span>
                     </div>
                     <div className="text-sm text-gray-800">
@@ -261,16 +296,9 @@ function ViniChatWidget() {
             {/* Typing Indicator */}
             {isTyping && (
               <div className="flex justify-start">
-                <div className="bg-gray-100 rounded-lg px-3 py-2">
-                  <div className="flex items-center space-x-1 mb-1">
-                    <Bot className="h-3 w-3 text-purple-600" />
-                    <span className="text-xs font-medium text-purple-600">VINI</span>
-                  </div>
-                  <div className="flex space-x-1">
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                  </div>
+                <div className="bg-gray-100 rounded-lg px-3 py-2 flex items-center space-x-2">
+                  <Loader2 className="h-4 w-4 text-purple-600 animate-spin" />
+                  <span className="text-xs font-medium text-purple-600">VINI is thinking...</span>
                 </div>
               </div>
             )}
@@ -290,13 +318,31 @@ function ViniChatWidget() {
                 disabled={isLoading}
                 className="flex-1 border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50"
               />
-              <button
-                type="submit"
-                disabled={isLoading || !message.trim()}
-                className="bg-indigo-600 text-white rounded-lg px-3 py-2 hover:bg-indigo-700 disabled:opacity-50"
-              >
-                <Send className="h-4 w-4" />
-              </button>
+              {!isLoading && (
+                <button
+                  type="submit"
+                  disabled={isLoading || !message.trim()}
+                  className="bg-indigo-600 text-white rounded-lg px-3 py-2 hover:bg-indigo-700 disabled:opacity-50"
+                >
+                  <Send className="h-4 w-4" />
+                </button>
+              )}
+              {isLoading && (
+                <button
+                  type="button"
+                  onClick={handleStop}
+                  className="bg-indigo-500 text-white rounded-lg px-3 py-2 flex items-center justify-center hover:bg-indigo-600 relative"
+                  title="Stop"
+                  style={{ width: 36, height: 36 }}
+                >
+                  <span className="absolute inset-0 flex items-center justify-center">
+                    <Loader2 className="h-7 w-7 animate-spin " />
+                  </span>
+                  <span className="absolute inset-0 flex items-center justify-center">
+                    <Pause className="h-4 w-4 z-10" />
+                  </span>
+                </button>
+              )}
             </form>
           </div>
         </div>
