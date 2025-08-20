@@ -5,6 +5,22 @@ import Expense from '../models/Expense.js';
 import Payment from '../models/Payment.js';
 import ProcessedChunk from '../models/ProcessedChunk.js';
 import ChatHistory from '../models/ChatHistory.js';
+import Collection from '../models/Collection.js';
+import Committee from '../models/Committee.js';
+import EstimatedIncome from '../models/EstimatedIncome.js';
+import EstimatedExpense from '../models/EstimatedExpense.js';
+import Event from '../models/Event.js';
+import EventLabel from '../models/EventLabel.js';
+import Game from '../models/Game.js';
+import LockSettings from '../models/LockSettings.js';
+import Moment from '../models/Moment.js';
+import PaymentDetails from '../models/PaymentDetails.js';
+import PreviousYear from '../models/PreviousYear.js';
+import Slide from '../models/Slide.js';
+import Notification from '../models/Notification.js';
+import NotificationHistory from '../models/NotificationHistory.js';
+import Banner from '../models/Banner.js';
+import ActivityLog from '../models/ActivityLog.js';
 import { cosineSimilarity, generateEmbedding } from './embeddingService.js';
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
@@ -46,55 +62,71 @@ export const formatTableResponse = (data, headers) => {
 
 export const searchCurrentData = async (query) => {
   try {
-    const incomes = await Income.find({ 
-      isDeleted: false,
-      $or: [
-        { name: { $regex: query, $options: 'i' } },
-        { incomeId: { $regex: query, $options: 'i' } }
-      ]
-    }).limit(10);
-    
-    const expenses = await Expense.find({ 
-      isDeleted: false,
-      $or: [
-        { purpose: { $regex: query, $options: 'i' } },
-        { name: { $regex: query, $options: 'i' } }
-      ]
-    }).limit(10);
-    
-    const users = await User.find({
-      $or: [
-        { name: { $regex: query, $options: 'i' } },
-        { registerId: { $regex: query, $options: 'i' } }
-      ]
-    }).limit(5);
-    
-    const payments = await Payment.find({
-      $or: [
-        { name: { $regex: query, $options: 'i' } },
-        { paymentId: { $regex: query, $options: 'i' } }
-      ]
-    }).limit(5);
-    
-    return { incomes, expenses, users, payments };
+    const [
+      incomes, expenses, users, payments, collections, committees, estimatedIncomes, estimatedExpenses, events, eventLabels, games, lockSettings, moments, paymentDetails, previousYears, slides, notifications, notificationHistories, banners, activityLogs, processedChunks, chatHistories
+    ] = await Promise.all([
+      Income.find({ isDeleted: false, $or: [ { name: { $regex: query, $options: 'i' } }, { incomeId: { $regex: query, $options: 'i' } } ] }).limit(10),
+      Expense.find({ isDeleted: false, $or: [ { purpose: { $regex: query, $options: 'i' } }, { name: { $regex: query, $options: 'i' } } ] }).limit(10),
+      User.find({ $or: [ { name: { $regex: query, $options: 'i' } }, { registerId: { $regex: query, $options: 'i' } } ] }).limit(5),
+      Payment.find({ $or: [ { name: { $regex: query, $options: 'i' } }, { paymentId: { $regex: query, $options: 'i' } } ] }).limit(5),
+      Collection.find({ $or: [ { name: { $regex: query, $options: 'i' } }, { collectionId: { $regex: query, $options: 'i' } } ] }).limit(5),
+      Committee.find({ $or: [ { name: { $regex: query, $options: 'i' } }, { committeeId: { $regex: query, $options: 'i' } } ] }).limit(5),
+      EstimatedIncome.find({ $or: [ { name: { $regex: query, $options: 'i' } }, { estimatedIncomeId: { $regex: query, $options: 'i' } } ] }).limit(5),
+      EstimatedExpense.find({ $or: [ { name: { $regex: query, $options: 'i' } }, { estimatedExpenseId: { $regex: query, $options: 'i' } } ] }).limit(5),
+      Event.find({ $or: [ { name: { $regex: query, $options: 'i' } }, { eventId: { $regex: query, $options: 'i' } } ] }).limit(5),
+      EventLabel.find({ $or: [ { label: { $regex: query, $options: 'i' } } ] }).limit(5),
+      Game.find({ $or: [ { name: { $regex: query, $options: 'i' } }, { gameId: { $regex: query, $options: 'i' } } ] }).limit(5),
+      LockSettings.find({ $or: [ { key: { $regex: query, $options: 'i' } } ] }).limit(5),
+      Moment.find({ $or: [ { title: { $regex: query, $options: 'i' } } ] }).limit(5),
+      PaymentDetails.find({ $or: [ { paymentId: { $regex: query, $options: 'i' } } ] }).limit(5),
+      PreviousYear.find({ $or: [ { year: { $regex: query, $options: 'i' } } ] }).limit(5),
+      Slide.find({ $or: [ { title: { $regex: query, $options: 'i' } } ] }).limit(5),
+      Notification.find({ $or: [ { title: { $regex: query, $options: 'i' } }, { message: { $regex: query, $options: 'i' } } ] }).limit(5),
+      NotificationHistory.find({ $or: [ { title: { $regex: query, $options: 'i' } }, { message: { $regex: query, $options: 'i' } } ] }).limit(5),
+      Banner.find({ $or: [ { title: { $regex: query, $options: 'i' } } ] }).limit(5),
+      ActivityLog.find({ $or: [ { action: { $regex: query, $options: 'i' } }, { user: { $regex: query, $options: 'i' } } ] }).limit(5),
+      ProcessedChunk.find({ chunkText: { $regex: query, $options: 'i' } }).limit(5),
+      ChatHistory.find({ chats: { $elemMatch: { message: { $regex: query, $options: 'i' } } } }).limit(5)
+    ]);
+    return {
+      incomes, expenses, users, payments, collections, committees, estimatedIncomes, estimatedExpenses, events, eventLabels, games, lockSettings, moments, paymentDetails, previousYears, slides, notifications, notificationHistories, banners, activityLogs, processedChunks, chatHistories
+    };
   } catch (error) {
     console.error('Error searching current data:', error);
-    return { incomes: [], expenses: [], users: [], payments: [] };
+    return {};
   }
 };
 
 export const getCurrentStats = async () => {
   try {
-    const incomes = await Income.find({ isDeleted: false });
-    const expenses = await Expense.find({ isDeleted: false });
-    const users = await User.find();
-    const payments = await Payment.find({ transactionStatus: 'successful' });
-    
+    const [
+      incomes, expenses, users, payments, collections, committees, estimatedIncomes, estimatedExpenses, events, eventLabels, games, lockSettings, moments, paymentDetails, previousYears, slides, notifications, notificationHistories, banners, activityLogs
+    ] = await Promise.all([
+      Income.find({ isDeleted: false }),
+      Expense.find({ isDeleted: false }),
+      User.find(),
+      Payment.find({ transactionStatus: 'successful' }),
+      Collection.find(),
+      Committee.find(),
+      EstimatedIncome.find(),
+      EstimatedExpense.find(),
+      Event.find(),
+      EventLabel.find(),
+      Game.find(),
+      LockSettings.find(),
+      Moment.find(),
+      PaymentDetails.find(),
+      PreviousYear.find(),
+      Slide.find(),
+      Notification.find(),
+      NotificationHistory.find(),
+      Banner.find(),
+      ActivityLog.find()
+    ]);
     const totalIncome = incomes.reduce((sum, income) => sum + income.amount, 0);
     const totalExpense = expenses.reduce((sum, expense) => sum + expense.amount, 0);
     const paidIncomes = incomes.filter(income => income.status === 'paid');
     const amountReceived = paidIncomes.reduce((sum, income) => sum + income.amount, 0);
-    
     return {
       totalIncome,
       totalExpense,
@@ -102,7 +134,23 @@ export const getCurrentStats = async () => {
       totalUsers: users.length,
       totalPayments: payments.length,
       incomeCount: incomes.length,
-      expenseCount: expenses.length
+      expenseCount: expenses.length,
+      collectionCount: collections.length,
+      committeeCount: committees.length,
+      estimatedIncomeCount: estimatedIncomes.length,
+      estimatedExpenseCount: estimatedExpenses.length,
+      eventCount: events.length,
+      eventLabelCount: eventLabels.length,
+      gameCount: games.length,
+      lockSettingCount: lockSettings.length,
+      momentCount: moments.length,
+      paymentDetailsCount: paymentDetails.length,
+      previousYearCount: previousYears.length,
+      slideCount: slides.length,
+      notificationCount: notifications.length,
+      notificationHistoryCount: notificationHistories.length,
+      bannerCount: banners.length,
+      activityLogCount: activityLogs.length
     };
   } catch (error) {
     console.error('Error getting current stats:', error);
@@ -258,14 +306,14 @@ export const chatWithViniLogic = async ({ message, registerId }) => {
       })).sort((a, b) => b.similarity - a.similarity).slice(0, 5);
       const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
       let context = `You are VINI, NBK Youth AI assistant. Answer based on this data:\n\n`;
-      context += `Current Stats: Total Income: ₹${currentStats.totalIncome?.toLocaleString('en-IN')}, Total Expense: ₹${currentStats.totalExpense?.toLocaleString('en-IN')}, Users: ${currentStats.totalUsers}\n\n`;
+      context += `Current Stats: Total Income: ₹${currentStats.totalIncome?.toLocaleString('en-IN')}, Total Expense: ₹${currentStats.totalExpense?.toLocaleString('en-IN')}, Users: ${currentStats.totalUsers}, Collections: ${currentStats.collectionCount}, Committees: ${currentStats.committeeCount}, Estimated Incomes: ${currentStats.estimatedIncomeCount}, Estimated Expenses: ${currentStats.estimatedExpenseCount}, Events: ${currentStats.eventCount}, Event Labels: ${currentStats.eventLabelCount}, Games: ${currentStats.gameCount}, Lock Settings: ${currentStats.lockSettingCount}, Moments: ${currentStats.momentCount}, Payment Details: ${currentStats.paymentDetailsCount}, Previous Years: ${currentStats.previousYearCount}, Slides: ${currentStats.slideCount}, Notifications: ${currentStats.notificationCount}, Notification Histories: ${currentStats.notificationHistoryCount}, Banners: ${currentStats.bannerCount}, Activity Logs: ${currentStats.activityLogCount}\n\n`;
       if (similarities.length > 0) {
         context += `Historical Data:\n`;
         similarities.slice(0, 3).forEach(chunk => {
           context += `${chunk.eventName} ${chunk.year}: ${chunk.chunkText.substring(0, 200)}...\n`;
         });
       }
-      context += `\nUser Question: ${message}\n\nProvide a helpful, natural response as VINI. Keep it concise and friendly.`;
+      context += `\nUser Question: ${message}\n\nProvide a helpful, natural response as VINI. Keep it concise and friendly. Use all available app data collections if relevant.`;
       const result = await model.generateContent(context);
       response = result.response.text();
     } catch (error) {

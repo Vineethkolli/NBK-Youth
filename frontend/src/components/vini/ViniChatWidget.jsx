@@ -153,31 +153,34 @@ function ViniChatWidget() {
             <div className="whitespace-pre-wrap">{otherLines.join('\n')}</div>
           )}
           {tableLines.length > 0 && (
-            <div className="overflow-x-auto">
-              <table className="min-w-full border border-gray-300 text-sm">
-                {tableLines.map((line, index) => {
-                  if (line.includes('---')) return null;
-                  const cells = line.split('|').map(cell => cell.trim()).filter(cell => cell);
-                  const isHeader = index === 0;
-                  
-                  return (
-                    <tr key={index} className={isHeader ? 'bg-gray-100' : ''}>
-                      {cells.map((cell, cellIndex) => (
-                        isHeader ? (
-                          <th key={cellIndex} className="border border-gray-300 px-3 py-2 font-medium text-left">
-                            {cell}
-                          </th>
-                        ) : (
-                          <td key={cellIndex} className="border border-gray-300 px-3 py-2">
-                            {cell}
-                          </td>
-                        )
-                      ))}
-                    </tr>
-                  );
-                })}
-              </table>
-            </div>
+       <div className="overflow-x-auto">
+  <table className="min-w-full border border-gray-300 text-sm">
+    <tbody>
+      {tableLines.map((line, index) => {
+        if (line.includes('---')) return null;
+        const cells = line.split('|').map(cell => cell.trim()).filter(cell => cell);
+        const isHeader = index === 0;
+        
+        return (
+          <tr key={index} className={isHeader ? 'bg-gray-100' : ''}>
+            {cells.map((cell, cellIndex) => (
+              isHeader ? (
+                <th key={cellIndex} className="border border-gray-300 px-3 py-2 font-medium text-left">
+                  {cell}
+                </th>
+              ) : (
+                <td key={cellIndex} className="border border-gray-300 px-3 py-2">
+                  {cell}
+                </td>
+              )
+            ))}
+          </tr>
+        );
+      })}
+    </tbody>
+  </table>
+</div>
+
           )}
         </div>
       );
