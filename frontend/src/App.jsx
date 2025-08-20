@@ -47,24 +47,28 @@ function RouteTracker() {
   }, [location]);
   return null; 
 }
-
 function AppContent() {
   const { user } = useAuth();
   const { isMaintenanceMode } = useMaintenanceMode();
+  const location = useLocation();
+
   if (isMaintenanceMode && user?.role !== 'developer') {
     return <MaintenancePage />;
   }
+
+  const isAuthPage = location.pathname.startsWith('/signin') || location.pathname.startsWith('/signup');
 
   return (
     <>
       <RouteTracker />
       <Toaster position="top-right" />
-      <PopupBanner />
+      {!isAuthPage && <PopupBanner />}
       <Routes>
         <Route element={<AuthLayout />}>
           <Route path="/signin" element={<SignIn />} />
           <Route path="/signup" element={<SignUp />} />
         </Route>
+
         <Route element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
           <Route path="/" element={<Home />} />
           <Route path="/profile" element={<Profile />} />
@@ -88,11 +92,14 @@ function AppContent() {
           <Route path="/committee" element={<Committee />} />
         </Route>
       </Routes>
-      <FloatingMusicIcon />
-      <ViniChatWidget />
+
+      {/* Only show in app, not on auth pages */}
+      {!isAuthPage && <FloatingMusicIcon />}
+      {!isAuthPage && <ViniChatWidget />}
     </>
   );
 }
+
 
 function App() {
   useEffect(() => {
