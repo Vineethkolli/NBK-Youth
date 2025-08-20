@@ -317,7 +317,7 @@ export const chatWithViniLogic = async ({ message, registerId }) => {
       const result = await model.generateContent(context);
       response = result.response.text();
     } catch (error) {
-      response = `This feature is in development or not available for your question yet. Please try a different query or ask about total income, expenses, or contributors.`;
+      response = `This feature is in development or not available for your question yet. Please try a different query or ask about income, expenses....`;
     }
   }
 
