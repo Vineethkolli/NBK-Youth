@@ -37,8 +37,6 @@ import PopupBanner from './components/developer/PopupBanner';
 import { initializeAnalytics, trackPageView } from './utils/analytics';
 import ActivityLogs from './pages/ActivityLogs'; 
 import Committee from './pages/Committee';
-import Records from './pages/Records';
-import ViniChat from './components/vini/ViniChat';
 
 function RouteTracker() {
   const location = useLocation();
@@ -87,11 +85,9 @@ function AppContent() {
           <Route path="/tech-stack" element={<TechStack />} />
           <Route path="/activity-logs" element={<ActivityLogs />} />
           <Route path="/committee" element={<Committee />} />
-          <Route path="/records" element={<Records />} />
         </Route>
       </Routes>
       <FloatingMusicIcon />
-      <ViniChat />
     </>
   );
 }

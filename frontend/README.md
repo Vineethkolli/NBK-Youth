@@ -25,13 +25,11 @@ DIRECTORY STRUCTURE
 |   |       committeeController.js
 |   |       developerController.js
 |   |       estimationController.js
-|   |       eventLabelController.js
 |   |       expenseController.js
 |   |       gameController.js
 |   |       hiddenProfileController.js
 |   |       homepageController.js
 |   |       incomeController.js
-|   |       lockSettingsController.js
 |   |       maintenanceController.js
 |   |       momentController.js
 |   |       notificationController.js
@@ -53,12 +51,10 @@ DIRECTORY STRUCTURE
 |   |       EstimatedExpense.js
 |   |       EstimatedIncome.js
 |   |       Event.js
-|   |       EventLabel.js
 |   |       Expense.js
 |   |       Game.js
 |   |       HiddenProfile.js
 |   |       Income.js
-|   |       LockSettings.js
 |   |       MaintenanceMode.js
 |   |       Moment.js
 |   |       Notification.js
@@ -78,13 +74,11 @@ DIRECTORY STRUCTURE
 |   |       committee.js
 |   |       developer.js
 |   |       estimation.js
-|   |       eventLabel.js
 |   |       expenses.js
 |   |       games.js
 |   |       hiddenProfiles.js
 |   |       homepage.js
 |   |       incomes.js
-|   |       lockSettings.js
 |   |       maintenance.js
 |   |       moments.js
 |   |       notifications.js
@@ -111,25 +105,41 @@ DIRECTORY STRUCTURE
     |   vercel.json
     |   vite.config.js
     |   
-    +---public
-    |   |   developerImage.png
-    |   |   google1f3713de9cdfe399.html
+    +---dev-dist
+    |       registerSW.js
+    |       sw.js
+    |       workbox-2e2c7e18.js
+    |       
+    +---dist
+    |   |   index.html
+    |   |   logo.png
     |   |   manifest.json
+    |   |   manifest.webmanifest
+    |   |   notificationlogo.png
+    |   |   registerSW.js
+    |   |   sw.js
     |   |   
-    |   \---logo
-    |           1200x630.png
-    |           128.png
-    |           144.png
-    |           152.png
-    |           16.png
-    |           167.png
-    |           180.png
-    |           192.png
-    |           32.png
-    |           512.png
-    |           96.png
-    |           notificationlogo.png
+    |   \---assets
+    |           html2canvas.esm-CBrSDip1.js
+    |           index-B6Tgvw9K.js
+    |           index-D5Bdzh-a.css
+    |           index.es-Htf3CKeG.js
+    |           purify.es-a-CayzAK.js
     |           
+    +---public
+    |       developerImage.png
+    |       logo-128x128.png
+    |       logo-144x144.png
+    |       logo-152x152.png
+    |       logo-192x192.png
+    |       logo-384x384.png
+    |       logo-512x512.png
+    |       logo-72x72.png
+    |       logo-96x96.png
+    |       logo.png
+    |       manifest.json
+    |       notificationlogo.png
+    |       
     \---src
         |   App.jsx
         |   index.css
@@ -155,15 +165,9 @@ DIRECTORY STRUCTURE
         |   |       OTPVerification.jsx
         |   |       ResetPassword.jsx
         |   |       
-        |   +---common
-        |   |       EventLabelDisplay.jsx
-        |   |       LockIndicator.jsx
-        |   |       
         |   +---developer
         |   |       BannerManager.jsx
         |   |       ClearData.jsx
-        |   |       EventLabelManager.jsx
-        |   |       LockManager.jsx
         |   |       MaintenanceMode.jsx
         |   |       PaymentDetails.jsx
         |   |       PopupBanner.jsx
@@ -196,9 +200,8 @@ DIRECTORY STRUCTURE
         |   |       
         |   +---home
         |   |       InstallApp.jsx
-        |   |       NotificationPrompt.jsx
+        |   |       SlideOrder.jsx
         |   |       Slideshow.jsx
-        |   |       SlidesOrder.jsx
         |   |       Timeline.jsx
         |   |       
         |   +---income
@@ -214,7 +217,6 @@ DIRECTORY STRUCTURE
         |   |       MomentGrid.jsx
         |   |       
         |   +---notifications
-        |   |       NotificationAutoRegister.jsx
         |   |       NotificationForm.jsx
         |   |       NotificationHistory.jsx
         |   |       
@@ -246,17 +248,15 @@ DIRECTORY STRUCTURE
         |   \---vibe
         |           CollectionItem.jsx
         |           CollectionManager.jsx
-        |           FloatingMusicIcon.jsx
         |           MusicPlayer.jsx
         |           SearchBar.jsx
         |           SongItem.jsx
+        |           SubCollectionItem.jsx
         |           
         +---context
         |       AuthContext.jsx
-        |       EventLabelContext.jsx
         |       HiddenProfileContext.jsx
         |       LanguageContext.jsx
-        |       LockContext.jsx
         |       MaintenanceModeContext.jsx
         |       MusicContext.jsx
         |       
@@ -292,10 +292,8 @@ DIRECTORY STRUCTURE
         \---utils
                 analytics.js
                 config.js
-                dateTime.js
                 gameUtils.js
                 mediaHelpers.js
-                notifications.js
                 paymentReceipt.js
                 roles.js
                 search.js
