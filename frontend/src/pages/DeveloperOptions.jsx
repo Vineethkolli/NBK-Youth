@@ -1,5 +1,6 @@
 import { useAuth } from '../context/AuthContext';
 import ClearData from '../components/developer/ClearData';
+import HistoricalDataManager from '../components/developer/HistoricalDataManager';
 
 function DeveloperOptions() {
   const { user } = useAuth();
@@ -30,6 +31,9 @@ function DeveloperOptions() {
 
       {/* Clear Data Section */}
         <ClearData />
+
+      {/* Historical Data Manager */}
+      <HistoricalDataManager />
     </div>
   );
 }
