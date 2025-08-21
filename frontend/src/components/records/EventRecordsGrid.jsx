@@ -23,27 +23,30 @@ function EventRecordsGrid({ records, isEditMode, onEdit, onDelete }) {
     setLoadingPreview(true); // start loader until iframe loads
   };
 
-  // Download PDF
-  const downloadFile = async (fileUrl, eventName, recordYear) => {
+  // Download PDF (direct link)
+  const downloadFile = (fileUrl, eventName, recordYear) => {
     try {
       setDownloading(true);
-      const response = await fetch(fileUrl);
-      if (!response.ok) throw new Error("Download failed");
 
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
+      const match = fileUrl.match(/[-\w]{25,}/);
+      if (!match) throw new Error("Invalid file link");
+
+      // Direct download link
+      const downloadUrl = `https://drive.google.com/uc?export=download&id=${match[0]}`;
 
       const link = document.createElement("a");
-      link.href = url;
+      link.href = downloadUrl;
       link.download = `${eventName}_${recordYear}.pdf`;
       document.body.appendChild(link);
       link.click();
       link.remove();
 
-      window.URL.revokeObjectURL(url);
+      // Simulate loader until browser takes over download
+      setTimeout(() => {
+        setDownloading(false);
+      }, 3000); 
     } catch (error) {
       alert("Error downloading file");
-    } finally {
       setDownloading(false);
     }
   };
@@ -118,7 +121,7 @@ function EventRecordsGrid({ records, isEditMode, onEdit, onDelete }) {
               </div>
               <div className="flex items-center space-x-3">
                 <button
-                  onClick={() => downloadFile(previewUrl.replace("/preview", "/view?usp=sharing"), previewName, previewYear)}
+                  onClick={() => downloadFile(previewUrl, previewName, previewYear)}
                   className="text-gray-600 hover:text-gray-900"
                   disabled={downloading}
                 >
