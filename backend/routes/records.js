@@ -40,6 +40,7 @@ router.post('/event-records',
 router.put('/event-records/:id',
   auth,
   checkRole(['developer']),
+  upload.single('file'),
   recordsController.updateEventRecord
 );
 router.delete('/event-records/:id',
