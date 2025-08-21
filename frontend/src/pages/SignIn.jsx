@@ -82,7 +82,7 @@ function SignIn() {
         {/* Hidden container for Google Translate */}
     <div id="google_translate_element" style={{ display: 'none' }}></div>
     <div className="relative ">
-      <div className="absolute top-6 right-0">
+      <div className="absolute top-10 right-0">
         <LanguageToggle /> 
       </div>
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -155,11 +155,16 @@ function SignIn() {
         </div>
       </form>
       </div>
-      <div className="w-full max-w-md text-black text-center mt-10">
-        <p className="font-bold text-lg tracking-wide">
-          Crafted with ❤️ Love
-        </p>
-      </div>
+     <div className="w-full max-w-md text-center mt-10">
+  <p className="font-semibold text-gray-700 text-sm md:text-base tracking-wide">
+    Developed by{" "}
+    <span className="text-green-600 font-bold text-lg md:text-xl">
+      Kolli Vineeth
+    </span>
+  </p>
+</div>
+
+
       <InstallApp />
     </>
   );
