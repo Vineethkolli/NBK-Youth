@@ -156,7 +156,7 @@ function SignIn() {
       </form>
       </div>
      <div className="w-full max-w-md text-center mt-10">
-  <p className="font-semibold text-gray-700 text-sm md:text-base tracking-wide">
+  <p className="font-semibold text-gray-700 md:text-base tracking-wide">
     Developed by{" "}
     <span className="text-green-600 font-bold text-lg md:text-xl">
       Kolli Vineeth
