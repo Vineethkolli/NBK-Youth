@@ -13,7 +13,7 @@ function FinancialRecordForm({ record, onClose, onSubmit }) {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Generate year options (2023 to next year)
+  // Generate year options  (2023 to next year)
   const currentYear = new Date().getFullYear();
   const yearOptions = [];
   for (let year = 2023; year <= currentYear + 1; year++) {
