@@ -34,8 +34,8 @@ export default function BannerManager() {
   const [formData, setFormData] = useState({
     title: '',
     message: '',
-    image: '',
-    video: '',
+    image: '', // will store File object
+    video: '', // will store File object
     status: 'disabled',
     periodicity: 1,
     duration: 0,
@@ -54,19 +54,31 @@ export default function BannerManager() {
     }
   };
 
-  const handleFileChange = async (e, type) => {
+  const handleFileChange = (e, type) => {
     const file = e.target.files[0];
     if (!file) return;
     if (file.size > 200 * 1024 * 1024) {
       toast.error('File size should be less than 200MB');
       return;
     }
-
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => {
-      setFormData(f => ({ ...f, [type]: reader.result }));
-    };
+    // If editing and replacing, set delete flag for old file
+    if (type === 'image') {
+      setFormData(f => ({
+        ...f,
+        image: file,
+        video: '',
+        deleteVideo: f.video && !f._id ? undefined : f.deleteVideo, // clear deleteVideo if not editing
+        deleteImage: f._id && f.image && !(f.image instanceof File) ? true : undefined
+      }));
+    } else if (type === 'video') {
+      setFormData(f => ({
+        ...f,
+        video: file,
+        image: '',
+        deleteImage: f.image && !f._id ? undefined : f.deleteImage, // clear deleteImage if not editing
+        deleteVideo: f._id && f.video && !(f.video instanceof File) ? true : undefined
+      }));
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -75,13 +87,47 @@ export default function BannerManager() {
     setSubmitting(true);
 
     try {
-      if (formData._id) {
-        await axios.put(`${API_URL}/api/banners/${formData._id}`, formData);
-        toast.success('Banner updated successfully');
+      const isEdit = Boolean(formData._id);
+      const url = isEdit
+        ? `${API_URL}/api/banners/${formData._id}`
+        : `${API_URL}/api/banners`;
+      const method = isEdit ? 'put' : 'post';
+
+      // Use FormData if image or video is present
+      const hasFile = formData.image instanceof File || formData.video instanceof File;
+      const isEditWithDelete = isEdit && (formData.deleteImage || formData.deleteVideo);
+      let dataToSend = null;
+      let config = {};
+      if (hasFile || isEditWithDelete) {
+        dataToSend = new FormData();
+        dataToSend.append('title', formData.title || '');
+        dataToSend.append('message', formData.message || '');
+        dataToSend.append('status', formData.status || 'disabled');
+        dataToSend.append('periodicity', formData.periodicity || 1);
+        dataToSend.append('duration', formData.duration || 0);
+        if (formData.image instanceof File) {
+          dataToSend.append('image', formData.image);
+        } else if (formData.video instanceof File) {
+          dataToSend.append('video', formData.video);
+        }
+        if (isEdit) {
+          if (formData.deleteImage) dataToSend.append('deleteImage', 'true');
+          if (formData.deleteVideo) dataToSend.append('deleteVideo', 'true');
+        }
+        config.headers = { 'Content-Type': 'multipart/form-data' };
       } else {
-        await axios.post(`${API_URL}/api/banners`, formData);
-        toast.success('Banner created successfully');
+        // No file, send as JSON
+        dataToSend = {
+          title: formData.title,
+          message: formData.message,
+          status: formData.status,
+          periodicity: formData.periodicity,
+          duration: formData.duration,
+        };
       }
+
+      await axios[method](url, dataToSend, config);
+      toast.success(`Banner ${isEdit ? 'updated' : 'created'} successfully`);
       setShowForm(false);
       resetForm();
       fetchBanners();
@@ -301,23 +347,31 @@ export default function BannerManager() {
                   accept="image/*"
                   onChange={(e) => handleFileChange(e, 'image')}
                   className="mt-1 block w-full"
+                  disabled={!!formData.video}
                 />
                 {formData.image && (
                   <div className="relative mt-2 h-32 w-full">
                     <img
-                      src={formData.image}
+                      src={formData.image instanceof File ? URL.createObjectURL(formData.image) : formData.image}
                       alt="Preview"
                       className="h-full object-contain"
                     />
                     <button
-                      onClick={() =>
-                        setFormData(f => ({ ...f, image: '' }))
-                      }
+                      type="button"
+                      onClick={() => setFormData(f => ({
+                        ...f,
+                        image: '',
+                        // If editing and there was an old image, set deleteImage flag
+                        deleteImage: f._id && f.image && !(f.image instanceof File) ? true : undefined
+                      }))}
                       className="absolute top-0 right-0 bg-black bg-opacity-50 text-white p-1 rounded-full"
                     >
                       <X className="h-4 w-4" />
                     </button>
                   </div>
+                )}
+                {formData.video && (
+                  <div className="text-xs text-red-500 mt-1">Remove video to select an image.</div>
                 )}
               </div>
 
@@ -331,23 +385,31 @@ export default function BannerManager() {
                   accept="video/*"
                   onChange={(e) => handleFileChange(e, 'video')}
                   className="mt-1 block w-full"
+                  disabled={!!formData.image}
                 />
                 {formData.video && (
                   <div className="relative mt-2 h-32 w-full">
                     <video
-                      src={formData.video}
+                      src={formData.video instanceof File ? URL.createObjectURL(formData.video) : formData.video}
                       controls
                       className="h-full object-contain"
                     />
                     <button
-                      onClick={() =>
-                        setFormData(f => ({ ...f, video: '' }))
-                      }
+                      type="button"
+                      onClick={() => setFormData(f => ({
+                        ...f,
+                        video: '',
+                        // If editing and there was an old video, set deleteVideo flag
+                        deleteVideo: f._id && f.video && !(f.video instanceof File) ? true : undefined
+                      }))}
                       className="absolute top-0 right-0 bg-black bg-opacity-50 text-white p-1 rounded-full"
                     >
                       <X className="h-4 w-4" />
                     </button>
                   </div>
+                )}
+                {formData.image && (
+                  <div className="text-xs text-red-500 mt-1">Remove image to select a video.</div>
                 )}
               </div>
 
@@ -409,7 +471,9 @@ export default function BannerManager() {
                       : 'bg-indigo-600 text-white hover:bg-indigo-700'
                   }`}
                 >
-                  {formData._id ? 'Update' : 'Create'}
+                  {submitting
+                    ? (formData._id ? 'Updating...' : 'Creating...')
+                    : (formData._id ? 'Update' : 'Create')}
                 </button>
               </div>
             </form>

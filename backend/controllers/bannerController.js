@@ -121,19 +121,36 @@ export const bannerController = {
       if (deleteImage === 'true' || deleteImageCloudinary === 'true') {
         updateOps.$unset = { ...(updateOps.$unset || {}), image: "" };
       }
-      // if user uploaded a new image:
-      else if (req.files?.image?.[0]) {
+      // Always upload new image if present
+      if (req.files?.image?.[0]) {
         imageUrl = await uploadToCloudinary(req.files.image[0].buffer, 'Banners', 'image');
         updateOps.$set.image = imageUrl;
+        // If $unset and $set both present, $set will overwrite
+        if (updateOps.$unset && updateOps.$unset.image !== undefined) {
+          delete updateOps.$unset.image;
+        }
       }
 
       // same pattern for video
+      // If deleteVideo flag is set, or a new video is uploaded, always delete the old video from Cloudinary
+      if ((deleteVideo === 'true' || deleteVideoCloudinary === 'true' || req.files?.video?.[0]) && originalBanner.video && originalBanner.video.includes('cloudinary.com')) {
+        try {
+          const publicId = originalBanner.video.split('/').pop().split('.')[0];
+          await cloudinary.uploader.destroy(`Banners/${publicId}`, { resource_type: 'video' });
+          videoUrl = undefined;
+        } catch (err) {
+          console.warn('Failed to delete banner video from Cloudinary:', err);
+        }
+      }
       if (deleteVideo === 'true' || deleteVideoCloudinary === 'true') {
         updateOps.$unset = { ...(updateOps.$unset || {}), video: "" };
       }
-      else if (req.files?.video?.[0]) {
+      if (req.files?.video?.[0]) {
         videoUrl = await uploadToCloudinary(req.files.video[0].buffer, 'Banners', 'video');
         updateOps.$set.video = videoUrl;
+        if (updateOps.$unset && updateOps.$unset.video !== undefined) {
+          delete updateOps.$unset.video;
+        }
       }
 
       const banner = await Banner.findByIdAndUpdate(
