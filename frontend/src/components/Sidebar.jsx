@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, User, FileText, UserCog, Users, Bell, ShieldCheck, Settings, IndianRupee, DollarSign, Trash2, CheckSquare, BarChart2, Terminal, MusicIcon, CameraIcon, TrophyIcon, X, ChevronLeft, Calculator, Layers, LayoutDashboard, FileClock } from 'lucide-react';
+import { Home, User, FolderOpen, UserCog, Users, Bell, ShieldCheck, Settings, IndianRupee, DollarSign, Trash2, CheckSquare, BarChart2, Terminal, MusicIcon, CameraIcon, TrophyIcon, X, ChevronLeft, Calculator, Layers, LayoutDashboard, FileClock } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 function Sidebar({ isOpen, onNavigate }) {
@@ -16,7 +16,7 @@ function Sidebar({ isOpen, onNavigate }) {
     { to: '/income', icon: IndianRupee, label: 'Income' },
     { to: '/expense', icon: DollarSign, label: 'Expense' },
     { to: '/estimation', icon: Calculator, label: 'Estimation' },
-    { to: '/records', icon: FileText, label: 'Records' },
+    { to: '/records', icon: FolderOpen, label: 'Records' },
     { to: '/profile', icon: User, label: 'Profile' },
     { to: '/pay-online', icon: ShieldCheck, label: 'Pay Online' },
     { to: '/notifications', icon: Bell, label: 'Notifications' },
@@ -58,7 +58,7 @@ function Sidebar({ isOpen, onNavigate }) {
     <nav className="flex-1 px-2 py-4 space-y-1">
       {links.map((link, index) => {
         const Icon = link.icon;
-        const isSeparator = [3, 7, 11, 15].includes(index);
+        const isSeparator = [3, 8, 12, 16].includes(index);
         return (
           <div key={link.to}>
             <Link

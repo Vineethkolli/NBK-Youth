@@ -80,7 +80,7 @@ function FloatingMusicIcon() {
 
   return (
     <div
-      className={`fixed z-50 w-14 h-14 bg-gradient-to-r from-indigo-500 to-purple-600
+      className={`fixed z-50 w-12 h-12 bg-gradient-to-r from-indigo-500 to-purple-600
                   rounded-full shadow-lg select-none transition-transform
                   ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
       style={{ left: position.x, top: position.y, touchAction: 'none' }}
