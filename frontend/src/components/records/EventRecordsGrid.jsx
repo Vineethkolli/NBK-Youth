@@ -1,62 +1,64 @@
 import { useState } from "react";
 import { Edit2, Trash2, FileText, ExternalLink, X, Download, Loader2 } from "lucide-react";
 
-function EventRecordsGrid({ records, isEditMode, onEdit, onDelete }) {
+function EventRecordsGrid({ records = [], isEditMode, onEdit, onDelete }) {
   const [previewUrl, setPreviewUrl] = useState(null);
   const [previewName, setPreviewName] = useState(null);
   const [previewYear, setPreviewYear] = useState(null);
+  const [previewFileUrl, setPreviewFileUrl] = useState(null); // store actual file url
   const [loadingPreview, setLoadingPreview] = useState(false);
   const [downloading, setDownloading] = useState(false);
 
-  // Open PDF Preview
+  // Open PDF Preview (Cloudinary URL)
   const previewFile = (fileUrl, eventName, recordYear) => {
-    const match = fileUrl.match(/[-\w]{25,}/); // extract Drive file ID
-    if (!match) {
-      alert("Invalid file link");
+    if (!fileUrl) {
+      alert("File URL not available");
       return;
     }
-
-    const previewLink = `https://drive.google.com/file/d/${match[0]}/preview`;
-    setPreviewUrl(previewLink);
+    const googleViewerUrl = `https://docs.google.com/gview?url=${encodeURIComponent(fileUrl)}&embedded=true`;
+    setPreviewUrl(googleViewerUrl);
+    setPreviewFileUrl(fileUrl); // keep real file url for download
     setPreviewName(eventName);
     setPreviewYear(recordYear);
-    setLoadingPreview(true); // start loader until iframe loads
+    setLoadingPreview(true);
   };
 
-  // Download PDF (direct link)
-  const downloadFile = (fileUrl, eventName, recordYear) => {
+  // Download PDF by fetching as blob then forcing download with correct filename
+  const downloadFile = async (fileUrl, eventName, recordYear) => {
     try {
       setDownloading(true);
+      const resp = await fetch(fileUrl, { method: "GET" });
+      if (!resp.ok) throw new Error("Failed to download file");
 
-      const match = fileUrl.match(/[-\w]{25,}/);
-      if (!match) throw new Error("Invalid file link");
-
-      // Direct download link
-      const downloadUrl = `https://drive.google.com/uc?export=download&id=${match[0]}`;
-
+      const blob = await resp.blob();
+      const blobUrl = window.URL.createObjectURL(
+        new Blob([blob], { type: "application/pdf" })
+      );
       const link = document.createElement("a");
-      link.href = downloadUrl;
-      link.download = `${eventName}_${recordYear}.pdf`;
+      const safeEvent = (eventName || "Event").replace(/[/\\?%*:|"<>]/g, "_"); // sanitize
+      const filename = `${safeEvent}_Record_${recordYear || "unknown"}.pdf`;
+      link.href = blobUrl;
+      link.setAttribute("download", filename);
       document.body.appendChild(link);
       link.click();
-      link.remove();
-
-      // Simulate loader until browser takes over download
-      setTimeout(() => {
-        setDownloading(false);
-      }, 3000); 
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
     } catch (error) {
+      console.error(error);
       alert("Error downloading file");
+    } finally {
       setDownloading(false);
     }
   };
 
-  if (records.length === 0) {
+  if (!records || records.length === 0) {
     return (
       <div className="text-center py-12">
         <FileText className="h-12 w-12 mx-auto text-gray-300 mb-4" />
         <p className="text-gray-500">No event records found</p>
-        <p className="text-sm text-gray-400">Upload PDF files to manage event records</p>
+        <p className="text-sm text-gray-400">
+          Upload PDF files to manage event records
+        </p>
       </div>
     );
   }
@@ -79,30 +81,58 @@ function EventRecordsGrid({ records, isEditMode, onEdit, onDelete }) {
                     <p className="text-sm text-gray-500">{record.recordYear}</p>
                   </div>
                 </div>
-                {isEditMode && (
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => onEdit(record)}
-                      className="text-blue-600 hover:text-blue-800"
-                    >
-                      <Edit2 className="h-4 w-4" />
-                    </button>
-                    <button
-                      onClick={() => onDelete(record._id)}
-                      className="text-red-600 hover:text-red-800"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
-                )}
+
+                <div className="flex items-center space-x-2">
+                  {/* Download button */}
+                  <button
+                    onClick={() =>
+                      downloadFile(
+                        record.fileUrl,
+                        record.eventName,
+                        record.recordYear
+                      )
+                    }
+                    className="text-gray-600 hover:text-gray-900"
+                    title="Download PDF"
+                    disabled={downloading}
+                  >
+                    {downloading ? (
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                    ) : (
+                      <Download className="h-5 w-5" />
+                    )}
+                  </button>
+
+                  {isEditMode && (
+                    <>
+                      <button
+                        onClick={() => onEdit(record)}
+                        className="text-blue-600 hover:text-blue-800"
+                        title="Edit"
+                      >
+                        <Edit2 className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => onDelete(record._id)}
+                        className="text-red-600 hover:text-red-800"
+                        title="Delete"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </>
+                  )}
+                </div>
               </div>
 
               <button
-                onClick={() => previewFile(record.fileUrl, record.eventName, record.recordYear)}
+                onClick={() =>
+                  previewFile(record.fileUrl, record.eventName, record.recordYear)
+                }
                 className="w-full mt-4 flex items-center justify-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
+                title="Open File (preview)"
               >
                 <ExternalLink className="h-4 w-4 mr-2" />
-                Open File
+                Open
               </button>
             </div>
           </div>
@@ -121,7 +151,9 @@ function EventRecordsGrid({ records, isEditMode, onEdit, onDelete }) {
               </div>
               <div className="flex items-center space-x-3">
                 <button
-                  onClick={() => downloadFile(previewUrl, previewName, previewYear)}
+                  onClick={() =>
+                    downloadFile(previewFileUrl, previewName, previewYear)
+                  }
                   className="text-gray-600 hover:text-gray-900"
                   disabled={downloading}
                 >
@@ -136,6 +168,7 @@ function EventRecordsGrid({ records, isEditMode, onEdit, onDelete }) {
                     setPreviewUrl(null);
                     setPreviewName(null);
                     setPreviewYear(null);
+                    setPreviewFileUrl(null);
                     setLoadingPreview(false);
                   }}
                   className="text-gray-600 hover:text-gray-900"
@@ -148,7 +181,7 @@ function EventRecordsGrid({ records, isEditMode, onEdit, onDelete }) {
             {/* PDF Viewer */}
             <div className="flex-1 relative">
               {loadingPreview && (
-                <div className="absolute inset-0 flex items-center justify-center bg-white">
+                <div className="absolute inset-0 flex items-center justify-center bg-white z-10">
                   <Loader2 className="h-10 w-10 text-indigo-600 animate-spin" />
                 </div>
               )}
