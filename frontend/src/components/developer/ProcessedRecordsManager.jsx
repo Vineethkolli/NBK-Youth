@@ -1,0 +1,314 @@
+import { useState, useEffect } from 'react';
+import { Plus, Edit2, Trash2, X, RefreshCw, Database, Play } from 'lucide-react';
+import { toast } from 'react-hot-toast';
+import axios from 'axios';
+import { API_URL } from '../../utils/config';
+
+function ProcessedRecordsManager() {
+  const [processedRecords, setProcessedRecords] = useState([]);
+  const [snapshots, setSnapshots] = useState([]);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [processingRecord, setProcessingRecord] = useState(null);
+  const [formData, setFormData] = useState({
+    snapshotId: '',
+    selectedCollections: []
+  });
+
+  useEffect(() => {
+    fetchProcessedRecords();
+    fetchSnapshots();
+  }, []);
+
+  const fetchProcessedRecords = async () => {
+    try {
+      const { data } = await axios.get(`${API_URL}/api/processed-records`);
+      setProcessedRecords(data);
+    } catch (error) {
+      toast.error('Failed to fetch processed records');
+    }
+  };
+
+  const fetchSnapshots = async () => {
+    try {
+      const { data } = await axios.get(`${API_URL}/api/snapshots`);
+      setSnapshots(data);
+    } catch (error) {
+      toast.error('Failed to fetch snapshots');
+    }
+  };
+
+  const getSelectedSnapshot = () => {
+    return snapshots.find(s => s.snapshotId === formData.snapshotId);
+  };
+
+  const getAvailableCollections = () => {
+    const snapshot = getSelectedSnapshot();
+    if (!snapshot) return [];
+    
+    const available = [];
+    Object.entries(snapshot.collections).forEach(([key, value]) => {
+      if (Array.isArray(value) && value.length > 0) {
+        available.push(key);
+      }
+    });
+    
+    // Add Stats if it exists
+    if (snapshot.stats && Object.keys(snapshot.stats).length > 0) {
+      available.push('Stats');
+    }
+    
+    return available;
+  };
+
+  const handleCollectionToggle = (collection) => {
+    setFormData(prev => ({
+      ...prev,
+      selectedCollections: prev.selectedCollections.includes(collection)
+        ? prev.selectedCollections.filter(c => c !== collection)
+        : [...prev.selectedCollections, collection]
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!formData.snapshotId) {
+      toast.error('Please select a snapshot');
+      return;
+    }
+    if (formData.selectedCollections.length === 0) {
+      toast.error('Please select at least one collection');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      await axios.post(`${API_URL}/api/processed-records`, formData);
+      toast.success('Processed record created successfully');
+      setShowAddForm(false);
+      resetForm();
+      fetchProcessedRecords();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to create processed record');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleProcess = async (record) => {
+    const action = record.status === 'ready' ? 'reprocess' : 'process';
+    if (!window.confirm(`Are you sure you want to ${action} this record?`)) return;
+
+    setProcessingRecord(record._id);
+    try {
+      const { data } = await axios.post(`${API_URL}/api/processed-records/${record._id}/process`);
+      toast.success(`Record ${action}ed successfully! ${data.chunksCount} chunks created.`);
+      fetchProcessedRecords();
+    } catch (error) {
+      toast.error(`Failed to ${action} record`);
+    } finally {
+      setProcessingRecord(null);
+    }
+  };
+
+  const handleDelete = async (record) => {
+    if (!window.confirm('Are you sure you want to delete this processed record?')) return;
+
+    try {
+      await axios.delete(`${API_URL}/api/processed-records/${record._id}`);
+      toast.success('Processed record deleted successfully');
+      fetchProcessedRecords();
+    } catch (error) {
+      toast.error('Failed to delete processed record');
+    }
+  };
+
+  const resetForm = () => {
+    setFormData({
+      snapshotId: '',
+      selectedCollections: []
+    });
+  };
+
+  const getStatusColor = (status, recordId) => {
+    if (processingRecord === recordId) return 'text-orange-600';
+    switch (status) {
+      case 'ready': return 'text-green-600';
+      case 'processing': return 'text-orange-600';
+      case 'error': return 'text-red-600';
+      default: return 'text-gray-600';
+    }
+  };
+
+  const getStatusText = (status, recordId) => {
+    if (processingRecord === recordId) return 'Processing...';
+    return status.charAt(0).toUpperCase() + status.slice(1);
+  };
+
+  return (
+    <div className="bg-white rounded-lg shadow p-6">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-xl font-semibold flex items-center">
+          <Database className="h-5 w-5 mr-2" />
+          Processed Records
+        </h2>
+        <div className="flex space-x-2">
+          <button
+            onClick={() => setShowAddForm(true)}
+            className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Add
+          </button>
+          <button
+            onClick={() => setIsEditMode(!isEditMode)}
+            className={`flex items-center px-4 py-2 rounded-md ${
+              isEditMode ? 'bg-red-600 text-white' : 'bg-gray-200 text-gray-700'
+            }`}
+          >
+            <Edit2 className="h-4 w-4 mr-2" />
+            {isEditMode ? 'Done' : 'Edit'}
+          </button>
+        </div>
+      </div>
+
+      {/* Processed Records List */}
+      <div className="space-y-4">
+        {processedRecords.length === 0 ? (
+          <div className="text-center text-gray-500 py-8">
+            <Database className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+            <p>No processed records yet</p>
+            <p className="text-sm">Click "Add" to create your first processed record</p>
+          </div>
+        ) : (
+          processedRecords.map((record) => (
+            <div key={record._id} className="border rounded-lg p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <h3 className="font-medium text-lg">{record.eventName} {record.year}</h3>
+                    <span className={`text-sm font-medium ${getStatusColor(record.status, record._id)}`}>
+                      ({getStatusText(record.status, record._id)})
+                    </span>
+                  </div>
+                  <p className="text-sm text-gray-600 mb-1">
+                    Collections: {record.selectedCollections.join(', ')}
+                  </p>
+                  <p className="text-sm text-gray-600 mb-1">
+                    Chunks: {record.chunksCount}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    From snapshot {record.snapshotId} • Added by {record.addedBy}
+                  </p>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  {record.status !== 'processing' && (
+                    <button
+                      onClick={() => handleProcess(record)}
+                      disabled={processingRecord === record._id}
+                      className="flex items-center px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+                    >
+                      {record.status === 'ready' ? (
+                        <>
+                          <RefreshCw className="h-4 w-4 mr-2" />
+                          Reprocess
+                        </>
+                      ) : (
+                        <>
+                          <Play className="h-4 w-4 mr-2" />
+                          Process
+                        </>
+                      )}
+                    </button>
+                  )}
+                  
+                  {isEditMode && (
+                    <button
+                      onClick={() => handleDelete(record)}
+                      className="text-red-600 hover:text-red-800"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* Add Form Modal */}
+      {showAddForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-medium">Create Processed Record</h3>
+              <button onClick={() => setShowAddForm(false)}>
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Snapshot *</label>
+                <select
+                  required
+                  value={formData.snapshotId}
+                  onChange={(e) => setFormData({ ...formData, snapshotId: e.target.value, selectedCollections: [] })}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                >
+                  <option value="">Select Snapshot</option>
+                  {snapshots.map(snapshot => (
+                    <option key={snapshot._id} value={snapshot.snapshotId}>
+                      {snapshot.eventName} {snapshot.year}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {formData.snapshotId && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Select Collections *</label>
+                  <div className="space-y-2">
+                    {getAvailableCollections().map(collection => (
+                      <label key={collection} className="flex items-center">
+                        <input
+                          type="checkbox"
+                          checked={formData.selectedCollections.includes(collection)}
+                          onChange={() => handleCollectionToggle(collection)}
+                          className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                        />
+                        <span className="ml-2 text-sm text-gray-900">{collection}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="flex justify-end space-x-2">
+                <button
+                  type="button"
+                  onClick={() => setShowAddForm(false)}
+                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
+                >
+                  {isSubmitting ? 'Creating...' : 'Add'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default ProcessedRecordsManager;

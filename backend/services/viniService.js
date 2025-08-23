@@ -3,8 +3,8 @@ import User from '../models/User.js';
 import Income from '../models/Income.js';
 import Expense from '../models/Expense.js';
 import Payment from '../models/Payment.js';
-import ProcessedChunk from '../models/ProcessedChunk.js';
 import ChatHistory from '../models/ChatHistory.js';
+import ProcessedChunk from '../models/ProcessedChunk.js';
 import Collection from '../models/Collection.js';
 import Committee from '../models/Committee.js';
 import EstimatedIncome from '../models/EstimatedIncome.js';
@@ -85,11 +85,10 @@ export const searchCurrentData = async (query) => {
       NotificationHistory.find({ $or: [ { title: { $regex: query, $options: 'i' } }, { message: { $regex: query, $options: 'i' } } ] }).limit(5),
       Banner.find({ $or: [ { title: { $regex: query, $options: 'i' } } ] }).limit(5),
       ActivityLog.find({ $or: [ { action: { $regex: query, $options: 'i' } }, { user: { $regex: query, $options: 'i' } } ] }).limit(5),
-      ProcessedChunk.find({ chunkText: { $regex: query, $options: 'i' } }).limit(5),
       ChatHistory.find({ chats: { $elemMatch: { message: { $regex: query, $options: 'i' } } } }).limit(5)
     ]);
     return {
-      incomes, expenses, users, payments, collections, committees, estimatedIncomes, estimatedExpenses, events, eventLabels, games, lockSettings, moments, paymentDetails, previousYears, slides, notifications, notificationHistories, banners, activityLogs, processedChunks, chatHistories
+      incomes, expenses, users, payments, collections, committees, estimatedIncomes, estimatedExpenses, events, eventLabels, games, lockSettings, moments, paymentDetails, previousYears, slides, notifications, notificationHistories, banners, activityLogs, chatHistories
     };
   } catch (error) {
     console.error('Error searching current data:', error);
@@ -185,10 +184,14 @@ export const chatWithViniLogic = async ({ message, registerId }) => {
     if (yearMatch) {
       const year = parseInt(yearMatch[0]);
       const eventName = eventMatch ? eventMatch[1] : null;
-      const historicalChunks = await ProcessedChunk.find({ status: 'ready', year });
+      const historicalChunks = await ProcessedChunk.find({ 
+        status: 'ready', 
+        year,
+        ...(eventName && { eventName: { $regex: eventName, $options: 'i' } })
+      });
       let found = false;
       for (const chunk of historicalChunks) {
-        if ((!eventName || (chunk.eventName && chunk.eventName.toLowerCase().includes(eventName.toLowerCase()))) && chunk.chunkText.toLowerCase().includes('vineeth')) {
+        if (chunk.chunkText.toLowerCase().includes('vineeth')) {
           const lines = chunk.chunkText.split('\n').filter(l => l.toLowerCase().includes('vineeth'));
           let amount = null;
           for (const line of lines) {
@@ -219,19 +222,21 @@ export const chatWithViniLogic = async ({ message, registerId }) => {
     if (yearMatch) {
       const year = parseInt(yearMatch[0]);
       const eventName = eventMatch ? eventMatch[1] : null;
-      const historicalChunks = await ProcessedChunk.find({ status: 'ready', year });
+      const historicalChunks = await ProcessedChunk.find({ 
+        status: 'ready', 
+        year,
+        ...(eventName && { eventName: { $regex: eventName, $options: 'i' } })
+      });
       let found = false;
       for (const chunk of historicalChunks) {
-        if (!eventName || (chunk.eventName && chunk.eventName.toLowerCase().includes(eventName.toLowerCase()))) {
-          const lines = chunk.chunkText.split('\n').filter(l => l.toLowerCase().includes('income id'));
-          if (lines.length >= 1) {
-            resp += `Top 3 contributors for ${chunk.eventName} ${year} (from records):\n`;
-            for (let i = 0; i < 3 && i < lines.length; i++) {
-              resp += `${lines[i]}\n`;
-            }
-            found = true;
-            break;
+        const lines = chunk.chunkText.split('\n').filter(l => l.toLowerCase().includes('income id'));
+        if (lines.length >= 1) {
+          resp += `Top 3 contributors for ${chunk.eventName} ${year} (from records):\n`;
+          for (let i = 0; i < 3 && i < lines.length; i++) {
+            resp += `${lines[i]}\n`;
           }
+          found = true;
+          break;
         }
       }
       if (!found) resp = `No top contributors found for ${eventName ? eventName + ' ' : ''}${year}.`;
@@ -258,16 +263,19 @@ export const chatWithViniLogic = async ({ message, registerId }) => {
     const eventMatch = message.match(/([a-zA-Z]+)\s*20\d{2}/);
     if (yearMatch) {
       const year = parseInt(yearMatch[0]);
-      const historicalChunks = await ProcessedChunk.find({ status: 'ready', year });
+      const eventName = eventMatch ? eventMatch[1] : null;
+      const historicalChunks = await ProcessedChunk.find({ 
+        status: 'ready', 
+        year,
+        ...(eventName && { eventName: { $regex: eventName, $options: 'i' } })
+      });
       let found = false;
       for (const chunk of historicalChunks) {
-        if (!eventMatch || (chunk.eventName && chunk.eventName.toLowerCase().includes(eventMatch[1].toLowerCase()))) {
-          response = `The total income for ${chunk.eventName} ${year} is ₹${chunk.metadata.totalIncome?.toLocaleString('en-IN') || 'N/A'}.`;
-          found = true;
-          break;
-        }
+        response = `The total income for ${chunk.eventName} ${year} is ₹${chunk.metadata.totalIncome?.toLocaleString('en-IN') || 'N/A'}.`;
+        found = true;
+        break;
       }
-      if (!found) response = `No historical income data found for ${eventMatch ? eventMatch[1] + ' ' : ''}${year}.`;
+      if (!found) response = `No historical income data found for ${eventName ? eventName + ' ' : ''}${year}.`;
     } else {
       const currentStats = await getCurrentStats();
       response = `The total income for the current event is ₹${currentStats.totalIncome?.toLocaleString('en-IN') || '0'}.`;
@@ -279,16 +287,19 @@ export const chatWithViniLogic = async ({ message, registerId }) => {
     const eventMatch = message.match(/([a-zA-Z]+)\s*20\d{2}/);
     if (yearMatch) {
       const year = parseInt(yearMatch[0]);
-      const historicalChunks = await ProcessedChunk.find({ status: 'ready', year });
+      const eventName = eventMatch ? eventMatch[1] : null;
+      const historicalChunks = await ProcessedChunk.find({ 
+        status: 'ready', 
+        year,
+        ...(eventName && { eventName: { $regex: eventName, $options: 'i' } })
+      });
       let found = false;
       for (const chunk of historicalChunks) {
-        if (!eventMatch || (chunk.eventName && chunk.eventName.toLowerCase().includes(eventMatch[1].toLowerCase()))) {
-          response = `The total expense for ${chunk.eventName} ${year} is ₹${chunk.metadata.totalExpense?.toLocaleString('en-IN') || 'N/A'}.`;
-          found = true;
-          break;
-        }
+        response = `The total expense for ${chunk.eventName} ${year} is ₹${chunk.metadata.totalExpense?.toLocaleString('en-IN') || 'N/A'}.`;
+        found = true;
+        break;
       }
-      if (!found) response = `No historical expense data found for ${eventMatch ? eventMatch[1] + ' ' : ''}${year}.`;
+      if (!found) response = `No historical expense data found for ${eventName ? eventName + ' ' : ''}${year}.`;
     } else {
       const currentStats = await getCurrentStats();
       response = `The total expense for the current event is ₹${currentStats.totalExpense?.toLocaleString('en-IN') || '0'}.`;
@@ -299,21 +310,21 @@ export const chatWithViniLogic = async ({ message, registerId }) => {
     try {
       const queryEmbedding = await generateEmbedding(message);
       const currentStats = await getCurrentStats();
-      const historicalChunks = await ProcessedChunk.find({ status: 'ready' });
+      const historicalChunks = await ProcessedChunk.find({ status: 'ready' }).limit(10);
       const similarities = historicalChunks.map(chunk => ({
         ...chunk.toObject(),
         similarity: cosineSimilarity(queryEmbedding, chunk.embedding)
       })).sort((a, b) => b.similarity - a.similarity).slice(0, 5);
       const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
       let context = `You are VINI, NBK Youth AI assistant. Answer based on this data:\n\n`;
-      context += `Current Stats: Total Income: ₹${currentStats.totalIncome?.toLocaleString('en-IN')}, Total Expense: ₹${currentStats.totalExpense?.toLocaleString('en-IN')}, Users: ${currentStats.totalUsers}, Collections: ${currentStats.collectionCount}, Committees: ${currentStats.committeeCount}, Estimated Incomes: ${currentStats.estimatedIncomeCount}, Estimated Expenses: ${currentStats.estimatedExpenseCount}, Events: ${currentStats.eventCount}, Event Labels: ${currentStats.eventLabelCount}, Games: ${currentStats.gameCount}, Lock Settings: ${currentStats.lockSettingCount}, Moments: ${currentStats.momentCount}, Payment Details: ${currentStats.paymentDetailsCount}, Previous Years: ${currentStats.previousYearCount}, Slides: ${currentStats.slideCount}, Notifications: ${currentStats.notificationCount}, Notification Histories: ${currentStats.notificationHistoryCount}, Banners: ${currentStats.bannerCount}, Activity Logs: ${currentStats.activityLogCount}\n\n`;
+      context += `Current Stats: Total Income: ₹${currentStats.totalIncome?.toLocaleString('en-IN')}, Total Expense: ₹${currentStats.totalExpense?.toLocaleString('en-IN')}, Users: ${currentStats.totalUsers}\n\n`;
       if (similarities.length > 0) {
         context += `Historical Data:\n`;
         similarities.slice(0, 3).forEach(chunk => {
           context += `${chunk.eventName} ${chunk.year}: ${chunk.chunkText.substring(0, 200)}...\n`;
         });
       }
-      context += `\nUser Question: ${message}\n\nProvide a helpful, natural response as VINI. Keep it concise and friendly. Use all available app data collections if relevant.`;
+      context += `\nUser Question: ${message}\n\nProvide a helpful, natural response as VINI. Keep it concise and friendly.`;
       const result = await model.generateContent(context);
       response = result.response.text();
     } catch (error) {

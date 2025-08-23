@@ -30,6 +30,8 @@ import eventLabelRoutes from './routes/eventLabel.js';
 import lockSettingsRoutes from './routes/lockSettings.js';
 import viniRoutes from './routes/vini.js';
 import recordsRoutes from './routes/records.js';
+import snapshotRoutes from './routes/snapshots.js';
+import processedRecordRoutes from './routes/processedRecords.js';
 
 dotenv.config();
 
@@ -85,6 +87,8 @@ app.use('/api/event-label', eventLabelRoutes);
 app.use('/api/lock-settings', lockSettingsRoutes);
 app.use('/api/vini', viniRoutes);
 app.use('/api/records', recordsRoutes);
+app.use('/api/snapshots', snapshotRoutes);
+app.use('/api/processed-records', processedRecordRoutes);
 
 // Health check endpoint
 app.get('/', (req, res) => {
