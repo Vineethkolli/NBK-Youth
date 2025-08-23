@@ -33,7 +33,7 @@ import { EventLabelProvider } from './context/EventLabelContext';
 import { LockProvider } from './context/LockContext';
 import FloatingMusicIcon from './components/vibe/FloatingMusicIcon';
 import TechStack from './pages/TechStack'
-import PopupBanner from './components/developer/PopupBanner';
+import PopupBanner from './components/adminPanel/PopupBanner';
 import { initializeAnalytics, trackPageView } from './utils/analytics';
 import ActivityLogs from './pages/ActivityLogs'; 
 import Committee from './pages/Committee';

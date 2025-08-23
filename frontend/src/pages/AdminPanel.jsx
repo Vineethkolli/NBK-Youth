@@ -1,10 +1,10 @@
 import { useAuth } from '../context/AuthContext';
-import PaymentDetails from '../components/developer/PaymentDetails';
-import MaintenanceMode from '../components/developer/MaintenanceMode';
-import RoleStatistics from '../components/developer/Stats';
-import BannerManager from '../components/developer/BannerManager';
-import EventLabelManager from '../components/developer/EventLabelManager';
-import LockManager from '../components/developer/LockManager';
+import PaymentDetails from '../components/adminPanel/PaymentDetails';
+import MaintenanceMode from '../components/adminPanel/MaintenanceMode';
+import RoleStatistics from '../components/adminPanel/Stats';
+import BannerManager from '../components/adminPanel/BannerManager';
+import EventLabelManager from '../components/adminPanel/EventLabelManager';
+import LockManager from '../components/adminPanel/LockManager';
 import { useState } from 'react';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
