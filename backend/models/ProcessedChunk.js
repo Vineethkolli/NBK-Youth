@@ -19,9 +19,7 @@ const processedChunkSchema = new mongoose.Schema({
   },
   metadata: {
     type: mongoose.Schema.Types.Mixed,
-    default: {},
-    snapshotId: String,
-    selectedCollections: [String]
+    default: {}
   },
   status: {
     type: String,
