@@ -41,12 +41,4 @@ const bannerSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-// Ensure at least one field (title, message, image, or video) is provided
-bannerSchema.pre('save', function(next) {
-  if (!this.title && !this.message && !this.image && !this.video) {
-    next(new Error('At least one of title, message, image, or video must be provided'));
-  }
-  next();
-});
-
 export default mongoose.model('Banner', bannerSchema);

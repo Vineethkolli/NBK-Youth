@@ -17,6 +17,18 @@ export const bannerController = {
     try {
       const { title, message, periodicity, duration, status } = req.body;
 
+      // Enforce: at least one of title, message, image, or video
+      if (
+        !title &&
+        !message &&
+        !(req.files?.image?.[0]) &&
+        !(req.files?.video?.[0])
+      ) {
+        return res.status(400).json({
+          message: 'At least one of title, message, image, or video must be provided'
+        });
+      }
+
       // If trying to enable this banner, check if any other banner is enabled
       if (status === 'enabled') {
         const enabledBanner = await Banner.findOne({ status: 'enabled' });
@@ -27,18 +39,15 @@ export const bannerController = {
         }
       }
 
-      let imageUrl = undefined;
-      let videoUrl = undefined;
-      let imagePublicId = undefined;
-      let videoPublicId = undefined;
+      let imageUrl, videoUrl, imagePublicId, videoPublicId;
 
-      // Use multer: req.files.image and req.files.video (field names must match in frontend)
-      if (req.files && req.files.image && req.files.image[0]) {
+      // Use multer: req.files.image and req.files.video
+      if (req.files?.image?.[0]) {
         const imageResult = await uploadToCloudinary(req.files.image[0].buffer, 'Banners', 'image');
         imageUrl = imageResult.secure_url;
         imagePublicId = imageResult.public_id;
       }
-      if (req.files && req.files.video && req.files.video[0]) {
+      if (req.files?.video?.[0]) {
         const videoResult = await uploadToCloudinary(req.files.video[0].buffer, 'Banners', 'video');
         videoUrl = videoResult.secure_url;
         videoPublicId = videoResult.public_id;
@@ -48,9 +57,9 @@ export const bannerController = {
         title,
         message,
         image: imageUrl,
-        imagePublicId: imagePublicId,
+        imagePublicId,
         video: videoUrl,
-        videoPublicId: videoPublicId,
+        videoPublicId,
         periodicity: periodicity || 1,
         duration: duration || 0,
         status: status || 'disabled',
@@ -83,6 +92,18 @@ export const bannerController = {
       }
       const originalData = originalBanner.toObject();
 
+      // Enforce: at least one of title, message, image, or video
+      const hasTitle = title || originalBanner.title;
+      const hasMessage = message || originalBanner.message;
+      const hasImage = req.files?.image?.[0] || (originalBanner.image && !(deleteImage === 'true' || deleteImageCloudinary === 'true'));
+      const hasVideo = req.files?.video?.[0] || (originalBanner.video && !(deleteVideo === 'true' || deleteVideoCloudinary === 'true'));
+
+      if (!hasTitle && !hasMessage && !hasImage && !hasVideo) {
+        return res.status(400).json({
+          message: 'At least one of title, message, image, or video must be provided'
+        });
+      }
+
       // If trying to enable this banner, check if any other banner is enabled
       if (status === 'enabled') {
         const enabledBanner = await Banner.findOne({ 
@@ -101,73 +122,51 @@ export const bannerController = {
       let imagePublicId = originalBanner.imagePublicId;
       let videoPublicId = originalBanner.videoPublicId;
 
-      // Handle Cloudinary deletion if requested (support both old and new flags)
-      if ((deleteImage === 'true' || deleteImageCloudinary === 'true') && originalBanner.image && originalBanner.image.includes('cloudinary.com')) {
+      // Handle Cloudinary deletion if requested
+      if ((deleteImage === 'true' || deleteImageCloudinary === 'true') && originalBanner.image?.includes('cloudinary.com')) {
         try {
-          const publicId = originalBanner.image.split('/').pop().split('.')[0];
-          await cloudinary.uploader.destroy(`Banners/${publicId}`);
+          await cloudinary.uploader.destroy(imagePublicId || '');
           imageUrl = undefined;
+          imagePublicId = undefined;
         } catch (err) {
           console.warn('Failed to delete banner image from Cloudinary:', err);
         }
       }
-      if ((deleteVideo === 'true' || deleteVideoCloudinary === 'true') && originalBanner.video && originalBanner.video.includes('cloudinary.com')) {
+      if ((deleteVideo === 'true' || deleteVideoCloudinary === 'true') && originalBanner.video?.includes('cloudinary.com')) {
         try {
-          const publicId = originalBanner.video.split('/').pop().split('.')[0];
-          await cloudinary.uploader.destroy(`Banners/${publicId}`, { resource_type: 'video' });
+          await cloudinary.uploader.destroy(videoPublicId || '', { resource_type: 'video' });
           videoUrl = undefined;
+          videoPublicId = undefined;
         } catch (err) {
           console.warn('Failed to delete banner video from Cloudinary:', err);
         }
       }
 
-      // Build an explicit $set / $unset update object
+      // Build update object
       const updateOps = {
         $set: { title, message, periodicity, duration, status },
       };
 
-      // if user requested image deletion:
-      if (deleteImage === 'true' || deleteImageCloudinary === 'true') {
-        updateOps.$unset = { ...(updateOps.$unset || {}), image: "" };
-      }
-      // Always upload new image if present
+      // Handle new image upload
       if (req.files?.image?.[0]) {
         const imageResult = await uploadToCloudinary(req.files.image[0].buffer, 'Banners', 'image');
         imageUrl = imageResult.secure_url;
         imagePublicId = imageResult.public_id;
         updateOps.$set.image = imageUrl;
         updateOps.$set.imagePublicId = imagePublicId;
-        // If $unset and $set both present, $set will overwrite
-        if (updateOps.$unset && updateOps.$unset.image !== undefined) {
-          delete updateOps.$unset.image;
-        }
+      } else if (deleteImage === 'true' || deleteImageCloudinary === 'true') {
+        updateOps.$unset = { ...(updateOps.$unset || {}), image: "", imagePublicId: "" };
       }
 
-      // same pattern for video
-      if ((deleteVideo === 'true' || deleteVideoCloudinary === 'true' || req.files?.video?.[0]) && originalBanner.video && originalBanner.video.includes('cloudinary.com')) {
-        try {
-          const publicId = originalBanner.video.split('/').pop().split('.')[0];
-          await cloudinary.uploader.destroy(`Banners/${publicId}`, { resource_type: 'video' });
-          videoUrl = undefined;
-        } catch (err) {
-          console.warn('Failed to delete banner video from Cloudinary:', err);
-        }
-      }
-      if (deleteVideo === 'true' || deleteVideoCloudinary === 'true') {
-        updateOps.$unset = { ...(updateOps.$unset || {}), video: "", videoPublicId: "" };
-      }
+      // Handle new video upload
       if (req.files?.video?.[0]) {
         const videoResult = await uploadToCloudinary(req.files.video[0].buffer, 'Banners', 'video');
         videoUrl = videoResult.secure_url;
         videoPublicId = videoResult.public_id;
         updateOps.$set.video = videoUrl;
         updateOps.$set.videoPublicId = videoPublicId;
-        if (updateOps.$unset && updateOps.$unset.video !== undefined) {
-          delete updateOps.$unset.video;
-        }
-        if (updateOps.$unset && updateOps.$unset.videoPublicId !== undefined) {
-          delete updateOps.$unset.videoPublicId;
-        }
+      } else if (deleteVideo === 'true' || deleteVideoCloudinary === 'true') {
+        updateOps.$unset = { ...(updateOps.$unset || {}), video: "", videoPublicId: "" };
       }
 
       const banner = await Banner.findByIdAndUpdate(
@@ -187,7 +186,7 @@ export const bannerController = {
         'Banner',
         banner._id.toString(),
         { before: originalData, after: banner.toObject() },
-        `Banner "${title || 'Untitled'}" updated by ${req.user.name}`
+        `Banner "${title || originalBanner.title || 'Untitled'}" updated by ${req.user.name}`
       );
 
       res.json(banner);
@@ -206,20 +205,18 @@ export const bannerController = {
       const originalData = banner.toObject();
 
       // Delete image from Cloudinary if it exists
-      if (banner.image && banner.image.includes('cloudinary.com')) {
+      if (banner.image?.includes('cloudinary.com') && banner.imagePublicId) {
         try {
-          const publicId = banner.image.split('/').pop().split('.')[0];
-          await cloudinary.uploader.destroy(`Banners/${publicId}`);
+          await cloudinary.uploader.destroy(banner.imagePublicId);
         } catch (err) {
           console.warn('Failed to delete banner image from Cloudinary:', err);
         }
       }
 
       // Delete video from Cloudinary if it exists
-      if (banner.video && banner.video.includes('cloudinary.com')) {
+      if (banner.video?.includes('cloudinary.com') && banner.videoPublicId) {
         try {
-          const publicId = banner.video.split('/').pop().split('.')[0];
-          await cloudinary.uploader.destroy(`Banners/${publicId}`, { resource_type: 'video' });
+          await cloudinary.uploader.destroy(banner.videoPublicId, { resource_type: 'video' });
         } catch (err) {
           console.warn('Failed to delete banner video from Cloudinary:', err);
         }
