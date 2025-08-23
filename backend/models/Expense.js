@@ -33,6 +33,9 @@ const expenseSchema = new mongoose.Schema({
   billImage: {
     type: String  // URL of the bill image
   },
+  billImagePublicId: {
+    type: String // Cloudinary public_id for bill image
+  },
   verifyLog: {
     type: String,
     enum: ['verified', 'pending', 'not verified', 'rejected'],

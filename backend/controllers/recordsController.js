@@ -148,7 +148,7 @@ export const recordsController = {
       }
 
       // Upload to Cloudinary (folder: EventRecords, resource_type: raw)
-      const uploadResult = await uploadToCloudinary(req.file.buffer, 'EventRecords', 'raw', true);
+  const uploadResult = await uploadToCloudinary(req.file.buffer, 'EventRecords', 'raw');
 
       const record = await EventRecord.create({
         eventName,
@@ -200,7 +200,7 @@ export const recordsController = {
         }
 
         // Upload new PDF
-        const uploadResult = await uploadToCloudinary(req.file.buffer, 'EventRecords', 'raw', true);
+  const uploadResult = await uploadToCloudinary(req.file.buffer, 'EventRecords', 'raw');
 
         updatedFields.fileUrl = uploadResult.secure_url;
         updatedFields.filePublicId = uploadResult.public_id;

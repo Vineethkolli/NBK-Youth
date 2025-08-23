@@ -1,4 +1,3 @@
-
 import Banner from '../models/Banner.js';
 import { uploadToCloudinary } from '../config/cloudinary.js';
 import cloudinary from '../config/cloudinary.js';
@@ -30,20 +29,28 @@ export const bannerController = {
 
       let imageUrl = undefined;
       let videoUrl = undefined;
+      let imagePublicId = undefined;
+      let videoPublicId = undefined;
 
       // Use multer: req.files.image and req.files.video (field names must match in frontend)
       if (req.files && req.files.image && req.files.image[0]) {
-        imageUrl = await uploadToCloudinary(req.files.image[0].buffer, 'Banners', 'image');
+        const imageResult = await uploadToCloudinary(req.files.image[0].buffer, 'Banners', 'image');
+        imageUrl = imageResult.secure_url;
+        imagePublicId = imageResult.public_id;
       }
       if (req.files && req.files.video && req.files.video[0]) {
-        videoUrl = await uploadToCloudinary(req.files.video[0].buffer, 'Banners', 'video');
+        const videoResult = await uploadToCloudinary(req.files.video[0].buffer, 'Banners', 'video');
+        videoUrl = videoResult.secure_url;
+        videoPublicId = videoResult.public_id;
       }
 
       const banner = await Banner.create({
         title,
         message,
         image: imageUrl,
+        imagePublicId: imagePublicId,
         video: videoUrl,
+        videoPublicId: videoPublicId,
         periodicity: periodicity || 1,
         duration: duration || 0,
         status: status || 'disabled',
@@ -91,6 +98,8 @@ export const bannerController = {
 
       let imageUrl = originalBanner.image;
       let videoUrl = originalBanner.video;
+      let imagePublicId = originalBanner.imagePublicId;
+      let videoPublicId = originalBanner.videoPublicId;
 
       // Handle Cloudinary deletion if requested (support both old and new flags)
       if ((deleteImage === 'true' || deleteImageCloudinary === 'true') && originalBanner.image && originalBanner.image.includes('cloudinary.com')) {
@@ -123,8 +132,11 @@ export const bannerController = {
       }
       // Always upload new image if present
       if (req.files?.image?.[0]) {
-        imageUrl = await uploadToCloudinary(req.files.image[0].buffer, 'Banners', 'image');
+        const imageResult = await uploadToCloudinary(req.files.image[0].buffer, 'Banners', 'image');
+        imageUrl = imageResult.secure_url;
+        imagePublicId = imageResult.public_id;
         updateOps.$set.image = imageUrl;
+        updateOps.$set.imagePublicId = imagePublicId;
         // If $unset and $set both present, $set will overwrite
         if (updateOps.$unset && updateOps.$unset.image !== undefined) {
           delete updateOps.$unset.image;
@@ -132,7 +144,6 @@ export const bannerController = {
       }
 
       // same pattern for video
-      // If deleteVideo flag is set, or a new video is uploaded, always delete the old video from Cloudinary
       if ((deleteVideo === 'true' || deleteVideoCloudinary === 'true' || req.files?.video?.[0]) && originalBanner.video && originalBanner.video.includes('cloudinary.com')) {
         try {
           const publicId = originalBanner.video.split('/').pop().split('.')[0];
@@ -143,13 +154,19 @@ export const bannerController = {
         }
       }
       if (deleteVideo === 'true' || deleteVideoCloudinary === 'true') {
-        updateOps.$unset = { ...(updateOps.$unset || {}), video: "" };
+        updateOps.$unset = { ...(updateOps.$unset || {}), video: "", videoPublicId: "" };
       }
       if (req.files?.video?.[0]) {
-        videoUrl = await uploadToCloudinary(req.files.video[0].buffer, 'Banners', 'video');
+        const videoResult = await uploadToCloudinary(req.files.video[0].buffer, 'Banners', 'video');
+        videoUrl = videoResult.secure_url;
+        videoPublicId = videoResult.public_id;
         updateOps.$set.video = videoUrl;
+        updateOps.$set.videoPublicId = videoPublicId;
         if (updateOps.$unset && updateOps.$unset.video !== undefined) {
           delete updateOps.$unset.video;
+        }
+        if (updateOps.$unset && updateOps.$unset.videoPublicId !== undefined) {
+          delete updateOps.$unset.videoPublicId;
         }
       }
 

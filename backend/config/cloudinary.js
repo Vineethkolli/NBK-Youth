@@ -9,14 +9,8 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-/**
- * Upload to Cloudinary
- * @param {*} file - Buffer, stream, or path
- * @param {string} folder - target folder
- * @param {string|null} type - optional type hint
- * @param {boolean} fullResponse - if true, return full object; otherwise return secure_url (default: false for backward compatibility)
- */
-export const uploadToCloudinary = async (file, folder = 'PaymentScreenshots', type = null, fullResponse = false) => {
+
+export const uploadToCloudinary = async (file, folder = 'PaymentScreenshots', type = null) => {
   try {
     const options = {
       folder,
@@ -60,15 +54,12 @@ export const uploadToCloudinary = async (file, folder = 'PaymentScreenshots', ty
       result = await cloudinary.uploader.upload(file, options);
     }
 
-    // 👇 Return based on caller preference
-    if (fullResponse) {
-      return {
-        secure_url: result.secure_url,
-        public_id: result.public_id,
-        resource_type: result.resource_type || options.resource_type,
-      };
-    }
-    return result.secure_url; // backward compatibility (homepage, expense, slides, etc.)
+    // Always return object with secure_url, public_id, and resource_type
+    return {
+      secure_url: result.secure_url,
+      public_id: result.public_id,
+      resource_type: result.resource_type || options.resource_type,
+    };
   } catch (error) {
     console.error('Cloudinary upload error:', error);
     throw new Error('Failed to upload file to Cloudinary');

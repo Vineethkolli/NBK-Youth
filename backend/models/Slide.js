@@ -5,6 +5,9 @@ const slideSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  mediaPublicId: {
+    type: String // Cloudinary public_id for slide media
+  },
   type: {
     type: String,
     enum: ['image', 'video'],

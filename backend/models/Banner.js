@@ -12,8 +12,14 @@ const bannerSchema = new mongoose.Schema({
   image: {
     type: String
   },
+  imagePublicId: {
+    type: String // Cloudinary public_id for image
+  },
   video: {
     type: String
+  },
+  videoPublicId: {
+    type: String // Cloudinary public_id for video
   },
   status: {
     type: String,

@@ -12,26 +12,28 @@ export const updateProfileImage = async (req, res) => {
 
     const originalImage = user.profileImage;
 
+
+
     // Delete old image from Cloudinary if it exists
-    if (user.profileImage && user.profileImage.includes('cloudinary.com')) {
+    if (user.profileImagePublicId) {
       try {
-        const publicId = user.profileImage.split('/').pop().split('.')[0];
-        await cloudinary.uploader.destroy(`ProfileImages/${publicId}`);
+        await cloudinary.uploader.destroy(user.profileImagePublicId, { resource_type: 'image' });
       } catch (err) {
         console.warn('Failed to delete old Cloudinary image:', err);
       }
     }
 
     // Upload new image to Cloudinary
-    let imageUrl = undefined;
+    let uploadResult = undefined;
     if (req.file) {
-      imageUrl = await uploadToCloudinary(req.file.buffer, 'ProfileImages', 'image');
+      uploadResult = await uploadToCloudinary(req.file.buffer, 'ProfileImages', 'image');
     } else {
       return res.status(400).json({ message: 'No image uploaded' });
     }
 
-    // Update user profile image
-    user.profileImage = imageUrl;
+    // Update user profile image and publicId
+    user.profileImage = uploadResult.secure_url;
+    user.profileImagePublicId = uploadResult.public_id;
     await user.save();
 
     // Log profile image update
@@ -40,11 +42,11 @@ export const updateProfileImage = async (req, res) => {
       'UPDATE',
       'User',
       user.registerId,
-      { before: { profileImage: originalImage }, after: { profileImage: imageUrl } },
+      { before: { profileImage: originalImage, profileImagePublicId: user.profileImagePublicId }, after: { profileImage: user.profileImage, profileImagePublicId: user.profileImagePublicId } },
       `Profile image updated by ${user.name}`
     );
 
-    res.json({ message: 'Profile image updated successfully', profileImage: imageUrl });
+    res.json({ message: 'Profile image updated successfully', profileImage: user.profileImage, profileImagePublicId: user.profileImagePublicId });
   } catch (error) {
     console.error('Error updating profile image:', error);
     res.status(500).json({ message: 'Failed to update profile image' });
@@ -62,17 +64,17 @@ export const deleteProfileImage = async (req, res) => {
     const originalImage = user.profileImage;
 
     // Delete image from Cloudinary if it exists
-    if (user.profileImage && user.profileImage.includes('cloudinary.com')) {
+    if (user.profileImagePublicId) {
       try {
-        const publicId = user.profileImage.split('/').pop().split('.')[0];
-        await cloudinary.uploader.destroy(`ProfileImages/${publicId}`);
+        await cloudinary.uploader.destroy(user.profileImagePublicId, { resource_type: 'image' });
       } catch (err) {
         console.warn('Failed to delete Cloudinary image:', err);
       }
     }
 
-    // Remove profile image from user
+    // Remove profile image and publicId from user
     user.profileImage = null;
+    user.profileImagePublicId = null;
     await user.save();
 
     // Log profile image deletion

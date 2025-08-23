@@ -33,6 +33,9 @@ const paymentSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    screenshotPublicId: {
+      type: String // Cloudinary public_id for payment screenshot
+    },
     transactionStatus: {
       type: String,
       enum: ['pending', 'successful', 'failed'],
