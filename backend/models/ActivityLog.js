@@ -8,7 +8,7 @@ const activityLogSchema = new mongoose.Schema({
   },
   entityType: {
     type: String,
-    enum: ['User', 'Income', 'Expense', 'Payment', 'Collection', 'Moment', 'Game', 'Banner', 'EstimatedIncome', 'EstimatedExpense', 'HiddenProfile', 'Slide', 'Event', "Notification", 'PreviousYear', 'MaintenanceMode', 'DeveloperOptions', 'Committee', 'PaymentDetails', 'EventLabel', 'LockSettings', 'FinancialRecord', 'EventRecord'],
+    enum: ['User', 'Income', 'Expense', 'Payment', 'Collection', 'Moment', 'Game', 'Banner', 'EstimatedIncome', 'EstimatedExpense', 'HiddenProfile', 'Slide', 'Event', "Notification", 'PreviousYear', 'MaintenanceMode', 'DeveloperOptions', 'Committee', 'PaymentDetails', 'EventLabel', 'LockSettings', 'FinancialRecord', 'EventRecord', 'Snapshot'],
     required: true
   },
   entityId: {
