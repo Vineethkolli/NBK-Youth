@@ -9,6 +9,10 @@ const songSchema = new mongoose.Schema({
     type: String,
     required: true
   }
+  ,
+  mediaPublicId: {
+    type: String // Cloudinary public_id for song media
+  }
 }, { timestamps: true });
 
 const collectionSchema = new mongoose.Schema({

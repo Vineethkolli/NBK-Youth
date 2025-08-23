@@ -23,16 +23,16 @@ export const homepageController = {
 
 
       // Use multer: req.file (field name 'file')
-      let url = undefined;
+      let uploadResult = undefined;
       if (req.file) {
-        // Pass type to uploadToCloudinary for correct resource_type/eager options
-        url = await uploadToCloudinary(req.file.buffer, 'HomepageSlides', req.body.type);
+        uploadResult = await uploadToCloudinary(req.file.buffer, 'HomepageSlides', req.body.type);
       } else {
         return res.status(400).json({ message: 'No file uploaded' });
       }
 
       const slide = await Slide.create({
-        url,
+        url: uploadResult.secure_url,
+        mediaPublicId: uploadResult.public_id,
         type,
         order,
         createdBy: req.user.registerId

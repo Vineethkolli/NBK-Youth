@@ -44,9 +44,9 @@ const PaymentController = {
       const { paymentId, registerId, name, email, phoneNumber, amount, belongsTo } = req.body;
 
       // Use multer: req.file (field name 'screenshot')
-      let screenshotUrl = undefined;
+      let uploadResult = undefined;
       if (req.file) {
-        screenshotUrl = await uploadToCloudinary(req.file.buffer, 'PaymentScreenshots', 'image');
+        uploadResult = await uploadToCloudinary(req.file.buffer, 'PaymentScreenshots', 'image');
       } else {
         return res.status(400).json({ message: 'No screenshot uploaded' });
       }
@@ -59,7 +59,8 @@ const PaymentController = {
         phoneNumber,
         amount,
         belongsTo,
-        screenshot: screenshotUrl,
+        screenshot: uploadResult.secure_url,
+        screenshotPublicId: uploadResult.public_id,
         transactionStatus: 'pending',
         verifyLog: 'not verified'
       });

@@ -121,16 +121,17 @@ const CollectionController = {
       }
 
       // Use multer: req.file (field name 'file')
-      let url = undefined;
+      let uploadResult = undefined;
       if (req.file) {
-        url = await uploadToCloudinary(req.file.buffer, 'Vibe', 'video');
+        uploadResult = await uploadToCloudinary(req.file.buffer, 'Vibe', 'video');
       } else {
         return res.status(400).json({ message: 'No file uploaded' });
       }
 
       collection.songs.push({
         name: req.body.name,
-        url
+        url: uploadResult.secure_url,
+        mediaPublicId: uploadResult.public_id
       });
 
       await collection.save();
