@@ -9,6 +9,11 @@ const financialRecordSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
+  status: {
+    type: String,
+    enum: ["Conducted", "Not Conducted"], 
+    default: "Conducted"
+  },
   amountLeft: {
     type: Number,
     required: true,
@@ -16,8 +21,26 @@ const financialRecordSchema = new mongoose.Schema({
   },
   maturityAmount: {
     type: Number,
+    required: true,
     default: 0
   },
+
+  // FD details
+  fdStartDate: {
+    type: Date
+  },
+  fdMaturityDate: {
+    type: Date
+  },
+  fdAccount: {           
+    type: String
+  },
+
+  remarks: {
+    type: String,
+    trim: true
+  },
+
   createdBy: {
     type: String,
     required: true
