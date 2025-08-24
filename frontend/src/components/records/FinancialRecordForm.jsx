@@ -2,15 +2,22 @@ import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 
 const EVENT_OPTIONS = ['Sankranti', 'Ganesh Chaturthi'];
+const STATUS_OPTIONS = ['Conducted', 'Not Conducted'];
 
 function FinancialRecordForm({ record, onClose, onSubmit }) {
   const [formData, setFormData] = useState({
     eventName: '',
     customEventName: '',
     year: new Date().getFullYear(),
+    status: 'Conducted',
     amountLeft: '',
-    maturityAmount: ''
+    maturityAmount: '',
+    fdStartDate: '',
+    fdMaturityDate: '',
+    fdAccount: '',
+    remarks: ''
   });
+  const [showFdDetails, setShowFdDetails] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Generate year options (2023 to next year)
@@ -26,9 +33,19 @@ function FinancialRecordForm({ record, onClose, onSubmit }) {
         eventName: EVENT_OPTIONS.includes(record.eventName) ? record.eventName : 'Other',
         customEventName: EVENT_OPTIONS.includes(record.eventName) ? '' : record.eventName,
         year: record.year,
-        amountLeft: record.amountLeft.toString(),
-        maturityAmount: record.maturityAmount.toString()
+        status: record.status || 'Conducted',
+        amountLeft: record.amountLeft?.toString() || '',
+        maturityAmount: record.maturityAmount?.toString() || '',
+        fdStartDate: record.fdStartDate ? record.fdStartDate.split('T')[0] : '',
+        fdMaturityDate: record.fdMaturityDate ? record.fdMaturityDate.split('T')[0] : '',
+        fdAccount: record.fdAccount || '',
+        remarks: record.remarks || ''
       });
+
+      // If FD details already exist, auto enable checkbox
+      if (record.fdStartDate || record.fdMaturityDate || record.fdAccount) {
+        setShowFdDetails(true);
+      }
     }
   }, [record]);
 
@@ -37,8 +54,9 @@ function FinancialRecordForm({ record, onClose, onSubmit }) {
     setIsSubmitting(true);
 
     try {
-      const finalEventName = formData.eventName === 'Other' ? formData.customEventName : formData.eventName;
-      
+      const finalEventName =
+        formData.eventName === 'Other' ? formData.customEventName : formData.eventName;
+
       if (!finalEventName.trim()) {
         throw new Error('Event name is required');
       }
@@ -46,13 +64,18 @@ function FinancialRecordForm({ record, onClose, onSubmit }) {
       const submitData = {
         eventName: finalEventName,
         year: parseInt(formData.year),
+        status: formData.status,
         amountLeft: parseFloat(formData.amountLeft) || 0,
-        maturityAmount: parseFloat(formData.maturityAmount) || 0
+        maturityAmount: parseFloat(formData.maturityAmount) || 0,
+        fdStartDate: showFdDetails ? formData.fdStartDate || null : null,
+        fdMaturityDate: showFdDetails ? formData.fdMaturityDate || null : null,
+        fdAccount: showFdDetails ? formData.fdAccount || '' : '',
+        remarks: formData.remarks.trim() || ''
       };
 
       await onSubmit(submitData);
     } catch (error) {
-      throw error;
+      console.error(error);
     } finally {
       setIsSubmitting(false);
     }
@@ -71,6 +94,7 @@ function FinancialRecordForm({ record, onClose, onSubmit }) {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Event Name */}
           <div>
             <label className="block text-sm font-medium text-gray-700">Event Name *</label>
             <select
@@ -80,8 +104,10 @@ function FinancialRecordForm({ record, onClose, onSubmit }) {
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
             >
               <option value="">Select Event</option>
-              {EVENT_OPTIONS.map(event => (
-                <option key={event} value={event}>{event}</option>
+              {EVENT_OPTIONS.map((event) => (
+                <option key={event} value={event}>
+                  {event}
+                </option>
               ))}
               <option value="Other">Other</option>
             </select>
@@ -101,6 +127,7 @@ function FinancialRecordForm({ record, onClose, onSubmit }) {
             </div>
           )}
 
+          {/* Year */}
           <div>
             <label className="block text-sm font-medium text-gray-700">Year *</label>
             <select
@@ -109,12 +136,32 @@ function FinancialRecordForm({ record, onClose, onSubmit }) {
               onChange={(e) => setFormData({ ...formData, year: parseInt(e.target.value) })}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
             >
-              {yearOptions.map(year => (
-                <option key={year} value={year}>{year}</option>
+              {yearOptions.map((year) => (
+                <option key={year} value={year}>
+                  {year}
+                </option>
               ))}
             </select>
           </div>
 
+          {/* Status */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Status *</label>
+            <select
+              required
+              value={formData.status}
+              onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+            >
+              {STATUS_OPTIONS.map((status) => (
+                <option key={status} value={status}>
+                  {status}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Amounts */}
           <div>
             <label className="block text-sm font-medium text-gray-700">Amount Left *</label>
             <input
@@ -129,7 +176,7 @@ function FinancialRecordForm({ record, onClose, onSubmit }) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">Maturity Amount</label>
+            <label className="block text-sm font-medium text-gray-700">Maturity Amount *</label>
             <input
               type="number"
               min="0"
@@ -140,6 +187,66 @@ function FinancialRecordForm({ record, onClose, onSubmit }) {
             />
           </div>
 
+          {/* Checkbox for FD details */}
+          <div className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              checked={showFdDetails}
+              onChange={(e) => setShowFdDetails(e.target.checked)}
+              className="h-4 w-4 text-indigo-600 border-gray-300 rounded"
+            />
+            <label className="text-sm font-medium text-gray-700">FD Details</label>
+          </div>
+
+          {/* FD Details (conditionally rendered) */}
+          {showFdDetails && (
+            <>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">FD Start Date</label>
+                <input
+                  type="date"
+                  value={formData.fdStartDate}
+                  onChange={(e) => setFormData({ ...formData, fdStartDate: e.target.value })}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">FD Maturity Date</label>
+                <input
+                  type="date"
+                  value={formData.fdMaturityDate}
+                  onChange={(e) => setFormData({ ...formData, fdMaturityDate: e.target.value })}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">FD Account</label>
+                <input
+                  type="text"
+                  value={formData.fdAccount}
+                  onChange={(e) => setFormData({ ...formData, fdAccount: e.target.value })}
+                  placeholder="Enter FD account details"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                />
+              </div>
+            </>
+          )}
+
+          {/* Remarks */}
+<div>
+  <textarea
+    value={formData.remarks}
+    onChange={(e) => setFormData({ ...formData, remarks: e.target.value })}
+    placeholder="Remarks"
+    rows={2}
+    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+  />
+</div>
+
+
+          {/* Actions */}
           <div className="flex justify-end space-x-2">
             <button
               type="button"
@@ -155,7 +262,13 @@ function FinancialRecordForm({ record, onClose, onSubmit }) {
                 isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
               }`}
             >
-              {isSubmitting ? (record ? 'Updating...' : 'Creating...') : (record ? 'Update' : 'Create')}
+              {isSubmitting
+                ? record
+                  ? 'Updating...'
+                  : 'Creating...'
+                : record
+                ? 'Update'
+                : 'Create'}
             </button>
           </div>
         </form>

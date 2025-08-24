@@ -1,11 +1,10 @@
 import FinancialRecord from '../models/FinancialRecord.js';
 import EventRecord from '../models/EventRecord.js';
-import { Readable } from 'stream';
 import { logActivity } from '../middleware/activityLogger.js';
 import cloudinary, { uploadToCloudinary } from '../config/cloudinary.js';
 
 export const recordsController = {
-  // Financial Timeline Methods (unchanged)
+  // ---------------- Financial Timeline Methods ----------------
   getAllFinancialRecords: async (req, res) => {
     try {
       const records = await FinancialRecord.find().sort({ year: -1 });
@@ -27,7 +26,17 @@ export const recordsController = {
 
   createFinancialRecord: async (req, res) => {
     try {
-      const { eventName, year, amountLeft, maturityAmount } = req.body;
+      const {
+        eventName,
+        year,
+        status,
+        amountLeft,
+        maturityAmount,
+        fdStartDate,
+        fdMaturityDate,
+        fdAccount,
+        remarks
+      } = req.body;
 
       const existingRecord = await FinancialRecord.findOne({ eventName, year });
       if (existingRecord) {
@@ -37,8 +46,13 @@ export const recordsController = {
       const record = await FinancialRecord.create({
         eventName,
         year,
+        status: status || "Conducted",
         amountLeft: amountLeft || 0,
         maturityAmount: maturityAmount || 0,
+        fdStartDate,
+        fdMaturityDate,
+        fdAccount,
+        remarks,
         createdBy: req.user.registerId
       });
 
@@ -68,10 +82,11 @@ export const recordsController = {
       }
 
       const originalData = originalRecord.toObject();
+      let updatedFields = { ...req.body };
 
       const record = await FinancialRecord.findByIdAndUpdate(
         req.params.id,
-        req.body,
+        updatedFields,
         { new: true }
       );
 
@@ -124,7 +139,7 @@ export const recordsController = {
     }
   },
 
-  // Event Records Methods (Cloudinary-based)
+  // ---------------- Event Records Methods (unchanged) ----------------
   getAllEventRecords: async (req, res) => {
     try {
       const records = await EventRecord.find().sort({ createdAt: -1 });
@@ -142,13 +157,11 @@ export const recordsController = {
         return res.status(400).json({ message: 'No file uploaded' });
       }
 
-      // Only allow PDFs
       if (req.file.mimetype !== 'application/pdf') {
         return res.status(400).json({ message: 'Only PDF files are allowed' });
       }
 
-      // Upload to Cloudinary (folder: EventRecords, resource_type: raw)
-  const uploadResult = await uploadToCloudinary(req.file.buffer, 'EventRecords', 'raw');
+      const uploadResult = await uploadToCloudinary(req.file.buffer, 'EventRecords', 'raw');
 
       const record = await EventRecord.create({
         eventName,
@@ -184,13 +197,11 @@ export const recordsController = {
       const originalData = originalRecord.toObject();
       let updatedFields = { ...req.body };
 
-      // If a new file is uploaded, delete old Cloudinary file (if exists) and upload new one
       if (req.file) {
         if (req.file.mimetype !== 'application/pdf') {
           return res.status(400).json({ message: 'Only PDF files are allowed' });
         }
 
-        // Delete old Cloudinary file if present
         if (originalRecord.filePublicId) {
           try {
             await cloudinary.uploader.destroy(originalRecord.filePublicId, { resource_type: 'raw' });
@@ -199,21 +210,17 @@ export const recordsController = {
           }
         }
 
-        // Upload new PDF
-  const uploadResult = await uploadToCloudinary(req.file.buffer, 'EventRecords', 'raw');
-
+        const uploadResult = await uploadToCloudinary(req.file.buffer, 'EventRecords', 'raw');
         updatedFields.fileUrl = uploadResult.secure_url;
         updatedFields.filePublicId = uploadResult.public_id;
       }
 
-      // Update DB record
       const record = await EventRecord.findByIdAndUpdate(
         req.params.id,
         updatedFields,
         { new: true }
       );
 
-      // Log activity
       await logActivity(
         req,
         'UPDATE',
@@ -239,7 +246,6 @@ export const recordsController = {
 
       const originalData = record.toObject();
 
-      // Delete file from Cloudinary (if we have public id)
       if (record.filePublicId) {
         try {
           await cloudinary.uploader.destroy(record.filePublicId, { resource_type: 'raw' });
@@ -249,7 +255,6 @@ export const recordsController = {
         }
       }
 
-      // Log deletion
       await logActivity(
         req,
         'DELETE',
