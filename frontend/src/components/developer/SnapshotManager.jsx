@@ -177,7 +177,6 @@ function SnapshotManager() {
           <div className="text-center text-gray-500 py-8">
             <Database className="h-12 w-12 mx-auto mb-4 text-gray-300" />
             <p>No snapshots created yet</p>
-            <p className="text-sm">Click "Add" to create your first snapshot</p>
           </div>
         ) : (
           snapshots.map((snapshot) => (

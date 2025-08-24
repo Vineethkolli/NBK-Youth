@@ -75,7 +75,7 @@ const formatDate = (dateString) => {
     return (
       <div className="text-center py-12">
         <Calendar className="h-12 w-12 mx-auto text-gray-300 mb-4" />
-        <p className="text-gray-500">No financial records found for this event</p>
+        <p className="text-gray-500">No financial records found</p>
       </div>
     );
   }
