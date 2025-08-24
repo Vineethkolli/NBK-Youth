@@ -199,40 +199,49 @@ function FinancialRecordForm({ record, onClose, onSubmit }) {
           </div>
 
           {/* FD Details (conditionally rendered) */}
-          {showFdDetails && (
-            <>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">FD Start Date</label>
-                <input
-                  type="date"
-                  value={formData.fdStartDate}
-                  onChange={(e) => setFormData({ ...formData, fdStartDate: e.target.value })}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                />
-              </div>
+          {/* FD Details (conditionally rendered) */}
+{showFdDetails && (
+  <>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <label className="block text-sm font-medium text-gray-700">
+          FD Start Date
+        </label>
+        <input
+          type="date"
+          value={formData.fdStartDate}
+          onChange={(e) => setFormData({ ...formData, fdStartDate: e.target.value })}
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+        />
+      </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700">FD Maturity Date</label>
-                <input
-                  type="date"
-                  value={formData.fdMaturityDate}
-                  onChange={(e) => setFormData({ ...formData, fdMaturityDate: e.target.value })}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                />
-              </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700">
+          FD Maturity Date
+        </label>
+        <input
+          type="date"
+          value={formData.fdMaturityDate}
+          onChange={(e) => setFormData({ ...formData, fdMaturityDate: e.target.value })}
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+        />
+      </div>
+    </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700">FD Account</label>
-                <input
-                  type="text"
-                  value={formData.fdAccount}
-                  onChange={(e) => setFormData({ ...formData, fdAccount: e.target.value })}
-                  placeholder="Enter FD account details"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                />
-              </div>
-            </>
-          )}
+    <div>
+      <label className="block text-sm font-medium text-gray-700">
+        FD Account
+      </label>
+      <input
+        type="text"
+        value={formData.fdAccount}
+        onChange={(e) => setFormData({ ...formData, fdAccount: e.target.value })}
+        placeholder="Details"
+        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+      />
+    </div>
+  </>
+)}
 
           {/* Remarks */}
 <div>
@@ -240,7 +249,7 @@ function FinancialRecordForm({ record, onClose, onSubmit }) {
     value={formData.remarks}
     onChange={(e) => setFormData({ ...formData, remarks: e.target.value })}
     placeholder="Remarks"
-    rows={2}
+    rows={1}
     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
   />
 </div>
