@@ -56,9 +56,6 @@ function EventRecordsGrid({ records = [], isEditMode, onEdit, onDelete }) {
       <div className="text-center py-12">
         <FileText className="h-12 w-12 mx-auto text-gray-300 mb-4" />
         <p className="text-gray-500">No event records found</p>
-        <p className="text-sm text-gray-400">
-          Upload PDF files to manage event records
-        </p>
       </div>
     );
   }
