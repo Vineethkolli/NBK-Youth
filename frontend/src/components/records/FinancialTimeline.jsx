@@ -147,35 +147,37 @@ const formatDate = (dateString) => {
   </div>
 
   {/* Deposit / FD toggle */}
-  {record.fdStartDate && (
-    <div>
-      <button
-        onClick={() => toggleRecord(record._id)}
-        className="flex items-center space-x-2 text-indigo-600"
-      >
-        <Banknote className="h-4 w-4" />
-        <span>Deposit Details</span>
-        {isExpanded ? (
-          <ChevronUp className="h-4 w-4" />
-        ) : (
-          <ChevronDown className="h-4 w-4" />
-        )}
-      </button>
-      {isExpanded && (
-        <div className="mt-2 grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-700">
-          {record.fdStartDate && (
-            <p><span className="font-medium">FD Start:</span> {formatDate(record.fdStartDate)}</p>
-          )}
-          {record.fdMaturityDate && (
-            <p><span className="font-medium">FD Maturity:</span> {formatDate(record.fdMaturityDate)}</p>
-          )}
-          {record.fdAccount && (
-            <p><span className="font-medium">FD Account:</span> {record.fdAccount}</p>
-          )}
-        </div>
+{(record.fdStartDate || record.fdMaturityDate || record.fdAccount) && (
+  <div>
+    <button
+      onClick={() => toggleRecord(record._id)}
+      className="flex items-center space-x-2 text-indigo-600"
+    >
+      <Banknote className="h-4 w-4" />
+      <span>Deposit Details</span>
+      {isExpanded ? (
+        <ChevronUp className="h-4 w-4" />
+      ) : (
+        <ChevronDown className="h-4 w-4" />
       )}
-    </div>
-  )}
+    </button>
+
+    {isExpanded && (
+      <div className="mt-2 grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-700">
+        {record.fdStartDate && (
+          <p><span className="font-medium">FD Start:</span> {formatDate(record.fdStartDate)}</p>
+        )}
+        {record.fdMaturityDate && (
+          <p><span className="font-medium">FD Maturity:</span> {formatDate(record.fdMaturityDate)}</p>
+        )}
+        {record.fdAccount && (
+          <p><span className="font-medium">FD Account:</span> {record.fdAccount}</p>
+        )}
+      </div>
+    )}
+  </div>
+)}
+
 
   {record.remarks && (
     <p>
