@@ -28,26 +28,32 @@ function FinancialRecordForm({ record, onClose, onSubmit }) {
   }
 
   useEffect(() => {
-    if (record) {
-      setFormData({
-        eventName: EVENT_OPTIONS.includes(record.eventName) ? record.eventName : 'Other',
-        customEventName: EVENT_OPTIONS.includes(record.eventName) ? '' : record.eventName,
-        year: record.year,
-        status: record.status || 'Conducted',
-        amountLeft: record.amountLeft?.toString() || '',
-        maturityAmount: record.maturityAmount?.toString() || '',
-        fdStartDate: record.fdStartDate ? record.fdStartDate.split('T')[0] : '',
-        fdMaturityDate: record.fdMaturityDate ? record.fdMaturityDate.split('T')[0] : '',
-        fdAccount: record.fdAccount || '',
-        remarks: record.remarks || ''
-      });
+  if (record) {
+    setFormData({
+      eventName: EVENT_OPTIONS.includes(record.eventName) ? record.eventName : 'Other',
+      customEventName: EVENT_OPTIONS.includes(record.eventName) ? '' : record.eventName,
+      year: record.year,
+      status: record.status || 'Conducted',
+      amountLeft: record.amountLeft?.toString() || '',
+      maturityAmount: record.maturityAmount?.toString() || '',
+      fdStartDate: record.fdStartDate ? record.fdStartDate.split('T')[0] : '',
+      fdMaturityDate: record.fdMaturityDate ? record.fdMaturityDate.split('T')[0] : '',
+      fdAccount: record.fdAccount || '',
+      remarks: record.remarks || ''
+    });
 
-      // If FD details already exist, auto enable checkbox
-      if (record.fdStartDate || record.fdMaturityDate || record.fdAccount) {
-        setShowFdDetails(true);
-      }
+    // ✅ If ANY FD detail exists, auto show deposit details
+    if (
+      record.fdStartDate ||
+      record.fdMaturityDate ||
+      record.fdAccount
+    ) {
+      setShowFdDetails(true);
+    } else {
+      setShowFdDetails(false);
     }
-  }, [record]);
+  }
+}, [record]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -198,7 +204,6 @@ function FinancialRecordForm({ record, onClose, onSubmit }) {
             <label className="text-sm font-medium text-gray-700">FD Details</label>
           </div>
 
-          {/* FD Details (conditionally rendered) */}
           {/* FD Details (conditionally rendered) */}
 {showFdDetails && (
   <>
