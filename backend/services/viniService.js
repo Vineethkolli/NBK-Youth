@@ -7,17 +7,69 @@ import ProcessedRecord from '../models/ProcessedRecords.js';
 import ChatHistory from '../models/ChatHistory.js';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { cosineSimilarity, generateEmbedding } from './embeddingService.js';
-import { 
-  getTimeBasedGreeting, 
-  getCreativeGreeting, 
-  isGreeting, 
-  isIdentityQuestion, 
-  isCreatorQuestion,
-  isNameQuestion,
-  isCurrentEventQuestion,
-  isMyIncomesQuestion,
-  formatTableResponse 
-} from './viniResponseService.js';
+// Merged response helpers (previously in viniResponseService.js)
+export const getTimeBasedGreeting = () => {
+  const now = new Date();
+  const istTime = new Date(now.getTime() + (5.5 * 60 * 60 * 1000)); // IST offset
+  const hour = istTime.getHours();
+  
+  if (hour < 12) return 'Good morning';
+  if (hour < 17) return 'Good afternoon';
+  return 'Good evening';
+};
+
+export const getCreativeGreeting = (userName) => {
+  const greetings = [
+    `${getTimeBasedGreeting()}, ${userName}! 🌟 Ready to explore your data?`,
+    `Hey there, ${userName}! ${getTimeBasedGreeting()}! ✨ What can I help you discover today?`,
+    `${getTimeBasedGreeting()}, ${userName}! 🚀 Let's dive into your NBK Youth data!`,
+    `Hello ${userName}! ${getTimeBasedGreeting()}! 💫 I'm here to help with all your queries!`
+  ];
+  return greetings[Math.floor(Math.random() * greetings.length)];
+};
+
+export const isGreeting = (message) => {
+  const greetings = ['hi', 'hello', 'hey', 'good morning', 'good afternoon', 'good evening', 'namaste'];
+  return greetings.some(greeting => message.toLowerCase().includes(greeting));
+};
+
+export const isIdentityQuestion = (message) => {
+  const identityKeywords = ['who are you', 'what are you', 'who is vini', 'about you', 'introduce yourself'];
+  return identityKeywords.some(keyword => message.toLowerCase().includes(keyword));
+};
+
+export const isCreatorQuestion = (message) => {
+  const creatorKeywords = ['who created you', 'who made you', 'who developed you', 'who built you', 'your creator', 'your developer', 'who created this', 'who made this app', 'who developed this website'];
+  return creatorKeywords.some(keyword => message.toLowerCase().includes(keyword));
+};
+
+export const isNameQuestion = (message) => {
+  const nameKeywords = ['what is my name', 'my name', 'who am i', 'what am i called'];
+  return nameKeywords.some(keyword => message.toLowerCase().includes(keyword));
+};
+
+export const isCurrentEventQuestion = (message) => {
+  const eventKeywords = ['current event', 'what event', 'event label', 'what data', 'show event data', 'present event'];
+  return eventKeywords.some(keyword => message.toLowerCase().includes(keyword));
+};
+
+export const isMyIncomesQuestion = (message) => {
+  const incomeKeywords = ['my incomes', 'show my incomes', 'all my incomes', 'my payments', 'my contributions'];
+  return incomeKeywords.some(keyword => message.toLowerCase().includes(keyword));
+};
+
+export const formatTableResponse = (data, headers) => {
+  if (!data || data.length === 0) return 'No data found.';
+  
+  let table = '| ' + headers.join(' | ') + ' |\n';
+  table += '|' + headers.map(() => '---').join('|') + '|\n';
+  
+  data.forEach(row => {
+    table += '| ' + row.join(' | ') + ' |\n';
+  });
+  
+  return table;
+};
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
@@ -162,10 +214,15 @@ export const chatWithViniLogic = async ({ message, registerId }) => {
             const lines = chunk.chunkText.split('\n').filter(l => l.toLowerCase().includes(searchName.toLowerCase()));
             let amount = null;
             for (const line of lines) {
-              const match = line.match(new RegExp(`${searchName}[^\\d]*(\\d{3,})`, 'i'));
-              if (match) { 
-                amount = parseInt(match[1]); 
-                break; 
+              // match amounts like ₹30, 30,000, 30000 etc.
+              const amountMatch = line.match(/(?:₹\s*)?([\d,\.]{1,})/);
+              if (amountMatch) {
+                const raw = amountMatch[1];
+                const digitsOnly = raw.replace(/[^\d]/g, '');
+                if (digitsOnly.length > 0) {
+                  amount = Math.round(parseFloat(digitsOnly));
+                  break;
+                }
               }
             }
             if (amount) {
@@ -209,11 +266,16 @@ export const chatWithViniLogic = async ({ message, registerId }) => {
         
         for (const chunk of historicalChunks) {
           if (!eventName || (chunk.eventName && chunk.eventName.toLowerCase().includes(eventName.toLowerCase()))) {
-            const lines = chunk.chunkText.split('\n').filter(l => l.toLowerCase().includes('income id'));
-            if (lines.length >= 1) {
+            const lines = chunk.chunkText.split('\n');
+            // try to find lines containing names and amounts
+            const candidateLines = lines.filter(l => /income id|\bamount\b|₹/.test(l.toLowerCase()));
+            if (candidateLines.length >= 1) {
               response += `Top ${topN} contributors for ${chunk.eventName} ${year}:\n\n`;
-              for (let i = 0; i < topN && i < lines.length; i++) {
-                response += `${i + 1}. ${lines[i]}\n`;
+              for (let i = 0; i < topN && i < candidateLines.length; i++) {
+                // normalize amount if present
+                const amtMatch = candidateLines[i].match(/(?:₹\s*)?([\d,\.]{1,})/);
+                const amountStr = amtMatch ? ` - ₹${amtMatch[1].replace(/[^\d]/g, '')}` : '';
+                response += `${i + 1}. ${candidateLines[i]}${amountStr}\n`;
               }
               found = true;
               break;
