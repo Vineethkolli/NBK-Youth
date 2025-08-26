@@ -3,7 +3,7 @@ import Income from '../models/Income.js';
 import Expense from '../models/Expense.js';
 import EventLabel from '../models/EventLabel.js';
 import ProcessedChunk from '../models/ProcessedChunk.js';
-import ProcessedRecord from '../models/x.js';
+import ProcessedRecord from '../models/ProcessedRecords.js';
 import ChatHistory from '../models/ChatHistory.js';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { cosineSimilarity, generateEmbedding } from './embeddingService.js';
