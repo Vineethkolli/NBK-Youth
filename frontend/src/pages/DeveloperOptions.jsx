@@ -1,6 +1,6 @@
 import { useAuth } from '../context/AuthContext';
 import ClearData from '../components/developer/ClearData';
-import HistoricalDataManager from '../components/developer/HistoricalDataManager';
+import ProcessedDataManager from '../components/developer/ProcessedDataManager';
 import SnapshotManager from '../components/developer/SnapshotManager';
 
 function DeveloperOptions() {
@@ -36,8 +36,8 @@ function DeveloperOptions() {
       {/* Snapshot Manager */}
       <SnapshotManager />
 
-      {/* Historical Data Manager */}
-      <HistoricalDataManager />
+      {/* Processed Data Manager */}
+      <ProcessedDataManager />
     </div>
   );
 }

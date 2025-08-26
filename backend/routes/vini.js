@@ -4,39 +4,39 @@ import { viniController } from '../controllers/viniController.js';
 
 const router = express.Router();
 
-// Get all processed events (developer only)
-router.get('/processed-events', 
+// Get all processed records (developer only)
+router.get('/processed-records', 
   auth, 
   checkRole(['developer']),
-  viniController.getAllProcessedEvents
+  viniController.getAllProcessedRecords
 );
 
-// Process current data into historical chunks (developer only)
-router.post('/process-data', 
+// Create processed record from snapshot (developer only)
+router.post('/processed-records', 
   auth, 
   checkRole(['developer']),
-  viniController.processCurrentData
+  viniController.createProcessedRecord
 );
 
-// Update processed event (developer only)
-router.put('/processed-events', 
+// Process record data into chunks (developer only)
+router.post('/process-record/:id', 
   auth, 
   checkRole(['developer']),
-  viniController.updateProcessedEvent
+  viniController.processRecord
 );
 
-// Delete processed event (developer only)
-router.delete('/processed-events', 
+// Reprocess record data (developer only)
+router.post('/reprocess-record/:id', 
   auth, 
   checkRole(['developer']),
-  viniController.deleteProcessedEvent
+  viniController.reprocessRecord
 );
 
-// Reprocess event data (developer only)
-router.post('/reprocess-event', 
+// Delete processed record (developer only)
+router.delete('/processed-records/:id', 
   auth, 
   checkRole(['developer']),
-  viniController.reprocessEvent
+  viniController.deleteProcessedRecord
 );
 
 // Chat with VINI (all authenticated users)

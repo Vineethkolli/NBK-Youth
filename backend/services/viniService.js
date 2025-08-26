@@ -1,159 +1,81 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
 import User from '../models/User.js';
 import Income from '../models/Income.js';
 import Expense from '../models/Expense.js';
-import Payment from '../models/Payment.js';
-import ProcessedChunk from '../models/ProcessedChunk.js';
-import ChatHistory from '../models/ChatHistory.js';
-import Collection from '../models/Collection.js';
-import Committee from '../models/Committee.js';
-import EstimatedIncome from '../models/EstimatedIncome.js';
-import EstimatedExpense from '../models/EstimatedExpense.js';
-import Event from '../models/Event.js';
 import EventLabel from '../models/EventLabel.js';
-import Game from '../models/Game.js';
-import LockSettings from '../models/LockSettings.js';
-import Moment from '../models/Moment.js';
-import PaymentDetails from '../models/PaymentDetails.js';
-import PreviousYear from '../models/PreviousYear.js';
-import Slide from '../models/Slide.js';
-import Notification from '../models/Notification.js';
-import NotificationHistory from '../models/NotificationHistory.js';
-import Banner from '../models/Banner.js';
-import ActivityLog from '../models/ActivityLog.js';
+import ProcessedChunk from '../models/ProcessedChunk.js';
+import ProcessedRecord from '../models/processedRecord.js';
+import ChatHistory from '../models/ChatHistory.js';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { cosineSimilarity, generateEmbedding } from './embeddingService.js';
+import { 
+  getTimeBasedGreeting, 
+  getCreativeGreeting, 
+  isGreeting, 
+  isIdentityQuestion, 
+  isCreatorQuestion,
+  isNameQuestion,
+  isCurrentEventQuestion,
+  isMyIncomesQuestion,
+  formatTableResponse 
+} from './viniResponseService.js';
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-export const getTimeBasedGreeting = () => {
-  const hour = new Date().getHours();
-  if (hour < 12) return 'Good morning';
-  if (hour < 17) return 'Good afternoon';
-  return 'Good evening';
-};
-
-export const isGreeting = (message) => {
-  const greetings = ['hi', 'hello', 'hey', 'good morning', 'good afternoon', 'good evening', 'namaste'];
-  return greetings.some(greeting => message.toLowerCase().includes(greeting));
-};
-
-export const isIdentityQuestion = (message) => {
-  const identityKeywords = ['who are you', 'what are you', 'who is vini', 'about you', 'introduce yourself'];
-  return identityKeywords.some(keyword => message.toLowerCase().includes(keyword));
-};
-
-export const isCreatorQuestion = (message) => {
-  const creatorKeywords = ['who created you', 'who made you', 'who developed you', 'who built you', 'your creator', 'your developer'];
-  return creatorKeywords.some(keyword => message.toLowerCase().includes(keyword));
-};
-
-export const formatTableResponse = (data, headers) => {
-  if (!data || data.length === 0) return 'No data found.';
-  
-  let table = '| ' + headers.join(' | ') + ' |\n';
-  table += '|' + headers.map(() => '---').join('|') + '|\n';
-  
-  data.forEach(row => {
-    table += '| ' + row.join(' | ') + ' |\n';
-  });
-  
-  return table;
-};
-
-export const searchCurrentData = async (query) => {
-  try {
-    const [
-      incomes, expenses, users, payments, collections, committees, estimatedIncomes, estimatedExpenses, events, eventLabels, games, lockSettings, moments, paymentDetails, previousYears, slides, notifications, notificationHistories, banners, activityLogs, processedChunks, chatHistories
-    ] = await Promise.all([
-      Income.find({ isDeleted: false, $or: [ { name: { $regex: query, $options: 'i' } }, { incomeId: { $regex: query, $options: 'i' } } ] }).limit(10),
-      Expense.find({ isDeleted: false, $or: [ { purpose: { $regex: query, $options: 'i' } }, { name: { $regex: query, $options: 'i' } } ] }).limit(10),
-      User.find({ $or: [ { name: { $regex: query, $options: 'i' } }, { registerId: { $regex: query, $options: 'i' } } ] }).limit(5),
-      Payment.find({ $or: [ { name: { $regex: query, $options: 'i' } }, { paymentId: { $regex: query, $options: 'i' } } ] }).limit(5),
-      Collection.find({ $or: [ { name: { $regex: query, $options: 'i' } }, { collectionId: { $regex: query, $options: 'i' } } ] }).limit(5),
-      Committee.find({ $or: [ { name: { $regex: query, $options: 'i' } }, { committeeId: { $regex: query, $options: 'i' } } ] }).limit(5),
-      EstimatedIncome.find({ $or: [ { name: { $regex: query, $options: 'i' } }, { estimatedIncomeId: { $regex: query, $options: 'i' } } ] }).limit(5),
-      EstimatedExpense.find({ $or: [ { name: { $regex: query, $options: 'i' } }, { estimatedExpenseId: { $regex: query, $options: 'i' } } ] }).limit(5),
-      Event.find({ $or: [ { name: { $regex: query, $options: 'i' } }, { eventId: { $regex: query, $options: 'i' } } ] }).limit(5),
-      EventLabel.find({ $or: [ { label: { $regex: query, $options: 'i' } } ] }).limit(5),
-      Game.find({ $or: [ { name: { $regex: query, $options: 'i' } }, { gameId: { $regex: query, $options: 'i' } } ] }).limit(5),
-      LockSettings.find({ $or: [ { key: { $regex: query, $options: 'i' } } ] }).limit(5),
-      Moment.find({ $or: [ { title: { $regex: query, $options: 'i' } } ] }).limit(5),
-      PaymentDetails.find({ $or: [ { paymentId: { $regex: query, $options: 'i' } } ] }).limit(5),
-      PreviousYear.find({ $or: [ { year: { $regex: query, $options: 'i' } } ] }).limit(5),
-      Slide.find({ $or: [ { title: { $regex: query, $options: 'i' } } ] }).limit(5),
-      Notification.find({ $or: [ { title: { $regex: query, $options: 'i' } }, { message: { $regex: query, $options: 'i' } } ] }).limit(5),
-      NotificationHistory.find({ $or: [ { title: { $regex: query, $options: 'i' } }, { message: { $regex: query, $options: 'i' } } ] }).limit(5),
-      Banner.find({ $or: [ { title: { $regex: query, $options: 'i' } } ] }).limit(5),
-      ActivityLog.find({ $or: [ { action: { $regex: query, $options: 'i' } }, { user: { $regex: query, $options: 'i' } } ] }).limit(5),
-      ProcessedChunk.find({ chunkText: { $regex: query, $options: 'i' } }).limit(5),
-      ChatHistory.find({ chats: { $elemMatch: { message: { $regex: query, $options: 'i' } } } }).limit(5)
-    ]);
-    return {
-      incomes, expenses, users, payments, collections, committees, estimatedIncomes, estimatedExpenses, events, eventLabels, games, lockSettings, moments, paymentDetails, previousYears, slides, notifications, notificationHistories, banners, activityLogs, processedChunks, chatHistories
-    };
-  } catch (error) {
-    console.error('Error searching current data:', error);
-    return {};
-  }
-};
-
 export const getCurrentStats = async () => {
   try {
-    const [
-      incomes, expenses, users, payments, collections, committees, estimatedIncomes, estimatedExpenses, events, eventLabels, games, lockSettings, moments, paymentDetails, previousYears, slides, notifications, notificationHistories, banners, activityLogs
-    ] = await Promise.all([
+    const [incomes, expenses, users] = await Promise.all([
       Income.find({ isDeleted: false }),
       Expense.find({ isDeleted: false }),
-      User.find(),
-      Payment.find({ transactionStatus: 'successful' }),
-      Collection.find(),
-      Committee.find(),
-      EstimatedIncome.find(),
-      EstimatedExpense.find(),
-      Event.find(),
-      EventLabel.find(),
-      Game.find(),
-      LockSettings.find(),
-      Moment.find(),
-      PaymentDetails.find(),
-      PreviousYear.find(),
-      Slide.find(),
-      Notification.find(),
-      NotificationHistory.find(),
-      Banner.find(),
-      ActivityLog.find()
+      User.find()
     ]);
+    
     const totalIncome = incomes.reduce((sum, income) => sum + income.amount, 0);
     const totalExpense = expenses.reduce((sum, expense) => sum + expense.amount, 0);
     const paidIncomes = incomes.filter(income => income.status === 'paid');
     const amountReceived = paidIncomes.reduce((sum, income) => sum + income.amount, 0);
+    
     return {
       totalIncome,
       totalExpense,
       amountReceived,
       totalUsers: users.length,
-      totalPayments: payments.length,
       incomeCount: incomes.length,
-      expenseCount: expenses.length,
-      collectionCount: collections.length,
-      committeeCount: committees.length,
-      estimatedIncomeCount: estimatedIncomes.length,
-      estimatedExpenseCount: estimatedExpenses.length,
-      eventCount: events.length,
-      eventLabelCount: eventLabels.length,
-      gameCount: games.length,
-      lockSettingCount: lockSettings.length,
-      momentCount: moments.length,
-      paymentDetailsCount: paymentDetails.length,
-      previousYearCount: previousYears.length,
-      slideCount: slides.length,
-      notificationCount: notifications.length,
-      notificationHistoryCount: notificationHistories.length,
-      bannerCount: banners.length,
-      activityLogCount: activityLogs.length
+      expenseCount: expenses.length
     };
   } catch (error) {
     console.error('Error getting current stats:', error);
+    return {};
+  }
+};
+
+export const searchCurrentData = async (query) => {
+  try {
+    const [incomes, expenses, users] = await Promise.all([
+      Income.find({ 
+        isDeleted: false, 
+        $or: [ 
+          { name: { $regex: query, $options: 'i' } }, 
+          { incomeId: { $regex: query, $options: 'i' } } 
+        ] 
+      }).limit(10),
+      Expense.find({ 
+        isDeleted: false, 
+        $or: [ 
+          { purpose: { $regex: query, $options: 'i' } }, 
+          { name: { $regex: query, $options: 'i' } } 
+        ] 
+      }).limit(10),
+      User.find({ 
+        $or: [ 
+          { name: { $regex: query, $options: 'i' } }, 
+          { registerId: { $regex: query, $options: 'i' } } 
+        ] 
+      }).limit(5)
+    ]);
+    
+    return { incomes, expenses, users };
+  } catch (error) {
+    console.error('Error searching current data:', error);
     return {};
   }
 };
@@ -164,184 +86,296 @@ export const chatWithViniLogic = async ({ message, registerId }) => {
   let response = '';
   const msg = message.toLowerCase();
 
-  // Handle greetings
-  if (isGreeting(msg)) {
-    const greeting = getTimeBasedGreeting();
-    response = `${greeting}, ${userName}! 😊 How can I help you today?`;
-  }
-  // Handle identity questions
-  else if (isIdentityQuestion(msg)) {
-    response = `I'm VINI, NBK Youth AI assistant here to answer queries from app data and historical records — quickly, accurately, and naturally.\n\nWhat would you like to know, ${userName}?`;
-  }
-  // Handle creator questions
-  else if (isCreatorQuestion(msg)) {
-    response = `I was created by Kolli Vineeth for the NBK Youth website and AI assistant.`;
-  }
-  // Amount paid by Vineeth (current and history, with event/year support)
-  else if (msg.includes('vineeth') && (msg.includes('amount paid') || msg.includes('contributed') || msg.includes('donated') || msg.includes('income'))) {
-    const yearMatch = message.match(/\b(20\d{2})\b/);
-    const eventMatch = message.match(/([a-zA-Z]+)\s*20\d{2}/);
-    let resp = '';
-    if (yearMatch) {
-      const year = parseInt(yearMatch[0]);
-      const eventName = eventMatch ? eventMatch[1] : null;
-      const historicalChunks = await ProcessedChunk.find({ status: 'ready', year });
-      let found = false;
-      for (const chunk of historicalChunks) {
-        if ((!eventName || (chunk.eventName && chunk.eventName.toLowerCase().includes(eventName.toLowerCase()))) && chunk.chunkText.toLowerCase().includes('vineeth')) {
-          const lines = chunk.chunkText.split('\n').filter(l => l.toLowerCase().includes('vineeth'));
-          let amount = null;
-          for (const line of lines) {
-            const match = line.match(/vineeth[^\d]*(\d{3,})/i);
-            if (match) { amount = parseInt(match[1]); break; }
-          }
-          if (amount) {
-            resp = `Vineeth paid ₹${amount.toLocaleString('en-IN')} for ${chunk.eventName} ${year}.`;
-            found = true;
-            break;
-          }
-        }
-      }
-      if (!found) resp = `No record found for Vineeth in ${eventName ? eventName + ' ' : ''}${year}.`;
-    } else {
-      const vineethIncomes = await Income.find({ isDeleted: false, name: /vineeth/i });
-      let total = vineethIncomes.reduce((sum, i) => sum + i.amount, 0);
-      if (total > 0) resp = `Vineeth has paid ₹${total.toLocaleString('en-IN')} in the current records.`;
-      else resp = `No income records found for Vineeth in current records.`;
+  try {
+    // Handle greetings with creative IST-based responses
+    if (isGreeting(msg)) {
+      response = getCreativeGreeting(userName);
     }
-    response = resp;
-  }
-  // Top 3 incomes (current and historical, with event/year support)
-  else if ((msg.includes('top') && (msg.includes('income') || msg.includes('contributor') || msg.includes('donor'))) || msg.includes('top 3')) {
-    const yearMatch = message.match(/\b(20\d{2})\b/);
-    const eventMatch = message.match(/([a-zA-Z]+)\s*20\d{2}/);
-    let resp = '';
-    if (yearMatch) {
-      const year = parseInt(yearMatch[0]);
-      const eventName = eventMatch ? eventMatch[1] : null;
-      const historicalChunks = await ProcessedChunk.find({ status: 'ready', year });
-      let found = false;
-      for (const chunk of historicalChunks) {
-        if (!eventName || (chunk.eventName && chunk.eventName.toLowerCase().includes(eventName.toLowerCase()))) {
-          const lines = chunk.chunkText.split('\n').filter(l => l.toLowerCase().includes('income id'));
-          if (lines.length >= 1) {
-            resp += `Top 3 contributors for ${chunk.eventName} ${year} (from records):\n`;
-            for (let i = 0; i < 3 && i < lines.length; i++) {
-              resp += `${lines[i]}\n`;
-            }
-            found = true;
-            break;
-          }
-        }
+    // Handle identity questions
+    else if (isIdentityQuestion(msg)) {
+      response = `I'm VINI, your NBK Youth AI assistant! 🤖 I'm here to help you explore and understand all your app data - from income and expenses to historical records. I can answer questions about current events, past celebrations, financial data, and much more!\n\nWhat would you like to know, ${userName}? ✨`;
+    }
+    // Handle creator questions
+    else if (isCreatorQuestion(msg)) {
+      response = `I was created by **Kolli Vineeth** for the NBK Youth website and AI assistant. He developed this entire platform to help manage and track all your community activities! 👨‍💻`;
+    }
+    // Handle name questions
+    else if (isNameQuestion(msg)) {
+      response = `Your name is **${userName}**! 😊 Is there anything specific you'd like to know about your data or activities?`;
+    }
+    // Handle current event questions
+    else if (isCurrentEventQuestion(msg)) {
+      const eventLabel = await EventLabel.findOne().sort({ createdAt: -1 });
+      if (eventLabel) {
+        const currentStats = await getCurrentStats();
+        response = `The current event is **${eventLabel.label}**! 🎉\n\nCurrent data summary:\n• Total Income: ₹${currentStats.totalIncome?.toLocaleString('en-IN') || '0'}\n• Amount Received: ₹${currentStats.amountReceived?.toLocaleString('en-IN') || '0'}\n• Total Expenses: ₹${currentStats.totalExpense?.toLocaleString('en-IN') || '0'}\n• Total Users: ${currentStats.totalUsers || 0}\n• Income Entries: ${currentStats.incomeCount || 0}\n• Expense Entries: ${currentStats.expenseCount || 0}`;
+      } else {
+        response = `No current event label is set. The system is showing general data without a specific event context.`;
       }
-      if (!found) resp = `No top contributors found for ${eventName ? eventName + ' ' : ''}${year}.`;
-    } else {
-      const topIncomes = await Income.find({ isDeleted: false, status: 'paid' }).sort({ amount: -1 }).limit(3);
-      if (topIncomes.length > 0) {
-        const tableData = topIncomes.map((income, idx) => [
-          (idx + 1).toString(),
+    }
+    // Handle "show all my incomes" questions
+    else if (isMyIncomesQuestion(msg)) {
+      const userIncomes = await Income.find({ 
+        isDeleted: false, 
+        $or: [
+          { name: { $regex: userName, $options: 'i' } },
+          { registerId: registerId }
+        ]
+      });
+      
+      if (userIncomes.length > 0) {
+        const eventLabel = await EventLabel.findOne().sort({ createdAt: -1 });
+        const eventContext = eventLabel ? `for ${eventLabel.label}` : 'from current records';
+        
+        const tableData = userIncomes.map(income => [
+          income.incomeId,
           income.name,
           `₹${income.amount.toLocaleString('en-IN')}`,
-          income.belongsTo
+          income.status,
+          income.paymentMode
         ]);
-        resp += `Top 3 contributors (current):\n`;
-        resp += formatTableResponse(tableData, ['Rank', 'Name', 'Amount', 'Category']);
+        
+        response = `Here are all your incomes ${eventContext}:\n\n`;
+        response += formatTableResponse(tableData, ['Income ID', 'Name', 'Amount', 'Status', 'Payment Mode']);
+        response += `\n\nTotal: ${userIncomes.length} entries, Amount: ₹${userIncomes.reduce((sum, i) => sum + i.amount, 0).toLocaleString('en-IN')}`;
       } else {
-        resp = `No top contributors found in current records.`;
+        response = `No income records found for you in the current data, ${userName}.`;
       }
     }
-    response = resp;
-  }
-  // Context-aware total income
-  else if (msg.includes('total income')) {
-    const yearMatch = message.match(/\b(20\d{2})\b/);
-    const eventMatch = message.match(/([a-zA-Z]+)\s*20\d{2}/);
-    if (yearMatch) {
-      const year = parseInt(yearMatch[0]);
-      const historicalChunks = await ProcessedChunk.find({ status: 'ready', year });
-      let found = false;
-      for (const chunk of historicalChunks) {
-        if (!eventMatch || (chunk.eventName && chunk.eventName.toLowerCase().includes(eventMatch[1].toLowerCase()))) {
-          response = `The total income for ${chunk.eventName} ${year} is ₹${chunk.metadata.totalIncome?.toLocaleString('en-IN') || 'N/A'}.`;
-          found = true;
-          break;
+    // Amount paid by specific person (current and historical)
+    else if (msg.includes('amount paid') || msg.includes('contributed') || msg.includes('donated')) {
+      const nameMatch = message.match(/(?:amount paid by|contributed by|donated by)\s+([a-zA-Z\s]+)/i);
+      const yearMatch = message.match(/\b(20\d{2})\b/);
+      const eventMatch = message.match(/([a-zA-Z]+)\s*20\d{2}/);
+      
+      let searchName = nameMatch ? nameMatch[1].trim() : userName;
+      
+      if (yearMatch) {
+        const year = parseInt(yearMatch[0]);
+        const eventName = eventMatch ? eventMatch[1] : null;
+        const historicalChunks = await ProcessedChunk.find({ status: 'ready', year });
+        let found = false;
+        
+        for (const chunk of historicalChunks) {
+          if ((!eventName || (chunk.eventName && chunk.eventName.toLowerCase().includes(eventName.toLowerCase()))) && 
+              chunk.chunkText.toLowerCase().includes(searchName.toLowerCase())) {
+            const lines = chunk.chunkText.split('\n').filter(l => l.toLowerCase().includes(searchName.toLowerCase()));
+            let amount = null;
+            for (const line of lines) {
+              const match = line.match(new RegExp(`${searchName}[^\\d]*(\\d{3,})`, 'i'));
+              if (match) { 
+                amount = parseInt(match[1]); 
+                break; 
+              }
+            }
+            if (amount) {
+              response = `${searchName} paid ₹${amount.toLocaleString('en-IN')} for ${chunk.eventName} ${year}.`;
+              found = true;
+              break;
+            }
+          }
         }
-      }
-      if (!found) response = `No historical income data found for ${eventMatch ? eventMatch[1] + ' ' : ''}${year}.`;
-    } else {
-      const currentStats = await getCurrentStats();
-      response = `The total income for the current event is ₹${currentStats.totalIncome?.toLocaleString('en-IN') || '0'}.`;
-    }
-  }
-  // Context-aware total expense
-  else if (msg.includes('total expense')) {
-    const yearMatch = message.match(/\b(20\d{2})\b/);
-    const eventMatch = message.match(/([a-zA-Z]+)\s*20\d{2}/);
-    if (yearMatch) {
-      const year = parseInt(yearMatch[0]);
-      const historicalChunks = await ProcessedChunk.find({ status: 'ready', year });
-      let found = false;
-      for (const chunk of historicalChunks) {
-        if (!eventMatch || (chunk.eventName && chunk.eventName.toLowerCase().includes(eventMatch[1].toLowerCase()))) {
-          response = `The total expense for ${chunk.eventName} ${year} is ₹${chunk.metadata.totalExpense?.toLocaleString('en-IN') || 'N/A'}.`;
-          found = true;
-          break;
+        if (!found) {
+          response = `No record found for ${searchName} in ${eventName ? eventName + ' ' : ''}${year}.`;
         }
-      }
-      if (!found) response = `No historical expense data found for ${eventMatch ? eventMatch[1] + ' ' : ''}${year}.`;
-    } else {
-      const currentStats = await getCurrentStats();
-      response = `The total expense for the current event is ₹${currentStats.totalExpense?.toLocaleString('en-IN') || '0'}.`;
-    }
-  }
-  // Fallback: try to answer with LLM or say developing
-  else {
-    try {
-      const queryEmbedding = await generateEmbedding(message);
-      const currentStats = await getCurrentStats();
-      const historicalChunks = await ProcessedChunk.find({ status: 'ready' });
-      const similarities = historicalChunks.map(chunk => ({
-        ...chunk.toObject(),
-        similarity: cosineSimilarity(queryEmbedding, chunk.embedding)
-      })).sort((a, b) => b.similarity - a.similarity).slice(0, 5);
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-      let context = `You are VINI, NBK Youth AI assistant. Answer based on this data:\n\n`;
-      context += `Current Stats: Total Income: ₹${currentStats.totalIncome?.toLocaleString('en-IN')}, Total Expense: ₹${currentStats.totalExpense?.toLocaleString('en-IN')}, Users: ${currentStats.totalUsers}, Collections: ${currentStats.collectionCount}, Committees: ${currentStats.committeeCount}, Estimated Incomes: ${currentStats.estimatedIncomeCount}, Estimated Expenses: ${currentStats.estimatedExpenseCount}, Events: ${currentStats.eventCount}, Event Labels: ${currentStats.eventLabelCount}, Games: ${currentStats.gameCount}, Lock Settings: ${currentStats.lockSettingCount}, Moments: ${currentStats.momentCount}, Payment Details: ${currentStats.paymentDetailsCount}, Previous Years: ${currentStats.previousYearCount}, Slides: ${currentStats.slideCount}, Notifications: ${currentStats.notificationCount}, Notification Histories: ${currentStats.notificationHistoryCount}, Banners: ${currentStats.bannerCount}, Activity Logs: ${currentStats.activityLogCount}\n\n`;
-      if (similarities.length > 0) {
-        context += `Historical Data:\n`;
-        similarities.slice(0, 3).forEach(chunk => {
-          context += `${chunk.eventName} ${chunk.year}: ${chunk.chunkText.substring(0, 200)}...\n`;
+      } else {
+        const currentIncomes = await Income.find({ 
+          isDeleted: false, 
+          name: { $regex: searchName, $options: 'i' } 
         });
+        
+        if (currentIncomes.length > 0) {
+          const total = currentIncomes.reduce((sum, i) => sum + i.amount, 0);
+          const eventLabel = await EventLabel.findOne().sort({ createdAt: -1 });
+          const eventContext = eventLabel ? `for ${eventLabel.label}` : 'in current records';
+          response = `${searchName} has paid ₹${total.toLocaleString('en-IN')} ${eventContext}.`;
+        } else {
+          response = `No income records found for ${searchName} in current records.`;
+        }
       }
-      context += `\nUser Question: ${message}\n\nProvide a helpful, natural response as VINI. Keep it concise and friendly. Use all available app data collections if relevant.`;
-      const result = await model.generateContent(context);
-      response = result.response.text();
-    } catch (error) {
-      response = `This feature is in development or not available for your question yet. Please try a different query or ask about income, expenses....`;
     }
-  }
+    // Top N contributors (current and historical)
+    else if ((msg.includes('top') && (msg.includes('income') || msg.includes('contributor') || msg.includes('donor'))) || msg.includes('top ')) {
+      const numberMatch = message.match(/top\s+(\d+)/i);
+      const topN = numberMatch ? parseInt(numberMatch[1]) : 3;
+      const yearMatch = message.match(/\b(20\d{2})\b/);
+      const eventMatch = message.match(/([a-zA-Z]+)\s*20\d{2}/);
+      
+      if (yearMatch) {
+        const year = parseInt(yearMatch[0]);
+        const eventName = eventMatch ? eventMatch[1] : null;
+        const historicalChunks = await ProcessedChunk.find({ status: 'ready', year });
+        let found = false;
+        
+        for (const chunk of historicalChunks) {
+          if (!eventName || (chunk.eventName && chunk.eventName.toLowerCase().includes(eventName.toLowerCase()))) {
+            const lines = chunk.chunkText.split('\n').filter(l => l.toLowerCase().includes('income id'));
+            if (lines.length >= 1) {
+              response += `Top ${topN} contributors for ${chunk.eventName} ${year}:\n\n`;
+              for (let i = 0; i < topN && i < lines.length; i++) {
+                response += `${i + 1}. ${lines[i]}\n`;
+              }
+              found = true;
+              break;
+            }
+          }
+        }
+        if (!found) {
+          response = `No top contributors found for ${eventName ? eventName + ' ' : ''}${year}.`;
+        }
+      } else {
+        const topIncomes = await Income.find({ isDeleted: false, status: 'paid' })
+          .sort({ amount: -1 })
+          .limit(topN);
+          
+        if (topIncomes.length > 0) {
+          const eventLabel = await EventLabel.findOne().sort({ createdAt: -1 });
+          const eventContext = eventLabel ? `for ${eventLabel.label}` : 'from current records';
+          
+          const tableData = topIncomes.map((income, idx) => [
+            (idx + 1).toString(),
+            income.name,
+            `₹${income.amount.toLocaleString('en-IN')}`,
+            income.belongsTo
+          ]);
+          
+          response += `Top ${topN} contributors ${eventContext}:\n\n`;
+          response += formatTableResponse(tableData, ['Rank', 'Name', 'Amount', 'Category']);
+        } else {
+          response = `No top contributors found in current records.`;
+        }
+      }
+    }
+    // Context-aware total income
+    else if (msg.includes('total income')) {
+      const yearMatch = message.match(/\b(20\d{2})\b/);
+      const eventMatch = message.match(/([a-zA-Z]+)\s*20\d{2}/);
+      
+      if (yearMatch) {
+        const year = parseInt(yearMatch[0]);
+        const historicalChunks = await ProcessedChunk.find({ status: 'ready', year });
+        let found = false;
+        
+        for (const chunk of historicalChunks) {
+          if (!eventMatch || (chunk.eventName && chunk.eventName.toLowerCase().includes(eventMatch[1].toLowerCase()))) {
+            response = `The total income for ${chunk.eventName} ${year} is ₹${chunk.metadata.totalIncome?.toLocaleString('en-IN') || 'N/A'}.`;
+            found = true;
+            break;
+          }
+        }
+        if (!found) {
+          response = `No historical income data found for ${eventMatch ? eventMatch[1] + ' ' : ''}${year}.`;
+        }
+      } else {
+        const currentStats = await getCurrentStats();
+        const eventLabel = await EventLabel.findOne().sort({ createdAt: -1 });
+        const eventContext = eventLabel ? `for ${eventLabel.label}` : 'for the current event';
+        response = `The total income ${eventContext} is ₹${currentStats.totalIncome?.toLocaleString('en-IN') || '0'}.`;
+      }
+    }
+    // Context-aware total expense
+    else if (msg.includes('total expense')) {
+      const yearMatch = message.match(/\b(20\d{2})\b/);
+      const eventMatch = message.match(/([a-zA-Z]+)\s*20\d{2}/);
+      
+      if (yearMatch) {
+        const year = parseInt(yearMatch[0]);
+        const historicalChunks = await ProcessedChunk.find({ status: 'ready', year });
+        let found = false;
+        
+        for (const chunk of historicalChunks) {
+          if (!eventMatch || (chunk.eventName && chunk.eventName.toLowerCase().includes(eventMatch[1].toLowerCase()))) {
+            response = `The total expense for ${chunk.eventName} ${year} is ₹${chunk.metadata.totalExpense?.toLocaleString('en-IN') || 'N/A'}.`;
+            found = true;
+            break;
+          }
+        }
+        if (!found) {
+          response = `No historical expense data found for ${eventMatch ? eventMatch[1] + ' ' : ''}${year}.`;
+        }
+      } else {
+        const currentStats = await getCurrentStats();
+        const eventLabel = await EventLabel.findOne().sort({ createdAt: -1 });
+        const eventContext = eventLabel ? `for ${eventLabel.label}` : 'for the current event';
+        response = `The total expense ${eventContext} is ₹${currentStats.totalExpense?.toLocaleString('en-IN') || '0'}.`;
+      }
+    }
+    // Fallback: try to answer with LLM using both current and historical data
+    else {
+      try {
+        const queryEmbedding = await generateEmbedding(message);
+        const currentStats = await getCurrentStats();
+        const eventLabel = await EventLabel.findOne().sort({ createdAt: -1 });
+        const historicalChunks = await ProcessedChunk.find({ status: 'ready' });
+        const processedRecords = await ProcessedRecord.find({ status: 'ready' });
+        
+        const similarities = historicalChunks.map(chunk => ({
+          ...chunk.toObject(),
+          similarity: cosineSimilarity(queryEmbedding, chunk.embedding)
+        })).sort((a, b) => b.similarity - a.similarity).slice(0, 5);
+        
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        let context = `You are VINI, NBK Youth AI assistant. Answer based on this data:\n\n`;
+        
+        // Current event context
+        if (eventLabel) {
+          context += `Current Event: ${eventLabel.label}\n`;
+        }
+        
+        // Current stats
+        context += `Current Stats: Total Income: ₹${currentStats.totalIncome?.toLocaleString('en-IN')}, Total Expense: ₹${currentStats.totalExpense?.toLocaleString('en-IN')}, Amount Received: ₹${currentStats.amountReceived?.toLocaleString('en-IN')}, Users: ${currentStats.totalUsers}, Income Entries: ${currentStats.incomeCount}, Expense Entries: ${currentStats.expenseCount}\n\n`;
+        
+        // Available historical events
+        if (processedRecords.length > 0) {
+          context += `Available Historical Events:\n`;
+          processedRecords.forEach(record => {
+            context += `- ${record.eventName} ${record.year} (${record.selectedCollections.join(', ')})\n`;
+          });
+          context += '\n';
+        }
+        
+        // Historical data context
+        if (similarities.length > 0) {
+          context += `Historical Data:\n`;
+          similarities.slice(0, 3).forEach(chunk => {
+            context += `${chunk.eventName} ${chunk.year}: ${chunk.chunkText.substring(0, 300)}...\n\n`;
+          });
+        }
+        
+        context += `\nUser Question: ${message}\n\nUser asking: ${userName} (${registerId})\n\nProvide a helpful, natural response as VINI. Keep it concise and friendly. Use all available current and historical data if relevant. If you mention amounts, use Indian number formatting with ₹ symbol.`;
+        
+        const result = await model.generateContent(context);
+        response = result.response.text();
+      } catch (error) {
+        console.error('LLM Error:', error);
+        response = `I'm still learning to answer that type of question! 🤔 Try asking about:\n\n• Current event details\n• Total income/expenses\n• Top contributors\n• Specific person's contributions\n• Your income records\n\nOr ask about any specific year like "Sankranti 2024" for historical data!`;
+      }
+    }
 
-  // Save chat history (non-blocking for caller)
-  (async () => {
-    try {
-      await ChatHistory.findOneAndUpdate(
-        { registerId },
-        { 
-          $push: { 
-            chats: { 
-              message, 
-              response, 
-              timestamp: new Date() 
+    // Save chat history (non-blocking)
+    setImmediate(async () => {
+      try {
+        await ChatHistory.findOneAndUpdate(
+          { registerId },
+          { 
+            $push: { 
+              chats: { 
+                message, 
+                response, 
+                timestamp: new Date() 
+              } 
             } 
-          } 
-        },
-        { upsert: true }
-      );
-    } catch (error) {
-      // ignore
-    }
-  })();
+          },
+          { upsert: true }
+        );
+      } catch (error) {
+        console.error('Failed to save chat history:', error);
+      }
+    });
 
-  return response;
+    return response;
+  } catch (error) {
+    console.error('Chat logic error:', error);
+    return `Sorry, I encountered an error processing your request. Please try again! 😅`;
+  }
 };
-
