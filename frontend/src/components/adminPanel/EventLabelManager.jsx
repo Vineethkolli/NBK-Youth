@@ -93,7 +93,7 @@ function EventLabelManager() {
             <div className="flex items-center space-x-2">
               <button
                 onClick={handleEdit}
-                className="flex items-center px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                className="flex items-center px-3 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-grey-700"
               >
                 <Edit2 className="h-4 w-4 mr-2" />
                 Edit
@@ -123,9 +123,6 @@ function EventLabelManager() {
       {eventLabel && !showForm && (
         <div className="p-4 bg-gray-50 rounded-lg">
           <p className="text-lg font-medium text-gray-900">{eventLabel.label}</p>
-          <p className="text-sm text-gray-500 mt-1">
-            Created on {new Date(eventLabel.createdAt).toLocaleDateString()}
-          </p>
         </div>
       )}
 
