@@ -54,7 +54,7 @@ function PaymentDetails({ onUpdate }) {
         {!isEditing ? (
           <button
             onClick={() => setIsEditing(true)}
-            className="flex items-center px-3 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+            className="flex items-center px-3 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-grey-700"
           >
             <Edit2 className="h-4 w-4 mr-2" />
             Edit

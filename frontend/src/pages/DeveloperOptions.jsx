@@ -24,7 +24,7 @@ function DeveloperOptions() {
           href="https://r4styp9l.status.cron-job.org/"
           target="_blank"
           rel="noopener noreferrer"
-          className="px-5 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-all"
+          className="px-5 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-all"
         >
           Status
         </a>
