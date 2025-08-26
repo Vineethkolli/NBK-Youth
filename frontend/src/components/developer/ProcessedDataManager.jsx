@@ -175,7 +175,7 @@ function ProcessedDataManager() {
         <button
           onClick={() => handleReprocess(record)}
           disabled={isProcessing}
-          className="flex items-center px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+          className="flex items-center px-3 py-1 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
           title="Reprocess"
         >
           <RotateCcw className="h-4 w-4 mr-1" />
@@ -219,7 +219,6 @@ function ProcessedDataManager() {
           <div className="text-center text-gray-500 py-8">
             <Database className="h-12 w-12 mx-auto mb-4 text-gray-300" />
             <p>No processed records yet</p>
-            <p className="text-sm">Click "Add" to create processed records from snapshots</p>
           </div>
         ) : (
           processedRecords.map((record) => (
@@ -230,7 +229,6 @@ function ProcessedDataManager() {
                   <div>
                     <h3 className="font-medium">{record.eventName} {record.year}</h3>
                     <p className="text-sm text-gray-500">
-                      Collections: {record.selectedCollections.join(', ')} • 
                       Chunks: {record.chunksCount || 0}
                     </p>
                   </div>

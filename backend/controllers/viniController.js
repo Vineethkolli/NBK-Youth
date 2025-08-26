@@ -2,7 +2,7 @@ import ProcessedChunk from '../models/ProcessedChunk.js';
 import ChatHistory from '../models/ChatHistory.js';
 import ProcessedRecord from '../models/ProcessedRecords.js';
 import Snapshot from '../models/Snapshot.js';
-import { processCurrentData, reprocessEventData } from '../services/recordsService.js';
+import { processRecordIntoChunks, buildSnapshotTextFromRecord } from '../services/processedRecordsService.js';
 import { chatWithViniLogic } from '../services/viniService.js';
 import { generateEmbedding } from '../services/embeddingService.js';
 
@@ -65,8 +65,9 @@ export const viniController = {
       record.status = 'processing';
       await record.save();
 
-      // Process the snapshot data into chunks
-      const chunkCount = await processSnapshotData(record);
+  // Build snapshot text and process into chunks via processedRecordsService
+  const { allText, metadata } = buildSnapshotTextFromRecord(record);
+  const chunkCount = await processRecordIntoChunks(record, allText, metadata, record.createdBy);
       
       // Update record with chunk count and status
       record.chunksCount = chunkCount;
