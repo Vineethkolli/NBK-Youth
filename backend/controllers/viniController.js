@@ -1,6 +1,6 @@
 import ProcessedChunk from '../models/ProcessedChunk.js';
 import ChatHistory from '../models/ChatHistory.js';
-import ProcessedRecord from '../models/processedRecord.js';
+import ProcessedRecord from '../models/x.js';
 import Snapshot from '../models/Snapshot.js';
 import { processCurrentData, reprocessEventData } from '../services/recordsService.js';
 import { chatWithViniLogic } from '../services/viniService.js';
