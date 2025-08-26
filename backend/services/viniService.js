@@ -211,33 +211,20 @@ export const chatWithViniLogic = async ({ message, registerId }) => {
         for (const chunk of historicalChunks) {
           if ((!eventName || (chunk.eventName && chunk.eventName.toLowerCase().includes(eventName.toLowerCase()))) && 
               chunk.chunkText.toLowerCase().includes(searchName.toLowerCase())) {
-            const lines = chunk.chunkText.split('\n');
+            const lines = chunk.chunkText.split('\n').filter(l => l.toLowerCase().includes(searchName.toLowerCase()));
             let amount = null;
-
-            // find all line indices that mention the name
-            const nameLower = searchName.toLowerCase();
-            const indices = [];
-            lines.forEach((ln, idx) => {
-              if (ln.toLowerCase().includes(nameLower)) indices.push(idx);
-            });
-
-            for (const idx of indices) {
-              // check the line itself and its neighbours for amount patterns
-              const checkRange = [lines[idx - 1], lines[idx], lines[idx + 1]].filter(Boolean);
-              for (const line of checkRange) {
-                const amountMatch = line.match(/(?:₹\s*)?([\d,\.]{1,})/);
-                if (amountMatch) {
-                  const raw = amountMatch[1];
-                  const digitsOnly = raw.replace(/[^\d]/g, '');
-                  if (digitsOnly.length > 0) {
-                    amount = Math.round(parseFloat(digitsOnly));
-                    break;
-                  }
+            for (const line of lines) {
+              // match amounts like ₹30, 30,000, 30000 etc.
+              const amountMatch = line.match(/(?:₹\s*)?([\d,\.]{1,})/);
+              if (amountMatch) {
+                const raw = amountMatch[1];
+                const digitsOnly = raw.replace(/[^\d]/g, '');
+                if (digitsOnly.length > 0) {
+                  amount = Math.round(parseFloat(digitsOnly));
+                  break;
                 }
               }
-              if (amount) break;
             }
-
             if (amount) {
               response = `${searchName} paid ₹${amount.toLocaleString('en-IN')} for ${chunk.eventName} ${year}.`;
               found = true;
