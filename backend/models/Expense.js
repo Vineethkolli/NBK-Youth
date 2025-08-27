@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import Counter from './Counter.js';
 
 const expenseSchema = new mongoose.Schema({
   expenseId: {
@@ -57,15 +58,12 @@ const expenseSchema = new mongoose.Schema({
 // Auto-generate expenseId (E0, E1, E2, ...)
 expenseSchema.pre('save', async function (next) {
   if (!this.expenseId) {
-    const lastExpense = await mongoose.model('Expense')
-      .findOne({})
-      .sort({ createdAt: -1 }); // safer than string sort
-
-    let nextId = 0;
-    if (lastExpense?.expenseId && /^E\d+$/.test(lastExpense.expenseId)) {
-      nextId = parseInt(lastExpense.expenseId.slice(1)) + 1;
-    }
-    this.expenseId = `E${nextId}`;
+    const counter = await Counter.findByIdAndUpdate(
+      'expenseId',
+      { $inc: { seq: 1 } },
+      { new: true, upsert: true }
+    );
+    this.expenseId = `E${counter.seq}`;
   }
   next();
 });

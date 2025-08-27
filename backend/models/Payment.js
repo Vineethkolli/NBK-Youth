@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import Counter from './Counter.js';
 
 const paymentSchema = new mongoose.Schema(
   {
@@ -56,18 +57,15 @@ const paymentSchema = new mongoose.Schema(
 // Always assign paymentId as P{max+1}, never reuse deleted IDs
 paymentSchema.pre('save', async function (next) {
   if (!this.paymentId) {
-    // Find the highest paymentId number
-    const lastPayment = await mongoose.model('Payment').findOne({}).sort({ paymentId: -1 });
-    let nextId = 0;
-    if (lastPayment && lastPayment.paymentId && /^P\d+$/.test(lastPayment.paymentId)) {
-      nextId = parseInt(lastPayment.paymentId.slice(1)) + 1;
-    }
-    this.paymentId = `P${nextId}`;
+    const counter = await Counter.findByIdAndUpdate(
+      'paymentId',
+      { $inc: { seq: 1 } },
+      { new: true, upsert: true }
+    );
+    this.paymentId = `P${counter.seq}`;
   }
   next();
 });
 
-// Avoid overwriting the model
-const Payment = mongoose.models.Payment || mongoose.model('Payment', paymentSchema);
 
-export default Payment;
+export default mongoose.model('Payment', paymentSchema);
