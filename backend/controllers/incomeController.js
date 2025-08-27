@@ -34,7 +34,6 @@ export const incomeController = {
         if (endDate) {
           query[dateField].$lte = new Date(endDate);
         }
-        // For paidDate filter, also ensure paidDate is not null
         if (dateFilter === 'paidDate') {
           query.paidDate = { ...query.paidDate, $ne: null };
         }
@@ -58,26 +57,32 @@ export const incomeController = {
     }
   },
 
-  // Create new income (case-insensitive name uniqueness)
+  // Create new income (case-insensitive + whitespace-normalized name uniqueness)
   createIncome: async (req, res) => {
     try {
-      const { name, status } = req.body;
+      let { name, status } = req.body;
+
+      // Normalize name: trim + collapse spaces
+      const normalizedName = name.trim().replace(/\s+/g, ' ');
 
       // Check for existing name case-insensitively
-      const existingIncome = await Income.findOne({ name: { $regex: `^${name}$`, $options: 'i' } });
+      const existingIncome = await Income.findOne({
+        name: { $regex: `^${normalizedName}$`, $options: 'i' }
+      });
       if (existingIncome) {
         return res.status(400).json({ message: 'Name already exists' });
       }
 
-      // Set paidDate if status is paid
       const incomeData = {
         ...req.body,
+        name: normalizedName,
         verifyLog: 'not verified'
       };
-      
+
       if (status === 'paid') {
         incomeData.paidDate = new Date();
       }
+
       const income = await Income.create(incomeData);
 
       await logActivity(
@@ -95,19 +100,21 @@ export const incomeController = {
     }
   },
 
-  // Update income (case-insensitive name check)
+  // Update income (case-insensitive + whitespace-normalized name uniqueness)
   updateIncome: async (req, res) => {
     try {
-      const { name, status } = req.body;
+      let { name, status } = req.body;
       const income = await Income.findById(req.params.id);
       if (!income) {
         return res.status(404).json({ message: 'Income not found' });
       }
 
+      let normalizedName;
       if (name) {
-        // Check other documents for same name case-insensitively
+        normalizedName = name.trim().replace(/\s+/g, ' ');
+
         const existingIncome = await Income.findOne({
-          name: { $regex: `^${name}$`, $options: 'i' },
+          name: { $regex: `^${normalizedName}$`, $options: 'i' },
           _id: { $ne: req.params.id }
         });
         if (existingIncome) {
@@ -117,15 +124,18 @@ export const incomeController = {
 
       const originalData = income.toObject();
 
-      // Handle paidDate based on status change
       let updateData = { ...req.body, verifyLog: 'not verified' };
+      if (normalizedName) {
+        updateData.name = normalizedName;
+      }
+
+      // Handle paidDate based on status change
       if (status === 'paid' && income.status !== 'paid') {
-        // Status changed from not paid to paid
         updateData.paidDate = new Date();
       } else if (status === 'not paid' && income.status === 'paid') {
-        // Status changed from paid to not paid
         updateData.paidDate = null;
       }
+
       const updatedIncome = await Income.findByIdAndUpdate(
         req.params.id,
         updateData,

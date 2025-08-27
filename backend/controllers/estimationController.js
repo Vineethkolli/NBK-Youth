@@ -30,10 +30,13 @@ export const estimationController = {
     try {
       const { name } = req.body;
 
-      // Case-insensitive name uniqueness check
-      const existingIncome = await EstimatedIncome.findOne({
-        name: { $regex: `^${name}$`, $options: 'i' }
-      });
+            // Normalize name: trim + collapse spaces
+            const normalizedName = name.trim().replace(/\s+/g, ' ');
+      
+            // Check for existing name case-insensitively
+            const existingIncome = await EstimatedIncome.findOne({
+              name: { $regex: `^${normalizedName}$`, $options: 'i' }
+            });
       if (existingIncome) {
         return res.status(400).json({ message: 'Name already exists' });
       }
@@ -68,11 +71,14 @@ export const estimationController = {
         return res.status(404).json({ message: 'Estimated income not found' });
       }
 
-      if (name) {
-        const existingIncome = await EstimatedIncome.findOne({
-          name: { $regex: `^${name}$`, $options: 'i' },
-          _id: { $ne: req.params.id }
-        });
+      let normalizedName;
+            if (name) {
+              normalizedName = name.trim().replace(/\s+/g, ' ');
+      
+              const existingIncome = await EstimatedIncome.findOne({
+                name: { $regex: `^${normalizedName}$`, $options: 'i' },
+                _id: { $ne: req.params.id }
+              });
         if (existingIncome) {
           return res.status(400).json({ message: 'Name already exists' });
         }
