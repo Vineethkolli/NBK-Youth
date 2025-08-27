@@ -10,6 +10,7 @@ import { logActivity } from '../middleware/activityLogger.js';
 import User from '../models/User.js';
 import Payment from '../models/Payment.js';
 import cloudinary from '../config/cloudinary.js'; // ✅ Import cloudinary
+import Counter from '../models/Counter.js';
 
 export const developerController = {
   clearData: async (req, res) => {
@@ -22,11 +23,13 @@ export const developerController = {
       switch (type) {
         case 'income':
           await Income.deleteMany({});
+          await Counter.findByIdAndDelete('incomeId');
           description = 'Cleared all income records';
           break;
 
         case 'expense':
           await Expense.deleteMany({});
+          await Counter.findByIdAndDelete('expenseId');
           description = 'Cleared all expense records';
 
           // ✅ Delete all Cloudinary files in 'ExpenseBills' folder
@@ -40,11 +43,13 @@ export const developerController = {
 
         case 'estimatedIncome':
           await EstimatedIncome.deleteMany({});
+          await Counter.findByIdAndDelete('EIID');
           description = 'Cleared all estimated income records';
           break;
 
         case 'estimatedExpense':
           await EstimatedExpense.deleteMany({});
+          await Counter.findByIdAndDelete('EEID');
           description = 'Cleared all estimated expense records';
           break;
 
@@ -65,6 +70,7 @@ export const developerController = {
 
         case 'payment':
           await Payment.deleteMany({});
+          await Counter.findByIdAndDelete('paymentId');
           description = 'Cleared all payment records';
 
           // ✅ Delete all Cloudinary files in 'PaymentScreenshots' folder
