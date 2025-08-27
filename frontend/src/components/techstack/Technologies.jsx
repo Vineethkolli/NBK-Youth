@@ -2,7 +2,9 @@ import React from "react";
 import { 
   SiVercel, SiRender, SiMongodb, SiGmail, SiCloudinary, SiGoogledrive,
   SiReact, SiTailwindcss, SiVite, SiNodedotjs, SiExpress, SiGoogleanalytics, SiPostman,
-  SiGit, SiGithub, SiGoogletranslate, SiGoogle, SiOpenai, SiYoutube, SiGithubcopilot } from "react-icons/si";
+  SiGit, SiGithub, SiGoogletranslate, SiGoogle, SiOpenai, SiYoutube, SiGithubcopilot,
+  SiHuggingface, SiGooglecloud 
+} from "react-icons/si";
 import { FaCode, FaWhatsapp, FaRobot, FaClock } from "react-icons/fa";
 import Footer from "../Footer";
 
@@ -50,12 +52,19 @@ const frontendTech = [
   { name: "Tailwind CSS", icon: <SiTailwindcss className="h-8 w-8 mr-2 text-teal-500" /> },
   { name: "Vite", icon: <SiVite className="h-8 w-8 mr-2 text-purple-500" /> },
 ];
+
 const backendTech = [
   { name: "Node.js", icon: <SiNodedotjs className="h-8 w-8 mr-2 text-green-500" /> },
   { name: "Express", icon: <SiExpress className="h-8 w-8 mr-2 text-gray-500" /> },
   { name: "MongoDB", icon: <SiMongodb className="h-8 w-8 mr-2 text-green-600" /> },
   { name: "JWT Authentication", icon: <FaCode className="h-8 w-8 mr-2 text-orange-500" /> },
 ];
+
+const aiIntegrations = [
+  { name: "Gemini API", icon: <SiGooglecloud className="h-8 w-8 mr-2 text-blue-500" /> },
+  { name: "Hugging Face", icon: <SiHuggingface className="h-8 w-8 mr-2 text-yellow-500" /> }
+];
+
 const features = [
   { name: "Web Push (Notifications)", icon: <FaCode className="h-8 w-8 mr-2 text-gray-500" /> },
   { name: "Progressive Web App (APP)", icon: <FaCode className="h-8 w-8 mr-2 text-gray-500" /> },
@@ -64,6 +73,7 @@ const features = [
   { name: "Google Analytics (User Interactions)", icon: <SiGoogleanalytics className="h-8 w-8 mr-2 text-yellow-500" /> },
   { name: "Cron-job.org (Keeps server warm)", icon: <FaClock className="h-8 w-8 mr-2 text-orange-600" /> },
 ];
+
 const tools = [
   { name: "GitHub", icon: <SiGithub className="h-8 w-8 mr-2 text-gray-800" /> },
   { name: "Git", icon: <SiGit className="h-8 w-8 mr-2 text-red-600" /> },
@@ -74,6 +84,7 @@ const tools = [
 const techCategories = [
   { category: "Frontend", items: frontendTech },
   { category: "Backend", items: backendTech },
+  { category: "AI & Integrations", items: aiIntegrations },
   { category: "Features", items: features },
   { category: "Tools", items: tools },
 ];
