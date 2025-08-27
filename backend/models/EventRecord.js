@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import Counter from './Counter.js';
 
 const eventRecordSchema = new mongoose.Schema({
   recordId: {
@@ -29,17 +30,12 @@ const eventRecordSchema = new mongoose.Schema({
 // Generate recordId as ER1, ER2, ER3, ...
 eventRecordSchema.pre('save', async function(next) {
   if (!this.recordId) {
-    const lastRecord = await mongoose.model('EventRecord').findOne({}).sort({ createdAt: -1 });
-    let nextId = 1;
-    if (lastRecord && lastRecord.recordId && /^ER\d+$/.test(lastRecord.recordId)) {
-      nextId = parseInt(lastRecord.recordId.slice(2)) + 1;
-    } else {
-      const all = await mongoose.model('EventRecord').find({ recordId: { $regex: /^ER\d+$/ } }).sort({ recordId: -1 }).limit(1);
-      if (all && all[0] && all[0].recordId) {
-        nextId = parseInt(all[0].recordId.slice(2)) + 1;
-      }
-    }
-    this.recordId = `ER${nextId}`;
+    const counter = await Counter.findByIdAndUpdate(
+      'recordId',
+      { $inc: { seq: 1 } },
+      { new: true, upsert: true }
+    );
+    this.recordId = `ER${counter.seq}`;
   }
   next();
 });

@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import Counter from './Counter.js';
 
 const incomeSchema = new mongoose.Schema({
   incomeId: {
@@ -68,15 +69,12 @@ const incomeSchema = new mongoose.Schema({
 
 incomeSchema.pre('save', async function (next) {
   if (!this.incomeId) {
-    const lastIncome = await mongoose.model('Income')
-      .findOne({})
-      .sort({ createdAt: -1 }); // safer than string sort
-
-    let nextId = 0;
-    if (lastIncome?.incomeId && /^I\d+$/.test(lastIncome.incomeId)) {
-      nextId = parseInt(lastIncome.incomeId.slice(1)) + 1;
-    }
-    this.incomeId = `I${nextId}`;
+    const counter = await Counter.findByIdAndUpdate(
+      'incomeId',
+      { $inc: { seq: 1 } },
+      { new: true, upsert: true }
+    );
+    this.incomeId = `I${counter.seq}`;
   }
   next();
 });
