@@ -34,9 +34,24 @@ const estimatedIncomeSchema = new mongoose.Schema({
   },
   EIID: {
     type: String,
-    required: true,
     unique: true
   }
 }, { timestamps: true });
+
+// Auto-generate EIID (EI0, EI1, EI2, ...)
+estimatedIncomeSchema.pre('save', async function (next) {
+  if (!this.EIID) {
+    const lastIncome = await mongoose.model('EstimatedIncome')
+      .findOne({})
+      .sort({ createdAt: -1 });
+
+    let nextId = 0;
+    if (lastIncome?.EIID && /^EI\d+$/.test(lastIncome.EIID)) {
+      nextId = parseInt(lastIncome.EIID.slice(2)) + 1;
+    }
+    this.EIID = `EI${nextId}`;
+  }
+  next();
+});
 
 export default mongoose.model('EstimatedIncome', estimatedIncomeSchema);

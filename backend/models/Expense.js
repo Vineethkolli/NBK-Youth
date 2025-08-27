@@ -54,13 +54,15 @@ const expenseSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // Generate expenseId as E0, E1, E2, ...
-// Always assign expenseId as E{max+1}, never reuse deleted IDs
-expenseSchema.pre('save', async function(next) {
+// Auto-generate expenseId (E0, E1, E2, ...)
+expenseSchema.pre('save', async function (next) {
   if (!this.expenseId) {
-    // Find the highest expenseId number
-    const lastExpense = await mongoose.model('Expense').findOne({}).sort({ expenseId: -1 });
+    const lastExpense = await mongoose.model('Expense')
+      .findOne({})
+      .sort({ createdAt: -1 }); // safer than string sort
+
     let nextId = 0;
-    if (lastExpense && lastExpense.expenseId && /^E\d+$/.test(lastExpense.expenseId)) {
+    if (lastExpense?.expenseId && /^E\d+$/.test(lastExpense.expenseId)) {
       nextId = parseInt(lastExpense.expenseId.slice(1)) + 1;
     }
     this.expenseId = `E${nextId}`;

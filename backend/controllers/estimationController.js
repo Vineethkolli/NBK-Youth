@@ -29,25 +29,20 @@ export const estimationController = {
   createEstimatedIncome: async (req, res) => {
     try {
       const { name } = req.body;
+
       // Case-insensitive name uniqueness check
-      const existingIncome = await EstimatedIncome.findOne({ name: { $regex: `^${name}$`, $options: 'i' } });
+      const existingIncome = await EstimatedIncome.findOne({
+        name: { $regex: `^${name}$`, $options: 'i' }
+      });
       if (existingIncome) {
         return res.status(400).json({ message: 'Name already exists' });
       }
 
-      // Always assign EIID as EI{max+1}, never reuse deleted IDs
-      const lastIncome = await EstimatedIncome.findOne({}).sort({ EIID: -1 });
-      let nextId = 1;
-      if (lastIncome && lastIncome.EIID && /^EI\d+$/.test(lastIncome.EIID)) {
-        nextId = parseInt(lastIncome.EIID.slice(2)) + 1;
-      }
       if (!req.body.registerId) {
         return res.status(400).json({ message: 'registerId is required' });
       }
-      const income = await EstimatedIncome.create({
-        ...req.body,
-        EIID: `EI${nextId}`
-      });
+
+      const income = await EstimatedIncome.create(req.body);
 
       await logActivity(
         req,
@@ -74,7 +69,6 @@ export const estimationController = {
       }
 
       if (name) {
-        // Case-insensitive check against other records
         const existingIncome = await EstimatedIncome.findOne({
           name: { $regex: `^${name}$`, $options: 'i' },
           _id: { $ne: req.params.id }
@@ -138,19 +132,11 @@ export const estimationController = {
 
   createEstimatedExpense: async (req, res) => {
     try {
-      // Always assign EEID as EE{max+1}, never reuse deleted IDs
-      const lastExpense = await EstimatedExpense.findOne({}).sort({ EEID: -1 });
-      let nextId = 1;
-      if (lastExpense && lastExpense.EEID && /^EE\d+$/.test(lastExpense.EEID)) {
-        nextId = parseInt(lastExpense.EEID.slice(2)) + 1;
-      }
       if (!req.body.registerId) {
         return res.status(400).json({ message: 'registerId is required' });
       }
-      const expense = await EstimatedExpense.create({
-        ...req.body,
-        EEID: `EE${nextId}`
-      });
+
+      const expense = await EstimatedExpense.create(req.body);
 
       await logActivity(
         req,
@@ -245,7 +231,27 @@ export const estimationController = {
       const villagersPaidCount = villagersIncomes.filter(i => i.status === 'paid').length;
       const villagersNotPaidCount = villagersIncomes.filter(i => i.status !== 'paid').length;
 
-      res.json({ totalEstimatedIncome, totalEstimatedPaidIncome, totalEstimatedNotPaidIncome, totalEstimatedExpense, balance, incomeCount, expenseCount, overallPaidCount, overallNotPaidCount, youthPaid, youthNotPaid, youthCount, youthPaidCount, youthNotPaidCount, villagersPaid, villagersNotPaid, villagersCount, villagersPaidCount, villagersNotPaidCount });
+      res.json({
+        totalEstimatedIncome,
+        totalEstimatedPaidIncome,
+        totalEstimatedNotPaidIncome,
+        totalEstimatedExpense,
+        balance,
+        incomeCount,
+        expenseCount,
+        overallPaidCount,
+        overallNotPaidCount,
+        youthPaid,
+        youthNotPaid,
+        youthCount,
+        youthPaidCount,
+        youthNotPaidCount,
+        villagersPaid,
+        villagersNotPaid,
+        villagersCount,
+        villagersPaidCount,
+        villagersNotPaidCount
+      });
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch estimation stats' });
     }
