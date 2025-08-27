@@ -65,12 +65,13 @@ const incomeSchema = new mongoose.Schema({
     type: String,
   },
 }, { timestamps: true });
+
 incomeSchema.pre('save', async function (next) {
   if (!this.incomeId) {
-    // Get last inserted income with numeric sort
-    const lastIncome = await mongoose.model('Income').findOne({})
-      .sort({ createdAt: -1 });  // safer, always latest doc
-    
+    const lastIncome = await mongoose.model('Income')
+      .findOne({})
+      .sort({ createdAt: -1 }); // safer than string sort
+
     let nextId = 0;
     if (lastIncome?.incomeId && /^I\d+$/.test(lastIncome.incomeId)) {
       nextId = parseInt(lastIncome.incomeId.slice(1)) + 1;
