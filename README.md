@@ -32,6 +32,12 @@
 <img src="https://img.shields.io/badge/ESLint-4B32C3?style=for-the-badge&logo=eslint&logoColor=white" />
 <img src="https://img.shields.io/badge/Axios-5A29E4?style=for-the-badge" />
 
+<!-- Row 3 (AI Integrations) -->
+<br/>
+<img src="https://img.shields.io/badge/Vini_AI-purple?style=for-the-badge&logo=ai" />
+<img src="https://img.shields.io/badge/Gemini_API-4285F4?style=for-the-badge&logo=google" />
+<img src="https://img.shields.io/badge/HuggingFace-yellow?style=for-the-badge&logo=huggingface&logoColor=black" />
+
 </div>
 
 ---
@@ -59,19 +65,26 @@ NBK-Youth is designed to streamline content, finance, and user management in a u
 ## ✨ Features
 
 - **👤 User Authentication & Profiles:**  
-  Supports sign-up/login, role-based access (Admin, Financier, Developer, User), category-based UI (Youth, General).
+  Supports sign-up, signin, forget password, role-based access (Admin, Financier, Developer, User), category-based UI (Youth, General).
 
 - **💰 Finance Management:**  
-  Handle income/expenses, estimations, verification, recycle bin, and budgeting with visual statistics.
+  Handle income, expenses, estimation, verification, recycle bin, and budgeting with visual statistics.
 
 - **🖼️ Media & Content Tools:**  
-  Slides, banners, YouTube/video uploads, moments, songs, pinned media, and multilingual support.
+  Slides, banners, YouTube video uploads, moments, songs and multilingual support.
 
 - **🔔 Notifications & Utilities:**  
   Web push notifications, site maintenance toggle, log tracking, PDF exports, and QR generator.
 
 - **🧩 PWA & Multilingual:**  
   Built as a Progressive Web App with support for languages like Telugu and English.
+
+- **🤖 Vini AI**  
+  - Chat with your data using natural language.  
+  - **Gemini API**: For reasoning, summarization, and context understanding.  
+  - **Hugging Face models**: For embeddings, NLP tasks, and custom AI workflows.  
+  - Data chunking + embeddings for previous records of data.  
+  - Future expansion: multimodal support (text, audio, image).  
 
 ---
 
@@ -80,17 +93,17 @@ NBK-Youth is designed to streamline content, finance, and user management in a u
 ### Frontend:
 - **React + Vite**
 - **Tailwind CSS**
-- **React Router**
 - **PWA plugin**
 - **JS libraries**
 
 ### Backend:
 - **Node.js + Express**
-- **MongoDB (via Mongoose)**
+- **MongoDB**
 - **JWT, bcrypt, dotenv**
 - **Cloudinary, Google Drive APIs**
 - **Nodemailer, Web-Push**
 - **CORS-enabled APIs**
+- **Gemini API, Hugging Face APIs**
 
 ### Hosting:
 - **Frontend:** [Vercel](https://vercel.com/)
@@ -111,7 +124,7 @@ NBK-Youth is designed to streamline content, finance, and user management in a u
 
 ```bash
 git clone https://github.com/Vineethkolli/NBK-Youth.git
-cd NBK-Youth/backend
+cd ../backend
 npm install
 ```
 
@@ -122,7 +135,7 @@ MONGODB_URI=your_mongodb_connection_string
 PUBLIC_VAPID_KEY=your_webpush_public_key
 PRIVATE_VAPID_KEY=your_webpush_private_key
 FRONTEND_URL=http://localhost:5173
-Also include needed JWT secret, Cloudinary creds, email credentials, Google drive api credentials.
+Also include needed JWT secret, Cloudinary creds, email credentials, Gemini api, Hugging face api, Google drive api credentials.
 ```
 
 Run backend:
