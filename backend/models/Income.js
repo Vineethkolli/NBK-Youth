@@ -65,15 +65,14 @@ const incomeSchema = new mongoose.Schema({
     type: String,
   },
 }, { timestamps: true });
-
-// Generate incomeId as I0, I1, I2, ...
-// Always assign incomeId as I{max+1}, never reuse deleted IDs
-incomeSchema.pre('save', async function(next) {
+incomeSchema.pre('save', async function (next) {
   if (!this.incomeId) {
-    // Find the highest incomeId number
-    const lastIncome = await mongoose.model('Income').findOne({}).sort({ incomeId: -1 });
+    // Get last inserted income with numeric sort
+    const lastIncome = await mongoose.model('Income').findOne({})
+      .sort({ createdAt: -1 });  // safer, always latest doc
+    
     let nextId = 0;
-    if (lastIncome && lastIncome.incomeId && /^I\d+$/.test(lastIncome.incomeId)) {
+    if (lastIncome?.incomeId && /^I\d+$/.test(lastIncome.incomeId)) {
       nextId = parseInt(lastIncome.incomeId.slice(1)) + 1;
     }
     this.incomeId = `I${nextId}`;
