@@ -78,7 +78,10 @@ export function MusicProvider({ children }) {
 
     const onTimeUpdate    = () => setProgress(audio.currentTime);
     const onLoadedMeta    = () => setDuration(audio.duration);
-    const onEnded         = () => handleNext();
+    const onEnded = () => {
+  handleNext();
+  setIsPlaying(true); 
+};
 
     audio.addEventListener('timeupdate',    onTimeUpdate);
     audio.addEventListener('loadedmetadata', onLoadedMeta);
