@@ -1,0 +1,41 @@
+import { formatDateTime } from '../../utils/dateTime';
+
+function HistoryEvents({ events, eventName, year }) {
+  if (!events || events.length === 0) {
+    return (
+      <div className="p-6 text-center text-gray-500">
+        No events data available for {eventName} {year}
+      </div>
+    );
+  }
+
+  return (
+    <div className="p-6">
+      <div className="mb-4">
+        <h2 className="text-xl font-semibold">{eventName} {year} - Events Timeline</h2>
+        <p className="text-sm text-gray-600">{events.length} events</p>
+      </div>
+
+      <div className="space-y-4">
+        <div className="relative">
+          <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-200" />
+          {events.map((event, index) => (
+            <div key={event._id || index} className="relative pl-8 pb-8">
+              <div className="absolute left-2 top-2 w-4 h-4 bg-indigo-600 rounded-full border-4 border-white" />
+              <div className="bg-white rounded-lg shadow p-4">
+                <div>
+                  <h3 className="font-medium">{event.name}</h3>
+                  <p className="text-sm text-gray-500">
+                    {event.dateTime ? formatDateTime(event.dateTime) : '-'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default HistoryEvents;

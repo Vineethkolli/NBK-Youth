@@ -7,6 +7,7 @@ import User from '../models/User.js';
 import Payment from '../models/Payment.js';
 import PreviousYear from '../models/PreviousYear.js';
 import { logActivity } from '../middleware/activityLogger.js';
+import Event from '../models/Event.js';
 
 export const snapshotController = {
   // Get all snapshots
@@ -47,6 +48,9 @@ export const snapshotController = {
       }
       if (selectedCollections.includes('EstimatedExpense')) {
         collections.EstimatedExpense = await EstimatedExpense.find();
+      }
+      if (selectedCollections.includes('Event')) {
+        collections.Event = await Event.find();
       }
 
       // Generate stats if requested

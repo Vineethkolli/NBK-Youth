@@ -18,7 +18,8 @@ const snapshotSchema = new mongoose.Schema({
     Income: [{ type: mongoose.Schema.Types.Mixed }],
     Expense: [{ type: mongoose.Schema.Types.Mixed }],
     EstimatedIncome: [{ type: mongoose.Schema.Types.Mixed }],
-    EstimatedExpense: [{ type: mongoose.Schema.Types.Mixed }]
+    EstimatedExpense: [{ type: mongoose.Schema.Types.Mixed }],
+    Event: [{ type: mongoose.Schema.Types.Mixed }]
   },
   stats: {
     type: mongoose.Schema.Types.Mixed,
