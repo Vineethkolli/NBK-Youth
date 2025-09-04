@@ -3,7 +3,7 @@
     "relation": ["delegate_permission/common.handle_all_urls"],
     "target": {
       "namespace": "android_app",
-      "package_name": "YOUR_PACKAGE_NAME",
+      "package_name": "app.nbkyouth",
       "sha256_cert_fingerprints": [
         "28:E5:B6:CE:99:89:F6:BC:FE:D1:2A:B1:BF:49:F3:13:05:79:98:14:90:6C:FF:E5:CC:DE:C9:D4:D4:4D:E6:0A"
       ]
