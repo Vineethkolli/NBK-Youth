@@ -15,12 +15,5 @@
   { "src": "/logo/152.png", "sizes": "152x152", "type": "image/png", "purpose": "any maskable" },
   { "src": "/logo/192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
   { "src": "/logo/512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
-],
-"screenshots": [
-  { "src": "/screenshots/home.png", "sizes": "1080x2160", "type": "image/png"},
-  { "src": "/screenshots/dashboard.png", "sizes": "1080x2160", "type": "image/png"},
-  { "src": "/screenshots/stats.png", "sizes": "1080x2160", "type": "image/png"},
-  { "src": "/screenshots/developer.png", "sizes": "1080x2160", "type": "image/png"}
-    
-  ]
+]
 }
