@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'react-hot-toast';
 import { Copy, QrCode } from 'lucide-react';
-import QRCode from "qrcode.react";
+import { QRCodeCanvas } from "qrcode.react";
 import axios from 'axios';
 import { API_URL } from '../../utils/config';
 
@@ -231,7 +231,7 @@ function PaymentForm({ onSubmit }) {
 
           {selectedOption === 'qr' && (
             <div className="flex justify-center">
-              <QRCode
+              <QRCodeCanvas
                 value={`upi://pay?pa=${paymentDetails.upiId}&pn=${encodeURIComponent(paymentDetails.accountHolder)}&am=${amount}&cu=INR`}
                 size={200}
                 level="H"
