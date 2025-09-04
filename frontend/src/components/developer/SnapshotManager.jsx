@@ -5,7 +5,7 @@ import axios from 'axios';
 import { API_URL } from '../../utils/config';
 
 const EVENT_OPTIONS = ['Sankranti', 'Ganesh Chaturthi'];
-const COLLECTION_OPTIONS = ['Income', 'Expense', 'EstimatedIncome', 'EstimatedExpense', 'Stats'];
+const COLLECTION_OPTIONS = ['Income', 'Expense', 'EstimatedIncome', 'EstimatedExpense', 'Stats', 'Event'];
 
 function SnapshotManager() {
   const [snapshots, setSnapshots] = useState([]);

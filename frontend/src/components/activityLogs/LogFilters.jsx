@@ -116,6 +116,7 @@ function LogFilters({ filters, onChange }) {
         <option value="FinancialRecord">Financial Record</option>
         <option value="EventRecord">Event Record</option>
         <option value="Snapshot">Snapshot</option>
+        <option value="History">History</option>
       </select>
 
       {/* Start Date Picker */}
