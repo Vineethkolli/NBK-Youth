@@ -4,7 +4,7 @@ import { Printer } from 'lucide-react';
 import { formatDateTime } from '../../utils/dateTime';
 import { toast } from 'react-hot-toast';
 
-function HistoryPrint({ selectedHistory, activeTab, data, showBelongsTo }) {
+function EnglishPrint({ selectedHistory, activeTab, data, showBelongsTo }) {
   const formatAmount = (amount) =>
     new Intl.NumberFormat('en-IN', {
       minimumFractionDigits: 0,
@@ -267,4 +267,4 @@ function HistoryPrint({ selectedHistory, activeTab, data, showBelongsTo }) {
   );
 }
 
-export default HistoryPrint;
+export default EnglishPrint;
