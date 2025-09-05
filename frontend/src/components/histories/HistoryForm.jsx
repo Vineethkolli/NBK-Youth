@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { X } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 const COLLECTION_OPTIONS = ['Stats', 'Income', 'Expense', 'Event'];
@@ -78,9 +77,6 @@ function HistoryForm({ snapshots, onClose, onSubmit }) {
       <div className="bg-white rounded-lg p-6 w-full max-w-md">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">Add History</h2>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
-            <X className="h-6 w-6" />
-          </button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">

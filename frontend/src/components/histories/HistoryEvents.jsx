@@ -10,8 +10,8 @@ function HistoryEvents({ events, snapshotName }) {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
+    <div className="p-6">
+      <div className="mb-4">
         <h2 className="text-xl font-semibold">{snapshotName} - Events Timeline</h2>
       </div>
 

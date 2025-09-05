@@ -12,7 +12,7 @@ function HistoryExpense({ expenses, snapshotName }) {
   return (
     <div className="p-6">
       <div className="mb-4">
-        <h2 className="text-xl font-semibold">{snapshotName} - Expense Records</h2>
+        <h2 className="text-xl font-semibold">{snapshotName} - Expense</h2>
       </div>
 
       <div className="overflow-x-auto">
