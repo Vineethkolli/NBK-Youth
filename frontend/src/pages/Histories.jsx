@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Plus, Edit2, Printer, Search, Filter, BarChart2, IndianRupee, DollarSign, Calendar } from 'lucide-react';
+import { Plus, Edit2, Printer, Trash2, Search, Filter, BarChart2, IndianRupee, DollarSign, CalendarDays } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { API_URL } from '../utils/config';
@@ -184,7 +184,7 @@ function Histories() {
       </div>
 
       {/* Event List */}
-      <div className="bg-white rounded-lg shadow p-6">
+      <div className="bg-white rounded-lg shadow p-2">
         {histories.length === 0 ? (
           <p className="text-gray-500 text-center py-4">No event histories available</p>
         ) : (
@@ -193,7 +193,7 @@ function Histories() {
               <div key={history._id} className="relative">
                 <button
                   onClick={() => setSelectedHistory(history)}
-                  className={`w-full p-3 rounded-lg border-2 transition-colors ${
+                  className={`w-full p-2 rounded-lg border-2 transition-colors ${
                     selectedHistory?._id === history._id
                       ? 'border-indigo-500 bg-indigo-50'
                       : 'border-gray-200 hover:border-gray-300'
@@ -203,11 +203,11 @@ function Histories() {
                 </button>
                 {isEditMode && (
                   <button
-                    onClick={() => handleDelete(history._id)}
-                    className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full p-1 hover:bg-red-700"
-                  >
-                    ×
-                  </button>
+  onClick={() => handleDelete(history._id)}
+  className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full p-1 hover:bg-red-700"
+>
+  <Trash2 className="w-4 h-4" />
+</button>
                 )}
               </div>
             ))}
@@ -217,11 +217,11 @@ function Histories() {
 
       {/* Data Tabs */}
       {selectedHistory && (
-        <div className="space-y-6">
-          <div className="flex space-x-6">
+        <div className="space-y-4">
+          <div className="flex space-x-4">
             <button
               onClick={() => setActiveTab('stats')}
-              className={`px-4 py-2 rounded-md font-semibold flex items-center ${
+              className={`px-2 py-2 rounded-md font-semibold flex items-center ${
                 activeTab === 'stats'
                   ? 'bg-indigo-600 text-white'
                   : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
@@ -233,7 +233,7 @@ function Histories() {
 
             <button
               onClick={() => setActiveTab('income')}
-              className={`px-4 py-2 rounded-md font-semibold flex items-center ${
+              className={`px-2 py-2 rounded-md font-semibold flex items-center ${
                 activeTab === 'income'
                   ? 'bg-indigo-600 text-white'
                   : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
@@ -245,7 +245,7 @@ function Histories() {
 
             <button
               onClick={() => setActiveTab('expense')}
-              className={`px-4 py-2 rounded-md font-semibold flex items-center ${
+              className={`px-2 py-2 rounded-md font-semibold flex items-center ${
                 activeTab === 'expense'
                   ? 'bg-indigo-600 text-white'
                   : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
@@ -257,14 +257,14 @@ function Histories() {
 
             <button
               onClick={() => setActiveTab('events')}
-              className={`px-4 py-2 rounded-md font-semibold flex items-center ${
+              className={`px-2 py-2 rounded-md font-semibold flex items-center ${
                 activeTab === 'events'
                   ? 'bg-indigo-600 text-white'
                   : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
               }`}
             >
-              <Calendar className="h-4 w-4 mr-2" />
-              Events
+              <CalendarDays className="h-4 w-4 mr-0" />
+              
             </button>
           </div>
 
@@ -364,10 +364,7 @@ function Histories() {
         />
       )}
 
-      {/* Footer */}
-      <footer className="pt-8 border-t text-center text-sm text-gray-500">
-        Since 2023 — We moved all records from paper to digital
-      </footer>
+      
     </div>
   );
 }
