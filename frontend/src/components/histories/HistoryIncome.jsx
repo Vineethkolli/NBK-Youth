@@ -13,7 +13,6 @@ function HistoryIncome({ incomes, snapshotName, showBelongsTo }) {
     <div className="p-6">
       <div className="mb-4">
         <h2 className="text-xl font-semibold">{snapshotName} - Income Records</h2>
-        <p className="text-sm text-gray-600">{incomes.length} entries</p>
       </div>
 
       <div className="overflow-x-auto">
@@ -35,7 +34,7 @@ function HistoryIncome({ incomes, snapshotName, showBelongsTo }) {
                 <td className="px-6 py-4 whitespace-nowrap text-sm">{income.name}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{income.amount}</td>
                 {showBelongsTo && (
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">{income.belongsTo}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">{income.belongsTo || '-'}</td>
                 )}
               </tr>
             ))}

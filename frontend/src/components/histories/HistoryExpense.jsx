@@ -13,7 +13,6 @@ function HistoryExpense({ expenses, snapshotName }) {
     <div className="p-6">
       <div className="mb-4">
         <h2 className="text-xl font-semibold">{snapshotName} - Expense Records</h2>
-        <p className="text-sm text-gray-600">{expenses.length} entries</p>
       </div>
 
       <div className="overflow-x-auto">

@@ -5,7 +5,6 @@ const COLLECTION_OPTIONS = ['Stats', 'Income', 'Expense', 'Events'];
 
 function HistoryForm({ snapshots, onClose, onSubmit }) {
   const [formData, setFormData] = useState({
-    snapshotName: '',
     snapshotId: '',
     selectedCollections: ['Stats']
   });
@@ -79,17 +78,7 @@ function HistoryForm({ snapshots, onClose, onSubmit }) {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Snapshot Name *</label>
-            <input
-              type="text"
-              required
-              value={formData.snapshotName}
-              onChange={(e) => setFormData({ ...formData, snapshotName: e.target.value })}
-              placeholder="e.g., Sankranti 2025, Ganesh Chaturthi 2024"
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-            />
-          </div>
+          {/* Snapshot name is derived from the selected snapshot (eventName + year) */}
 
           <div>
             <label className="block text-sm font-medium text-gray-700">Select Snapshot *</label>

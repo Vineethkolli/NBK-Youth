@@ -52,7 +52,7 @@ function HistoryPrint({ selectedHistory, activeTab, data, searchQuery, filters, 
       doc.text(`Page ${i} of ${pageCount}`, doc.internal.pageSize.width - 20, doc.internal.pageSize.height - 10, { align: 'right' });
     }
 
-    doc.save(`${selectedHistory.eventName}_${selectedHistory.year}_${activeTab}.pdf`);
+    doc.save(`${selectedHistory.snapshotName}_${activeTab}.pdf`);
   };
 
   const printStats = (doc, stats, startY, snapshotName) => {
@@ -82,8 +82,6 @@ function HistoryPrint({ selectedHistory, activeTab, data, searchQuery, filters, 
   };
 
   const printIncome = (doc, incomes, startY, snapshotName, showBelongsTo) => {
-    doc.setFontSize(14);
-    doc.text(`${snapshotName} - Income Records`, 15, startY);
     
     const headers = showBelongsTo 
       ? ['S.No', 'Name', 'Amount', 'Belongs To']
@@ -97,7 +95,7 @@ function HistoryPrint({ selectedHistory, activeTab, data, searchQuery, filters, 
     ]);
 
     autoTable(doc, {
-      startY: startY + 4,
+      startY: startY,
       head: [headers],
       body: body,
       theme: 'grid',
