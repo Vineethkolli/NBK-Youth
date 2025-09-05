@@ -3,7 +3,7 @@ import autoTable from 'jspdf-autotable';
 import { Printer } from 'lucide-react';
 import { formatDateTime } from '../../utils/dateTime';
 
-function HistoryPrint({ selectedHistory, activeTab, data, searchQuery, filters }) {
+function HistoryPrint({ selectedHistory, activeTab, data, searchQuery, filters, showBelongsTo }) {
   const formatAmount = (amount) => {
     return new Intl.NumberFormat('en-IN', {
       minimumFractionDigits: 0,
@@ -27,20 +27,20 @@ function HistoryPrint({ selectedHistory, activeTab, data, searchQuery, filters }
     // Title
     doc.setFontSize(20);
     doc.setTextColor(0, 0, 0);
-    const title = `${selectedHistory.eventName} ${selectedHistory.year} - ${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} Report`;
+    const title = `${selectedHistory.snapshotName} - ${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} Report`;
     const titleWidth = doc.getTextWidth(title);
     const xPos = (doc.internal.pageSize.width - titleWidth) / 2;
     doc.text(title, xPos, yPos);
     yPos += 15;
 
     if (activeTab === 'stats' && data) {
-      printStats(doc, data, yPos);
+      printStats(doc, data, yPos, selectedHistory.snapshotName);
     } else if (activeTab === 'income' && Array.isArray(data)) {
-      printIncome(doc, data, yPos);
+      printIncome(doc, data, yPos, selectedHistory.snapshotName, showBelongsTo);
     } else if (activeTab === 'expense' && Array.isArray(data)) {
-      printExpense(doc, data, yPos);
+      printExpense(doc, data, yPos, selectedHistory.snapshotName);
     } else if (activeTab === 'events' && Array.isArray(data)) {
-      printEvents(doc, data, yPos);
+      printEvents(doc, data, yPos, selectedHistory.snapshotName);
     }
 
     // Footer
@@ -55,11 +55,11 @@ function HistoryPrint({ selectedHistory, activeTab, data, searchQuery, filters }
     doc.save(`${selectedHistory.eventName}_${selectedHistory.year}_${activeTab}.pdf`);
   };
 
-  const printStats = (doc, stats, startY) => {
+  const printStats = (doc, stats, startY, snapshotName) => {
     const budgetStats = stats.budgetStats || {};
     
     doc.setFontSize(14);
-    doc.text('Budget Statistics', 15, startY);
+    doc.text(`${snapshotName} - Budget Statistics`, 15, startY);
     
     const budgetHead = ['Category', 'Count', 'Amount'];
     const budgetBody = [
@@ -81,20 +81,19 @@ function HistoryPrint({ selectedHistory, activeTab, data, searchQuery, filters }
     });
   };
 
-  const printIncome = (doc, incomes, startY) => {
+  const printIncome = (doc, incomes, startY, snapshotName, showBelongsTo) => {
     doc.setFontSize(14);
-    doc.text('Income Records', 15, startY);
+    doc.text(`${snapshotName} - Income Records`, 15, startY);
     
-    const headers = ['S.No', 'Income ID', 'Name', 'Amount', 'Status', 'Payment Mode', 'Belongs To', 'Entry Date'];
+    const headers = showBelongsTo 
+      ? ['S.No', 'Name', 'Amount', 'Belongs To']
+      : ['S.No', 'Name', 'Amount'];
+      
     const body = incomes.map((income, index) => [
       index + 1,
-      income.incomeId || '-',
       income.name || '-',
       income.amount || 0,
-      income.status || '-',
-      income.paymentMode || '-',
-      income.belongsTo || '-',
-      income.createdAt ? formatDateTime(income.createdAt) : '-'
+      ...(showBelongsTo ? [income.belongsTo || '-'] : [])
     ]);
 
     autoTable(doc, {
@@ -107,19 +106,15 @@ function HistoryPrint({ selectedHistory, activeTab, data, searchQuery, filters }
     });
   };
 
-  const printExpense = (doc, expenses, startY) => {
+  const printExpense = (doc, expenses, startY, snapshotName) => {
     doc.setFontSize(14);
-    doc.text('Expense Records', 15, startY);
+    doc.text(`${snapshotName} - Expense Records`, 15, startY);
     
-    const headers = ['S.No', 'Expense ID', 'Purpose', 'Amount', 'Payment Mode', 'Spender', 'Entry Date'];
+    const headers = ['S.No', 'Purpose', 'Amount'];
     const body = expenses.map((expense, index) => [
       index + 1,
-      expense.expenseId || '-',
       expense.purpose || '-',
-      expense.amount || 0,
-      expense.paymentMode || '-',
-      expense.name || '-',
-      expense.createdAt ? formatDateTime(expense.createdAt) : '-'
+      expense.amount || 0
     ]);
 
     autoTable(doc, {
@@ -132,9 +127,9 @@ function HistoryPrint({ selectedHistory, activeTab, data, searchQuery, filters }
     });
   };
 
-  const printEvents = (doc, events, startY) => {
+  const printEvents = (doc, events, startY, snapshotName) => {
     doc.setFontSize(14);
-    doc.text('Events Timeline', 15, startY);
+    doc.text(`${snapshotName} - Events Timeline`, 15, startY);
     
     const headers = ['S.No', 'Event Name', 'Date & Time'];
     const body = events.map((event, index) => [

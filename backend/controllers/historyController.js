@@ -19,13 +19,13 @@ export const historyController = {
   // Create history from snapshot
   createHistory: async (req, res) => {
     try {
-      const { eventName, year, snapshotId, selectedCollections } = req.body;
+      const { snapshotName, snapshotId, selectedCollections } = req.body;
 
-      // Check for duplicate eventName + year
-      const existingHistory = await History.findOne({ eventName, year });
+      // Check for duplicate snapshotName
+      const existingHistory = await History.findOne({ snapshotName });
       if (existingHistory) {
         return res.status(400).json({
-          message: `History for ${eventName} ${year} already exists`
+          message: `History with name "${snapshotName}" already exists`
         });
       }
 
@@ -50,8 +50,7 @@ export const historyController = {
       });
 
       const history = await History.create({
-        eventName,
-        year,
+        snapshotName,
         snapshotId,
         selectedCollections,
         snapshotData: filteredSnapshotData,
@@ -63,9 +62,9 @@ export const historyController = {
         req,
         'CREATE',
         'History',
-        `${eventName}-${year}`,
-        { before: null, after: { eventName, year, collections: selectedCollections } },
-        `History for ${eventName} ${year} created by ${req.user.name}`
+        snapshotName,
+        { before: null, after: { snapshotName, collections: selectedCollections } },
+        `History "${snapshotName}" created by ${req.user.name}`
       );
 
       res.status(201).json(history);
@@ -94,9 +93,9 @@ export const historyController = {
         req,
         'DELETE',
         'History',
-        `${history.eventName}-${history.year}`,
+        history.snapshotId,
         { before: originalData, after: null },
-        `History for ${history.eventName} ${history.year} deleted by ${req.user.name}`
+        `History "${history.snapshotId}" deleted by ${req.user.name}`
       );
 
       await History.findByIdAndDelete(req.params.id);

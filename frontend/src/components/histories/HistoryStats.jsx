@@ -1,10 +1,10 @@
 import { IndianRupee, Users } from 'lucide-react';
 
-function HistoryStats({ stats, eventName, year }) {
+function HistoryStats({ stats, snapshotName }) {
   if (!stats || Object.keys(stats).length === 0) {
     return (
       <div className="p-6 text-center text-gray-500">
-        No statistics data available for {eventName} {year}
+        No statistics data available for {snapshotName}
       </div>
     );
   }
@@ -36,7 +36,7 @@ function HistoryStats({ stats, eventName, year }) {
   return (
     <div className="p-6 space-y-6">
       <div className="mb-4">
-        <h2 className="text-xl font-semibold">{eventName} {year} - Statistics</h2>
+        <h2 className="text-xl font-semibold">{snapshotName} - Statistics</h2>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -123,6 +123,135 @@ function HistoryStats({ stats, eventName, year }) {
           </div>
         </div>
       </div>
+
+      {/* Villagers Stats */}
+      <div className="bg-gray-50 rounded-lg p-6">
+        <h3 className="text-lg font-semibold mb-4">Villagers</h3>
+        <div className="mb-4">
+          <p className="text-lg font-bold">
+            Total Amount: {formatAmount(stats.villagers?.total || 0)}
+          </p>
+        </div>
+        <table className="min-w-full">
+          <thead>
+            <tr>
+              <th className="text-left font-semibold">Status</th>
+              <th className="text-right font-semibold">Cash</th>
+              <th className="text-right font-semibold">Online</th>
+              <th className="text-right font-semibold">Web App</th>
+              <th className="text-right font-semibold">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Paid</td>
+              <td className="text-right">{formatAmount(stats.villagers?.paid?.cash || 0)}</td>
+              <td className="text-right">{formatAmount(stats.villagers?.paid?.online || 0)}</td>
+              <td className="text-right">{formatAmount(stats.villagers?.paid?.webApp || 0)}</td>
+              <td className="text-right font-semibold">{formatAmount(stats.villagers?.paid?.total || 0)}</td>
+            </tr>
+            <tr>
+              <td>Pending</td>
+              <td className="text-right">{formatAmount(stats.villagers?.pending?.cash || 0)}</td>
+              <td className="text-right">{formatAmount(stats.villagers?.pending?.online || 0)}</td>
+              <td className="text-right">{formatAmount(stats.villagers?.pending?.webApp || 0)}</td>
+              <td className="text-right font-semibold">{formatAmount(stats.villagers?.pending?.total || 0)}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      {/* Youth Stats */}
+      <div className="bg-gray-50 rounded-lg p-6">
+        <h3 className="text-lg font-semibold mb-4">Youth</h3>
+        <div className="mb-4">
+          <p className="text-lg font-bold">
+            Total Amount: {formatAmount(stats.youth?.total || 0)}
+          </p>
+        </div>
+        <table className="min-w-full">
+          <thead>
+            <tr>
+              <th className="text-left font-semibold">Status</th>
+              <th className="text-right font-semibold">Cash</th>
+              <th className="text-right font-semibold">Online</th>
+              <th className="text-right font-semibold">Web App</th>
+              <th className="text-right font-semibold">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Paid</td>
+              <td className="text-right">{formatAmount(stats.youth?.paid?.cash || 0)}</td>
+              <td className="text-right">{formatAmount(stats.youth?.paid?.online || 0)}</td>
+              <td className="text-right">{formatAmount(stats.youth?.paid?.webApp || 0)}</td>
+              <td className="text-right font-semibold">{formatAmount(stats.youth?.paid?.total || 0)}</td>
+            </tr>
+            <tr>
+              <td>Pending</td>
+              <td className="text-right">{formatAmount(stats.youth?.pending?.cash || 0)}</td>
+              <td className="text-right">{formatAmount(stats.youth?.pending?.online || 0)}</td>
+              <td className="text-right">{formatAmount(stats.youth?.pending?.webApp || 0)}</td>
+              <td className="text-right font-semibold">{formatAmount(stats.youth?.pending?.total || 0)}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      {/* Date-wise Statistics */}
+      {stats.dateWiseStats && stats.dateWiseStats.length > 0 && (
+        <div className="bg-gray-50 rounded-lg p-6">
+          <h3 className="text-lg font-semibold mb-4">Date-wise Stats</h3>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total Income</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount Received</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total Expenses</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {stats.dateWiseStats.map((dayStat, index) => (
+                  <tr key={index}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      {new Date(dayStat.date).toLocaleDateString('en-GB', {
+                        day: 'numeric',
+                        month: 'numeric',
+                        year: 'numeric'
+                      })}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      <div>
+                        <div className="font-semibold">{formatAmount(dayStat.totalIncome)}</div>
+                        <div className="text-xs text-gray-500">{formatNumber(dayStat.totalIncomeEntries)} entries</div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      <div>
+                        <div className="font-semibold">{formatAmount(dayStat.amountReceived)}</div>
+                        <div className="text-xs text-gray-500">{formatNumber(dayStat.amountReceivedEntries)} entries</div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      <div>
+                        <div className="font-semibold">{formatAmount(dayStat.totalExpenses)}</div>
+                        <div className="text-xs text-gray-500">{formatNumber(dayStat.totalExpenseEntries)} entries</div>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {stats.dateWiseStats.length > 0 && (
+              <div className="text-center py-2 text-sm text-gray-500">
+                Total: {formatNumber(stats.dateWiseStats.length)} days
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
