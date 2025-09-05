@@ -32,7 +32,7 @@ const StatsPrint = ({ stats }) => {
       </style>
     `);
     printWindow.document.write('</head><body>');
-    printWindow.document.write('<h2><span translate="no">NBK యూత్ స్టాటిస్టిక్స్ రిపోర్ట్</span></h2>');
+    printWindow.document.write('<h2><span translate="no">NBK యూత్ గణాంకాలు రిపోర్ట్</span></h2>');
     if (renderedLabel) {
       printWindow.document.write(`<div class="event-label" style="text-align: center; margin-bottom: 10px; color: #666;">${renderedLabel}</div>`);
     } else if (eventLabel?.label) {

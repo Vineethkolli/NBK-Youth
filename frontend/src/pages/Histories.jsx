@@ -10,9 +10,12 @@ import HistoryIncome from '../components/histories/HistoryIncome';
 import HistoryExpense from '../components/histories/HistoryExpense';
 import HistoryEvents from '../components/histories/HistoryEvents';
 import EnglishPrint from '../components/histories/HistoryEnglishPrint';
+import TeluguPrint from '../components/histories/HistoryTeluguPrint';
+import { useLanguage } from '../context/LanguageContext';
 
 function Histories() {
   const { user } = useAuth();
+  const { language } = useLanguage();
   const [histories, setHistories] = useState([]);
   const [selectedHistory, setSelectedHistory] = useState(null);
   const [activeTab, setActiveTab] = useState('stats');
@@ -27,6 +30,7 @@ function Histories() {
   });
 
   const isPrivilegedUser = ['developer'].includes(user?.role);
+  const PrintComponent = language === 'te' ? TeluguPrint : EnglishPrint;
 
   useEffect(() => {
     fetchHistories();
@@ -172,12 +176,10 @@ function Histories() {
             </>
           )}
 
-          <EnglishPrint
+          <PrintComponent
             selectedHistory={selectedHistory}
             activeTab={activeTab}
             data={filteredData()}
-            searchQuery={searchQuery}
-            filters={filters}
             showBelongsTo={showBelongsTo}
           />
         </div>
