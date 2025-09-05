@@ -28,11 +28,14 @@ export const historyController = {
         });
       }
 
-      // Find the snapshot by name (eventName + year)
-      const [eventName, year] = snapshotName.split(' ');
-      const snapshot = await Snapshot.findOne({ 
+      // Find the snapshot by name: snapshotName format is "<eventName> <year>". 
+      // eventName may contain spaces (e.g., "Ganesh Chaturthi 2025"), so split accordingly.
+      const parts = snapshotName.trim().split(' ');
+      const yearStr = parts.pop();
+      const eventName = parts.join(' ');
+      const snapshot = await Snapshot.findOne({
         eventName: eventName,
-        year: parseInt(year)
+        year: parseInt(yearStr)
       });
 
       if (!snapshot) {

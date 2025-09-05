@@ -2,12 +2,12 @@ import { useState } from 'react';
 import { X } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
-const COLLECTION_OPTIONS = ['Stats', 'Income', 'Expense', 'Events'];
+const COLLECTION_OPTIONS = ['Stats', 'Income', 'Expense', 'Event'];
 
 function HistoryForm({ snapshots, onClose, onSubmit }) {
   const [formData, setFormData] = useState({
     snapshotName: '',
-    selectedCollections: ['Stats']
+    selectedCollections: [ ]
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -22,7 +22,10 @@ function HistoryForm({ snapshots, onClose, onSubmit }) {
 
   const getSelectedSnapshot = () => {
     if (!formData.snapshotName) return null;
-    const [eventName, year] = formData.snapshotName.split(' ');
+    // snapshotName is "<eventName> <year>". eventName may contain spaces.
+    const parts = formData.snapshotName.trim().split(' ');
+    const year = parts.pop();
+    const eventName = parts.join(' ');
     return snapshots.find(s => s.eventName === eventName && s.year === parseInt(year));
   };
 
@@ -42,7 +45,7 @@ function HistoryForm({ snapshots, onClose, onSubmit }) {
       if (snapshot.collections[key] && snapshot.collections[key].length > 0) {
         if (key === 'Income') available.push('Income');
         if (key === 'Expense') available.push('Expense');
-        if (key === 'Event') available.push('Events');
+        if (key === 'Event') available.push('Event');
       }
     });
 
