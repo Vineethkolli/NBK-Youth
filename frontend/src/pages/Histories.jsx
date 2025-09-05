@@ -20,10 +20,10 @@ function Histories() {
   const [isEditMode, setIsEditMode] = useState(false);
   const [snapshots, setSnapshots] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showBelongsTo, setShowBelongsTo] = useState(false);
   const [filters, setFilters] = useState({
-    sort: '',
-    belongsTo: '',
-    showBelongsTo: false
+    sort: 'desc',
+    belongsTo: ''
   });
 
   const isPrivilegedUser = ['developer'].includes(user?.role);
@@ -122,7 +122,7 @@ function Histories() {
       }
 
       // Apply filters
-      if (filters.belongsTo && activeTab === 'income' && filters.showBelongsTo) {
+      if (filters.belongsTo && activeTab === 'income') {
         filtered = filtered.filter(item => item.belongsTo === filters.belongsTo);
       }
 
@@ -293,28 +293,28 @@ function Histories() {
                 </select>
 
                 {activeTab === 'income' && (
-                  <select
-                    value={filters.belongsTo}
-                    onChange={(e) => setFilters({ ...filters, belongsTo: e.target.value })}
-                    className="form-select"
-                  >
-                    <option value="">Belongs To</option>
-                    <option value="villagers">Villagers</option>
-                    <option value="youth">Youth</option>
-                  </select>
-                )}
+  <>
+    <select
+      value={filters.belongsTo}
+      onChange={(e) => setFilters({ ...filters, belongsTo: e.target.value })}
+      className="form-select"
+    >
+      <option value="">Belongs To</option>
+      <option value="villagers">Villagers</option>
+      <option value="youth">Youth</option>
+    </select>
 
-                {activeTab === 'income' && (
-                  <label className="inline-flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={filters.showBelongsTo}
-                      onChange={(e) => setFilters({ ...filters, showBelongsTo: e.target.checked })}
-                      className="form-checkbox"
-                    />
-                    <span className="ml-2 text-sm">Show Belongs To</span>
-                  </label>
-                )}
+    <label className="flex items-center space-x-2">
+      <input
+        type="checkbox"
+        checked={showBelongsTo}
+        onChange={(e) => setShowBelongsTo(e.target.checked)}
+      />
+      <span className="text-sm"></span>
+    </label>
+  </>
+)}
+
               </div>
             </div>
           )}
@@ -331,7 +331,7 @@ function Histories() {
               <HistoryIncome 
                 incomes={filteredData()} 
                 snapshotName={selectedHistory.snapshotName}
-                showBelongsTo={filters.showBelongsTo}
+                showBelongsTo={showBelongsTo}
               />
             )}
             {activeTab === 'expense' && (
@@ -356,7 +356,6 @@ function Histories() {
           snapshots={snapshots}
           onClose={() => setShowForm(false)}
           onSubmit={handleFormSubmit}
-          showBelongsTo={filters.showBelongsTo}
         />
       )}
 
