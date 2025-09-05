@@ -29,10 +29,10 @@ function HistoryStats({ stats, snapshotName }) {
   const userStats = stats.userStats || {};
 
   return (
-    <div className="p-4 space-y-6">
+    <div className="p-3 space-y-6">
       {/* Header */}
       <div className="mb-6">
-        <h2 className="text-xl font-semibold">{snapshotName} - Statistics</h2>
+        <h2 className="text-xl font-semibold">Statistics</h2>
       </div>
 
       {/* Budget + User Stats */}

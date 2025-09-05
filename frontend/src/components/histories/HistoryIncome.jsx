@@ -10,11 +10,7 @@ function HistoryIncome({ incomes, snapshotName, showBelongsTo }) {
   }
 
   return (
-    <div className="p-6">
-      <div className="mb-4">
-        <h2 className="text-xl font-semibold">{snapshotName} - Income</h2>
-      </div>
-
+    <div className="space-y-6">
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
