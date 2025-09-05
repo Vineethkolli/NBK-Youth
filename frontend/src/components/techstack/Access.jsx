@@ -9,6 +9,7 @@ const accessControl = {
     'Stats': { full: ['Admin', 'Financier'], view: ['User'] },
     'Income': { full: ['Admin','Financier'], view: ['User'] },
     'Expense': { full: ['Financier'], view: ['User', 'Admin'] },
+    'Histories': { full: [], view: ['User','Admin', 'Financier'] },
     'Records': { full: [], view: ['User', 'Admin', 'Financier'] },
     'Estimation Stats': { full: ['Admin', 'Financier'], view: ['User'] },
     'Estimation Income': { full: ['Admin', 'Financier'], view: ['Youth'] },
