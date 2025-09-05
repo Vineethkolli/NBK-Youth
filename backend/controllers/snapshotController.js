@@ -1,8 +1,6 @@
 import Snapshot from '../models/Snapshot.js';
 import Income from '../models/Income.js';
 import Expense from '../models/Expense.js';
-import EstimatedIncome from '../models/EstimatedIncome.js';
-import EstimatedExpense from '../models/EstimatedExpense.js';
 import User from '../models/User.js';
 import Payment from '../models/Payment.js';
 import PreviousYear from '../models/PreviousYear.js';
@@ -28,8 +26,8 @@ export const snapshotController = {
       // Check for duplicate eventName + year
       const existingSnapshot = await Snapshot.findOne({ eventName, year });
       if (existingSnapshot) {
-        return res.status(400).json({ 
-          message: `Snapshot for ${eventName} ${year} already exists` 
+        return res.status(400).json({
+          message: `Snapshot for ${eventName} ${year} already exists`
         });
       }
 
@@ -42,12 +40,6 @@ export const snapshotController = {
       }
       if (selectedCollections.includes('Expense')) {
         collections.Expense = await Expense.find({ isDeleted: false });
-      }
-      if (selectedCollections.includes('EstimatedIncome')) {
-        collections.EstimatedIncome = await EstimatedIncome.find();
-      }
-      if (selectedCollections.includes('EstimatedExpense')) {
-        collections.EstimatedExpense = await EstimatedExpense.find();
       }
       if (selectedCollections.includes('Event')) {
         collections.Event = await Event.find();
@@ -79,8 +71,8 @@ export const snapshotController = {
       res.status(201).json(snapshot);
     } catch (error) {
       if (error.code === 11000) {
-        return res.status(400).json({ 
-          message: 'Snapshot for this event and year already exists' 
+        return res.status(400).json({
+          message: 'Snapshot for this event and year already exists'
         });
       }
       res.status(500).json({ message: 'Failed to create snapshot' });
@@ -91,7 +83,7 @@ export const snapshotController = {
   updateSnapshot: async (req, res) => {
     try {
       const { eventName, year } = req.body;
-      
+
       const originalSnapshot = await Snapshot.findById(req.params.id);
       if (!originalSnapshot) {
         return res.status(404).json({ message: 'Snapshot not found' });
@@ -99,14 +91,14 @@ export const snapshotController = {
 
       // Check for duplicate if eventName or year changed
       if (eventName !== originalSnapshot.eventName || year !== originalSnapshot.year) {
-        const existingSnapshot = await Snapshot.findOne({ 
-          eventName, 
+        const existingSnapshot = await Snapshot.findOne({
+          eventName,
           year,
           _id: { $ne: req.params.id }
         });
         if (existingSnapshot) {
-          return res.status(400).json({ 
-            message: `Snapshot for ${eventName} ${year} already exists` 
+          return res.status(400).json({
+            message: `Snapshot for ${eventName} ${year} already exists`
           });
         }
       }
@@ -174,7 +166,63 @@ export const snapshotController = {
   }
 };
 
-// Helper function to generate stats
+// --- Helper functions ---
+
+// Copy of statsController.calculateDateWiseStats
+const calculateDateWiseStats = async (incomes, expenses) => {
+  const dateMap = new Map();
+
+  incomes.forEach(income => {
+    const dateKey = new Date(income.createdAt).toDateString();
+    if (!dateMap.has(dateKey)) {
+      dateMap.set(dateKey, {
+        date: dateKey,
+        totalIncome: 0,
+        totalIncomeEntries: 0,
+        amountReceived: 0,
+        amountReceivedEntries: 0,
+        totalExpenses: 0,
+        totalExpenseEntries: 0
+      });
+    }
+    const dayStats = dateMap.get(dateKey);
+    dayStats.totalIncome += income.amount;
+    dayStats.totalIncomeEntries += 1;
+
+    if (income.status === 'paid') {
+      dayStats.amountReceived += income.amount;
+      dayStats.amountReceivedEntries += 1;
+    }
+  });
+
+  expenses.forEach(expense => {
+    const dateKey = new Date(expense.createdAt).toDateString();
+    if (!dateMap.has(dateKey)) {
+      dateMap.set(dateKey, {
+        date: dateKey,
+        totalIncome: 0,
+        totalIncomeEntries: 0,
+        amountReceived: 0,
+        amountReceivedEntries: 0,
+        totalExpenses: 0,
+        totalExpenseEntries: 0
+      });
+    }
+    const dayStats = dateMap.get(dateKey);
+    dayStats.totalExpenses += expense.amount;
+    dayStats.totalExpenseEntries += 1;
+  });
+
+  return Array.from(dateMap.values())
+    .sort((a, b) => new Date(b.date) - new Date(a.date))
+    .map(stat => ({
+      ...stat,
+      totalIncome: Math.round(stat.totalIncome),
+      amountReceived: Math.round(stat.amountReceived),
+      totalExpenses: Math.round(stat.totalExpenses)
+    }));
+};
+
 const generateStats = async () => {
   try {
     const incomes = await Income.find({ isDeleted: false });
@@ -183,45 +231,82 @@ const generateStats = async () => {
     const successfulPayments = await Payment.find({ transactionStatus: 'successful' });
     const previousYear = await PreviousYear.findOne() || { amount: 0 };
 
-    // Calculate budget stats
+    const roundNumber = (num) => Math.round(num);
+
+    // Budget stats
     const totalIncome = {
       count: incomes.length,
-      amount: Math.round(incomes.reduce((sum, income) => sum + income.amount, 0))
+      amount: roundNumber(incomes.reduce((sum, income) => sum + income.amount, 0))
     };
 
     const paidIncomes = incomes.filter(income => income.status === 'paid');
     const amountReceived = {
       count: paidIncomes.length,
-      amount: Math.round(paidIncomes.reduce((sum, income) => sum + income.amount, 0))
+      amount: roundNumber(paidIncomes.reduce((sum, income) => sum + income.amount, 0))
     };
 
     const pendingIncomes = incomes.filter(income => income.status === 'not paid');
     const amountPending = {
       count: pendingIncomes.length,
-      amount: Math.round(pendingIncomes.reduce((sum, income) => sum + income.amount, 0))
+      amount: roundNumber(pendingIncomes.reduce((sum, income) => sum + income.amount, 0))
     };
 
     const totalExpenses = {
       count: expenses.length,
-      amount: Math.round(expenses.reduce((sum, expense) => sum + expense.amount, 0))
+      amount: roundNumber(expenses.reduce((sum, expense) => sum + expense.amount, 0)),
+      onlineAmount: roundNumber(expenses.filter(exp => exp.paymentMode === 'online')
+        .reduce((sum, exp) => sum + exp.amount, 0)),
+      cashAmount: roundNumber(expenses.filter(exp => exp.paymentMode === 'cash')
+        .reduce((sum, exp) => sum + exp.amount, 0))
     };
 
-    const onlinePayments = paidIncomes.filter(income => 
+    const onlinePayments = paidIncomes.filter(income =>
       ['online', 'web app'].includes(income.paymentMode.toLowerCase()));
     const online = {
       count: onlinePayments.length,
-      amount: Math.round(onlinePayments.reduce((sum, income) => sum + income.amount, 0))
+      amount: roundNumber(onlinePayments.reduce((sum, inc) => sum + inc.amount, 0))
     };
 
-    const offlinePayments = paidIncomes.filter(income => 
+    const offlinePayments = paidIncomes.filter(income =>
       income.paymentMode.toLowerCase() === 'cash');
     const offline = {
       count: offlinePayments.length,
-      amount: Math.round(offlinePayments.reduce((sum, income) => sum + income.amount, 0))
+      amount: roundNumber(offlinePayments.reduce((sum, inc) => sum + inc.amount, 0))
     };
 
     const amountLeft = {
-      amount: Math.round(amountReceived.amount - totalExpenses.amount)
+      amount: roundNumber(amountReceived.amount - totalExpenses.amount),
+      onlineAmount: roundNumber(online.amount - totalExpenses.onlineAmount),
+      cashAmount: roundNumber(offline.amount - totalExpenses.cashAmount)
+    };
+
+    // Villagers & Youth stats (same structure as statsController)
+    const calculateGroupStats = (belongsTo) => {
+      const groupIncomes = incomes.filter(income =>
+        income.belongsTo.toLowerCase() === belongsTo.toLowerCase());
+
+      const paid = {
+        cash: roundNumber(groupIncomes.filter(i => i.status === 'paid' && i.paymentMode === 'cash')
+          .reduce((sum, i) => sum + i.amount, 0)),
+        online: roundNumber(groupIncomes.filter(i => i.status === 'paid' && i.paymentMode === 'online')
+          .reduce((sum, i) => sum + i.amount, 0)),
+        webApp: roundNumber(groupIncomes.filter(i => i.status === 'paid' && i.paymentMode === 'web app')
+          .reduce((sum, i) => sum + i.amount, 0))
+      };
+      paid.total = roundNumber(paid.cash + paid.online + paid.webApp);
+
+      const pending = {
+        cash: roundNumber(groupIncomes.filter(i => i.status === 'not paid' && i.paymentMode === 'cash')
+          .reduce((sum, i) => sum + i.amount, 0)),
+        online: roundNumber(groupIncomes.filter(i => i.status === 'not paid' && i.paymentMode === 'online')
+          .reduce((sum, i) => sum + i.amount, 0)),
+        webApp: roundNumber(groupIncomes.filter(i => i.status === 'not paid' && i.paymentMode === 'web app')
+          .reduce((sum, i) => sum + i.amount, 0))
+      };
+      pending.total = roundNumber(pending.cash + pending.online + pending.webApp);
+
+      const total = roundNumber(paid.total + pending.total);
+      return { paid, pending, total };
     };
 
     return {
@@ -230,7 +315,7 @@ const generateStats = async () => {
         amountReceived,
         amountPending,
         totalExpenses,
-        previousYearAmount: { amount: Math.round(previousYear.amount) },
+        previousYearAmount: { amount: roundNumber(previousYear.amount) },
         amountLeft,
         online,
         offline
@@ -238,11 +323,13 @@ const generateStats = async () => {
       userStats: {
         totalUsers: users.length,
         successfulPayments: successfulPayments.length
-      }
+      },
+      villagers: calculateGroupStats('villagers'),
+      youth: calculateGroupStats('youth'),
+      dateWiseStats: await calculateDateWiseStats(incomes, expenses)
     };
   } catch (error) {
     console.error('Error generating stats:', error);
     return {};
   }
 };
-
