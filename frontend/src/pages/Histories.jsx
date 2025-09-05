@@ -9,7 +9,7 @@ import HistoryStats from '../components/histories/HistoryStats';
 import HistoryIncome from '../components/histories/HistoryIncome';
 import HistoryExpense from '../components/histories/HistoryExpense';
 import HistoryEvents from '../components/histories/HistoryEvents';
-import HistoryPrint from '../components/histories/HistoryPrint';
+import HistoryPrint from '../components/histories/HistoryEnglishPrint';
 
 function Histories() {
   const { user } = useAuth();
