@@ -22,7 +22,8 @@ function Histories() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState({
     sort: '',
-    belongsTo: ''
+    belongsTo: '',
+    showBelongsTo: false
   });
 
   const isPrivilegedUser = ['developer'].includes(user?.role);
@@ -121,7 +122,7 @@ function Histories() {
       }
 
       // Apply filters
-      if (filters.belongsTo && activeTab === 'income') {
+      if (filters.belongsTo && activeTab === 'income' && filters.showBelongsTo) {
         filtered = filtered.filter(item => item.belongsTo === filters.belongsTo);
       }
 
@@ -192,8 +193,7 @@ function Histories() {
                       : 'border-gray-200 hover:border-gray-300'
                   }`}
                 >
-                  <div className="text-sm font-medium">{history.eventName}</div>
-                  <div className="text-xs text-gray-500">{history.year}</div>
+                  <div className="text-sm font-medium">{history.snapshotName}</div>
                 </button>
                 {isEditMode && (
                   <button
@@ -303,6 +303,18 @@ function Histories() {
                     <option value="youth">Youth</option>
                   </select>
                 )}
+
+                {activeTab === 'income' && (
+                  <label className="inline-flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={filters.showBelongsTo}
+                      onChange={(e) => setFilters({ ...filters, showBelongsTo: e.target.checked })}
+                      className="form-checkbox"
+                    />
+                    <span className="ml-2 text-sm">Show Belongs To</span>
+                  </label>
+                )}
               </div>
             </div>
           )}
@@ -312,29 +324,26 @@ function Histories() {
             {activeTab === 'stats' && (
               <HistoryStats 
                 stats={getCurrentData()} 
-                eventName={selectedHistory.eventName}
-                year={selectedHistory.year}
+                snapshotName={selectedHistory.snapshotName}
               />
             )}
             {activeTab === 'income' && (
               <HistoryIncome 
                 incomes={filteredData()} 
-                eventName={selectedHistory.eventName}
-                year={selectedHistory.year}
+                snapshotName={selectedHistory.snapshotName}
+                showBelongsTo={filters.showBelongsTo}
               />
             )}
             {activeTab === 'expense' && (
               <HistoryExpense 
                 expenses={filteredData()} 
-                eventName={selectedHistory.eventName}
-                year={selectedHistory.year}
+                snapshotName={selectedHistory.snapshotName}
               />
             )}
             {activeTab === 'events' && (
               <HistoryEvents 
                 events={getCurrentData()} 
-                eventName={selectedHistory.eventName}
-                year={selectedHistory.year}
+                snapshotName={selectedHistory.snapshotName}
               />
             )}
           </div>
@@ -347,6 +356,7 @@ function Histories() {
           snapshots={snapshots}
           onClose={() => setShowForm(false)}
           onSubmit={handleFormSubmit}
+          showBelongsTo={filters.showBelongsTo}
         />
       )}
 

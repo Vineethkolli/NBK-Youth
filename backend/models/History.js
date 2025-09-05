@@ -1,13 +1,10 @@
 import mongoose from 'mongoose';
 
 const historySchema = new mongoose.Schema({
-  eventName: {
+  snapshotName: {
     type: String,
-    required: true
-  },
-  year: {
-    type: Number,
-    required: true
+    required: true,
+    unique: true
   },
   snapshotId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -27,8 +24,5 @@ const historySchema = new mongoose.Schema({
     required: true
   }
 }, { timestamps: true });
-
-// Compound unique index for eventName + year
-historySchema.index({ eventName: 1, year: 1 }, { unique: true });
 
 export default mongoose.model('History', historySchema);

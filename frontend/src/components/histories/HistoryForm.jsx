@@ -5,8 +5,7 @@ const COLLECTION_OPTIONS = ['Stats', 'Income', 'Expense', 'Events'];
 
 function HistoryForm({ snapshots, onClose, onSubmit }) {
   const [formData, setFormData] = useState({
-    eventName: '',
-    year: new Date().getFullYear(),
+    snapshotName: '',
     snapshotId: '',
     selectedCollections: ['Stats']
   });
@@ -81,26 +80,13 @@ function HistoryForm({ snapshots, onClose, onSubmit }) {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">Event Name *</label>
+            <label className="block text-sm font-medium text-gray-700">Snapshot Name *</label>
             <input
               type="text"
               required
-              value={formData.eventName}
-              onChange={(e) => setFormData({ ...formData, eventName: e.target.value })}
-              placeholder="e.g., Sankranti, Ganesh Chaturthi"
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Year *</label>
-            <input
-              type="number"
-              required
-              min="2020"
-              max="2030"
-              value={formData.year}
-              onChange={(e) => setFormData({ ...formData, year: parseInt(e.target.value) })}
+              value={formData.snapshotName}
+              onChange={(e) => setFormData({ ...formData, snapshotName: e.target.value })}
+              placeholder="e.g., Sankranti 2025, Ganesh Chaturthi 2024"
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
             />
           </div>
