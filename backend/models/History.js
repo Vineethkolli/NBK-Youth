@@ -6,11 +6,6 @@ const historySchema = new mongoose.Schema({
     required: true,
     unique: true
   },
-  snapshotId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Snapshot',
-    required: true
-  },
   selectedCollections: {
     type: [String],
     required: true

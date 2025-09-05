@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { X } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 
 const COLLECTION_OPTIONS = ['Stats', 'Income', 'Expense', 'Events'];
 
 function HistoryForm({ snapshots, onClose, onSubmit }) {
   const [formData, setFormData] = useState({
-    snapshotId: '',
+    snapshotName: '',
     selectedCollections: ['Stats']
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -20,7 +21,9 @@ function HistoryForm({ snapshots, onClose, onSubmit }) {
   };
 
   const getSelectedSnapshot = () => {
-    return snapshots.find(s => s._id === formData.snapshotId);
+    if (!formData.snapshotName) return null;
+    const [eventName, year] = formData.snapshotName.split(' ');
+    return snapshots.find(s => s.eventName === eventName && s.year === parseInt(year));
   };
 
   const getAvailableCollections = () => {
@@ -48,7 +51,7 @@ function HistoryForm({ snapshots, onClose, onSubmit }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.snapshotId) {
+    if (!formData.snapshotName) {
       toast.error('Please select a snapshot');
       return;
     }
@@ -78,30 +81,28 @@ function HistoryForm({ snapshots, onClose, onSubmit }) {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Snapshot name is derived from the selected snapshot (eventName + year) */}
-
           <div>
             <label className="block text-sm font-medium text-gray-700">Select Snapshot *</label>
             <select
               required
-              value={formData.snapshotId}
+              value={formData.snapshotName}
               onChange={(e) => setFormData({ 
                 ...formData, 
-                snapshotId: e.target.value,
+                snapshotName: e.target.value,
                 selectedCollections: [] // Reset collections when snapshot changes
               })}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
             >
               <option value="">Select Snapshot</option>
               {snapshots.map(snapshot => (
-                <option key={snapshot._id} value={snapshot._id}>
+                <option key={snapshot._id} value={`${snapshot.eventName} ${snapshot.year}`}>
                   {snapshot.eventName} {snapshot.year}
                 </option>
               ))}
             </select>
           </div>
 
-          {formData.snapshotId && (
+          {formData.snapshotName && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Collections *</label>
               <div className="space-y-2 max-h-40 overflow-y-auto border rounded-md p-3">

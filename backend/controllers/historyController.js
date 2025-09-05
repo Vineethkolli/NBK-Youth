@@ -7,8 +7,7 @@ export const historyController = {
   getAllHistories: async (req, res) => {
     try {
       const histories = await History.find()
-        .populate('snapshotId')
-        .sort({ year: -1, eventName: 1 });
+        .sort({ createdAt: -1 });
 
       res.json(histories);
     } catch (error) {
@@ -19,16 +18,7 @@ export const historyController = {
   // Create history from snapshot
   createHistory: async (req, res) => {
     try {
-      const { snapshotId, selectedCollections } = req.body;
-
-      // Get the snapshot data
-      const snapshot = await Snapshot.findById(snapshotId);
-      if (!snapshot) {
-        return res.status(404).json({ message: 'Snapshot not found' });
-      }
-
-      // Derive snapshotName from snapshot (eventName + year)
-      const snapshotName = `${snapshot.eventName} ${snapshot.year}`;
+      const { snapshotName, selectedCollections } = req.body;
 
       // Check for duplicate snapshotName
       const existingHistory = await History.findOne({ snapshotName });
@@ -36,6 +26,17 @@ export const historyController = {
         return res.status(400).json({
           message: `History with name "${snapshotName}" already exists`
         });
+      }
+
+      // Find the snapshot by name (eventName + year)
+      const [eventName, year] = snapshotName.split(' ');
+      const snapshot = await Snapshot.findOne({ 
+        eventName: eventName,
+        year: parseInt(year)
+      });
+
+      if (!snapshot) {
+        return res.status(404).json({ message: 'Snapshot not found' });
       }
 
       // Extract only the selected collections from snapshot
@@ -54,7 +55,6 @@ export const historyController = {
 
       const history = await History.create({
         snapshotName,
-        snapshotId,
         selectedCollections,
         snapshotData: filteredSnapshotData,
         createdBy: req.user.registerId
@@ -74,7 +74,7 @@ export const historyController = {
     } catch (error) {
       if (error.code === 11000) {
         return res.status(400).json({
-          message: 'History for this event and year already exists'
+          message: 'History for this snapshot already exists'
         });
       }
       res.status(500).json({ message: 'Failed to create history' });

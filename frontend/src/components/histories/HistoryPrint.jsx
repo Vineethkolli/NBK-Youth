@@ -2,6 +2,7 @@ import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { Printer } from 'lucide-react';
 import { formatDateTime } from '../../utils/dateTime';
+import { toast } from 'react-hot-toast';
 
 function HistoryPrint({ selectedHistory, activeTab, data, searchQuery, filters, showBelongsTo }) {
   const formatAmount = (amount) => {
@@ -55,11 +56,9 @@ function HistoryPrint({ selectedHistory, activeTab, data, searchQuery, filters, 
     doc.save(`${selectedHistory.snapshotName}_${activeTab}.pdf`);
   };
 
-  const printStats = (doc, stats, startY, snapshotName) => {
+  const printStats = (doc, stats, startY) => {
     const budgetStats = stats.budgetStats || {};
     
-    doc.setFontSize(14);
-    doc.text(`${snapshotName} - Budget Statistics`, 15, startY);
     
     const budgetHead = ['Category', 'Count', 'Amount'];
     const budgetBody = [
@@ -72,7 +71,7 @@ function HistoryPrint({ selectedHistory, activeTab, data, searchQuery, filters, 
     ];
 
     autoTable(doc, {
-      startY: startY + 4,
+      startY: startY,
       head: [budgetHead],
       body: budgetBody,
       theme: 'grid',
@@ -81,17 +80,43 @@ function HistoryPrint({ selectedHistory, activeTab, data, searchQuery, filters, 
     });
   };
 
-  const printIncome = (doc, incomes, startY, snapshotName, showBelongsTo) => {
+  const printIncome = (doc, incomes, startY, showBelongsTo) => {
     
     const headers = showBelongsTo 
       ? ['S.No', 'Name', 'Amount', 'Belongs To']
       : ['S.No', 'Name', 'Amount'];
       
-    const body = incomes.map((income, index) => [
+    const body = incomes.map((income, index) => {
+      const row = [
+        index + 1,
+        income.name || '-',
+        income.amount || 0
+      ];
+      
+      if (showBelongsTo) {
+        row.push(income.belongsTo || '-');
+      }
+      
+      return row;
+    });
+
+    autoTable(doc, {
+      startY: startY,
+      head: [headers],
+      body: body,
+      theme: 'grid',
+      headStyles: { fillColor: [33, 115, 175], textColor: [255, 255, 255], fontSize: 9 },
+      styles: { fontSize: 9, cellPadding: 2, rowHeight: 6 }
+    });
+  };
+
+  const printExpense = (doc, expenses, startY) => {
+    
+    const headers = ['S.No', 'Purpose', 'Amount'];
+    const body = expenses.map((expense, index) => [
       index + 1,
-      income.name || '-',
-      income.amount || 0,
-      ...(showBelongsTo ? [income.belongsTo || '-'] : [])
+      expense.purpose || '-',
+      expense.amount || 0
     ]);
 
     autoTable(doc, {
@@ -104,30 +129,7 @@ function HistoryPrint({ selectedHistory, activeTab, data, searchQuery, filters, 
     });
   };
 
-  const printExpense = (doc, expenses, startY, snapshotName) => {
-    doc.setFontSize(14);
-    doc.text(`${snapshotName} - Expense Records`, 15, startY);
-    
-    const headers = ['S.No', 'Purpose', 'Amount'];
-    const body = expenses.map((expense, index) => [
-      index + 1,
-      expense.purpose || '-',
-      expense.amount || 0
-    ]);
-
-    autoTable(doc, {
-      startY: startY + 4,
-      head: [headers],
-      body: body,
-      theme: 'grid',
-      headStyles: { fillColor: [33, 115, 175], textColor: [255, 255, 255], fontSize: 9 },
-      styles: { fontSize: 9, cellPadding: 2, rowHeight: 6 }
-    });
-  };
-
-  const printEvents = (doc, events, startY, snapshotName) => {
-    doc.setFontSize(14);
-    doc.text(`${snapshotName} - Events Timeline`, 15, startY);
+  const printEvents = (doc, events, startY) => {
     
     const headers = ['S.No', 'Event Name', 'Date & Time'];
     const body = events.map((event, index) => [
@@ -137,7 +139,7 @@ function HistoryPrint({ selectedHistory, activeTab, data, searchQuery, filters, 
     ]);
 
     autoTable(doc, {
-      startY: startY + 4,
+      startY: startY,
       head: [headers],
       body: body,
       theme: 'grid',

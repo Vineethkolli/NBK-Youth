@@ -61,6 +61,11 @@ function Histories() {
       setShowForm(false);
       fetchHistories();
     } catch (error) {
+      if (error.response?.status === 400) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error('Failed to create history');
+      }
       throw error;
     }
   };
@@ -73,7 +78,7 @@ function Histories() {
       toast.success('History deleted successfully');
       fetchHistories();
       if (selectedHistory?._id === historyId) {
-        setSelectedHistory(histories.length > 1 ? histories[0] : null);
+        setSelectedHistory(histories.length > 1 ? histories.find(h => h._id !== historyId) : null);
       }
     } catch (error) {
       toast.error('Failed to delete history');
@@ -94,7 +99,7 @@ function Histories() {
       case 'expense':
         return snapshot.collections?.Expense || [];
       case 'events':
-        return snapshot.collections?.Events || [];
+        return snapshot.collections?.Event || [];
       default:
         return null;
     }
@@ -142,40 +147,41 @@ function Histories() {
   };
 
   return (
-  <div className="space-y-6">
-  <div className="flex justify-between items-center">
-    <h1 className="text-2xl font-semibold">Histories</h1>
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-semibold">Histories</h1>
 
-    <div className="flex items-center space-x-3">
-      {isPrivilegedUser && (
-        <>
-          <button
-            onClick={() => setShowForm(true)}
-            className="btn-primary flex items-center"
-          >
-            <Plus className="h-4 w-4 mr-1" />
-            Add
-          </button>
+        <div className="flex items-center space-x-3">
+          {isPrivilegedUser && (
+            <>
+              <button
+                onClick={() => setShowForm(true)}
+                className="btn-primary flex items-center"
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                Add
+              </button>
 
-          <button
-            onClick={() => setIsEditMode(!isEditMode)}
-            className={`btn-secondary flex items-center ${isEditMode ? 'bg-red-100' : ''}`}
-          >
-            <Edit2 className="h-4 w-4 mr-1" />
-            {isEditMode ? 'Done' : 'Edit'}
-          </button>
-        </>
-      )}
+              <button
+                onClick={() => setIsEditMode(!isEditMode)}
+                className={`btn-secondary flex items-center ${isEditMode ? 'bg-red-100' : ''}`}
+              >
+                <Edit2 className="h-4 w-4 mr-1" />
+                {isEditMode ? 'Done' : 'Edit'}
+              </button>
+            </>
+          )}
 
-      <HistoryPrint
-        selectedHistory={selectedHistory}
-        activeTab={activeTab}
-        data={filteredData()}
-        searchQuery={searchQuery}
-        filters={filters}
-      />
-    </div>
-  </div>
+          <HistoryPrint
+            selectedHistory={selectedHistory}
+            activeTab={activeTab}
+            data={filteredData()}
+            searchQuery={searchQuery}
+            filters={filters}
+            showBelongsTo={showBelongsTo}
+          />
+        </div>
+      </div>
 
       {/* Event List */}
       <div className="bg-white rounded-lg shadow p-6">
@@ -293,28 +299,27 @@ function Histories() {
                 </select>
 
                 {activeTab === 'income' && (
-  <>
-    <select
-      value={filters.belongsTo}
-      onChange={(e) => setFilters({ ...filters, belongsTo: e.target.value })}
-      className="form-select"
-    >
-      <option value="">Belongs To</option>
-      <option value="villagers">Villagers</option>
-      <option value="youth">Youth</option>
-    </select>
+                  <>
+                    <select
+                      value={filters.belongsTo}
+                      onChange={(e) => setFilters({ ...filters, belongsTo: e.target.value })}
+                      className="form-select"
+                    >
+                      <option value="">Belongs To</option>
+                      <option value="villagers">Villagers</option>
+                      <option value="youth">Youth</option>
+                    </select>
 
-    <label className="flex items-center space-x-2">
-      <input
-        type="checkbox"
-        checked={showBelongsTo}
-        onChange={(e) => setShowBelongsTo(e.target.checked)}
-      />
-      <span className="text-sm"></span>
-    </label>
-  </>
-)}
-
+                    <label className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        checked={showBelongsTo}
+                        onChange={(e) => setShowBelongsTo(e.target.checked)}
+                      />
+                      <span className="text-sm"></span>
+                    </label>
+                  </>
+                )}
               </div>
             </div>
           )}
@@ -359,6 +364,10 @@ function Histories() {
         />
       )}
 
+      {/* Footer */}
+      <footer className="pt-8 border-t text-center text-sm text-gray-500">
+        Since 2023 — We moved all records from paper to digital
+      </footer>
     </div>
   );
 }
