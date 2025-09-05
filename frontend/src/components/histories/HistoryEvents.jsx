@@ -10,9 +10,9 @@ function HistoryEvents({ events, snapshotName }) {
   }
 
   return (
-    <div className="p-6">
+    <div className="p-3 space-y-6">
       <div className="mb-4">
-        <h2 className="text-xl font-semibold">{snapshotName} - Events Timeline</h2>
+        <h2 className="text-xl font-semibold">Events Timeline</h2>
       </div>
 
       <div className="space-y-4">
