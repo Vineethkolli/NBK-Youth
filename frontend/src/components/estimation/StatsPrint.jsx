@@ -4,7 +4,7 @@ import autoTable from 'jspdf-autotable';
 import { Printer } from 'lucide-react';
 import { useEventLabel } from '../../context/EventLabelContext';
 
-const StatsPrint = ({ stats }) => {
+const StatsPrint = ({ stats, budgetStats }) => {
   const { eventLabel } = useEventLabel();
 
   // Format numbers as per Indian numbering
@@ -23,6 +23,20 @@ const StatsPrint = ({ stats }) => {
   const handlePrint = () => {
     const doc = new jsPDF();
     let yPos = 20;
+
+    // Calculate comparisons for the new sections
+    const currentIncome = budgetStats?.totalIncome?.amount || 0;
+    const currentExpense = budgetStats?.totalExpenses?.amount || 0;
+    const currentAmountLeft = budgetStats?.amountLeft?.amount || 0;
+    
+    const estimatedIncome = stats.totalEstimatedIncome || 0;
+    const estimatedExpense = stats.totalEstimatedExpense || 0;
+    const estimatedAmountLeft = estimatedIncome - estimatedExpense;
+
+    const incomeExpenseBalance = currentIncome - estimatedExpense;
+    const incomeComparison = currentIncome - estimatedIncome;
+    const expenseComparison = currentExpense - estimatedExpense;
+    const amountLeftComparison = currentAmountLeft - estimatedAmountLeft;
 
     // Common table options for autoTable
     const commonTableOptions = {
@@ -47,7 +61,7 @@ const StatsPrint = ({ stats }) => {
 
     doc.setFontSize(20);
     doc.setTextColor(0, 0, 0);
-    const title = 'Estimation Stats';
+    const title = 'Estimation Statistics Report';
     const titleWidth = doc.getTextWidth(title);
     const xPos = (doc.internal.pageSize.width - titleWidth) / 2;
     doc.text(title, xPos, yPos);
@@ -63,10 +77,40 @@ const StatsPrint = ({ stats }) => {
     } else {
       yPos += 10;
     }
+
+    // Comparison Analysis
+    doc.setFontSize(14);
+    doc.setTextColor(0, 0, 0);
+    doc.text('Comparison Analysis', 15, yPos);
+    yPos += 4;
+
+    const comparisonData = [
+      ['Comparison Type', 'Current', 'Estimated', 'Difference'],
+      ['Current Income vs Estimated Expense', formatAmount(currentIncome), formatAmount(estimatedExpense), formatAmount(incomeExpenseBalance)],
+      ['Income Comparison', formatAmount(currentIncome), formatAmount(estimatedIncome), formatAmount(incomeComparison)],
+      ['Expense Comparison', formatAmount(currentExpense), formatAmount(estimatedExpense), formatAmount(expenseComparison)],
+      ['Amount Left Comparison', formatAmount(currentAmountLeft), formatAmount(estimatedAmountLeft), formatAmount(amountLeftComparison)]
+    ];
+
+    autoTable(doc, {
+      startY: yPos,
+      head: [comparisonData[0]],
+      body: comparisonData.slice(1),
+      ...commonTableOptions,
+      columnStyles: {
+        0: { cellWidth: 70 },
+        1: { cellWidth: 35 },
+        2: { cellWidth: 35 },
+        3: { cellWidth: 40 }
+      }
+    });
+
+    yPos = doc.lastAutoTable.finalY + 20;
+
     // Estimation Overview
     doc.setFontSize(14);
     doc.setTextColor(0, 0, 0);
-    doc.text('Overview', 15, yPos);
+    doc.text('Estimation Overview', 15, yPos);
     yPos += 4;
 
     const estimationData = [
@@ -187,7 +231,7 @@ const StatsPrint = ({ stats }) => {
       );
     }
 
-    doc.save('Estimation_Stats.pdf');
+    doc.save('Estimation_Statistics_Report.pdf');
   };
 
   return (
