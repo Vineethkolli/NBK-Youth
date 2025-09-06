@@ -3,8 +3,9 @@
 # 🌟 **NBK-YOUTH**  
 ### *Empowering Youth, Celebrating Unity and Joy*
 
-<br/>
+**NBK YOUTH WEB APP** — *Started on OCT 2024*
 
+<br/>
 </div>
 
 ---
@@ -162,3 +163,6 @@ Visit: [http://localhost:5173](http://localhost:5173)
 
 This project was developed by **Kolli Vineeth**  
 🔗 GitHub: [@Vineethkolli](https://github.com/Vineethkolli)
+
+
+<div align="center"> ©2024 Designed and Developed by <strong>Kolli Vineeth</strong> </div>
