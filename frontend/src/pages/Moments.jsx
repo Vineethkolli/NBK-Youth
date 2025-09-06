@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Edit2, Youtube, Upload, FolderOpen, RotateCcw } from 'lucide-react';
+import { Edit2, Youtube, Upload, FolderOpen, GripHorizontal } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { API_URL } from '../utils/config';
@@ -176,7 +176,7 @@ function Moments() {
             onClick={() => setIsReorderMode(true)}
             className="btn-secondary"
           >
-            <RotateCcw className="h-4 w-4 mr-2" />
+            <GripHorizontal className="h-4 w-4 mr-2" />
             Reorder Mode
           </button>
         </div>
