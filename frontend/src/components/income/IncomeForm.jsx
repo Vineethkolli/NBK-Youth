@@ -108,7 +108,6 @@ function IncomeForm({ income, onClose, onSuccess }) {
               type="text"
               required
               value={formData.name}
-              spellCheck={true}
               onChange={(e) => {
               const capitalized = e.target.value
       .replace(/\b\w/g, char => char.toUpperCase());
