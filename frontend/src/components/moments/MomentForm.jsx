@@ -1,13 +1,13 @@
 import { useState } from 'react';
-import { X, Upload, Pin } from 'lucide-react';
+import { X, Upload, Pin, Youtube, FolderOpen } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 function MomentForm({ type, onClose, onSubmit }) {
   const [formData, setFormData] = useState({
     title: '',
     url: '',
-    file: null,
-    filePreview: null,
+    files: [],
+    filesPreview: [],
     isPinned: false
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -20,26 +20,30 @@ function MomentForm({ type, onClose, onSubmit }) {
 
     setIsSubmitting(true);
     try {
-      if (
-        type === 'youtube' &&
-        !formData.url.includes('youtube.com') &&
-        !formData.url.includes('youtu.be')
-      ) {
-        throw new Error('Please enter a valid YouTube URL');
-      }
-
-      if (type === 'media') {
-        // Build FormData for file upload
+      if (type === 'youtube') {
+        if (!formData.url.includes('youtube.com') && !formData.url.includes('youtu.be')) {
+          throw new Error('Please enter a valid YouTube URL');
+        }
+        await onSubmit(formData, setUploadProgress);
+      } else if (type === 'drive') {
+        if (!formData.url.includes('drive.google.com')) {
+          throw new Error('Please enter a valid Google Drive URL');
+        }
+        await onSubmit(formData, setUploadProgress);
+      } else if (type === 'upload') {
+        if (formData.files.length === 0) {
+          throw new Error('Please select at least one file');
+        }
+        
         const data = new FormData();
         data.append('title', formData.title);
         data.append('isPinned', formData.isPinned);
-        data.append('file', formData.file);
+        
+        formData.files.forEach((file) => {
+          data.append('files', file);
+        });
+        
         await onSubmit(data, setUploadProgress);
-        if (formData.file && formData.file.type.startsWith('video/')) {
-          toast.success('Video uploaded! Drive will process and show it shortly.', { duration: 4000 });
-        }
-      } else {
-        await onSubmit(formData, setUploadProgress);
       }
       onClose();
     } catch (error) {
@@ -50,31 +54,73 @@ function MomentForm({ type, onClose, onSubmit }) {
   };
 
   const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    if (file.size > 1024 * 1024 * 1024) {
-      toast.error('File size should be less than 1GB');
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
+
+    // Validate total size (1GB limit)
+    const totalSize = files.reduce((sum, file) => sum + file.size, 0);
+    if (totalSize > 1024 * 1024 * 1024) {
+      toast.error('Total file size should be less than 1GB');
       return;
     }
+
+    // Create preview URLs
+    const previews = files.map(file => ({
+      file,
+      url: URL.createObjectURL(file),
+      type: file.type.startsWith('image/') ? 'image' : 'video'
+    }));
+
     setFormData({
       ...formData,
-      file,
-      filePreview: URL.createObjectURL(file)
+      files,
+      filesPreview: previews
     });
+  };
+
+  const removeFile = (index) => {
+    const newFiles = formData.files.filter((_, i) => i !== index);
+    const newPreviews = formData.filesPreview.filter((_, i) => i !== index);
+    
+    // Revoke URL for removed file
+    URL.revokeObjectURL(formData.filesPreview[index].url);
+    
+    setFormData({
+      ...formData,
+      files: newFiles,
+      filesPreview: newPreviews
+    });
+  };
+
+  const getFormTitle = () => {
+    switch (type) {
+      case 'youtube': return 'Add YouTube Video';
+      case 'drive': return 'Add Drive Media';
+      case 'upload': return 'Upload Media';
+      default: return 'Add Media';
+    }
+  };
+
+  const getFormIcon = () => {
+    switch (type) {
+      case 'youtube': return <Youtube className="h-5 w-5 mr-2" />;
+      case 'drive': return <FolderOpen className="h-5 w-5 mr-2" />;
+      case 'upload': return <Upload className="h-5 w-5 mr-2" />;
+      default: return <Upload className="h-5 w-5 mr-2" />;
+    }
   };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md">
+      <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
           <div className="flex items-center">
-            <h2 className="text-xl font-semibold">
-              {type === 'youtube' ? 'Add YouTube Video' : 'Upload Media'}
-            </h2>
+            {getFormIcon()}
+            <h2 className="text-xl font-semibold">{getFormTitle()}</h2>
             <button
               type="button"
               onClick={() => setFormData(prev => ({ ...prev, isPinned: !prev.isPinned }))}
-              className={`ml-2 p-1 rounded-full ${formData.isPinned ? 'text-yellow-500' : 'text-gray-400'}`}
+              className={`ml-3 p-1 rounded-full ${formData.isPinned ? 'text-yellow-500' : 'text-gray-400'}`}
             >
               <Pin className="h-5 w-5" />
             </button>
@@ -86,70 +132,89 @@ function MomentForm({ type, onClose, onSubmit }) {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">Title (Optional)</label>
+            <label className="block text-sm font-medium text-gray-700">Title *</label>
             <input
               type="text"
+              required
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              placeholder="Enter a descriptive title"
             />
           </div>
 
-          {type === 'youtube' ? (
+          {(type === 'youtube' || type === 'drive') && (
             <div>
-              <label className="block text-sm font-medium text-gray-700">YouTube URL</label>
+              <label className="block text-sm font-medium text-gray-700">
+                {type === 'youtube' ? 'YouTube URL' : 'Google Drive URL'} *
+              </label>
               <input
                 type="url"
                 required
                 value={formData.url}
                 onChange={(e) => setFormData({ ...formData, url: e.target.value })}
-                placeholder="https://youtube.com/watch?v=..."
+                placeholder={
+                  type === 'youtube' 
+                    ? 'https://youtube.com/watch?v=... or https://youtu.be/...'
+                    : 'https://drive.google.com/file/d/...'
+                }
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
               />
+              {type === 'drive' && (
+                <p className="mt-1 text-xs text-gray-500">
+                  Make sure the file has View access for everyone
+                </p>
+              )}
             </div>
-          ) : (
+          )}
+
+          {type === 'upload' && (
             <div>
-              <label className="block text-sm font-medium text-gray-700">Upload File</label>
+              <label className="block text-sm font-medium text-gray-700">Upload Files *</label>
               <input
                 key={fileInputKey}
                 type="file"
                 required
+                multiple
                 accept="image/*,video/*"
                 onChange={handleFileChange}
                 className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
               />
-              {formData.filePreview && (
-                <div className="mt-2 relative">
-                  {formData.file && formData.file.type.startsWith('image/') ? (
-                    <img
-                      src={formData.filePreview}
-                      alt="Preview"
-                      className="max-h-40 object-contain border rounded"
-                    />
-                  ) : (
-                    <video
-                      src={formData.filePreview}
-                      controls
-                      className="max-h-40 object-contain border rounded"
-                    />
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setFormData({ ...formData, file: null, filePreview: null });
-                      setFileInputKey(Date.now());
-                    }}
-                    className="absolute top-0 right-0 bg-black bg-opacity-50 text-white p-1 rounded-full"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
+              
+              {formData.filesPreview.length > 0 && (
+                <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-4 max-h-60 overflow-y-auto">
+                  {formData.filesPreview.map((preview, index) => (
+                    <div key={index} className="relative">
+                      {preview.type === 'image' ? (
+                        <img
+                          src={preview.url}
+                          alt={`Preview ${index + 1}`}
+                          className="w-full h-24 object-cover rounded border"
+                        />
+                      ) : (
+                        <video
+                          src={preview.url}
+                          className="w-full h-24 object-cover rounded border"
+                          muted
+                        />
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => removeFile(index)}
+                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ))}
                 </div>
               )}
+
               {uploadProgress > 0 && uploadProgress < 100 && (
                 <div className="mt-2">
                   <div className="bg-gray-200 rounded-full h-2.5">
                     <div
-                      className="bg-indigo-600 h-2.5 rounded-full"
+                      className="bg-indigo-600 h-2.5 rounded-full transition-all duration-300"
                       style={{ width: `${uploadProgress}%` }}
                     ></div>
                   </div>
@@ -167,10 +232,10 @@ function MomentForm({ type, onClose, onSubmit }) {
             {isSubmitting ? (
               <>
                 <Upload className="animate-spin h-5 w-5 mr-2" />
-                {type === 'youtube' ? 'Adding...' : 'Uploading...'}
+                {type === 'upload' ? 'Uploading...' : 'Adding...'}
               </>
             ) : (
-              type === 'youtube' ? 'Add Video' : 'Upload Media'
+              `Add ${type === 'youtube' ? 'Video' : 'Media'}`
             )}
           </button>
         </form>
