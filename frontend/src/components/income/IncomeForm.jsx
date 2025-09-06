@@ -108,7 +108,14 @@ function IncomeForm({ income, onClose, onSuccess }) {
               type="text"
               required
               value={formData.name}
-              onChange={(e) => handleNameChange(e.target.value)}
+              spellCheck={true}
+              inputMode="text" 
+              autoCorrect="on"
+              onChange={(e) => {
+              const capitalized = e.target.value
+      .replace(/\b\w/g, char => char.toUpperCase());
+    handleNameChange(capitalized);
+  }}
               className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 ${
                 nameError ? 'border-red-500' : ''
               }`}
