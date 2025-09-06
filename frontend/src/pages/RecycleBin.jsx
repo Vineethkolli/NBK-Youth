@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Trash2, RefreshCw } from 'lucide-react';
+import { Trash2, RefreshCw,  IndianRupee, DollarSign } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { API_URL } from '../utils/config';
@@ -99,27 +99,30 @@ function RecycleBin() {
           </div>
 
           <div className="flex space-x-6">
-            <button
-              onClick={() => setActiveBin('income')}
-              className={`px-4 py-2 rounded-md font-semibold ${
-                activeBin === 'income'
-                  ? 'bg-indigo-600 text-white'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              }`}
-            >
-              Income
-            </button>
-            <button
-              onClick={() => setActiveBin('expense')}
-              className={`px-4 py-2 rounded-md font-semibold ${
-                activeBin === 'expense'
-                  ? 'bg-indigo-600 text-white'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              }`}
-            >
-              Expense
-            </button>
-          </div>
+  <button
+    onClick={() => setActiveBin('income')}
+    className={`px-4 py-2 rounded-md font-semibold flex items-center space-x-2 ${
+      activeBin === 'income'
+        ? 'bg-indigo-600 text-white'
+        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+    }`}
+  >
+    <IndianRupee size={18} />
+    <span>Income</span>
+  </button>
+
+  <button
+    onClick={() => setActiveBin('expense')}
+    className={`px-4 py-2 rounded-md font-semibold flex items-center space-x-2 ${
+      activeBin === 'expense'
+        ? 'bg-indigo-600 text-white'
+        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+    }`}
+  >
+    <DollarSign size={18} />
+    <span>Expense</span>
+  </button>
+</div>
         </div>
       </div>
 

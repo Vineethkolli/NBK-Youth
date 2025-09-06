@@ -112,7 +112,7 @@ return (
     <div className="space-y-2">
       {/* Top row: heading left, buttons right */}
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-semibold">Expenses</h1>
+        <h1 className="text-2xl font-semibold">Expense</h1>
 
         <div className="flex items-center space-x-3">
           {['developer', 'financier'].includes(user?.role) && (

@@ -8,6 +8,7 @@ import { API_URL } from '../utils/config';
 import EventLabelDisplay from '../components/common/EventLabelDisplay';
 import LockIndicator from '../components/common/LockIndicator';
 import { useLockSettings } from '../context/LockContext';
+import { IndianRupee, DollarSign, ShieldCheck } from 'lucide-react'; // icons
 
 function Verification() {
   const { user } = useAuth();
@@ -35,17 +36,11 @@ function Verification() {
         endpoint = 'payments/verification/data';
       }
 
-      const { data } = await axios.get(`${API_URL}/api/${endpoint}`, {
-        params: filters
-      });
+      const { data } = await axios.get(`${API_URL}/api/${endpoint}`, { params: filters });
 
-      if (activeTab === 'income') {
-        setIncomeData(data);
-      } else if (activeTab === 'expense') {
-        setExpenseData(data);
-      } else {
-        setPaymentData(data);
-      }
+      if (activeTab === 'income') setIncomeData(data);
+      else if (activeTab === 'expense') setExpenseData(data);
+      else setPaymentData(data);
     } catch (error) {
       toast.error(`Failed to fetch ${activeTab} data`);
     }
@@ -54,13 +49,9 @@ function Verification() {
   const handleVerifyLogUpdate = async (id, verifyLog) => {
     try {
       let endpoint;
-      if (activeTab === 'income') {
-        endpoint = 'incomes';
-      } else if (activeTab === 'expense') {
-        endpoint = 'expenses';
-      } else {
-        endpoint = 'payments';
-      }
+      if (activeTab === 'income') endpoint = 'incomes';
+      else if (activeTab === 'expense') endpoint = 'expenses';
+      else endpoint = 'payments';
 
       await axios.patch(`${API_URL}/api/${endpoint}/${id}/verify`, {
         verifyLog,
@@ -70,9 +61,7 @@ function Verification() {
       toast.success('Verification status updated successfully');
       fetchData();
     } catch (error) {
-      if (error.response?.data?.existingName) {
-        throw error;
-      }
+      if (error.response?.data?.existingName) throw error;
       toast.error('Failed to update verification status');
     }
   };
@@ -90,42 +79,45 @@ function Verification() {
     }
   };
 
-  if (!['developer', 'financier'].includes(user?.role)) {
-    return <div>Access denied</div>;
-  }
+  if (!['developer', 'financier'].includes(user?.role)) return <div>Access denied</div>;
+
+  // Map icons for each tab
+  const tabIcons = {
+    income: <IndianRupee size={18} />,
+    expense: <DollarSign size={18} />,
+    payment: <ShieldCheck size={18} />
+  };
 
   return (
     <div className="space-y-6">
       {/* Title and Lock Indicator */}
-      {/* Top row: heading left, buttons right */}<div className="space-y-2">
-  {/* Container for heading + tabs */}
-  <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-    <h1 className="text-2xl font-semibold mb-2 lg:mb-0">Verification Management</h1>
-      {/* Lock indicator and event label below */}
-  <div className="flex items-center mb-6 lg:mb-0">
-  <LockIndicator />
-  <EventLabelDisplay />
-</div>
+      <div className="space-y-2">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+          <h1 className="text-2xl font-semibold mb-2 lg:mb-0">Verification Management</h1>
+          <div className="flex items-center mb-6 lg:mb-0 space-x-2">
+            <LockIndicator />
+            <EventLabelDisplay />
+          </div>
 
-    
-    {/* Tabs container */}
-    <div className="flex space-x-6 ">
-      {['income', 'expense', 'payment'].map((tab) => (
-        <button
-          key={tab}
-          onClick={() => setActiveTab(tab)}
-          className={`px-4 py-2 rounded-md font-semibold ${
-            activeTab === tab
-              ? 'bg-indigo-600 text-white'
-              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-          }`}
-        >
-          {tab.charAt(0).toUpperCase() + tab.slice(1)}
-        </button>
-      ))}
-    </div>
-  </div>
-</div>
+          {/* Tabs */}
+          <div className="flex space-x-4">
+            {['income', 'expense', 'payment'].map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`px-3 py-2 rounded-md font-semibold flex items-center space-x-2 ${
+                  activeTab === tab
+                    ? 'bg-indigo-600 text-white'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
+              >
+                {tabIcons[tab]}
+                <span>{tab.charAt(0).toUpperCase() + tab.slice(1)}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
 
       {/* Filters */}
       <div className="my-4">
@@ -145,7 +137,7 @@ function Verification() {
           type={activeTab}
           onVerifyLogUpdate={handleVerifyLogUpdate}
           onUpdatePayment={handleUpdatePayment}
-          isLocked={lockSettings.isLocked} // pass isLocked prop here
+          isLocked={lockSettings.isLocked}
         />
       </div>
     </div>
