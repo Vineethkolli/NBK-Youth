@@ -66,7 +66,7 @@ const StatsPrint = ({ stats }) => {
       theme: 'grid',
       headStyles: { fillColor: [33, 115, 175], textColor: [255, 255, 255], fontSize: 10 },
       styles: { fontSize: 10, cellPadding: 2, rowHeight: 7, halign: 'center' },
-      columnStyles: { 0: { cellWidth: 60 }, 1: { cellWidth: 40 }, 2: { cellWidth: 60 } }
+      columnStyles: { 0: { cellWidth: 85 }, 1: { cellWidth: 45 }, 2: { cellWidth: 50 } }
     });
     yPos = doc.lastAutoTable.finalY + 16;
 

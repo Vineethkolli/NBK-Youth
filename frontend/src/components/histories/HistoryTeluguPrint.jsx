@@ -6,6 +6,27 @@ import { toast } from 'react-hot-toast';
 function TeluguPrint({ selectedHistory, activeTab, data, showBelongsTo }) {
   const printRef = useRef();
 
+  // Get translated snapshot name from the webpage or translate it
+  const getTranslatedSnapshotName = () => {
+    // First try to get from the webpage if it's already translated
+    const renderedSnapshotElement = document.querySelector('[data-snapshot-name]');
+    if (renderedSnapshotElement) {
+      return renderedSnapshotElement.innerText?.trim();
+    }
+    
+    // If not found, translate common event names
+    if (selectedHistory?.snapshotName) {
+      const name = selectedHistory.snapshotName;
+      if (name.includes('Sankranti')) {
+        return name.replace('Sankranti', 'సంక్రాంతి');
+      } else if (name.includes('Ganesh Chaturthi')) {
+        return name.replace('Ganesh Chaturthi', 'గణేశ్ చతుర్థి');
+      }
+      return name; // Return as-is if no translation available
+    }
+    return '';
+  };
+
   const formatAmount = (amount) =>
     `<span translate="no">${new Intl.NumberFormat('en-IN', {
       minimumFractionDigits: 0,
@@ -60,10 +81,11 @@ function TeluguPrint({ selectedHistory, activeTab, data, showBelongsTo }) {
 
     printWindow.document.write(`<h2><span translate="no">${teluguTitle}</span></h2>`);
 
-    if (selectedHistory.snapshotName) {
+    const translatedSnapshotName = getTranslatedSnapshotName();
+    if (translatedSnapshotName) {
       printWindow.document.write(`
         <div style="text-align: center; margin-bottom: 10px; color: #666;">
-          ${selectedHistory.snapshotName}
+          ${translatedSnapshotName}
         </div>
       `);
     }
