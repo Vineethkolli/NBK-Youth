@@ -112,7 +112,8 @@ function MomentForm({ type, onClose, onSubmit }) {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-lg p-6 w-full max-w-lg max-h-[85vh] overflow-y-auto mx-4">
+
         <div className="flex justify-between items-center mb-4">
           <div className="flex items-center">
             {getFormIcon()}
@@ -139,7 +140,7 @@ function MomentForm({ type, onClose, onSubmit }) {
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-              placeholder="Enter a descriptive title"
+              placeholder="Enter title"
             />
           </div>
 
@@ -155,7 +156,7 @@ function MomentForm({ type, onClose, onSubmit }) {
                 onChange={(e) => setFormData({ ...formData, url: e.target.value })}
                 placeholder={
                   type === 'youtube' 
-                    ? 'https://youtube.com/watch?v=... or https://youtu.be/...'
+                    ? 'https://youtu.be/...'
                     : 'https://drive.google.com/file/d/...'
                 }
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
@@ -170,7 +171,7 @@ function MomentForm({ type, onClose, onSubmit }) {
 
           {type === 'upload' && (
             <div>
-              <label className="block text-sm font-medium text-gray-700">Upload Files *</label>
+              <label className="block text-sm font-medium text-gray-700">Upload Files * (Maximum 20 files)</label>
               <input
                 key={fileInputKey}
                 type="file"
