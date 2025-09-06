@@ -254,7 +254,7 @@ function Histories() {
               }`}
             >
               <DollarSign className="h-4 w-4 mr-2" />
-              Expenses
+              Expense
             </button>
 
             <button

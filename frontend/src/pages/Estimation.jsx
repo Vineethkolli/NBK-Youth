@@ -7,6 +7,7 @@ import IncomeSection from '../components/estimation/IncomeSection';
 import ExpenseSection from '../components/estimation/ExpenseSection';
 import { useAuth } from '../context/AuthContext';
 import EventLabelDisplay from '../components/common/EventLabelDisplay';
+import { BarChart2, DollarSign, IndianRupee } from 'lucide-react'; // icons
 
 function Estimation() {
   const { user } = useAuth();
@@ -58,47 +59,47 @@ function Estimation() {
           <div className="flex items-center mb-6 lg:mb-0 ">
             <EventLabelDisplay />
           </div>
-          <div className="flex space-x-6">
+          <div className="flex space-x-4">
             <button
               onClick={() => setActiveTab('stats')}
-              className={`px-4 py-2 rounded-md font-semibold ${
+              className={`px-3 py-2 rounded-md font-semibold flex items-center space-x-2 ${
                 activeTab === 'stats'
                   ? 'bg-indigo-600 text-white'
                   : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
               }`}
             >
-              Stats
+              <BarChart2 size={18} />
+              <span>Stats</span>
             </button>
 
-            {/* Render Income and Expense buttons only if the user's category is 'youth' */}
             {user?.category === 'youth' && (
               <>
                 <button
                   onClick={() => setActiveTab('income')}
-                  className={`px-4 py-2 rounded-md font-semibold ${
+                  className={`px-3 py-2 rounded-md font-semibold flex items-center space-x-2 ${
                     activeTab === 'income'
                       ? 'bg-indigo-600 text-white'
                       : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                   }`}
                 >
-                  Income
+                  <IndianRupee size={18} />
+                  <span>Income</span>
                 </button>
                 <button
                   onClick={() => setActiveTab('expense')}
-                  className={`px-4 py-2 rounded-md font-semibold ${
+                  className={`px-3 py-2 rounded-md font-semibold flex items-center space-x-2 ${
                     activeTab === 'expense'
                       ? 'bg-indigo-600 text-white'
                       : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                   }`}
                 >
-                  Expense
+                  <DollarSign size={18} />
+                  <span>Expense</span>
                 </button>
               </>
             )}
           </div>
         </div>
-
-        
       </div>
 
       {/* Tab content */}
