@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, Upload, Pin, Youtube, FolderOpen } from 'lucide-react';
+import { X, Upload, Youtube, FolderOpen } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 function MomentForm({ type, onClose, onSubmit }) {
@@ -7,8 +7,7 @@ function MomentForm({ type, onClose, onSubmit }) {
     title: '',
     url: '',
     files: [],
-    filesPreview: [],
-    isPinned: false
+    filesPreview: []
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -24,12 +23,13 @@ function MomentForm({ type, onClose, onSubmit }) {
         if (!formData.url.includes('youtube.com') && !formData.url.includes('youtu.be')) {
           throw new Error('Please enter a valid YouTube URL');
         }
-        await onSubmit(formData, setUploadProgress);
+        // send plain object (backend expects title + url)
+        await onSubmit({ title: formData.title, url: formData.url });
       } else if (type === 'drive') {
         if (!formData.url.includes('drive.google.com')) {
           throw new Error('Please enter a valid Google Drive URL');
         }
-        await onSubmit(formData, setUploadProgress);
+        await onSubmit({ title: formData.title, url: formData.url });
       } else if (type === 'upload') {
         if (formData.files.length === 0) {
           throw new Error('Please select at least one file');
@@ -37,8 +37,8 @@ function MomentForm({ type, onClose, onSubmit }) {
         
         const data = new FormData();
         data.append('title', formData.title);
-        data.append('isPinned', formData.isPinned);
-        
+        // NOTE: removed isPinned usage entirely
+
         formData.files.forEach((file) => {
           data.append('files', file);
         });
@@ -50,6 +50,7 @@ function MomentForm({ type, onClose, onSubmit }) {
       toast.error(error.message || 'Failed to add moment');
     } finally {
       setIsSubmitting(false);
+      setUploadProgress(0);
     }
   };
 
@@ -83,13 +84,20 @@ function MomentForm({ type, onClose, onSubmit }) {
     const newPreviews = formData.filesPreview.filter((_, i) => i !== index);
     
     // Revoke URL for removed file
-    URL.revokeObjectURL(formData.filesPreview[index].url);
-    
+    try {
+      URL.revokeObjectURL(formData.filesPreview[index].url);
+    } catch (err) {}
+
     setFormData({
       ...formData,
       files: newFiles,
       filesPreview: newPreviews
     });
+
+    // reset input if removed all files to allow re-upload of same files later
+    if (newFiles.length === 0) {
+      setFileInputKey(Date.now());
+    }
   };
 
   const getFormTitle = () => {
@@ -118,13 +126,6 @@ function MomentForm({ type, onClose, onSubmit }) {
           <div className="flex items-center">
             {getFormIcon()}
             <h2 className="text-xl font-semibold">{getFormTitle()}</h2>
-            <button
-              type="button"
-              onClick={() => setFormData(prev => ({ ...prev, isPinned: !prev.isPinned }))}
-              className={`ml-3 p-1 rounded-full ${formData.isPinned ? 'text-yellow-500' : 'text-gray-400'}`}
-            >
-              <Pin className="h-5 w-5" />
-            </button>
           </div>
           <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
             <X className="h-6 w-6" />

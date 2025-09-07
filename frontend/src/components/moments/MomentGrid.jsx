@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Trash2, Pin, Edit2, Check, Download, ChevronRight } from 'lucide-react';
+import { Trash2, Edit2, Check, ChevronRight } from 'lucide-react';
 import MediaPreview from './MediaPreview.jsx';
 import MediaGallery from './MediaGallery.jsx';
 import MediaLightbox from './MediaLightbox.jsx';
@@ -9,7 +9,6 @@ function MomentGrid({
   isEditMode, 
   onDelete, 
   onDeleteMediaFile,
-  onTogglePin, 
   onUpdateTitle 
 }) {
   const [editingTitleId, setEditingTitleId] = useState(null);
@@ -32,17 +31,6 @@ function MomentGrid({
     const fileId = url.match(/[?&]id=([^&]+)/)?.[1];
     if (!fileId) return url;
     return `https://drive.google.com/thumbnail?id=${fileId}&sz=w600`;
-  };
-
-  // Drive download helper
-  const getDriveDownloadUrl = (url) => {
-    if (!url) return '';
-    const fileId =
-      url.match(/[?&]id=([^&]+)/)?.[1] ||
-      url.match(/\/file\/d\/([^/]+)/)?.[1] ||
-      url.match(/open\?id=([^&]+)/)?.[1];
-    if (!fileId) return url;
-    return `https://drive.google.com/uc?export=download&id=${fileId}`;
   };
 
   const downloadFile = (downloadUrl, name) => {
@@ -93,13 +81,13 @@ function MomentGrid({
 
       return (
         <div
-  className={`relative w-full h-48 ${!isEditMode ? 'cursor-pointer' : ''}`}
-  onClick={() => {
-    if (!isEditMode) {
-      setExpandedMoment(moment);
-    }
-  }}
->
+          className={`relative w-full h-48 ${!isEditMode ? 'cursor-pointer' : ''}`}
+          onClick={() => {
+            if (!isEditMode) {
+              setExpandedMoment(moment);
+            }
+          }}
+        >
           <img
             src={getDriveThumbnailUrl(firstFile.url)}
             alt={firstFile.name}
@@ -114,38 +102,36 @@ function MomentGrid({
           <div className="absolute top-0 right-0 h-full w-1/5 bg-gradient-to-l from-white/90 to-transparent" />
 
           {/* Arrow button */}
-<button
-  onClick={(e) => {
-    e.stopPropagation();
-    if (!isEditMode) {
-      setExpandedMoment(moment);
-    }
-  }}
-  className={`absolute top-1/2 right-3 -translate-y-1/2 
-             p-2 bg-black bg-opacity-70 text-white rounded-full 
-             hover:bg-opacity-90 transition  cursor-pointer}`}
-
->
-  <ChevronRight className="h-5 w-5" />
-</button>
-
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              if (!isEditMode) {
+                setExpandedMoment(moment);
+              }
+            }}
+            className={`absolute top-1/2 right-3 -translate-y-1/2 
+               p-2 bg-black bg-opacity-70 text-white rounded-full 
+               hover:bg-opacity-90 transition  cursor-pointer}`}
+          >
+            <ChevronRight className="h-5 w-5" />
+          </button>
 
           {/* See All overlay bottom-right */}
           {remainingCount > 0 && (
-  <button
-    onClick={(e) => {
-      e.stopPropagation();
-      if (!isEditMode) {
-        setExpandedMoment(moment);
-      }
-    }}
-    className="absolute bottom-3 right-2 px-2 py-1 
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                if (!isEditMode) {
+                  setExpandedMoment(moment);
+                }
+              }}
+              className="absolute bottom-3 right-2 px-2 py-1 
                bg-black bg-opacity-70 text-white text-sm font-semibold rounded 
                hover:bg-opacity-90 transition"
-  >
-    See All (+{remainingCount})
-  </button>
-)}
+            >
+              See All (+{remainingCount})
+            </button>
+          )}
         </div>
       );
     }
@@ -153,18 +139,10 @@ function MomentGrid({
     return <div className="flex items-center justify-center h-56 text-gray-400">No media uploaded</div>;
   };
 
-  
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-  {[...moments]
-    .sort((a, b) => {
-      // Prefer createdAt if available, fallback to MongoDB ObjectId timestamp
-      const timeA = a.createdAt ? new Date(a.createdAt).getTime() : new Date(parseInt(a._id.substring(0, 8), 16) * 1000).getTime();
-      const timeB = b.createdAt ? new Date(b.createdAt).getTime() : new Date(parseInt(b._id.substring(0, 8), 16) * 1000).getTime();
-      return timeB - timeA; // Newest first
-    })
-    .map((moment) => (
+        {moments.map((moment) => (
           <div key={moment._id} className="bg-white rounded-lg shadow-md overflow-hidden flex flex-col">
             <div className="relative w-full h-48">
               {moment.type === 'youtube' ? (
@@ -178,16 +156,11 @@ function MomentGrid({
                 <div className="relative w-full h-full">
                   <MediaPreview
                     url={moment.url}
-                    type={moment.title.match(/\.(jpeg|jpg|gif|png)$/) != null ? 'image' : 'video'}
+                    // media type detection should be reliable on the media item; for moments (drive) we treat as view-only
+                    type={moment.url && moment.url.match(/\.(jpeg|jpg|gif|png)$/i) ? 'image' : 'video'}
                     title={moment.title}
                   />
-                  <button
-                    onClick={() => downloadFile(getDriveDownloadUrl(moment.url), moment.title)}
-                    className="absolute bottom-2 right-2 p-2 bg-black bg-opacity-50 text-white rounded-full hover:bg-opacity-75 transition"
-                    title="Download media"
-                  >
-                    <Download className="h-4 w-4" />
-                  </button>
+                  {/* Drive items are view-only per rules: no download button shown */}
                 </div>
               ) : (
                 renderPreviewThumbnails(moment)
@@ -195,12 +168,6 @@ function MomentGrid({
 
               {isEditMode && (
                 <div className="absolute top-2 right-2 flex space-x-2">
-                  <button
-                    onClick={() => onTogglePin(moment._id)}
-                    className={`p-1.5 rounded-full ${moment.isPinned ? 'bg-yellow-400 hover:bg-yellow-500' : 'bg-black bg-opacity-40 hover:bg-opacity-60'} text-white transition-colors`}
-                  >
-                    <Pin className="h-4 w-4" />
-                  </button>
                   <button
                     onClick={() => handleDeleteClick(moment._id)}
                     className={`p-1.5 bg-red-600 text-white rounded-full hover:bg-red-700 transition-colors ${deletingId === moment._id ? 'opacity-50 cursor-not-allowed' : ''}`}
