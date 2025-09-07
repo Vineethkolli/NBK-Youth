@@ -190,14 +190,14 @@ function Committee() {
                             <span className="text-4xl font-bold text-gray-400">{m.name.charAt(0).toUpperCase()}</span>
                           </div>
                         )}
-                        {(isEditMode || isReorderMode) && (
-                          <button
-                            onClick={() => handleRemove(m._id)}
-                            className="absolute top-2 right-2 bg-red-600 text-white rounded-full p-2 hover:bg-red-700 transition-colors shadow-lg"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
-                        )}
+                        {isEditMode && (
+  <button
+    onClick={() => handleRemove(m._id)}
+    className="absolute top-2 right-2 bg-red-600 text-white rounded-full p-2 hover:bg-red-700 transition-colors shadow-lg"
+  >
+    <Trash2 className="h-4 w-4" />
+  </button>
+)}
                       </div>
 
                       <div className="p-2">
