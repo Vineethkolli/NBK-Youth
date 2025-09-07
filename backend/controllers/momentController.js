@@ -1,3 +1,4 @@
+// controllers/momentController.js
 import Moment from '../models/Moment.js';
 import { google } from 'googleapis';
 import { Readable } from 'stream';
@@ -36,7 +37,9 @@ const getDirectViewUrl = (url) => {
 export const momentController = {
   getAllMoments: async (req, res) => {
     try {
-      const moments = await Moment.find().sort({ isPinned: -1, order: 1, createdAt: -1 });
+      // Sort by order (descending) first so saved reorder shows.
+      // Then fallback to createdAt descending to show newest first by default.
+      const moments = await Moment.find().sort({ order: -1, createdAt: -1 });
       res.json(moments);
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch moments', error: error.message });
@@ -45,8 +48,7 @@ export const momentController = {
 
   addYouTubeMoment: async (req, res) => {
     try {
-
-      const { title, url, isPinned } = req.body;
+      const { title, url } = req.body;
       const maxOrder = await Moment.findOne().sort('-order');
       const order = maxOrder ? maxOrder.order + 1 : 0;
       const momentData = {
@@ -56,9 +58,7 @@ export const momentController = {
         order,
         createdBy: req.user.registerId,
       };
-      if (typeof isPinned !== 'undefined') {
-        momentData.isPinned = isPinned === true || isPinned === 'true';
-      }
+
       const moment = await Moment.create(momentData);
 
       await logActivity(
@@ -78,8 +78,7 @@ export const momentController = {
 
   addDriveMoment: async (req, res) => {
     try {
-
-      const { title, url, isPinned } = req.body;
+      const { title, url } = req.body;
       const maxOrder = await Moment.findOne().sort('-order');
       const order = maxOrder ? maxOrder.order + 1 : 0;
       const directUrl = getDirectViewUrl(url);
@@ -90,9 +89,7 @@ export const momentController = {
         order,
         createdBy: req.user.registerId,
       };
-      if (typeof isPinned !== 'undefined') {
-        momentData.isPinned = isPinned === true || isPinned === 'true';
-      }
+
       const moment = await Moment.create(momentData);
 
       await logActivity(
@@ -112,8 +109,7 @@ export const momentController = {
 
   uploadMediaMoment: async (req, res) => {
     try {
-
-      const { title, isPinned } = req.body;
+      const { title } = req.body;
       const files = req.files; // Multiple files
       if (!files || files.length === 0) {
         return res.status(400).json({ message: 'No files uploaded' });
@@ -159,9 +155,7 @@ export const momentController = {
         order,
         createdBy: req.user.registerId,
       };
-      if (typeof isPinned !== 'undefined') {
-        momentData.isPinned = isPinned === true || isPinned === 'true';
-      }
+
       const moment = await Moment.create(momentData);
 
       await logActivity(
@@ -234,34 +228,6 @@ export const momentController = {
       res.json(moment);
     } catch (error) {
       res.status(500).json({ message: 'Failed to update media order' });
-    }
-  },
-
-  togglePin: async (req, res) => {
-    try {
-      const moment = await Moment.findById(req.params.id);
-
-      if (!moment) {
-        return res.status(404).json({ message: 'Moment not found' });
-      }
-
-      const originalData = moment.toObject();
-
-      moment.isPinned = !moment.isPinned;
-      await moment.save();
-
-      await logActivity(
-        req,
-        'UPDATE',
-        'Moment',
-        moment._id.toString(),
-        { before: originalData, after: moment.toObject() },
-        `Moment "${moment.title}" ${moment.isPinned ? 'pinned' : 'unpinned'} by ${req.user.name}`
-      );
-
-      res.json(moment);
-    } catch (error) {
-      res.status(500).json({ message: 'Failed to toggle pin status', error: error.message });
     }
   },
 

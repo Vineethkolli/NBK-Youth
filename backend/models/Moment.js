@@ -1,3 +1,4 @@
+// models/Moment.js
 import mongoose from 'mongoose';
 
 const mediaFileSchema = new mongoose.Schema({
@@ -40,10 +41,6 @@ const momentSchema = new mongoose.Schema({
   order: {
     type: Number,
     default: 0
-  },
-  isPinned: {
-    type: Boolean,
-    default: false
   },
   createdBy: {
     type: String,

@@ -8,9 +8,27 @@ function MomentReorder({ moments, onSave, onCancel, onMediaOrderSave }) {
   const [expandedMoment, setExpandedMoment] = useState(null);
 
   useEffect(() => {
+    // Keep moment objects but normalize orders if you want; keep original otherwise
     setLocalMoments([...moments]);
     setHasChanges(false);
   }, [moments]);
+
+  const updateMomentOrders = (arr) => {
+    // Assign order such that first item has highest order (so sorting by order desc shows first at top)
+    const total = arr.length;
+    return arr.map((moment, index) => ({
+      ...moment,
+      order: total - index
+    }));
+  };
+
+  const updateMediaOrders = (files) => {
+    const total = files.length;
+    return files.map((file, index) => ({
+      ...file,
+      order: total - index
+    }));
+  };
 
   const onDragEnd = (result) => {
     const { source, destination, type } = result;
@@ -23,11 +41,8 @@ function MomentReorder({ moments, onSave, onCancel, onMediaOrderSave }) {
       const [moved] = updated.splice(source.index, 1);
       updated.splice(destination.index, 0, moved);
       
-      // Update order values
-      const reordered = updated.map((moment, index) => ({
-        ...moment,
-        order: index
-      }));
+      // Update order values (top = highest)
+      const reordered = updateMomentOrders(updated);
       
       setLocalMoments(reordered);
       setHasChanges(true);
@@ -41,11 +56,8 @@ function MomentReorder({ moments, onSave, onCancel, onMediaOrderSave }) {
       const [moved] = mediaFiles.splice(source.index, 1);
       mediaFiles.splice(destination.index, 0, moved);
 
-      // Update order values
-      const reorderedMedia = mediaFiles.map((file, index) => ({
-        ...file,
-        order: index
-      }));
+      // Update order values (top = highest)
+      const reorderedMedia = updateMediaOrders(mediaFiles);
 
       updated[momentIndex] = {
         ...updated[momentIndex],
@@ -64,10 +76,7 @@ function MomentReorder({ moments, onSave, onCancel, onMediaOrderSave }) {
     const [item] = updated.splice(fromIndex, 1);
     updated.splice(toIndex, 0, item);
     
-    const reordered = updated.map((moment, index) => ({
-      ...moment,
-      order: index
-    }));
+    const reordered = updateMomentOrders(updated);
     
     setLocalMoments(reordered);
     setHasChanges(true);
@@ -82,10 +91,7 @@ function MomentReorder({ moments, onSave, onCancel, onMediaOrderSave }) {
     const [item] = mediaFiles.splice(fromIndex, 1);
     mediaFiles.splice(toIndex, 0, item);
 
-    const reorderedMedia = mediaFiles.map((file, index) => ({
-      ...file,
-      order: index
-    }));
+    const reorderedMedia = updateMediaOrders(mediaFiles);
 
     updated[momentIndex] = {
       ...updated[momentIndex],
@@ -99,12 +105,16 @@ function MomentReorder({ moments, onSave, onCancel, onMediaOrderSave }) {
   const handleSave = async () => {
     try {
       // Save moment order
-      await onSave(localMoments);
+      // We will send objects with _id and order fields — backend will update each document
+      const momentsToSend = localMoments.map(m => ({ _id: m._id, order: m.order }));
+      await onSave(momentsToSend);
       
       // Save media order for upload type moments
       for (const moment of localMoments) {
         if (moment.type === 'upload' && moment.mediaFiles?.length > 0) {
-          await onMediaOrderSave(moment._id, moment.mediaFiles);
+          // ensure media files are sent with _id and order
+          const mediaFilesToSend = moment.mediaFiles.map(f => ({ _id: f._id, name: f.name, url: f.url, type: f.type, order: f.order, mediaPublicId: f.mediaPublicId }));
+          await onMediaOrderSave(moment._id, mediaFilesToSend);
         }
       }
       

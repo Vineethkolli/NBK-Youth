@@ -59,15 +59,7 @@ function Moments() {
     }
   };
 
-  const handleTogglePin = async (momentId) => {
-    try {
-      await axios.patch(`${API_URL}/api/moments/${momentId}/pin`);
-      toast.success('Pin status updated');
-      fetchMoments();
-    } catch (error) {
-      toast.error('Failed to update pin status');
-    }
-  };
+  // removed pin toggle (pin/unpin no longer supported)
 
   const handleDelete = async (momentId) => {
     if (!window.confirm('Are you sure you want to delete this moment?')) return;
@@ -105,6 +97,7 @@ function Moments() {
     try {
       await axios.put(`${API_URL}/api/moments/order`, { moments: reorderedMoments });
       toast.success('Order updated successfully');
+      // reflect reorder immediately
       setMoments(reorderedMoments);
       setIsReorderMode(false);
     } catch (error) {
@@ -128,17 +121,6 @@ function Moments() {
   };
 
   const isPrivilegedUser = ['developer', 'admin', 'financier'].includes(user?.role);
-
-  if (isReorderMode) {
-    return (
-      <MomentReorder
-        moments={moments}
-        onSave={handleOrderSave}
-        onCancel={() => setIsReorderMode(false)}
-        onMediaOrderSave={handleMediaOrderSave}
-      />
-    );
-  }
 
   return (
     <div className="max-w-7xl mx-auto sm:px-6 lg:px-0 py-0">
@@ -166,15 +148,19 @@ function Moments() {
             Upload Media
           </button>
           <button
-            onClick={() => setIsEditMode(!isEditMode)}
+            onClick={() => { setIsEditMode(!isEditMode); setIsReorderMode(false); }}
             className={`btn-secondary ${isEditMode ? 'bg-red-100' : ''}`}
           >
             <Edit2 className="h-4 w-4 mr-2" />
             {isEditMode ? 'Done' : 'Edit Mode'}
           </button>
+
+          {/* Reorder button: keep visible but dim/disabled when active */}
           <button
             onClick={() => setIsReorderMode(true)}
-            className="btn-secondary"
+            disabled={isReorderMode}
+            className={`btn-secondary ${isReorderMode ? 'opacity-50 cursor-not-allowed' : ''}`}
+            title={isReorderMode ? 'Reorder is active' : 'Enter reorder mode'}
           >
             <GripHorizontal className="h-4 w-4 mr-2" />
             Reorder Mode
@@ -182,14 +168,23 @@ function Moments() {
         </div>
       )}
 
-      <MomentGrid
-        moments={moments}
-        isEditMode={isEditMode}
-        onDelete={handleDelete}
-        onDeleteMediaFile={handleDeleteMediaFile}
-        onTogglePin={handleTogglePin}
-        onUpdateTitle={handleUpdateTitle}
-      />
+      {/* If reorder mode — render MomentReorder in place of grid (header stays visible) */}
+      {isReorderMode ? (
+        <MomentReorder
+          moments={moments}
+          onSave={handleOrderSave}
+          onCancel={() => setIsReorderMode(false)}
+          onMediaOrderSave={handleMediaOrderSave}
+        />
+      ) : (
+        <MomentGrid
+          moments={moments}
+          isEditMode={isEditMode}
+          onDelete={handleDelete}
+          onDeleteMediaFile={handleDeleteMediaFile}
+          onUpdateTitle={handleUpdateTitle}
+        />
+      )}
 
       {showForm && (
         <MomentForm

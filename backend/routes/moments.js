@@ -1,3 +1,4 @@
+// routes/moments.js
 import express from 'express';
 import { auth, checkRole } from '../middleware/auth.js';
 import { momentController } from '../controllers/momentController.js';
@@ -53,11 +54,7 @@ router.delete('/:momentId/media/:mediaId',
   momentController.deleteMediaFile
 );
 
-router.patch('/:id/pin',
-  auth,
-  checkRole(['developer', 'admin', 'financier']),
-  momentController.togglePin
-);
+// Note: pin/unpin removed
 
 router.patch('/:id/title', 
   auth, 
