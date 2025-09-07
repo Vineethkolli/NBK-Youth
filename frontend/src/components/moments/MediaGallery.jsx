@@ -107,36 +107,7 @@ function MediaGallery({
               >
                 <Download className="h-4 w-4" />
               </button>
-
-              {/* Edit Mode Options */}
-              {isEditMode && (
-                <div className="absolute top-2 right-2">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleMediaOptions(file._id);
-                    }}
-                    className="p-1 bg-black bg-opacity-50 text-white rounded-full hover:bg-opacity-75 transition-opacity"
-                  >
-                    <MoreVertical className="h-4 w-4" />
-                  </button>
-
-                  {showMediaOptions === file._id && (
-                    <div className="absolute top-8 right-0 bg-white rounded-lg shadow-lg border py-2 z-10">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeleteMedia(file._id);
-                        }}
-                        className="flex items-center px-4 py-2 text-red-600 hover:bg-red-50 w-full text-left"
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Delete
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
+              
             </div>
           ))}
         </div>
