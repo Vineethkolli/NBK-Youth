@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Trash2, Edit2, Check, ChevronRight } from 'lucide-react';
+import { Trash2, Edit2, Check, ChevronRight, Play } from 'lucide-react';
 import MediaPreview from './MediaPreview.jsx';
 import MediaGallery from './MediaGallery.jsx';
 import MediaLightbox from './MediaLightbox.jsx';
@@ -9,14 +9,15 @@ function MomentGrid({
   isEditMode, 
   onDelete, 
   onDeleteMediaFile,
-  onUpdateTitle 
+  onUpdateTitle,
+  onAddMediaToMoment,
+  onMediaOrderSave
 }) {
   const [editingTitleId, setEditingTitleId] = useState(null);
   const [tempTitle, setTempTitle] = useState('');
   const [deletingId, setDeletingId] = useState(null);
   const [expandedMoment, setExpandedMoment] = useState(null);
   const [lightboxData, setLightboxData] = useState(null);
-  const [showMediaOptions, setShowMediaOptions] = useState(null);
 
   // YouTube URL Helper
   const getEmbedUrl = (url) => {
@@ -97,6 +98,15 @@ function MomentGrid({
               e.target.src = 'https://placehold.co/600x400/eeeeee/cccccc?text=Error';
             }}
           />
+            
+            {/* Video Play Button Overlay */}
+            {firstFile.type === 'video' && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="bg-black bg-opacity-50 rounded-full p-3">
+                  <Play className="h-6 w-6 text-white" />
+                </div>
+              </div>
+            )}
 
           {/* Fade effect on right 20% */}
           <div className="absolute top-0 right-0 h-full w-1/5 bg-gradient-to-l from-white/90 to-transparent" />
@@ -156,11 +166,18 @@ function MomentGrid({
                 <div className="relative w-full h-full">
                   <MediaPreview
                     url={moment.url}
-                    // media type detection should be reliable on the media item; for moments (drive) we treat as view-only
                     type={moment.url && moment.url.match(/\.(jpeg|jpg|gif|png)$/i) ? 'image' : 'video'}
                     title={moment.title}
                   />
-                  {/* Drive items are view-only per rules: no download button shown */}
+                  
+                  {/* Video Play Button Overlay for Drive videos */}
+                  {moment.url && !moment.url.match(/\.(jpeg|jpg|gif|png)$/i) && (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="bg-black bg-opacity-50 rounded-full p-3">
+                        <Play className="h-6 w-6 text-white" />
+                      </div>
+                    </div>
+                  )}
                 </div>
               ) : (
                 renderPreviewThumbnails(moment)
@@ -222,8 +239,8 @@ function MomentGrid({
           onClose={() => setExpandedMoment(null)}
           onMediaClick={(mediaFiles, index) => openLightbox(mediaFiles, index, expandedMoment.title)}
           onDeleteMedia={onDeleteMediaFile}
-          showMediaOptions={showMediaOptions}
-          setShowMediaOptions={setShowMediaOptions}
+          onAddMedia={onAddMediaToMoment}
+          onMediaOrderSave={onMediaOrderSave}
         />
       )}
 

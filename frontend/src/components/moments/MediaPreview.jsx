@@ -1,4 +1,4 @@
-import { Download } from 'lucide-react';
+import { Download, Play } from 'lucide-react';
 
 function MediaPreview({ url, type, title }) {
   // CORRECTED: This function now gets the reliable thumbnail URL for images.
@@ -26,13 +26,21 @@ function MediaPreview({ url, type, title }) {
           onError={(e) => { e.target.onerror = null; e.target.src='https://placehold.co/400x225/eeeeee/cccccc?text=Error'; }}
         />
       ) : (
-        <iframe
-          src={getVideoPlayerUrl(url)}
-          className="w-full h-full"
-          allowFullScreen
-          allow="autoplay"
-          title={title || 'Video'}
-        />
+        <div className="relative w-full h-full">
+          <iframe
+            src={getVideoPlayerUrl(url)}
+            className="w-full h-full"
+            allowFullScreen
+            allow="autoplay"
+            title={title || 'Video'}
+          />
+          {/* Video Play Button Overlay */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="bg-black bg-opacity-50 rounded-full p-3">
+              <Play className="h-6 w-6 text-white" />
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
