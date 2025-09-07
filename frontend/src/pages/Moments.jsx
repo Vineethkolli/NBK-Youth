@@ -59,7 +59,6 @@ function Moments() {
     }
   };
 
-  // removed pin toggle (pin/unpin no longer supported)
 
   const handleDelete = async (momentId) => {
     if (!window.confirm('Are you sure you want to delete this moment?')) return;
