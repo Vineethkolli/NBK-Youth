@@ -8,7 +8,11 @@ function MediaGalleryReorder({ mediaFiles, onSave, onCancel }) {
 
   useEffect(() => {
     if (mediaFiles?.length) {
-      setLocalMediaFiles([...mediaFiles]);
+      // always show in descending order (highest order first)
+      const sorted = [...mediaFiles].sort(
+        (a, b) => b.order - a.order || new Date(b.createdAt) - new Date(a.createdAt)
+      );
+      setLocalMediaFiles(sorted);
       setHasChanges(false);
     }
   }, [mediaFiles]);
@@ -40,7 +44,11 @@ function MediaGalleryReorder({ mediaFiles, onSave, onCancel }) {
   };
 
   const handleSave = () => {
-    const reordered = localMediaFiles.map((m, idx) => ({ ...m, order: idx + 1 }));
+    // assign descending order: top = highest
+    const reordered = localMediaFiles.map((m, idx) => ({
+      ...m,
+      order: localMediaFiles.length - idx,
+    }));
     onSave(reordered);
     setHasChanges(false);
   };
@@ -100,7 +108,7 @@ function MediaGalleryReorder({ mediaFiles, onSave, onCancel }) {
                               e.target.src = 'https://placehold.co/400x300/eeeeee/cccccc?text=Error';
                             }}
                           />
-                          
+
                           {/* Video Play Button Overlay */}
                           {file.type === 'video' && (
                             <div className="absolute inset-0 flex items-center justify-center">
