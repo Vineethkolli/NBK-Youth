@@ -17,6 +17,7 @@ function MomentGrid({
   const [deletingId, setDeletingId] = useState(null);
   const [expandedMoment, setExpandedMoment] = useState(null);
   const [lightboxData, setLightboxData] = useState(null);
+  const [showMediaOptions, setShowMediaOptions] = useState(null);
 
   // YouTube URL Helper
   const getEmbedUrl = (url) => {
@@ -91,7 +92,14 @@ function MomentGrid({
       const remainingCount = moment.mediaFiles.length - 1;
 
       return (
-        <div className="relative w-full h-48 cursor-pointer" onClick={() => setExpandedMoment(moment)}>
+        <div
+  className={`relative w-full h-48 ${!isEditMode ? 'cursor-pointer' : ''}`}
+  onClick={() => {
+    if (!isEditMode) {
+      setExpandedMoment(moment);
+    }
+  }}
+>
           <img
             src={getDriveThumbnailUrl(firstFile.url)}
             alt={firstFile.name}
@@ -106,32 +114,38 @@ function MomentGrid({
           <div className="absolute top-0 right-0 h-full w-1/5 bg-gradient-to-l from-white/90 to-transparent" />
 
           {/* Arrow button */}
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setExpandedMoment(moment);
-            }}
-            className="absolute top-1/2 right-3 -translate-y-1/2 
-                       p-2 bg-black bg-opacity-70 text-white rounded-full 
-                       hover:bg-opacity-90 transition"
-          >
-            <ChevronRight className="h-5 w-5" />
-          </button>
+<button
+  onClick={(e) => {
+    e.stopPropagation();
+    if (!isEditMode) {
+      setExpandedMoment(moment);
+    }
+  }}
+  className={`absolute top-1/2 right-3 -translate-y-1/2 
+             p-2 bg-black bg-opacity-70 text-white rounded-full 
+             hover:bg-opacity-90 transition  cursor-pointer}`}
+
+>
+  <ChevronRight className="h-5 w-5" />
+</button>
+
 
           {/* See All overlay bottom-right */}
           {remainingCount > 0 && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setExpandedMoment(moment);
-              }}
-              className="absolute bottom-3 right-2 px-2 py-1 
-                         bg-black bg-opacity-70 text-white text-sm font-semibold rounded 
-                         hover:bg-opacity-90 transition"
-            >
-              See All (+{remainingCount})
-            </button>
-          )}
+  <button
+    onClick={(e) => {
+      e.stopPropagation();
+      if (!isEditMode) {
+        setExpandedMoment(moment);
+      }
+    }}
+    className="absolute bottom-3 right-2 px-2 py-1 
+               bg-black bg-opacity-70 text-white text-sm font-semibold rounded 
+               hover:bg-opacity-90 transition"
+  >
+    See All (+{remainingCount})
+  </button>
+)}
         </div>
       );
     }
@@ -233,6 +247,18 @@ function MomentGrid({
           </div>
         ))}
       </div>
+
+      {/* Expanded Gallery Modal */}
+      {expandedMoment && (
+        <MediaGallery
+          moment={expandedMoment}
+          onClose={() => setExpandedMoment(null)}
+          onMediaClick={(mediaFiles, index) => openLightbox(mediaFiles, index, expandedMoment.title)}
+          onDeleteMedia={onDeleteMediaFile}
+          showMediaOptions={showMediaOptions}
+          setShowMediaOptions={setShowMediaOptions}
+        />
+      )}
 
       {/* Lightbox Modal */}
       {lightboxData && (
