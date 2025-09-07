@@ -174,62 +174,63 @@ export const momentController = {
   },
 
   updateMomentOrder: async (req, res) => {
-    try {
-      const { moments } = req.body;
+  try {
+    const { moments } = req.body;
 
-      const originalMoments = await Moment.find();
-      const originalData = originalMoments.map(m => m.toObject());
+    const originalMoments = await Moment.find();
+    const originalData = originalMoments.map(m => m.toObject());
 
-      // Update order for each moment
-      for (const moment of moments) {
-        await Moment.findByIdAndUpdate(moment._id, { order: moment.order });
-      }
-
-      await logActivity(
-        req,
-        'UPDATE',
-        'Moment',
-        'moment-order',
-        { before: originalData, after: moments },
-        `Moment order updated by ${req.user.name}`
-      );
-
-      res.json({ message: 'Moment order updated successfully' });
-    } catch (error) {
-      res.status(500).json({ message: 'Failed to update moment order' });
+    // Bulk update orders
+    for (const moment of moments) {
+      await Moment.findByIdAndUpdate(moment._id, { order: moment.order });
     }
-  },
+
+    const updatedMoments = await Moment.find().sort({ order: -1, createdAt: -1 });
+
+    await logActivity(
+      req,
+      'UPDATE',
+      'Moment',
+      'moment-order',
+      { before: originalData, after: updatedMoments },
+      `Moment order updated by ${req.user.name}`
+    );
+
+    res.json({ message: 'Moment order updated successfully', moments: updatedMoments });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to update moment order' });
+  }
+},
+
 
   updateMediaOrder: async (req, res) => {
-    try {
-      const { momentId } = req.params;
-      const { mediaFiles } = req.body;
+  try {
+    const { momentId } = req.params;
+    const { mediaFiles } = req.body;
 
-      const moment = await Moment.findById(momentId);
-      if (!moment) {
-        return res.status(404).json({ message: 'Moment not found' });
-      }
+    const moment = await Moment.findById(momentId);
+    if (!moment) return res.status(404).json({ message: 'Moment not found' });
 
-      const originalData = moment.toObject();
+    const originalData = moment.toObject();
 
-      // Update media files order
-      moment.mediaFiles = mediaFiles;
-      await moment.save();
+    // Replace with reordered media array
+    moment.mediaFiles = mediaFiles;
+    await moment.save();
 
-      await logActivity(
-        req,
-        'UPDATE',
-        'Moment',
-        moment._id.toString(),
-        { before: originalData, after: moment.toObject() },
-        `Media order updated for moment "${moment.title}" by ${req.user.name}`
-      );
+    await logActivity(
+      req,
+      'UPDATE',
+      'Moment',
+      moment._id.toString(),
+      { before: originalData, after: moment.toObject() },
+      `Media order updated for moment "${moment.title}" by ${req.user.name}`
+    );
 
-      res.json(moment);
-    } catch (error) {
-      res.status(500).json({ message: 'Failed to update media order' });
-    }
-  },
+    res.json({ message: 'Media order updated successfully', moment });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to update media order' });
+  }
+},
 
   updateTitle: async (req, res) => {
     try {

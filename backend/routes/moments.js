@@ -54,7 +54,6 @@ router.delete('/:momentId/media/:mediaId',
   momentController.deleteMediaFile
 );
 
-// Note: pin/unpin removed
 
 router.patch('/:id/title', 
   auth, 
