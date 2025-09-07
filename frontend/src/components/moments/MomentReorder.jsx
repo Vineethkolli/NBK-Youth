@@ -8,7 +8,11 @@ function MomentReorder({ moments, onSave, onCancel }) {
 
   useEffect(() => {
     if (moments?.length) {
-      setLocalMoments([...moments]);
+      // always show in descending order (highest on top)
+      const sorted = [...moments].sort(
+        (a, b) => b.order - a.order || new Date(b.createdAt) - new Date(a.createdAt)
+      );
+      setLocalMoments(sorted);
       setHasChanges(false);
     }
   }, [moments]);
@@ -16,7 +20,9 @@ function MomentReorder({ moments, onSave, onCancel }) {
   // --- Helpers ---
   const getEmbedUrl = (url) => {
     if (!url) return '';
-    const videoId = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?]+)/);
+    const videoId = url.match(
+      /(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?]+)/
+    );
     return videoId ? `https://www.youtube.com/embed/${videoId[1]}` : url;
   };
 
@@ -48,7 +54,11 @@ function MomentReorder({ moments, onSave, onCancel }) {
   };
 
   const handleSave = () => {
-    const reordered = localMoments.map((m, idx) => ({ ...m, order: idx + 1 }));
+    // assign descending order: top = highest
+    const reordered = localMoments.map((m, idx) => ({
+      ...m,
+      order: localMoments.length - idx,
+    }));
     onSave(reordered);
     setHasChanges(false);
   };
@@ -66,7 +76,8 @@ function MomentReorder({ moments, onSave, onCancel }) {
             className="w-full h-full object-cover"
             onError={(e) => {
               e.target.onerror = null;
-              e.target.src = 'https://placehold.co/600x400/eeeeee/cccccc?text=Error';
+              e.target.src =
+                'https://placehold.co/600x400/eeeeee/cccccc?text=Error';
             }}
           />
           {remaining > 0 && (
@@ -86,7 +97,11 @@ function MomentReorder({ moments, onSave, onCancel }) {
         />
       );
     }
-    return <div className="flex items-center justify-center h-48 bg-gray-100 text-gray-400">No Media</div>;
+    return (
+      <div className="flex items-center justify-center h-48 bg-gray-100 text-gray-400">
+        No Media
+      </div>
+    );
   };
 
   return (
@@ -94,7 +109,8 @@ function MomentReorder({ moments, onSave, onCancel }) {
       {/* Info + Save/Cancel */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex flex-col items-center space-y-3">
         <p className="text-blue-800 text-sm text-center">
-          <GripHorizontal className="h-4 w-4 inline mb-1" /> Drag or use arrows to change order of moments.
+          <GripHorizontal className="h-4 w-4 inline mb-1" /> Drag or use arrows
+          to change order of moments.
         </p>
         <div className="flex justify-center space-x-3">
           <button
@@ -129,7 +145,9 @@ function MomentReorder({ moments, onSave, onCancel }) {
                       ref={dragProvided.innerRef}
                       {...dragProvided.draggableProps}
                       className={`bg-white rounded-lg shadow-md overflow-hidden transition-transform ${
-                        snapshot.isDragging ? 'ring-2 ring-indigo-500' : 'hover:shadow-lg'
+                        snapshot.isDragging
+                          ? 'ring-2 ring-indigo-500'
+                          : 'hover:shadow-lg'
                       }`}
                     >
                       {/* Media + Order Number */}
@@ -155,7 +173,7 @@ function MomentReorder({ moments, onSave, onCancel }) {
                         {moment.title || 'Untitled'}
                       </div>
 
-                      {/* Reorder Controls (same as Committee) */}
+                      {/* Reorder Controls */}
                       <div className="p-3 bg-gray-50 border-t flex justify-center items-center space-x-4">
                         <div {...dragProvided.dragHandleProps} className="flex items-center">
                           <GripHorizontal className="h-5 w-5 text-gray-500 hover:text-gray-700" />
