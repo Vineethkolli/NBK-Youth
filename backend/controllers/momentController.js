@@ -45,20 +45,21 @@ export const momentController = {
 
   addYouTubeMoment: async (req, res) => {
     try {
-      const { title, url, isPinned } = req.body;
 
-      // Get the highest order number
+      const { title, url, isPinned } = req.body;
       const maxOrder = await Moment.findOne().sort('-order');
       const order = maxOrder ? maxOrder.order + 1 : 0;
-
-      const moment = await Moment.create({
+      const momentData = {
         title,
         type: 'youtube',
         url,
         order,
-        isPinned: !!isPinned,
         createdBy: req.user.registerId,
-      });
+      };
+      if (typeof isPinned !== 'undefined') {
+        momentData.isPinned = isPinned === true || isPinned === 'true';
+      }
+      const moment = await Moment.create(momentData);
 
       await logActivity(
         req,
@@ -77,23 +78,22 @@ export const momentController = {
 
   addDriveMoment: async (req, res) => {
     try {
-      const { title, url, isPinned } = req.body;
 
-      // Get the highest order number
+      const { title, url, isPinned } = req.body;
       const maxOrder = await Moment.findOne().sort('-order');
       const order = maxOrder ? maxOrder.order + 1 : 0;
-
-      // Convert to direct view URL
       const directUrl = getDirectViewUrl(url);
-
-      const moment = await Moment.create({
+      const momentData = {
         title,
         type: 'drive',
         url: directUrl,
         order,
-        isPinned: !!isPinned,
         createdBy: req.user.registerId,
-      });
+      };
+      if (typeof isPinned !== 'undefined') {
+        momentData.isPinned = isPinned === true || isPinned === 'true';
+      }
+      const moment = await Moment.create(momentData);
 
       await logActivity(
         req,
@@ -112,26 +112,19 @@ export const momentController = {
 
   uploadMediaMoment: async (req, res) => {
     try {
+
       const { title, isPinned } = req.body;
       const files = req.files; // Multiple files
-
       if (!files || files.length === 0) {
         return res.status(400).json({ message: 'No files uploaded' });
       }
-
-      // Get the highest order number
       const maxOrder = await Moment.findOne().sort('-order');
       const order = maxOrder ? maxOrder.order + 1 : 0;
-
       const mediaFiles = [];
-
-      // Upload each file to Google Drive
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
         const mimeType = file.mimetype;
         const stream = Readable.from(file.buffer);
-
-        // Upload to Google Drive
         const driveResponse = await drive.files.create({
           requestBody: {
             name: `${title || 'untitled'}-${Date.now()}-${i}`,
@@ -143,8 +136,6 @@ export const momentController = {
             body: stream,
           },
         });
-
-        // Make file publicly accessible
         await drive.permissions.create({
           fileId: driveResponse.data.id,
           requestBody: {
@@ -152,10 +143,7 @@ export const momentController = {
             type: 'anyone',
           },
         });
-
-        // Create direct view URL
         const directUrl = `https://drive.google.com/uc?export=view&id=${driveResponse.data.id}`;
-
         mediaFiles.push({
           name: file.originalname,
           url: directUrl,
@@ -164,15 +152,17 @@ export const momentController = {
           mediaPublicId: driveResponse.data.id
         });
       }
-
-      const moment = await Moment.create({
+      const momentData = {
         title,
         type: 'upload',
         mediaFiles,
         order,
-        isPinned: !!isPinned,
         createdBy: req.user.registerId,
-      });
+      };
+      if (typeof isPinned !== 'undefined') {
+        momentData.isPinned = isPinned === true || isPinned === 'true';
+      }
+      const moment = await Moment.create(momentData);
 
       await logActivity(
         req,

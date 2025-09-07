@@ -17,7 +17,6 @@ function MomentGrid({
   const [deletingId, setDeletingId] = useState(null);
   const [expandedMoment, setExpandedMoment] = useState(null);
   const [lightboxData, setLightboxData] = useState(null);
-  const [showMediaOptions, setShowMediaOptions] = useState(null);
 
   // YouTube URL Helper
   const getEmbedUrl = (url) => {
@@ -234,19 +233,6 @@ function MomentGrid({
           </div>
         ))}
       </div>
-
-      {/* Expanded Gallery Modal */}
-      {expandedMoment && (
-        <MediaGallery
-          moment={expandedMoment}
-          isEditMode={isEditMode}
-          onClose={() => setExpandedMoment(null)}
-          onMediaClick={(mediaFiles, index) => openLightbox(mediaFiles, index, expandedMoment.title)}
-          onDeleteMedia={onDeleteMediaFile}
-          showMediaOptions={showMediaOptions}
-          setShowMediaOptions={setShowMediaOptions}
-        />
-      )}
 
       {/* Lightbox Modal */}
       {lightboxData && (
