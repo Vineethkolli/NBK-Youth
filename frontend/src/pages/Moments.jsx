@@ -115,6 +115,22 @@ function Moments() {
     }
   };
 
+  const handleAddMediaToMoment = async (momentId, files) => {
+    try {
+      const data = new FormData();
+      files.forEach((file) => {
+        data.append('files', file);
+      });
+      
+      await axios.post(`${API_URL}/api/moments/${momentId}/media`, data, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      toast.success('Media added successfully');
+      fetchMoments();
+    } catch (error) {
+      throw error;
+    }
+  };
   const openForm = (type) => {
     setFormType(type);
     setShowForm(true);
@@ -183,6 +199,8 @@ function Moments() {
           onDelete={handleDelete}
           onDeleteMediaFile={handleDeleteMediaFile}
           onUpdateTitle={handleUpdateTitle}
+          onAddMediaToMoment={handleAddMediaToMoment}
+          onMediaOrderSave={handleMediaOrderSave}
         />
       )}
 

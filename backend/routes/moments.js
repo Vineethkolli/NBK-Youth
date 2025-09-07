@@ -42,6 +42,12 @@ router.put('/:momentId/media-order',
   momentController.updateMediaOrder
 );
 
+router.post('/:momentId/media',
+  auth,
+  checkRole(['developer', 'admin', 'financier']),
+  upload.array('files', 20),
+  momentController.addMediaToMoment
+);
 router.delete('/:id', 
   auth, 
   checkRole(['developer', 'admin', 'financier']), 

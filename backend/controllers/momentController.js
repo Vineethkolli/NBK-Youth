@@ -232,6 +232,88 @@ export const momentController = {
   }
 },
 
+  addMediaToMoment: async (req, res) => {
+    try {
+      const { momentId } = req.params;
+      const files = req.files; // Multiple files
+      
+      if (!files || files.length === 0) {
+        return res.status(400).json({ message: 'No files uploaded' });
+      }
+
+      const moment = await Moment.findById(momentId);
+      if (!moment) {
+        return res.status(404).json({ message: 'Moment not found' });
+      }
+
+      if (moment.type !== 'upload') {
+        return res.status(400).json({ message: 'Can only add media to upload type moments' });
+      }
+
+      const originalData = moment.toObject();
+      const newMediaFiles = [];
+
+      // Get the highest current order
+      const maxOrder = moment.mediaFiles.length > 0 
+        ? Math.max(...moment.mediaFiles.map(m => m.order || 0))
+        : 0;
+
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const mimeType = file.mimetype;
+        const stream = Readable.from(file.buffer);
+        
+        const driveResponse = await drive.files.create({
+          requestBody: {
+            name: `${moment.title || 'untitled'}-${Date.now()}-${i}`,
+            mimeType,
+            parents: [process.env.GOOGLE_DRIVE_FOLDER_ID],
+          },
+          media: {
+            mimeType,
+            body: stream,
+          },
+        });
+        
+        await drive.permissions.create({
+          fileId: driveResponse.data.id,
+          requestBody: {
+            role: 'reader',
+            type: 'anyone',
+          },
+        });
+        
+        const directUrl = `https://drive.google.com/uc?export=view&id=${driveResponse.data.id}`;
+        
+        const newMediaFile = {
+          name: file.originalname,
+          url: directUrl,
+          type: file.mimetype.startsWith('image/') ? 'image' : 'video',
+          order: maxOrder + i + 1,
+          mediaPublicId: driveResponse.data.id
+        };
+        
+        moment.mediaFiles.push(newMediaFile);
+        newMediaFiles.push(newMediaFile);
+      }
+
+      await moment.save();
+
+      await logActivity(
+        req,
+        'UPDATE',
+        'Moment',
+        moment._id.toString(),
+        { before: originalData, after: moment.toObject() },
+        `${files.length} media files added to moment "${moment.title}" by ${req.user.name}`
+      );
+
+      res.status(201).json(moment);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to add media to moment', error: error.message });
+    }
+  },
+
   updateTitle: async (req, res) => {
     try {
       const { id } = req.params;
