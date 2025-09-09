@@ -117,14 +117,14 @@ function MediaGallery({
             className="btn-primary"
           >
             <Plus className="h-4 w-4 mr-2" />
-            Add
+           
           </button>
           <button
             onClick={() => { setIsEditMode(!isEditMode); setIsReorderMode(false); }}
             className={`btn-secondary ${isEditMode ? 'bg-red-100' : ''}`}
           >
             <Edit2 className="h-4 w-4 mr-2" />
-            {isEditMode ? 'Done' : 'Edit'}
+            {isEditMode ? 'Done' : ''}
           </button>
           <button
             onClick={() => setIsReorderMode(true)}
@@ -133,7 +133,7 @@ function MediaGallery({
             title={isReorderMode ? 'Reorder is active' : 'Enter reorder mode'}
           >
             <GripHorizontal className="h-4 w-4 mr-2" />
-            Reorder
+            
           </button>
           <button
             onClick={onClose}

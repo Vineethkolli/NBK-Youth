@@ -157,7 +157,7 @@ function Moments() {
             className="btn-primary"
           >
             <FolderOpen className="h-4 w-4 mr-2" />
-            Add Drive Media
+            Add Drive
           </button>
           <button
             onClick={() => openForm('upload')}
