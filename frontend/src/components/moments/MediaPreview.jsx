@@ -1,4 +1,4 @@
-import { Download, Play } from 'lucide-react';
+import { Download } from 'lucide-react';
 
 function MediaPreview({ url, type, title }) {
   // CORRECTED: This function now gets the reliable thumbnail URL for images.
@@ -34,12 +34,6 @@ function MediaPreview({ url, type, title }) {
             allow="autoplay"
             title={title || 'Video'}
           />
-          {/* Video Play Button Overlay */}
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="bg-black bg-opacity-50 rounded-full p-3">
-              <Play className="h-6 w-6 text-white" />
-            </div>
-          </div>
         </div>
       )}
     </div>

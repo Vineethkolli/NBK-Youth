@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { ArrowLeft, X, Play, Download, Trash2, Plus, Edit2, GripHorizontal, Upload } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ArrowLeft, X, Download, Trash2, Plus, Edit2, GripHorizontal } from 'lucide-react';
 import MediaGalleryReorder from './MediaGalleryReorder';
 import MediaUploadForm from './MediaUploadForm';
 
@@ -8,15 +8,18 @@ function MediaGallery({
   onClose, 
   onMediaClick, 
   onDeleteMedia,
-  onAddMedia
+  onAddMedia,
+  onMediaOrderSave,
+  onMomentUpdate
 }) {
   const [isEditMode, setIsEditMode] = useState(false);
   const [isReorderMode, setIsReorderMode] = useState(false);
   const [showUploadForm, setShowUploadForm] = useState(false);
   const [localMediaFiles, setLocalMediaFiles] = useState([]);
+  const [hasChanges, setHasChanges] = useState(false);
 
   // Initialize local media files sorted by order (newest first if no order)
-  useState(() => {
+  useEffect(() => {
     if (moment.mediaFiles) {
       const sorted = [...moment.mediaFiles].sort((a, b) => {
         if (a.order !== undefined && b.order !== undefined) {
@@ -25,20 +28,22 @@ function MediaGallery({
         return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
       });
       setLocalMediaFiles(sorted);
+      setHasChanges(false);
     }
   }, [moment.mediaFiles]);
 
-  // CORRECTED: This function now reliably gets embeddable thumbnails for both images and videos.
+  // Get embeddable thumbnail for both images and videos
   const getThumbnailUrl = (url) => {
     const fileId = url.match(/[?&]id=([^&]+)/)?.[1];
     if (!fileId) return url;
-    // Use the reliable Google Drive thumbnail endpoint. &sz=w1000 requests a larger size.
     return `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`;
   };
 
   const getDriveDownloadUrl = (url) => {
     if (!url) return '';
-    const fileId = url.match(/[?&]id=([^&]+)/)?.[1] || url.match(/\/file\/d\/([^\/]+)/)?.[1] || url.match(/open\?id=([^&]+)/)?.[1];
+    const fileId = url.match(/[?&]id=([^&]+)/)?.[1] 
+      || url.match(/\/file\/d\/([^\/]+)/)?.[1] 
+      || url.match(/open\?id=([^&]+)/)?.[1];
     if (!fileId) return url;
     return `https://drive.google.com/uc?export=download&id=${fileId}`;
   };
@@ -54,7 +59,6 @@ function MediaGallery({
       a.click();
       a.remove();
     } catch (err) {
-      // Fallback to opening in new tab
       window.open(downloadUrl, '_blank', 'noopener');
     }
   };
@@ -63,28 +67,34 @@ function MediaGallery({
     try {
       await onAddMedia(moment._id, files);
       setShowUploadForm(false);
-      // Media will be updated via parent component
+      if (onMomentUpdate) {
+        onMomentUpdate();
+      }
     } catch (error) {
-      throw error;
+      console.error(error);
     }
   };
 
   const handleDeleteMedia = async (mediaId) => {
-    if (window.confirm('Are you sure you want to delete this media?')) {
-      await onDeleteMedia(moment._id, mediaId);
+    await onDeleteMedia(moment._id, mediaId);
+    if (onMomentUpdate) {
+      onMomentUpdate();
     }
   };
 
   const handleMediaOrderSave = async (reorderedMedia) => {
     try {
-      // Update local state immediately
       setLocalMediaFiles(reorderedMedia);
       setIsReorderMode(false);
+      setHasChanges(false);
       
-      // Call parent to update backend
       await onMediaOrderSave(moment._id, reorderedMedia);
+      
+      if (onMomentUpdate) {
+        onMomentUpdate();
+      }
     } catch (error) {
-      throw error;
+      console.error(error);
     }
   };
 
@@ -150,25 +160,23 @@ function MediaGallery({
                   className="aspect-square bg-gray-100 rounded-lg overflow-hidden cursor-pointer"
                   onClick={() => onMediaClick(localMediaFiles, index)}
                 >
-                  {/* UNIFIED RENDER: Both image and video types now use an <img> tag 
-                      with the reliable thumbnail URL. This ensures all media has a visible preview.
-                      The full video will be played in the lightbox. */}
-                  <img
-                    src={getThumbnailUrl(file.url)}
-                    alt={file.name}
-                    className="w-full h-full object-cover hover:scale-105 transition-transform"
-                    // Add a fallback for broken images
-                    onError={(e) => { e.target.onerror = null; e.target.src='https://placehold.co/400x400/eeeeee/cccccc?text=Error'; }}
-                  />
-                  
-                  {/* Video Play Button Overlay */}
-                  {file.type === 'video' && (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="bg-black bg-opacity-50 rounded-full p-3">
-                        <Play className="h-8 w-8 text-white" />
+                  <div className="relative w-full h-full">
+                    <img
+                      src={getThumbnailUrl(file.url)}
+                      alt={file.name}
+                      className="w-full h-full object-cover hover:scale-105 transition-transform"
+                      onError={(e) => { 
+                        e.target.onerror = null; 
+                        e.target.src='https://placehold.co/400x400/eeeeee/cccccc?text=Error'; 
+                      }}
+                    />
+                    {file.type === 'video' && (
+                      <div className="absolute bottom-2 left-2 flex items-center space-x-1 bg-black bg-opacity-70 rounded-full px-2 py-1">
+                        <div className="w-0 h-0 border-l-[6px] border-l-white border-t-[4px] border-t-transparent border-b-[4px] border-b-transparent"></div>
+                        <span className="text-white text-xs font-medium">Video</span>
                       </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
 
                 {/* Download Button */}
@@ -176,7 +184,17 @@ function MediaGallery({
                   onClick={(e) => {
                     e.stopPropagation();
                     const dl = getDriveDownloadUrl(file.url);
-                    downloadFile(dl, file.name);
+                    if (/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+                      const link = document.createElement('a');
+                      link.href = dl;
+                      link.download = file.name;
+                      link.target = '_blank';
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                    } else {
+                      downloadFile(dl, file.name);
+                    }
                   }}
                   className="absolute bottom-2 right-2 p-2 bg-black bg-opacity-50 text-white rounded-full hover:bg-opacity-75 transition-opacity opacity-0 group-hover:opacity-100"
                   title="Download"
@@ -189,7 +207,9 @@ function MediaGallery({
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleDeleteMedia(file._id);
+                      if (window.confirm('Are you sure you want to delete this media?')) {
+                        handleDeleteMedia(file._id);
+                      }
                     }}
                     className="absolute top-2 right-2 p-2 bg-red-600 text-white rounded-full hover:bg-red-700 transition-colors"
                     title="Delete"

@@ -226,7 +226,9 @@ export const momentController = {
       `Media order updated for moment "${moment.title}" by ${req.user.name}`
     );
 
-    res.json({ message: 'Media order updated successfully', moment });
+    // Return the updated moment with populated data
+    const updatedMoment = await Moment.findById(momentId);
+    res.json({ message: 'Media order updated successfully', moment: updatedMoment });
   } catch (error) {
     res.status(500).json({ message: 'Failed to update media order' });
   }
@@ -308,7 +310,9 @@ export const momentController = {
         `${files.length} media files added to moment "${moment.title}" by ${req.user.name}`
       );
 
-      res.status(201).json(moment);
+      // Return the updated moment with all media files
+      const updatedMoment = await Moment.findById(req.params.momentId);
+      res.status(201).json(updatedMoment);
     } catch (error) {
       res.status(500).json({ message: 'Failed to add media to moment', error: error.message });
     }
@@ -389,7 +393,9 @@ export const momentController = {
         `Media file "${mediaFile.name}" deleted from moment "${moment.title}" by ${req.user.name}`
       );
 
-      res.json({ message: 'Media file deleted successfully', moment });
+      // Return the updated moment with remaining media files
+      const updatedMoment = await Moment.findById(req.params.momentId);
+      res.json({ message: 'Media file deleted successfully', moment: updatedMoment });
     } catch (error) {
       res.status(500).json({ message: 'Failed to delete media file', error: error.message });
     }

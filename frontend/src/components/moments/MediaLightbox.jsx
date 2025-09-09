@@ -143,13 +143,14 @@ function MediaLightbox({
             onError={(e) => { e.target.onerror = null; e.target.src='https://placehold.co/800x600/000000/ffffff?text=Image+Not+Found'; }}
           />
         ) : (
-          // CHANGED: Video is now displayed using an iframe for reliability.
-          <iframe
-            src={getVideoPlayerUrl(currentMedia.url)}
-            className="w-full h-full max-w-4xl aspect-video border-0"
-            allow="autoplay; fullscreen"
-            title={currentMedia.name}
-          />
+          <div className="relative w-full h-full max-w-4xl aspect-video">
+            <iframe
+              src={getVideoPlayerUrl(currentMedia.url)}
+              className="w-full h-full border-0"
+              allow="autoplay; fullscreen"
+              title={currentMedia.name}
+            />
+          </div>
         )}
 
         {/* Navigation Arrows */}
@@ -169,21 +170,35 @@ function MediaLightbox({
             </button>
           </>
         )}
+        
+        {/* Fixed Download Button - Bottom Right */}
+        <button
+          onClick={() => {
+            const dl = getDriveDownloadUrl(currentMedia.url);
+            // For mobile, try direct download
+            if (/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+              const link = document.createElement('a');
+              link.href = dl;
+              link.download = currentMedia.name;
+              link.target = '_blank';
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+            } else {
+              downloadFile(dl, currentMedia.name);
+            }
+          }}
+          className="fixed bottom-6 right-6 p-3 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 shadow-lg z-10"
+          title="Download"
+        >
+          <Download className="h-5 w-5" />
+        </button>
       </div>
 
       {/* Bottom Bar */}
       <div className="bg-black bg-opacity-75 text-white p-4 flex items-center justify-between">
         <div>
           <p className="font-medium">{currentMedia.name}</p>
-        </div>
-        <div className="flex items-center space-x-4">
-          <button
-            onClick={() => downloadFile(getDriveDownloadUrl(currentMedia.url), currentMedia.name)}
-            className="flex items-center px-3 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
-          >
-            <Download className="h-4 w-4 mr-2" />
-            Download
-          </button>
         </div>
       </div>
     </div>

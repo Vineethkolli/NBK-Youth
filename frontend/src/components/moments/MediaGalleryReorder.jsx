@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { GripHorizontal, ArrowUp, ArrowDown, Play } from 'lucide-react';
+import { GripHorizontal, ArrowUp, ArrowDown } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 
 function MediaGalleryReorder({ mediaFiles, onSave, onCancel }) {
@@ -108,19 +108,18 @@ function MediaGalleryReorder({ mediaFiles, onSave, onCancel }) {
                               e.target.src = 'https://placehold.co/400x300/eeeeee/cccccc?text=Error';
                             }}
                           />
-
-                          {/* Video Play Button Overlay */}
-                          {file.type === 'video' && (
-                            <div className="absolute inset-0 flex items-center justify-center">
-                              <div className="bg-black bg-opacity-50 rounded-full p-2">
-                                <Play className="h-4 w-4 text-white" />
-                              </div>
-                            </div>
-                          )}
                         </div>
                         <div className="absolute top-2 left-2 bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">
                           {index + 1}
                         </div>
+                        
+                        {/* Video indicator - Bottom Left */}
+                        {file.type === 'video' && (
+                          <div className="absolute bottom-2 left-2 flex items-center space-x-1 bg-black bg-opacity-70 rounded-full px-2 py-1">
+                            <div className="w-0 h-0 border-l-[4px] border-l-white border-t-[2px] border-t-transparent border-b-[2px] border-b-transparent"></div>
+                            <span className="text-white text-xs">Video</span>
+                          </div>
+                        )}
                       </div>
 
                       {/* File Name */}
