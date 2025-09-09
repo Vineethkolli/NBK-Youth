@@ -15,10 +15,11 @@ function Moments() {
   const [isReorderMode, setIsReorderMode] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [formType, setFormType] = useState(null);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   useEffect(() => {
     fetchMoments();
-  }, []);
+  }, [refreshTrigger]);
 
   const fetchMoments = async () => {
     try {
@@ -27,6 +28,10 @@ function Moments() {
     } catch (error) {
       toast.error('Failed to fetch moments');
     }
+  };
+
+  const triggerRefresh = () => {
+    setRefreshTrigger(prev => prev + 1);
   };
 
   const handleFormSubmit = async (formData) => {
@@ -65,18 +70,17 @@ function Moments() {
     try {
       await axios.delete(`${API_URL}/api/moments/${momentId}`);
       toast.success('Media deleted successfully');
-      fetchMoments();
+      triggerRefresh();
     } catch (error) {
       toast.error('Failed to delete moment');
     }
   };
 
   const handleDeleteMediaFile = async (momentId, mediaId) => {
-    if (!window.confirm('Are you sure you want to delete this media?')) return;
     try {
       await axios.delete(`${API_URL}/api/moments/${momentId}/media/${mediaId}`);
       toast.success('Media deleted successfully');
-      fetchMoments();
+      triggerRefresh();
     } catch (error) {
       toast.error('Failed to delete media');
     }
@@ -86,7 +90,7 @@ function Moments() {
     try {
       await axios.patch(`${API_URL}/api/moments/${id}/title`, { title: newTitle });
       toast.success('Media updated successfully');
-      fetchMoments();
+      triggerRefresh();
     } catch (error) {
       toast.error('Failed to update title');
     }
@@ -108,7 +112,7 @@ function Moments() {
     try {
       await axios.put(`${API_URL}/api/moments/${momentId}/media-order`, { mediaFiles: reorderedMediaFiles });
       toast.success('Media order updated successfully');
-      fetchMoments();
+      triggerRefresh();
     } catch (error) {
       toast.error('Failed to update media order');
     }
@@ -125,7 +129,7 @@ function Moments() {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       toast.success('Media added successfully');
-      fetchMoments();
+      triggerRefresh();
     } catch (error) {
       throw error;
     }
@@ -200,6 +204,7 @@ function Moments() {
           onUpdateTitle={handleUpdateTitle}
           onAddMediaToMoment={handleAddMediaToMoment}
           onMediaOrderSave={handleMediaOrderSave}
+          onMomentUpdate={triggerRefresh}
         />
       )}
 
