@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { ArrowLeft, X, Download, Trash2, Plus, Edit2, GripHorizontal } from 'lucide-react';
 import MediaGalleryReorder from './MediaGalleryReorder';
 import MediaUploadForm from './MediaUploadForm';
+import { useAuth } from '../../context/AuthContext'; 
 
 function MediaGallery({
   moment,
@@ -11,10 +12,14 @@ function MediaGallery({
   onAddMedia,
   onMediaOrderSave,
 }) {
+  const { user } = useAuth(); 
   const [isEditMode, setIsEditMode] = useState(false);
   const [isReorderMode, setIsReorderMode] = useState(false);
   const [showUploadForm, setShowUploadForm] = useState(false);
   const [localMediaFiles, setLocalMediaFiles] = useState([]);
+
+  const allowedRoles = ['admin', 'developer', 'financier'];
+  const canManageMedia = user && allowedRoles.includes(user.role);
 
   useEffect(() => {
     if (moment && moment.mediaFiles) {
@@ -26,7 +31,7 @@ function MediaGallery({
       });
       setLocalMediaFiles(sorted);
     }
-  }, [moment]); // Reruns whenever the moment prop changes
+  }, [moment]);
 
   const getThumbnailUrl = (url) => {
     const fileId = url.match(/[?&]id=([^&]+)/)?.[1];
@@ -67,10 +72,7 @@ function MediaGallery({
     }
   };
 
-  // ✅ **MODIFIED FUNCTION**
   const handleDeleteMedia = async (mediaId) => {
-    // We now wait for the parent function to complete.
-    // The prop change will trigger the useEffect hook to update the UI.
     await onDeleteMedia(moment._id, mediaId);
   };
 
@@ -86,47 +88,44 @@ function MediaGallery({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-90 flex flex-col z-50">
+      {/* Header */}
       <div className="bg-white p-4 flex items-center justify-between">
         <div className="flex items-center space-x-4">
-          <button
-            onClick={onClose}
-            className="text-gray-600 hover:text-gray-800"
-          >
+          <button onClick={onClose} className="text-gray-600 hover:text-gray-800">
             <ArrowLeft className="h-6 w-6" />
           </button>
           <h2 className="text-xl font-semibold">{moment.title}</h2>
         </div>
         <div className="flex items-center space-x-4">
-          <button
-            onClick={() => setShowUploadForm(true)}
-            className="btn-primary"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-          </button>
-          <button
-            onClick={() => { setIsEditMode(!isEditMode); setIsReorderMode(false); }}
-            className={`btn-secondary ${isEditMode ? 'bg-red-100' : ''}`}
-          >
-            <Edit2 className="h-4 w-4 mr-2" />
-            {isEditMode ? 'Done' : ''}
-          </button>
-          <button
-            onClick={() => setIsReorderMode(true)}
-            disabled={isReorderMode}
-            className={`btn-secondary ${isReorderMode ? 'opacity-50 cursor-not-allowed' : ''}`}
-            title={isReorderMode ? 'Reorder is active' : 'Enter reorder mode'}
-          >
-            <GripHorizontal className="h-4 w-4 mr-2" />
-          </button>
-          <button
-            onClick={onClose}
-            className="text-gray-600 hover:text-gray-800"
-          >
+          {canManageMedia && (
+            <>
+              <button onClick={() => setShowUploadForm(true)} className="btn-primary">
+                <Plus className="h-4 w-4 mr-2" />
+              </button>
+              <button
+                onClick={() => { setIsEditMode(!isEditMode); setIsReorderMode(false); }}
+                className={`btn-secondary ${isEditMode ? 'bg-red-100' : ''}`}
+              >
+                <Edit2 className="h-4 w-4 mr-2" />
+                {isEditMode ? 'Done' : ''}
+              </button>
+              <button
+                onClick={() => setIsReorderMode(true)}
+                disabled={isReorderMode}
+                className={`btn-secondary ${isReorderMode ? 'opacity-50 cursor-not-allowed' : ''}`}
+                title={isReorderMode ? 'Reorder is active' : 'Enter reorder mode'}
+              >
+                <GripHorizontal className="h-4 w-4 mr-2" />
+              </button>
+            </>
+          )}
+          <button onClick={onClose} className="text-gray-600 hover:text-gray-800">
             <X className="h-6 w-6" />
           </button>
         </div>
       </div>
 
+      {/* Body */}
       {isReorderMode ? (
         <MediaGalleryReorder
           mediaFiles={localMediaFiles}
@@ -149,7 +148,7 @@ function MediaGallery({
                       className="w-full h-full object-cover hover:scale-105 transition-transform"
                       onError={(e) => {
                         e.target.onerror = null;
-                        e.target.src='https://placehold.co/400x400/eeeeee/cccccc?text=Error';
+                        e.target.src = 'https://placehold.co/400x400/eeeeee/cccccc?text=Error';
                       }}
                     />
                     {file.type === 'video' && (
@@ -161,6 +160,7 @@ function MediaGallery({
                   </div>
                 </div>
 
+                {/* Download */}
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -183,7 +183,8 @@ function MediaGallery({
                   <Download className="h-4 w-4" />
                 </button>
 
-                {isEditMode && (
+                {/* Delete only if allowed */}
+                {canManageMedia && isEditMode && (
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -203,7 +204,8 @@ function MediaGallery({
         </div>
       )}
 
-      {showUploadForm && (
+      {/* Upload Form */}
+      {canManageMedia && showUploadForm && (
         <MediaUploadForm
           momentTitle={moment.title}
           onClose={() => setShowUploadForm(false)}
