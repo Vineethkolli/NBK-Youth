@@ -103,41 +103,33 @@ function MediaUploadForm({ momentTitle, onClose, onSubmit }) {
             />
             
             {filesPreview.length > 0 && (
-              <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-4 max-h-60 overflow-y-auto">
-                {filesPreview.map((preview, index) => (
-                  <div key={index} className="relative">
-                    {preview.type === 'image' ? (
-                      <img
-                        src={preview.url}
-                        alt={`Preview ${index + 1}`}
-                        className="w-full h-24 object-cover rounded border"
-                      />
-                    ) : (
-                      <div className="relative">
-                        <video
-                          src={preview.url}
-                          className="w-full h-24 object-cover rounded border"
-                          muted
-                        />
-                        {/* Video Play Button Overlay */}
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="bg-black bg-opacity-50 rounded-full p-2">
-                            <Play className="h-4 w-4 text-white" />
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                    <button
-                      type="button"
-                      onClick={() => removeFile(index)}
-                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
+  <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-4 max-h-60 overflow-y-auto">
+    {filesPreview.map((preview, index) => (
+      <div key={index} className="relative">
+        {preview.type === 'image' ? (
+          <img
+            src={preview.url}
+            alt={`Preview ${index + 1}`}
+            className="w-full h-24 object-cover rounded border"
+          />
+        ) : (
+          <video
+            src={preview.url}
+            className="w-full h-24 object-cover rounded border"
+            controls  // ✅ show real player controls
+          />
+        )}
+        <button
+          type="button"
+          onClick={() => removeFile(index)}
+          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+        >
+          <X className="h-3 w-3" />
+        </button>
+      </div>
+    ))}
+  </div>
+)}
           </div>
 
           <button

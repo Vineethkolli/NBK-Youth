@@ -117,7 +117,6 @@ function MediaGallery({
             className="btn-primary"
           >
             <Plus className="h-4 w-4 mr-2" />
-           
           </button>
           <button
             onClick={() => { setIsEditMode(!isEditMode); setIsReorderMode(false); }}
@@ -133,7 +132,6 @@ function MediaGallery({
             title={isReorderMode ? 'Reorder is active' : 'Enter reorder mode'}
           >
             <GripHorizontal className="h-4 w-4 mr-2" />
-            
           </button>
           <button
             onClick={onClose}
@@ -172,8 +170,27 @@ function MediaGallery({
                     />
                     {file.type === 'video' && (
                       <div className="absolute bottom-2 left-2 flex items-center space-x-1 bg-black bg-opacity-70 rounded-full px-2 py-1">
+                        {/* Play triangle */}
                         <div className="w-0 h-0 border-l-[6px] border-l-white border-t-[4px] border-t-transparent border-b-[4px] border-b-transparent"></div>
-                        <span className="text-white text-xs font-medium">Video</span>
+                        
+                        {/* Show duration */}
+                        <span className="text-white text-xs font-medium">
+                          {file.duration ? file.duration : '...'}
+                        </span>
+
+                        {/* Hidden video to fetch duration */}
+                        <video
+                          src={file.url}
+                          className="hidden"
+                          onLoadedMetadata={(e) => {
+                            const seconds = Math.floor(e.target.duration);
+                            const mins = Math.floor(seconds / 60);
+                            const secs = seconds % 60;
+                            const formatted = `${mins}:${secs.toString().padStart(2, '0')}`;
+                            file.duration = formatted;
+                            setLocalMediaFiles((prev) => [...prev]); // trigger re-render
+                          }}
+                        />
                       </div>
                     )}
                   </div>
