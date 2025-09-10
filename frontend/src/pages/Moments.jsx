@@ -15,11 +15,10 @@ function Moments() {
   const [isReorderMode, setIsReorderMode] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [formType, setFormType] = useState(null);
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   useEffect(() => {
     fetchMoments();
-  }, [refreshTrigger]);
+  }, []); // Fetch only on initial mount
 
   const fetchMoments = async () => {
     try {
@@ -28,10 +27,6 @@ function Moments() {
     } catch (error) {
       toast.error('Failed to fetch moments');
     }
-  };
-
-  const triggerRefresh = () => {
-    setRefreshTrigger(prev => prev + 1);
   };
 
   const handleFormSubmit = async (formData) => {
@@ -52,7 +47,6 @@ function Moments() {
         case 'upload':
           endpoint = `${API_URL}/api/moments/upload`;
           successMessage = 'Media uploaded successfully.';
-          // Check if any of the uploaded files are videos
           for (const value of formData.values()) {
             if (value instanceof File && value.type.startsWith('video/')) {
               hasVideo = true;
@@ -66,7 +60,6 @@ function Moments() {
 
       await axios.post(endpoint, formData);
       
-      // Show video processing toast first so it appears at the bottom of the stack
       if (hasVideo) {
         toast.success('For videos, processing may take a few minutes before playback is available.', {
           duration: 4000,
@@ -74,7 +67,7 @@ function Moments() {
       }
       toast.success(successMessage);
 
-      fetchMoments();
+      fetchMoments(); // Refresh after creating a new moment
     } catch (error) {
       throw error;
     }
@@ -87,7 +80,7 @@ function Moments() {
     await toast.promise(promise, {
       loading: 'Deleting...',
       success: () => {
-        triggerRefresh();
+        setMoments(prevMoments => prevMoments.filter(m => m._id !== momentId));
         return 'Media deleted successfully';
       },
       error: 'Failed to delete moment',
@@ -99,7 +92,15 @@ function Moments() {
     await toast.promise(promise, {
       loading: 'Deleting...',
       success: () => {
-        triggerRefresh();
+        setMoments(prevMoments =>
+          prevMoments.map(moment => {
+            if (moment._id === momentId) {
+              const updatedMediaFiles = moment.mediaFiles.filter(mf => mf._id !== mediaId);
+              return { ...moment, mediaFiles: updatedMediaFiles };
+            }
+            return moment;
+          })
+        );
         return 'Media deleted successfully';
       },
       error: 'Failed to delete media',
@@ -109,8 +110,12 @@ function Moments() {
   const handleUpdateTitle = async (id, newTitle) => {
     try {
       await axios.patch(`${API_URL}/api/moments/${id}/title`, { title: newTitle });
+      setMoments(prevMoments =>
+          prevMoments.map(moment =>
+              moment._id === id ? { ...moment, title: newTitle } : moment
+          )
+      );
       toast.success('Media updated successfully');
-      triggerRefresh();
     } catch (error) {
       toast.error('Failed to update title');
     }
@@ -130,8 +135,12 @@ function Moments() {
   const handleMediaOrderSave = async (momentId, reorderedMediaFiles) => {
     try {
       await axios.put(`${API_URL}/api/moments/${momentId}/media-order`, { mediaFiles: reorderedMediaFiles });
+      setMoments(prevMoments =>
+        prevMoments.map(moment =>
+          moment._id === momentId ? { ...moment, mediaFiles: reorderedMediaFiles } : moment
+        )
+      );
       toast.success('Media order updated successfully');
-      triggerRefresh();
     } catch (error) {
       toast.error('Failed to update media order');
     }
@@ -144,15 +153,22 @@ function Moments() {
       files.forEach((file) => {
         data.append('files', file);
         if (file.type.startsWith('video/')) {
-            hasVideo = true;
+          hasVideo = true;
         }
       });
-      
-      await axios.post(`${API_URL}/api/moments/${momentId}/media`, data, {
+
+      const response = await axios.post(`${API_URL}/api/moments/${momentId}/media`, data, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
 
-      // Show video processing toast first so it appears at the bottom of the stack
+      const updatedMoment = response.data;
+
+      setMoments(prevMoments =>
+        prevMoments.map(moment =>
+          moment._id === momentId ? updatedMoment : moment
+        )
+      );
+
       if (hasVideo) {
         toast.success('For videos, processing may take a few minutes before playback is available.', {
           duration: 4000,
@@ -160,7 +176,7 @@ function Moments() {
       }
       toast.success('Media uploaded successfully.');
 
-      triggerRefresh();
+      return updatedMoment;
     } catch (error) {
       throw error;
     }
@@ -205,7 +221,6 @@ function Moments() {
             <Edit2 className="h-4 w-4 mr-2" />
             {isEditMode ? 'Done' : 'Edit Mode'}
           </button>
-
           <button
             onClick={() => setIsReorderMode(true)}
             disabled={isReorderMode}
@@ -234,7 +249,6 @@ function Moments() {
           onUpdateTitle={handleUpdateTitle}
           onAddMediaToMoment={handleAddMediaToMoment}
           onMediaOrderSave={handleMediaOrderSave}
-          onMomentUpdate={triggerRefresh}
         />
       )}
 
