@@ -12,14 +12,12 @@ function MediaUploadForm({ momentTitle, onClose, onSubmit }) {
     const selectedFiles = Array.from(e.target.files);
     if (selectedFiles.length === 0) return;
 
-    // Validate total size (1GB limit)
     const totalSize = selectedFiles.reduce((sum, file) => sum + file.size, 0);
     if (totalSize > 1024 * 1024 * 1024) {
       toast.error('Total file size should be less than 1GB');
       return;
     }
 
-    // Create preview URLs
     const previews = selectedFiles.map(file => ({
       file,
       url: URL.createObjectURL(file),
@@ -34,7 +32,6 @@ function MediaUploadForm({ momentTitle, onClose, onSubmit }) {
     const newFiles = files.filter((_, i) => i !== index);
     const newPreviews = filesPreview.filter((_, i) => i !== index);
     
-    // Revoke URL for removed file
     try {
       URL.revokeObjectURL(filesPreview[index].url);
     } catch (err) {}
@@ -42,7 +39,6 @@ function MediaUploadForm({ momentTitle, onClose, onSubmit }) {
     setFiles(newFiles);
     setFilesPreview(newPreviews);
 
-    // Reset input if removed all files
     if (newFiles.length === 0) {
       setFileInputKey(Date.now());
     }
@@ -116,7 +112,7 @@ function MediaUploadForm({ momentTitle, onClose, onSubmit }) {
           <video
             src={preview.url}
             className="w-full h-24 object-cover rounded border"
-            controls  // ✅ show real player controls
+            controls
           />
         )}
         <button

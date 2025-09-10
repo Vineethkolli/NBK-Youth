@@ -10,7 +10,6 @@ function MomentForm({ type, onClose, onSubmit }) {
     filesPreview: []
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
   const [fileInputKey, setFileInputKey] = useState(Date.now());
 
   const handleSubmit = async (e) => {
@@ -23,7 +22,6 @@ function MomentForm({ type, onClose, onSubmit }) {
         if (!formData.url.includes('youtube.com') && !formData.url.includes('youtu.be')) {
           throw new Error('Please enter a valid YouTube URL');
         }
-        // send plain object (backend expects title + url)
         await onSubmit({ title: formData.title, url: formData.url });
       } else if (type === 'drive') {
         if (!formData.url.includes('drive.google.com')) {
@@ -37,20 +35,18 @@ function MomentForm({ type, onClose, onSubmit }) {
         
         const data = new FormData();
         data.append('title', formData.title);
-        // NOTE: removed isPinned usage entirely
 
         formData.files.forEach((file) => {
           data.append('files', file);
         });
         
-        await onSubmit(data, setUploadProgress);
+        await onSubmit(data); 
       }
       onClose();
     } catch (error) {
       toast.error(error.message || 'Failed to add moment');
     } finally {
       setIsSubmitting(false);
-      setUploadProgress(0);
     }
   };
 
@@ -58,14 +54,12 @@ function MomentForm({ type, onClose, onSubmit }) {
     const files = Array.from(e.target.files);
     if (files.length === 0) return;
 
-    // Validate total size (1GB limit)
     const totalSize = files.reduce((sum, file) => sum + file.size, 0);
     if (totalSize > 1024 * 1024 * 1024) {
       toast.error('Total file size should be less than 1GB');
       return;
     }
 
-    // Create preview URLs
     const previews = files.map(file => ({
       file,
       url: URL.createObjectURL(file),
@@ -82,8 +76,6 @@ function MomentForm({ type, onClose, onSubmit }) {
   const removeFile = (index) => {
     const newFiles = formData.files.filter((_, i) => i !== index);
     const newPreviews = formData.filesPreview.filter((_, i) => i !== index);
-    
-    // Revoke URL for removed file
     try {
       URL.revokeObjectURL(formData.filesPreview[index].url);
     } catch (err) {}
@@ -94,7 +86,6 @@ function MomentForm({ type, onClose, onSubmit }) {
       filesPreview: newPreviews
     });
 
-    // reset input if removed all files to allow re-upload of same files later
     if (newFiles.length === 0) {
       setFileInputKey(Date.now());
     }
@@ -183,44 +174,32 @@ function MomentForm({ type, onClose, onSubmit }) {
                 className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
               />
               
-             {formData.filesPreview.length > 0 && (
-  <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-4 max-h-60 overflow-y-auto">
-    {formData.filesPreview.map((preview, index) => (
-      <div key={index} className="relative">
-        {preview.type === 'image' ? (
-          <img
-            src={preview.url}
-            alt={`Preview ${index + 1}`}
-            className="w-full h-24 object-cover rounded border"
-          />
-        ) : (
-          <video
-            src={preview.url}
-            className="w-full h-24 object-cover rounded border"
-            controls   // ✅ show real player controls
-          />
-        )}
-        <button
-          type="button"
-          onClick={() => removeFile(index)}
-          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
-        >
-          <X className="h-3 w-3" />
-        </button>
-      </div>
-    ))}
-  </div>
-)}
-
-              {uploadProgress > 0 && uploadProgress < 100 && (
-                <div className="mt-2">
-                  <div className="bg-gray-200 rounded-full h-2.5">
-                    <div
-                      className="bg-indigo-600 h-2.5 rounded-full transition-all duration-300"
-                      style={{ width: `${uploadProgress}%` }}
-                    ></div>
-                  </div>
-                  <p className="text-sm text-gray-600 mt-1">{uploadProgress}% uploaded</p>
+              {formData.filesPreview.length > 0 && (
+                <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-4 max-h-60 overflow-y-auto">
+                  {formData.filesPreview.map((preview, index) => (
+                    <div key={index} className="relative">
+                      {preview.type === 'image' ? (
+                        <img
+                          src={preview.url}
+                          alt={`Preview ${index + 1}`}
+                          className="w-full h-24 object-cover rounded border"
+                        />
+                      ) : (
+                        <video
+                          src={preview.url}
+                          className="w-full h-24 object-cover rounded border"
+                          controls
+                        />
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => removeFile(index)}
+                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>

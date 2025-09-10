@@ -18,12 +18,11 @@ function MediaGallery({
   const [localMediaFiles, setLocalMediaFiles] = useState([]);
   const [hasChanges, setHasChanges] = useState(false);
 
-  // Initialize local media files sorted by order (newest first if no order)
   useEffect(() => {
     if (moment.mediaFiles) {
       const sorted = [...moment.mediaFiles].sort((a, b) => {
         if (a.order !== undefined && b.order !== undefined) {
-          return b.order - a.order; // Higher order first
+          return b.order - a.order; 
         }
         return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
       });
@@ -32,7 +31,6 @@ function MediaGallery({
     }
   }, [moment.mediaFiles]);
 
-  // Get embeddable thumbnail for both images and videos
   const getThumbnailUrl = (url) => {
     const fileId = url.match(/[?&]id=([^&]+)/)?.[1];
     if (!fileId) return url;
@@ -100,7 +98,6 @@ function MediaGallery({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-90 flex flex-col z-50">
-      {/* Header */}
       <div className="bg-white p-4 flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <button
@@ -117,7 +114,7 @@ function MediaGallery({
             className="btn-primary"
           >
             <Plus className="h-4 w-4 mr-2" />
-           
+            
           </button>
           <button
             onClick={() => { setIsEditMode(!isEditMode); setIsReorderMode(false); }}
@@ -144,7 +141,6 @@ function MediaGallery({
         </div>
       </div>
 
-      {/* Media Grid */}
       {isReorderMode ? (
         <MediaGalleryReorder
           mediaFiles={localMediaFiles}
@@ -179,7 +175,6 @@ function MediaGallery({
                   </div>
                 </div>
 
-                {/* Download Button */}
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -202,7 +197,6 @@ function MediaGallery({
                   <Download className="h-4 w-4" />
                 </button>
 
-                {/* Delete Button (Edit Mode) */}
                 {isEditMode && (
                   <button
                     onClick={(e) => {
@@ -223,7 +217,6 @@ function MediaGallery({
         </div>
       )}
 
-      {/* Upload Form Modal */}
       {showUploadForm && (
         <MediaUploadForm
           momentTitle={moment.title}
