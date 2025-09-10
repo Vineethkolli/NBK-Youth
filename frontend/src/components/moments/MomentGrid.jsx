@@ -77,7 +77,8 @@ function MomentGrid({
   // Render previews for "upload" type
   const renderPreviewThumbnails = (moment) => {
     if (moment.type === 'upload' && moment.mediaFiles?.length > 0) {
-      const firstFile = moment.mediaFiles[0];
+      const firstFile = [...moment.mediaFiles].sort((a, b) => b.order - a.order)[0];
+
       const remainingCount = moment.mediaFiles.length - 1;
 
       return (

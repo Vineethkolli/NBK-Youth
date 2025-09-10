@@ -183,34 +183,34 @@ function MomentForm({ type, onClose, onSubmit }) {
                 className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
               />
               
-              {formData.filesPreview.length > 0 && (
-                <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-4 max-h-60 overflow-y-auto">
-                  {formData.filesPreview.map((preview, index) => (
-                    <div key={index} className="relative">
-                      {preview.type === 'image' ? (
-                        <img
-                          src={preview.url}
-                          alt={`Preview ${index + 1}`}
-                          className="w-full h-24 object-cover rounded border"
-                        />
-                      ) : (
-                        <video
-                          src={preview.url}
-                          className="w-full h-24 object-cover rounded border"
-                          muted
-                        />
-                      )}
-                      <button
-                        type="button"
-                        onClick={() => removeFile(index)}
-                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
+             {formData.filesPreview.length > 0 && (
+  <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-4 max-h-60 overflow-y-auto">
+    {formData.filesPreview.map((preview, index) => (
+      <div key={index} className="relative">
+        {preview.type === 'image' ? (
+          <img
+            src={preview.url}
+            alt={`Preview ${index + 1}`}
+            className="w-full h-24 object-cover rounded border"
+          />
+        ) : (
+          <video
+            src={preview.url}
+            className="w-full h-24 object-cover rounded border"
+            controls   // ✅ show real player controls
+          />
+        )}
+        <button
+          type="button"
+          onClick={() => removeFile(index)}
+          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+        >
+          <X className="h-3 w-3" />
+        </button>
+      </div>
+    ))}
+  </div>
+)}
 
               {uploadProgress > 0 && uploadProgress < 100 && (
                 <div className="mt-2">
