@@ -38,6 +38,7 @@ function Moments() {
     try {
       let endpoint = '';
       let successMessage = '';
+      let hasVideo = false;
 
       switch (formType) {
         case 'youtube':
@@ -50,40 +51,59 @@ function Moments() {
           break;
         case 'upload':
           endpoint = `${API_URL}/api/moments/upload`;
-          successMessage = 'Files uploaded successfully. It takes time to process based on video/image uploaded';
+          successMessage = 'Media uploaded successfully.';
+          // Check if any of the uploaded files are videos
+          for (const value of formData.values()) {
+            if (value instanceof File && value.type.startsWith('video/')) {
+              hasVideo = true;
+              break;
+            }
+          }
           break;
         default:
           throw new Error('Invalid form type');
       }
 
       await axios.post(endpoint, formData);
+      
+      // Show video processing toast first so it appears at the bottom of the stack
+      if (hasVideo) {
+        toast.success('For videos, processing may take a few minutes before playback is available.', {
+          duration: 4000,
+        });
+      }
       toast.success(successMessage);
+
       fetchMoments();
     } catch (error) {
       throw error;
     }
   };
 
-
   const handleDelete = async (momentId) => {
     if (!window.confirm('Are you sure you want to delete this moment?')) return;
-    try {
-      await axios.delete(`${API_URL}/api/moments/${momentId}`);
-      toast.success('Media deleted successfully');
-      triggerRefresh();
-    } catch (error) {
-      toast.error('Failed to delete moment');
-    }
+
+    const promise = axios.delete(`${API_URL}/api/moments/${momentId}`);
+    await toast.promise(promise, {
+      loading: 'Deleting...',
+      success: () => {
+        triggerRefresh();
+        return 'Media deleted successfully';
+      },
+      error: 'Failed to delete moment',
+    });
   };
 
   const handleDeleteMediaFile = async (momentId, mediaId) => {
-    try {
-      await axios.delete(`${API_URL}/api/moments/${momentId}/media/${mediaId}`);
-      toast.success('Media deleted successfully');
-      triggerRefresh();
-    } catch (error) {
-      toast.error('Failed to delete media');
-    }
+    const promise = axios.delete(`${API_URL}/api/moments/${momentId}/media/${mediaId}`);
+    await toast.promise(promise, {
+      loading: 'Deleting...',
+      success: () => {
+        triggerRefresh();
+        return 'Media deleted successfully';
+      },
+      error: 'Failed to delete media',
+    });
   };
 
   const handleUpdateTitle = async (id, newTitle) => {
@@ -100,7 +120,6 @@ function Moments() {
     try {
       await axios.put(`${API_URL}/api/moments/order`, { moments: reorderedMoments });
       toast.success('Order updated successfully');
-      // reflect reorder immediately
       setMoments(reorderedMoments);
       setIsReorderMode(false);
     } catch (error) {
@@ -121,19 +140,32 @@ function Moments() {
   const handleAddMediaToMoment = async (momentId, files) => {
     try {
       const data = new FormData();
+      let hasVideo = false;
       files.forEach((file) => {
         data.append('files', file);
+        if (file.type.startsWith('video/')) {
+            hasVideo = true;
+        }
       });
       
       await axios.post(`${API_URL}/api/moments/${momentId}/media`, data, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
-      toast.success('Media added successfully');
+
+      // Show video processing toast first so it appears at the bottom of the stack
+      if (hasVideo) {
+        toast.success('For videos, processing may take a few minutes before playback is available.', {
+          duration: 4000,
+        });
+      }
+      toast.success('Media uploaded successfully.');
+
       triggerRefresh();
     } catch (error) {
       throw error;
     }
   };
+
   const openForm = (type) => {
     setFormType(type);
     setShowForm(true);
@@ -174,7 +206,6 @@ function Moments() {
             {isEditMode ? 'Done' : 'Edit Mode'}
           </button>
 
-          {/* Reorder button: keep visible but dim/disabled when active */}
           <button
             onClick={() => setIsReorderMode(true)}
             disabled={isReorderMode}
@@ -187,7 +218,6 @@ function Moments() {
         </div>
       )}
 
-      {/* If reorder mode — render MomentReorder in place of grid (header stays visible) */}
       {isReorderMode ? (
         <MomentReorder
           moments={moments}

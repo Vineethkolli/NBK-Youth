@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Trash2, Edit2, Check, ChevronRight } from 'lucide-react';
 import MediaPreview from './MediaPreview.jsx';
 import MediaGallery from './MediaGallery.jsx';
@@ -19,19 +19,41 @@ function MomentGrid({
   const [expandedMoment, setExpandedMoment] = useState(null);
   const [lightboxData, setLightboxData] = useState(null);
 
-  // YouTube URL Helper
+  useEffect(() => {
+    const handlePopState = () => {
+      const hash = window.location.hash;
+      if (hash !== '#lightbox' && lightboxData) setLightboxData(null);
+      if (hash !== '#gallery' && hash !== '#lightbox' && expandedMoment) setExpandedMoment(null);
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [expandedMoment, lightboxData]);
+
+  const openGallery = (moment) => {
+    setExpandedMoment(moment);
+    window.history.pushState({ view: 'gallery' }, '', '#gallery');
+  };
+
+  const openLightbox = (mediaFiles, currentIndex, momentTitle) => {
+    setLightboxData({
+      mediaFiles,
+      currentIndex,
+      momentTitle,
+      onClose: () => window.history.back(),
+    });
+    window.history.pushState({ view: 'lightbox' }, '', '#lightbox');
+  };
+
   const getEmbedUrl = (url) => {
     if (!url) return '';
     const videoId = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?]+)/);
     return videoId ? `https://www.youtube.com/embed/${videoId[1]}` : url;
   };
 
-  // Drive thumbnail helper
   const getDriveThumbnailUrl = (url) => {
     if (!url) return '';
     const fileId = url.match(/[?&]id=([^&]+)/)?.[1];
-    if (!fileId) return url;
-    return `https://drive.google.com/thumbnail?id=${fileId}&sz=w600`;
+    return fileId ? `https://drive.google.com/thumbnail?id=${fileId}&sz=w600` : url;
   };
 
   const downloadFile = (downloadUrl, name) => {
@@ -48,7 +70,7 @@ function MomentGrid({
       window.open(downloadUrl, '_blank', 'noopener');
     }
   };
-  
+
   const handleEditTitle = (id, currentTitle) => {
     setEditingTitleId(id);
     setTempTitle(currentTitle);
@@ -65,71 +87,32 @@ function MomentGrid({
     setTimeout(() => setDeletingId(null), 600);
   };
 
-  const openLightbox = (mediaFiles, currentIndex, momentTitle) => {
-    setLightboxData({
-      mediaFiles,
-      currentIndex,
-      momentTitle,
-      onClose: () => setLightboxData(null),
-    });
-  };
-
-  // Render previews for "upload" type
   const renderPreviewThumbnails = (moment) => {
     if (moment.type === 'upload' && moment.mediaFiles?.length > 0) {
       const firstFile = [...moment.mediaFiles].sort((a, b) => b.order - a.order)[0];
-
       const remainingCount = moment.mediaFiles.length - 1;
-
       return (
         <div
           className={`relative w-full h-48 ${!isEditMode ? 'cursor-pointer' : ''}`}
-          onClick={() => {
-            if (!isEditMode) {
-              setExpandedMoment(moment);
-            }
-          }}
+          onClick={() => { if (!isEditMode) openGallery(moment); }}
         >
           <img
             src={getDriveThumbnailUrl(firstFile.url)}
             alt={firstFile.name}
             className="w-full h-full object-cover"
-            onError={(e) => {
-              e.target.onerror = null;
-              e.target.src = 'https://placehold.co/600x400/eeeeee/cccccc?text=Error';
-            }}
+            onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/600x400/eeeeee/cccccc?text=Error'; }}
           />
-
-          {/* Fade effect on right 20% */}
           <div className="absolute top-0 right-0 h-full w-1/5 bg-gradient-to-l from-white/90 to-transparent" />
-
-          {/* Arrow button */}
           <button
-            onClick={(e) => {
-              e.stopPropagation();
-              if (!isEditMode) {
-                setExpandedMoment(moment);
-              }
-            }}
-            className={`absolute top-1/2 right-3 -translate-y-1/2 
-               p-2 bg-black bg-opacity-70 text-white rounded-full 
-               hover:bg-opacity-90 transition  cursor-pointer}`}
+            onClick={(e) => { e.stopPropagation(); if (!isEditMode) openGallery(moment); }}
+            className="absolute top-1/2 right-3 -translate-y-1/2 p-2 bg-black bg-opacity-70 text-white rounded-full hover:bg-opacity-90 transition cursor-pointer"
           >
             <ChevronRight className="h-5 w-5" />
           </button>
-
-          {/* See All overlay bottom-right */}
           {remainingCount > 0 && (
             <button
-              onClick={(e) => {
-                e.stopPropagation();
-                if (!isEditMode) {
-                  setExpandedMoment(moment);
-                }
-              }}
-              className="absolute bottom-3 right-2 px-2 py-1 
-               bg-black bg-opacity-70 text-white text-sm font-semibold rounded 
-               hover:bg-opacity-90 transition"
+              onClick={(e) => { e.stopPropagation(); if (!isEditMode) openGallery(moment); }}
+              className="absolute bottom-3 right-2 px-2 py-1 bg-black bg-opacity-70 text-white text-sm font-semibold rounded hover:bg-opacity-90 transition"
             >
               See All (+{remainingCount})
             </button>
@@ -137,7 +120,6 @@ function MomentGrid({
         </div>
       );
     }
-
     return <div className="flex items-center justify-center h-56 text-gray-400">No media uploaded</div>;
   };
 
@@ -178,7 +160,6 @@ function MomentGrid({
                 </div>
               )}
             </div>
-
             <div className="p-2 flex-grow">
               {editingTitleId === moment._id ? (
                 <div className="flex items-center space-x-2">
@@ -215,11 +196,10 @@ function MomentGrid({
         ))}
       </div>
 
-      {/* Expanded Gallery Modal */}
       {expandedMoment && (
         <MediaGallery
           moment={expandedMoment}
-          onClose={() => setExpandedMoment(null)}
+          onClose={() => window.history.back()}
           onMediaClick={(mediaFiles, index) => openLightbox(mediaFiles, index, expandedMoment.title)}
           onDeleteMedia={onDeleteMediaFile}
           onAddMedia={onAddMediaToMoment}
@@ -227,10 +207,7 @@ function MomentGrid({
         />
       )}
 
-      {/* Lightbox Modal */}
-      {lightboxData && (
-        <MediaLightbox {...lightboxData} />
-      )}
+      {lightboxData && <MediaLightbox {...lightboxData} />}
     </>
   );
 }
