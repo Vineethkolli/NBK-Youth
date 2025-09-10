@@ -4,10 +4,10 @@ import MediaPreview from './MediaPreview.jsx';
 import MediaGallery from './MediaGallery.jsx';
 import MediaLightbox from './MediaLightbox.jsx';
 
-function MomentGrid({ 
-  moments, 
-  isEditMode, 
-  onDelete, 
+function MomentGrid({
+  moments,
+  isEditMode,
+  onDelete,
   onDeleteMediaFile,
   onUpdateTitle,
   onAddMediaToMoment,
@@ -28,6 +28,17 @@ function MomentGrid({
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, [expandedMoment, lightboxData]);
+  
+  // This effect ensures that if the expandedMoment is updated in the parent state,
+  // the local expandedMoment state reflects that change.
+  useEffect(() => {
+    if (expandedMoment) {
+        const updatedMoment = moments.find(m => m._id === expandedMoment._id);
+        if (updatedMoment) {
+            setExpandedMoment(updatedMoment);
+        }
+    }
+  }, [moments, expandedMoment]);
 
   const openGallery = (moment) => {
     setExpandedMoment(moment);
@@ -171,8 +182,8 @@ function MomentGrid({
                     autoFocus
                     onKeyDown={(e) => e.key === 'Enter' && handleSaveTitle(moment._id)}
                   />
-                  <button 
-                    onClick={() => handleSaveTitle(moment._id)} 
+                  <button
+                    onClick={() => handleSaveTitle(moment._id)}
                     className="text-green-600 p-1 hover:bg-green-100 rounded-full"
                   >
                     <Check className="h-5 w-5" />
@@ -182,8 +193,8 @@ function MomentGrid({
                 <div className="flex items-start justify-between">
                   <h3 className="font-semibold text-lg mr-2">{moment.title}</h3>
                   {isEditMode && (
-                    <button 
-                      onClick={() => handleEditTitle(moment._id, moment.title)} 
+                    <button
+                      onClick={() => handleEditTitle(moment._id, moment.title)}
                       className="text-gray-500 hover:text-gray-700 p-1 hover:bg-gray-100 rounded-full flex-shrink-0"
                     >
                       <Edit2 className="h-4 w-4" />

@@ -3,33 +3,30 @@ import { ArrowLeft, X, Download, Trash2, Plus, Edit2, GripHorizontal } from 'luc
 import MediaGalleryReorder from './MediaGalleryReorder';
 import MediaUploadForm from './MediaUploadForm';
 
-function MediaGallery({ 
-  moment, 
-  onClose, 
-  onMediaClick, 
+function MediaGallery({
+  moment,
+  onClose,
+  onMediaClick,
   onDeleteMedia,
   onAddMedia,
   onMediaOrderSave,
-  onMomentUpdate
 }) {
   const [isEditMode, setIsEditMode] = useState(false);
   const [isReorderMode, setIsReorderMode] = useState(false);
   const [showUploadForm, setShowUploadForm] = useState(false);
   const [localMediaFiles, setLocalMediaFiles] = useState([]);
-  const [hasChanges, setHasChanges] = useState(false);
 
   useEffect(() => {
-    if (moment.mediaFiles) {
+    if (moment && moment.mediaFiles) {
       const sorted = [...moment.mediaFiles].sort((a, b) => {
         if (a.order !== undefined && b.order !== undefined) {
-          return b.order - a.order; 
+          return b.order - a.order;
         }
         return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
       });
       setLocalMediaFiles(sorted);
-      setHasChanges(false);
     }
-  }, [moment.mediaFiles]);
+  }, [moment]); // Reruns whenever the moment prop changes
 
   const getThumbnailUrl = (url) => {
     const fileId = url.match(/[?&]id=([^&]+)/)?.[1];
@@ -39,8 +36,8 @@ function MediaGallery({
 
   const getDriveDownloadUrl = (url) => {
     if (!url) return '';
-    const fileId = url.match(/[?&]id=([^&]+)/)?.[1] 
-      || url.match(/\/file\/d\/([^\/]+)/)?.[1] 
+    const fileId = url.match(/[?&]id=([^&]+)/)?.[1]
+      || url.match(/\/file\/d\/([^\/]+)/)?.[1]
       || url.match(/open\?id=([^&]+)/)?.[1];
     if (!fileId) return url;
     return `https://drive.google.com/uc?export=download&id=${fileId}`;
@@ -65,32 +62,23 @@ function MediaGallery({
     try {
       await onAddMedia(moment._id, files);
       setShowUploadForm(false);
-      if (onMomentUpdate) {
-        onMomentUpdate();
-      }
     } catch (error) {
       console.error(error);
     }
   };
 
+  // ✅ **MODIFIED FUNCTION**
   const handleDeleteMedia = async (mediaId) => {
+    // We now wait for the parent function to complete.
+    // The prop change will trigger the useEffect hook to update the UI.
     await onDeleteMedia(moment._id, mediaId);
-    if (onMomentUpdate) {
-      onMomentUpdate();
-    }
   };
 
   const handleMediaOrderSave = async (reorderedMedia) => {
     try {
       setLocalMediaFiles(reorderedMedia);
       setIsReorderMode(false);
-      setHasChanges(false);
-      
       await onMediaOrderSave(moment._id, reorderedMedia);
-      
-      if (onMomentUpdate) {
-        onMomentUpdate();
-      }
     } catch (error) {
       console.error(error);
     }
@@ -114,7 +102,6 @@ function MediaGallery({
             className="btn-primary"
           >
             <Plus className="h-4 w-4 mr-2" />
-            
           </button>
           <button
             onClick={() => { setIsEditMode(!isEditMode); setIsReorderMode(false); }}
@@ -130,7 +117,6 @@ function MediaGallery({
             title={isReorderMode ? 'Reorder is active' : 'Enter reorder mode'}
           >
             <GripHorizontal className="h-4 w-4 mr-2" />
-            
           </button>
           <button
             onClick={onClose}
@@ -152,7 +138,7 @@ function MediaGallery({
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {localMediaFiles?.map((file, index) => (
               <div key={file._id} className="relative group">
-                <div 
+                <div
                   className="aspect-square bg-gray-100 rounded-lg overflow-hidden cursor-pointer"
                   onClick={() => onMediaClick(localMediaFiles, index)}
                 >
@@ -161,9 +147,9 @@ function MediaGallery({
                       src={getThumbnailUrl(file.url)}
                       alt={file.name}
                       className="w-full h-full object-cover hover:scale-105 transition-transform"
-                      onError={(e) => { 
-                        e.target.onerror = null; 
-                        e.target.src='https://placehold.co/400x400/eeeeee/cccccc?text=Error'; 
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src='https://placehold.co/400x400/eeeeee/cccccc?text=Error';
                       }}
                     />
                     {file.type === 'video' && (
