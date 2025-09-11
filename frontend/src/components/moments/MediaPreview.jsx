@@ -1,39 +1,22 @@
 import { Download } from 'lucide-react';
 
 function MediaPreview({ url, type, title }) {
+  // CORRECTED: This function now gets the reliable thumbnail URL for images.
   const getImageUrl = (url) => {
     const fileId = url.match(/[?&]id=([^&]+)/)?.[1];
     if (!fileId) return url;
     return `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`;
   };
 
+  // This function creates the iframe player URL for videos, which is the correct approach.
   const getVideoPlayerUrl = (url) => {
     const fileId = url.match(/[?&]id=([^&]+)/)?.[1];
     if (!fileId) return url;
     return `https://drive.google.com/file/d/${fileId}/preview`;
   };
 
-  const getDriveDownloadUrl = (url) => {
-    const fileId =
-      url.match(/[?&]id=([^&]+)/)?.[1] ||
-      url.match(/\/file\/d\/([^/]+)/)?.[1] ||
-      url.match(/open\?id=([^&]+)/)?.[1];
-    if (!fileId) return url;
-    return `https://drive.google.com/uc?export=download&id=${fileId}`;
-  };
-
-  const handleDownload = () => {
-    const dl = getDriveDownloadUrl(url);
-    const a = document.createElement('a');
-    a.href = dl;
-    a.download = title || 'file';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-  };
-
   return (
-    <div className="relative w-full h-full aspect-video bg-gray-900 group">
+    <div className="relative w-full h-full aspect-video bg-gray-900">
       {type === 'image' ? (
         <img
           src={getImageUrl(url)}
@@ -53,15 +36,6 @@ function MediaPreview({ url, type, title }) {
           />
         </div>
       )}
-
-      {/* ✅ Small Download button (visible on hover/always mobile) */}
-      <button
-        onClick={handleDownload}
-        className="absolute bottom-2 right-2 p-2 bg-black bg-opacity-60 text-white rounded-full hover:bg-opacity-80"
-        title="Download"
-      >
-        <Download className="h-4 w-4" />
-      </button>
     </div>
   );
 }
