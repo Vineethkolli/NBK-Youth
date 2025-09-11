@@ -215,13 +215,6 @@ function Moments() {
             Upload Media
           </button>
           <button
-            onClick={() => { setIsEditMode(!isEditMode); setIsReorderMode(false); }}
-            className={`btn-secondary ${isEditMode ? 'bg-red-100' : ''}`}
-          >
-            <Edit2 className="h-4 w-4 mr-2" />
-            {isEditMode ? 'Done' : 'Edit Mode'}
-          </button>
-          <button
             onClick={() => setIsReorderMode(true)}
             disabled={isReorderMode}
             className={`btn-secondary ${isReorderMode ? 'opacity-50 cursor-not-allowed' : ''}`}
@@ -230,6 +223,14 @@ function Moments() {
             <GripHorizontal className="h-4 w-4 mr-2" />
             Reorder Mode
           </button>
+          <button
+            onClick={() => { setIsEditMode(!isEditMode); setIsReorderMode(false); }}
+            className={`btn-secondary ${isEditMode ? 'bg-red-100' : ''}`}
+          >
+            <Edit2 className="h-4 w-4 mr-2" />
+            {isEditMode ? 'Done' : 'Edit Mode'}
+          </button>
+
         </div>
       )}
 
