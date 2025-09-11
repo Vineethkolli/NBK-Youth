@@ -76,14 +76,6 @@ function CollectionManager({ collections, onUpdate, isEditMode, onEditModeToggle
               Create Collection
             </button>
             <button
-              onClick={onEditModeToggle}
-              className={`btn-secondary ${isEditMode ? 'bg-red-100' : ''}`}
-            >
-              <Edit2 className="h-4 w-4 mr-2" />
-              {isEditMode ? 'Done' : 'Edit Mode'}
-            </button>
-          
-            <button
               onClick={() => {
                 setFormData({ name: '', collectionId: '', file: null, filePreview: null });
                 setFileInputKey(Date.now());
@@ -95,6 +87,14 @@ function CollectionManager({ collections, onUpdate, isEditMode, onEditModeToggle
               <Upload className="h-4 w-4 mr-2" />
               {isUploading ? 'Uploading...' : 'Upload Song'}
             </button>
+            <button
+              onClick={onEditModeToggle}
+              className={`btn-secondary ${isEditMode ? 'bg-red-100' : ''}`}
+            >
+              <Edit2 className="h-4 w-4 mr-2" />
+              {isEditMode ? 'Done' : 'Edit Mode'}
+            </button>
+          
           </>
         )}
       </div>
