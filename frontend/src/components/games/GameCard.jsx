@@ -79,7 +79,7 @@ function GameCard({ game, isEditMode, onSelect, onEdit, onDelete }) {
           )}
           {error && <p className="text-sm text-red-600">{error}</p>}
           <p className="text-sm text-gray-500">
-            {game.timerRequired ? 'Timer Required' : 'No Timer'}
+            {game.players.length} player{game.players.length !== 1 && 's'}
           </p>
         </div>
         {isEditMode && (
