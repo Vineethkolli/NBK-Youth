@@ -208,19 +208,19 @@ function Records() {
             </div>
 
             {isDeveloper && (
-              <div className="flex justify-end space-x-2">
+              <div className="flex justify-end space-x-3">
                 <button
                   onClick={() => setShowFinancialForm(true)}
-                  className="btn-primary"
+                  className="btn-primary flex items-center"
                 >
-                  <Plus className="h-4 w-4 mr-2" />
+                  <Plus className="h-4 w-4 mr-1" />
                   Add
                 </button>
                 <button
                   onClick={() => setIsEditMode(!isEditMode)}
-                  className={`btn-secondary ${isEditMode ? 'bg-red-100' : ''}`}
+                  className={`btn-primary flex items-center ${isEditMode ? 'bg-red-100' : ''}`}
                 >
-                  <Edit2 className="h-4 w-4 mr-2" />
+                  <Edit2 className="h-4 w-4 mr-1" />
                   {isEditMode ? 'Done' : 'Edit'}
                 </button>
               </div>
@@ -241,19 +241,19 @@ function Records() {
         <div className="space-y-6">
           {/* Controls */}
           {isDeveloper && (
-            <div className="flex justify-end space-x-2">
+            <div className="flex justify-end space-x-3">
               <button
                 onClick={() => setShowRecordForm(true)}
-                className="btn-primary"
+                className="btn-primary flex items-center"
               >
-                <Plus className="h-4 w-4 mr-2" />
+                <Plus className="h-4 w-4 mr-1" />
                 Add
               </button>
               <button
                 onClick={() => setIsEditMode(!isEditMode)}
-                className={`btn-secondary ${isEditMode ? 'bg-red-100' : ''}`}
+                className={`btn-primary flex items-center ${isEditMode ? 'bg-red-100' : ''}`}
               >
-                <Edit2 className="h-4 w-4 mr-2" />
+                <Edit2 className="h-4 w-4 mr-1" />
                 {isEditMode ? 'Done' : 'Edit'}
               </button>
             </div>
