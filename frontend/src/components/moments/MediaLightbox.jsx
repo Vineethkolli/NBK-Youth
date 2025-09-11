@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, X, ChevronLeft, ChevronRight, Download, Trash2 } from 'lucide-react';
+import { ArrowLeft, X, ChevronLeft, ChevronRight, Download } from 'lucide-react';
 
 function MediaLightbox({ 
   mediaFiles, 
@@ -9,15 +9,17 @@ function MediaLightbox({
   onDelete 
 }) {
   const [activeIndex, setActiveIndex] = useState(currentIndex);
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
       switch (e.key) {
         case 'ArrowLeft':
-          handlePrevious();
+          if (activeIndex > 0) handlePrevious();
           break;
         case 'ArrowRight':
-          handleNext();
+          if (activeIndex < mediaFiles.length - 1) handleNext();
           break;
         case 'Escape':
           onClose();
@@ -30,21 +32,19 @@ function MediaLightbox({
   }, [activeIndex]);
 
   const handlePrevious = () => {
-    setActiveIndex((prev) => (prev - 1 + mediaFiles.length) % mediaFiles.length);
+    setActiveIndex((prev) => Math.max(prev - 1, 0));
   };
 
   const handleNext = () => {
-    setActiveIndex((prev) => (prev + 1) % mediaFiles.length);
+    setActiveIndex((prev) => Math.min(prev + 1, mediaFiles.length - 1));
   };
 
-  // CORRECTED: This function now gets the reliable thumbnail URL for images.
   const getImageUrl = (url) => {
     const fileId = url.match(/[?&]id=([^&]+)/)?.[1];
     if (!fileId) return url;
-    return `https://drive.google.com/thumbnail?id=${fileId}&sz=w2048`; // Request high-res for lightbox
+    return `https://drive.google.com/thumbnail?id=${fileId}&sz=w2048`;
   };
 
-  // ADDED: This function creates the iframe player URL for videos.
   const getVideoPlayerUrl = (url) => {
     const fileId = url.match(/[?&]id=([^&]+)/)?.[1];
     if (!fileId) return url;
@@ -75,10 +75,7 @@ function MediaLightbox({
 
   const currentMedia = mediaFiles[activeIndex];
 
-  // Touch handling for mobile swipe
-  const [touchStart, setTouchStart] = useState(null);
-  const [touchEnd, setTouchEnd] = useState(null);
-
+  // Touch Handlers
   const handleTouchStart = (e) => {
     setTouchEnd(null);
     setTouchStart(e.targetTouches[0].clientX);
@@ -89,15 +86,15 @@ function MediaLightbox({
   };
 
   const handleTouchEnd = () => {
-    if (!touchStart || !touchEnd) return;
-    
+    if (touchStart === null || touchEnd === null) return;
+
     const distance = touchStart - touchEnd;
     const isLeftSwipe = distance > 50;
     const isRightSwipe = distance < -50;
 
-    if (isLeftSwipe) {
+    if (isLeftSwipe && activeIndex < mediaFiles.length - 1) {
       handleNext();
-    } else if (isRightSwipe) {
+    } else if (isRightSwipe && activeIndex > 0) {
       handlePrevious();
     }
   };
@@ -158,24 +155,25 @@ function MediaLightbox({
           <>
             <button
               onClick={handlePrevious}
-              className="absolute left-4 top-1/2 transform -translate-y-1/2 p-3 bg-black bg-opacity-50 text-white rounded-full hover:bg-opacity-75 transition-opacity"
+              disabled={activeIndex === 0}
+              className={`absolute left-4 top-1/2 transform -translate-y-1/2 p-3 bg-black bg-opacity-50 text-white rounded-full transition-opacity ${activeIndex === 0 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-opacity-75'}`}
             >
               <ChevronLeft className="h-6 w-6" />
             </button>
             <button
               onClick={handleNext}
-              className="absolute right-4 top-1/2 transform -translate-y-1/2 p-3 bg-black bg-opacity-50 text-white rounded-full hover:bg-opacity-75 transition-opacity"
+              disabled={activeIndex === mediaFiles.length - 1}
+              className={`absolute right-4 top-1/2 transform -translate-y-1/2 p-3 bg-black bg-opacity-50 text-white rounded-full transition-opacity ${activeIndex === mediaFiles.length - 1 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-opacity-75'}`}
             >
               <ChevronRight className="h-6 w-6" />
             </button>
           </>
         )}
-        
-        {/* Fixed Download Button - Bottom Right */}
+
+        {/* Download Button */}
         <button
           onClick={() => {
             const dl = getDriveDownloadUrl(currentMedia.url);
-            // For mobile, try direct download
             if (/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
               const link = document.createElement('a');
               link.href = dl;
