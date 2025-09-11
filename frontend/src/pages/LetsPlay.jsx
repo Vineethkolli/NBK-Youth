@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Plus, Edit2 } from 'lucide-react';
+import { Plus, Edit2, ArrowLeft } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { API_URL } from '../utils/config';
@@ -26,6 +26,24 @@ function LetsPlay() {
     fetchGames();
   }, []);
 
+  // Effect to handle browser back button functionality
+  useEffect(() => {
+    const handlePopState = (event) => {
+      // When the user navigates back, if the history state is null or not our 'players' view,
+      // it means we should be on the games list.
+      if (!event.state || event.state.view !== 'players') {
+        setSelectedGame(null);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+
+    // Cleanup the event listener when the component unmounts
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, []); // Empty dependency array ensures this runs only once
+
   const fetchGames = async () => {
     try {
       const { data } = await axios.get(`${API_URL}/api/games`);
@@ -35,7 +53,19 @@ function LetsPlay() {
     }
   };
 
-  // Game CRUD operations
+  // --- Navigation Handlers ---
+  const handleSelectGame = (game) => {
+    setSelectedGame(game);
+    // Push a new state into the browser history to represent the player view
+    window.history.pushState({ view: 'players' }, '');
+  };
+
+  const handleGoBack = () => {
+    // This uses the browser's history to go back, triggering the popstate event
+    window.history.back();
+  };
+
+  // --- Game CRUD operations ---
   const handleCreateGame = async (formData) => {
     try {
       const { data } = await axios.post(`${API_URL}/api/games`, formData);
@@ -76,7 +106,7 @@ function LetsPlay() {
     }
   };
 
-  // Player management
+  // --- Player management ---
   const handleAddPlayer = async (playerName) => {
     try {
       const { data } = await axios.post(`${API_URL}/api/games/${selectedGame._id}/players`, {
@@ -187,23 +217,23 @@ function LetsPlay() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-  {games.length > 0 ? (
-    games.map((game) => (
-      <GameCard
-        key={game._id}
-        game={game}
-        isEditMode={isEditMode}
-        onSelect={() => setSelectedGame(game)}
-        onEdit={(gameId, newName) => handleGameEdit(gameId, newName)}
-        onDelete={() => handleGameDelete(game)}
-      />
-    ))
-  ) : (
-    <div className="text-center text-gray-500">
-      No games created yet
-    </div>
-  )}
-</div>
+            {games.length > 0 ? (
+              games.map((game) => (
+                <GameCard
+                  key={game._id}
+                  game={game}
+                  isEditMode={isEditMode}
+                  onSelect={() => handleSelectGame(game)}
+                  onEdit={(gameId, newName) => handleGameEdit(gameId, newName)}
+                  onDelete={() => handleGameDelete(game)}
+                />
+              ))
+            ) : (
+              <div className="text-center text-gray-500">
+                No games created yet
+              </div>
+            )}
+          </div>
         </div>
       )}
 
@@ -213,10 +243,10 @@ function LetsPlay() {
           <div className="flex justify-between items-center mb-6">
             <div>
               <button
-                onClick={() => setSelectedGame(null)}
-                className="text-gray-600 hover:text-gray-800 mb-2"
+                onClick={handleGoBack}
+                className="flex items-center text-gray-600 hover:text-gray-800 mb-2"
               >
-                ← Back to Games
+                <ArrowLeft className="h-4 w-4 mr-1" /> Back to Games
               </button>
               <h2 className="text-2xl font-semibold">{selectedGame.name}</h2>
             </div>
@@ -241,24 +271,24 @@ function LetsPlay() {
           </div>
 
           {selectedGame.players.length > 0 ? (
-      <PlayerList
-        players={selectedGame.players}
-        isEditMode={isEditMode}
-        timerRequired={selectedGame.timerRequired}
-        onTimeUpdate={(player) => {
-          setSelectedPlayer(player);
-          setShowTimeForm(true);
-        }}
-        onStatusUpdate={handleStatusUpdate}
-        onEdit={handleUpdatePlayer}
-        onDelete={handlePlayerDelete}
-      />
-    ) : (
-      <div className="text-center text-gray-500 text-g">
-        No players added yet
-      </div>
-    )}
-  </div>
+            <PlayerList
+              players={selectedGame.players}
+              isEditMode={isEditMode}
+              timerRequired={selectedGame.timerRequired}
+              onTimeUpdate={(player) => {
+                setSelectedPlayer(player);
+                setShowTimeForm(true);
+              }}
+              onStatusUpdate={handleStatusUpdate}
+              onEdit={handleUpdatePlayer}
+              onDelete={handlePlayerDelete}
+            />
+          ) : (
+            <div className="text-center text-gray-500 text-g">
+              No players added yet
+            </div>
+          )}
+        </div>
       )}
 
       {/* Modals */}

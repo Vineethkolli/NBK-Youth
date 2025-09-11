@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, X, ChevronLeft, ChevronRight, Download, Trash2 } from 'lucide-react';
+import { ArrowLeft, X, ChevronLeft, ChevronRight, Download } from 'lucide-react';
 
 function MediaLightbox({ 
   mediaFiles, 
   currentIndex, 
   momentTitle, 
-  onClose, 
-  onDelete 
+  onClose 
 }) {
   const [activeIndex, setActiveIndex] = useState(currentIndex);
 
@@ -37,45 +36,43 @@ function MediaLightbox({
     setActiveIndex((prev) => (prev + 1) % mediaFiles.length);
   };
 
-  // CORRECTED: This function now gets the reliable thumbnail URL for images.
+  // ✅ High-res image for lightbox
   const getImageUrl = (url) => {
     const fileId = url.match(/[?&]id=([^&]+)/)?.[1];
     if (!fileId) return url;
-    return `https://drive.google.com/thumbnail?id=${fileId}&sz=w2048`; // Request high-res for lightbox
+    return `https://drive.google.com/thumbnail?id=${fileId}&sz=w2048`;
   };
 
-  // ADDED: This function creates the iframe player URL for videos.
+  // ✅ Video iframe preview
   const getVideoPlayerUrl = (url) => {
     const fileId = url.match(/[?&]id=([^&]+)/)?.[1];
     if (!fileId) return url;
     return `https://drive.google.com/file/d/${fileId}/preview`;
   };
 
+  // ✅ Force direct download link
   const getDriveDownloadUrl = (url) => {
     if (!url) return '';
-    const fileId = url.match(/[?&]id=([^&]+)/)?.[1] || url.match(/\/file\/d\/([^\/]+)/)?.[1] || url.match(/open\?id=([^&]+)/)?.[1];
+    const fileId =
+      url.match(/[?&]id=([^&]+)/)?.[1] ||
+      url.match(/\/file\/d\/([^/]+)/)?.[1] ||
+      url.match(/open\?id=([^&]+)/)?.[1];
     if (!fileId) return url;
     return `https://drive.google.com/uc?export=download&id=${fileId}`;
   };
 
   const downloadFile = (downloadUrl, name) => {
-    try {
-      const a = document.createElement('a');
-      a.href = downloadUrl;
-      a.target = '_blank';
-      a.rel = 'noopener noreferrer';
-      if (name) a.download = name;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-    } catch (err) {
-      window.open(downloadUrl, '_blank', 'noopener');
-    }
+    const a = document.createElement('a');
+    a.href = downloadUrl;
+    a.download = name || 'file';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
   };
 
   const currentMedia = mediaFiles[activeIndex];
 
-  // Touch handling for mobile swipe
+  // ✅ Touch swipe handling for mobile
   const [touchStart, setTouchStart] = useState(null);
   const [touchEnd, setTouchEnd] = useState(null);
 
@@ -90,16 +87,11 @@ function MediaLightbox({
 
   const handleTouchEnd = () => {
     if (!touchStart || !touchEnd) return;
-    
     const distance = touchStart - touchEnd;
     const isLeftSwipe = distance > 50;
     const isRightSwipe = distance < -50;
-
-    if (isLeftSwipe) {
-      handleNext();
-    } else if (isRightSwipe) {
-      handlePrevious();
-    }
+    if (isLeftSwipe) handleNext();
+    else if (isRightSwipe) handlePrevious();
   };
 
   return (
@@ -171,22 +163,11 @@ function MediaLightbox({
           </>
         )}
         
-        {/* Fixed Download Button - Bottom Right */}
+        {/* ✅ Fixed Download Button - Bottom Right */}
         <button
           onClick={() => {
             const dl = getDriveDownloadUrl(currentMedia.url);
-            // For mobile, try direct download
-            if (/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-              const link = document.createElement('a');
-              link.href = dl;
-              link.download = currentMedia.name;
-              link.target = '_blank';
-              document.body.appendChild(link);
-              link.click();
-              document.body.removeChild(link);
-            } else {
-              downloadFile(dl, currentMedia.name);
-            }
+            downloadFile(dl, currentMedia.name);
           }}
           className="fixed bottom-6 right-6 p-3 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 shadow-lg z-10"
           title="Download"
