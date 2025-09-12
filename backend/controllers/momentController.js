@@ -1,4 +1,3 @@
-// controllers/momentController.js
 import Moment from '../models/Moment.js';
 import { google } from 'googleapis';
 import { Readable } from 'stream';
@@ -694,10 +693,27 @@ export const momentController = {
 
       const originalData = moment.toObject();
 
-      // Delete subfolder and all its contents if it exists
+      // Delete all media files in parallel first, then delete the subfolder
       if (moment.subfolderId) {
         try {
-          await deleteFolderRecursively(moment.subfolderId);
+          // Get all files in the subfolder
+          const response = await drive.files.list({
+            q: `'${moment.subfolderId}' in parents`,
+            fields: 'files(id, mimeType)',
+          });
+
+          // Delete all files in parallel
+          const deletePromises = response.data.files.map(file => 
+            drive.files.delete({ fileId: file.id }).catch(error => {
+              console.error(`Failed to delete file ${file.id}:`, error);
+            })
+          );
+
+          // Wait for all file deletions to complete
+          await Promise.all(deletePromises);
+
+          // Now delete the empty folder
+          await drive.files.delete({ fileId: moment.subfolderId });
         } catch (driveError) {
           console.error('Failed to delete subfolder from Google Drive:', driveError);
         }
@@ -731,6 +747,108 @@ export const momentController = {
       res.json({ message: 'Moment deleted successfully' });
     } catch (error) {
       res.status(500).json({ message: 'Failed to delete moment', error: error.message });
+    }
+  },
+
+  addDriveMediaMoment: async (req, res) => {
+    try {
+      const { title, url } = req.body;
+      
+      // Extract folder ID or file ID from URL
+      const folderId = extractFolderIdFromUrl(url);
+      const fileId = extractFileIdFromUrl(url);
+
+      if (!folderId && !fileId) {
+        return res.status(400).json({ message: 'Invalid Google Drive URL' });
+      }
+
+      let filesToProcess = [];
+
+      if (folderId) {
+        // It's a folder URL - get all files from folder
+        filesToProcess = await getFilesFromFolder(folderId);
+      } else if (fileId) {
+        // It's a single file URL - get file details
+        try {
+          const fileResponse = await drive.files.get({
+            fileId: fileId,
+            fields: 'id, name, mimeType, webViewLink'
+          });
+          filesToProcess = [fileResponse.data];
+        } catch (error) {
+          return res.status(400).json({ message: 'Unable to access the file. Please check permissions.' });
+        }
+      }
+
+      if (filesToProcess.length === 0) {
+        return res.status(400).json({ message: 'No media files found' });
+      }
+
+      const maxOrder = await Moment.findOne().sort('-order');
+      const order = maxOrder ? maxOrder.order + 1 : 0;
+
+      // Create subfolder for this moment
+      const subfolderName = `${title}_${Date.now()}`;
+      const subfolderId = await createSubfolder(process.env.GOOGLE_DRIVE_FOLDER_ID, subfolderName);
+
+      // Copy files to our subfolder in parallel and create media files array
+      const copyPromises = filesToProcess.map(async (file, i) => {
+        // Copy file to our subfolder
+        const copiedFile = await drive.files.copy({
+          fileId: file.id,
+          requestBody: {
+            name: file.name,
+            parents: [subfolderId],
+          },
+        });
+
+        // Set permissions for the copied file
+        await drive.permissions.create({
+          fileId: copiedFile.data.id,
+          requestBody: {
+            role: 'reader',
+            type: 'anyone',
+          },
+        });
+
+        const directUrl = `https://drive.google.com/uc?export=view&id=${copiedFile.data.id}`;
+        
+        return {
+          name: file.name,
+          url: directUrl,
+          type: file.mimeType.startsWith('image/') ? 'image' : 'video',
+          order: i,
+          mediaPublicId: copiedFile.data.id
+        };
+      });
+
+      // Wait for all copy operations to complete
+      const mediaFiles = await Promise.all(copyPromises);
+
+      const momentData = {
+        title,
+        type: 'upload',
+        mediaFiles,
+        order,
+        subfolderName,
+        subfolderId,
+        createdBy: req.user.registerId,
+      };
+
+      const moment = await Moment.create(momentData);
+
+      await logActivity(
+        req,
+        'CREATE',
+        'Moment',
+        moment._id.toString(),
+        { before: null, after: moment.toObject() },
+        `Drive media moment "${title}" with ${filesToProcess.length} files added by ${req.user.name}`
+      );
+
+      res.status(201).json(moment);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to add Drive media moment', error: error.message });
     }
   },
 };

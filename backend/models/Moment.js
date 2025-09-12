@@ -1,4 +1,3 @@
-// models/Moment.js
 import mongoose from 'mongoose';
 
 const mediaFileSchema = new mongoose.Schema({

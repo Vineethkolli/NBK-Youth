@@ -12,6 +12,7 @@ function MomentForm({ type, onClose, onSubmit }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [fileInputKey, setFileInputKey] = useState(Date.now());
 
+  // ----------------- HANDLE SUBMIT -----------------
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (isSubmitting) return;
@@ -23,25 +24,33 @@ function MomentForm({ type, onClose, onSubmit }) {
           throw new Error('Please enter a valid YouTube URL');
         }
         await onSubmit({ title: formData.title, url: formData.url });
+
       } else if (type === 'drive') {
-        if (!formData.url.includes('drive.google.com')) {
-          throw new Error('Please enter a valid Google Drive URL');
+        if (!formData.url.includes('drive.google.com/file/d/')) {
+          throw new Error('Please enter a valid Google Drive File URL');
         }
         await onSubmit({ title: formData.title, url: formData.url });
+
+      } else if (type === 'drive-media') {
+        if (
+          !formData.url.includes('drive.google.com/file/d/') &&
+          !formData.url.includes('drive.google.com/drive/folders/')
+        ) {
+          throw new Error('Please enter a valid Google Drive File or Folder URL');
+        }
+        await onSubmit({ title: formData.title, url: formData.url });
+
       } else if (type === 'upload') {
         if (formData.files.length === 0) {
           throw new Error('Please select at least one file');
         }
-        
+
         const data = new FormData();
         data.append('title', formData.title);
-
-        formData.files.forEach((file) => {
-          data.append('files', file);
-        });
-        
-        await onSubmit(data); 
+        formData.files.forEach((file) => data.append('files', file));
+        await onSubmit(data);
       }
+
       onClose();
     } catch (error) {
       toast.error(error.message || 'Failed to add moment');
@@ -50,6 +59,7 @@ function MomentForm({ type, onClose, onSubmit }) {
     }
   };
 
+  // ----------------- FILE HANDLERS -----------------
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
     if (files.length === 0) return;
@@ -66,36 +76,24 @@ function MomentForm({ type, onClose, onSubmit }) {
       type: file.type.startsWith('image/') ? 'image' : 'video'
     }));
 
-    setFormData({
-      ...formData,
-      files,
-      filesPreview: previews
-    });
+    setFormData({ ...formData, files, filesPreview: previews });
   };
 
   const removeFile = (index) => {
     const newFiles = formData.files.filter((_, i) => i !== index);
     const newPreviews = formData.filesPreview.filter((_, i) => i !== index);
-    try {
-      URL.revokeObjectURL(formData.filesPreview[index].url);
-    } catch (err) {}
+    try { URL.revokeObjectURL(formData.filesPreview[index].url); } catch (err) {}
 
-    setFormData({
-      ...formData,
-      files: newFiles,
-      filesPreview: newPreviews
-    });
-
-    if (newFiles.length === 0) {
-      setFileInputKey(Date.now());
-    }
+    setFormData({ ...formData, files: newFiles, filesPreview: newPreviews });
+    if (newFiles.length === 0) setFileInputKey(Date.now());
   };
 
+  // ----------------- UI HELPERS -----------------
   const getFormTitle = () => {
     switch (type) {
       case 'youtube': return 'Add YouTube Video';
-      case 'drive': return 'Add Drive Media';
-      case 'drive-folder': return 'Add Drive Folder';
+      case 'drive': return 'Add Drive Link';
+      case 'drive-media': return 'Add Drive Media';
       case 'upload': return 'Upload Media';
       default: return 'Add Media';
     }
@@ -104,17 +102,18 @@ function MomentForm({ type, onClose, onSubmit }) {
   const getFormIcon = () => {
     switch (type) {
       case 'youtube': return <Youtube className="h-5 w-5 mr-2" />;
-      case 'drive': return <FolderOpen className="h-5 w-5 mr-2" />;
-      case 'drive-folder': return <FolderOpen className="h-5 w-5 mr-2" />;
-      case 'upload': return <Upload className="h-5 w-5 mr-2" />;
+      case 'drive':
+      case 'drive-media': return <FolderOpen className="h-5 w-5 mr-2" />;
+      case 'upload':
       default: return <Upload className="h-5 w-5 mr-2" />;
     }
   };
 
+  // ----------------- RENDER -----------------
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-full max-w-lg max-h-[85vh] overflow-y-auto mx-4">
-
+        {/* Header */}
         <div className="flex justify-between items-center mb-4">
           <div className="flex items-center">
             {getFormIcon()}
@@ -125,7 +124,9 @@ function MomentForm({ type, onClose, onSubmit }) {
           </button>
         </div>
 
+        {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Title */}
           <div>
             <label className="block text-sm font-medium text-gray-700">Title *</label>
             <input
@@ -133,15 +134,18 @@ function MomentForm({ type, onClose, onSubmit }) {
               required
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
               placeholder="Enter title"
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
             />
           </div>
 
-          {(type === 'youtube' || type === 'drive') && (
+          {/* URL Input */}
+          {(type === 'youtube' || type === 'drive' || type === 'drive-media') && (
             <div>
               <label className="block text-sm font-medium text-gray-700">
-                {type === 'youtube' ? 'YouTube URL' : 'Google Drive URL'} *
+                {type === 'youtube' ? 'YouTube URL *' :
+                 type === 'drive-media' ? 'Google Drive File or Folder URL *' :
+                 'Google Drive File URL *'}
               </label>
               <input
                 type="url"
@@ -149,42 +153,32 @@ function MomentForm({ type, onClose, onSubmit }) {
                 value={formData.url}
                 onChange={(e) => setFormData({ ...formData, url: e.target.value })}
                 placeholder={
-                  type === 'youtube' 
-                    ? 'https://youtu.be/...'
-                    : 'https://drive.google.com/file/d/...'
+                  type === 'youtube' ? 'https://youtu.be/...' :
+                  type === 'drive-media' ? 'https://drive.google.com/drive/folders/... or https://drive.google.com/file/d/...' :
+                  'https://drive.google.com/file/d/...'
                 }
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
               />
-              {type === 'drive' && (
-                <p className="mt-1 text-xs text-gray-500">
-                  Make sure the file has View access for everyone
-                </p>
+              {type !== 'youtube' && (
+                <div className="mt-2 text-xs text-gray-500 space-y-1">
+                  {type === 'drive-media' && (
+                    <>
+                      <p>• For folders: All media files in the folder will be added</p>
+                      <p>• For single files: Only that file will be added</p>
+                    </>
+                  )}
+                  <p>• Make sure the file/folder has View access for everyone</p>
+                </div>
               )}
             </div>
           )}
 
-          {type === 'drive-folder' && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Google Drive Folder URL *
-              </label>
-              <input
-                type="url"
-                required
-                value={formData.url}
-                onChange={(e) => setFormData({ ...formData, url: e.target.value })}
-                placeholder="https://drive.google.com/drive/folders/..."
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-              />
-              <p className="mt-1 text-xs text-gray-500">
-                Make sure the folder has View access for everyone. All media files in the folder will be added.
-              </p>
-            </div>
-          )}
-
+          {/* File Upload */}
           {type === 'upload' && (
             <div>
-              <label className="block text-sm font-medium text-gray-700">Upload Files * (Maximum 20 files)</label>
+              <label className="block text-sm font-medium text-gray-700">
+                Upload Files * (Maximum 20 files)
+              </label>
               <input
                 key={fileInputKey}
                 type="file"
@@ -192,9 +186,10 @@ function MomentForm({ type, onClose, onSubmit }) {
                 multiple
                 accept="image/*,video/*"
                 onChange={handleFileChange}
-                className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+                className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 
+                  file:rounded-full file:border-0 file:text-sm file:font-semibold 
+                  file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
               />
-              
               {formData.filesPreview.length > 0 && (
                 <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-4 max-h-60 overflow-y-auto">
                   {formData.filesPreview.map((preview, index) => (
@@ -226,18 +221,22 @@ function MomentForm({ type, onClose, onSubmit }) {
             </div>
           )}
 
+          {/* Submit Button */}
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+            className="w-full flex justify-center py-2 px-4 border border-transparent 
+              rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 
+              hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 
+              focus:ring-indigo-500 disabled:opacity-50"
           >
             {isSubmitting ? (
               <>
                 <Upload className="animate-spin h-5 w-5 mr-2" />
-                {type === 'upload' ? 'Uploading...' : type === 'drive-folder' ? 'Processing...' : 'Adding...'}
+                {type === 'upload' ? 'Uploading...' : 'Adding...'}
               </>
             ) : (
-              `Add ${type === 'youtube' ? 'Video' : type === 'drive-folder' ? 'Folder' : 'Media'}`
+              `Add ${type === 'youtube' ? 'Video' : 'Media'}`
             )}
           </button>
         </form>

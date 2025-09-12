@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Edit2, Youtube, Upload, FolderOpen, GripHorizontal } from 'lucide-react';
+import { Edit2, Youtube, Upload, FolderOpen, GripHorizontal, Plus } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { API_URL } from '../utils/config';
@@ -47,6 +47,10 @@ function Moments() {
         case 'drive-folder':
           endpoint = `${API_URL}/api/moments/drive-folder`;
           successMessage = 'Drive folder media added successfully. Ensure View access is enabled.';
+          break;
+        case 'drive-media':
+          endpoint = `${API_URL}/api/moments/drive-media`;
+          successMessage = 'Drive media copied and added successfully. Ensure View access is enabled.';
           break;
         case 'upload':
           endpoint = `${API_URL}/api/moments/upload`;
@@ -217,7 +221,7 @@ function Moments() {
   return (
     <div className="max-w-7xl mx-auto sm:px-6 lg:px-0 py-0">
       {isPrivilegedUser && (
-        <div className="flex justify-start items-center mb-6 space-x-4">
+        <div className="flex justify-start items-center mb-6 space-x-3">
           <button
             onClick={() => openForm('youtube')}
             className="btn-primary"
@@ -225,19 +229,19 @@ function Moments() {
             <Youtube className="h-4 w-4 mr-2" />
             Add YouTube
           </button>
-          <button
-            onClick={() => openForm('drive')}
-            className="btn-primary"
-          >
-            <FolderOpen className="h-4 w-4 mr-2" />
-            Add Drive
-          </button>
-          <button
+           <button
             onClick={() => openForm('upload')}
             className="btn-primary"
           >
             <Upload className="h-4 w-4 mr-2" />
             Upload Media
+          </button>
+          <button
+            onClick={() => openForm('drive-media')}
+            className="btn-primary"
+          >
+            <FolderOpen className="h-4 w-4 mr-2" />
+            Drive Media
           </button>
           <button
             onClick={() => setIsReorderMode(true)}
@@ -254,6 +258,13 @@ function Moments() {
           >
             <Edit2 className="h-4 w-4 mr-2" />
             {isEditMode ? 'Done' : 'Edit Mode'}
+          </button>
+           <button
+            onClick={() => openForm('drive')}
+            className="btn-primary"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Add Drive
           </button>
 
         </div>

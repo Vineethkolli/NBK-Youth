@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, X, Download, Trash2, Plus, Edit2, GripHorizontal } from 'lucide-react';
+import { ArrowLeft, X, Download, Trash2, Upload, FolderOpen, Edit2, GripHorizontal } from 'lucide-react';
 import MediaGalleryReorder from './MediaGalleryReorder';
 import MediaUploadForm from './MediaUploadForm';
 import MediaDriveForm from './MediaDriveForm';
@@ -112,12 +112,10 @@ function MediaGallery({
           {canManageMedia && (
             <>
               <button onClick={() => setShowUploadForm(true)} className="btn-primary">
-                <Plus className="h-4 w-4 mr-2" />
-                Upload
+                <Upload className="h-4 w-4 mr-2" />
               </button>
               <button onClick={() => setShowDriveForm(true)} className="btn-primary">
-                <Plus className="h-4 w-4 mr-2" />
-                Drive
+                <FolderOpen className="h-4 w-4 mr-2" />
               </button>
               <button
                 onClick={() => setIsReorderMode(true)}
@@ -126,14 +124,13 @@ function MediaGallery({
                 title={isReorderMode ? 'Reorder is active' : 'Enter reorder mode'}
               >
                 <GripHorizontal className="h-4 w-4 mr-2" />
-                Reorder
               </button>
               <button
                 onClick={() => { setIsEditMode(!isEditMode); setIsReorderMode(false); }}
                 className={`btn-secondary ${isEditMode ? 'bg-red-100' : ''}`}
               >
                 <Edit2 className="h-4 w-4 mr-2" />
-                {isEditMode ? 'Done' : 'Edit'}
+                {isEditMode ? 'Done' : ''}
               </button>
             </>
           )}
