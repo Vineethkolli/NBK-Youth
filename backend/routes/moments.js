@@ -1,4 +1,3 @@
-// routes/moments.js
 import express from 'express';
 import { auth, checkRole } from '../middleware/auth.js';
 import { momentController } from '../controllers/momentController.js';
@@ -27,6 +26,12 @@ router.post('/drive-folder',
   auth, 
   checkRole(['developer', 'admin', 'financier']), 
   momentController.addDriveFolder
+);
+
+router.post('/drive-media',
+  auth,
+  checkRole(['developer', 'admin', 'financier']),
+  momentController.addDriveMediaMoment
 );
 
 router.post('/upload',
