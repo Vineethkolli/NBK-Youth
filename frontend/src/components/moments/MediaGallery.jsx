@@ -208,6 +208,7 @@ function MediaGallery({
       {canManageMedia && showUploadForm && (
         <MediaUploadForm
           momentTitle={moment.title}
+          momentId={moment._id}
           onClose={() => setShowUploadForm(false)}
           onSubmit={handleAddMedia}
         />

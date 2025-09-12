@@ -1,11 +1,15 @@
 import { useState } from 'react';
+import axios from 'axios';
 import { X, Upload, Play } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
-function MediaUploadForm({ momentTitle, onClose, onSubmit }) {
+function MediaUploadForm({ momentTitle, onClose, onSubmit, momentId }) {
   const [files, setFiles] = useState([]);
   const [filesPreview, setFilesPreview] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [progress, setProgress] = useState(0); // overall progress %
+  const [currentFileIndex, setCurrentFileIndex] = useState(null);
+  const [currentFileProgress, setCurrentFileProgress] = useState(0);
   const [fileInputKey, setFileInputKey] = useState(Date.now());
 
   const handleFileChange = (e) => {
@@ -44,21 +48,77 @@ function MediaUploadForm({ momentTitle, onClose, onSubmit }) {
     }
   };
 
+  const CHUNK_SIZE = 5 * 1024 * 1024; // 5MB
+
+  const uploadFileInChunks = async (file, fileIdx) => {
+    // 1. Request resumable session
+    const sessionRes = await axios.post('/api/moments/resumable-session', {
+      name: file.name,
+      mimeType: file.type,
+    });
+    const uploadUrl = sessionRes.data.uploadUrl;
+    let bytesUploaded = 0;
+    let chunkIdx = 0;
+    while (bytesUploaded < file.size) {
+      const chunk = file.slice(bytesUploaded, bytesUploaded + CHUNK_SIZE);
+      const chunkArrayBuffer = await chunk.arrayBuffer();
+      const chunkBlob = new Blob([chunkArrayBuffer], { type: file.type });
+      const chunkForm = new FormData();
+      chunkForm.append('chunk', chunkBlob, file.name);
+      chunkForm.append('uploadUrl', uploadUrl);
+      chunkForm.append('startByte', bytesUploaded);
+      chunkForm.append('endByte', Math.min(bytesUploaded + CHUNK_SIZE - 1, file.size - 1));
+      chunkForm.append('totalBytes', file.size);
+      chunkForm.append('fileName', file.name);
+      chunkForm.append('mimeType', file.type);
+      await axios.post('/api/moments/upload-chunk', chunkForm, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      bytesUploaded += CHUNK_SIZE;
+      chunkIdx++;
+      setCurrentFileProgress(Math.round((bytesUploaded / file.size) * 100));
+      setProgress(Math.round(((fileIdx + bytesUploaded / file.size) / files.length) * 100));
+    }
+    // 2. Finalize upload and store metadata
+    // Get fileId from uploadUrl
+    const fileIdMatch = uploadUrl.match(/\/upload\/drive\/v3\/files\/(.*?)\?/);
+    const fileId = fileIdMatch ? fileIdMatch[1] : null;
+    const fileMeta = {
+      name: file.name,
+      url: `https://drive.google.com/uc?export=view&id=${fileId}`,
+      type: file.type.startsWith('image/') ? 'image' : 'video',
+      order: fileIdx,
+      mediaPublicId: fileId,
+    };
+    await axios.post('/api/moments/finalize-upload', {
+      momentId,
+      fileMeta,
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (files.length === 0) {
       toast.error('Please select at least one file');
       return;
     }
-
     setIsSubmitting(true);
+    setProgress(0);
     try {
-      await onSubmit(files);
+      for (let i = 0; i < files.length; i++) {
+        setCurrentFileIndex(i);
+        setCurrentFileProgress(0);
+        await uploadFileInChunks(files[i], i);
+      }
+      toast.success('All files uploaded successfully');
       onClose();
     } catch (error) {
       toast.error(error.message || 'Failed to upload media');
     } finally {
       setIsSubmitting(false);
+      setProgress(0);
+      setCurrentFileIndex(null);
+      setCurrentFileProgress(0);
     }
   };
 
@@ -136,7 +196,11 @@ function MediaUploadForm({ momentTitle, onClose, onSubmit }) {
             {isSubmitting ? (
               <>
                 <Upload className="animate-spin h-5 w-5 mr-2" />
-                Uploading...
+                Uploading...{' '}
+                {progress}%
+                {currentFileIndex !== null && (
+                  <span className="ml-2 text-xs text-gray-700">File {currentFileIndex + 1}/{files.length}: {currentFileProgress}%</span>
+                )}
               </>
             ) : (
               'Add Media'
