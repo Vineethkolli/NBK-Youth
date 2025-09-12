@@ -35,6 +35,69 @@ const getDirectViewUrl = (url) => {
 };
 
 export const momentController = {
+  // 3. Finalize upload and store metadata
+  finalizeUpload: async (req, res) => {
+    try {
+      const { momentId, fileMeta } = req.body;
+      // fileMeta: { name, url, type, order, mediaPublicId }
+      const moment = await Moment.findById(momentId);
+      if (!moment) return res.status(404).json({ message: 'Moment not found' });
+      moment.mediaFiles.push(fileMeta);
+      await moment.save();
+      res.json({ success: true, moment });
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to finalize upload', error: error.message });
+    }
+  },
+  // 2. Receive chunk and stream to Google Drive uploadUrl
+  uploadChunkToDrive: async (req, res) => {
+    try {
+      const { uploadUrl, startByte, endByte, totalBytes, fileName, mimeType } = req.body;
+      const chunk = req.file;
+      if (!uploadUrl || !chunk) {
+        return res.status(400).json({ message: 'Missing uploadUrl or chunk' });
+      }
+      // Prepare headers for chunk upload
+      const headers = {
+        'Content-Length': chunk.size,
+        'Content-Type': mimeType,
+        'Content-Range': `bytes ${startByte}-${endByte}/${totalBytes}`,
+      };
+      // Stream chunk to Google Drive uploadUrl
+      const response = await fetch(uploadUrl, {
+        method: 'PUT',
+        headers,
+        body: chunk.buffer,
+      });
+      if (!response.ok) {
+        return res.status(500).json({ message: 'Failed to upload chunk', error: await response.text() });
+      }
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to upload chunk', error: error.message });
+    }
+  },
+  // 1. Create resumable upload session and return uploadUrl
+  createResumableUploadSession: async (req, res) => {
+    try {
+      const { name, mimeType } = req.body;
+      const driveRes = await drive.files.create({
+        requestBody: {
+          name,
+          mimeType,
+          parents: [process.env.GOOGLE_DRIVE_FOLDER_ID],
+        },
+        media: { mimeType },
+        fields: 'id',
+        supportsAllDrives: true,
+        uploadType: 'resumable',
+      });
+      const uploadUrl = driveRes.res.headers.location;
+      res.json({ uploadUrl });
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to create resumable upload session', error: error.message });
+    }
+  },
   getAllMoments: async (req, res) => {
     try {
       // Sort by order (descending) first so saved reorder shows.

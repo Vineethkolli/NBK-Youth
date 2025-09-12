@@ -1,4 +1,4 @@
-// routes/moments.js
+
 import express from 'express';
 import { auth, checkRole } from '../middleware/auth.js';
 import { momentController } from '../controllers/momentController.js';
@@ -8,6 +8,27 @@ import multer from 'multer';
 const upload = multer({ storage: multer.memoryStorage() });
 
 const router = express.Router();
+
+// Finalize upload and store metadata
+router.post('/finalize-upload',
+  auth,
+  checkRole(['developer', 'admin', 'financier']),
+  momentController.finalizeUpload
+);
+// Chunk upload endpoint (no disk storage)
+router.post('/upload-chunk',
+  auth,
+  checkRole(['developer', 'admin', 'financier']),
+  upload.single('chunk'),
+  momentController.uploadChunkToDrive
+);
+
+// Resumable upload session endpoint
+router.post('/resumable-session',
+  auth,
+  checkRole(['developer', 'admin', 'financier']),
+  momentController.createResumableUploadSession
+);
 
 router.get('/', momentController.getAllMoments);
 
