@@ -42,6 +42,12 @@ const momentSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
+  subfolderName: {
+    type: String // Name of the subfolder in Google Drive
+  },
+  subfolderId: {
+    type: String // Google Drive folder ID for this moment's media
+  },
   createdBy: {
     type: String,
     required: true

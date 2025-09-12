@@ -95,6 +95,7 @@ function MomentForm({ type, onClose, onSubmit }) {
     switch (type) {
       case 'youtube': return 'Add YouTube Video';
       case 'drive': return 'Add Drive Media';
+      case 'drive-folder': return 'Add Drive Folder';
       case 'upload': return 'Upload Media';
       default: return 'Add Media';
     }
@@ -104,6 +105,7 @@ function MomentForm({ type, onClose, onSubmit }) {
     switch (type) {
       case 'youtube': return <Youtube className="h-5 w-5 mr-2" />;
       case 'drive': return <FolderOpen className="h-5 w-5 mr-2" />;
+      case 'drive-folder': return <FolderOpen className="h-5 w-5 mr-2" />;
       case 'upload': return <Upload className="h-5 w-5 mr-2" />;
       default: return <Upload className="h-5 w-5 mr-2" />;
     }
@@ -161,6 +163,25 @@ function MomentForm({ type, onClose, onSubmit }) {
             </div>
           )}
 
+          {type === 'drive-folder' && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Google Drive Folder URL *
+              </label>
+              <input
+                type="url"
+                required
+                value={formData.url}
+                onChange={(e) => setFormData({ ...formData, url: e.target.value })}
+                placeholder="https://drive.google.com/drive/folders/..."
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              />
+              <p className="mt-1 text-xs text-gray-500">
+                Make sure the folder has View access for everyone. All media files in the folder will be added.
+              </p>
+            </div>
+          )}
+
           {type === 'upload' && (
             <div>
               <label className="block text-sm font-medium text-gray-700">Upload Files * (Maximum 20 files)</label>
@@ -213,10 +234,10 @@ function MomentForm({ type, onClose, onSubmit }) {
             {isSubmitting ? (
               <>
                 <Upload className="animate-spin h-5 w-5 mr-2" />
-                {type === 'upload' ? 'Uploading...' : 'Adding...'}
+                {type === 'upload' ? 'Uploading...' : type === 'drive-folder' ? 'Processing...' : 'Adding...'}
               </>
             ) : (
-              `Add ${type === 'youtube' ? 'Video' : 'Media'}`
+              `Add ${type === 'youtube' ? 'Video' : type === 'drive-folder' ? 'Folder' : 'Media'}`
             )}
           </button>
         </form>
