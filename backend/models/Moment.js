@@ -19,7 +19,7 @@ const mediaFileSchema = new mongoose.Schema({
     default: 0
   },
   mediaPublicId: {
-    type: String // Cloudinary/Drive public_id for media
+    type: String 
   }
 }, { timestamps: true });
 
@@ -34,9 +34,9 @@ const momentSchema = new mongoose.Schema({
     required: true
   },
   url: {
-    type: String // For youtube and drive types
+    type: String 
   },
-  mediaFiles: [mediaFileSchema], // For upload type
+  mediaFiles: [mediaFileSchema],
   order: {
     type: Number,
     default: 0
