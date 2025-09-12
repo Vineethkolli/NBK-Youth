@@ -44,10 +44,6 @@ function Moments() {
           endpoint = `${API_URL}/api/moments/drive`;
           successMessage = 'Drive media added successfully. Ensure View access is enabled.';
           break;
-        case 'drive-folder':
-          endpoint = `${API_URL}/api/moments/drive-folder`;
-          successMessage = 'Drive folder media added successfully. Ensure View access is enabled.';
-          break;
         case 'drive-media':
           endpoint = `${API_URL}/api/moments/drive-media`;
           successMessage = 'Drive media copied and added successfully. Ensure View access is enabled.';
