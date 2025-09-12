@@ -11,6 +11,7 @@ function MomentGrid({
   onDeleteMediaFile,
   onUpdateTitle,
   onAddMediaToMoment,
+  onAddDriveMediaToMoment,
   onMediaOrderSave
 }) {
   const [editingTitleId, setEditingTitleId] = useState(null);
@@ -214,6 +215,7 @@ function MomentGrid({
           onMediaClick={(mediaFiles, index) => openLightbox(mediaFiles, index, expandedMoment.title)}
           onDeleteMedia={onDeleteMediaFile}
           onAddMedia={onAddMediaToMoment}
+          onAddDriveMedia={onAddDriveMediaToMoment}
           onMediaOrderSave={onMediaOrderSave}
         />
       )}

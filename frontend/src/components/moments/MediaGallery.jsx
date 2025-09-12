@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { ArrowLeft, X, Download, Trash2, Plus, Edit2, GripHorizontal } from 'lucide-react';
 import MediaGalleryReorder from './MediaGalleryReorder';
 import MediaUploadForm from './MediaUploadForm';
+import MediaDriveForm from './MediaDriveForm';
 import { useAuth } from '../../context/AuthContext'; 
 
 function MediaGallery({
@@ -10,12 +11,14 @@ function MediaGallery({
   onMediaClick,
   onDeleteMedia,
   onAddMedia,
+  onAddDriveMedia,
   onMediaOrderSave,
 }) {
   const { user } = useAuth(); 
   const [isEditMode, setIsEditMode] = useState(false);
   const [isReorderMode, setIsReorderMode] = useState(false);
   const [showUploadForm, setShowUploadForm] = useState(false);
+  const [showDriveForm, setShowDriveForm] = useState(false);
   const [localMediaFiles, setLocalMediaFiles] = useState([]);
 
   const allowedRoles = ['admin', 'developer', 'financier'];
@@ -72,6 +75,15 @@ function MediaGallery({
     }
   };
 
+  const handleAddDriveMedia = async (driveUrl) => {
+    try {
+      await onAddDriveMedia(moment._id, driveUrl);
+      setShowDriveForm(false);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   const handleDeleteMedia = async (mediaId) => {
     await onDeleteMedia(moment._id, mediaId);
   };
@@ -101,6 +113,11 @@ function MediaGallery({
             <>
               <button onClick={() => setShowUploadForm(true)} className="btn-primary">
                 <Plus className="h-4 w-4 mr-2" />
+                Upload
+              </button>
+              <button onClick={() => setShowDriveForm(true)} className="btn-primary">
+                <Plus className="h-4 w-4 mr-2" />
+                Drive
               </button>
               <button
                 onClick={() => setIsReorderMode(true)}
@@ -109,13 +126,14 @@ function MediaGallery({
                 title={isReorderMode ? 'Reorder is active' : 'Enter reorder mode'}
               >
                 <GripHorizontal className="h-4 w-4 mr-2" />
+                Reorder
               </button>
               <button
                 onClick={() => { setIsEditMode(!isEditMode); setIsReorderMode(false); }}
                 className={`btn-secondary ${isEditMode ? 'bg-red-100' : ''}`}
               >
                 <Edit2 className="h-4 w-4 mr-2" />
-                {isEditMode ? 'Done' : ''}
+                {isEditMode ? 'Done' : 'Edit'}
               </button>
             </>
           )}
@@ -210,6 +228,24 @@ function MediaGallery({
           momentTitle={moment.title}
           onClose={() => setShowUploadForm(false)}
           onSubmit={handleAddMedia}
+        />
+      )}
+
+      {/* Drive Form */}
+      {canManageMedia && showDriveForm && (
+        <MediaDriveForm
+          momentTitle={moment.title}
+          onClose={() => setShowDriveForm(false)}
+          onSubmit={handleAddDriveMedia}
+        />
+      )}
+
+      {/* Drive Form */}
+      {canManageMedia && showDriveForm && (
+        <MediaDriveForm
+          momentTitle={moment.title}
+          onClose={() => setShowDriveForm(false)}
+          onSubmit={handleAddDriveMedia}
         />
       )}
     </div>

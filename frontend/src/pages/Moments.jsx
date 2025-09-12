@@ -44,6 +44,10 @@ function Moments() {
           endpoint = `${API_URL}/api/moments/drive`;
           successMessage = 'Drive media added successfully. Ensure View access is enabled.';
           break;
+        case 'drive-folder':
+          endpoint = `${API_URL}/api/moments/drive-folder`;
+          successMessage = 'Drive folder media added successfully. Ensure View access is enabled.';
+          break;
         case 'upload':
           endpoint = `${API_URL}/api/moments/upload`;
           successMessage = 'Media uploaded successfully.';
@@ -182,6 +186,27 @@ function Moments() {
     }
   };
 
+  const handleAddDriveMediaToMoment = async (momentId, driveUrl) => {
+    try {
+      const response = await axios.post(`${API_URL}/api/moments/${momentId}/drive-media`, {
+        url: driveUrl
+      });
+
+      const updatedMoment = response.data;
+
+      setMoments(prevMoments =>
+        prevMoments.map(moment =>
+          moment._id === momentId ? updatedMoment : moment
+        )
+      );
+
+      toast.success('Drive media added successfully.');
+      return updatedMoment;
+    } catch (error) {
+      throw error;
+    }
+  };
+
   const openForm = (type) => {
     setFormType(type);
     setShowForm(true);
@@ -249,6 +274,7 @@ function Moments() {
           onDeleteMediaFile={handleDeleteMediaFile}
           onUpdateTitle={handleUpdateTitle}
           onAddMediaToMoment={handleAddMediaToMoment}
+          onAddDriveMediaToMoment={handleAddDriveMediaToMoment}
           onMediaOrderSave={handleMediaOrderSave}
         />
       )}

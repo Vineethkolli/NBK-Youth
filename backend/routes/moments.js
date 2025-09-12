@@ -23,6 +23,12 @@ router.post('/drive',
   momentController.addDriveMoment
 );
 
+router.post('/drive-folder', 
+  auth, 
+  checkRole(['developer', 'admin', 'financier']), 
+  momentController.addDriveFolder
+);
+
 router.post('/upload',
   auth,
   checkRole(['developer', 'admin', 'financier']),
@@ -48,6 +54,13 @@ router.post('/:momentId/media',
   upload.array('files', 20),
   momentController.addMediaToMoment
 );
+
+router.post('/:momentId/drive-media',
+  auth,
+  checkRole(['developer', 'admin', 'financier']),
+  momentController.addDriveMediaToMoment
+);
+
 router.delete('/:id', 
   auth, 
   checkRole(['developer', 'admin', 'financier']), 
