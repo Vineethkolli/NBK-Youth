@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, FolderOpen } from 'lucide-react';
+import { X, FolderOpen, Upload } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 function MediaDriveForm({ momentTitle, onClose, onSubmit }) {
@@ -77,8 +77,8 @@ function MediaDriveForm({ momentTitle, onClose, onSubmit }) {
           >
             {isSubmitting ? (
               <>
-                <FolderOpen className="animate-spin h-5 w-5 mr-2" />
-                Processing...
+                <Upload className="animate-spin h-5 w-5 mr-2" />
+                Adding...
               </>
             ) : (
               'Add Media'
