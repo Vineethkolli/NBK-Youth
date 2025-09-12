@@ -7,6 +7,7 @@ import { API_URL } from '../utils/config';
 import MomentForm from '../components/moments/MomentForm';
 import MomentGrid from '../components/moments/MomentGrid';
 import MomentReorder from '../components/moments/MomentReorder';
+import WatchMore from '../components/moments/WatchMore';
 
 function Moments() {
   const { user } = useAuth();
@@ -265,6 +266,8 @@ function Moments() {
 
         </div>
       )}
+      
+      <WatchMore/>
 
       {isReorderMode ? (
         <MomentReorder
