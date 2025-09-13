@@ -196,7 +196,7 @@ function MediaLightbox({
       {/* Bottom Bar */}
       <div className="bg-black bg-opacity-75 text-white p-4 flex items-center justify-between">
         <div>
-          <p className="font-medium">{currentMedia.name}</p>
+          <p className="font-medium notranslate">{currentMedia.name}</p>
         </div>
       </div>
     </div>

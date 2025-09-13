@@ -4,6 +4,7 @@ import CollectionManager from '../components/vibe/CollectionManager';
 import CollectionItem from '../components/vibe/CollectionItem';
 import SearchBar from '../components/vibe/SearchBar';
 import MusicPlayer from '../components/vibe/MusicPlayer';
+import UploadToCollectionForm from '../components/vibe/UploadToCollectionForm';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { API_URL } from '../utils/config';
@@ -16,7 +17,10 @@ function Vibe() {
   const { currentSong, handleSongSelect } = useMusicPlayer();
   const [collections, setCollections] = useState([]);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [uploadMode, setUploadMode] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showUploadForm, setShowUploadForm] = useState(false);
+  const [selectedCollection, setSelectedCollection] = useState(null);
 
   useEffect(() => {
     fetchCollections();
@@ -121,6 +125,17 @@ function Vibe() {
     }
   };
 
+  const handleUploadToCollection = (collection) => {
+    setSelectedCollection(collection);
+    setShowUploadForm(true);
+  };
+
+  const handleUploadSuccess = () => {
+    fetchCollections();
+    setShowUploadForm(false);
+    setSelectedCollection(null);
+  };
+
   const filteredCollections = filterCollections(collections, searchQuery);
 
   return (
@@ -133,7 +148,15 @@ function Vibe() {
           collections={collections}
           onUpdate={fetchCollections}
           isEditMode={isEditMode}
-          onEditModeToggle={() => setIsEditMode(!isEditMode)}
+          onEditModeToggle={() => {
+            setIsEditMode(!isEditMode);
+            setUploadMode(false); // Exit upload mode when entering edit mode
+          }}
+          uploadMode={uploadMode}
+          onUploadModeToggle={() => {
+            setUploadMode(!uploadMode);
+            setIsEditMode(false); // Exit edit mode when entering upload mode
+          }}
         />
       </div>
 
@@ -143,15 +166,29 @@ function Vibe() {
             key={collection._id}
             collection={collection}
             isEditMode={isEditMode}
+            uploadMode={uploadMode}
             currentSong={currentSong}
             onSongPlay={handleSongPlay}
             onEdit={handleCollectionEdit}
             onDelete={handleCollectionDelete}
             onSongEdit={handleSongEdit}
             onSongDelete={handleSongDelete}
+            onUploadToCollection={handleUploadToCollection}
           />
         ))}
       </div>
+
+      {/* Upload to Collection Form */}
+      {showUploadForm && selectedCollection && (
+        <UploadToCollectionForm
+          collection={selectedCollection}
+          onClose={() => {
+            setShowUploadForm(false);
+            setSelectedCollection(null);
+          }}
+          onSuccess={handleUploadSuccess}
+        />
+      )}
 
       {/* Show music player only on Vibe page */}
       <MusicPlayer />
