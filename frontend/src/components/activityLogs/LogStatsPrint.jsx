@@ -2,112 +2,156 @@ import React from 'react';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { Printer } from 'lucide-react';
-import { useEventLabel } from '../../context/EventLabelContext';
 
 const LogStatsPrint = ({ stats }) => {
-  const { eventLabel } = useEventLabel();
+
+  const formatNumber = (n) => {
+    if (n === undefined || n === null) return '0';
+    return n.toLocaleString();
+  };
 
   const handlePrint = () => {
     const doc = new jsPDF();
-    const timestamp = new Date().toLocaleString();
+    let yPos = 20;
 
-    // ----- Title -----
-    doc.setFontSize(16);
-    doc.text('Log Statistics Report', 105, 15, { align: 'center' });
+    // Title (centered) - spacing copied from StatsPrint
+    doc.setFontSize(20);
+    doc.setTextColor(0, 0, 0);
+    const title = 'Activity Logs Statistics Report';
+    const titleWidth = doc.getTextWidth(title);
+    const xPos = (doc.internal.pageSize.width - titleWidth) / 2;
+    doc.text(title, xPos, yPos);
+    yPos += 10;
 
-    if (eventLabel) {
-      doc.setFontSize(12);
-      doc.setTextColor(100, 100, 100);
-      doc.text(eventLabel.label, 105, 22, { align: 'center' });
-      doc.setTextColor(0, 0, 0);
-    }
-
-    let yPos = eventLabel ? 30 : 25;
+    // Shared styles (copied from StatsPrint)
+    const headStyles = { fillColor: [33, 115, 175], textColor: [255, 255, 255], fontSize: 10 };
+    const commonStyles = { fontSize: 10, cellPadding: 2, rowHeight: 7, halign: 'center' };
 
     // ----- Overview -----
+    doc.setFontSize(14);
+    doc.setTextColor(0, 0, 0);
+    doc.text('Overview', 15, yPos);
+    yPos += 4;
+
     autoTable(doc, {
       startY: yPos,
       head: [['Metric', 'Count']],
       body: [
-        ['Total Logs', stats.totalLogs?.toLocaleString() || '0'],
-        ['Last 24 Hours', stats.recentActivity?.toLocaleString() || '0']
+        ['Total Logs', formatNumber(stats?.totalLogs)],
+        ['Last 24 Hours', formatNumber(stats?.recentActivity)]
       ],
-      styles: { halign: 'center' }
+      theme: 'grid',
+      headStyles,
+      styles: commonStyles,
+      columnStyles: { 0: { cellWidth: 110 }, 1: { cellWidth: 70 } }
     });
 
-    yPos = doc.lastAutoTable.finalY + 10;
+    yPos = doc.lastAutoTable.finalY + 16;
 
-    // ----- Action Breakdown -----
-    if (stats.actionBreakdown) {
+    // ----- Actions Breakdown -----
+    if (stats?.actionBreakdown) {
+      doc.setFontSize(14);
+      doc.setTextColor(0, 0, 0);
+      doc.text('Actions Breakdown', 15, yPos);
+      yPos += 4;
+
+      const actionBody = Object.entries(stats.actionBreakdown).map(([action, count]) => [
+        action,
+        formatNumber(count),
+        `${stats?.totalLogs ? ((count / stats.totalLogs) * 100).toFixed(1) : 0}%`
+      ]);
+
       autoTable(doc, {
         startY: yPos,
         head: [['Action', 'Count', 'Percentage']],
-        body: Object.entries(stats.actionBreakdown).map(([action, count]) => [
-          action,
-          count,
-          `${((count / stats.totalLogs) * 100).toFixed(1)}%`
-        ]),
-        theme: 'grid'
+        body: actionBody,
+        theme: 'grid',
+        headStyles,
+        styles: commonStyles,
+        columnStyles: { 0: { cellWidth: 80 }, 1: { cellWidth: 50 }, 2: { cellWidth: 50 } }
       });
-      yPos = doc.lastAutoTable.finalY + 10;
+
+      yPos = doc.lastAutoTable.finalY + 16;
     }
 
     // ----- Entity Breakdown -----
-    if (stats.entityBreakdown) {
+    if (stats?.entityBreakdown) {
+      doc.setFontSize(14);
+      doc.setTextColor(0, 0, 0);
+      doc.text('Entity Breakdown', 15, yPos);
+      yPos += 4;
+
+      const entityBody = Object.entries(stats.entityBreakdown).map(([entity, count]) => [
+        entity,
+        formatNumber(count),
+        `${stats?.totalLogs ? ((count / stats.totalLogs) * 100).toFixed(1) : 0}%`
+      ]);
+
       autoTable(doc, {
         startY: yPos,
         head: [['Entity', 'Count', 'Percentage']],
-        body: Object.entries(stats.entityBreakdown).map(([entity, count]) => [
-          entity,
-          count,
-          `${((count / stats.totalLogs) * 100).toFixed(1)}%`
-        ]),
-        theme: 'grid'
+        body: entityBody,
+        theme: 'grid',
+        headStyles,
+        styles: commonStyles,
+        columnStyles: { 0: { cellWidth: 80 }, 1: { cellWidth: 50 }, 2: { cellWidth: 50 } }
       });
-      yPos = doc.lastAutoTable.finalY + 10;
+
+      yPos = doc.lastAutoTable.finalY + 16;
     }
 
-    // ----- Detailed User Activity Breakdown -----
-    if (stats.detailedUserBreakdown && Object.keys(stats.detailedUserBreakdown).length > 0) {
-      Object.entries(stats.detailedUserBreakdown).forEach(([entityType, users], idx) => {
-        autoTable(doc, {
-          startY: yPos,
-          head: [['Entity Type', 'User Name', 'Register ID', 'Total Actions', 'Actions']],
-          body: users.map(user => [
-            entityType,
-            user.userName,
-            user.registerId,
-            user.totalActions,
-            Object.entries(user.actions)
-              .map(([action, count]) => `${action}: ${count}`)
-              .join(', ')
-          ]),
-          theme: 'grid'
-        });
-        yPos = doc.lastAutoTable.finalY + 10;
+    // ----- Detailed User Activity Breakdown (per entity type) -----
+    if (stats?.detailedUserBreakdown && Object.keys(stats.detailedUserBreakdown).length > 0) {
+      const entries = Object.entries(stats.detailedUserBreakdown);
 
-        // If near page bottom, add new page
-        if (yPos > 260 && idx !== Object.keys(stats.detailedUserBreakdown).length - 1) {
+      for (let idx = 0; idx < entries.length; idx++) {
+        const [entityType, users] = entries[idx];
+
+        // If near bottom, add new page (kept similar spacing logic)
+        if (yPos > 250) {
           doc.addPage();
           yPos = 20;
         }
-      });
+
+        // Section heading uses entity type instead of a column (spacing like StatsPrint)
+        doc.setFontSize(14);
+        doc.setTextColor(0, 0, 0);
+        doc.text(`Entity Type - ${entityType}`, 15, yPos);
+        yPos += 4;
+
+        const body = (users || []).map((user) => [
+          user.userName || '-',
+          user.registerId || '-',
+          formatNumber(user.totalActions || 0),
+          Object.entries(user.actions || {})
+            .map(([action, cnt]) => `${action}: ${cnt}`)
+            .join(', ')
+        ]);
+
+        autoTable(doc, {
+          startY: yPos,
+          head: [['User Name', 'Register ID', 'Total Actions', 'Actions']],
+          body,
+          theme: 'grid',
+          headStyles,
+          styles: commonStyles,
+          columnStyles: { 0: { cellWidth: 50 }, 1: { cellWidth: 30 }, 2: { cellWidth: 30 }, 3: { cellWidth: 70 } }
+        });
+
+        yPos = doc.lastAutoTable.finalY + 16;
+      }
     }
 
-    // ----- Footer -----
+    // Footer: timestamp + page numbers (copied exact behavior from StatsPrint)
     const pageCount = doc.internal.getNumberOfPages();
     for (let i = 1; i <= pageCount; i++) {
       doc.setPage(i);
-      doc.setFontSize(9);
-      doc.text(`Generated on: ${timestamp}`, 15, doc.internal.pageSize.height - 10);
-      doc.text(
-        `Page ${i} of ${pageCount}`,
-        doc.internal.pageSize.width - 40,
-        doc.internal.pageSize.height - 10
-      );
+      doc.setFontSize(8);
+      doc.text(`Generated on: ${new Date().toLocaleString()}`, 15, doc.internal.pageSize.height - 10);
+      doc.text(`Page ${i} of ${pageCount}`, doc.internal.pageSize.width - 20, doc.internal.pageSize.height - 10, { align: 'right' });
     }
 
-    doc.save('Log_Stats_Report.pdf');
+    doc.save('Activity_Logs_Statistics_Report.pdf');
   };
 
   return (
