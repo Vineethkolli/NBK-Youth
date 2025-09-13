@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { ArrowLeft, X, ChevronLeft, ChevronRight, Download } from 'lucide-react';
 
-function MediaLightbox({ 
-  mediaFiles, 
-  currentIndex, 
-  momentTitle, 
-  onClose, 
-  onDelete 
+function MediaLightbox({
+  mediaFiles,
+  currentIndex,
+  momentTitle,
+  onClose,
+  onDelete
 }) {
   const [activeIndex, setActiveIndex] = useState(currentIndex);
   const [touchStart, setTouchStart] = useState(null);
@@ -100,7 +100,7 @@ function MediaLightbox({
   };
 
   return (
-    <div 
+    <div
       className="fixed inset-0 bg-black z-50 flex flex-col"
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
@@ -131,16 +131,16 @@ function MediaLightbox({
       </div>
 
       {/* Media Display */}
-      <div className="flex-1 flex items-center justify-center relative p-4">
+      <div className="flex-1 flex items-center justify-center relative overflow-hidden">
         {currentMedia.type === 'image' ? (
           <img
             src={getImageUrl(currentMedia.url)}
             alt={currentMedia.name}
-            className="max-w-full max-h-full object-contain"
+            className="max-w-[90%] max-h-[90%] object-contain"
             onError={(e) => { e.target.onerror = null; e.target.src='https://placehold.co/800x600/000000/ffffff?text=Image+Not+Found'; }}
           />
         ) : (
-          <div className="relative w-full h-full max-w-4xl aspect-video">
+          <div className="relative w-full h-full max-w-4xl p-2 aspect-video">
             <iframe
               src={getVideoPlayerUrl(currentMedia.url)}
               className="w-full h-full border-0"
@@ -186,7 +186,7 @@ function MediaLightbox({
               downloadFile(dl, currentMedia.name);
             }
           }}
-          className="fixed bottom-6 right-6 p-3 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 shadow-lg z-10"
+          className="fixed bottom-4 right-5 p-3 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 shadow-lg z-10"
           title="Download"
         >
           <Download className="h-5 w-5" />
