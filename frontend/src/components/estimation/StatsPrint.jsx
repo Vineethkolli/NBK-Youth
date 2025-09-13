@@ -7,7 +7,6 @@ import { useEventLabel } from '../../context/EventLabelContext';
 const StatsPrint = ({ stats, budgetStats }) => {
   const { eventLabel } = useEventLabel();
 
-  // Format numbers as per Indian numbering
   const formatAmount = (amount) => {
     return new Intl.NumberFormat('en-IN', {
       minimumFractionDigits: 0,
@@ -15,9 +14,13 @@ const StatsPrint = ({ stats, budgetStats }) => {
     }).format(amount);
   };
 
-  // Display negative amounts with shortage text
-  const displayAmountWithShortage = (amount) => {
-    return amount < 0 ? `${formatAmount(amount)} (Shortage)` : formatAmount(amount);
+  const formatAmountAsString = (amount) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount);
   };
 
   const handlePrint = () => {
@@ -127,7 +130,7 @@ const StatsPrint = ({ stats, budgetStats }) => {
         formatAmount((stats.villagersPaid || 0) + (stats.villagersNotPaid || 0))
       ],
       ['Estimated Expense', `${stats.expenseCount || 0} `, formatAmount(stats.totalEstimatedExpense)],
-      ['Amount Left', '-', displayAmountWithShortage(stats.balance)]
+      ['Amount Left', '-', stats.balance < 0 ? `${formatAmount(stats.balance)} (Shortage)` : formatAmount(stats.balance)]
     ];
 
     autoTable(doc, {
@@ -151,7 +154,7 @@ const StatsPrint = ({ stats, budgetStats }) => {
           } else {
             doc.setTextColor(0, 0, 0);  
           }
-          doc.text(displayAmountWithShortage(stats.balance), cellCenterX, cellCenterY, { align: 'center' });
+          doc.text(stats.balance < 0 ? `${formatAmount(stats.balance)} (Shortage)` : formatAmount(stats.balance), cellCenterX, cellCenterY, { align: 'center' });
           doc.setTextColor(0, 0, 0);
         }
       }

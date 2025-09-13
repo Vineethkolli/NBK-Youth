@@ -1,7 +1,12 @@
 import { IndianRupee, TrendingUp, TrendingDown, AlertTriangle, CheckCircle, DollarSign } from 'lucide-react';
 import StatsPrint from './StatsPrint';
+import StatsTeluguPrint from './StatsTeluguPrint';
+import { useLanguage } from '../../context/LanguageContext';
 
 function EstimationStats({ stats, budgetStats }) {
+  const { language } = useLanguage();
+  const PrintComponent = language === 'te' ? StatsTeluguPrint : StatsPrint;
+
   const noTranslate = (value) => {
     return <span translate="no" className="notranslate">{value}</span>;
   };
@@ -52,7 +57,7 @@ function EstimationStats({ stats, budgetStats }) {
   return (
     <div className="space-y-6">
       <div className="flex justify-end mb-0">
-        <StatsPrint stats={stats} budgetStats={budgetStats} />
+        <PrintComponent stats={stats} budgetStats={budgetStats} />
       </div>
 
       {/* Comparison Cards */}

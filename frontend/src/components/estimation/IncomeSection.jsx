@@ -6,9 +6,13 @@ import { API_URL } from '../../utils/config';
 import EstimatedIncomeTable from './IncomeTable';
 import EstimationForm from './Form';
 import IncomePrint from './IncomePrint';
+import IncomeTeluguPrint from './IncomeTeluguPrint';
 import { useAuth } from '../../context/AuthContext';
+import { useLanguage } from '../../context/LanguageContext';
 
 function IncomeSection({ refreshStats }) {
+  const { language } = useLanguage();
+  const PrintComponent = language === 'te' ? IncomeTeluguPrint : IncomePrint;
   const [incomes, setIncomes] = useState([]);
   const [incomeFilters, setIncomeFilters] = useState({
     status: '',
@@ -115,7 +119,7 @@ function IncomeSection({ refreshStats }) {
     <span>Add</span>
   </button>
 )}
-  <IncomePrint 
+  <PrintComponent 
     incomes={incomes} 
     visibleColumns={incomeColumns} 
     incomeFilters={incomeFilters} 

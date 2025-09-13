@@ -6,9 +6,13 @@ import { API_URL } from '../../utils/config';
 import EstimatedExpenseTable from "./ExpenseTable"; 
 import EstimationForm from './Form';
 import ExpensePrint from './ExpensePrint'; 
+import ExpenseTeluguPrint from './ExpenseTeluguPrint';
 import { useAuth } from '../../context/AuthContext';
+import { useLanguage } from '../../context/LanguageContext';
 
 function ExpenseSection({ refreshStats }) {
+  const { language } = useLanguage();
+  const PrintComponent = language === 'te' ? ExpenseTeluguPrint : ExpensePrint;
   const [expenses, setExpenses] = useState([]);
   const [expenseFilters, setExpenseFilters] = useState({
     sortField: 'presentAmount',
@@ -135,7 +139,7 @@ useEffect(() => {
   </button>
 )}
           {/* Print button */}
-          <ExpensePrint expenses={expenses} visibleColumns={expenseColumns} />
+          <PrintComponent expenses={expenses} visibleColumns={expenseColumns} />
         </div>
       </div>
       
