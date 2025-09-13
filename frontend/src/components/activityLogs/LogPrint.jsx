@@ -120,8 +120,8 @@ const ActivityLogPrint = ({ filters, search }) => {
   };
 
   return (
-    <button onClick={handlePrint} className="btn-secondary">
-      <Printer className="h-4 w-4 mr-2 inline" />
+    <button onClick={handlePrint} className="btn-secondary flex items-center">
+      <Printer className="h-4 w-4 mr-1 inline" />
       <span>Print</span>
     </button>
   );

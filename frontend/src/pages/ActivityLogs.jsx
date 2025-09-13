@@ -8,6 +8,7 @@ import LogTable from '../components/activityLogs/LogTable';
 import LogFilters from '../components/activityLogs/LogFilters';
 import LogStats from '../components/activityLogs/LogStats';
 import LogPrint from '../components/activityLogs/LogPrint';
+import LogStatsPrint from '../components/activityLogs/LogStatsPrint';
 
 function ActivityLogs() {
   const { user } = useAuth();
@@ -111,8 +112,12 @@ function ActivityLogs() {
             Stats
           </button>
 
-          {/* Print button aligned with tabs */}
-          <LogPrint filters={filters} search={search} />
+          {/* Print button will change based on activeTab */}
+          {activeTab === 'logs' ? (
+            <LogPrint filters={filters} search={search} />
+          ) : (
+            <LogStatsPrint stats={stats} />
+          )}
         </div>
       </div>
 
