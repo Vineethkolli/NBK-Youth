@@ -1,6 +1,15 @@
 import { useState } from 'react';
 import { X } from 'lucide-react';
 
+function capitalizeWords(input) {
+  return input
+    .split(' ')
+    .map(word =>
+      word ? word.charAt(0).toUpperCase() + word.slice(1).toLowerCase() : ''
+    )
+    .join(' ');
+}
+
 function PlayerForm({ onSubmit, onClose }) {
   const [playerName, setPlayerName] = useState('');
   const [error, setError] = useState('');
@@ -35,8 +44,8 @@ function PlayerForm({ onSubmit, onClose }) {
               required
               value={playerName}
               onChange={(e) => {
-                setPlayerName(e.target.value);
-                setError('');
+                const formatted = capitalizeWords(e.target.value);
+                setPlayerName(formatted);
               }}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
             />
