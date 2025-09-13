@@ -25,19 +25,26 @@ DIRECTORY STRUCTURE
 |   |       committeeController.js
 |   |       developerController.js
 |   |       estimationController.js
+|   |       eventLabelController.js
 |   |       expenseController.js
 |   |       gameController.js
 |   |       hiddenProfileController.js
+|   |       historyController.js
 |   |       homepageController.js
 |   |       incomeController.js
+|   |       lockSettingsController.js
 |   |       maintenanceController.js
 |   |       momentController.js
+|   |       momentMediaController.js
 |   |       notificationController.js
 |   |       paymentController.js
 |   |       paymentDetailsController.js
+|   |       recordsController.js
+|   |       snapshotController.js
 |   |       statsController.js
 |   |       usersController.js
 |   |       verificationController.js
+|   |       viniController.js
 |   |       
 |   +---middleware
 |   |       activityLogger.js
@@ -46,15 +53,22 @@ DIRECTORY STRUCTURE
 |   +---models
 |   |       ActivityLog.js
 |   |       Banner.js
+|   |       ChatHistory.js
 |   |       Collection.js
 |   |       Committee.js
+|   |       Counter.js
 |   |       EstimatedExpense.js
 |   |       EstimatedIncome.js
 |   |       Event.js
+|   |       EventLabel.js
+|   |       EventRecord.js
 |   |       Expense.js
+|   |       FinancialRecord.js
 |   |       Game.js
 |   |       HiddenProfile.js
+|   |       History.js
 |   |       Income.js
+|   |       LockSettings.js
 |   |       MaintenanceMode.js
 |   |       Moment.js
 |   |       Notification.js
@@ -63,7 +77,10 @@ DIRECTORY STRUCTURE
 |   |       Payment.js
 |   |       PaymentDetails.js
 |   |       PreviousYear.js
+|   |       ProcessedChunk.js
+|   |       ProcessedRecords.js
 |   |       Slide.js
+|   |       Snapshot.js
 |   |       User.js
 |   |       
 |   +---routes
@@ -74,21 +91,33 @@ DIRECTORY STRUCTURE
 |   |       committee.js
 |   |       developer.js
 |   |       estimation.js
+|   |       eventLabel.js
 |   |       expenses.js
 |   |       games.js
 |   |       hiddenProfiles.js
+|   |       histories.js
 |   |       homepage.js
 |   |       incomes.js
+|   |       lockSettings.js
 |   |       maintenance.js
 |   |       moments.js
 |   |       notifications.js
 |   |       payment.js
 |   |       paymentDetails.js
+|   |       records.js
+|   |       snapshots.js
 |   |       stats.js
 |   |       users.js
 |   |       verification.js
+|   |       vini.js
+|   |       
+|   +---services
+|   |       embeddingService.js
+|   |       processedRecordsService.js
+|   |       viniService.js
 |   |       
 |   \---utils
+|           driveUtils.js
 |           emailService.js
 |           setupDefaults.js
 |           
@@ -105,41 +134,25 @@ DIRECTORY STRUCTURE
     |   vercel.json
     |   vite.config.js
     |   
-    +---dev-dist
-    |       registerSW.js
-    |       sw.js
-    |       workbox-2e2c7e18.js
-    |       
-    +---dist
-    |   |   index.html
-    |   |   logo.png
-    |   |   manifest.json
-    |   |   manifest.webmanifest
-    |   |   notificationlogo.png
-    |   |   registerSW.js
-    |   |   sw.js
-    |   |   
-    |   \---assets
-    |           html2canvas.esm-CBrSDip1.js
-    |           index-B6Tgvw9K.js
-    |           index-D5Bdzh-a.css
-    |           index.es-Htf3CKeG.js
-    |           purify.es-a-CayzAK.js
-    |           
     +---public
-    |       developerImage.png
-    |       logo-128x128.png
-    |       logo-144x144.png
-    |       logo-152x152.png
-    |       logo-192x192.png
-    |       logo-384x384.png
-    |       logo-512x512.png
-    |       logo-72x72.png
-    |       logo-96x96.png
-    |       logo.png
-    |       manifest.json
-    |       notificationlogo.png
-    |       
+    |   |   developerImage.png
+    |   |   google1f3713de9cdfe399.html
+    |   |   manifest.json
+    |   |   
+    |   \---logo
+    |           1200x630.png
+    |           128.png
+    |           144.png
+    |           152.png
+    |           16.png
+    |           167.png
+    |           180.png
+    |           192.png
+    |           32.png
+    |           512.png
+    |           96.png
+    |           notificationlogo.png
+    |           
     \---src
         |   App.jsx
         |   index.css
@@ -156,7 +169,17 @@ DIRECTORY STRUCTURE
         |   |       LogFilters.jsx
         |   |       LogPrint.jsx
         |   |       LogStats.jsx
+        |   |       LogStatsPrint.jsx
         |   |       LogTable.jsx
+        |   |       
+        |   +---adminPanel
+        |   |       BannerManager.jsx
+        |   |       EventLabelManager.jsx
+        |   |       LockManager.jsx
+        |   |       MaintenanceMode.jsx
+        |   |       PaymentDetails.jsx
+        |   |       PopupBanner.jsx
+        |   |       Stats.jsx
         |   |       
         |   +---auth
         |   |       ForgotPassword.jsx
@@ -165,24 +188,28 @@ DIRECTORY STRUCTURE
         |   |       OTPVerification.jsx
         |   |       ResetPassword.jsx
         |   |       
+        |   +---common
+        |   |       EventLabelDisplay.jsx
+        |   |       LockIndicator.jsx
+        |   |       
         |   +---developer
-        |   |       BannerManager.jsx
         |   |       ClearData.jsx
-        |   |       MaintenanceMode.jsx
-        |   |       PaymentDetails.jsx
-        |   |       PopupBanner.jsx
-        |   |       Stats.jsx
+        |   |       ProcessedDataManager.jsx
+        |   |       SnapshotManager.jsx
         |   |       
         |   +---estimation
         |   |       ExpensePrint.jsx
         |   |       ExpenseSection.jsx
         |   |       ExpenseTable.jsx
+        |   |       ExpenseTeluguPrint.jsx
         |   |       Form.jsx
         |   |       IncomePrint.jsx
         |   |       IncomeSection.jsx
         |   |       IncomeTable.jsx
+        |   |       IncomeTeluguPrint.jsx
         |   |       Stats.jsx
         |   |       StatsPrint.jsx
+        |   |       StatsTeluguPrint.jsx
         |   |       
         |   +---expense
         |   |       ExpenseEnglishPrint.jsx
@@ -198,10 +225,20 @@ DIRECTORY STRUCTURE
         |   |       PlayerList.jsx
         |   |       TimeForm.jsx
         |   |       
+        |   +---histories
+        |   |       HistoryEnglishPrint.jsx
+        |   |       HistoryEvents.jsx
+        |   |       HistoryExpense.jsx
+        |   |       HistoryForm.jsx
+        |   |       HistoryIncome.jsx
+        |   |       HistoryStats.jsx
+        |   |       HistoryTeluguPrint.jsx
+        |   |       
         |   +---home
         |   |       InstallApp.jsx
-        |   |       SlideOrder.jsx
+        |   |       NotificationPrompt.jsx
         |   |       Slideshow.jsx
+        |   |       SlidesOrder.jsx
         |   |       Timeline.jsx
         |   |       
         |   +---income
@@ -212,11 +249,19 @@ DIRECTORY STRUCTURE
         |   |       IncomeTeluguPrint.jsx
         |   |       
         |   +---moments
+        |   |       MediaDriveForm.jsx
+        |   |       MediaGallery.jsx
+        |   |       MediaGalleryReorder.jsx
+        |   |       MediaLightbox.jsx
         |   |       MediaPreview.jsx
+        |   |       MediaUploadForm.jsx
         |   |       MomentForm.jsx
         |   |       MomentGrid.jsx
+        |   |       MomentReorder.jsx
+        |   |       WatchMore.jsx
         |   |       
         |   +---notifications
+        |   |       NotificationAutoRegister.jsx
         |   |       NotificationForm.jsx
         |   |       NotificationHistory.jsx
         |   |       
@@ -227,6 +272,12 @@ DIRECTORY STRUCTURE
         |   +---profile
         |   |       ProfileImage.jsx
         |   |       ProfileImageDialog.jsx
+        |   |       
+        |   +---records
+        |   |       EventRecordForm.jsx
+        |   |       EventRecordsGrid.jsx
+        |   |       FinancialRecordForm.jsx
+        |   |       FinancialTimeline.jsx
         |   |       
         |   +---settings
         |   |       InstallApp.jsx
@@ -245,18 +296,24 @@ DIRECTORY STRUCTURE
         |   |       VerificationFilters.jsx
         |   |       VerificationTable.jsx
         |   |       
-        |   \---vibe
-        |           CollectionItem.jsx
-        |           CollectionManager.jsx
-        |           MusicPlayer.jsx
-        |           SearchBar.jsx
-        |           SongItem.jsx
-        |           SubCollectionItem.jsx
+        |   +---vibe
+        |   |       CollectionItem.jsx
+        |   |       CollectionManager.jsx
+        |   |       FloatingMusicIcon.jsx
+        |   |       MusicPlayer.jsx
+        |   |       SearchBar.jsx
+        |   |       SongItem.jsx
+        |   |       
+        |   \---vini
+        |           ChatWidget.jsx
+        |           FloatingButton.jsx
         |           
         +---context
         |       AuthContext.jsx
+        |       EventLabelContext.jsx
         |       HiddenProfileContext.jsx
         |       LanguageContext.jsx
+        |       LockContext.jsx
         |       MaintenanceModeContext.jsx
         |       MusicContext.jsx
         |       
@@ -271,6 +328,7 @@ DIRECTORY STRUCTURE
         |       DeveloperOptions.jsx
         |       Estimation.jsx
         |       Expense.jsx
+        |       Histories.jsx
         |       Home.jsx
         |       Income.jsx
         |       LetsPlay.jsx
@@ -279,6 +337,7 @@ DIRECTORY STRUCTURE
         |       Notifications.jsx
         |       PayOnline.jsx
         |       Profile.jsx
+        |       Records.jsx
         |       RecycleBin.jsx
         |       Settings.jsx
         |       SignIn.jsx
@@ -288,12 +347,14 @@ DIRECTORY STRUCTURE
         |       Users.jsx
         |       Verification.jsx
         |       Vibe.jsx
+        |       vini.jsx
         |       
         \---utils
                 analytics.js
                 config.js
+                dateTime.js
                 gameUtils.js
-                mediaHelpers.js
+                notifications.js
                 paymentReceipt.js
                 roles.js
                 search.js
