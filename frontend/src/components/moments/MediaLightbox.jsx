@@ -136,7 +136,7 @@ function MediaLightbox({
           <img
             src={getImageUrl(currentMedia.url)}
             alt={currentMedia.name}
-            className="max-w-[90%] max-h-[90%] object-contain"
+            className="max-w-[95%] max-h-[95%] object-contain"
             onError={(e) => { e.target.onerror = null; e.target.src='https://placehold.co/800x600/000000/ffffff?text=Image+Not+Found'; }}
           />
         ) : (
