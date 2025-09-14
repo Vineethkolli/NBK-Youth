@@ -4,7 +4,7 @@ import CollectionManager from '../components/vibe/CollectionManager';
 import CollectionItem from '../components/vibe/CollectionItem';
 import SearchBar from '../components/vibe/SearchBar';
 import MusicPlayer from '../components/vibe/MusicPlayer';
-import UploadToCollectionForm from '../components/vibe/UploadToCollectionForm';
+import UploadToCollectionForm from '../components/vibe/UploadToCollection';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { API_URL } from '../utils/config';
@@ -58,19 +58,32 @@ function Vibe() {
 
   // Collection CRUD operations
   const handleCollectionEdit = async (collection) => {
-    const newName = prompt('Enter new collection name:', collection.name);
-    if (!newName || newName === collection.name) return;
+  const newName = prompt('Enter new collection name:', collection.name);
+  if (!newName || newName === collection.name) return;
 
-    try {
-      await axios.put(`${API_URL}/api/collections/${collection._id}`, {
-        name: newName
-      });
-      toast.success('Collection updated successfully');
-      fetchCollections();
-    } catch (error) {
-      toast.error('Failed to update collection');
-    }
-  };
+  // Check if a collection with same name (case-insensitive) already exists
+  const nameExists = collections.some(c =>
+    c._id !== collection._id && c.name.toLowerCase() === newName.trim().toLowerCase()
+  );
+
+  if (nameExists) {
+    toast.error('Failed to update collection');
+    toast.error('A collection with this name already exists');
+    return;
+  }
+
+  try {
+    await axios.put(`${API_URL}/api/collections/${collection._id}`, {
+      name: newName.trim()
+    });
+    toast.success('Collection updated successfully');
+    fetchCollections();
+  } catch (error) {
+    toast.error('Failed to update collection');
+  }
+};
+
+
 
   const handleCollectionDelete = async (collection) => {
     if (!window.confirm('Are you sure you want to delete this collection?')) return;
