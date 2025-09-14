@@ -15,7 +15,7 @@ const songSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-const collectionSchema = new mongoose.Schema({
+const vibeSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
@@ -29,4 +29,4 @@ const collectionSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-export default mongoose.model('Collection', collectionSchema);
+export default mongoose.model('VibeSong', vibeSchema);
