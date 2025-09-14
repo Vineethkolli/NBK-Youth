@@ -22,62 +22,79 @@ const CollectionController = {
 
   // Create collection
   createCollection: async (req, res) => {
-    try {
-      const collection = await Collection.create({
-        name: req.body.name,
-        createdBy: req.user.id
-      });
+  try {
+    const name = req.body.name.trim();
+    const existing = await Collection.findOne({
+      name: { $regex: `^${name}$`, $options: 'i' } // case-insensitive match
+    });
 
-      // Log collection creation
-      await logActivity(
-        req,
-        'CREATE',
-        'Collection',
-        collection._id.toString(),
-        { before: null, after: collection.toObject() },
-        `Collection "${collection.name}" created by ${req.user.name}`
-      );
-
-      res.status(201).json(collection);
-    } catch (error) {
-      res.status(500).json({ message: 'Failed to create collection' });
+    if (existing) {
+      return res.status(400).json({ message: 'Collection name already exists' });
     }
-  },
+
+    const collection = await Collection.create({
+      name,
+      createdBy: req.user.id
+    });
+
+    await logActivity(
+      req,
+      'CREATE',
+      'Collection',
+      collection._id.toString(),
+      { before: null, after: collection.toObject() },
+      `Collection "${collection.name}" created by ${req.user.name}`
+    );
+
+    res.status(201).json(collection);
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to create collection' });
+  }
+},
+
 
   // Update collection
   updateCollection: async (req, res) => {
-    try {
-      const originalCollection = await Collection.findById(req.params.id);
-      if (!originalCollection) {
-        return res.status(404).json({ message: 'Collection not found' });
-      }
+  try {
+    const name = req.body.name.trim();
 
-      const originalData = originalCollection.toObject();
+    // Check if another collection already has this name (case-insensitive)
+    const existing = await Collection.findOne({
+      _id: { $ne: req.params.id }, // exclude current collection
+      name: { $regex: `^${name}$`, $options: 'i' }
+    });
 
-      const collection = await Collection.findByIdAndUpdate(
-        req.params.id,
-        { name: req.body.name },
-        { new: true }
-      );
-      if (!collection) {
-        return res.status(404).json({ message: 'Collection not found' });
-      }
-
-      // Log collection update
-      await logActivity(
-        req,
-        'UPDATE',
-        'Collection',
-        collection._id.toString(),
-        { before: originalData, after: collection.toObject() },
-        `Collection "${collection.name}" updated by ${req.user.name}`
-      );
-
-      res.json(collection);
-    } catch (error) {
-      res.status(500).json({ message: 'Failed to update collection' });
+    if (existing) {
+      return res.status(400).json({ message: 'Collection name already exists' });
     }
-  },
+
+    const originalCollection = await Collection.findById(req.params.id);
+    if (!originalCollection) {
+      return res.status(404).json({ message: 'Collection not found' });
+    }
+
+    const originalData = originalCollection.toObject();
+
+    const collection = await Collection.findByIdAndUpdate(
+      req.params.id,
+      { name },
+      { new: true }
+    );
+
+    await logActivity(
+      req,
+      'UPDATE',
+      'Collection',
+      collection._id.toString(),
+      { before: originalData, after: collection.toObject() },
+      `Collection "${collection.name}" updated by ${req.user.name}`
+    );
+
+    res.json(collection);
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to update collection' });
+  }
+},
 
   // Delete collection
   deleteCollection: async (req, res) => {
