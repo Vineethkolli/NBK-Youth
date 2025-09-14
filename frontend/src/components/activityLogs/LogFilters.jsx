@@ -105,7 +105,7 @@ function LogFilters({ filters, onChange }) {
         <option value="Event">Event</option>
         <option value="Slide">Slide</option>
         <option value="Notification">Notification</option>
-        <option value="Collection">Vibe</option>
+        <option value="Vibe">Vibe</option>
         <option value="Moment">Moment</option>
         <option value="Game">Game</option>
         <option value="Committee">Committee</option>
