@@ -89,31 +89,37 @@ const ActivityLogPrint = ({ filters, search }) => {
       });
 
       // Title
-      doc.setFontSize(16);
-      doc.text(title, doc.internal.pageSize.getWidth() / 2, 15, {
-        align: 'center',
-      });
+doc.setFontSize(16);
+doc.text(title, doc.internal.pageSize.getWidth() / 2, 15, {
+  align: 'center',
+});
 
-      autoTable(doc, {
-        head: [headers],
-        body: rows,
-        startY: 25,
-        styles: { fontSize: 10 },
-        didDrawPage: (data) => {
-          const pageCount = doc.internal.getNumberOfPages();
-          const pageNum = doc.internal.getCurrentPageInfo().pageNumber;
-          const pageWidth = doc.internal.pageSize.getWidth();
-          const pageHeight = doc.internal.pageSize.getHeight();
+// Generate the table (NO footer here yet)
+autoTable(doc, {
+  head: [headers],
+  body: rows,
+  startY: 25,
+  styles: { fontSize: 10 },
+});
 
-          doc.setFontSize(9);
-          doc.text(`Generated: ${timestamp}`, data.settings.margin.left, pageHeight - 10);
-          doc.text(`Page ${pageNum}/${pageCount}`, pageWidth - data.settings.margin.right, pageHeight - 10, {
-            align: 'right',
-          });
-        },
-      });
+// ✅ Now all pages exist, so we can add correct page numbers
+const pageCount = doc.internal.getNumberOfPages();
+const pageWidth = doc.internal.pageSize.getWidth();
+const pageHeight = doc.internal.pageSize.getHeight();
+const marginLeft = 10;
+const marginRight = 10;
 
-      doc.save('Activity_Logs_Report.pdf');
+for (let i = 1; i <= pageCount; i++) {
+  doc.setPage(i);
+  doc.setFontSize(9);
+  doc.text(`Generated: ${timestamp}`, marginLeft, pageHeight - 10);
+  doc.text(`Page ${i} of ${pageCount}`, pageWidth - marginRight, pageHeight - 10, {
+    align: 'right',
+  });
+}
+
+doc.save('Activity_Logs_Report.pdf');
+
     } catch (err) {
       toast.error('Failed to fetch all logs for printing');
     }
