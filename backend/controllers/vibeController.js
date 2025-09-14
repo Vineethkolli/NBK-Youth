@@ -1,4 +1,4 @@
-import Collection from '../models/Collection.js';
+import Collection from '../models/Vibe.js';
 import cloudinary from '../config/cloudinary.js';
 import { uploadToCloudinary } from '../config/cloudinary.js';
 import { logActivity } from '../middleware/activityLogger.js';
@@ -9,7 +9,7 @@ const extractPublicId = (url) => {
   return `Vibe/${filename.split('.')[0]}`;
 };
 
-const CollectionController = {
+const VibeController = {
   // Get all collections
   getAllCollections: async (req, res) => {
     try {
@@ -240,4 +240,4 @@ const CollectionController = {
   }
 };
 
-export default CollectionController;
+export default VibeController;
