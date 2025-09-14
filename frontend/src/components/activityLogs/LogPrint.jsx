@@ -23,6 +23,8 @@ const ActivityLogPrint = ({ filters, search }) => {
       const doc = new jsPDF();
       const title = 'Activity Logs Report';
       const timestamp = new Date().toLocaleString();
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
 
       const headers = [
         'S.No',
@@ -89,36 +91,28 @@ const ActivityLogPrint = ({ filters, search }) => {
       });
 
       // Title
-doc.setFontSize(16);
-doc.text(title, doc.internal.pageSize.getWidth() / 2, 15, {
-  align: 'center',
-});
+      doc.setFontSize(16);
+      doc.text(title, pageWidth / 2, 15, { align: 'center' });
 
-// Generate the table (NO footer here yet)
-autoTable(doc, {
-  head: [headers],
-  body: rows,
-  startY: 25,
-  styles: { fontSize: 10 },
-});
+      // Table
+      autoTable(doc, {
+        head: [headers],
+        body: rows,
+        startY: 25,
+        styles: { fontSize: 10 },
+      });
 
-// ✅ Now all pages exist, so we can add correct page numbers
-const pageCount = doc.internal.getNumberOfPages();
-const pageWidth = doc.internal.pageSize.getWidth();
-const pageHeight = doc.internal.pageSize.getHeight();
-const marginLeft = 10;
-const marginRight = 10;
+      // Footer: timestamp on left, page number on right
+      const pageCount = doc.getNumberOfPages();
+      for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        doc.setFontSize(9);
+        doc.setTextColor(100, 100, 100);
+        doc.text(`Generated on: ${timestamp}`, 10, pageHeight - 10);
+        doc.text(`Page ${i} of ${pageCount}`, pageWidth - 30, pageHeight - 10);
+      }
 
-for (let i = 1; i <= pageCount; i++) {
-  doc.setPage(i);
-  doc.setFontSize(9);
-  doc.text(`Generated: ${timestamp}`, marginLeft, pageHeight - 10);
-  doc.text(`Page ${i} of ${pageCount}`, pageWidth - marginRight, pageHeight - 10, {
-    align: 'right',
-  });
-}
-
-doc.save('Activity_Logs_Report.pdf');
+      doc.save('Activity_Logs_Report.pdf');
 
     } catch (err) {
       toast.error('Failed to fetch all logs for printing');

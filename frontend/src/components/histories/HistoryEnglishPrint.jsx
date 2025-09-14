@@ -56,13 +56,12 @@ function EnglishPrint({ selectedHistory, activeTab, data, showBelongsTo }) {
     const pageCount = doc.internal.getNumberOfPages();
     for (let i = 1; i <= pageCount; i++) {
       doc.setPage(i);
-      doc.setFontSize(8);
-      doc.text(`Generated on: ${timestamp}`, 15, doc.internal.pageSize.height - 10);
+      doc.setFontSize(9);
+      doc.text(`Generated on: ${timestamp}`, 10, doc.internal.pageSize.height - 10);
       doc.text(
         `Page ${i} of ${pageCount}`,
-        doc.internal.pageSize.width - 20,
+        doc.internal.pageSize.width - 30,
         doc.internal.pageSize.height - 10,
-        { align: 'right' }
       );
     }
 

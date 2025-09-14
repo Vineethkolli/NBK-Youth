@@ -221,22 +221,19 @@ const StatsPrint = ({ stats, budgetStats }) => {
     });
 
     // Footer: Add page numbers and timestamp on the bottom of each page
-    const pageCount = doc.internal.getNumberOfPages();
+    const timestamp = new Date().toLocaleString();
+    const pageCount = doc.getNumberOfPages();
     for (let i = 1; i <= pageCount; i++) {
       doc.setPage(i);
-      doc.setFontSize(8);
-      doc.text(`Generated on: ${new Date().toLocaleString()}`, 15, doc.internal.pageSize.height - 10);
-      doc.text(
-        `Page ${i} of ${pageCount}`,
-        doc.internal.pageSize.width - 20,
-        doc.internal.pageSize.height - 10,
-        { align: 'right' }
-      );
+      doc.setFontSize(9);
+      doc.setTextColor(100, 100, 100);
+      doc.text(`Generated on: ${timestamp}`, 10, doc.internal.pageSize.height - 10);
+      doc.text(`Page ${i} of ${pageCount}`, doc.internal.pageSize.width - 30, doc.internal.pageSize.height - 10);
     }
 
     doc.save('Estimation_Statistics_Report.pdf');
   };
-
+  
   return (
     <button onClick={handlePrint} className="btn-secondary flex items-center">
       <Printer className="h-4 w-4 mr-1 inline" />

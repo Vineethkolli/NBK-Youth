@@ -2,26 +2,37 @@ import React from 'react';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { Printer } from 'lucide-react';
+import { useEventLabel } from '../../context/EventLabelContext';
 
 const ExpensePrint = ({ expenses, visibleColumns }) => {
+  const { eventLabel } = useEventLabel();
+
   const generatePDF = () => {
     const doc = new jsPDF();
     const timestamp = new Date().toLocaleString();
-
     const pageWidth = doc.internal.pageSize.getWidth();
+
+    // Title
     doc.setFontSize(16);
-    doc.text("Estimated Expense", pageWidth / 2, 22, { align: 'center' });
+    doc.text('Estimated Expense', pageWidth / 2, 15, { align: 'center' });
 
-    // Prepare table columns based on the visibleColumns settings
+    // Event Label (optional)
+    if (eventLabel) {
+      doc.setFontSize(12);
+      doc.setTextColor(100, 100, 100);
+      doc.text(eventLabel.label, pageWidth / 2, 22, { align: 'center' });
+    }
+
+    // Table Columns
     const tableColumns = [];
-    if (visibleColumns.sno) tableColumns.push("S.No");
-    if (visibleColumns.registerId) tableColumns.push("Register ID");
-    if (visibleColumns.purpose) tableColumns.push("Purpose");
-    if (visibleColumns.previousAmount) tableColumns.push("Previous Amount");
-    if (visibleColumns.presentAmount) tableColumns.push("Present Amount");
-    if (visibleColumns.others) tableColumns.push("Others");
+    if (visibleColumns.sno) tableColumns.push('S.No');
+    if (visibleColumns.registerId) tableColumns.push('Register ID');
+    if (visibleColumns.purpose) tableColumns.push('Purpose');
+    if (visibleColumns.previousAmount) tableColumns.push('Previous Amount');
+    if (visibleColumns.presentAmount) tableColumns.push('Present Amount');
+    if (visibleColumns.others) tableColumns.push('Others');
 
-    // Prepare table rows dynamically from expenses
+    // Table Rows
     const tableRows = expenses.map((expense, index) => {
       const row = [];
       if (visibleColumns.sno) row.push(index + 1);
@@ -33,31 +44,33 @@ const ExpensePrint = ({ expenses, visibleColumns }) => {
       return row;
     });
 
-    // PDF table with autoTable, adding a footer with timestamp and page number
+    // Table
     autoTable(doc, {
-      startY: 30,
+      startY: eventLabel ? 30 : 25,
       head: [tableColumns],
       body: tableRows,
       margin: { top: 10 },
-      didDrawPage: (data) => {
-        const pageCount = doc.internal.getNumberOfPages();
-        doc.setFontSize(9);
-        // Footer: timestamp on the left
-        doc.text(
-          `Generated on: ${timestamp}`,
-          data.settings.margin.left,
-          doc.internal.pageSize.height - 10
-        );
-        // Footer: page number on the right
-        doc.text(
-          `Page ${doc.internal.getCurrentPageInfo().pageNumber} of ${pageCount}`,
-          doc.internal.pageSize.getWidth() - data.settings.margin.right - 30,
-          doc.internal.pageSize.height - 10
-        );
-      },
     });
 
-    // Save the generated PDF
+    // Add footer with timestamp and page numbers on every page
+    const pageCount = doc.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFontSize(9);
+
+      doc.text(
+        `Generated on: ${timestamp}`,
+        10,
+        doc.internal.pageSize.height - 10
+      );
+
+      doc.text(
+        `Page ${i} of ${pageCount}`,
+        doc.internal.pageSize.width - 30,
+        doc.internal.pageSize.height - 10
+      );
+    }
+
     doc.save('Estimated_Expense.pdf');
   };
 
