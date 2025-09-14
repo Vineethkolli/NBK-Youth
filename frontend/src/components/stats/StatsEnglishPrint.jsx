@@ -44,6 +44,7 @@ const StatsPrint = ({ stats }) => {
 
     // Budget Stats
     doc.setFontSize(14);
+    doc.setTextColor(0, 0, 0);
     doc.text('Budget Statistics', 15, yPos);
     yPos += 4;
     const amountLeft = stats.budgetStats.amountLeft.amount;
@@ -73,6 +74,7 @@ const StatsPrint = ({ stats }) => {
 
     // Payment Mode Stats
     doc.setFontSize(14);
+    doc.setTextColor(0, 0, 0);
     doc.text('Payment Mode Statistics', 15, yPos);
     yPos += 4;
     const paymentHead = ['Mode', 'Count', 'Amount Received', 'Amount Left'];
@@ -93,6 +95,7 @@ const StatsPrint = ({ stats }) => {
 
     // Villagers Stats
     doc.setFontSize(14);
+    doc.setTextColor(0, 0, 0);
     doc.text('Villagers Statistics', 15, yPos);
     yPos += 4;
     const villagersHead = ['Category', 'Cash', 'Online', 'Web App', 'Total'];
@@ -114,6 +117,7 @@ const StatsPrint = ({ stats }) => {
 
     // Youth Stats
     doc.setFontSize(14);
+    doc.setTextColor(0, 0, 0);
     doc.text('Youth Statistics', 15, yPos);
     yPos += 4;
     const youthHead = ['Category', 'Cash', 'Online', 'Web App', 'Total'];
@@ -139,6 +143,7 @@ const StatsPrint = ({ stats }) => {
       yPos = 20;
 
       doc.setFontSize(14);
+      doc.setTextColor(0, 0, 0);
       doc.text('Date-wise Statistics', 15, yPos);
       yPos += 4;
 
