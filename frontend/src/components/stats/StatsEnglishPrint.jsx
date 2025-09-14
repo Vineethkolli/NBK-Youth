@@ -20,6 +20,7 @@ const StatsPrint = ({ stats }) => {
 
   const handlePrint = () => {
     const doc = new jsPDF();
+    const timestamp = new Date().toLocaleString();
     let yPos = 20;
 
     // Title
@@ -31,7 +32,7 @@ const StatsPrint = ({ stats }) => {
     doc.text(title, xPos, yPos);
     yPos += 10;
 
-    // Add event label if it exists
+    // Event label
     if (eventLabel) {
       doc.setFontSize(12);
       doc.setTextColor(100, 100, 100);
@@ -130,43 +131,43 @@ const StatsPrint = ({ stats }) => {
       headStyles: { fillColor: [33, 115, 175], textColor: [255, 255, 255] },
       styles: { fontSize: 10, cellPadding: 2, rowHeight: 7, halign: 'center' }
     });
-
     yPos = doc.lastAutoTable.finalY + 16;
 
-// Date-wise Statistics
-if (stats.dateWiseStats && stats.dateWiseStats.length > 0) {
-  doc.addPage(); // <-- start on a new page
-  yPos = 20;
+    // Date-wise Statistics
+    if (stats.dateWiseStats && stats.dateWiseStats.length > 0) {
+      doc.addPage();
+      yPos = 20;
 
-  doc.setFontSize(14);
-  doc.text('Date-wise Statistics', 15, yPos);
-  yPos += 4;
-  
-  const dateWiseHead = ['Date', 'Total Income', 'Amount Received', 'Total Expenses'];
-  const dateWiseBody = stats.dateWiseStats.map(dayStat => [
-    new Date(dayStat.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'numeric', year: 'numeric' }),
-    `${formatAmount(dayStat.totalIncome)} (${dayStat.totalIncomeEntries} entries)`,
-    `${formatAmount(dayStat.amountReceived)} (${dayStat.amountReceivedEntries} entries)`,
-    `${formatAmount(dayStat.totalExpenses)} (${dayStat.totalExpenseEntries} entries)`
-  ]);
+      doc.setFontSize(14);
+      doc.text('Date-wise Statistics', 15, yPos);
+      yPos += 4;
 
-  autoTable(doc, {
-    startY: yPos,
-    head: [dateWiseHead],
-    body: dateWiseBody,
-    theme: 'grid',
-    headStyles: { fillColor: [33, 115, 175], textColor: [255, 255, 255] },
-    styles: { fontSize: 10, cellPadding: 2, rowHeight: 7, halign: 'center' }
-  });
-}
+      const dateWiseHead = ['Date', 'Total Income', 'Amount Received', 'Total Expenses'];
+      const dateWiseBody = stats.dateWiseStats.map(dayStat => [
+        new Date(dayStat.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'numeric', year: 'numeric' }),
+        `${formatAmount(dayStat.totalIncome)} (${dayStat.totalIncomeEntries} entries)`,
+        `${formatAmount(dayStat.amountReceived)} (${dayStat.amountReceivedEntries} entries)`,
+        `${formatAmount(dayStat.totalExpenses)} (${dayStat.totalExpenseEntries} entries)`
+      ]);
 
-    // Footer: timestamp + page numbers
-    const pageCount = doc.internal.getNumberOfPages();
+      autoTable(doc, {
+        startY: yPos,
+        head: [dateWiseHead],
+        body: dateWiseBody,
+        theme: 'grid',
+        headStyles: { fillColor: [33, 115, 175], textColor: [255, 255, 255] },
+        styles: { fontSize: 10, cellPadding: 2, rowHeight: 7, halign: 'center' }
+      });
+    }
+
+    // Footer: timestamp  and page X of Y 
+    const pageCount = doc.getNumberOfPages();
     for (let i = 1; i <= pageCount; i++) {
       doc.setPage(i);
-      doc.setFontSize(8);
-      doc.text(`Generated on: ${new Date().toLocaleString()}`, 15, doc.internal.pageSize.height - 10);
-      doc.text(`Page ${i} of ${pageCount}`, doc.internal.pageSize.width - 20, doc.internal.pageSize.height - 10, { align: 'right' });
+      doc.setFontSize(9);
+      doc.setTextColor(100);
+      doc.text(`Generated on: ${timestamp}`, 10, doc.internal.pageSize.height - 10);
+      doc.text(`Page ${i} of ${pageCount}`, doc.internal.pageSize.width - 30, doc.internal.pageSize.height - 10);
     }
 
     doc.save('Statistics_Report.pdf');

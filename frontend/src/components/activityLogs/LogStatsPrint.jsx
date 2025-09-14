@@ -14,7 +14,7 @@ const LogStatsPrint = ({ stats }) => {
     const doc = new jsPDF();
     let yPos = 20;
 
-    // Title (centered) - spacing copied from StatsPrint
+    // Title (centered)
     doc.setFontSize(20);
     doc.setTextColor(0, 0, 0);
     const title = 'Activity Logs Statistics Report';
@@ -23,7 +23,7 @@ const LogStatsPrint = ({ stats }) => {
     doc.text(title, xPos, yPos);
     yPos += 10;
 
-    // Shared styles (copied from StatsPrint)
+    // Shared styles
     const headStyles = { fillColor: [33, 115, 175], textColor: [255, 255, 255], fontSize: 10 };
     const commonStyles = { fontSize: 10, cellPadding: 2, rowHeight: 7, halign: 'center' };
 
@@ -100,20 +100,18 @@ const LogStatsPrint = ({ stats }) => {
       yPos = doc.lastAutoTable.finalY + 16;
     }
 
-    // ----- Detailed User Activity Breakdown (per entity type) -----
+    // ----- Detailed User Activity Breakdown -----
     if (stats?.detailedUserBreakdown && Object.keys(stats.detailedUserBreakdown).length > 0) {
       const entries = Object.entries(stats.detailedUserBreakdown);
 
       for (let idx = 0; idx < entries.length; idx++) {
         const [entityType, users] = entries[idx];
 
-        // If near bottom, add new page (kept similar spacing logic)
         if (yPos > 250) {
           doc.addPage();
           yPos = 20;
         }
 
-        // Section heading uses entity type instead of a column (spacing like StatsPrint)
         doc.setFontSize(14);
         doc.setTextColor(0, 0, 0);
         doc.text(`Entity Type - ${entityType}`, 15, yPos);
@@ -142,13 +140,15 @@ const LogStatsPrint = ({ stats }) => {
       }
     }
 
-    // Footer: timestamp + page numbers (copied exact behavior from StatsPrint)
-    const pageCount = doc.internal.getNumberOfPages();
+    // Footer
+    const timestamp = new Date().toLocaleString();
+    const pageCount = doc.getNumberOfPages();
     for (let i = 1; i <= pageCount; i++) {
       doc.setPage(i);
-      doc.setFontSize(8);
-      doc.text(`Generated on: ${new Date().toLocaleString()}`, 15, doc.internal.pageSize.height - 10);
-      doc.text(`Page ${i} of ${pageCount}`, doc.internal.pageSize.width - 20, doc.internal.pageSize.height - 10, { align: 'right' });
+      doc.setFontSize(9);
+      doc.setTextColor(100, 100, 100);
+      doc.text(`Generated on: ${timestamp}`, 10, doc.internal.pageSize.height - 10);
+      doc.text(`Page ${i} of ${pageCount}`, doc.internal.pageSize.width - 30, doc.internal.pageSize.height - 10);
     }
 
     doc.save('Activity_Logs_Statistics_Report.pdf');

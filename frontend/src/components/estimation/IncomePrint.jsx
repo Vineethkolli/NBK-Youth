@@ -2,12 +2,15 @@ import React from 'react';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { Printer } from 'lucide-react';
+import { useEventLabel } from '../../context/EventLabelContext';
 
 const IncomePrint = ({ incomes, visibleColumns, incomeFilters }) => {
+  const { eventLabel } = useEventLabel();
+
   const generatePDF = () => {
     // Clone incomes to avoid mutating the original array
     let sortedIncomes = [...incomes];
-    
+
     // Apply sorting if incomeFilters.sortOrder is provided
     if (incomeFilters && incomeFilters.sortOrder) {
       const { sortField, sortOrder } = incomeFilters;
@@ -17,14 +20,22 @@ const IncomePrint = ({ incomes, visibleColumns, incomeFilters }) => {
         return sortOrder === 'asc' ? aValue - bValue : bValue - aValue;
       });
     }
-    
+
     const doc = new jsPDF();
     const timestamp = new Date().toLocaleString();
-    
     const pageWidth = doc.internal.pageSize.getWidth();
+
+    // Title
     doc.setFontSize(16);
-    doc.text("Estimated Income", pageWidth / 2, 22, { align: 'center' });
-    
+    doc.text('Estimated Income', pageWidth / 2, 15, { align: 'center' });
+
+    // Event Label (optional)
+    if (eventLabel) {
+      doc.setFontSize(12);
+      doc.setTextColor(100, 100, 100);
+      doc.text(eventLabel.label, pageWidth / 2, 22, { align: 'center' });
+    }
+
     // Prepare table header based on visible columns
     const tableColumns = [];
     if (visibleColumns.sno) tableColumns.push("S.No");
@@ -49,31 +60,34 @@ const IncomePrint = ({ incomes, visibleColumns, incomeFilters }) => {
       if (visibleColumns.others) row.push(income.others);
       return row;
     });
-    
-    // Generate table using autoTable plugin with a footer
+
+    // Table
     autoTable(doc, {
-      startY: 30,
+      startY: eventLabel ? 30 : 25,
       head: [tableColumns],
       body: tableRows,
       margin: { top: 10 },
-      didDrawPage: (data) => {
-        const pageCount = doc.internal.getNumberOfPages();
-        doc.setFontSize(9);
-        // Footer with timestamp on the left
-        doc.text(
-          `Generated on: ${timestamp}`,
-          data.settings.margin.left,
-          doc.internal.pageSize.height - 10
-        );
-        // Footer with page number on the right
-        doc.text(
-          `Page ${doc.internal.getCurrentPageInfo().pageNumber} of ${pageCount}`,
-          doc.internal.pageSize.getWidth() - data.settings.margin.right - 30,
-          doc.internal.pageSize.height - 10
-        );
-      },
     });
-    
+
+    // Footer: timestamp  and page X of Y on every page
+    const pageCount = doc.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFontSize(9);
+
+      doc.text(
+        `Generated on: ${timestamp}`,
+        10,
+        doc.internal.pageSize.height - 10
+      );
+
+      doc.text(
+        `Page ${i} of ${pageCount}`,
+        doc.internal.pageSize.width - 30,
+        doc.internal.pageSize.height - 10
+      );
+    }
+
     // Save the generated PDF
     doc.save('Estimated_Income.pdf');
   };
