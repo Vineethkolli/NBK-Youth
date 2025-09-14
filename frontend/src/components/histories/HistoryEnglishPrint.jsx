@@ -75,6 +75,7 @@ function EnglishPrint({ selectedHistory, activeTab, data, showBelongsTo }) {
 
   // --- Budget Stats ---
   doc.setFontSize(14);
+  doc.setTextColor(0, 0, 0);
   doc.text('Budget Statistics', 15, yPos);
   yPos += 4;
 
@@ -105,6 +106,7 @@ function EnglishPrint({ selectedHistory, activeTab, data, showBelongsTo }) {
 
   // --- Payment Mode Stats ---
   doc.setFontSize(14);
+  doc.setTextColor(0, 0, 0);
   doc.text('Payment Mode Statistics', 15, yPos);
   yPos += 4;
 
@@ -127,6 +129,7 @@ function EnglishPrint({ selectedHistory, activeTab, data, showBelongsTo }) {
   // --- Villagers Stats ---
   if (stats.villagers) {
     doc.setFontSize(14);
+    doc.setTextColor(0, 0, 0);
     doc.text('Villagers Statistics', 15, yPos);
     yPos += 4;
 
@@ -151,6 +154,7 @@ function EnglishPrint({ selectedHistory, activeTab, data, showBelongsTo }) {
   // --- Youth Stats ---
   if (stats.youth) {
     doc.setFontSize(14);
+    doc.setTextColor(0, 0, 0);
     doc.text('Youth Statistics', 15, yPos);
     yPos += 4;
 
@@ -178,6 +182,7 @@ function EnglishPrint({ selectedHistory, activeTab, data, showBelongsTo }) {
     yPos = 20;
 
     doc.setFontSize(14);
+    doc.setTextColor(0, 0, 0);
     doc.text('Date-wise Statistics', 15, yPos);
     yPos += 4;
 
