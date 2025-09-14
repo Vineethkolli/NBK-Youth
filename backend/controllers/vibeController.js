@@ -40,7 +40,7 @@ const VibeController = {
     await logActivity(
       req,
       'CREATE',
-      'Collection',
+      'Vibe',
       collection._id.toString(),
       { before: null, after: collection.toObject() },
       `Collection "${collection.name}" created by ${req.user.name}`
@@ -84,7 +84,7 @@ const VibeController = {
     await logActivity(
       req,
       'UPDATE',
-      'Collection',
+      'Vibe',
       collection._id.toString(),
       { before: originalData, after: collection.toObject() },
       `Collection "${collection.name}" updated by ${req.user.name}`
@@ -116,7 +116,7 @@ const VibeController = {
       await logActivity(
         req,
         'DELETE',
-        'Collection',
+        'Vibe',
         collection._id.toString(),
         { before: originalData, after: null },
         `Collection "${collection.name}" deleted by ${req.user.name}`
@@ -158,7 +158,7 @@ const VibeController = {
       await logActivity(
         req,
         'CREATE',
-        'Collection',
+        'Vibe',
         collection._id.toString(),
         { before: null, after: { songName: req.body.name } },
         `Song "${req.body.name}" uploaded to collection "${collection.name}" by ${req.user.name}`
@@ -224,7 +224,7 @@ const VibeController = {
       await logActivity(
         req,
         'DELETE',
-        'Collection',
+        'Vibe',
         collection._id.toString(),
         { before: originalSongData, after: null },
         `Song "${song.name}" deleted from collection "${collection.name}" by ${req.user.name}`
