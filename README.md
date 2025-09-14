@@ -66,13 +66,13 @@ NBK-Youth is designed to streamline content, finance, and user management in a u
 ## ✨ Features
 
 - **👤 User Authentication & Profiles:**  
-  Supports sign-up, signin, forget password, role-based access (Admin, Financier, Developer, User), category-based UI (Youth, General).
+  Supports sign-up, signin, forget password, role-based access (Developer, Financier, Admin, User),  category-based UI (Youth, General).
 
 - **💰 Finance Management:**  
   Handle income, expenses, estimation, verification, recycle bin, and budgeting with visual statistics.
 
-- **🖼️ Media & Content Tools:**  
-  Slides, banners, YouTube video uploads, moments, songs and multilingual support.
+- **🖼️ Media & Content:**  
+  Slides, banners, YouTube & Drive media uploads, moments and songs music player.
 
 - **🔔 Notifications & Utilities:**  
   Web push notifications, site maintenance toggle, log tracking, PDF exports, and QR generator.
@@ -80,11 +80,16 @@ NBK-Youth is designed to streamline content, finance, and user management in a u
 - **🧩 PWA & Multilingual:**  
   Built as a Progressive Web App with support for languages like Telugu and English.
 
+- **🛠️ Admin Panel:**  
+  Manage users, roles, site settings, and oversee all application data with full administrative control.
+
+ - **📜 Histories & Records:**  
+   Archive and manage past events and financial transactions with timeline views for easy reference and future auditing
+
 - **🤖 Vini AI**  
-  - Chat with your data using natural language.  
+  - Chat with data using natural language.  
   - **Gemini API**: For reasoning, summarization, and context understanding.  
-  - **Hugging Face models**: For embeddings, NLP tasks, and custom AI workflows.  
-  - Data chunking + embeddings for previous records of data.  
+  - **Hugging Face models**: For embeData chunking + embeddings for previous records of data.  
   - Future expansion: multimodal support (text, audio, image).  
 
 ---
@@ -100,10 +105,9 @@ NBK-Youth is designed to streamline content, finance, and user management in a u
 ### Backend:
 - **Node.js + Express**
 - **MongoDB**
-- **JWT, bcrypt, dotenv**
-- **Cloudinary, Google Drive APIs**
+- **CORS, JWT, bcrypt, dotenv**
+- **Cloudinary, Google Drive**
 - **Nodemailer, Web-Push**
-- **CORS-enabled APIs**
 - **Gemini API, Hugging Face APIs**
 
 ### Hosting:
@@ -115,9 +119,8 @@ NBK-Youth is designed to streamline content, finance, and user management in a u
 ## ⚙️ Setup Instructions
 
 ### 📦 Prerequisites:
-- [Node.js](https://nodejs.org/)
-- MongoDB connection (Atlas/local)
-- VAPID Keys, Cloudinary API, Google API Credentials
+- Node.js
+- MongoDB connection
 
 ---
 
@@ -132,11 +135,32 @@ npm install
 Create `.env` file:
 
 ```
-MONGODB_URI=your_mongodb_connection_string
-PUBLIC_VAPID_KEY=your_webpush_public_key
-PRIVATE_VAPID_KEY=your_webpush_private_key
 FRONTEND_URL=http://localhost:5173
-Also include needed JWT secret, Cloudinary creds, email credentials, Gemini api, Hugging face api, Google drive api credentials.
+MONGODB_URI=
+JWT_SECRET=
+
+# VAPID Keys for Web Push Notifications
+PUBLIC_VAPID_KEY=
+PRIVATE_VAPID_KEY=
+
+# Cloudinary Configuration
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+
+# Email Configuration
+GMAIL_USER=
+GMAIL_PASS=
+
+DEFAULT_DEVELOPER_PASSWORD=
+
+# Google Drive API Credentials
+GOOGLE_DRIVE_CREDENTIALS=
+GOOGLE_DRIVE_FOLDER_ID=
+
+# AI Services
+HUGGINGFACE_API_KEY=
+GEMINI_API_KEY=
 ```
 
 Run backend:
@@ -147,11 +171,23 @@ node server.js
 
 ---
 
-### 💻 Frontend Setup
+### 🖥️ Frontend Setup
 
 ```bash
 cd ../frontend
 npm install
+```
+
+Create `.env` file:
+
+```
+VITE_BACKEND_URL=http://localhost:5000
+VITE_GA_MEASUREMENT_ID=
+```
+
+Run frontend:
+
+```bash
 npm run dev
 ```
 
