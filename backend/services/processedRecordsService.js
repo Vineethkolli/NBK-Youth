@@ -1,5 +1,4 @@
 import ProcessedChunk from '../models/ProcessedChunk.js';
-import ProcessedRecord from '../models/ProcessedRecords.js';
 import { generateEmbedding } from './embeddingService.js';
 
 const createChunksFromLines = (lines = [], maxWords = 300, overlapLines = 3) => {

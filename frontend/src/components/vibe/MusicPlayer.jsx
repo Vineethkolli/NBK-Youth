@@ -1,4 +1,3 @@
-// src/components/vibe/MusicPlayer.jsx
 import { Play, Pause, SkipBack, SkipForward, X } from 'lucide-react';
 import { useMusicPlayer } from '../../context/MusicContext';
 
@@ -74,7 +73,6 @@ export default function MusicPlayer() {
           </div>
         </div>
 
-        {/* Close */}
         <button
           onClick={closeMusicPlayer}
           className="absolute top-1 right-3 p-1 hover:bg-gray-100 rounded"

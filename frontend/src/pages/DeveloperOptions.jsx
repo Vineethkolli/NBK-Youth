@@ -29,14 +29,11 @@ function DeveloperOptions() {
           Status
         </a>
       </div>
+      
+      <ClearData />
 
-      {/* Clear Data Section */}
-        <ClearData />
-
-      {/* Snapshot Manager */}
       <SnapshotManager />
 
-      {/* Processed Data Manager */}
       <ProcessedDataManager />
     </div>
   );

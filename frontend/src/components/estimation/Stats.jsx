@@ -1,4 +1,4 @@
-import { IndianRupee, TrendingUp, TrendingDown, AlertTriangle, CheckCircle, DollarSign } from 'lucide-react';
+import { IndianRupee, TrendingUp, AlertTriangle, CheckCircle, DollarSign } from 'lucide-react';
 import StatsPrint from './StatsPrint';
 import StatsTeluguPrint from './StatsTeluguPrint';
 import { useLanguage } from '../../context/LanguageContext';

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'react-hot-toast';
-import { Copy, QrCode } from 'lucide-react';
+import { Copy, QrCode, X } from 'lucide-react';
 import { QRCodeCanvas } from "qrcode.react";
 import axios from 'axios';
 import { API_URL } from '../../utils/config';
@@ -274,9 +274,9 @@ function PaymentForm({ onSubmit }) {
                       setScreenshotPreview(null);
                       setScreenshotInputKey(Date.now());
                     }}
-                    className="absolute top-0 right-0 bg-black bg-opacity-50 text-white p-1 rounded-full"
+                    className="absolute top-0 right-0 bg-black bg-opacity-70 text-white p-1 rounded-full"
                   >
-                    ×
+                    <X className="h-4 w-4" />
                   </button>
                 </div>
               )}

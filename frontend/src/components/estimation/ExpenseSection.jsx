@@ -19,11 +19,11 @@ function ExpenseSection({ refreshStats }) {
     sortOrder: ''
   });
 
-const { user } = useAuth(); // Moved above the state
+const { user } = useAuth(); 
 
 const [expenseColumns, setExpenseColumns] = useState({
   sno: true,
-  registerId: false, // Default to false
+  registerId: false, 
   purpose: true,
   previousAmount: false,
   presentAmount: true,
@@ -99,7 +99,7 @@ useEffect(() => {
 
   const handleFormSubmit = async (formData) => {
     try {
-      // Always send registerId
+      
       const payload = { ...formData, registerId: user.registerId };
       if (formMode === 'add') {
         const { data } = await axios.post(`${API_URL}/api/estimation/expense`, payload);

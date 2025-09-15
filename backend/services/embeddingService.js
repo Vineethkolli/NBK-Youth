@@ -1,11 +1,7 @@
-// embeddingService.js
 import { HfInference } from '@huggingface/inference';
 
 const hf = new HfInference(process.env.HUGGINGFACE_API_KEY);
 
-/**
- * Generate embedding and ensure we return a plain 1D numeric array.
- */
 export const generateEmbedding = async (text) => {
   try {
     const response = await hf.featureExtraction({

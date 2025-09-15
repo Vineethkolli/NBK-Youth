@@ -13,13 +13,13 @@ const bannerSchema = new mongoose.Schema({
     type: String
   },
   imagePublicId: {
-    type: String // Cloudinary public_id for image
+    type: String 
   },
   video: {
     type: String
   },
   videoPublicId: {
-    type: String // Cloudinary public_id for video
+    type: String 
   },
   status: {
     type: String,
@@ -32,7 +32,7 @@ const bannerSchema = new mongoose.Schema({
     min: 1
   },
   duration: {
-    type: Number, // Duration in seconds
+    type: Number, 
     default: 0
   },
   createdBy: {

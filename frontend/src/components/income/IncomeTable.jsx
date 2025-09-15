@@ -26,7 +26,7 @@ function IncomeTable({
   };
 
   const sendWhatsAppMessage = (income) => {
-    if (isLocked) return; // optionally disable sending when locked
+    if (isLocked) return; // disable sending when locked
     const countryCode = '+91'; 
     const phoneNumber = income.phoneNumber;
     const name = income.name;

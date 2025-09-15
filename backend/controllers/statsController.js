@@ -8,7 +8,7 @@ import { logActivity } from '../middleware/activityLogger.js';
 export const statsController = {
   getStats: async (req, res) => {
     try {
-      // Get all incomes
+
       const incomes = await Income.find({ isDeleted: false });
       const expenses = await Expense.find({ isDeleted: false });
       const users = await User.find();
@@ -139,7 +139,6 @@ export const statsController = {
         { upsert: true, new: true }
       );
 
-      // Log previous year amount update
       await logActivity(
         req,
         'UPDATE',

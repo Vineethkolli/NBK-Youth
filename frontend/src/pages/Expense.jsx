@@ -110,7 +110,7 @@ function Expense() {
 return (
   <div className="space-y-6">
     <div className="space-y-2">
-      {/* Top row: heading left, buttons right */}
+      {/* Top row */}
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-semibold">Expense</h1>
 
@@ -139,7 +139,6 @@ return (
       </div>
     </div>
 
-    {/* Start vertical spacing from here onwards */}
     {/* Search and filters */}
     <div className="space-y-3">
       <div className="relative">

@@ -32,10 +32,10 @@ const expenseSchema = new mongoose.Schema({
     type: String,
   },
   billImage: {
-    type: String  // URL of the bill image
+    type: String  
   },
   billImagePublicId: {
-    type: String // Cloudinary public_id for bill image
+    type: String 
   },
   verifyLog: {
     type: String,
@@ -54,7 +54,6 @@ const expenseSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-// Generate expenseId as E0, E1, E2, ...
 // Auto-generate expenseId (E0, E1, E2, ...)
 expenseSchema.pre('save', async function (next) {
   if (!this.expenseId) {

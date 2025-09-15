@@ -68,7 +68,7 @@ const RoleStatistics = () => {
         if (newStats.roleStats.hasOwnProperty(role)) {
           newStats.roleStats[role].count++;
           if (role !== 'user') {
-            newStats.roleStats[role].registerIds.push(user.registerId); // Dont show register IDs for users
+            newStats.roleStats[role].registerIds.push(user.registerId); // Dont show register IDs for users role
           }
         }
       });

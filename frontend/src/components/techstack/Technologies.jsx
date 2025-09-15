@@ -157,7 +157,6 @@ function TechStackDetails() {
         </ul>
       </section>
 
-      {/* Footer */}
       <Footer />
     </div>
   );

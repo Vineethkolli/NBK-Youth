@@ -5,7 +5,7 @@ import PaymentController from './paymentController.js';
 import { logActivity } from '../middleware/activityLogger.js';
 
 export const verificationController = {
-  // Get verification data
+
   getVerificationData: async (req, res) => {
     try {
       const { type } = req.params;
@@ -30,7 +30,7 @@ export const verificationController = {
     }
   },
 
-  // Update verification status
+
   updateVerificationStatus: async (req, res) => {
     try {
       const { type, id } = req.params;
@@ -61,7 +61,6 @@ export const verificationController = {
         item.deletedAt = new Date();
         item.deletedBy = registerId;
       }
-
 
       // Update verification status
       item.verifyLog = verifyLog;

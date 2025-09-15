@@ -14,7 +14,7 @@ function RecycleBin() {
   const [deletedExpenses, setDeletedExpenses] = useState([]);
   const [loadingIncomeId, setLoadingIncomeId] = useState(null);
   const [loadingExpenseId, setLoadingExpenseId] = useState(null);
-  const [activeBin, setActiveBin] = useState('income'); // New state for active bin view
+  const [activeBin, setActiveBin] = useState('income'); 
 
   useEffect(() => {
     fetchDeletedItems();
@@ -89,7 +89,6 @@ function RecycleBin() {
 
   return (
     <div className="space-y-6">
-      {/* Header with LockIndicator, EventLabelDisplay, and bin toggle buttons */}
       <div className="space-y-2">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
           <h1 className="text-2xl font-semibold mb-2 lg:mb-0">Recycle Bin</h1>

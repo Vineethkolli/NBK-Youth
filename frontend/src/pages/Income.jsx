@@ -124,7 +124,6 @@ function Income() {
 
 return (
   <div className="space-y-6">
-    {/* Top row: heading left, buttons right */}
     <div className="space-y-2">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-semibold">Income</h1>
@@ -153,8 +152,6 @@ return (
         <EventLabelDisplay />
       </div>
     </div>
-
-    {/* Start vertical spacing from here onwards */}
 
     {/* Search and filters */}
     <div className="space-y-3">
@@ -235,8 +232,6 @@ return (
     )}
   </div>
 );
-
-
 }
 
 export default Income;

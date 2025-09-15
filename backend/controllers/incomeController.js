@@ -24,7 +24,6 @@ export const incomeController = {
       if (belongsTo) query.belongsTo = belongsTo;
       if (verifyLog) query.verifyLog = verifyLog;
 
-      // Date range filter
       if (startDate || endDate) {
         const dateField = dateFilter === 'paidDate' ? 'paidDate' : 'createdAt';
         query[dateField] = {};
@@ -46,7 +45,7 @@ export const incomeController = {
     }
   },
 
-  // Get verification data
+
   getVerificationData: async (req, res) => {
     try {
       const { verifyLog } = req.query;
@@ -62,10 +61,8 @@ export const incomeController = {
     try {
       let { name, status } = req.body;
 
-      // Normalize name: trim + collapse spaces
       const normalizedName = name.trim().replace(/\s+/g, ' ');
 
-      // Check for existing name case-insensitively
       const existingIncome = await Income.findOne({
         name: { $regex: `^${normalizedName}$`, $options: 'i' }
       });
@@ -157,7 +154,7 @@ export const incomeController = {
     }
   },
 
-  // Update verification status
+
   updateVerificationStatus: async (req, res) => {
     try {
       const { verifyLog, registerId } = req.body;
@@ -223,7 +220,7 @@ export const incomeController = {
     }
   },
 
-  // Get recycle bin items
+
   getRecycleBin: async (req, res) => {
     try {
       const deletedIncomes = await Income.find({ isDeleted: true }).sort({ updatedAt: -1 });
@@ -233,7 +230,7 @@ export const incomeController = {
     }
   },
 
-  // Restore from recycle bin
+
   restoreIncome: async (req, res) => {
     try {
       const income = await Income.findById(req.params.id);

@@ -64,7 +64,6 @@ function ClearData() {
         )) }
       </div>
 
-      {/* Warning Section */}
       <div className="mt-6 bg-yellow-50 p-4 rounded-md">
         <div className="flex items-start">
           <AlertTriangle className="h-5 w-5 text-yellow-600 mt-0.5 mr-2" />

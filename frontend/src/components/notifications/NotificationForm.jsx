@@ -33,7 +33,6 @@ function NotificationForm({ onSuccess }) {
 
       await axios.post(`${API_URL}/api/notifications/notify`, requestData);
 
-      // Optimistically update UI
       if (onSuccess) {
         onSuccess(requestData);
       }

@@ -1,7 +1,6 @@
 import ActivityLog from '../models/ActivityLog.js';
 
 export const activityLogController = {
-  // Get all activity logs with filters
   getAllLogs: async (req, res) => {
     try {
       const { 
@@ -27,27 +26,22 @@ export const activityLogController = {
         ];
       }
 
-      // Filter by action
       // Filter by action (multi-select support)
 if (action) {
-  const actionsArray = action.split(',').filter(Boolean); // removes empty strings
+  const actionsArray = action.split(',').filter(Boolean);
   if (actionsArray.length > 0) {
     query.action = { $in: actionsArray };
   }
 }
 
-
-      // Filter by entity type
       if (entityType) {
         query.entityType = entityType;
       }
 
-      // Filter by register ID
       if (registerId) {
         query.registerId = registerId;
       }
 
-      // Date range filter
       if (startDate || endDate) {
         query.createdAt = {};
         if (startDate) {
@@ -96,7 +90,7 @@ getLogStats: async (req, res) => {
             count: { $sum: 1 }
           }
         },
-        { $sort: { count: -1 } } // sort by count descending
+        { $sort: { count: -1 } } 
       ]),
 
       // Get entity breakdown
@@ -107,7 +101,7 @@ getLogStats: async (req, res) => {
             count: { $sum: 1 }
           }
         },
-        { $sort: { count: -1 } } // sort by count descending
+        { $sort: { count: -1 } } 
       ]),
 
       // Get total logs count
@@ -189,13 +183,13 @@ const detailedUserBreakdown = {};
 // First, map entity groups with total actions per entity
 const entityTotals = userActivityBreakdown.map(entityGroup => {
   const users = entityGroup.users
-    .sort((a, b) => b.totalActions - a.totalActions) // Sort users by total actions
+    .sort((a, b) => b.totalActions - a.totalActions) 
     .map(user => ({
       registerId: user.registerId,
       userName: user.userName,
       totalActions: user.totalActions,
       actions: user.actions
-        .sort((a, b) => b.count - a.count) // Sort actions by count
+        .sort((a, b) => b.count - a.count) 
         .reduce((acc, action) => {
           acc[action.action] = action.count;
           return acc;
@@ -211,10 +205,8 @@ const entityTotals = userActivityBreakdown.map(entityGroup => {
   };
 });
 
-// Sort entities descending by total actions
 entityTotals.sort((a, b) => b.totalActions - a.totalActions);
 
-// Build the final object
 entityTotals.forEach(entity => {
   detailedUserBreakdown[entity.entityType] = entity.users;
   

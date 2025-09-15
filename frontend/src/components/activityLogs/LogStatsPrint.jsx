@@ -14,7 +14,7 @@ const LogStatsPrint = ({ stats }) => {
     const doc = new jsPDF();
     let yPos = 20;
 
-    // Title (centered)
+    // Title
     doc.setFontSize(20);
     doc.setTextColor(0, 0, 0);
     const title = 'Activity Logs Statistics Report';
@@ -27,7 +27,7 @@ const LogStatsPrint = ({ stats }) => {
     const headStyles = { fillColor: [33, 115, 175], textColor: [255, 255, 255], fontSize: 10 };
     const commonStyles = { fontSize: 10, cellPadding: 2, rowHeight: 7, halign: 'center' };
 
-    // ----- Overview -----
+    // Overview 
     doc.setFontSize(14);
     doc.setTextColor(0, 0, 0);
     doc.text('Overview', 15, yPos);
@@ -48,7 +48,7 @@ const LogStatsPrint = ({ stats }) => {
 
     yPos = doc.lastAutoTable.finalY + 16;
 
-    // ----- Actions Breakdown -----
+    // Actions Breakdown
     if (stats?.actionBreakdown) {
       doc.setFontSize(14);
       doc.setTextColor(0, 0, 0);
@@ -74,7 +74,7 @@ const LogStatsPrint = ({ stats }) => {
       yPos = doc.lastAutoTable.finalY + 16;
     }
 
-    // ----- Entity Breakdown -----
+    // Entity Breakdown
     if (stats?.entityBreakdown) {
       doc.setFontSize(14);
       doc.setTextColor(0, 0, 0);
@@ -100,7 +100,7 @@ const LogStatsPrint = ({ stats }) => {
       yPos = doc.lastAutoTable.finalY + 16;
     }
 
-    // ----- Detailed User Activity Breakdown -----
+    // User Activity Breakdown 
     if (stats?.detailedUserBreakdown && Object.keys(stats.detailedUserBreakdown).length > 0) {
       const entries = Object.entries(stats.detailedUserBreakdown);
 

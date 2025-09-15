@@ -5,11 +5,11 @@ function EventRecordsGrid({ records = [], isEditMode, onEdit, onDelete }) {
   const [previewUrl, setPreviewUrl] = useState(null);
   const [previewName, setPreviewName] = useState(null);
   const [previewYear, setPreviewYear] = useState(null);
-  const [previewFileUrl, setPreviewFileUrl] = useState(null); // store actual file url
+  const [previewFileUrl, setPreviewFileUrl] = useState(null); 
   const [loadingPreview, setLoadingPreview] = useState(false);
   const [downloading, setDownloading] = useState(false);
 
-  // Open PDF Preview (Cloudinary URL)
+  // Open PDF Preview 
   const previewFile = (fileUrl, eventName, recordYear) => {
     if (!fileUrl) {
       alert("File URL not available");
@@ -35,7 +35,7 @@ function EventRecordsGrid({ records = [], isEditMode, onEdit, onDelete }) {
         new Blob([blob], { type: "application/pdf" })
       );
       const link = document.createElement("a");
-      const safeEvent = (eventName || "Event").replace(/[/\\?%*:|"<>]/g, "_"); // sanitize
+      const safeEvent = (eventName || "Event").replace(/[/\\?%*:|"<>]/g, "_");
       const filename = `${safeEvent}_Record_${recordYear || "unknown"}.pdf`;
       link.href = blobUrl;
       link.setAttribute("download", filename);

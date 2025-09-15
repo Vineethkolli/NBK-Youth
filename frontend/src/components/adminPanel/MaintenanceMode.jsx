@@ -36,7 +36,6 @@ function MaintenanceMode() {
       </p>
 
       <div className="flex flex-col sm:flex-row sm:items-end sm:gap-4 mb-1">
-        {/* Expected Service Return Time Input (always visible) */}
         <div className="flex-1 mb-2 sm:mb-0">
           <label
             htmlFor="expectedBackAt"
@@ -59,7 +58,6 @@ function MaintenanceMode() {
           />
         </div>
 
-        {/* Status + Button */}
         <div className="flex items-center justify-center flex-wrap gap-3 space-x-8">
           <div
             className={`inline-flex items-center px-3 py-2 rounded-full text-sm ${

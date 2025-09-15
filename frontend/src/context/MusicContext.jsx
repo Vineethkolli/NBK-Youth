@@ -12,7 +12,7 @@ export function MusicProvider({ children }) {
   const [progress, setProgress]           = useState(0);
   const [duration, setDuration]           = useState(0);
 
-  // ─── playback controls ────────────────────────────────────────────────────
+  // playback controls
   const handleSongSelect = (song, queue) => {
     const idx = queue.findIndex(s => s._id === song._id);
     if (idx < 0) return;
@@ -62,7 +62,7 @@ export function MusicProvider({ children }) {
     }
   };
 
-  // ─── sync <audio> element when song or play/pause changes ───────────────
+  // sync audio element when song or play/pause changes
   useEffect(() => {
     const audio = audioRef.current;
 
@@ -96,7 +96,7 @@ export function MusicProvider({ children }) {
     };
   }, [currentSong, isPlaying]);
 
-  // ─── setup MediaSession metadata & action handlers ──────────────────────
+  // setup MediaSession metadata & action handlers
   useEffect(() => {
     if (!('mediaSession' in navigator)) return;
 
@@ -125,7 +125,7 @@ export function MusicProvider({ children }) {
     navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
   }, [currentSong, isPlaying]);
 
-  // ─── update MediaSession playback position ───────────────────────────────
+  // update MediaSession playback position
   useEffect(() => {
     if (
       'mediaSession' in navigator &&
@@ -144,7 +144,7 @@ export function MusicProvider({ children }) {
     }
   }, [progress, duration, currentSong]);
 
-  // ─── keep playbackState alive on visibility change ───────────────────────
+  // keep playbackState alive on visibility change 
   useEffect(() => {
     const onVisChange = () => {
       if (document.hidden && currentSong && 'mediaSession' in navigator) {
@@ -155,7 +155,7 @@ export function MusicProvider({ children }) {
     return () => document.removeEventListener('visibilitychange', onVisChange);
   }, [currentSong, isPlaying]);
 
-  // ─── restore playbackState when window is focused ─────────────────────────
+  // restore playbackState when window is focused 
   useEffect(() => {
     const handleFocus = () => {
       if (currentSong && 'mediaSession' in navigator) {

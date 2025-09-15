@@ -25,7 +25,7 @@ export const extractFileIdFromUrl = (url) => {
   return null;
 };
 
-// Helper function to extract folder ID from URL
+// Extract folder ID from URL
 export const extractFolderIdFromUrl = (url) => {
   const folderMatch = url.match(/\/folders\/([^/?]+)/);
   if (folderMatch) {
@@ -34,14 +34,14 @@ export const extractFolderIdFromUrl = (url) => {
   return null;
 };
 
-// Helper function to get direct view URL from Drive sharing URL
+// Get direct view URL from Drive sharing URL
 export const getDirectViewUrl = (url) => {
   const fileId = extractFileIdFromUrl(url);
   if (!fileId) return url;
   return `https://drive.google.com/uc?export=view&id=${fileId}`;
 };
 
-// Helper function to create subfolder
+// Create subfolder
 export const createSubfolder = async (parentFolderId, subfolderName) => {
   try {
     const response = await drive.files.create({
@@ -58,7 +58,7 @@ export const createSubfolder = async (parentFolderId, subfolderName) => {
   }
 };
 
-// Helper function to get all files from a folder
+// Get all files from a folder
 export const getFilesFromFolder = async (folderId) => {
   try {
     const response = await drive.files.list({

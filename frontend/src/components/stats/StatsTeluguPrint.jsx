@@ -139,7 +139,7 @@ const StatsPrint = ({ stats }) => {
 
         {stats.dateWiseStats && stats.dateWiseStats.length > 0 && (
           <>
-            <div className="page-break"></div> {/* ✅ Force new page */}
+            <div className="page-break"></div> {/* Force new page */}
             <h3>Date-wise Statistics</h3>
             {(() => {
               const dateWiseCols = ['Date', 'Total Income', 'Amount Received', 'Total Expenses'];

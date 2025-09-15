@@ -2,7 +2,6 @@ import PaymentDetails from '../models/PaymentDetails.js';
 import { logActivity } from '../middleware/activityLogger.js';
 
 export const paymentDetailsController = {
-  // Get payment details
   getPaymentDetails: async (req, res) => {
     try {
       let details = await PaymentDetails.findOne();
@@ -22,7 +21,7 @@ export const paymentDetailsController = {
     }
   },
 
-  // Update payment details
+
   updatePaymentDetails: async (req, res) => {
     try {
       const { upiNumber, upiId, accountHolder } = req.body;
@@ -43,7 +42,6 @@ export const paymentDetailsController = {
         });
       }
 
-      // Log payment details update
       await logActivity(
         req,
         originalData ? 'UPDATE' : 'CREATE',

@@ -56,7 +56,7 @@ function Vibe() {
     handleSongSelect(song, queue);
   };
 
-  // Collection CRUD operations
+  // Collection operations
   const handleCollectionEdit = async (collection) => {
   const newName = prompt('Enter new collection name:', collection.name);
   if (!newName || newName === collection.name) return;
@@ -84,7 +84,6 @@ function Vibe() {
 };
 
 
-
   const handleCollectionDelete = async (collection) => {
     if (!window.confirm('Are you sure you want to delete this collection?')) return;
     try {
@@ -96,7 +95,7 @@ function Vibe() {
     }
   };
 
-  // Song CRUD operations
+  // Song operations
   const handleSongEdit = async (song) => {
     const newName = prompt('Enter new song name:', song.name);
     if (!newName || newName === song.name) return;
@@ -203,7 +202,6 @@ function Vibe() {
         />
       )}
 
-      {/* Show music player only on Vibe page */}
       <MusicPlayer />
     </div>
   );

@@ -4,32 +4,9 @@ import { snapshotController } from '../controllers/snapshotController.js';
 
 const router = express.Router();
 
-// Get all snapshots (developer only)
-router.get('/', 
-  auth, 
-  checkRole(['developer']),
-  snapshotController.getAllSnapshots
-);
-
-// Create snapshot (developer only)
-router.post('/', 
-  auth, 
-  checkRole(['developer']),
-  snapshotController.createSnapshot
-);
-
-// Update snapshot (developer only)
-router.put('/:id', 
-  auth, 
-  checkRole(['developer']),
-  snapshotController.updateSnapshot
-);
-
-// Delete snapshot (developer only)
-router.delete('/:id', 
-  auth, 
-  checkRole(['developer']),
-  snapshotController.deleteSnapshot
-);
+router.get('/', auth, checkRole(['developer']), snapshotController.getAllSnapshots);
+router.post('/', auth, checkRole(['developer']), snapshotController.createSnapshot);
+router.put('/:id', auth, checkRole(['developer']), snapshotController.updateSnapshot);
+router.delete('/:id', auth, checkRole(['developer']), snapshotController.deleteSnapshot);
 
 export default router;

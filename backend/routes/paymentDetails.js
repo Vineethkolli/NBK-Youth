@@ -4,14 +4,8 @@ import { paymentDetailsController } from '../controllers/paymentDetailsControlle
 
 const router = express.Router();
 
-// Get payment details (public)
 router.get('/', paymentDetailsController.getPaymentDetails);
 
-// Update payment details (developer only)
-router.put('/', 
-  auth, 
-  checkRole(['developer', 'financier', 'admin']),
-  paymentDetailsController.updatePaymentDetails
-);
+router.put('/', auth, checkRole(['developer', 'financier', 'admin']), paymentDetailsController.updatePaymentDetails);
 
 export default router;

@@ -152,7 +152,6 @@ function Records() {
 
   return (
     <div className="space-y-6">
-      {/* Header and Tabs */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-3 lg:space-y-0">
         <h1 className="text-2xl font-semibold">Records</h1>
 
@@ -186,7 +185,6 @@ function Records() {
       {/* Tab Content */}
       {activeTab === 'timeline' && (
         <div className="space-y-6">
-          {/* Controls */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
             <div className="flex items-center space-x-4">
               <span className="text-sm font-medium">Event:</span>
@@ -239,7 +237,6 @@ function Records() {
 
       {activeTab === 'records' && (
         <div className="space-y-6">
-          {/* Controls */}
           {isDeveloper && (
             <div className="flex justify-end space-x-3">
               <button
@@ -291,7 +288,7 @@ function Records() {
           onSubmit={handleEventRecordSubmit}
         />
       )}
-      {/*  Footer  */}
+
     <footer className="pt-8 border-t text-center text-sm text-gray-500">
       Since 2023 — We moved all records from paper to digital
     </footer>

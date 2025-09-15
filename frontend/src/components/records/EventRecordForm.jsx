@@ -94,7 +94,6 @@ function EventRecordForm({ record, onClose, onSubmit }) {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-full max-w-md">
-        {/* Header */}
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">
             {record ? 'Edit Event Record' : 'Add Event Record'}
@@ -109,7 +108,6 @@ function EventRecordForm({ record, onClose, onSubmit }) {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Event Name */}
           <div>
             <label className="block text-sm font-medium text-gray-700">
               Event Name *
@@ -151,7 +149,6 @@ function EventRecordForm({ record, onClose, onSubmit }) {
             </div>
           )}
 
-          {/* Record Year */}
           <div>
             <label className="block text-sm font-medium text-gray-700">
               Record Year *
@@ -172,12 +169,10 @@ function EventRecordForm({ record, onClose, onSubmit }) {
             </select>
           </div>
 
-          {/* File Upload */}
           <div>
             <label className="block text-sm font-medium text-gray-700">
               {record ? 'Update PDF File' : 'Upload PDF File *'}
             </label>
-
 
             <input
               key={fileInputKey}
@@ -194,7 +189,6 @@ function EventRecordForm({ record, onClose, onSubmit }) {
             />
           </div>
 
-          {/* Buttons */}
           <div className="flex justify-end space-x-2">
             <button
               type="button"

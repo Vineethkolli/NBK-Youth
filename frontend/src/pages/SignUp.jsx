@@ -63,12 +63,10 @@ function SignUp() {
     }
   };
 
-  // Toggle password visibility
   const togglePasswordVisibility = () => {
     setShowPassword((prevState) => !prevState);
   };
 
-  // Toggle confirm password visibility
   const toggleConfirmPasswordVisibility = () => {
     setShowConfirmPassword((prevState) => !prevState);
   };
@@ -180,6 +178,7 @@ function SignUp() {
           </div>
         </form>
       </div>
+      
       {/* InstallApp component for app download prompt */}
       <InstallApp />
     </>

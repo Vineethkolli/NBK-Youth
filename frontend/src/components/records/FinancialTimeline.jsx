@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Edit2, Trash2, TrendingUp, TrendingDown, Minus, Calendar, Banknote, ChevronDown, ChevronUp } from 'lucide-react';
 
 function FinancialTimeline({ records, isEditMode, onEdit, onDelete }) {
-  const [expandedRecords, setExpandedRecords] = useState({}); // track expanded FDs
+  const [expandedRecords, setExpandedRecords] = useState({}); 
 
   const toggleRecord = (id) => {
     setExpandedRecords((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -96,7 +96,6 @@ const formatDate = (dateString) => {
 
             return (
               <div key={record._id} className="relative">
-                {/* Timeline dot */}
                 <div className="absolute left-6 w-4 h-4 bg-indigo-600 rounded-full border-4 border-white shadow"></div>
 
                 {/* Content */}

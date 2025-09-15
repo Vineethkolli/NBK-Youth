@@ -1,14 +1,14 @@
 import { Download } from 'lucide-react';
 
 function MediaPreview({ url, type, title }) {
-  // CORRECTED: This function now gets the reliable thumbnail URL for images.
+  // gets the thumbnail URL for images.
   const getImageUrl = (url) => {
     const fileId = url.match(/[?&]id=([^&]+)/)?.[1];
     if (!fileId) return url;
     return `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`;
   };
 
-  // This function creates the iframe player URL for videos, which is the correct approach.
+  // iframe player URL for videos
   const getVideoPlayerUrl = (url) => {
     const fileId = url.match(/[?&]id=([^&]+)/)?.[1];
     if (!fileId) return url;

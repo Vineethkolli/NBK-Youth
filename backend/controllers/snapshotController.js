@@ -8,7 +8,7 @@ import { logActivity } from '../middleware/activityLogger.js';
 import Event from '../models/Event.js';
 
 export const snapshotController = {
-  // Get all snapshots
+
   getAllSnapshots: async (req, res) => {
     try {
       const snapshots = await Snapshot.find().sort({ year: -1, eventName: 1 });
@@ -18,7 +18,7 @@ export const snapshotController = {
     }
   },
 
-  // Create snapshot
+
   createSnapshot: async (req, res) => {
     try {
       const { eventName, year, selectedCollections } = req.body;
@@ -58,7 +58,6 @@ export const snapshotController = {
         addedBy: req.user.registerId
       });
 
-      // Log snapshot creation
       await logActivity(
         req,
         'CREATE',
@@ -79,7 +78,7 @@ export const snapshotController = {
     }
   },
 
-  // Update snapshot
+
   updateSnapshot: async (req, res) => {
     try {
       const { eventName, year } = req.body;
@@ -111,7 +110,6 @@ export const snapshotController = {
         { new: true }
       );
 
-      // Log snapshot update
       await logActivity(
         req,
         'UPDATE',
@@ -127,7 +125,7 @@ export const snapshotController = {
     }
   },
 
-  // Delete snapshot
+
   deleteSnapshot: async (req, res) => {
     try {
       const snapshot = await Snapshot.findById(req.params.id);
@@ -137,7 +135,6 @@ export const snapshotController = {
 
       const originalData = snapshot.toObject();
 
-      // Log snapshot deletion
       await logActivity(
         req,
         'DELETE',
@@ -166,9 +163,8 @@ export const snapshotController = {
   }
 };
 
-// --- Helper functions ---
-
-// Copy of statsController.calculateDateWiseStats
+// Helper functions
+// calculateDateWiseStats
 const calculateDateWiseStats = async (incomes, expenses) => {
   const dateMap = new Map();
 
@@ -280,7 +276,7 @@ const generateStats = async () => {
       cashAmount: roundNumber(offline.amount - totalExpenses.cashAmount)
     };
 
-    // Villagers & Youth stats (same structure as statsController)
+    // Villagers & Youth stats
     const calculateGroupStats = (belongsTo) => {
       const groupIncomes = incomes.filter(income =>
         income.belongsTo.toLowerCase() === belongsTo.toLowerCase());

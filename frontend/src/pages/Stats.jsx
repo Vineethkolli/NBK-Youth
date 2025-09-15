@@ -97,21 +97,19 @@ function Stats() {
 
   return (
     <div className="space-y-6">
-      {/* Header block */}
       <div className="space-y-2">
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-semibold">Statistics</h1>
           <PrintComponent stats={stats} />
         </div>
 
-        {/* Lock + Event Label row */}
         <div className="flex items-center">
           <LockIndicator />
           <EventLabelDisplay />
         </div>
       </div>
 
-      {/* Content */}
+     
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Budget Stats */}
         <div className="bg-white rounded-lg shadow p-6">
@@ -366,7 +364,6 @@ function Stats() {
         </div>
       </div>
 
-      {/* Footer */}
       <Footer />
     </div>
   );

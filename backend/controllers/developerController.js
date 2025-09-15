@@ -9,7 +9,7 @@ import Event from '../models/Event.js';
 import { logActivity } from '../middleware/activityLogger.js';
 import User from '../models/User.js';
 import Payment from '../models/Payment.js';
-import cloudinary from '../config/cloudinary.js'; // ✅ Import cloudinary
+import cloudinary from '../config/cloudinary.js'; 
 import Counter from '../models/Counter.js';
 
 export const developerController = {
@@ -32,7 +32,7 @@ export const developerController = {
           await Counter.findByIdAndDelete('expenseId');
           description = 'Cleared all expense records';
 
-          // ✅ Delete all Cloudinary files in 'ExpenseBills' folder
+          // Delete all Cloudinary files in 'ExpenseBills' folder
           await deleteCloudinaryFolder('ExpenseBills');
           break;
 
@@ -73,7 +73,6 @@ export const developerController = {
           await Counter.findByIdAndDelete('paymentId');
           description = 'Cleared all payment records';
 
-          // ✅ Delete all Cloudinary files in 'PaymentScreenshots' folder
           await deleteCloudinaryFolder('PaymentScreenshots');
           break;
 
@@ -89,7 +88,6 @@ export const developerController = {
           return res.status(400).json({ message: 'Invalid data type' });
       }
 
-      // Log the activity
       await logActivity(
         req,
         'DELETE',
@@ -107,7 +105,7 @@ export const developerController = {
   }
 };
 
-// ✅ Utility function to delete all files in a Cloudinary folder
+// Utility function to delete all files in a Cloudinary folder
 const deleteCloudinaryFolder = async (folder) => {
   try {
     const { resources } = await cloudinary.api.resources({

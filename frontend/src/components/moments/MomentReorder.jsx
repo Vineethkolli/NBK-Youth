@@ -17,7 +17,7 @@ function MomentReorder({ moments, onSave, onCancel }) {
     }
   }, [moments]);
 
-  // --- Helpers ---
+  // Helpers
   const getEmbedUrl = (url) => {
     if (!url) return '';
     const videoId = url.match(
@@ -106,7 +106,6 @@ function MomentReorder({ moments, onSave, onCancel }) {
 
   return (
     <div className="space-y-4">
-      {/* Info + Save/Cancel */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex flex-col items-center space-y-3">
         <p className="text-blue-800 text-sm text-center">
           <GripHorizontal className="h-4 w-4 inline mb-1" /> Drag or use arrows

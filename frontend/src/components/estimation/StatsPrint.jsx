@@ -71,7 +71,6 @@ const StatsPrint = ({ stats, budgetStats }) => {
 
     yPos += 10;
 
-    // Add event label if it exists
     if (eventLabel) {
       doc.setFontSize(12);
       doc.setTextColor(100, 100, 100);
@@ -220,7 +219,7 @@ const StatsPrint = ({ stats, budgetStats }) => {
       ...commonTableOptions
     });
 
-    // Footer: Add page numbers and timestamp on the bottom of each page
+    // Footer
     const timestamp = new Date().toLocaleString();
     const pageCount = doc.getNumberOfPages();
     for (let i = 1; i <= pageCount; i++) {

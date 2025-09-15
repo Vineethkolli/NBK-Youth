@@ -18,7 +18,6 @@ const NotificationSettings = () => {
   );
   const [showResetPrompt, setShowResetPrompt] = useState(false);
 
-  // EXACT iOS install-app prompt logic from previous file
   if (isIos() && !isInStandaloneMode()) {
     return (
       <div className="bg-white rounded-lg shadow p-6">

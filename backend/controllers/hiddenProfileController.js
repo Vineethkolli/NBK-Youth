@@ -19,7 +19,6 @@ export const hiddenProfileController = {
       const existingProfile = await HiddenProfile.findOne({ profileId });
 
       if (existingProfile) {
-        // Log profile unhiding
         await logActivity(
           req,
           'UPDATE',
@@ -32,7 +31,6 @@ export const hiddenProfileController = {
         await HiddenProfile.deleteOne({ profileId });
         res.json({ message: 'Profile unhidden', hidden: false });
       } else {
-        // Log profile hiding
         await logActivity(
           req,
           'UPDATE',

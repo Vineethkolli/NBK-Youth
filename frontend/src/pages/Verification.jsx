@@ -8,7 +8,7 @@ import { API_URL } from '../utils/config';
 import EventLabelDisplay from '../components/common/EventLabelDisplay';
 import LockIndicator from '../components/common/LockIndicator';
 import { useLockSettings } from '../context/LockContext';
-import { IndianRupee, DollarSign, ShieldCheck } from 'lucide-react'; // icons
+import { IndianRupee, DollarSign, ShieldCheck } from 'lucide-react'; 
 
 function Verification() {
   const { user } = useAuth();
@@ -81,7 +81,6 @@ function Verification() {
 
   if (!['developer', 'financier'].includes(user?.role)) return <div>Access denied</div>;
 
-  // Map icons for each tab
   const tabIcons = {
     income: <IndianRupee size={18} />,
     expense: <DollarSign size={18} />,
@@ -90,7 +89,6 @@ function Verification() {
 
   return (
     <div className="space-y-6">
-      {/* Title and Lock Indicator */}
       <div className="space-y-2">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
           <h1 className="text-2xl font-semibold mb-2 lg:mb-0">Verification Management</h1>
@@ -99,7 +97,6 @@ function Verification() {
             <EventLabelDisplay />
           </div>
 
-          {/* Tabs */}
           <div className="flex space-x-4">
             {['income', 'expense', 'payment'].map((tab) => (
               <button
@@ -119,12 +116,10 @@ function Verification() {
         </div>
       </div>
 
-      {/* Filters */}
       <div className="my-4">
         <VerificationFilters filters={filters} onChange={setFilters} />
       </div>
 
-      {/* Data Table */}
       <div className="bg-white rounded-lg shadow">
         <VerificationTable
           data={

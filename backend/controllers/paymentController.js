@@ -4,7 +4,7 @@ import { uploadToCloudinary } from '../config/cloudinary.js';
 import { logActivity } from '../middleware/activityLogger.js';
 
 const PaymentController = {
-  // Fetch all payments (or only payments for a specific user)
+
   async getAllPayments(req, res) {
     try {
       const { registerId } = req.query;
@@ -38,7 +38,7 @@ const PaymentController = {
     }
   },
 
-  // Create a new payment
+
   async createPayment(req, res) {
     try {
       const { paymentId, registerId, name, email, phoneNumber, amount, belongsTo } = req.body;
@@ -67,7 +67,6 @@ const PaymentController = {
 
       await newPayment.save();
 
-      // Log payment creation
       await logActivity(
         { user: { registerId, name }, ip: req.ip, get: req.get.bind(req) },
         'CREATE',
@@ -83,7 +82,7 @@ const PaymentController = {
     }
   },
 
-  // Get verification data
+
   async getVerificationData(req, res) {
     try {
       const { verifyLog } = req.query;
@@ -94,7 +93,7 @@ const PaymentController = {
     }
   },
 
-  // Update payment details
+
   async updatePayment(req, res) {
     try {
       const { id } = req.params;
@@ -120,7 +119,6 @@ const PaymentController = {
       payment.belongsTo = belongsTo;
       await payment.save();
 
-      // Log payment update
       await logActivity(
         req,
         'UPDATE',
@@ -136,7 +134,7 @@ const PaymentController = {
     }
   },
 
-  // Update verification status
+
   async updateVerificationStatus(req, res) {
     try {
       const { id } = req.params;
@@ -185,7 +183,7 @@ const PaymentController = {
       payment.verifiedAt = new Date();
 
       await payment.save();
-      // Log verification status change
+      
       await logActivity(
         req,
         'VERIFY',
@@ -201,7 +199,7 @@ const PaymentController = {
     }
   },
   
-  // Delete payment by paymentId
+
   async deletePayment(req, res) {
     try {
       const { paymentId } = req.params;

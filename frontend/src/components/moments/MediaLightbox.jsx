@@ -106,7 +106,6 @@ function MediaLightbox({
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
-      {/* Top Bar */}
       <div className="bg-black bg-opacity-75 text-white p-4 flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <button
@@ -130,7 +129,6 @@ function MediaLightbox({
         </button>
       </div>
 
-      {/* Media Display */}
       <div className="flex-1 flex items-center justify-center relative overflow-hidden">
         {currentMedia.type === 'image' ? (
           <img
@@ -150,7 +148,6 @@ function MediaLightbox({
           </div>
         )}
 
-        {/* Navigation Arrows */}
         {mediaFiles.length > 1 && (
           <>
             <button
@@ -170,7 +167,6 @@ function MediaLightbox({
           </>
         )}
 
-        {/* Download Button */}
         <button
           onClick={() => {
             const dl = getDriveDownloadUrl(currentMedia.url);
@@ -193,7 +189,6 @@ function MediaLightbox({
         </button>
       </div>
 
-      {/* Bottom Bar */}
       <div className="bg-black bg-opacity-75 text-white p-4 flex items-center justify-between">
         <div>
           <p className="font-medium notranslate">{currentMedia.name}</p>

@@ -9,7 +9,6 @@ export const MaintenanceModeProvider = ({ children }) => {
   const [expectedBackAt, setExpectedBackAt] = useState('');
 
   useEffect(() => {
-    // Fetch the current maintenance status from the server
     const fetchMaintenanceStatus = async () => {
       try {
         const { data } = await axios.get(`${API_URL}/api/maintenance/status`);

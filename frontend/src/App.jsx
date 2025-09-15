@@ -65,13 +65,13 @@ function AppContent() {
       <PopupBanner />
 
       <Routes>
-        {/* Public (Auth) Routes */}
+        {/* Public Auth Routes */}
         <Route element={<AuthLayout />}>
           <Route path="/signin" element={<SignIn />} />
           <Route path="/signup" element={<SignUp />} />
         </Route>
 
-        {/* Protected (Dashboard) Routes */}
+        {/* Protected Dashboard Routes */}
         <Route element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
           <Route path="/" element={<Home />} />
           <Route path="/profile" element={<Profile />} />

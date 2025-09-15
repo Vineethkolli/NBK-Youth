@@ -3,7 +3,6 @@ import User from '../models/User.js';
 import { logActivity } from '../middleware/activityLogger.js';
 
 export const committeeController = {
-  // Get all committee members (always fresh)
   getAllMembers: async (req, res) => {
     try {
       const committees = await Committee.find().sort('order');
@@ -13,7 +12,6 @@ export const committeeController = {
         committees.map(async (c) => {
           const user = await User.findOne({ registerId: c.registerId })
           if (!user) {
-            // skip or return a placeholder
             return { ...c.toObject(), name: 'Unknown', profileImage: null };
           }
           return {
@@ -37,7 +35,7 @@ export const committeeController = {
     }
   },
 
-  // Add committee member (we only store registerId + metadata)
+
   addMember: async (req, res) => {
     try {
       const { registerId } = req.body;
@@ -66,7 +64,6 @@ export const committeeController = {
 );
 
 
-      // return with live user data
       res.status(201).json({
         ...member.toObject(),
         name:         user.name,
@@ -78,7 +75,7 @@ export const committeeController = {
     }
   },
 
-  // Update member order
+
   updateOrder: async (req, res) => {
     try {
       const { members } = req.body;
@@ -86,12 +83,10 @@ export const committeeController = {
       const originalMembers = await Committee.find();
       const originalData = originalMembers.map(m => m.toObject());
 
-      // Update order for each member
       for (const member of members) {
         await Committee.findByIdAndUpdate(member._id, { order: member.order });
       }
 
-      // Log order update
       await logActivity(
         req,
         'UPDATE',
@@ -107,7 +102,7 @@ export const committeeController = {
     }
   },
 
-  // Remove committee member
+
   removeMember: async (req, res) => {
     try {
       const member = await Committee.findById(req.params.id);
@@ -117,7 +112,7 @@ export const committeeController = {
 
       const originalData = member.toObject();
       const user = await User.findOne({ registerId: member.registerId });
-      // Log member removal
+      
 await logActivity(
   req,
   'DELETE',
@@ -129,7 +124,6 @@ await logActivity(
 
       await Committee.findByIdAndDelete(req.params.id);
 
-      // Reorder remaining members
       const remainingMembers = await Committee.find().sort('order');
       for (let i = 0; i < remainingMembers.length; i++) {
         remainingMembers[i].order = i + 1;

@@ -41,7 +41,6 @@ export const bannerController = {
 
       let imageUrl, videoUrl, imagePublicId, videoPublicId;
 
-      // Use multer: req.files.image and req.files.video
       if (req.files?.image?.[0]) {
         const imageResult = await uploadToCloudinary(req.files.image[0].buffer, 'Banners', 'image');
         imageUrl = imageResult.secure_url;
@@ -66,7 +65,6 @@ export const bannerController = {
         createdBy: req.user.registerId
       });
 
-      // Log banner creation
       await logActivity(
         req,
         'CREATE',
@@ -142,7 +140,6 @@ export const bannerController = {
         }
       }
 
-      // Build update object
       const updateOps = {
         $set: { title, message, periodicity, duration, status },
       };
@@ -179,7 +176,6 @@ export const bannerController = {
         return res.status(404).json({ message: 'Banner not found' });
       }
 
-      // Log banner update
       await logActivity(
         req,
         'UPDATE',
@@ -222,7 +218,6 @@ export const bannerController = {
         }
       }
 
-      // Log banner deletion
       await logActivity(
         req,
         'DELETE',
