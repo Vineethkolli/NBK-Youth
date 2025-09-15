@@ -160,10 +160,7 @@ export const resetPassword = async (req, res) => {
     }
     user.password = newPassword;
     await user.save();
-<<<<<<< HEAD
-=======
-
->>>>>>> 8414a97 (comments)
+    
     return res.json({ message: 'Password reset successful' });
   } catch (error) {
     if (error.name === 'JsonWebTokenError') {
