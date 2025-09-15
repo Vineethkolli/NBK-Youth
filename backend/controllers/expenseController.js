@@ -22,7 +22,6 @@ export const expenseController = {
       if (paymentMode) query.paymentMode = paymentMode;
       if (verifyLog) query.verifyLog = verifyLog;
 
-      // Date range filter
       if (startDate || endDate) {
         query.createdAt = {};
         if (startDate) {
@@ -40,7 +39,7 @@ export const expenseController = {
     }
   },
 
-  // Get verification data
+
   getVerificationData: async (req, res) => {
     try {
       const { verifyLog } = req.query;
@@ -52,7 +51,7 @@ export const expenseController = {
     }
   },
 
-  // Create new expense
+ 
   createExpense: async (req, res) => {
     try {
       let billImageUrl = null;
@@ -74,7 +73,6 @@ export const expenseController = {
         verifyLog: 'not verified'
       });
 
-      // Log expense creation
       await logActivity(
         req,
         'CREATE',
@@ -91,7 +89,7 @@ export const expenseController = {
     }
   },
 
-  // Update expense
+
   updateExpense: async (req, res) => {
     try {
       const expense = await Expense.findById(req.params.id);
@@ -133,7 +131,7 @@ export const expenseController = {
         }
       }
 
-      // Update expense
+     
       const updatedExpense = await Expense.findByIdAndUpdate(
         req.params.id,
         {
@@ -145,7 +143,6 @@ export const expenseController = {
         { new: true }
       );
 
-      // Log expense update
       await logActivity(
         req,
         'UPDATE',
@@ -162,7 +159,7 @@ export const expenseController = {
     }
   },
 
-  // Update verification status
+
   updateVerificationStatus: async (req, res) => {
     try {
       const { verifyLog, registerId } = req.body;
@@ -185,7 +182,6 @@ export const expenseController = {
       expense.verifyLog = verifyLog;
       await expense.save();
 
-      // Log verification status change
       await logActivity(
         req,
         'VERIFY',
@@ -212,13 +208,11 @@ export const expenseController = {
       const originalData = expense.toObject();
 
       // Do NOT delete bill image from Cloudinary on soft delete
-
       expense.isDeleted = true;
       expense.deletedAt = new Date();
       expense.deletedBy = req.user.registerId;
       await expense.save({ validateBeforeSave: false });
 
-      // Log expense deletion
       await logActivity(
         req,
         'DELETE',
@@ -235,7 +229,7 @@ export const expenseController = {
     }
   },
 
-  // Get recycle bin items
+
   getRecycleBin: async (req, res) => {
     try {
       const deletedExpenses = await Expense.find({ isDeleted: true })
@@ -246,7 +240,7 @@ export const expenseController = {
     }
   },
 
-  // Restore from recycle bin
+
   restoreExpense: async (req, res) => {
     try {
       const expense = await Expense.findById(req.params.id);
@@ -259,7 +253,6 @@ export const expenseController = {
       expense.isDeleted = false;
       await expense.save({ validateBeforeSave: false });
 
-      // Log expense restoration
       await logActivity(
         req,
         'RESTORE',
@@ -275,7 +268,7 @@ export const expenseController = {
     }
   },
 
-  // Permanently delete from recycle bin
+
   permanentDeleteExpense: async (req, res) => {
     try {
       const expense = await Expense.findById(req.params.id);
@@ -295,7 +288,6 @@ export const expenseController = {
         }
       }
 
-      // Log permanent deletion
       await logActivity(
         req,
         'DELETE',

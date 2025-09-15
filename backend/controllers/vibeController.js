@@ -10,7 +10,7 @@ const extractPublicId = (url) => {
 };
 
 const VibeController = {
-  // Get all collections
+
   getAllCollections: async (req, res) => {
     try {
       const collections = await Collection.find().sort({ createdAt: -1 });
@@ -20,7 +20,7 @@ const VibeController = {
     }
   },
 
-  // Create collection
+
   createCollection: async (req, res) => {
   try {
     const name = req.body.name.trim();
@@ -53,14 +53,13 @@ const VibeController = {
 },
 
 
-  // Update collection
   updateCollection: async (req, res) => {
   try {
     const name = req.body.name.trim();
 
     // Check if another collection already has this name (case-insensitive)
     const existing = await Collection.findOne({
-      _id: { $ne: req.params.id }, // exclude current collection
+      _id: { $ne: req.params.id }, 
       name: { $regex: `^${name}$`, $options: 'i' }
     });
 
@@ -96,7 +95,7 @@ const VibeController = {
   }
 },
 
-  // Delete collection
+
   deleteCollection: async (req, res) => {
     try {
       const collection = await Collection.findById(req.params.id);
@@ -112,7 +111,6 @@ const VibeController = {
         await cloudinary.uploader.destroy(publicId, { resource_type: 'video' });
       }
 
-      // Log collection deletion
       await logActivity(
         req,
         'DELETE',
@@ -129,7 +127,7 @@ const VibeController = {
     }
   },
 
-  // Upload song
+
   uploadSong: async (req, res) => {
     try {
       const collection = await Collection.findById(req.params.collectionId);
@@ -154,7 +152,6 @@ const VibeController = {
       await collection.save();
       res.status(201).json(collection);
       
-      // Log song upload
       await logActivity(
         req,
         'CREATE',
@@ -169,7 +166,7 @@ const VibeController = {
     }
   },
 
-  // Update song
+
   updateSong: async (req, res) => {
     try {
       const collection = await Collection.findById(req.params.collectionId);
@@ -201,7 +198,7 @@ const VibeController = {
     }
   },
 
-  // Delete song
+
   deleteSong: async (req, res) => {
     try {
       const collection = await Collection.findById(req.params.collectionId);
@@ -220,7 +217,6 @@ const VibeController = {
       const publicId = extractPublicId(song.url);
       await cloudinary.uploader.destroy(publicId, { resource_type: 'video' });
 
-      // Log song deletion
       await logActivity(
         req,
         'DELETE',

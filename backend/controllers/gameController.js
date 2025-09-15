@@ -2,7 +2,7 @@ import Game from '../models/Game.js';
 import { logActivity } from '../middleware/activityLogger.js';
 
 export const gameController = {
-  // Get all games
+
   getAllGames: async (req, res) => {
     try {
       const games = await Game.find().sort('-createdAt');
@@ -12,7 +12,7 @@ export const gameController = {
     }
   },
 
-  // Create game
+
   createGame: async (req, res) => {
     try {
       const existingGame = await Game.findOne({ name: req.body.name });
@@ -25,7 +25,6 @@ export const gameController = {
         createdBy: req.user.id
       });
 
-      // Log game creation
       await logActivity(
         req,
         'CREATE',
@@ -41,7 +40,7 @@ export const gameController = {
     }
   },
   
-  // Update game
+
 updateGame: async (req, res) => {
   try {
     const originalGame = await Game.findById(req.params.id);
@@ -49,7 +48,6 @@ updateGame: async (req, res) => {
       return res.status(404).json({ message: 'Game not found' });
     }
 
-    // Check if another game with the same name exists
     const existingGame = await Game.findOne({
       name: req.body.name,
       _id: { $ne: req.params.id }, 
@@ -61,7 +59,6 @@ updateGame: async (req, res) => {
 
     const originalData = originalGame.toObject();
 
-    // Proceed with updating the game
     const game = await Game.findByIdAndUpdate(
       req.params.id,
       { ...req.body },
@@ -72,7 +69,6 @@ updateGame: async (req, res) => {
       return res.status(404).json({ message: 'Game not found' });
     }
 
-    // Log game update
     await logActivity(
       req,
       'UPDATE',
@@ -89,7 +85,6 @@ updateGame: async (req, res) => {
 },
 
 
-  // Delete game
   deleteGame: async (req, res) => {
     try {
       const game = await Game.findById(req.params.id);
@@ -99,7 +94,6 @@ updateGame: async (req, res) => {
 
       const originalData = game.toObject();
 
-      // Log game deletion
       await logActivity(
         req,
         'DELETE',
@@ -116,7 +110,7 @@ updateGame: async (req, res) => {
     }
   },
 
-  // Add player
+
   addPlayer: async (req, res) => {
     try {
       const game = await Game.findById(req.params.id);
@@ -135,7 +129,6 @@ updateGame: async (req, res) => {
       });
       await game.save();
 
-      // Log player addition
       await logActivity(
         req,
         'CREATE',
@@ -144,7 +137,7 @@ updateGame: async (req, res) => {
         { before: null, after: { playerName: req.body.name } },
         `Player "${req.body.name}" added to game "${game.name}" by ${req.user.name}`
       );
-      // Return the complete updated game object
+
       const updatedGame = await Game.findById(req.params.id);
       res.status(201).json(updatedGame);
     } catch (error) {
@@ -152,7 +145,7 @@ updateGame: async (req, res) => {
     }
   },
 
-  // Update player
+
   updatePlayer: async (req, res) => {
     try {
       const game = await Game.findById(req.params.gameId);
@@ -177,7 +170,6 @@ updateGame: async (req, res) => {
       Object.assign(player, req.body);
       await game.save();
   
-      // Log player update
       await logActivity(
         req,
         'UPDATE',
@@ -194,7 +186,6 @@ updateGame: async (req, res) => {
   },
   
 
-  // Delete player
   deletePlayer: async (req, res) => {
     try {
       const game = await Game.findById(req.params.gameId);
@@ -209,7 +200,6 @@ updateGame: async (req, res) => {
 
       const originalPlayerData = { ...player.toObject() };
 
-      // Log player deletion
       await logActivity(
         req,
         'DELETE',
@@ -222,7 +212,6 @@ updateGame: async (req, res) => {
       game.players.pull(req.params.playerId);
       await game.save();
 
-      // Return the complete updated game object
       const updatedGame = await Game.findById(req.params.gameId);
       res.json(updatedGame);
     } catch (error) {

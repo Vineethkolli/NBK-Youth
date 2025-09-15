@@ -2,7 +2,7 @@ import EventLabel from '../models/EventLabel.js';
 import { logActivity } from '../middleware/activityLogger.js';
 
 export const eventLabelController = {
-  // Get current event label
+  
   getEventLabel: async (req, res) => {
     try {
       const eventLabel = await EventLabel.findOne().sort({ createdAt: -1 });
@@ -12,7 +12,7 @@ export const eventLabelController = {
     }
   },
 
-  // Create event label
+
   createEventLabel: async (req, res) => {
     try {
       const { label } = req.body;
@@ -25,7 +25,6 @@ export const eventLabelController = {
         createdBy: req.user.registerId
       });
 
-      // Log event label creation
       await logActivity(
         req,
         'CREATE',
@@ -41,7 +40,7 @@ export const eventLabelController = {
     }
   },
 
-  // Update event label
+
   updateEventLabel: async (req, res) => {
     try {
       const { label } = req.body;
@@ -59,7 +58,6 @@ export const eventLabelController = {
         { new: true }
       );
 
-      // Log event label update
       await logActivity(
         req,
         'UPDATE',
@@ -75,7 +73,7 @@ export const eventLabelController = {
     }
   },
 
-  // Delete event label
+
   deleteEventLabel: async (req, res) => {
     try {
       const eventLabel = await EventLabel.findById(req.params.id);
@@ -86,7 +84,6 @@ export const eventLabelController = {
 
       const originalData = eventLabel.toObject();
 
-      // Log event label deletion
       await logActivity(
         req,
         'DELETE',

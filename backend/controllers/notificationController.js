@@ -117,7 +117,6 @@ export const sendNotification = async (req, res) => {
       sentBy: senderRegisterId,
     });
 
-    // Log notification sending
     await logActivity(
       req,
       'CREATE',

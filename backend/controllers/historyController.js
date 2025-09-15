@@ -3,7 +3,7 @@ import Snapshot from '../models/Snapshot.js';
 import { logActivity } from '../middleware/activityLogger.js';
 
 export const historyController = {
-  // Get all histories
+
   getAllHistories: async (req, res) => {
     try {
       const histories = await History.find()
@@ -15,7 +15,7 @@ export const historyController = {
     }
   },
 
-  // Create history from snapshot
+
   createHistory: async (req, res) => {
     try {
       const { snapshotName, selectedCollections } = req.body;
@@ -63,7 +63,6 @@ export const historyController = {
         createdBy: req.user.registerId
       });
 
-      // Log history creation
       await logActivity(
         req,
         'CREATE',
@@ -84,7 +83,7 @@ export const historyController = {
     }
   },
 
-  // Delete history
+
   deleteHistory: async (req, res) => {
     try {
       const history = await History.findById(req.params.id);
@@ -94,7 +93,6 @@ export const historyController = {
 
       const originalData = history.toObject();
 
-      // Log history deletion
       await logActivity(
         req,
         'DELETE',

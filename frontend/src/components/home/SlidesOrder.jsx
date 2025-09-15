@@ -63,7 +63,6 @@ function SlidesOrder({
   return (
     <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-2">
       <div className="bg-white rounded-lg w-full max-w-4xl max-h-[90vh] overflow-hidden">
-        {/* Header */}
         <div className="p-3 border-b bg-gray-50">
           <div className="flex justify-between items-center">
             <h3 className="text-lg font-semibold">Reorder Slides</h3>

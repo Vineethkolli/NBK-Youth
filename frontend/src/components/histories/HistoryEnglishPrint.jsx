@@ -24,14 +24,14 @@ function EnglishPrint({ selectedHistory, activeTab, data, showBelongsTo }) {
     let yPos = 20;
     const timestamp = new Date().toLocaleString();
 
-    // --- Title ---
+    // Title
     doc.setFontSize(16);
     doc.setTextColor(0, 0, 0);
     const title = `${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} Report`;
     doc.text(title, 105, yPos, { align: 'center' });
     yPos += 7;
 
-    // --- Snapshot Name (instead of eventLabel) ---
+    // Snapshot Name
     if (selectedHistory.snapshotName) {
       doc.setFontSize(12);
       doc.setTextColor(100, 100, 100);
@@ -41,7 +41,7 @@ function EnglishPrint({ selectedHistory, activeTab, data, showBelongsTo }) {
       yPos += 5;
     }
 
-    // --- Print Sections ---
+    // Print Sections
     if (activeTab === 'stats' && data) {
       printStats(doc, data, yPos);
     } else if (activeTab === 'income' && Array.isArray(data)) {
@@ -52,7 +52,7 @@ function EnglishPrint({ selectedHistory, activeTab, data, showBelongsTo }) {
       printEvents(doc, data, yPos);
     }
 
-    // --- Footer: timestamp + page numbers ---
+    // Footer
     const pageCount = doc.internal.getNumberOfPages();
     for (let i = 1; i <= pageCount; i++) {
       doc.setPage(i);
@@ -68,12 +68,12 @@ function EnglishPrint({ selectedHistory, activeTab, data, showBelongsTo }) {
     doc.save(`${selectedHistory.snapshotName}_${activeTab}.pdf`);
   };
 
-  // --- Print Functions ---
+  // Print Functions
   const printStats = (doc, stats, startY) => {
     const budgetStats = stats.budgetStats || {};
     let yPos = startY;
 
-  // --- Budget Stats ---
+  // Budget Stats
   doc.setFontSize(14);
   doc.setTextColor(0, 0, 0);
   doc.text('Budget Statistics', 15, yPos);
@@ -104,7 +104,7 @@ function EnglishPrint({ selectedHistory, activeTab, data, showBelongsTo }) {
   });
   yPos = doc.lastAutoTable.finalY + 16;
 
-  // --- Payment Mode Stats ---
+  // Payment Mode Stats
   doc.setFontSize(14);
   doc.setTextColor(0, 0, 0);
   doc.text('Payment Mode Statistics', 15, yPos);
@@ -126,7 +126,7 @@ function EnglishPrint({ selectedHistory, activeTab, data, showBelongsTo }) {
   });
   yPos = doc.lastAutoTable.finalY + 16;
 
-  // --- Villagers Stats ---
+  // Villagers Stats
   if (stats.villagers) {
     doc.setFontSize(14);
     doc.setTextColor(0, 0, 0);
@@ -151,7 +151,7 @@ function EnglishPrint({ selectedHistory, activeTab, data, showBelongsTo }) {
     yPos = doc.lastAutoTable.finalY + 16;
   }
 
-  // --- Youth Stats ---
+  // Youth Stats
   if (stats.youth) {
     doc.setFontSize(14);
     doc.setTextColor(0, 0, 0);
@@ -176,7 +176,7 @@ function EnglishPrint({ selectedHistory, activeTab, data, showBelongsTo }) {
     yPos = doc.lastAutoTable.finalY + 16;
   }
 
-  // --- Date-wise Stats ---
+  // Date-wise Stats
   if (stats.dateWiseStats && stats.dateWiseStats.length > 0) {
     doc.addPage();
     yPos = 20;

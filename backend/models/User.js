@@ -46,7 +46,7 @@ const userSchema = new mongoose.Schema({
     default: null
   },
   profileImagePublicId: {
-    type: String, // Cloudinary public_id for profile image
+    type: String, 
     default: null
   },
   language: {

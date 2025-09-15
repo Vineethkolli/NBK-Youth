@@ -133,10 +133,13 @@ function TechStack() {
           ))}
         </div>
       </section>
+
       <MindMap />
+
       <Access />
-      {/* (Platforms, Technologies, References, Footer) */}
+
       <TechStackDetails />
+      
     </div>
   );
 }

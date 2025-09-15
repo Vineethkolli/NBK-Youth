@@ -18,7 +18,6 @@ const ExpensePrint = ({ expenses, visibleColumns, userRole }) => {
     // Visible columns
     const columns = Object.keys(visibleColumns).filter(column => visibleColumns[column]);
 
-    // Add Serial Number as first column
     headers.push('S.No');
 
     columns.forEach(column => {
@@ -37,7 +36,7 @@ const ExpensePrint = ({ expenses, visibleColumns, userRole }) => {
       }
     });
 
-    // Rows
+  
     expenses.forEach((expense, index) => {
       const row = [index + 1];
       columns.forEach(column => {
@@ -76,7 +75,7 @@ const ExpensePrint = ({ expenses, visibleColumns, userRole }) => {
       margin: { top: 10 },
     });
 
-    // Add footer on every page like IncomePrint
+    // Footer
     const pageCount = doc.getNumberOfPages();
     for (let i = 1; i <= pageCount; i++) {
       doc.setPage(i);

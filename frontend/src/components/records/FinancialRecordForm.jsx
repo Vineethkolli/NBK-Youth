@@ -94,7 +94,7 @@ function FinancialRecordForm({ record, onClose, onSubmit }) {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Event Name */}
+
           <div>
             <label className="block text-sm font-medium text-gray-700">Event Name *</label>
             <select
@@ -127,7 +127,6 @@ function FinancialRecordForm({ record, onClose, onSubmit }) {
             </div>
           )}
 
-          {/* Year */}
           <div>
             <label className="block text-sm font-medium text-gray-700">Year *</label>
             <select
@@ -144,7 +143,6 @@ function FinancialRecordForm({ record, onClose, onSubmit }) {
             </select>
           </div>
 
-          {/* Status */}
           <div>
             <label className="block text-sm font-medium text-gray-700">Status *</label>
             <select
@@ -161,7 +159,6 @@ function FinancialRecordForm({ record, onClose, onSubmit }) {
             </select>
           </div>
 
-          {/* Amounts */}
           <div>
             <label className="block text-sm font-medium text-gray-700">Amount Left *</label>
             <input
@@ -243,7 +240,6 @@ function FinancialRecordForm({ record, onClose, onSubmit }) {
   </>
 )}
 
-          {/* Remarks */}
 <div>
   <textarea
     value={formData.remarks}
@@ -255,7 +251,6 @@ function FinancialRecordForm({ record, onClose, onSubmit }) {
 </div>
 
 
-          {/* Actions */}
           <div className="flex justify-end space-x-2">
             <button
               type="button"

@@ -16,14 +16,12 @@ const ExpensePrint = ({ expenses, visibleColumns }) => {
     doc.setFontSize(16);
     doc.text('Estimated Expense', pageWidth / 2, 15, { align: 'center' });
 
-    // Event Label (optional)
     if (eventLabel) {
       doc.setFontSize(12);
       doc.setTextColor(100, 100, 100);
       doc.text(eventLabel.label, pageWidth / 2, 22, { align: 'center' });
     }
 
-    // Table Columns
     const tableColumns = [];
     if (visibleColumns.sno) tableColumns.push('S.No');
     if (visibleColumns.registerId) tableColumns.push('Register ID');
@@ -32,7 +30,6 @@ const ExpensePrint = ({ expenses, visibleColumns }) => {
     if (visibleColumns.presentAmount) tableColumns.push('Present Amount');
     if (visibleColumns.others) tableColumns.push('Others');
 
-    // Table Rows
     const tableRows = expenses.map((expense, index) => {
       const row = [];
       if (visibleColumns.sno) row.push(index + 1);
@@ -52,7 +49,7 @@ const ExpensePrint = ({ expenses, visibleColumns }) => {
       margin: { top: 10 },
     });
 
-    // Add footer with timestamp and page numbers on every page
+    // Footer
     const pageCount = doc.getNumberOfPages();
     for (let i = 1; i <= pageCount; i++) {
       doc.setPage(i);

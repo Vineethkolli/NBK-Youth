@@ -26,23 +26,18 @@ function LetsPlay() {
     fetchGames();
   }, []);
 
-  // Effect to handle browser back button functionality
   useEffect(() => {
     const handlePopState = (event) => {
-      // When the user navigates back, if the history state is null or not our 'players' view,
-      // it means we should be on the games list.
       if (!event.state || event.state.view !== 'players') {
         setSelectedGame(null);
       }
     };
 
     window.addEventListener('popstate', handlePopState);
-
-    // Cleanup the event listener when the component unmounts
     return () => {
       window.removeEventListener('popstate', handlePopState);
     };
-  }, []); // Empty dependency array ensures this runs only once
+  }, []); 
 
   const fetchGames = async () => {
     try {
@@ -53,7 +48,7 @@ function LetsPlay() {
     }
   };
 
-  // --- Navigation Handlers ---
+  // Navigation Handlers
   const handleSelectGame = (game) => {
     setSelectedGame(game);
     // Push a new state into the browser history to represent the player view
@@ -61,11 +56,10 @@ function LetsPlay() {
   };
 
   const handleGoBack = () => {
-    // This uses the browser's history to go back, triggering the popstate event
     window.history.back();
   };
 
-  // --- Game CRUD operations ---
+  // Game management
   const handleCreateGame = async (formData) => {
     try {
       const { data } = await axios.post(`${API_URL}/api/games`, formData);
@@ -106,7 +100,7 @@ function LetsPlay() {
     }
   };
 
-  // --- Player management ---
+  // Player management
   const handleAddPlayer = async (playerName) => {
     try {
       const { data } = await axios.post(`${API_URL}/api/games/${selectedGame._id}/players`, {

@@ -15,7 +15,6 @@ function InstallApp() {
   const [showIOSPopup, setShowIOSPopup] = useState(false);
 
   useEffect(() => {
-    // Detect platform
     const detectPlatform = () => {
       if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
         setPlatform('ios');

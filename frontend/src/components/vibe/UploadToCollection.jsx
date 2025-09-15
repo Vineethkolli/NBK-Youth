@@ -56,7 +56,6 @@ function UploadToCollectionForm({ collection, onClose, onSuccess }) {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-full max-w-lg mx-4 max-h-[85vh] overflow-y-auto">
-        {/* Header */}
         <div className="flex justify-between items-center mb-4">
           <div className="flex items-center">
             <Music className="h-5 w-5 mr-2 text-indigo-600" />
@@ -72,9 +71,7 @@ function UploadToCollectionForm({ collection, onClose, onSuccess }) {
           </button>
         </div>
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Collection Name */}
           <div>
             <label className="block text-sm font-medium text-gray-700">
               Collection Name
@@ -87,7 +84,6 @@ function UploadToCollectionForm({ collection, onClose, onSuccess }) {
             />
           </div>
 
-          {/* Song Name */}
           <div>
             <label className="block text-sm font-medium text-gray-700">
               Song Name *
@@ -104,7 +100,6 @@ function UploadToCollectionForm({ collection, onClose, onSuccess }) {
             />
           </div>
 
-          {/* Audio File */}
           <div>
             <label className="block text-sm font-medium text-gray-700">
               Audio File *
@@ -121,7 +116,6 @@ function UploadToCollectionForm({ collection, onClose, onSuccess }) {
             />
           </div>
 
-          {/* Preview */}
           {formData.filePreview && (
             <div className="relative mt-4">
               <audio controls src={formData.filePreview} className="w-full" />
@@ -136,7 +130,6 @@ function UploadToCollectionForm({ collection, onClose, onSuccess }) {
             </div>
           )}
 
-          {/* Submit Button */}
           <button
             type="submit"
             disabled={isUploading || !formData.file}

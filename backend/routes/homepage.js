@@ -11,13 +11,7 @@ const router = express.Router();
 
 // Slide routes
 router.get('/slides', homepageController.getSlides);
-router.post(
-  '/slides',
-  auth,
-  checkRole(['developer', 'financier', 'admin']),
-  upload.single('file'),
-  homepageController.addSlide
-);
+router.post('/slides', auth, checkRole(['developer', 'financier', 'admin']), upload.single('file'), homepageController.addSlide);
 router.delete('/slides/:id', auth, checkRole(['developer', 'financier', 'admin']), homepageController.deleteSlide);
 router.put('/slides/order', auth, checkRole(['developer', 'financier', 'admin']), homepageController.updateSlideOrder);
 

@@ -12,7 +12,6 @@ function MomentForm({ type, onClose, onSubmit }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [fileInputKey, setFileInputKey] = useState(Date.now());
 
-  // ----------------- HANDLE SUBMIT -----------------
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (isSubmitting) return;
@@ -59,7 +58,7 @@ function MomentForm({ type, onClose, onSubmit }) {
     }
   };
 
-  // ----------------- FILE HANDLERS -----------------
+  // File handlers
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
     if (files.length === 0) return;
@@ -88,7 +87,7 @@ function MomentForm({ type, onClose, onSubmit }) {
     if (newFiles.length === 0) setFileInputKey(Date.now());
   };
 
-  // ----------------- UI HELPERS -----------------
+  // UI helpers
   const getFormTitle = () => {
     switch (type) {
       case 'youtube': return 'Add YouTube Video';
@@ -109,11 +108,9 @@ function MomentForm({ type, onClose, onSubmit }) {
     }
   };
 
-  // ----------------- RENDER -----------------
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-full max-w-lg max-h-[85vh] overflow-y-auto mx-4">
-        {/* Header */}
         <div className="flex justify-between items-center mb-4">
           <div className="flex items-center">
             {getFormIcon()}

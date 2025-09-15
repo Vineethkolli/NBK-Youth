@@ -6,7 +6,7 @@ const slideSchema = new mongoose.Schema({
     required: true
   },
   mediaPublicId: {
-    type: String // Cloudinary public_id for slide media
+    type: String 
   },
   type: {
     type: String,

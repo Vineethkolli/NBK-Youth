@@ -4,7 +4,7 @@ import { logActivity } from '../middleware/activityLogger.js';
 import cloudinary, { uploadToCloudinary } from '../config/cloudinary.js';
 
 export const recordsController = {
-  // ---------------- Financial Timeline Methods ----------------
+  // Financial Timeline
   getAllFinancialRecords: async (req, res) => {
     try {
       const records = await FinancialRecord.find().sort({ year: -1 });
@@ -139,7 +139,7 @@ export const recordsController = {
     }
   },
 
-  // ---------------- Event Records Methods (unchanged) ----------------
+  // Event Records
   getAllEventRecords: async (req, res) => {
     try {
       const records = await EventRecord.find().sort({ createdAt: -1 });

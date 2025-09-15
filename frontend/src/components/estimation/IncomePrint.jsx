@@ -29,7 +29,6 @@ const IncomePrint = ({ incomes, visibleColumns, incomeFilters }) => {
     doc.setFontSize(16);
     doc.text('Estimated Income', pageWidth / 2, 15, { align: 'center' });
 
-    // Event Label (optional)
     if (eventLabel) {
       doc.setFontSize(12);
       doc.setTextColor(100, 100, 100);
@@ -69,7 +68,7 @@ const IncomePrint = ({ incomes, visibleColumns, incomeFilters }) => {
       margin: { top: 10 },
     });
 
-    // Footer: timestamp  and page X of Y on every page
+    // Footer
     const pageCount = doc.getNumberOfPages();
     for (let i = 1; i <= pageCount; i++) {
       doc.setPage(i);
@@ -88,7 +87,6 @@ const IncomePrint = ({ incomes, visibleColumns, incomeFilters }) => {
       );
     }
 
-    // Save the generated PDF
     doc.save('Estimated_Income.pdf');
   };
 

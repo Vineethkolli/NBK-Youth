@@ -12,8 +12,6 @@ export const updateProfileImage = async (req, res) => {
 
     const originalImage = user.profileImage;
 
-
-
     // Delete old image from Cloudinary if it exists
     if (user.profileImagePublicId) {
       try {
@@ -36,7 +34,6 @@ export const updateProfileImage = async (req, res) => {
     user.profileImagePublicId = uploadResult.public_id;
     await user.save();
 
-    // Log profile image update
     await logActivity(
       req,
       'UPDATE',
@@ -77,7 +74,6 @@ export const deleteProfileImage = async (req, res) => {
     user.profileImagePublicId = null;
     await user.save();
 
-    // Log profile image deletion
     await logActivity(
       req,
       'DELETE',
@@ -95,7 +91,6 @@ export const deleteProfileImage = async (req, res) => {
 };
 
 
-// Get all users (developer only) with notification status
 export const getAllUsers = async (req, res) => {
   try {
     const { search } = req.query;
@@ -130,7 +125,7 @@ export const getAllUsers = async (req, res) => {
   }
 };
 
-// Update user profile
+
 export const updateProfile = async (req, res) => {
   try {
     const { name, email, phoneNumber } = req.body;
@@ -168,7 +163,7 @@ export const updateProfile = async (req, res) => {
     
     await user.save();
     res.json(user);
-    // Log profile update
+
     await logActivity(
       req,
       'UPDATE',
@@ -183,7 +178,7 @@ export const updateProfile = async (req, res) => {
   }
 };
 
-// Update user category (developer only)
+
 export const updateUserCategory = async (req, res) => {
   try {
     const userToUpdate = await User.findById(req.params.userId);
@@ -205,7 +200,6 @@ export const updateUserCategory = async (req, res) => {
       { new: true }
     ).select('-password');
     
-    // Log category update
     await logActivity(
       req,
       'UPDATE',
@@ -221,7 +215,7 @@ export const updateUserCategory = async (req, res) => {
   }
 };
 
-// Delete user (developer only)
+
 export const deleteUser = async (req, res) => {
   try {
     const userToDelete = await User.findById(req.params.userId);
@@ -237,7 +231,6 @@ export const deleteUser = async (req, res) => {
     
     const originalData = userToDelete.toObject();
 
-    // Log user deletion
     await logActivity(
       req,
       'DELETE',
@@ -254,7 +247,7 @@ export const deleteUser = async (req, res) => {
   }
 };
 
-// Update user role (developer only)
+
 export const updateUserRole = async (req, res) => {
   try {
     const userToUpdate = await User.findById(req.params.userId);
@@ -276,7 +269,6 @@ export const updateUserRole = async (req, res) => {
       { new: true }
     ).select('-password');
     
-    // Log role update
     await logActivity(
       req,
       'UPDATE',
@@ -292,7 +284,7 @@ export const updateUserRole = async (req, res) => {
   }
 };
 
-// Get user profile
+
 export const getProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select('-password');
@@ -305,7 +297,7 @@ export const getProfile = async (req, res) => {
   }
 };
 
-// Update language preference
+
 export const updateLanguage = async (req, res) => {
   try {
     const { language } = req.body;
@@ -317,7 +309,6 @@ export const updateLanguage = async (req, res) => {
       { new: true }
     ).select('-password');
 
-    // Log language update
     await logActivity(
       req,
       'UPDATE',

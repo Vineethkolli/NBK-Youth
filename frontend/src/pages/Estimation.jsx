@@ -7,7 +7,7 @@ import IncomeSection from '../components/estimation/IncomeSection';
 import ExpenseSection from '../components/estimation/ExpenseSection';
 import { useAuth } from '../context/AuthContext';
 import EventLabelDisplay from '../components/common/EventLabelDisplay';
-import { BarChart2, DollarSign, IndianRupee } from 'lucide-react'; // icons
+import { BarChart2, DollarSign, IndianRupee } from 'lucide-react'; 
 
 function Estimation() {
   const { user } = useAuth();
@@ -52,7 +52,6 @@ function Estimation() {
 
   return (
     <div className="space-y-6">
-      {/* Header and Tabs */}
       <div className="space-y-2">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
           <h1 className="text-2xl font-semibold mb-2 lg:mb-0">Estimation Management</h1>
@@ -102,7 +101,6 @@ function Estimation() {
         </div>
       </div>
 
-      {/* Tab content */}
       {activeTab === 'stats' && <EstimationStats stats={stats} budgetStats={budgetStats} />}
 
       {activeTab === 'income' && user?.category === 'youth' && (

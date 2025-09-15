@@ -140,7 +140,6 @@ function MediaGallery({
         </div>
       </div>
 
-      {/* Body */}
       {isReorderMode ? (
         <MediaGalleryReorder
           mediaFiles={localMediaFiles}
@@ -175,7 +174,6 @@ function MediaGallery({
                   </div>
                 </div>
 
-                {/* Download */}
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -237,14 +235,6 @@ function MediaGallery({
         />
       )}
 
-      {/* Drive Form */}
-      {canManageMedia && showDriveForm && (
-        <MediaDriveForm
-          momentTitle={moment.title}
-          onClose={() => setShowDriveForm(false)}
-          onSubmit={handleAddDriveMedia}
-        />
-      )}
     </div>
   );
 }

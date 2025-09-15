@@ -30,7 +30,6 @@ export const maintenanceController = {
         { upsert: true, new: true }
       );
 
-      // Log maintenance mode toggle
       await logActivity(
         req,
         'UPDATE',

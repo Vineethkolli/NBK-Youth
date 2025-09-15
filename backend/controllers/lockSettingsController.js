@@ -2,7 +2,7 @@ import LockSettings from '../models/LockSettings.js';
 import { logActivity } from '../middleware/activityLogger.js';
 
 export const lockSettingsController = {
-  // Get lock status
+
   getLockStatus: async (req, res) => {
     try {
       const lockSettings = await LockSettings.findOne();
@@ -12,7 +12,7 @@ export const lockSettingsController = {
     }
   },
 
-  // Toggle lock status
+
   toggleLockStatus: async (req, res) => {
     try {
       const { isLocked } = req.body;
@@ -29,7 +29,6 @@ export const lockSettingsController = {
         { upsert: true, new: true }
       );
 
-      // Log lock status change
       await logActivity(
         req,
         'UPDATE',

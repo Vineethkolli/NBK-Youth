@@ -83,7 +83,6 @@ function ActivityLogs() {
 
   return (
     <div className="space-y-6">
-      {/* Header and Tabs */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-2 lg:space-y-0">
         <h1 className="text-2xl font-semibold">Activity Logs</h1>
 
@@ -112,7 +111,6 @@ function ActivityLogs() {
             Stats
           </button>
 
-          {/* Print button will change based on activeTab */}
           {activeTab === 'logs' ? (
             <LogPrint filters={filters} search={search} />
           ) : (
@@ -121,7 +119,6 @@ function ActivityLogs() {
         </div>
       </div>
 
-      {/* Tab content */}
       {activeTab === 'logs' && (
         <>
           <div className="space-y-4">

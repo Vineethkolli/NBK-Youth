@@ -36,14 +36,12 @@ function AdminPanel() {
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
+      
+      <BannerManager />
+      
+      <MaintenanceMode />
 
-      {/* Banner Manager (Developer Only) */}
-       <BannerManager />
-
-      {/* Maintenance Mode (Developer Only) */}
-     <MaintenanceMode />
-
-      {/* Reset Roles (Developer Only) */}
+      {/* Reset Roles */}
       {user?.role === 'developer' && (
         <div className="bg-white rounded-lg shadow p-6 flex items-center justify-between">
           <div>
@@ -66,16 +64,12 @@ function AdminPanel() {
         </div>
       )}
 
-      {/* Lock Manager (Developer Only) */}
       {user?.role === 'developer' && <LockManager />}
 
-      {/* Event Label Manager (Developer Only) */}
       <EventLabelManager />
 
-      {/* Role Statistics (Visible to all non-user roles) */}
       <RoleStatistics />
 
-      {/* Payment Details (Visible to all non-user roles) */}
       <PaymentDetails />
     </div>
   );

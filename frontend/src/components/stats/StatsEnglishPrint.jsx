@@ -32,7 +32,6 @@ const StatsPrint = ({ stats }) => {
     doc.text(title, xPos, yPos);
     yPos += 10;
 
-    // Event label
     if (eventLabel) {
       doc.setFontSize(12);
       doc.setTextColor(100, 100, 100);
@@ -165,7 +164,7 @@ const StatsPrint = ({ stats }) => {
       });
     }
 
-    // Footer: timestamp  and page X of Y 
+    // Footer
     const pageCount = doc.getNumberOfPages();
     for (let i = 1; i <= pageCount; i++) {
       doc.setPage(i);

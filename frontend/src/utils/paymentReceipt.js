@@ -6,7 +6,6 @@ import { API_URL } from './config';
 export const generatePaymentReceipt = async (payment) => {
   const doc = new jsPDF();
 
-  // Fetch event label
   let eventLabel = null;
   try {
     const { data } = await axios.get(`${API_URL}/api/event-label`);
@@ -15,11 +14,9 @@ export const generatePaymentReceipt = async (payment) => {
     console.error('Failed to fetch event label:', error);
   }
 
-  // Add logo
   const logoUrl = '/logo/192.png'; 
   doc.addImage(logoUrl, 'PNG', 20, 10, 40, 40); 
 
-  // Add header
   doc.setFontSize(22);
   doc.setTextColor(34, 34, 34); 
   doc.text('NBK Youth', 105, 30, { align: 'center' });
@@ -28,14 +25,12 @@ export const generatePaymentReceipt = async (payment) => {
   doc.setTextColor(50, 50, 50);
   doc.text('Payment Receipt', 105, 40, { align: 'center' });
 
-  // Add event label if it exists
   if (eventLabel) {
     doc.setFontSize(12);
     doc.setTextColor(100, 100, 100);
     doc.text(eventLabel.label, 105, 48, { align: 'center' });
   }
 
-  // Add horizontal divider
   const lineYPosition = eventLabel ? 55 : 50;
   doc.setDrawColor(200, 200, 200); 
   doc.setLineWidth(0.5);
@@ -46,7 +41,6 @@ export const generatePaymentReceipt = async (payment) => {
   doc.setTextColor(50, 50, 50);
   doc.text('Payment Details', 20, lineYPosition + 10);
 
-  // Details styling
   doc.setFontSize(12);
   doc.setTextColor(60, 60, 60);
   const startY = lineYPosition + 20;
@@ -81,7 +75,7 @@ export const generatePaymentReceipt = async (payment) => {
   doc.textWithLink('View', rightColumn, screenshotYPosition, { url: payment.screenshot });
   doc.setTextColor(0, 0, 0); 
 
-  // Footer section
+  // Footer
   const footerYPosition = screenshotYPosition + 20;
   doc.setFontSize(10);
   doc.setTextColor(120, 120, 120); 

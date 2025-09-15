@@ -30,7 +30,6 @@ export const signUp = async (req, res) => {
       language: language || 'en'
     });
 
-    // Log user registration
     await logActivity(
       { user: { registerId: user.registerId, name: user.name }, ip: req.ip, get: req.get.bind(req) },
       'CREATE',
@@ -76,7 +75,6 @@ export const signIn = async (req, res) => {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    // Log user sign in
     await logActivity(
       { user: { registerId: user.registerId, name: user.name }, ip: req.ip, get: req.get.bind(req) },
       'UPDATE',
@@ -160,8 +158,19 @@ export const resetPassword = async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
+
     user.password = newPassword;
     await user.save();
+
+    await logActivity(
+      { user: { registerId: user.registerId, name: user.name }, ip: req.ip, get: req.get.bind(req) },
+      'UPDATE',
+      'User',
+      user.registerId,
+      { before: null, after: null },
+      `User ${user.name} has reset their password`
+    );
+
     return res.json({ message: 'Password reset successful' });
   } catch (error) {
     if (error.name === 'JsonWebTokenError') {
@@ -170,6 +179,7 @@ export const resetPassword = async (req, res) => {
     return res.status(500).json({ message: 'Server error' });
   }
 };
+
 
 export const changePassword = async (req, res) => {
   try {
@@ -181,7 +191,6 @@ export const changePassword = async (req, res) => {
     user.password = newPassword;
     await user.save();
 
-    // Log password change
     await logActivity(
       req,
       'UPDATE',

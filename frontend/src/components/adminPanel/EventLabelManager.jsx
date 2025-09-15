@@ -34,11 +34,9 @@ function EventLabelManager() {
     setIsSubmitting(true);
     try {
       if (eventLabel) {
-        // Update existing
         await axios.put(`${API_URL}/api/event-label/${eventLabel._id}`, formData);
         toast.success('Event label updated successfully');
       } else {
-        // Create new
         await axios.post(`${API_URL}/api/event-label`, formData);
         toast.success('Event label created successfully');
       }

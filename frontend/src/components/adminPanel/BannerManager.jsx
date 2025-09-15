@@ -34,7 +34,7 @@ export default function BannerManager() {
   const [formData, setFormData] = useState({
     title: '',
     message: '',
-    image: '', // will store File object
+    image: '', 
     video: '', // will store File object
     status: 'disabled',
     periodicity: 1,
@@ -164,7 +164,6 @@ export default function BannerManager() {
         }
       }
   
-      // Now toggle the clicked banner’s status
       const updatedStatus = banner.status === 'enabled' ? 'disabled' : 'enabled';
       await axios.put(`${API_URL}/api/banners/${banner._id}`, {
         ...banner,
@@ -208,7 +207,6 @@ export default function BannerManager() {
 
   return (
     <div className="bg-white rounded-lg shadow p-6">
-      {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-semibold">Popup Banner</h2>
         <div className="space-x-2">
@@ -241,7 +239,7 @@ export default function BannerManager() {
             key={banner._id}
             className="border rounded-lg p-4 flex flex-col sm:flex-row sm:justify-between items-start sm:items-center gap-4"
           >
-            {/* Left: Banner Details */}
+
             <div className="flex-1 space-y-1">
               <h3 className="font-medium text-lg">{banner.title}</h3>
               <p className="text-gray-700">{renderMessageWithLinks(banner.message)}</p>
@@ -291,7 +289,7 @@ export default function BannerManager() {
         ))}
       </div>
 
-      {/* Banner Form Modal */}
+      {/* Banner Form */}
       {showForm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-2xl">
@@ -305,7 +303,7 @@ export default function BannerManager() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Title */}
+          
               <div>
                 <label className="block text-sm font-medium text-gray-700">
                   Title
@@ -321,7 +319,6 @@ export default function BannerManager() {
                 />
               </div>
 
-              {/* Message */}
               <div>
                 <label className="block text-sm font-medium text-gray-700">
                   Message
@@ -337,7 +334,6 @@ export default function BannerManager() {
                 />
               </div>
 
-              {/* Image Upload */}
               <div>
                 <label className="block text-sm font-medium text-gray-700">
                   Image
@@ -375,7 +371,6 @@ export default function BannerManager() {
                 )}
               </div>
 
-              {/* Video Upload */}
               <div>
                 <label className="block text-sm font-medium text-gray-700">
                   Video
@@ -453,7 +448,6 @@ export default function BannerManager() {
                 </div>
               </div>
 
-              {/* Form Actions */}
               <div className="flex justify-end space-x-2">
                 <button
                   type="button"

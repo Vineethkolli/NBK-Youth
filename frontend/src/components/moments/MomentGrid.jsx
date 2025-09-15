@@ -30,8 +30,7 @@ function MomentGrid({
     return () => window.removeEventListener('popstate', handlePopState);
   }, [expandedMoment, lightboxData]);
   
-  // This effect ensures that if the expandedMoment is updated in the parent state,
-  // the local expandedMoment state reflects that change.
+  // If the expandedMoment is updated in the parent state, the local expandedMoment state reflects that change.
   useEffect(() => {
     if (expandedMoment) {
         const updatedMoment = moments.find(m => m._id === expandedMoment._id);

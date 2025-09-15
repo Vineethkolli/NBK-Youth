@@ -77,7 +77,7 @@ const handlePrint = () => {
     margin: { top: 10 },
   });
 
-  // add page numbers and timestamp footer on every page
+  // Footer
   const pageCount = doc.getNumberOfPages();
   for (let i = 1; i <= pageCount; i++) {
     doc.setPage(i);

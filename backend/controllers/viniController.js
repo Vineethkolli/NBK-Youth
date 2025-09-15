@@ -1,4 +1,3 @@
-// viniController.js
 import ProcessedChunk from '../models/ProcessedChunk.js';
 import ChatHistory from '../models/ChatHistory.js';
 import ProcessedRecord from '../models/ProcessedRecords.js';
@@ -6,7 +5,7 @@ import { processRecordIntoChunks, buildSnapshotTextFromRecord } from '../service
 import { chatWithViniLogic } from '../services/viniService.js';
 
 export const viniController = {
-  // Get all processed records
+
   getAllProcessedRecords: async (req, res) => {
     try {
       const records = await ProcessedRecord.find()
@@ -60,7 +59,6 @@ export const viniController = {
         return res.status(404).json({ message: 'Processed record not found' });
       }
 
-      // Update status to processing
       record.status = 'processing';
       await record.save();
 
@@ -76,7 +74,7 @@ export const viniController = {
       res.json({ message: 'Data processed successfully', chunkCount });
     } catch (error) {
       console.error('Processing error:', error);
-      // Update status to error
+
       const record = await ProcessedRecord.findById(req.params.id);
       if (record) {
         record.status = 'error';
@@ -97,7 +95,6 @@ export const viniController = {
       // Delete existing chunks
       await ProcessedChunk.deleteMany({ eventName: record.eventName, year: record.year });
 
-      // Update status to processing
       record.status = 'processing';
       record.chunksCount = 0;
       await record.save();
@@ -118,7 +115,7 @@ export const viniController = {
     }
   },
 
-  // Delete processed record
+ 
   deleteProcessedRecord: async (req, res) => {
     try {
       const record = await ProcessedRecord.findById(req.params.id);
@@ -138,7 +135,7 @@ export const viniController = {
     }
   },
 
-  // Chat with VINI
+
   chatWithVini: async (req, res) => {
     try {
       const { message, registerId } = req.body;
@@ -149,7 +146,7 @@ export const viniController = {
     }
   },
 
-  // Get chat history
+
   getChatHistory: async (req, res) => {
     try {
       const { registerId } = req.params;
@@ -161,7 +158,7 @@ export const viniController = {
     }
   },
 
-  // Clear chat history
+
   clearChatHistory: async (req, res) => {
     try {
       const { registerId } = req.params;

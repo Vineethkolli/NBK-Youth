@@ -30,7 +30,6 @@ function HistoryStats({ stats, snapshotName }) {
 
   return (
     <div className="p-3 space-y-6">
-      {/* Header */}
       <div className="mb-6">
         <h2 className="text-xl font-semibold">Statistics</h2>
       </div>

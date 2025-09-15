@@ -261,7 +261,7 @@ function Slideshow({ isEditing }) {
 
       {!isEditing && slide.type === 'video' && (
         <div className="absolute bottom-3 right-3 flex space-x-2 bg-black/30 backdrop-blur-md p-1 rounded-full shadow-lg">
-          {/* Mute Button */}
+          {/* Mute/Unmute Button */}
           <button
             onClick={(e) => {
               e.stopPropagation();

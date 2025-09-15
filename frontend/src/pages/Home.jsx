@@ -29,7 +29,6 @@ function Home() {
   return (
     <div>
 
-      {/* Home component */}
       <div className="max-w-7xl mx-auto sm:px-6 lg:px-0 space-y-8">
         {['developer', 'financier', 'admin'].includes(user?.role) && (
           <div className="flex justify-end">
@@ -43,7 +42,6 @@ function Home() {
           </div>
         )}
 
-        {/* Slideshow Component */}
         <Slideshow isEditing={isEditing} />
 
         {/* Welcome Message */}
@@ -56,7 +54,6 @@ function Home() {
           </p>
         </div>
 
-        {/* Timeline Component */}
         <Timeline events={events} isEditing={isEditing} onUpdate={fetchEvents} />
         
         <div className="bg-gray-100 border-t border-gray-200 rounded-lg">
@@ -65,7 +62,6 @@ function Home() {
           </p>
         </div>
 
-        {/* Footer */}
         <Footer />
       </div>
     </div>

@@ -328,7 +328,6 @@ function Histories() {
 
           {/* Content */}
           <div className="bg-white rounded-lg shadow">
-            {/* Add data attribute for snapshot name translation */}
             <div data-snapshot-name style={{ display: 'none' }}>
               {selectedHistory?.snapshotName}
             </div>

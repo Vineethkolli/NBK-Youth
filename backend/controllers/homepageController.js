@@ -5,7 +5,7 @@ import cloudinary from '../config/cloudinary.js';
 import { logActivity } from '../middleware/activityLogger.js';
 
 export const homepageController = {
-  // Get all Slides
+
   getSlides: async (req, res) => {
     try {
       const slides = await Slide.find().sort('order');
@@ -38,7 +38,6 @@ export const homepageController = {
         createdBy: req.user.registerId
       });
 
-      // Log slide addition
       await logActivity(
         req,
         'CREATE',
@@ -69,7 +68,6 @@ export const homepageController = {
       const resourceType = slide.type === 'video' ? 'video' : 'image';
       await cloudinary.uploader.destroy(`HomepageSlides/${publicId}`, { resource_type: resourceType });
 
-      // Log slide deletion
       await logActivity(
         req,
         'DELETE',
@@ -79,7 +77,6 @@ export const homepageController = {
         `${slide.type} slide deleted from homepage by ${req.user.name}`
       );
 
-      // Delete from database
       await Slide.findByIdAndDelete(req.params.id);
 
       // Reorder remaining slides
@@ -107,7 +104,6 @@ export const homepageController = {
       await Slide.findByIdAndUpdate(slide._id, { order: slide.order });
     }
 
-    // Log order update
     await logActivity(
       req,
       'UPDATE',
@@ -124,7 +120,6 @@ export const homepageController = {
 },
 
 
-  // Get all Events 
   getEvents: async (req, res) => {
     try {
       const events = await Event.find().sort('-dateTime');
@@ -134,7 +129,7 @@ export const homepageController = {
     }
   },
 
-  // Add an Event
+
   addEvent: async (req, res) => {
     try {
       const event = await Event.create({
@@ -142,7 +137,6 @@ export const homepageController = {
         registerId: req.user.registerId
       });
 
-      // Log event addition
       await logActivity(
         req,
         'CREATE',
@@ -158,7 +152,7 @@ export const homepageController = {
     }
   },
 
-  //Delete an Event
+
   deleteEvent: async (req, res) => {
     try {
       const event = await Event.findById(req.params.id);
@@ -168,7 +162,6 @@ export const homepageController = {
 
       const originalData = event.toObject();
 
-      // Log event deletion
       await logActivity(
         req,
         'DELETE',

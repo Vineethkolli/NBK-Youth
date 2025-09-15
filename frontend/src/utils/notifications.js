@@ -46,12 +46,12 @@ export const subscribeToPush = async (registerId) => {
   return subscription;
 };
 
-// Detect iOS devices (copied from previous file)
+// Detect iOS devices
 export const isIos = () => {
   const userAgent = window.navigator.userAgent.toLowerCase();
   return /iphone|ipad|ipod/.test(userAgent);
 };
 
-// Check if PWA is in standalone mode (copied from previous file)
+// Check if PWA is in standalone mode 
 export const isInStandaloneMode = () =>
   ('standalone' in window.navigator) && window.navigator.standalone;

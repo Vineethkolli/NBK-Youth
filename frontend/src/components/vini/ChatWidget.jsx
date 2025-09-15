@@ -216,7 +216,7 @@ function ChatWidget({ isOpen, setIsOpen }) {
 
   return (
     <div className="fixed bottom-4 right-4 left-4 md:left-auto md:w-80 w-auto max-w-full h-[500px] bg-white rounded-lg shadow-2xl border z-50 flex flex-col">
-      {/* Header */}
+    
       <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white p-4 rounded-t-lg flex items-center justify-between">
         <div className="flex flex-col">
           <span className="font-semibold text-lg leading-tight">VINI</span>
@@ -279,7 +279,6 @@ function ChatWidget({ isOpen, setIsOpen }) {
           </div>
         ))}
 
-        {/* Typing Indicator */}
         {isTyping && (
           <div className="flex justify-start">
             <div className="bg-gray-100 rounded-lg px-3 py-2 flex items-center space-x-2">

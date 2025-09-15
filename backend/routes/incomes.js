@@ -1,67 +1,27 @@
 import express from 'express';
-import { auth, checkPermission } from '../middleware/auth.js';
+import { auth, checkRole } from '../middleware/auth.js';
 import { incomeController } from '../controllers/incomeController.js';
 
 const router = express.Router();
 
-// Get all incomes with filters
 router.get('/', auth, incomeController.getIncomes);
 
-// Get verification data
-router.get('/verification', 
-  auth, 
-  checkPermission('ACCESS_LOGS'),
-  incomeController.getVerificationData
-);
+router.get('/verification', auth, checkRole(['developer', 'financier']), incomeController.getVerificationData);
 
-// Add new income (admin, developer, financier only)
-router.post('/', 
-  auth, 
-  checkPermission('MANAGE_INCOME'),
-  incomeController.createIncome
-);
+router.post('/', auth, checkRole(['admin','developer', 'financier']), incomeController.createIncome);
 
-// Update income
-router.put('/:id', 
-  auth, 
-  checkPermission('MANAGE_INCOME'),
-  incomeController.updateIncome
-);
+router.put('/:id', auth, checkRole(['admin','developer', 'financier']), incomeController.updateIncome);
 
-// Update verification status
-router.patch('/:id/verify',
-  auth,
-  checkPermission('ACCESS_LOGS'),
-  incomeController.updateVerificationStatus
-);
-
+router.patch('/:id/verify', auth, checkRole(['developer', 'financier']), incomeController.updateVerificationStatus);
 
 // Soft delete income (move to recycle bin)
-router.delete('/:id', 
-  auth, 
-  checkPermission('DELETE_INCOME'),
-  incomeController.deleteIncome
-);
+router.delete('/:id', auth, checkRole(['developer', 'financier']), incomeController.deleteIncome);
 
-// Get recycle bin items
-router.get('/recycle-bin', 
-  auth, 
-  checkPermission('DELETE_INCOME'),
-  incomeController.getRecycleBin
-);
+router.get('/recycle-bin', auth, checkRole(['developer', 'financier']), incomeController.getRecycleBin);
 
-// Restore from recycle bin
-router.post('/restore/:id', 
-  auth, 
-  checkPermission('DELETE_INCOME'),
-  incomeController.restoreIncome
-);
+router.post('/restore/:id', auth, checkRole(['developer', 'financier']), incomeController.restoreIncome);
 
 // Permanently delete from recycle bin
-router.delete('/permanent/:id', 
-  auth, 
-  checkPermission('DELETE_INCOME'),
-  incomeController.permanentDeleteIncome
-);
+router.delete('/permanent/:id', auth, checkRole(['developer', 'financier']), incomeController.permanentDeleteIncome);
 
 export default router;

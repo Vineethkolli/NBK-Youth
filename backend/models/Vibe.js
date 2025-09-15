@@ -11,7 +11,7 @@ const songSchema = new mongoose.Schema({
   }
   ,
   mediaPublicId: {
-    type: String // Cloudinary public_id for song media
+    type: String 
   }
 }, { timestamps: true });
 

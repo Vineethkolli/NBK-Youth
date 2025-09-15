@@ -1,4 +1,3 @@
-// viniservice.js
 import User from '../models/User.js';
 import Income from '../models/Income.js';
 import Expense from '../models/Expense.js';
@@ -9,7 +8,7 @@ import ChatHistory from '../models/ChatHistory.js';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { cosineSimilarity, generateEmbedding } from './embeddingService.js';
 
-// Merged response helpers (previously in viniResponseService.js)
+
 export const getTimeBasedGreeting = () => {
   const now = new Date();
   const istTime = new Date(now.getTime() + (5.5 * 60 * 60 * 1000)); // IST offset
@@ -189,10 +188,9 @@ export const chatWithViniLogic = async ({ message, registerId }) => {
   const msg = message.toLowerCase();
 
   try {
-    // greetings / identity / creator / name / current event / my incomes (unchanged - omitted here for brevity)
+    // greetings / identity / creator / name / current event / my incomes 
     if (isGreeting(msg)) {
       response = getCreativeGreeting(userName);
-      // save + return below
     } else if (isIdentityQuestion(msg)) {
       response = `I'm VINI, your NBK Youth AI assistant! 🤖 I'm here to help you explore and understand all your app data - from income and expenses to historical records. I can answer questions about current events, past celebrations, financial data, and much more!\n\nWhat would you like to know, ${userName}? ✨`;
     } else if (isCreatorQuestion(msg)) {

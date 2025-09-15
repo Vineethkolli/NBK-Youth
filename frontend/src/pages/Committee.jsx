@@ -153,7 +153,6 @@ function Committee() {
   </div>
 )}
 
-
       <DragDropContext onDragEnd={onDragEnd}>
         <Droppable droppableId="committee-droppable">
           {provided => (

@@ -19,7 +19,7 @@ const eventRecordSchema = new mongoose.Schema({
     required: true
   },
   filePublicId: {
-    type: String, // Cloudinary public_id (used to delete/replace)
+    type: String, 
   },
   uploadedBy: {
     type: String,

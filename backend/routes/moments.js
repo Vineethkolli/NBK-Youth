@@ -8,7 +8,7 @@ const upload = multer({ storage: multer.memoryStorage() });
 const router = express.Router();
 const authRoles = ['developer', 'admin', 'financier'];
 
-// --- Moment Routes ---
+// Moment Routes
 router.get('/', momentController.getAllMoments);
 
 router.post('/youtube', auth, checkRole(authRoles), momentController.addYouTubeMoment);
@@ -21,7 +21,7 @@ router.patch('/:id/title', auth, checkRole(authRoles), momentController.updateTi
 router.delete('/:id', auth, checkRole(authRoles), momentController.deleteMoment);
 
 
-// --- Moment Media Routes ---
+// Moment Media Routes
 router.post('/:momentId/media', auth, checkRole(authRoles), upload.array('files', 20), momentMediaController.addMediaToMoment);
 router.post('/:momentId/drive-media', auth, checkRole(authRoles), momentMediaController.addDriveMediaToMoment);
 
