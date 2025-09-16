@@ -158,9 +158,19 @@ export const resetPassword = async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
+
     user.password = newPassword;
     await user.save();
-    
+
+    await logActivity(
+      { user: { registerId: user.registerId, name: user.name }, ip: req.ip, get: req.get.bind(req) },
+      'UPDATE',
+      'User',
+      user.registerId,
+      { before: null, after: null },
+      `User ${user.name} has reset their password`
+    );
+
     return res.json({ message: 'Password reset successful' });
   } catch (error) {
     if (error.name === 'JsonWebTokenError') {
@@ -169,6 +179,7 @@ export const resetPassword = async (req, res) => {
     return res.status(500).json({ message: 'Server error' });
   }
 };
+
 
 export const changePassword = async (req, res) => {
   try {
