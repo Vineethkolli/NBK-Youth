@@ -8,7 +8,6 @@ dotenv.config();
 
 const app = express();
 
-// Replace with Google OAuth credentials
 const CLIENT_ID = process.env.GMAIL_CLIENT_ID;
 const CLIENT_SECRET = process.env.GMAIL_CLIENT_SECRET;
 const REDIRECT_URI = 'http://localhost:5000/oauth2callback';
@@ -33,17 +32,17 @@ console.log('Visit this URL in your browser to authorize:\n', authUrl);
 app.get('/oauth2callback', async (req, res) => {
   const code = req.query.code;
 
-  if (!code) return res.send('❌ No code received');
+  if (!code) return res.send('No code received');
 
   try {
     const { tokens } = await oAuth2Client.getToken(code);
-    console.log('✅ REFRESH TOKEN:', tokens.refresh_token);
+    console.log('REFRESH TOKEN:', tokens.refresh_token);
     res.send(
-      '✅ Refresh token printed in server console. Copy it into your .env as GMAIL_REFRESH_TOKEN'
+      'Refresh token printed in server console. Copy it into your .env as GMAIL_REFRESH_TOKEN'
     );
   } catch (err) {
-    console.error('❌ Error retrieving tokens:', err.response?.data || err.message);
-    res.send('❌ Error retrieving tokens. Check server console.');
+    console.error('Error retrieving tokens:', err.response?.data || err.message);
+    res.send('Error retrieving tokens. Check server console.');
   }
 });
 

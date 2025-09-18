@@ -61,10 +61,10 @@ export const sendOTPEmail = async (email, otp) => {
             },
         });
 
-        console.log('✅ Email sent:', response.data);
+        console.log('Email sent:', response.data);
         return true;
     } catch (error) {
-        console.error('❌ Email sending failed:', error.message);
+        console.error('Email sending failed:', error.message);
         return false;
     }
 };
