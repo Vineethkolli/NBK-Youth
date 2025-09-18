@@ -1,5 +1,7 @@
 import { google } from 'googleapis';
 import { Buffer } from 'buffer';
+import process from 'process';
+import { fileURLToPath } from 'url';
 
 const oAuth2Client = new google.auth.OAuth2(
   process.env.GMAIL_CLIENT_ID,
@@ -15,7 +17,7 @@ async function keepTokenAlive() {
     const gmail = google.gmail({ version: 'v1', auth: oAuth2Client });
 
     const from = process.env.GMAIL_USER;
-    const to = process.env.GMAIL_USER; 
+    const to = process.env.GMAIL_USER; // sending to self
     const subject = 'NBK Youth Keep-Alive';
     const html = `<p>This is an automatic keep-alive email to prevent token expiration.</p>`;
 
@@ -44,11 +46,14 @@ async function keepTokenAlive() {
     console.log('✅ Keep-alive email sent successfully.');
   } catch (err) {
     console.error('❌ Keep-alive failed:', err.message);
-    process.exit(1); 
+    process.exit(1);
   }
 }
 
-// Run if called directly
-if (require.main === module) keepTokenAlive();
+// Run if this file is executed directly
+const __filename = fileURLToPath(import.meta.url);
+if (process.argv[1] === __filename) {
+  keepTokenAlive();
+}
 
 export default keepTokenAlive;
