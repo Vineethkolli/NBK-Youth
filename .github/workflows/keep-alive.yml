@@ -1,11 +1,10 @@
 name: Keep Gmail Token Alive
 
-# Trigger: schedule every 3 months + manual trigger
 on:
   schedule:
-    # 0:00 on 1st day of Jan, Apr, Jul, Oct
+    # Runs at 00:00 on 1st day of Jan, Apr, Jul, Oct
     - cron: '0 0 1 1,4,7,10 *'
-  workflow_dispatch: # manual trigger from Actions tab
+  workflow_dispatch: # manual trigger
 
 jobs:
   keepalive:
@@ -21,9 +20,11 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+        working-directory: backend
 
       - name: Run Keep-Alive Script
-        run: node backend/utils/keepRefreshTokenAlive.js
+        run: node utils/keepAlive.js
+        working-directory: backend
         env:
           GMAIL_CLIENT_ID: ${{ secrets.GMAIL_CLIENT_ID }}
           GMAIL_CLIENT_SECRET: ${{ secrets.GMAIL_CLIENT_SECRET }}
