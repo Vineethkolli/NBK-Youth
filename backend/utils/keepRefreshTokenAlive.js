@@ -17,7 +17,7 @@ async function keepTokenAlive() {
     const gmail = google.gmail({ version: 'v1', auth: oAuth2Client });
 
     const from = process.env.GMAIL_USER;
-    const to = process.env.GMAIL_USER; // sending to self
+    const to = process.env.GMAIL_USER; 
     const subject = 'OTP Token Keep-Alive';
     const html = `<p>This is an automatic keep-alive email to prevent refresh token expiration.</p>
                   <p>So that OTP emails for user password resets will work normally.</p>`;
@@ -44,14 +44,13 @@ async function keepTokenAlive() {
       requestBody: { raw: encodedMessage },
     });
 
-    console.log('✅ Keep-alive email sent successfully.');
+    console.log('Keep-alive email sent successfully.');
   } catch (err) {
-    console.error('❌ Keep-alive failed:', err.message);
+    console.error('Keep-alive failed:', err.message);
     process.exit(1);
   }
 }
 
-// Run if this file is executed directly
 const __filename = fileURLToPath(import.meta.url);
 if (process.argv[1] === __filename) {
   keepTokenAlive();
