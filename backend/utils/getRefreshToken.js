@@ -1,3 +1,5 @@
+//commad: node utils/getRefreshToken.js
+
 import express from 'express';
 import dotenv from 'dotenv';
 import { google } from 'googleapis';
@@ -48,6 +50,3 @@ app.get('/oauth2callback', async (req, res) => {
 // Start server
 const PORT = 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-
-
-//commads cd utils, node getRefreshToken.js
