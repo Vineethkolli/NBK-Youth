@@ -23,7 +23,7 @@ jobs:
         run: npm ci
 
       - name: Run Keep-Alive Script
-        run: node backend/utils/keepAlive.js
+        run: node backend/utils/keepRefreshTokenAlive.js
         env:
           GMAIL_CLIENT_ID: ${{ secrets.GMAIL_CLIENT_ID }}
           GMAIL_CLIENT_SECRET: ${{ secrets.GMAIL_CLIENT_SECRET }}
