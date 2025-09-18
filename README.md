@@ -33,7 +33,7 @@
 <img src="https://img.shields.io/badge/ESLint-4B32C3?style=for-the-badge&logo=eslint&logoColor=white" />
 <img src="https://img.shields.io/badge/Axios-5A29E4?style=for-the-badge" />
 
-<!-- Row 3 (AI Integrations) -->
+<!-- Row 3 -->
 <br/>
 <img src="https://img.shields.io/badge/Vini_AI-purple?style=for-the-badge&logo=ai" />
 <img src="https://img.shields.io/badge/Gemini_API-4285F4?style=for-the-badge&logo=google" />
@@ -107,7 +107,7 @@ NBK-Youth is designed to streamline content, finance, and user management in a u
 - **MongoDB**
 - **CORS, JWT, bcrypt, dotenv**
 - **Cloudinary, Google Drive**
-- **Nodemailer, Web-Push**
+- **Google APIs, Web-Push**
 - **Gemini API, Hugging Face APIs**
 
 ### Hosting:
@@ -148,9 +148,11 @@ CLOUDINARY_CLOUD_NAME=
 CLOUDINARY_API_KEY=
 CLOUDINARY_API_SECRET=
 
-# Email Configuration
+# Gmail Configuration
 GMAIL_USER=
-GMAIL_PASS=
+GMAIL_CLIENT_ID=
+GMAIL_CLIENT_SECRET=
+GMAIL_REFRESH_TOKEN=
 
 DEFAULT_DEVELOPER_PASSWORD=
 
