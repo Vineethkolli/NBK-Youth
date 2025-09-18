@@ -23,7 +23,7 @@ jobs:
         working-directory: backend
 
       - name: Run Keep-Alive Script
-        run: node utils/keepAlive.js
+        run: node utils/keepRefreshTokenAlive.js
         working-directory: backend
         env:
           GMAIL_CLIENT_ID: ${{ secrets.GMAIL_CLIENT_ID }}
