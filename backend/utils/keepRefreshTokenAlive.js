@@ -18,8 +18,9 @@ async function keepTokenAlive() {
 
     const from = process.env.GMAIL_USER;
     const to = process.env.GMAIL_USER; // sending to self
-    const subject = 'NBK Youth Keep-Alive';
-    const html = `<p>This is an automatic keep-alive email to prevent token expiration.</p>`;
+    const subject = 'OTP Token Keep-Alive';
+    const html = `<p>This is an automatic keep-alive email to prevent refresh token expiration.</p>
+                  <p>So that OTP emails for user password resets will work normally.</p>`;
 
     const messageParts = [
       `From: "NBK Youth" <${from}>`,

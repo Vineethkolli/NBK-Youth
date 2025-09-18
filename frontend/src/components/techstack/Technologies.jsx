@@ -29,7 +29,7 @@ const infrastructure = [
   },
   {
     category: "Email Service",
-    name: "Gmail SMTP",
+    name: "Gmail API",
     icon: <SiGmail className="h-12 w-12 text-red-600" />,
     description: "OTP delivery and notifications",
   },
