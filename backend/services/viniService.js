@@ -11,7 +11,7 @@ import { cosineSimilarity, generateEmbedding } from './embeddingService.js';
 
 export const getTimeBasedGreeting = () => {
   const now = new Date();
-  const istTime = new Date(now.getTime() + (5.5 * 60 * 60 * 1000)); // IST offset
+  const istTime = new Date(now.getTime() + (5.5 * 60 * 60 * 1000));
   const hour = istTime.getHours();
 
   if (hour < 12) return 'Good morning';
