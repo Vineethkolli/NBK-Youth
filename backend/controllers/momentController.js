@@ -52,7 +52,7 @@ export const momentController = {
     }
   },
 
-  addDriveMoment: async (req, res) => {
+  addDriveLinkMoment: async (req, res) => {
     try {
       const { title, url } = req.body;
       const maxOrder = await Moment.findOne().sort('-order');
