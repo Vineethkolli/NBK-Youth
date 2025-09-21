@@ -12,7 +12,7 @@ const authRoles = ['developer', 'admin', 'financier'];
 router.get('/', momentController.getAllMoments);
 
 router.post('/youtube', auth, checkRole(authRoles), momentController.addYouTubeMoment);
-router.post('/drive', auth, checkRole(authRoles), momentController.addDriveMoment);
+router.post('/drive', auth, checkRole(authRoles), momentController.addDriveLinkMoment);
 router.post('/drive-media', auth, checkRole(authRoles), momentController.addDriveMediaMoment);
 router.post('/upload', auth, checkRole(authRoles), upload.array('files', 20), momentController.uploadMediaMoment);
 
