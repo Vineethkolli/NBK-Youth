@@ -23,7 +23,7 @@ jobs:
         working-directory: backend
 
       - name: Run Keep-Alive Script
-        run: node utils/keepMongoAlive.js
+        run: node utils/keepMongodbAlive.js
         working-directory: backend
         env:
           MONGO_URI: ${{ secrets.MONGO_URI }}
