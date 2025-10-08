@@ -161,6 +161,50 @@ const VibeController = {
     }
   },
 
+  uploadMultipleSongs: async (req, res) => {
+    try {
+      const collection = await Collection.findById(req.params.collectionId);
+      if (!collection) {
+        return res.status(404).json({ message: 'Collection not found' });
+      }
+
+      const { songs } = req.body;
+      if (!songs || !Array.isArray(songs) || songs.length === 0) {
+        return res.status(400).json({ message: 'Songs array is required and must not be empty' });
+      }
+
+      if (songs.length > 10) {
+        return res.status(400).json({ message: 'Maximum 10 songs can be uploaded at once' });
+      }
+
+      // Validate each song
+      for (const song of songs) {
+        if (!song.name || !song.url || !song.mediaPublicId) {
+          return res.status(400).json({ message: 'Each song must have name, url, and mediaPublicId' });
+        }
+      }
+
+      // Add all songs to collection
+      collection.songs.push(...songs);
+      await collection.save();
+
+      // Log activity for bulk upload
+      const songNames = songs.map(song => song.name).join(', ');
+      await logActivity(
+        req,
+        'CREATE',
+        'Vibe',
+        collection._id.toString(),
+        { before: null, after: { songCount: songs.length, songNames } },
+        `${songs.length} songs uploaded to collection "${collection.name}" by ${req.user.name}: ${songNames}`
+      );
+
+      res.status(201).json(collection);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to upload songs' });
+    }
+  },
+
 
   updateSong: async (req, res) => {
     try {
