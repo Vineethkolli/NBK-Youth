@@ -13,6 +13,7 @@ router.delete('/:id', auth, checkRole(['developer', 'financier', 'admin']), Vibe
 
 // song (audio file, field name: 'file') routes
 router.post('/:collectionId/songs', auth, VibeController.uploadSong);
+router.post('/:collectionId/songs/bulk', auth, VibeController.uploadMultipleSongs);
 router.put('/:collectionId/songs/:songId', auth, checkRole(['developer', 'financier', 'admin']), VibeController.updateSong);
 router.delete('/:collectionId/songs/:songId', auth, checkRole(['developer', 'financier', 'admin']), VibeController.deleteSong);
 

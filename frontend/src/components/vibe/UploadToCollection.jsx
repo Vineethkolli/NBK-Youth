@@ -7,76 +7,128 @@ import { API_URL } from '../../utils/config';
 
 function UploadToCollectionForm({ collection, onClose, onSuccess }) {
   const [formData, setFormData] = useState({
-    songName: '',
-    file: null,
-    filePreview: null,
+    songs: [], // Array of { name: '', file: null, filePreview: null }
   });
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [fileInputKey, setFileInputKey] = useState(Date.now());
 
   const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
 
-    if (!file.type.startsWith('audio/')) {
-      toast.error('Please upload a valid audio file');
+    if (files.length > 10) {
+      toast.error('Maximum 10 files can be selected at once');
       return;
     }
 
-    if (file.size > 90 * 1024 * 1024) {
-      toast.error('Audio file must be smaller than 90MB');
-      return;
+    const validFiles = [];
+    for (const file of files) {
+      if (!file.type.startsWith('audio/')) {
+        toast.error(`File "${file.name}" is not a valid audio file`);
+        continue;
+      }
+
+      if (file.size > 90 * 1024 * 1024) {
+        toast.error(`File "${file.name}" must be smaller than 90MB`);
+        continue;
+      }
+
+      validFiles.push({
+        name: file.name.replace(/\.[^/.]+$/, ""), // Remove file extension
+        file,
+        filePreview: URL.createObjectURL(file),
+      });
     }
 
-    setFormData((f) => ({
-      ...f,
-      file,
-      filePreview: URL.createObjectURL(file),
-    }));
+    if (validFiles.length > 0) {
+      setFormData((f) => ({
+        ...f,
+        songs: [...f.songs, ...validFiles],
+      }));
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.file || isUploading) return;
-
-    if (formData.file.size > 90 * 1024 * 1024) {
-      toast.error('Audio file must be smaller than 90MB');
-      return;
+    if (formData.songs.length === 0 || isUploading) return;
+  
+    // Validate all files
+    for (const song of formData.songs) {
+      if (!song.name.trim()) {
+        return toast.error('All songs must have a name');
+      }
+      if (!song.file) {
+        return toast.error('All songs must have a file');
+      }
+      if (song.file.size > 90 * 1024 * 1024) {
+        return toast.error(`Song "${song.name}" must be smaller than 90MB`);
+      }
     }
-
+  
     setIsUploading(true);
     setUploadProgress(0);
-
+  
     try {
-      const uploaded = await uploadDirectToCloudinary({
-        file: formData.file,
-        folder: 'Vibe',
-        resourceType: 'video', // Cloudinary treats audio as "video"
-        onProgress: (p) => setUploadProgress(p),
+      const uploadedSongs = [];
+  
+      for (let i = 0; i < formData.songs.length; i++) {
+        const song = formData.songs[i];
+  
+        const uploaded = await uploadDirectToCloudinary({
+          file: song.file,
+          folder: 'Vibe',
+          resourceType: 'video', // Cloudinary treats audio as "video"
+          onProgress: (percent) => {
+            // Combine per-file progress with overall progress
+            const totalProgress = ((i + percent / 100) / formData.songs.length) * 100;
+            setUploadProgress(totalProgress);
+          },
+        });
+  
+        uploadedSongs.push({
+          name: song.name,
+          url: uploaded.url,
+          mediaPublicId: uploaded.publicId,
+        });
+      }
+  
+      // Upload all songs to the collection
+      await axios.post(`${API_URL}/api/collections/${collection._id}/songs/bulk`, {
+        songs: uploadedSongs,
       });
-
-      await axios.post(`${API_URL}/api/collections/${collection._id}/songs`, {
-        name: formData.songName,
-        url: uploaded.url,
-        mediaPublicId: uploaded.publicId,
-      });
-
-      toast.success('Song uploaded successfully');
+  
+      toast.success(`${formData.songs.length} songs uploaded successfully`);
       onSuccess();
       onClose();
     } catch (error) {
       console.error(error);
-      toast.error('Failed to upload song');
+      toast.error('Failed to upload songs');
     } finally {
       setIsUploading(false);
       setUploadProgress(0);
     }
-  };
+  };  
 
   const resetFile = () => {
-    setFormData((f) => ({ ...f, file: null, filePreview: null, songName: '' }));
+    setFormData({ songs: [] });
     setFileInputKey(Date.now());
+  };
+
+  const updateSongName = (index, name) => {
+    setFormData((f) => ({
+      ...f,
+      songs: f.songs.map((song, i) => 
+        i === index ? { ...song, name } : song
+      ),
+    }));
+  };
+
+  const removeSong = (index) => {
+    setFormData((f) => ({
+      ...f,
+      songs: f.songs.filter((_, i) => i !== index),
+    }));
   };
 
   return (
@@ -112,29 +164,14 @@ function UploadToCollectionForm({ collection, onClose, onSuccess }) {
 
           <div>
             <label className="block text-sm font-medium text-gray-700">
-              Song Name *
-            </label>
-            <input
-              type="text"
-              required
-              value={formData.songName}
-              onChange={(e) =>
-                setFormData({ ...formData, songName: e.target.value })
-              }
-              placeholder="Enter song name"
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Audio File *
+              Audio Files * (Max 10)
             </label>
             <input
               key={fileInputKey}
               type="file"
               required
               accept="audio/*"
+              multiple
               onChange={handleFileChange}
               disabled={isUploading}
               className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 
@@ -143,23 +180,50 @@ function UploadToCollectionForm({ collection, onClose, onSuccess }) {
             />
           </div>
 
-          {formData.filePreview && (
-            <div className="relative mt-4">
-              <audio controls src={formData.filePreview} className="w-full" />
-              <button
-                type="button"
-                onClick={resetFile}
-                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
-                title="Remove audio"
-              >
-                <X className="h-4 w-4" />
-              </button>
+          {formData.songs.length > 0 && (
+  <div className="space-y-3">
+    <h3 className="text-sm font-medium text-gray-700">Selected Songs ({formData.songs.length})</h3>
+    <div className="grid gap-3">
+      {formData.songs.map((song, index) => (
+        <div
+          key={index}
+          className="relative p-3 bg-indigo-50 rounded-lg border border-indigo-100 shadow-sm"
+        >
+          {/* Remove button top-right */}
+          <button
+            type="button"
+            onClick={() => removeSong(index)}
+            className="absolute top-2 right-2 text-red-500 hover:text-red-700"
+          >
+            <X className="h-5 w-5" />
+          </button>
+
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between">
+            <div className="flex-1 w-full sm:mr-3">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Song Name *</label>
+              <input
+                type="text"
+                required
+                value={song.name}
+                onChange={(e) => updateSongName(index, e.target.value)}
+                placeholder="Enter song name"
+                className="w-full text-sm rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              />
+
+              {song.filePreview && (
+                <audio controls src={song.filePreview} className="w-full mt-2 rounded-md" />
+              )}
             </div>
-          )}
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+)}
 
 <button
   type="submit"
-  disabled={isUploading || !formData.file}
+  disabled={isUploading || formData.songs.length === 0}
   className="w-full flex justify-center items-center py-2 px-4 border border-transparent 
     rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 
     hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 
@@ -169,10 +233,10 @@ function UploadToCollectionForm({ collection, onClose, onSuccess }) {
     <>
       <Upload className="animate-spin h-5 w-5 mr-2" />
       Uploading...
-      <span className="ml-2 text-sm text-white">{uploadProgress}%</span>
+      <span className="ml-2 text-sm text-white">{Math.round(uploadProgress)}%</span>
     </>
   ) : (
-    'Upload Song'
+    `Upload ${formData.songs.length} Song${formData.songs.length !== 1 ? 's' : ''}`
   )}
 </button>
         </form>
