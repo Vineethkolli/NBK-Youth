@@ -1,6 +1,6 @@
 import Payment from '../models/Payment.js';
 import Income from '../models/Income.js';
-import { uploadToCloudinary } from '../config/cloudinary.js';
+import cloudinary from '../config/cloudinary.js';
 import { logActivity } from '../middleware/activityLogger.js';
 
 const PaymentController = {
@@ -41,14 +41,9 @@ const PaymentController = {
 
   async createPayment(req, res) {
     try {
-      const { paymentId, registerId, name, email, phoneNumber, amount, belongsTo } = req.body;
-
-      // Use multer: req.file (field name 'screenshot')
-      let uploadResult = undefined;
-      if (req.file) {
-        uploadResult = await uploadToCloudinary(req.file.buffer, 'PaymentScreenshots', 'image');
-      } else {
-        return res.status(400).json({ message: 'No screenshot uploaded' });
+      const { paymentId, registerId, name, email, phoneNumber, amount, belongsTo, screenshot, screenshotPublicId } = req.body;
+      if (!screenshot || !screenshotPublicId) {
+        return res.status(400).json({ message: 'Missing uploaded screenshot details' });
       }
 
       const newPayment = new Payment({
@@ -59,8 +54,8 @@ const PaymentController = {
         phoneNumber,
         amount,
         belongsTo,
-        screenshot: uploadResult.secure_url,
-        screenshotPublicId: uploadResult.public_id,
+        screenshot,
+        screenshotPublicId,
         transactionStatus: 'pending',
         verifyLog: 'not verified'
       });

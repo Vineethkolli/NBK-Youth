@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, X, ExternalLink} from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
+import { uploadDirectToCloudinary } from '../../utils/cloudinaryUpload';
 import { API_URL } from '../../utils/config';
 
 function StatusToggle({ banner, onToggle }) {
@@ -40,6 +41,7 @@ export default function BannerManager() {
     periodicity: 1,
     duration: 0,
   });
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   useEffect(() => {
     fetchBanners();
@@ -57,8 +59,8 @@ export default function BannerManager() {
   const handleFileChange = (e, type) => {
     const file = e.target.files[0];
     if (!file) return;
-    if (file.size > 200 * 1024 * 1024) {
-      toast.error('File size should be less than 200MB');
+    if (file.size > 90 * 1024 * 1024) {
+      toast.error('File size should be less than 90MB');
       return;
     }
     // If editing and replacing, set delete flag for old file
@@ -85,6 +87,7 @@ export default function BannerManager() {
     e.preventDefault();
     if (submitting) return;
     setSubmitting(true);
+    setUploadProgress(0);
 
     try {
       const isEdit = Boolean(formData._id);
@@ -93,40 +96,49 @@ export default function BannerManager() {
         : `${API_URL}/api/banners`;
       const method = isEdit ? 'put' : 'post';
 
-      // Use FormData if image or video is present
-      const hasFile = formData.image instanceof File || formData.video instanceof File;
-      const isEditWithDelete = isEdit && (formData.deleteImage || formData.deleteVideo);
-      let dataToSend = null;
-      let config = {};
-      if (hasFile || isEditWithDelete) {
-        dataToSend = new FormData();
-        dataToSend.append('title', formData.title || '');
-        dataToSend.append('message', formData.message || '');
-        dataToSend.append('status', formData.status || 'disabled');
-        dataToSend.append('periodicity', formData.periodicity || 1);
-        dataToSend.append('duration', formData.duration || 0);
-        if (formData.image instanceof File) {
-          dataToSend.append('image', formData.image);
-        } else if (formData.video instanceof File) {
-          dataToSend.append('video', formData.video);
-        }
-        if (isEdit) {
-          if (formData.deleteImage) dataToSend.append('deleteImage', 'true');
-          if (formData.deleteVideo) dataToSend.append('deleteVideo', 'true');
-        }
-        config.headers = { 'Content-Type': 'multipart/form-data' };
-      } else {
-        // No file, send as JSON
-        dataToSend = {
-          title: formData.title,
-          message: formData.message,
-          status: formData.status,
-          periodicity: formData.periodicity,
-          duration: formData.duration,
-        };
+      const isReplacingImage = formData.image instanceof File;
+      const isReplacingVideo = formData.video instanceof File;
+
+      const payload = {
+        title: formData.title,
+        message: formData.message,
+        status: formData.status,
+        periodicity: formData.periodicity,
+        duration: formData.duration,
+      };
+
+      if (isEdit) {
+        if (formData.deleteImage) payload.deleteImage = 'true';
+        if (formData.deleteVideo) payload.deleteVideo = 'true';
       }
 
-      await axios[method](url, dataToSend, config);
+      if (isReplacingImage) {
+        const uploaded = await uploadDirectToCloudinary({
+          file: formData.image,
+          folder: 'Banners',
+          resourceType: 'image',
+          onProgress: (p) => setUploadProgress(p),
+        });
+        payload.image = uploaded.url;
+        payload.imagePublicId = uploaded.publicId;
+      } else if (!isReplacingVideo && typeof formData.image === 'string') {
+        payload.image = formData.image;
+      }
+
+      if (isReplacingVideo) {
+        const uploaded = await uploadDirectToCloudinary({
+          file: formData.video,
+          folder: 'Banners',
+          resourceType: 'video',
+          onProgress: (p) => setUploadProgress(p),
+        });
+        payload.video = uploaded.url;
+        payload.videoPublicId = uploaded.publicId;
+      } else if (!isReplacingImage && typeof formData.video === 'string') {
+        payload.video = formData.video;
+      }
+
+      await axios[method](url, payload);
       toast.success(`Banner ${isEdit ? 'updated' : 'created'} successfully`);
       setShowForm(false);
       resetForm();
@@ -135,6 +147,7 @@ export default function BannerManager() {
       toast.error(err.response?.data?.message || 'Operation failed');
     } finally {
       setSubmitting(false);
+      setUploadProgress(0);
     }
   };
 
@@ -457,18 +470,20 @@ export default function BannerManager() {
                   Cancel
                 </button>
                 <button
-                  type="submit"
-                  disabled={submitting}
-                  className={`px-4 py-2 rounded-md ${
-                    submitting
-                      ? 'bg-gray-400 text-gray-700 cursor-not-allowed'
-                      : 'bg-indigo-600 text-white hover:bg-indigo-700'
-                  }`}
-                >
-                  {submitting
-                    ? (formData._id ? 'Updating...' : 'Creating...')
-                    : (formData._id ? 'Update' : 'Create')}
-                </button>
+  type="submit"
+  disabled={submitting}
+  className={`px-4 py-2 rounded-md ${
+    submitting
+      ? 'bg-gray-400 text-gray-700 cursor-not-allowed'
+      : 'bg-indigo-600 text-white hover:bg-indigo-700'
+  }`}
+>
+  {submitting
+    ? uploadProgress > 0
+      ? `${formData._id ? 'Updating' : 'Creating'}... ${uploadProgress}%`
+      : formData._id ? 'Updating...' : 'Creating...' 
+      : formData._id ? 'Update' : 'Create'}
+</button>
               </div>
             </form>
           </div>

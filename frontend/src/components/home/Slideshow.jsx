@@ -12,6 +12,7 @@ function Slideshow({ isEditing }) {
   const [isUploading, setIsUploading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(null);
   const [isEditingOrder, setIsEditingOrder] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   // Playback state
   const [isMuted, setIsMuted] = useState(true);
@@ -115,8 +116,8 @@ function Slideshow({ isEditing }) {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 100 * 1024 * 1024) {
-      toast.error('File size should be less than 100MB');
+    if (file.size > 90 * 1024 * 1024) {
+      toast.error('File size should be less than 90MB');
       return;
     }
 
@@ -124,11 +125,18 @@ function Slideshow({ isEditing }) {
     setIsUploading(true);
 
     try {
-      const data = new FormData();
-      data.append('file', file);
-      data.append('type', type);
-      await axios.post(`${API_URL}/api/homepage/slides`, data, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+      const { uploadDirectToCloudinary } = await import('../../utils/cloudinaryUpload');
+      const uploaded = await uploadDirectToCloudinary({
+        file,
+        folder: 'HomepageSlides',
+        resourceType: type,
+        onProgress: (progress) => setUploadProgress(progress),
+      });      
+
+      await axios.post(`${API_URL}/api/homepage/slides`, {
+        type,
+        url: uploaded.url,
+        mediaPublicId: uploaded.publicId,
       });
       toast.success('Slide added successfully');
       await fetchSlides();
@@ -136,6 +144,7 @@ function Slideshow({ isEditing }) {
       toast.error('Failed to upload slide');
     } finally {
       setIsUploading(false);
+      setUploadProgress(0);
       e.target.value = '';
     }
   };
@@ -212,17 +221,19 @@ function Slideshow({ isEditing }) {
               id="slide-upload"
               disabled={isUploading}
             />
-            <label
-              htmlFor="slide-upload"
-              className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md cursor-pointer"
-            >
-              {isUploading ? (
-                <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-              ) : (
-                <Plus className="h-5 w-5 mr-2" />
-              )}
-              {isUploading ? 'Adding...' : 'Add Slide'}
-            </label>
+           <label
+  htmlFor="slide-upload"
+  className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md cursor-pointer"
+>
+  {isUploading ? (
+    <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+  ) : (
+    <Plus className="h-5 w-5 mr-2" />
+  )}
+  {isUploading
+    ? `Adding... ${uploadProgress > 0 ? `${uploadProgress}%` : ''}`
+    : 'Add Slide'}
+</label>
           </div>
         ) : (
           <p className="text-gray-500">No slides available</p>
@@ -312,8 +323,16 @@ function Slideshow({ isEditing }) {
             htmlFor="slide-upload"
             className={`inline-flex items-center px-2 py-1 rounded-md shadow-sm bg-white ${isUploading ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
           >
-            {isUploading ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Plus className="h-4 w-4 mr-1" />}
-            {isUploading ? 'Adding...' : 'Add'}
+            {isUploading ? (
+  <>
+    <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+    Adding... {uploadProgress > 0 ? `${uploadProgress}%` : ''}
+  </>
+) : (
+  <>
+    <Plus className="h-4 w-4 mr-1" /> Add
+  </>
+)}
           </label>
           <button
             onClick={() => setIsEditingOrder(!isEditingOrder)}

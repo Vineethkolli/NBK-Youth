@@ -1,13 +1,17 @@
 import { useState } from 'react';
 import { X, Upload, Camera, Trash2 } from 'lucide-react';
+import { uploadDirectToCloudinary } from '../../utils/cloudinaryUpload';
+import { useAuth } from '../../context/AuthContext';
 
 
 function ProfileImageDialog({ image, onClose, onUpload }) {
+  const { user } = useAuth();
   const [isUploading, setIsUploading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [fileInputKey, setFileInputKey] = useState(Date.now());
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   const handleFileSelect = (e) => {
     const file = e.target.files[0];
@@ -18,9 +22,8 @@ function ProfileImageDialog({ image, onClose, onUpload }) {
       return;
     }
 
-    // Validate file size (15MB)
-    if (file.size > 15 * 1024 * 1024) {
-      alert('Please upload an image less than 15MB');
+    if (file.size > 30 * 1024 * 1024) {
+      alert('Please upload an image less than 30MB');
       return;
     }
 
@@ -33,14 +36,20 @@ function ProfileImageDialog({ image, onClose, onUpload }) {
 
     setIsUploading(true);
     try {
-      const data = new FormData();
-      data.append('image', selectedImage);
-      await onUpload(data);
+      const uploaded = await uploadDirectToCloudinary({
+        file: selectedImage,
+        folder: 'ProfileImages',
+        resourceType: 'image',
+        token: user?.token,
+        onProgress: (p) => setUploadProgress(p),
+      });
+      await onUpload({ profileImage: uploaded.url, profileImagePublicId: uploaded.publicId });
     } catch (error) {
       console.error('Error uploading image:', error);
       alert('Failed to upload image');
     } finally {
       setIsUploading(false);
+      setUploadProgress(0);
     }
   };
 
@@ -144,23 +153,24 @@ function ProfileImageDialog({ image, onClose, onUpload }) {
             </div>
 
             {selectedImage && (
-              <button
-                onClick={handleUpload}
-                disabled={isUploading || isDeleting}
-                className="inline-flex items-center px-4 py-2 border border-transparent 
-                  text-sm font-medium rounded-md text-white bg-indigo-600 
-                  hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isUploading ? (
-                  <>
-                    <Upload className="h-4 w-4 mr-2 animate-spin" />
-                    Uploading...
-                  </>
-                ) : (
-                  'Update'
-                )}
-              </button>
-            )}
+  <button
+    onClick={handleUpload}
+    disabled={isUploading || isDeleting}
+    className={`inline-flex items-center px-4 py-2 border border-transparent 
+      text-sm font-medium rounded-md text-white bg-indigo-600 
+      hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed`}
+  >
+    {isUploading ? (
+      <>
+        <Upload className="h-4 w-4 mr-2 animate-spin" />
+        Uploading{uploadProgress > 0 ? ` ${uploadProgress}%` : '...'}
+      </>
+    ) : (
+      'Update'
+    )}
+  </button>
+)}
+            
           </div>
         </div>
       </div>

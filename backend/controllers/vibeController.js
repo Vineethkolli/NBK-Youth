@@ -1,6 +1,5 @@
 import Collection from '../models/Vibe.js';
 import cloudinary from '../config/cloudinary.js';
-import { uploadToCloudinary } from '../config/cloudinary.js';
 import { logActivity } from '../middleware/activityLogger.js';
 
 const extractPublicId = (url) => {
@@ -134,19 +133,15 @@ const VibeController = {
       if (!collection) {
         return res.status(404).json({ message: 'Collection not found' });
       }
-
-      // Use multer: req.file (field name 'file')
-      let uploadResult = undefined;
-      if (req.file) {
-        uploadResult = await uploadToCloudinary(req.file.buffer, 'Vibe', 'video');
-      } else {
-        return res.status(400).json({ message: 'No file uploaded' });
+      const { name, url, mediaPublicId } = req.body;
+      if (!url || !mediaPublicId) {
+        return res.status(400).json({ message: 'Missing uploaded song details' });
       }
 
       collection.songs.push({
-        name: req.body.name,
-        url: uploadResult.secure_url,
-        mediaPublicId: uploadResult.public_id
+        name,
+        url,
+        mediaPublicId
       });
 
       await collection.save();
@@ -179,15 +174,13 @@ const VibeController = {
         return res.status(404).json({ message: 'Song not found' });
       }
 
-      // If a new file is provided, delete the old one and upload the new one
-      if (req.file) {
+      // If a new url is provided, delete the old one and set new
+      if (req.body.url && req.body.mediaPublicId) {
         // Delete old file from Cloudinary
         const oldPublicId = extractPublicId(song.url);
         await cloudinary.uploader.destroy(oldPublicId, { resource_type: 'video' });
-
-        // Upload new file
-        const newUrl = await uploadToCloudinary(req.file.buffer, 'Vibe', 'video');
-        song.url = newUrl;
+        song.url = req.body.url;
+        song.mediaPublicId = req.body.mediaPublicId;
       }
 
       song.name = req.body.name;

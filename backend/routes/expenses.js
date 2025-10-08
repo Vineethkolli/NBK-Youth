@@ -1,9 +1,7 @@
 import express from 'express';
 import { auth, checkRole } from '../middleware/auth.js';
 import { expenseController } from '../controllers/expenseController.js';
-import multer from 'multer';
-
-const upload = multer({ storage: multer.memoryStorage() });
+// Multer removed: direct client upload to Cloudinary
 
 const router = express.Router();
 
@@ -11,9 +9,9 @@ router.get('/', auth, expenseController.getExpenses);
 
 router.get('/verification',  auth, checkRole(['developer', 'financier']), expenseController.getVerificationData);
 
-router.post('/', auth, checkRole(['developer', 'financier']), upload.single('billImage'), expenseController.createExpense);
+router.post('/', auth, checkRole(['developer', 'financier']), expenseController.createExpense);
 
-router.put('/:id', auth, checkRole(['developer', 'financier']), upload.single('billImage'), expenseController.updateExpense);
+router.put('/:id', auth, checkRole(['developer', 'financier']), expenseController.updateExpense);
 
 router.patch('/:id/verify', auth, checkRole(['developer', 'financier']), expenseController.updateVerificationStatus);
 
