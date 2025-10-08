@@ -2,10 +2,6 @@
 import express from 'express';
 import { auth, checkRole } from '../middleware/auth.js';
 import { updateProfileImage, deleteProfileImage, getAllUsers, updateProfile, updateUserCategory, deleteUser, updateUserRole, getProfile, updateLanguage } from '../controllers/usersController.js';
-import multer from 'multer';
-
-// Configure multer for file uploads (in-memory storage)
-const upload = multer({ storage: multer.memoryStorage() });
 
 const router = express.Router();
 
@@ -13,7 +9,7 @@ const router = express.Router();
 router.get('/profile', auth, getProfile);
 router.patch('/profile', auth, updateProfile);
 router.patch('/language', auth, updateLanguage);
-router.post('/profile/image', auth, upload.single('image'), updateProfileImage);
+router.post('/profile/image', auth, updateProfileImage);
 router.delete('/profile/image', auth, deleteProfileImage);
 
 // Admin, Developer routes

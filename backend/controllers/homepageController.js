@@ -1,6 +1,5 @@
 import Slide from '../models/Slide.js';
 import Event from '../models/Event.js';
-import { uploadToCloudinary } from '../config/cloudinary.js';
 import cloudinary from '../config/cloudinary.js';
 import { logActivity } from '../middleware/activityLogger.js';
 
@@ -17,22 +16,15 @@ export const homepageController = {
 
   addSlide: async (req, res) => {
     try {
-      const { type } = req.body;
+      const { type, url, mediaPublicId } = req.body;
       const maxOrder = await Slide.findOne().sort('-order');
       const order = maxOrder ? maxOrder.order + 1 : 0;
-
-
-      // Use multer: req.file (field name 'file')
-      let uploadResult = undefined;
-      if (req.file) {
-        uploadResult = await uploadToCloudinary(req.file.buffer, 'HomepageSlides', req.body.type);
-      } else {
-        return res.status(400).json({ message: 'No file uploaded' });
+      if (!url || !mediaPublicId) {
+        return res.status(400).json({ message: 'Missing slide media details' });
       }
-
       const slide = await Slide.create({
-        url: uploadResult.secure_url,
-        mediaPublicId: uploadResult.public_id,
+        url,
+        mediaPublicId,
         type,
         order,
         createdBy: req.user.registerId

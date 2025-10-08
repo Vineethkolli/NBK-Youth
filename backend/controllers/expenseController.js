@@ -1,5 +1,4 @@
 import Expense from '../models/Expense.js';
-import { uploadToCloudinary } from '../config/cloudinary.js';
 import cloudinary from '../config/cloudinary.js';
 import { logActivity } from '../middleware/activityLogger.js';
 
@@ -54,22 +53,12 @@ export const expenseController = {
  
   createExpense: async (req, res) => {
     try {
-      let billImageUrl = null;
-      
-      // Upload bill image if provided
-      let uploadResult = null;
-      if (req.file) {
-        try {
-          uploadResult = await uploadToCloudinary(req.file.buffer, 'ExpenseBills', 'image');
-        } catch (uploadError) {
-          console.error('Failed to upload bill image:', uploadError);
-        }
-      }
+      const { billImage, billImagePublicId } = req.body; // direct-upload result from client
 
       const expense = await Expense.create({
         ...req.body,
-        billImage: uploadResult ? uploadResult.secure_url : null,
-        billImagePublicId: uploadResult ? uploadResult.public_id : null,
+        billImage: billImage || null,
+        billImagePublicId: billImagePublicId || null,
         verifyLog: 'not verified'
       });
 
@@ -100,10 +89,10 @@ export const expenseController = {
       const originalData = expense.toObject();
       let billImageUrl = expense.billImage;
 
-      // Handle bill image update
+      // Handle bill image update via direct-upload metadata
       let billImagePublicId = expense.billImagePublicId;
-      if (req.file) {
-        // Delete old image from Cloudinary if it exists
+      if (req.body.billImage && req.body.billImagePublicId) {
+        // If new image provided, delete old and set new
         if (expense.billImagePublicId) {
           try {
             await cloudinary.uploader.destroy(expense.billImagePublicId, { resource_type: 'image' });
@@ -111,13 +100,8 @@ export const expenseController = {
             console.warn('Failed to delete old bill image from Cloudinary:', err);
           }
         }
-        try {
-          const uploadResult = await uploadToCloudinary(req.file.buffer, 'ExpenseBills', 'image');
-          billImageUrl = uploadResult.secure_url;
-          billImagePublicId = uploadResult.public_id;
-        } catch (uploadError) {
-          console.error('Failed to upload bill image:', uploadError);
-        }
+        billImageUrl = req.body.billImage;
+        billImagePublicId = req.body.billImagePublicId;
       }
 
       // If user requested bill image deletion (no new file, just delete)

@@ -1,5 +1,4 @@
 import Banner from '../models/Banner.js';
-import { uploadToCloudinary } from '../config/cloudinary.js';
 import cloudinary from '../config/cloudinary.js';
 import { logActivity } from '../middleware/activityLogger.js';
 
@@ -15,15 +14,10 @@ export const bannerController = {
 
   createBanner: async (req, res) => {
     try {
-      const { title, message, periodicity, duration, status } = req.body;
+      const { title, message, periodicity, duration, status, image, imagePublicId, video, videoPublicId } = req.body;
 
       // Enforce: at least one of title, message, image, or video
-      if (
-        !title &&
-        !message &&
-        !(req.files?.image?.[0]) &&
-        !(req.files?.video?.[0])
-      ) {
+      if (!title && !message && !image && !video) {
         return res.status(400).json({
           message: 'At least one of title, message, image, or video must be provided'
         });
@@ -39,26 +33,18 @@ export const bannerController = {
         }
       }
 
-      let imageUrl, videoUrl, imagePublicId, videoPublicId;
-
-      if (req.files?.image?.[0]) {
-        const imageResult = await uploadToCloudinary(req.files.image[0].buffer, 'Banners', 'image');
-        imageUrl = imageResult.secure_url;
-        imagePublicId = imageResult.public_id;
-      }
-      if (req.files?.video?.[0]) {
-        const videoResult = await uploadToCloudinary(req.files.video[0].buffer, 'Banners', 'video');
-        videoUrl = videoResult.secure_url;
-        videoPublicId = videoResult.public_id;
-      }
+      let imageUrl = image;
+      let videoUrl = video;
+      let imagePid = imagePublicId;
+      let videoPid = videoPublicId;
 
       const banner = await Banner.create({
         title,
         message,
         image: imageUrl,
-        imagePublicId,
+        imagePublicId: imagePid,
         video: videoUrl,
-        videoPublicId,
+        videoPublicId: videoPid,
         periodicity: periodicity || 1,
         duration: duration || 0,
         status: status || 'disabled',
@@ -82,7 +68,7 @@ export const bannerController = {
 
   updateBanner: async (req, res) => {
     try {
-      const { title, message, periodicity, duration, status, deleteImage, deleteVideo, deleteImageCloudinary, deleteVideoCloudinary } = req.body;
+      const { title, message, periodicity, duration, status, deleteImage, deleteVideo, deleteImageCloudinary, deleteVideoCloudinary, image, imagePublicId, video, videoPublicId } = req.body;
 
       const originalBanner = await Banner.findById(req.params.id);
       if (!originalBanner) {
@@ -93,8 +79,8 @@ export const bannerController = {
       // Enforce: at least one of title, message, image, or video
       const hasTitle = title || originalBanner.title;
       const hasMessage = message || originalBanner.message;
-      const hasImage = req.files?.image?.[0] || (originalBanner.image && !(deleteImage === 'true' || deleteImageCloudinary === 'true'));
-      const hasVideo = req.files?.video?.[0] || (originalBanner.video && !(deleteVideo === 'true' || deleteVideoCloudinary === 'true'));
+      const hasImage = image || (originalBanner.image && !(deleteImage === 'true' || deleteImageCloudinary === 'true'));
+      const hasVideo = video || (originalBanner.video && !(deleteVideo === 'true' || deleteVideoCloudinary === 'true'));
 
       if (!hasTitle && !hasMessage && !hasImage && !hasVideo) {
         return res.status(400).json({
@@ -117,24 +103,24 @@ export const bannerController = {
 
       let imageUrl = originalBanner.image;
       let videoUrl = originalBanner.video;
-      let imagePublicId = originalBanner.imagePublicId;
-      let videoPublicId = originalBanner.videoPublicId;
+      let imagePid = originalBanner.imagePublicId;
+      let videoPid = originalBanner.videoPublicId;
 
       // Handle Cloudinary deletion if requested
       if ((deleteImage === 'true' || deleteImageCloudinary === 'true') && originalBanner.image?.includes('cloudinary.com')) {
         try {
-          await cloudinary.uploader.destroy(imagePublicId || '');
+          await cloudinary.uploader.destroy(imagePid || '');
           imageUrl = undefined;
-          imagePublicId = undefined;
+          imagePid = undefined;
         } catch (err) {
           console.warn('Failed to delete banner image from Cloudinary:', err);
         }
       }
       if ((deleteVideo === 'true' || deleteVideoCloudinary === 'true') && originalBanner.video?.includes('cloudinary.com')) {
         try {
-          await cloudinary.uploader.destroy(videoPublicId || '', { resource_type: 'video' });
+          await cloudinary.uploader.destroy(videoPid || '', { resource_type: 'video' });
           videoUrl = undefined;
-          videoPublicId = undefined;
+          videoPid = undefined;
         } catch (err) {
           console.warn('Failed to delete banner video from Cloudinary:', err);
         }
@@ -144,24 +130,22 @@ export const bannerController = {
         $set: { title, message, periodicity, duration, status },
       };
 
-      // Handle new image upload
-      if (req.files?.image?.[0]) {
-        const imageResult = await uploadToCloudinary(req.files.image[0].buffer, 'Banners', 'image');
-        imageUrl = imageResult.secure_url;
-        imagePublicId = imageResult.public_id;
+      // Handle new image metadata
+      if (image && imagePublicId) {
+        imageUrl = image;
+        imagePid = imagePublicId;
         updateOps.$set.image = imageUrl;
-        updateOps.$set.imagePublicId = imagePublicId;
+        updateOps.$set.imagePublicId = imagePid;
       } else if (deleteImage === 'true' || deleteImageCloudinary === 'true') {
         updateOps.$unset = { ...(updateOps.$unset || {}), image: "", imagePublicId: "" };
       }
 
-      // Handle new video upload
-      if (req.files?.video?.[0]) {
-        const videoResult = await uploadToCloudinary(req.files.video[0].buffer, 'Banners', 'video');
-        videoUrl = videoResult.secure_url;
-        videoPublicId = videoResult.public_id;
+      // Handle new video metadata
+      if (video && videoPublicId) {
+        videoUrl = video;
+        videoPid = videoPublicId;
         updateOps.$set.video = videoUrl;
-        updateOps.$set.videoPublicId = videoPublicId;
+        updateOps.$set.videoPublicId = videoPid;
       } else if (deleteVideo === 'true' || deleteVideoCloudinary === 'true') {
         updateOps.$unset = { ...(updateOps.$unset || {}), video: "", videoPublicId: "" };
       }

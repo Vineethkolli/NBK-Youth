@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { X, Upload } from 'lucide-react';
+import { uploadDirectToCloudinary } from '../../utils/cloudinaryUpload';
 
 const EVENT_OPTIONS = ['Sankranti', 'Ganesh Chaturthi'];
 
@@ -12,6 +13,7 @@ function EventRecordForm({ record, onClose, onSubmit }) {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [fileInputKey, setFileInputKey] = useState(Date.now());
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   // Generate year options (2023 → next year)
   const currentYear = new Date().getFullYear();
@@ -45,8 +47,8 @@ function EventRecordForm({ record, onClose, onSubmit }) {
       return;
     }
 
-    if (file.size > 50 * 1024 * 1024) {
-      alert('File size should be less than 50MB');
+    if (file.size > 90 * 1024 * 1024) {
+      alert('File size should be less than 90MB');
       return;
     }
 
@@ -56,6 +58,7 @@ function EventRecordForm({ record, onClose, onSubmit }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setUploadProgress(0);
 
     try {
       const finalEventName =
@@ -71,14 +74,25 @@ function EventRecordForm({ record, onClose, onSubmit }) {
         throw new Error('Please select a PDF file');
       }
 
-      const submitData = new FormData();
-      submitData.append('eventName', finalEventName);
-      submitData.append('recordYear', formData.recordYear);
-
+      let fileMeta = null;
       if (formData.file) {
-        submitData.append('file', formData.file);
+        fileMeta = await uploadDirectToCloudinary({
+          file: formData.file,
+          folder: 'EventRecords',
+          resourceType: 'raw',
+          onProgress: (p) => setUploadProgress(p),
+        });
       }
-      await onSubmit(submitData);
+
+      const payload = {
+        eventName: finalEventName,
+        recordYear: formData.recordYear,
+      };
+      if (fileMeta) {
+        payload.fileUrl = fileMeta.url;
+        payload.filePublicId = fileMeta.publicId;
+      }
+      await onSubmit(payload);
 
       // Reset file input after success
       setFileInputKey(Date.now());
@@ -88,6 +102,7 @@ function EventRecordForm({ record, onClose, onSubmit }) {
       alert(error.message || 'Something went wrong');
     } finally {
       setIsSubmitting(false);
+      setUploadProgress(0);
     }
   };
 
@@ -198,23 +213,26 @@ function EventRecordForm({ record, onClose, onSubmit }) {
               Cancel
             </button>
             <button
-              type="submit"
-              disabled={isSubmitting}
-              className={`px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 flex items-center ${
-                isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
-            >
-              {isSubmitting ? (
-                <>
-                  <Upload className="h-4 w-4 mr-2 animate-spin" />
-                  {record ? 'Updating...' : 'Uploading...'}
-                </>
-              ) : record ? (
-                'Update'
-              ) : (
-                'Upload'
-              )}
-            </button>
+  type="submit"
+  disabled={isSubmitting}
+  className={`px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 flex items-center justify-center ${
+    isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+  }`}
+>
+  {isSubmitting ? (
+    <>
+      <Upload className="h-4 w-4 mr-2 animate-spin" />
+      {record ? 'Updating' : 'Uploading'}
+      {uploadProgress > 0 && <span className="ml-2 text-sm text-white">{uploadProgress}%</span>}
+      ...
+    </>
+  ) : record ? (
+    'Update'
+  ) : (
+    'Upload'
+  )}
+</button>
+
           </div>
         </form>
       </div>

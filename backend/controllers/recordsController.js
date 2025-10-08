@@ -1,7 +1,7 @@
 import FinancialRecord from '../models/FinancialRecord.js';
 import EventRecord from '../models/EventRecord.js';
 import { logActivity } from '../middleware/activityLogger.js';
-import cloudinary, { uploadToCloudinary } from '../config/cloudinary.js';
+import cloudinary from '../config/cloudinary.js';
 
 export const recordsController = {
   // Financial Timeline
@@ -151,23 +151,19 @@ export const recordsController = {
 
   createEventRecord: async (req, res) => {
     try {
-      const { eventName, recordYear } = req.body;
+      const body = req.body || {};
+      const { eventName, recordYear } = body;
 
-      if (!req.file) {
-        return res.status(400).json({ message: 'No file uploaded' });
+      const { fileUrl, filePublicId } = body;
+      if (!fileUrl || !filePublicId) {
+        return res.status(400).json({ message: 'Missing file metadata' });
       }
-
-      if (req.file.mimetype !== 'application/pdf') {
-        return res.status(400).json({ message: 'Only PDF files are allowed' });
-      }
-
-      const uploadResult = await uploadToCloudinary(req.file.buffer, 'EventRecords', 'raw');
 
       const record = await EventRecord.create({
         eventName,
         recordYear,
-        fileUrl: uploadResult.secure_url,
-        filePublicId: uploadResult.public_id,
+        fileUrl,
+        filePublicId,
         uploadedBy: req.user.registerId
       });
 
@@ -197,11 +193,7 @@ export const recordsController = {
       const originalData = originalRecord.toObject();
       let updatedFields = { ...req.body };
 
-      if (req.file) {
-        if (req.file.mimetype !== 'application/pdf') {
-          return res.status(400).json({ message: 'Only PDF files are allowed' });
-        }
-
+      if (req.body && req.body.fileUrl && req.body.filePublicId) {
         if (originalRecord.filePublicId) {
           try {
             await cloudinary.uploader.destroy(originalRecord.filePublicId, { resource_type: 'raw' });
@@ -209,10 +201,6 @@ export const recordsController = {
             console.error('Failed to delete old Cloudinary file:', err);
           }
         }
-
-        const uploadResult = await uploadToCloudinary(req.file.buffer, 'EventRecords', 'raw');
-        updatedFields.fileUrl = uploadResult.secure_url;
-        updatedFields.filePublicId = uploadResult.public_id;
       }
 
       const record = await EventRecord.findByIdAndUpdate(

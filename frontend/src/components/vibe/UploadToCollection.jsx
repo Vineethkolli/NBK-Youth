@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { X, Music, Upload } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
+import { uploadDirectToCloudinary } from '../../utils/cloudinaryUpload';
 import { API_URL } from '../../utils/config';
 
 function UploadToCollectionForm({ collection, onClose, onSuccess }) {
@@ -11,11 +12,23 @@ function UploadToCollectionForm({ collection, onClose, onSuccess }) {
     filePreview: null,
   });
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [fileInputKey, setFileInputKey] = useState(Date.now());
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
+
+    if (!file.type.startsWith('audio/')) {
+      toast.error('Please upload a valid audio file');
+      return;
+    }
+
+    if (file.size > 90 * 1024 * 1024) {
+      toast.error('Audio file must be smaller than 90MB');
+      return;
+    }
+
     setFormData((f) => ({
       ...f,
       file,
@@ -27,24 +40,37 @@ function UploadToCollectionForm({ collection, onClose, onSuccess }) {
     e.preventDefault();
     if (!formData.file || isUploading) return;
 
+    if (formData.file.size > 90 * 1024 * 1024) {
+      toast.error('Audio file must be smaller than 90MB');
+      return;
+    }
+
     setIsUploading(true);
-    const data = new FormData();
-    data.append('name', formData.songName);
-    data.append('file', formData.file);
+    setUploadProgress(0);
 
     try {
-      await axios.post(
-        `${API_URL}/api/collections/${collection._id}/songs`,
-        data,
-        { headers: { 'Content-Type': 'multipart/form-data' } }
-      );
+      const uploaded = await uploadDirectToCloudinary({
+        file: formData.file,
+        folder: 'Vibe',
+        resourceType: 'video', // Cloudinary treats audio as "video"
+        onProgress: (p) => setUploadProgress(p),
+      });
+
+      await axios.post(`${API_URL}/api/collections/${collection._id}/songs`, {
+        name: formData.songName,
+        url: uploaded.url,
+        mediaPublicId: uploaded.publicId,
+      });
+
       toast.success('Song uploaded successfully');
       onSuccess();
       onClose();
     } catch (error) {
+      console.error(error);
       toast.error('Failed to upload song');
     } finally {
       setIsUploading(false);
+      setUploadProgress(0);
     }
   };
 
@@ -110,9 +136,10 @@ function UploadToCollectionForm({ collection, onClose, onSuccess }) {
               required
               accept="audio/*"
               onChange={handleFileChange}
+              disabled={isUploading}
               className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 
                 file:rounded-full file:border-0 file:text-sm file:font-semibold 
-                file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+                file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 disabled:opacity-50 disabled:cursor-not-allowed"
             />
           </div>
 
@@ -130,23 +157,24 @@ function UploadToCollectionForm({ collection, onClose, onSuccess }) {
             </div>
           )}
 
-          <button
-            type="submit"
-            disabled={isUploading || !formData.file}
-            className="w-full flex justify-center py-2 px-4 border border-transparent 
-              rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 
-              hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 
-              focus:ring-indigo-500 disabled:opacity-50"
-          >
-            {isUploading ? (
-              <>
-                <Upload className="animate-spin h-5 w-5 mr-2" />
-                Uploading...
-              </>
-            ) : (
-              'Upload Song'
-            )}
-          </button>
+<button
+  type="submit"
+  disabled={isUploading || !formData.file}
+  className="w-full flex justify-center items-center py-2 px-4 border border-transparent 
+    rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 
+    hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 
+    focus:ring-indigo-500 disabled:opacity-50"
+>
+  {isUploading ? (
+    <>
+      <Upload className="animate-spin h-5 w-5 mr-2" />
+      Uploading...
+      <span className="ml-2 text-sm text-white">{uploadProgress}%</span>
+    </>
+  ) : (
+    'Upload Song'
+  )}
+</button>
         </form>
       </div>
     </div>

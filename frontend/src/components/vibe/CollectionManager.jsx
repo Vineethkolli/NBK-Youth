@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Upload, X, Plus, Edit2, Music } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
+import { uploadDirectToCloudinary } from '../../utils/cloudinaryUpload';
 import { API_URL } from '../../utils/config';
 import { useAuth } from '../../context/AuthContext';
 
@@ -9,11 +10,12 @@ function CollectionManager({ collections, onUpdate, isEditMode, onEditModeToggle
   const { user } = useAuth();
   const [showNewUpload, setShowNewUpload] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [formData, setFormData] = useState({
     collectionName: '',
     songName: '',
     file: null,
-    filePreview: null
+    filePreview: null,
   });
   const [fileInputKey, setFileInputKey] = useState(Date.now());
 
@@ -24,7 +26,7 @@ function CollectionManager({ collections, onUpdate, isEditMode, onEditModeToggle
       collectionName: '',
       songName: '',
       file: null,
-      filePreview: null
+      filePreview: null,
     });
     setFileInputKey(Date.now());
   };
@@ -33,28 +35,35 @@ function CollectionManager({ collections, onUpdate, isEditMode, onEditModeToggle
     e.preventDefault();
     if (!formData.file || isUploading) return;
 
+    if (formData.file.size > 90 * 1024 * 1024) {
+      return toast.error('Audio file must be smaller than 90MB');
+    }
+
     const existingCollection = collections.find(
-      col => col.name.toLowerCase() === formData.collectionName.toLowerCase()
+      (col) => col.name.toLowerCase() === formData.collectionName.toLowerCase()
     );
     if (existingCollection) {
       return toast.error('Collection name already exists. Please choose a different name.');
     }
 
     setIsUploading(true);
+    setUploadProgress(0);
 
     try {
-      const collectionResponse = await axios.post(`${API_URL}/api/collections`, { 
-        name: formData.collectionName 
+      const collectionResponse = await axios.post(`${API_URL}/api/collections`, {
+        name: formData.collectionName,
       });
 
-      const songData = new FormData();
-      songData.append('name', formData.songName);
-      songData.append('file', formData.file);
+      const uploaded = await uploadDirectToCloudinary({
+        file: formData.file,
+        folder: 'Vibe',
+        resourceType: 'video', // Cloudinary treats audio as 'video' type
+        onProgress: (p) => setUploadProgress(p),
+      });
 
       await axios.post(
         `${API_URL}/api/collections/${collectionResponse.data._id}/songs`,
-        songData,
-        { headers: { 'Content-Type': 'multipart/form-data' } }
+        { name: formData.songName, url: uploaded.url, mediaPublicId: uploaded.publicId }
       );
 
       toast.success('Collection and song created successfully');
@@ -62,19 +71,32 @@ function CollectionManager({ collections, onUpdate, isEditMode, onEditModeToggle
       resetForm();
       onUpdate();
     } catch (error) {
+      console.error(error);
       toast.error('Failed to create collection and upload song');
     } finally {
       setIsUploading(false);
+      setUploadProgress(0);
     }
   };
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    setFormData(f => ({
+
+    if (!file.type.startsWith('audio/')) {
+      toast.error('Please upload a valid audio file');
+      return;
+    }
+
+    if (file.size > 90 * 1024 * 1024) {
+      toast.error('Please upload an audio file smaller than 90MB');
+      return;
+    }
+
+    setFormData((f) => ({
       ...f,
       file,
-      filePreview: URL.createObjectURL(file)
+      filePreview: URL.createObjectURL(file),
     }));
   };
 
@@ -162,19 +184,20 @@ function CollectionManager({ collections, onUpdate, isEditMode, onEditModeToggle
                   required
                   accept="audio/*"
                   onChange={handleFileChange}
+                  disabled={isUploading}
                   className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 
                     file:rounded-full file:border-0 file:text-sm file:font-semibold 
-                    file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+                    file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 disabled:opacity-50 disabled:cursor-not-allowed"
                 />
               </div>
 
               {formData.filePreview && (
                 <div className="relative mt-4">
-                  <audio controls src={formData.filePreview} className="w-full " />
+                  <audio controls src={formData.filePreview} className="w-full" />
                   <button
                     type="button"
                     onClick={() => {
-                      setFormData(f => ({ ...f, file: null, filePreview: null }));
+                      setFormData((f) => ({ ...f, file: null, filePreview: null }));
                       setFileInputKey(Date.now());
                     }}
                     className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
@@ -184,23 +207,25 @@ function CollectionManager({ collections, onUpdate, isEditMode, onEditModeToggle
                 </div>
               )}
 
-              <button
-                type="submit"
-                disabled={isUploading || !formData.file}
-                className="w-full flex justify-center py-2 px-4 border border-transparent 
-                  rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 
-                  hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 
-                  focus:ring-indigo-500 disabled:opacity-50"
-              >
-                {isUploading ? (
-                  <>
-                    <Upload className="animate-spin h-5 w-5 mr-2" />
-                    Uploading...
-                  </>
-                ) : (
-                  'Upload Song'
-                )}
-              </button>
+<button
+  type="submit"
+  disabled={isUploading || !formData.file}
+  className="w-full flex justify-center items-center py-2 px-4 border border-transparent 
+    rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 
+    hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 
+    focus:ring-indigo-500 disabled:opacity-50"
+>
+  {isUploading ? (
+    <>
+      <Upload className="animate-spin h-5 w-5 mr-2" />
+      Uploading...
+      <span className="ml-2 text-sm text-white">{uploadProgress}%</span>
+    </>
+  ) : (
+    'Upload Song'
+  )}
+</button>
+
             </form>
           </div>
         </div>

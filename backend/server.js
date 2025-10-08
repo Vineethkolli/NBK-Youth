@@ -32,6 +32,7 @@ import viniRoutes from './routes/vini.js';
 import recordsRoutes from './routes/records.js';
 import snapshotRoutes from './routes/snapshots.js';
 import historiesRoutes from './routes/histories.js';
+import cloudinaryRoutes from './routes/cloudinary.js';
 
 dotenv.config();
 
@@ -89,6 +90,7 @@ app.use('/api/vini', viniRoutes);
 app.use('/api/records', recordsRoutes);
 app.use('/api/snapshots', snapshotRoutes);
 app.use('/api/histories', historiesRoutes);
+app.use('/api/uploads', cloudinaryRoutes);
 
 // Health check endpoint
 app.get('/', (req, res) => {

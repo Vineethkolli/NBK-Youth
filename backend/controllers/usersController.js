@@ -1,7 +1,7 @@
 import User from '../models/User.js';
 import Notification from '../models/Notification.js';
 import { logActivity } from '../middleware/activityLogger.js';
-import cloudinary, { uploadToCloudinary } from '../config/cloudinary.js';
+import cloudinary from '../config/cloudinary.js';
 
 export const updateProfileImage = async (req, res) => {
   try {
@@ -12,6 +12,11 @@ export const updateProfileImage = async (req, res) => {
 
     const originalImage = user.profileImage;
 
+    const { profileImage, profileImagePublicId } = req.body;
+    if (!profileImage || !profileImagePublicId) {
+      return res.status(400).json({ message: 'Missing uploaded image details' });
+    }
+
     // Delete old image from Cloudinary if it exists
     if (user.profileImagePublicId) {
       try {
@@ -21,17 +26,9 @@ export const updateProfileImage = async (req, res) => {
       }
     }
 
-    // Upload new image to Cloudinary
-    let uploadResult = undefined;
-    if (req.file) {
-      uploadResult = await uploadToCloudinary(req.file.buffer, 'ProfileImages', 'image');
-    } else {
-      return res.status(400).json({ message: 'No image uploaded' });
-    }
-
     // Update user profile image and publicId
-    user.profileImage = uploadResult.secure_url;
-    user.profileImagePublicId = uploadResult.public_id;
+    user.profileImage = profileImage;
+    user.profileImagePublicId = profileImagePublicId;
     await user.save();
 
     await logActivity(

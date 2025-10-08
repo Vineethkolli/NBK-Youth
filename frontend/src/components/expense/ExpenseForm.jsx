@@ -3,6 +3,7 @@ import { X } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
+import { uploadDirectToCloudinary } from '../../utils/cloudinaryUpload';
 import { API_URL } from '../../utils/config';
 
 function ExpenseForm({ expense, onClose, onSuccess }) {
@@ -18,6 +19,7 @@ function ExpenseForm({ expense, onClose, onSuccess }) {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [isDeleting, setIsDeleting] = useState(false);
   const [fileInputKey, setFileInputKey] = useState(Date.now());
 
@@ -31,19 +33,19 @@ function ExpenseForm({ expense, onClose, onSuccess }) {
         phoneNumber: expense.phoneNumber || '',
         billImage: null,
         billImagePreview: expense.billImage || null,
-        billImageCloudinary: expense.billImage || null // track original image
+        billImageCloudinary: expense.billImage || null
       });
     }
   }, [expense]);
 
   const handleBillUpload = (file) => {
     if (!file) return;
-    
+
     if (file.size > 30 * 1024 * 1024) {
       toast.error('File must be less than 30MB');
       return;
     }
-    
+
     if (!file.type.startsWith('image/')) {
       toast.error('Only images are allowed');
       return;
@@ -61,7 +63,7 @@ function ExpenseForm({ expense, onClose, onSuccess }) {
       ...prev,
       billImage: null,
       billImagePreview: null,
-      billImageCloudinary: null // mark for deletion in backend
+      billImageCloudinary: null
     }));
     setFileInputKey(Date.now());
   };
@@ -76,33 +78,42 @@ function ExpenseForm({ expense, onClose, onSuccess }) {
     }
 
     setIsSubmitting(true);
+    setUploadProgress(0);
 
     try {
-      const data = new FormData();
-      data.append('purpose', formData.purpose);
-      data.append('amount', formData.amount);
-      data.append('paymentMode', formData.paymentMode);
-      data.append('name', formData.name);
-      data.append('phoneNumber', formData.phoneNumber);
-      data.append('registerId', user.registerId);
-
+      let uploaded = null;
       if (formData.billImage instanceof File) {
-        data.append('billImage', formData.billImage);
+        uploaded = await uploadDirectToCloudinary({
+          file: formData.billImage,
+          folder: 'ExpenseBills',
+          resourceType: 'image',
+          token: user?.token,
+          onProgress: (p) => setUploadProgress(p),
+        });
       }
-      // If user removed the original image, send a flag to backend
+
+      const payload = {
+        purpose: formData.purpose,
+        amount: formData.amount,
+        paymentMode: formData.paymentMode,
+        name: formData.name,
+        phoneNumber: formData.phoneNumber,
+        registerId: user.registerId,
+      };
+
+      if (uploaded) {
+        payload.billImage = uploaded.url;
+        payload.billImagePublicId = uploaded.publicId;
+      }
       if (!formData.billImagePreview && expense && expense.billImage) {
-        data.append('deleteBillImage', 'true');
+        payload.deleteBillImage = 'true';
       }
 
       if (expense) {
-        await axios.put(`${API_URL}/api/expenses/${expense._id}`, data, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
+        await axios.put(`${API_URL}/api/expenses/${expense._id}`, payload);
         toast.success('Expense updated successfully');
       } else {
-        await axios.post(`${API_URL}/api/expenses`, data, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
+        await axios.post(`${API_URL}/api/expenses`, payload);
         toast.success('Expense added successfully');
       }
 
@@ -111,6 +122,7 @@ function ExpenseForm({ expense, onClose, onSuccess }) {
       toast.error(error.response?.data?.message || 'Operation failed');
     } finally {
       setIsSubmitting(false);
+      setUploadProgress(0);
     }
   };
 
@@ -188,17 +200,7 @@ function ExpenseForm({ expense, onClose, onSuccess }) {
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
             />
           </div>
-{/*
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Phone Number</label>
-            <input
-              type="tel"
-              value={formData.phoneNumber}
-              onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-            />
-          </div>
-*/}
+
           <div>
             <label className="block text-sm font-medium text-gray-700">Bill</label>
             <input
@@ -240,14 +242,22 @@ function ExpenseForm({ expense, onClose, onSuccess }) {
               Cancel
             </button>
             <button
-              type="submit"
-              disabled={isSubmitting}
-              className={`px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 ${
-                isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
-            >
-              {isSubmitting ? (expense ? 'Updating...' : 'Adding...') : (expense ? 'Update' : 'Add')}
-            </button>
+  type="submit"
+  disabled={isSubmitting}
+  className={`px-4 py-2 flex items-center justify-center border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 ${
+    isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+  }`}
+>
+  {isSubmitting ? (
+    <>
+      {expense ? 'Updating...' : 'Adding...'}
+      {uploadProgress > 0 && <span className="ml-2 text-sm text-white">{uploadProgress}%</span>}
+    </>
+  ) : (
+    expense ? 'Update' : 'Add'
+  )}
+</button>
+
           </div>
         </form>
       </div>

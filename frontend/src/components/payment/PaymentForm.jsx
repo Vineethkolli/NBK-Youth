@@ -4,6 +4,7 @@ import { toast } from 'react-hot-toast';
 import { Copy, QrCode, X } from 'lucide-react';
 import { QRCodeCanvas } from "qrcode.react";
 import axios from 'axios';
+import { uploadDirectToCloudinary } from '../../utils/cloudinaryUpload';
 import { API_URL } from '../../utils/config';
 
 function PaymentForm({ onSubmit }) {
@@ -25,6 +26,7 @@ function PaymentForm({ onSubmit }) {
     upiNumber: '',
     upiId: ''
   });
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   useEffect(() => {
     fetchPaymentDetails();
@@ -70,8 +72,8 @@ function PaymentForm({ onSubmit }) {
       return;
     }
 
-    if (file.size > 15 * 1024 * 1024) {
-      toast.error('File size should be less than 15MB');
+    if (file.size > 30 * 1024 * 1024) {
+      toast.error('File size should be less than 30MB');
       return;
     }
 
@@ -86,18 +88,29 @@ function PaymentForm({ onSubmit }) {
     }
 
     setIsSubmitting(true);
+    setUploadProgress(0);
 
     try {
-      const data = new FormData();
-      data.append('amount', Number(amount));
-      data.append('screenshot', screenshot);
-      data.append('belongsTo', belongsTo);
-      data.append('name', user.name);
-      data.append('email', user.email);
-      data.append('phoneNumber', user.phoneNumber);
-      data.append('registerId', user.registerId);
+      const uploaded = await uploadDirectToCloudinary({
+        file: screenshot,
+        folder: 'PaymentScreenshots',
+        resourceType: 'image',
+        token: user?.token,
+        onProgress: (p) => setUploadProgress(p),
+      });
 
-      await onSubmit(data);
+      const payload = {
+        amount: Number(amount),
+        belongsTo,
+        name: user.name,
+        email: user.email,
+        phoneNumber: user.phoneNumber,
+        registerId: user.registerId,
+        screenshot: uploaded.url,
+        screenshotPublicId: uploaded.publicId,
+      };
+
+      await axios.post(`${API_URL}/api/payments`, payload);
 
       setAmount('');
       setScreenshot(null);
@@ -111,6 +124,7 @@ function PaymentForm({ onSubmit }) {
       toast.error('Failed to submit payment');
     } finally {
       setIsSubmitting(false);
+      setUploadProgress(0);
     }
   };
 
@@ -283,14 +297,22 @@ function PaymentForm({ onSubmit }) {
             </div>
 
             <button
-              onClick={handleSubmit}
-              className={`w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 ${
-                isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? 'Submitting...' : 'Submit Payment'}
-            </button>
+  onClick={handleSubmit}
+  className={`w-full flex items-center justify-center bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 ${
+    isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+  }`}
+  disabled={isSubmitting}
+>
+  {isSubmitting ? (
+    <>
+      Submitting...
+      {uploadProgress > 0 && <span className="ml-2 text-sm text-white">{uploadProgress}%</span>}
+    </>
+  ) : (
+    'Submit Payment'
+  )}
+</button>
+            
           </div>
         </div>
       )}
