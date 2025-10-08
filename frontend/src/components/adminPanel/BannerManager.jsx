@@ -36,7 +36,7 @@ export default function BannerManager() {
     title: '',
     message: '',
     image: '', 
-    video: '', // will store File object
+    video: '', 
     status: 'disabled',
     periodicity: 1,
     duration: 0,

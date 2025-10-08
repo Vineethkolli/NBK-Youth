@@ -70,7 +70,6 @@ function CollectionManager({ collections, onUpdate, isEditMode, onEditModeToggle
           folder: 'Vibe',
           resourceType: 'video', // Cloudinary treats audio as 'video'
           onProgress: (percent) => {
-            // Calculate overall progress
             const totalProgress = ((i + percent / 100) / formData.songs.length) * 100;
             setUploadProgress(totalProgress);
           },
@@ -243,7 +242,6 @@ function CollectionManager({ collections, onUpdate, isEditMode, onEditModeToggle
           key={index}
           className="relative p-3 bg-indigo-50 rounded-lg border border-indigo-100 shadow-sm"
         >
-          {/* Remove button in top-right */}
           <button
             type="button"
             onClick={() => removeSong(index)}

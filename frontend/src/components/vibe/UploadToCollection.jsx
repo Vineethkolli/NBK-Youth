@@ -80,7 +80,6 @@ function UploadToCollectionForm({ collection, onClose, onSuccess }) {
           folder: 'Vibe',
           resourceType: 'video', // Cloudinary treats audio as "video"
           onProgress: (percent) => {
-            // Combine per-file progress with overall progress
             const totalProgress = ((i + percent / 100) / formData.songs.length) * 100;
             setUploadProgress(totalProgress);
           },
@@ -189,7 +188,6 @@ function UploadToCollectionForm({ collection, onClose, onSuccess }) {
           key={index}
           className="relative p-3 bg-indigo-50 rounded-lg border border-indigo-100 shadow-sm"
         >
-          {/* Remove button top-right */}
           <button
             type="button"
             onClick={() => removeSong(index)}

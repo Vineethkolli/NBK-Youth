@@ -200,7 +200,7 @@ function EventRecordForm({ record, onClose, onSubmit }) {
                 file:text-sm file:font-semibold
                 file:bg-indigo-50 file:text-indigo-700
                 hover:file:bg-indigo-100"
-              required={!record} // required only when adding new
+              required={!record} 
             />
           </div>
 

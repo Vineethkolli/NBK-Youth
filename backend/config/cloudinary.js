@@ -54,7 +54,7 @@ export const uploadToCloudinary = async (file, folder = 'PaymentScreenshots', ty
       result = await cloudinary.uploader.upload(file, options);
     }
 
-    // Always return object with secure_url, public_id, and resource_type
+    // return object with secure_url, public_id, and resource_type
     return {
       secure_url: result.secure_url,
       public_id: result.public_id,

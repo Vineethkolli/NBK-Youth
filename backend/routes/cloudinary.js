@@ -4,8 +4,7 @@ import cloudinaryController from '../controllers/cloudinaryController.js';
 
 const router = express.Router();
 
-// Authenticated route to request a signed upload (protects API secret)
+// Authenticated route to request a signed upload
 router.post('/sign', auth, cloudinaryController.getSignature);
 
 export default router;
-

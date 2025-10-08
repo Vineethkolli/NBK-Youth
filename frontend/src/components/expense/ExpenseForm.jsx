@@ -20,7 +20,6 @@ function ExpenseForm({ expense, onClose, onSuccess }) {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [isDeleting, setIsDeleting] = useState(false);
   const [fileInputKey, setFileInputKey] = useState(Date.now());
 
   useEffect(() => {
@@ -126,19 +125,6 @@ function ExpenseForm({ expense, onClose, onSuccess }) {
     }
   };
 
-  const handleDelete = async () => {
-    if (isDeleting) return;
-    setIsDeleting(true);
-    try {
-      await axios.delete(`${API_URL}/api/expenses/${expense._id}`);
-      toast.success('Expense moved to recycle bin');
-      onSuccess();
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Delete failed');
-    } finally {
-      setIsDeleting(false);
-    }
-  };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">

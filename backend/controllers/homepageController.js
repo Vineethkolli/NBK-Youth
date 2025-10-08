@@ -56,7 +56,6 @@ export const homepageController = {
 
       // Delete from Cloudinary
       const publicId = slide.url.split('/').pop().split('.')[0];
-      // Use resource_type: 'video' for videos
       const resourceType = slide.type === 'video' ? 'video' : 'image';
       await cloudinary.uploader.destroy(`HomepageSlides/${publicId}`, { resource_type: resourceType });
 
