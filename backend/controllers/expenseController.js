@@ -53,7 +53,7 @@ export const expenseController = {
  
   createExpense: async (req, res) => {
     try {
-      const { billImage, billImagePublicId } = req.body; // direct-upload result from client
+      const { billImage, billImagePublicId } = req.body;
 
       const expense = await Expense.create({
         ...req.body,

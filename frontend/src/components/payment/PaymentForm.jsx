@@ -86,10 +86,10 @@ function PaymentForm({ onSubmit }) {
       toast.error('Please upload payment screenshot');
       return;
     }
-
+  
     setIsSubmitting(true);
     setUploadProgress(0);
-
+  
     try {
       const uploaded = await uploadDirectToCloudinary({
         file: screenshot,
@@ -98,7 +98,7 @@ function PaymentForm({ onSubmit }) {
         token: user?.token,
         onProgress: (p) => setUploadProgress(p),
       });
-
+  
       const payload = {
         amount: Number(amount),
         belongsTo,
@@ -109,24 +109,28 @@ function PaymentForm({ onSubmit }) {
         screenshot: uploaded.url,
         screenshotPublicId: uploaded.publicId,
       };
-
-      await axios.post(`${API_URL}/api/payments`, payload);
-
+  
+      await onSubmit(payload);
+  
+      // Reset form for next payment
       setAmount('');
       setScreenshot(null);
+      setScreenshotPreview(null);
+      setScreenshotInputKey(Date.now()); 
       setShowPaymentOptions(false);
       setSelectedOption(null);
-
-      toast.success('Payment submitted successfully. We will verify and confirm payment in 4 hours. Thank you for your patience.', {
-        duration: 5000
-      });
+  
+      toast.success(
+        'Payment submitted successfully. We will verify and confirm payment in 4 hours. Thank you for your patience.',
+        { duration: 5000 }
+      );
     } catch (error) {
       toast.error('Failed to submit payment');
     } finally {
       setIsSubmitting(false);
       setUploadProgress(0);
     }
-  };
+  };  
 
   return (
     <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-6">

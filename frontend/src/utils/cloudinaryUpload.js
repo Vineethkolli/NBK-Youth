@@ -18,7 +18,7 @@ export async function getCloudinarySignature(token, { folder, resourceType = 'au
   return res.data;
 }
 
-// 2️⃣ Direct upload using XHR for real-time progress
+// Direct upload using XHR for real-time progress
 export async function uploadDirectToCloudinary({ file, folder, resourceType = 'auto', token, onProgress }) {
   const { cloudName, apiKey, signature, timestamp } = await getCloudinarySignature(token, { folder, resourceType });
 
