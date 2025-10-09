@@ -2,14 +2,13 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import CollectionManager from '../components/vibe/CollectionManager';
 import CollectionItem from '../components/vibe/CollectionItem';
-import SearchBar from '../components/vibe/SearchBar';
 import MusicPlayer from '../components/vibe/MusicPlayer';
 import UploadToCollectionForm from '../components/vibe/UploadToCollection';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { API_URL } from '../utils/config';
 import { createSongQueue } from '../utils/songQueue';
-import { filterCollections } from '../utils/search';
+import SearchBar, { filterCollections } from '../components/vibe/Search';
 import { useMusicPlayer } from '../context/MusicContext';
 
 function Vibe() {

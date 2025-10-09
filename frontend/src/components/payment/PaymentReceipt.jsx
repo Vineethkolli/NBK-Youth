@@ -1,7 +1,7 @@
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 import axios from 'axios';
-import { API_URL } from './config';
+import { API_URL } from '../../utils/config';
 
 export const generatePaymentReceipt = async (payment) => {
   const doc = new jsPDF();
@@ -14,11 +14,11 @@ export const generatePaymentReceipt = async (payment) => {
     console.error('Failed to fetch event label:', error);
   }
 
-  const logoUrl = '/logo/192.png'; 
-  doc.addImage(logoUrl, 'PNG', 20, 10, 40, 40); 
+  const logoUrl = '/logo/192.png';
+  doc.addImage(logoUrl, 'PNG', 20, 10, 40, 40);
 
   doc.setFontSize(22);
-  doc.setTextColor(34, 34, 34); 
+  doc.setTextColor(34, 34, 34);
   doc.text('NBK Youth', 105, 30, { align: 'center' });
 
   doc.setFontSize(16);
@@ -32,17 +32,14 @@ export const generatePaymentReceipt = async (payment) => {
   }
 
   const lineYPosition = eventLabel ? 55 : 50;
-  doc.setDrawColor(200, 200, 200); 
+  doc.setDrawColor(200, 200, 200);
   doc.setLineWidth(0.5);
   doc.line(20, lineYPosition, 190, lineYPosition);
 
-  // Payment details title
   doc.setFontSize(14);
   doc.setTextColor(50, 50, 50);
   doc.text('Payment Details', 20, lineYPosition + 10);
 
-  doc.setFontSize(12);
-  doc.setTextColor(60, 60, 60);
   const startY = lineYPosition + 20;
   const leftMargin = 20;
   const rightColumn = 100;
@@ -66,19 +63,17 @@ export const generatePaymentReceipt = async (payment) => {
     doc.text(rightColumn, startY + (index * 10), row[1]);
   });
 
-  // Clickable "View" link for Screenshot
   const screenshotYPosition = startY + details.length * 10 + 10;
   doc.setFont('helvetica', 'bold');
   doc.text(leftMargin, screenshotYPosition, 'Screenshot:');
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(0, 0, 255);
   doc.textWithLink('View', rightColumn, screenshotYPosition, { url: payment.screenshot });
-  doc.setTextColor(0, 0, 0); 
+  doc.setTextColor(0, 0, 0);
 
-  // Footer
   const footerYPosition = screenshotYPosition + 20;
   doc.setFontSize(10);
-  doc.setTextColor(120, 120, 120); 
+  doc.setTextColor(120, 120, 120);
   doc.text('Thank you for your payment!', 105, footerYPosition, { align: 'center' });
   doc.text('For any queries, contact us at gangavaramnbkyouth@gmail.com.', 105, footerYPosition + 5, { align: 'center' });
 
