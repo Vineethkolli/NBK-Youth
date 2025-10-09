@@ -25,6 +25,7 @@ const accessControl = {
     'RecycleBin': { full: ['Financier'], view: [] },
     'TechStack': { full: [], view: ['User','Admin', 'Financier'] },
     'DeveloperOptions': { full: [], view: [] },
+    'ActivityLogs': { full: [], view: [] },
   },
 };
 

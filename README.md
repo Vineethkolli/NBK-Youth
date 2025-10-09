@@ -82,7 +82,13 @@ NBK-Youth is designed to streamline content, finance, and user management in a u
   Manage users, roles, site settings, and oversee all application data with full administrative control.
 
  - **📜 Histories & Records:**  
-   Archive and manage past events and financial transactions with timeline views for easy reference and future auditing
+   Archive and manage past events and financial transactions with timeline views for easy reference and future auditing.
+
+- **⏱️ Keep-Alive & Automation:**  
+   GitHub Actions used to keep Backend server, MongoDB, and OTP refresh token endpoints alive.  
+
+- **☁️ Google Cloud Integration:**  
+   A Service Account is used for storing media on Google Drive, and OAuth credentials are used for sending OTPs.  
 
 - **🤖 Vini AI**  
   - Chat with data using natural language.  
