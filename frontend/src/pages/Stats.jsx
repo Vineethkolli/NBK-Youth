@@ -161,7 +161,7 @@ function Stats() {
               {/* Previous Year Amount */}
               <div>
                 <p className="font-semibold">Previous Year Amount</p>
-                {(user?.role === 'developer' || user?.role === 'financier') && isEditingPreviousYear ? (
+                {(user?.role === 'developer' || user?.role === 'financier' || user?.role === 'admin') && isEditingPreviousYear ? (
                   <div className="flex items-center space-x-2">
                     <input
                       type="number"
@@ -185,7 +185,7 @@ function Stats() {
                     <p className="text-lg font-bold">
                       {formatAmount(stats.budgetStats.previousYearAmount.amount)}
                     </p>
-                    {(user?.role === 'developer' || user?.role === 'financier') && (
+                    {(user?.role === 'developer' || user?.role === 'financier' || user?.role === 'admin' ) && (
                       <button
                         onClick={() => setIsEditingPreviousYear(true)}
                         className="text-gray-500 hover:text-gray-700"

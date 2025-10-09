@@ -37,15 +37,28 @@ const infrastructure = [
     category: "Media Storage",
     name: "Cloudinary",
     icon: <SiCloudinary className="h-12 w-12 text-blue-600" />,
-    description: "Cloud storage for images and audio",
+    description: "Cloud storage for images, videos, audios and files",
   },
   {
     category: "Photos & Images",
     name: "Google Drive",
     icon: <SiGoogledrive className="h-12 w-12 text-green-500" />,
-    description: "Cloud storage for photos, images and videos",
+    description: "Cloud storage for images and videos",
+  },
+  {
+    category: "Cloud Platform",
+    name: "Google Cloud Console",
+    icon: <SiGooglecloud className="h-12 w-12 text-blue-600" />,
+    description: "Service Account for Drive storage and OAuth Credentials for sending OTPs",
+  },
+  {
+    category: "Automation / CI",
+    name: "GitHub Actions",
+    icon: <SiGithub className="h-12 w-12 text-gray-800" />,
+    description: "Keeps backend, MongoDB, and OTP endpoints alive",
   },
 ];
+
 
 const frontendTech = [
   { name: "React", icon: <SiReact className="h-8 w-8 mr-2 text-blue-500" /> },
