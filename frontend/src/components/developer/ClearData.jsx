@@ -49,6 +49,8 @@ function ClearData() {
           { name: 'Expenses', type: 'expense' },
           { name: 'Estimated Incomes', type: 'estimatedIncome' },
           { name: 'Estimated Expenses', type: 'estimatedExpense' },
+          { name: 'Event Labels', type: 'eventLabels' },
+          { name: 'Previous Year Amount', type: 'previousYear' },
           { name: 'Notifications', type: 'notifications' },
           { name: 'Events', type: 'events' },
           { name: 'Activities', type: 'letsPlay' },

@@ -11,6 +11,8 @@ import User from '../models/User.js';
 import Payment from '../models/Payment.js';
 import cloudinary from '../config/cloudinary.js'; 
 import Counter from '../models/Counter.js';
+import PreviousYear from '../models/PreviousYear.js';
+import EventLabel from '../models/EventLabel.js';
 
 export const developerController = {
   clearData: async (req, res) => {
@@ -66,6 +68,16 @@ export const developerController = {
         case 'events':
           await Event.deleteMany({});
           description = 'Cleared all events records';
+          break;
+        
+        case 'eventLabels':
+          await EventLabel.deleteMany({});
+          description = 'Cleared event label';
+          break;
+
+        case 'previousYear':
+          await PreviousYear.deleteMany({});
+          description = 'Cleared previous year amount in stats';
           break;
 
         case 'payment':
