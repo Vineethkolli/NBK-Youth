@@ -38,7 +38,6 @@ function DeveloperOptions() {
 
   return (
     <div className="space-y-6">
-      {/* Backend Health Monitor */}
       <div className="bg-white border border-blue-200 rounded-xl shadow-md p-4 flex items-center justify-between">
         <div>
           <h2 className="text-xl font-semibold text-blue-800 mb-1">Backend Health Monitor</h2>
@@ -53,7 +52,6 @@ function DeveloperOptions() {
         </a>
       </div>
 
-      {/* Lock Manager */}
       <LockManager />
 
       {/* Reset Roles */}
