@@ -1,0 +1,32 @@
+name: Keep Render Backend Alive
+
+on:
+  schedule:
+    # Cron times in UTC (IST = UTC +5:30)
+    - cron: '30 23 * * *'   # 5:00 AM IST
+    - cron: '30 3  * * *'   # 9:00 AM IST
+    - cron: '30 7  * * *'   # 1:00 PM IST
+    - cron: '30 11 * * *'   # 5:00 PM IST
+    - cron: '30 15 * * *'   # 9:00 PM IST
+
+jobs:
+  wakeup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Render backend with retry
+        env:
+          BACKEND_URL: ${{ secrets.RENDER_BACKEND_URL }}
+        run: |
+          MAX_RETRIES=3
+          for i in $(seq 1 $MAX_RETRIES); do
+            RESPONSE=$(curl -s --max-time 120 -o /dev/null -w "%{http_code}" "$BACKEND_URL")
+            if [ "$RESPONSE" -ge 200 ] && [ "$RESPONSE" -lt 400 ]; then
+              echo "Backend is awake ✅ (HTTP $RESPONSE)"
+              exit 0
+            else
+              echo "Ping failed ❌ (HTTP $RESPONSE), retrying in 10s..."
+              sleep 10
+            fi
+          done
+          echo "All retries failed. Backend did not respond."
+          exit 1
