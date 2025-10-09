@@ -20,6 +20,10 @@ const RoleStatistics = () => {
       developer: { count: 0, registerIds: [] },
       financier: { count: 0, registerIds: [] },
       user: { count: 0, registerIds: [] } 
+    },
+    categoryStats: {
+      youth: 0,
+      general: 0
     }
   });
 
@@ -41,6 +45,10 @@ const RoleStatistics = () => {
           financier: { count: 0, registerIds: [] },
           admin: { count: 0, registerIds: [] },
           user: { count: 0, registerIds: [] } 
+        },
+        categoryStats: {
+          youth: 0,
+          general: 0
         }
       };
 
@@ -68,9 +76,13 @@ const RoleStatistics = () => {
         if (newStats.roleStats.hasOwnProperty(role)) {
           newStats.roleStats[role].count++;
           if (role !== 'user') {
-            newStats.roleStats[role].registerIds.push(user.registerId); // Dont show register IDs for users role
+            newStats.roleStats[role].registerIds.push(user.registerId);
           }
         }
+
+        // Category stats
+        if (user.category === 'youth') newStats.categoryStats.youth++;
+        else if (user.category === 'general') newStats.categoryStats.general++;
       });
 
       setStats(newStats);
@@ -83,105 +95,115 @@ const RoleStatistics = () => {
     fetchStats();
   }, []);
 
+  const renderTable = (headers, rows) => (
+    <div className="overflow-x-auto mb-6">
+      <table className="min-w-full divide-y divide-gray-200 border rounded-lg">
+        <thead className="bg-gray-50">
+          <tr>
+            {headers.map((header) => (
+              <th
+                key={header}
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+              >
+                {header}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody className="bg-white divide-y divide-gray-200">
+          {rows}
+        </tbody>
+      </table>
+    </div>
+  );
+
   return (
-    <div className="bg-white rounded-lg shadow p-6">
-      <h2 className="text-xl font-semibold mb-4">Stats</h2>
-      
+    <div className="bg-white rounded-lg shadow p-6 space-y-6">
+      <h2 className="text-2xl font-semibold mb-4">Statistics</h2>
+
       {/* Total Users */}
-      <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-        <div className="flex items-center">
-          <Users className="h-5 w-5 text-gray-600 mr-2" />
-          <h3 className="font-medium">Total Users: {stats.totalUsers}</h3>
-        </div>
+      <div className="flex items-center p-4 bg-gray-50 rounded-lg">
+        <Users className="h-5 w-5 text-gray-600 mr-2" />
+        <h3 className="font-medium text-lg">Total Users: {stats.totalUsers}</h3>
       </div>
 
       {/* Role Stats */}
       <div>
-        <h3 className="font-medium mb-3">Roles</h3>
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Count</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Register IDs</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {Object.entries(stats.roleStats).map(([role, { count, registerIds }]) => (
-                <tr key={role}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 capitalize">{role}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">{count}</td>
-                  <td className="px-6 py-4 text-sm">
-                    {role === 'user' ? '' : registerIds.join(', ')}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <h3 className="font-medium mb-3 text-lg">Roles</h3>
+        {renderTable(
+          ['Role', 'Count', 'Register IDs'],
+          Object.entries(stats.roleStats).map(([role, { count, registerIds }]) => (
+            <tr key={role}>
+              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 capitalize">
+                {role}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm">{count}</td>
+              <td className="px-6 py-4 text-sm">{role === 'user' ? '' : registerIds.join(', ')}</td>
+            </tr>
+          ))
+        )}
+      </div>
+
+      {/* Category Stats */}
+      <div>
+        <h3 className="font-medium mb-3 text-lg">Categories</h3>
+        {renderTable(
+          ['Category', 'Count'],
+          Object.entries(stats.categoryStats).map(([category, count]) => (
+            <tr key={category}>
+              <td className="px-6 py-4 whitespace-nowrap text-sm capitalize">{category}</td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm">{count}</td>
+            </tr>
+          ))
+        )}
       </div>
 
       {/* Language Stats */}
-      <div className="mb-6">
-        <div className="flex items-center mb-3">
-          <Languages className="h-5 w-5 text-gray-600 mr-2" />
-          <h3 className="font-medium">Language</h3>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Language</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Count</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Register IDs</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              <tr>
-                <td className="px-6 py-4 whitespace-nowrap text-sm">Telugu</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm">{stats.languageStats.telugu.count}</td>
-                <td className="px-6 py-4 text-sm">{stats.languageStats.telugu.registerIds.join(', ')}</td>
-              </tr>
-              <tr>
-                <td className="px-6 py-4 whitespace-nowrap text-sm">English</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm">{stats.languageStats.english.count}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+<div>
+  <div className="flex items-center mb-3">
+    <Languages className="h-5 w-5 text-gray-600 mr-2" />
+    <h3 className="font-medium text-lg">Languages</h3>
+  </div>
+  {renderTable(
+    ['Language', 'Count', 'Register IDs'],
+    <>
+      <tr>
+        <td className="px-6 py-4 whitespace-nowrap text-sm">Telugu</td>
+        <td className="px-6 py-4 whitespace-nowrap text-sm">{stats.languageStats.telugu.count}</td>
+        <td className="px-6 py-4 text-sm">{stats.languageStats.telugu.registerIds.join(', ')}</td>
+      </tr>
+      <tr>
+        <td className="px-6 py-4 whitespace-nowrap text-sm">English</td>
+        <td className="px-6 py-4 whitespace-nowrap text-sm">{stats.languageStats.english.count}</td>
+        <td className="px-6 py-4 text-sm"></td>
+      </tr>
+    </>
+  )}
+</div>
+
 
       {/* Notification Stats */}
-      <div className="mb-6">
+      <div>
         <div className="flex items-center mb-3">
           <Bell className="h-5 w-5 text-gray-600 mr-2" />
-          <h3 className="font-medium">Notifications</h3>
+          <h3 className="font-medium text-lg">Notifications</h3>
         </div>
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Count</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Register IDs</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              <tr>
-                <td className="px-6 py-4 whitespace-nowrap text-sm">Disabled</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm">{stats.notificationStats.disabled.count}</td>
-                <td className="px-6 py-4 text-sm">{stats.notificationStats.disabled.registerIds.join(', ')}</td>
-              </tr>
-              <tr>
-                <td className="px-6 py-4 whitespace-nowrap text-sm">Enabled</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm">{stats.notificationStats.enabled.count}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+        {renderTable(
+          ['Status', 'Count', 'Register IDs'],
+          <>
+            <tr>
+              <td className="px-6 py-4 whitespace-nowrap text-sm">Disabled</td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm">{stats.notificationStats.disabled.count}</td>
+              <td className="px-6 py-4 text-sm">{stats.notificationStats.disabled.registerIds.join(', ')}</td>
+            </tr>
+            <tr>
+              <td className="px-6 py-4 whitespace-nowrap text-sm">Enabled</td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm">{stats.notificationStats.enabled.count}</td>
+              <td className="px-6 py-4 text-sm">{stats.notificationStats.enabled.registerIds.join(', ')}</td>
+            </tr>
+          </>
+        )}
       </div>
-
     </div>
   );
 };
