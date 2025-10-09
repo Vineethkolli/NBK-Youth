@@ -21,9 +21,10 @@ function AdminPanel() {
 
       <EventLabelManager />
 
+      <PaymentDetails />
+
       <RoleStatistics />
 
-      <PaymentDetails />
     </div>
   );
 }

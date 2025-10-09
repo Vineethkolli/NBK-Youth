@@ -5,7 +5,6 @@ import { useAuth } from '../context/AuthContext';
 function Sidebar({ isOpen, onNavigate }) {
   const location = useLocation();
   const { user } = useAuth();
-  const defaultdeveloper = 'gangavaramnbkyouth@gmail.com';
 
   const links = [
     { to: '/', icon: Home, label: 'Home' },
@@ -32,10 +31,10 @@ function Sidebar({ isOpen, onNavigate }) {
     ...((['admin', 'developer', 'financier'].includes(user?.role)) ? [
       { to: '/admin-panel', icon: LayoutDashboard, label: 'Admin Panel' }
     ] : []),
-        ...(([ 'developer', 'financier'].includes(user?.role)) ? [
+    ...(([ 'developer', 'financier'].includes(user?.role)) ? [
       { to: '/recycle-bin', icon: Trash2, label: 'Recycle Bin' }
     ] : []),
-    ...(user?.email === defaultdeveloper? [
+    ...(['developer'].includes(user?.role) ? [
         { to: '/developer-options', icon: Terminal, label: 'Developer Options' },
         { to: '/activity-logs',     icon: FileClock, label: 'Activity Logs' }
       ] : []),
