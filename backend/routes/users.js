@@ -12,10 +12,10 @@ router.patch('/language', auth, updateLanguage);
 router.post('/profile/image', auth, updateProfileImage);
 router.delete('/profile/image', auth, deleteProfileImage);
 
-// Admin, Developer routes
+// Admin, Financier, Developer routes
 router.get('/', auth, checkRole(['developer', 'financier', 'admin']), getAllUsers);
-router.patch('/:userId/category', auth, checkRole(['developer']), updateUserCategory);
+router.patch('/:userId/category', auth, checkRole(['developer', 'financier', 'admin']), updateUserCategory);
+router.patch('/:userId/role', auth, checkRole(['developer', 'financier', 'admin']), updateUserRole);
 router.delete('/:userId', auth, checkRole(['developer']), deleteUser);
-router.patch('/:userId/role', auth, checkRole(['developer']), updateUserRole);
 
 export default router;

@@ -100,7 +100,8 @@ export const getAllUsers = async (req, res) => {
           { name: { $regex: search, $options: 'i' } },
           { email: { $regex: search, $options: 'i' } },
           { phoneNumber: { $regex: search, $options: 'i' } },
-          { role: { $regex: search, $options: 'i' } }
+          { role: { $regex: search, $options: 'i' } },
+          { category: { $regex: search, $options: 'i' } } 
         ]
       };
     }
@@ -248,35 +249,51 @@ export const deleteUser = async (req, res) => {
 export const updateUserRole = async (req, res) => {
   try {
     const userToUpdate = await User.findById(req.params.userId);
-    
-    if (!userToUpdate) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-    
-    // Prevent role change for default developer account
+    if (!userToUpdate) return res.status(404).json({ message: 'User not found' });
+
+    const requester = req.user;
+    const newRole = req.body.role;
+
+    // Protect default dev account
     if (userToUpdate.email === 'gangavaramnbkyouth@gmail.com') {
       return res.status(403).json({ message: 'Cannot change default developer role' });
     }
-    
-    const originalRole = userToUpdate.role;
 
-    const updatedUser = await User.findByIdAndUpdate(
-      req.params.userId,
-      { role: req.body.role },
-      { new: true }
-    ).select('-password');
-    
+    // Prevent admin from changing financier or developer roles
+if (requester.role === 'admin' && ['financier', 'developer'].includes(userToUpdate.role)) {
+  return res.status(403).json({ message: 'Admins cannot change Financier or Developer roles' });
+}
+
+    // Prevent financier from changing developer roles
+    if (requester.role === 'financier' && userToUpdate.role === 'developer') {
+      return res.status(403).json({ message: 'Financiers cannot change Developer roles' });
+    }
+
+    // Role assignment limitations
+    if (requester.role === 'admin' && !['user', 'admin'].includes(newRole)) {
+      return res.status(403).json({ message: 'Admins can only assign User or Admin roles' });
+    }
+
+    if (requester.role === 'financier' && !['user', 'admin', 'financier'].includes(newRole)) {
+      return res.status(403).json({ message: 'Financiers can only assign User, Admin, or Financier roles' });
+    }
+
+    const originalRole = userToUpdate.role;
+    userToUpdate.role = newRole;
+    await userToUpdate.save();
+
     await logActivity(
       req,
       'UPDATE',
       'User',
-      updatedUser.registerId,
-      { before: { role: originalRole }, after: { role: updatedUser.role } },
-      `User ${updatedUser.name} role changed from ${originalRole} to ${updatedUser.role} by ${req.user.name}`
+      userToUpdate.registerId,
+      { before: { role: originalRole }, after: { role: newRole } },
+      `User ${userToUpdate.name} role changed from ${originalRole} to ${newRole} by ${requester.name}`
     );
 
-    res.json(updatedUser);
+    res.json(userToUpdate);
   } catch (error) {
+    console.error('Error updating user role:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };

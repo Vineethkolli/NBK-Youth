@@ -76,21 +76,22 @@ function Users() {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
-                <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
-                <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
-                <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase">Phone</th>
-                <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
-                <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
-                <th className="px-5 py-3 text-center text-xs font-medium text-gray-500 uppercase">Notifications</th>
-                <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
-              </tr>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Phone</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
+                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Notifications</th>
+                {currentUser.role === 'developer' && (
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>)}
+            </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {users.map((user) => (
                 <tr key={user._id}>
-                  <td className="px-5 py-3 whitespace-nowrap text-sm">{user.registerId}</td>
-                 <td className="px-5 py-3 whitespace-nowrap text-sm">
+                  <td className="px-4 py-3 whitespace-nowrap text-sm">{user.registerId}</td>
+                 <td className="px-4 py-3 whitespace-nowrap text-sm">
   {user.name}{' '}
   {(user.role === 'admin' || user.role === 'developer' || user.role === 'financier') && (
     <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-red-300 text-red-900 ml-1">
@@ -103,22 +104,22 @@ function Users() {
     </span>
   )}
 </td>
-                  <td className="px-5 py-3 whitespace-nowrap text-sm">{user.email || 'N/A'}</td>
-                  <td className="px-5 py-3 whitespace-nowrap text-sm">{user.phoneNumber}</td>
-                  <td className="px-5 py-3 whitespace-nowrap text-sm">
-                    <select
-                      value={user.role}
-                      onChange={(e) => handleRoleChange(user._id, e.target.value)}
-                      disabled={user.email === 'gangavaramnbkyouth@gmail.com'}
-                      className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
-                    >
-                      <option value="user">User</option>
-                      <option value="admin">Admin</option>
-                      <option value="developer">Developer</option>
-                      <option value="financier">Financier</option>
-                    </select>
-                  </td>
-                  <td className="px-5 py-3 whitespace-nowrap text-sm">
+                  <td className="px-4 py-3 whitespace-nowrap text-sm">{user.email || 'N/A'}</td>
+                  <td className="px-4 py-3 whitespace-nowrap text-sm">{user.phoneNumber}</td>
+                  <td className="px-4 py-3 whitespace-nowrap text-sm">
+  <select
+    value={user.role}
+    onChange={(e) => handleRoleChange(user._id, e.target.value)}
+    disabled={user.email === 'gangavaramnbkyouth@gmail.com'}
+    className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+  >
+    <option value="user">User</option>
+    <option value="admin">Admin</option>
+    <option value="financier">Financier</option>
+    <option value="developer">Developer</option>
+  </select>
+</td>
+                  <td className="px-4 py-3 whitespace-nowrap text-sm">
                     <select
                       value={user.category}
                       onChange={(e) => handleCategoryChange(user._id, e.target.value)}
@@ -129,22 +130,24 @@ function Users() {
                       <option value="general">General</option>
                     </select>
                   </td>
-                  <td className="px-5 py-3 whitespace-nowrap text-center">
+                  <td className="px-4 py-3 whitespace-nowrap text-center">
                     {user.notificationsEnabled ? (
                       <Bell className="h-5 w-5 text-green-600" title="Notifications Enabled" />
                     ) : (
                       <BellOff className="h-5 w-5 text-gray-400" title="Notifications Disabled" />
                     )}
                   </td>
-                  <td className="px-5 py-3 whitespace-nowrap text-sm">
-                    <button
-                      onClick={() => handleDeleteUser(user._id)}
-                      disabled={user.email === 'gangavaramnbkyouth@gmail.com'}
-                      className="text-red-600 hover:text-red-900 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      <Trash2 className="h-5 w-5" />
-                    </button>
-                  </td>
+                  {currentUser.role === 'developer' && (
+          <td className="px-4 py-3 whitespace-nowrap text-sm">
+            <button
+              onClick={() => handleDeleteUser(user._id)}
+              disabled={user.email === 'gangavaramnbkyouth@gmail.com'}
+              className="text-red-600 hover:text-red-900 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Trash2 className="h-5 w-5" />
+            </button>
+          </td>
+        )}
                 </tr>
               ))}
             </tbody>
