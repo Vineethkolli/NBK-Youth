@@ -76,31 +76,36 @@ function Users() {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Phone</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
-                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Notifications</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
+                <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
+                <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+                <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase">Phone</th>
+                <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
+                <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
+                <th className="px-5 py-3 text-center text-xs font-medium text-gray-500 uppercase">Notifications</th>
+                <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {users.map((user) => (
                 <tr key={user._id}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">{user.registerId}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm flex items-center">
-                    {user.name}
-                    {user.category === 'youth' && (
-                      <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-300 text-yellow-900">
-                        Youth
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">{user.email || 'N/A'}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">{user.phoneNumber}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                  <td className="px-5 py-3 whitespace-nowrap text-sm">{user.registerId}</td>
+                 <td className="px-5 py-3 whitespace-nowrap text-sm">
+  {user.name}{' '}
+  {(user.role === 'admin' || user.role === 'developer' || user.role === 'financier') && (
+    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-300 text-red-900 ml-1">
+      {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+    </span>
+  )}
+  {user.category === 'youth' && (
+    <span className="inline-flex items-center px-1.5 py-0 rounded-full text-xs font-medium bg-yellow-300 text-yellow-900 ml-1">
+      Y
+    </span>
+  )}
+</td>
+                  <td className="px-5 py-3 whitespace-nowrap text-sm">{user.email || 'N/A'}</td>
+                  <td className="px-5 py-3 whitespace-nowrap text-sm">{user.phoneNumber}</td>
+                  <td className="px-5 py-3 whitespace-nowrap text-sm">
                     <select
                       value={user.role}
                       onChange={(e) => handleRoleChange(user._id, e.target.value)}
@@ -113,7 +118,7 @@ function Users() {
                       <option value="financier">Financier</option>
                     </select>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                  <td className="px-5 py-3 whitespace-nowrap text-sm">
                     <select
                       value={user.category}
                       onChange={(e) => handleCategoryChange(user._id, e.target.value)}
@@ -124,14 +129,14 @@ function Users() {
                       <option value="general">General</option>
                     </select>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-center">
+                  <td className="px-5 py-3 whitespace-nowrap text-center">
                     {user.notificationsEnabled ? (
                       <Bell className="h-5 w-5 text-green-600" title="Notifications Enabled" />
                     ) : (
                       <BellOff className="h-5 w-5 text-gray-400" title="Notifications Disabled" />
                     )}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                  <td className="px-5 py-3 whitespace-nowrap text-sm">
                     <button
                       onClick={() => handleDeleteUser(user._id)}
                       disabled={user.email === 'gangavaramnbkyouth@gmail.com'}
