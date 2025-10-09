@@ -114,16 +114,25 @@ function SnapshotManager() {
   };
 
   const handleDelete = async (snapshot) => {
-    if (!window.confirm(`Are you sure you want to delete snapshot ${snapshot.snapshotId}?`)) return;
+  const firstConfirm = window.confirm(
+    `Are you sure you want to delete snapshot "${snapshot.eventName} ${snapshot.year}"?`
+  );
+  if (!firstConfirm) return;
 
-    try {
-      await axios.delete(`${API_URL}/api/snapshots/${snapshot._id}`);
-      toast.success('Snapshot deleted successfully');
-      fetchSnapshots();
-    } catch (error) {
-      toast.error('Failed to delete snapshot');
-    }
-  };
+  const secondConfirm = window.confirm(
+    'Are you sure? This action is irreversible.'
+  );
+  if (!secondConfirm) return;
+
+  try {
+    await axios.delete(`${API_URL}/api/snapshots/${snapshot._id}`);
+    toast.success('Snapshot deleted successfully');
+    fetchSnapshots();
+  } catch (error) {
+    toast.error('Failed to delete snapshot');
+  }
+};
+
 
   const resetForm = () => {
     setFormData({

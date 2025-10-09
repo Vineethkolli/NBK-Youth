@@ -1,20 +1,22 @@
 import { useState } from 'react';
 import { X } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 
 function GameForm({ onSubmit, onClose }) {
   const [formData, setFormData] = useState({
     name: '',
     timerRequired: false
   });
-  const [error, setError] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       await onSubmit(formData);
+      toast.success('Game created successfully!');
       onClose();
     } catch (error) {
-      setError(error.response?.data?.message || 'Failed to create game');
+      const message = error.response?.data?.message || 'Failed to create game';
+      toast.error(message);  
     }
   };
 
@@ -37,14 +39,11 @@ function GameForm({ onSubmit, onClose }) {
               type="text"
               required
               value={formData.name}
-              onChange={(e) => {
-                setFormData({ ...formData, name: e.target.value });
-                setError('');
-              }}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
             />
-            {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
           </div>
+
           <div className="flex items-center">
             <input
               type="checkbox"
@@ -57,6 +56,7 @@ function GameForm({ onSubmit, onClose }) {
               Timer Required
             </label>
           </div>
+
           <div className="flex justify-end space-x-2">
             <button
               type="button"

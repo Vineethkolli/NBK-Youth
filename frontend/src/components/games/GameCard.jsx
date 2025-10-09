@@ -1,16 +1,37 @@
 import { useState } from 'react';
 import { Edit2, Trash2, ChevronRight, Check } from 'lucide-react';
-import { getTopPlayers } from '../../utils/gameUtils';
+import { toast } from 'react-hot-toast';
 
 function GameCard({ game, isEditMode, onSelect, onEdit, onDelete }) {
   const [editingGameId, setEditingGameId] = useState(null);
   const [newGameName, setNewGameName] = useState('');
-  const [error, setError] = useState('');
+
+  // Top Player Sorting
+  const sortPlayersByTime = (players) => {
+    return [...players]
+      .filter(player => player.timeCompleted)
+      .sort((a, b) => a.timeCompleted - b.timeCompleted)
+      .slice(0, 3);
+  };
+
+  const sortPlayersByWinnerStatus = (players) => {
+    const winners = players.filter(p => p.status === 'winner-1st');
+    const secondPlace = players.filter(p => p.status === 'winner-2nd');
+    const thirdPlace = players.filter(p => p.status === 'winner-3rd');
+    return [...winners, ...secondPlace, ...thirdPlace];
+  };
+
+  const getTopPlayers = (game) => {
+    if (game.timerRequired) {
+      const topPlayers = sortPlayersByTime(game.players);
+      return topPlayers.map(p => ({ ...p, timeCompleted: undefined }));
+    }
+    return sortPlayersByWinnerStatus(game.players);
+  };
 
   const topPlayers = getTopPlayers(game);
 
   const getRankBadge = (index, player) => {
-    // For timer-based games
     if (game.timerRequired) {
       const colors = [
         'bg-yellow-400 text-yellow-900',
@@ -20,7 +41,6 @@ function GameCard({ game, isEditMode, onSelect, onEdit, onDelete }) {
       return colors[index] || 'bg-gray-200 text-gray-700';
     }
 
-    // For non-timer games, use the actual rank from status
     const rank = player.status.split('-')[1];
     switch (rank) {
       case '1st':
@@ -37,7 +57,6 @@ function GameCard({ game, isEditMode, onSelect, onEdit, onDelete }) {
   const handleNameEdit = (gameId, name) => {
     setEditingGameId(gameId);
     setNewGameName(name);
-    setError('');
   };
 
   const saveGameName = async (gameId) => {
@@ -45,13 +64,15 @@ function GameCard({ game, isEditMode, onSelect, onEdit, onDelete }) {
 
     try {
       await onEdit(gameId, newGameName);
+      toast.success('Game name updated successfully!');
       setEditingGameId(null);
       setNewGameName('');
-      setError('');
     } catch (error) {
-      setError(error.response?.data?.message || 'Failed to update game name');
+      const message = error.response?.data?.message || 'Failed to update game name';
+      toast.error(message);
     }
   };
+
 
   return (
     <div className="bg-white rounded-lg shadow p-4">
@@ -68,7 +89,6 @@ function GameCard({ game, isEditMode, onSelect, onEdit, onDelete }) {
                 if (e.key === 'Escape') {
                   setEditingGameId(null);
                   setNewGameName('');
-                  setError('');
                 }
               }}
               className="form-input text-lg font-medium w-full"
@@ -77,11 +97,11 @@ function GameCard({ game, isEditMode, onSelect, onEdit, onDelete }) {
           ) : (
             <h3 className="text-lg font-medium">{game.name}</h3>
           )}
-          {error && <p className="text-sm text-red-600">{error}</p>}
           <p className="text-sm text-gray-500">
             {game.players.length} player{game.players.length !== 1 && 's'}
           </p>
         </div>
+
         {isEditMode && (
           <div className="flex space-x-2">
             {editingGameId === game._id ? (
@@ -111,13 +131,12 @@ function GameCard({ game, isEditMode, onSelect, onEdit, onDelete }) {
 
       <div className="mb-4 flex flex-wrap gap-2">
         {topPlayers.map((player, index) => (
-          <div
-            key={player._id}
-            className="inline-flex items-center"
-          >
-            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${getRankBadge(index, player)}`}>
+          <div key={player._id} className="inline-flex items-center">
+            <div
+              className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${getRankBadge(index, player)}`}
+            >
               <span translate="no">
-              {game.timerRequired ? index + 1 : player.status.split('-')[1][0]}
+                {game.timerRequired ? index + 1 : player.status.split('-')[1][0]}
               </span>
             </div>
             <span className="ml-1 text-sm">

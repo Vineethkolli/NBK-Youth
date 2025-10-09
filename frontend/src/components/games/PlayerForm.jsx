@@ -1,17 +1,19 @@
 import { useState } from 'react';
 import { X } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 
 function PlayerForm({ onSubmit, onClose }) {
   const [playerName, setPlayerName] = useState('');
-  const [error, setError] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       await onSubmit(playerName);
+      toast.success(`Player "${playerName}" added successfully!`);
       onClose();
     } catch (error) {
-      setError(error.response?.data?.message || 'Failed to add player');
+      const message = error.response?.data?.message || 'Failed to add player';
+      toast.error(message);  
     }
   };
 
@@ -35,15 +37,13 @@ function PlayerForm({ onSubmit, onClose }) {
               required
               value={playerName}
               onChange={(e) => {
-                const capitalized = e.target.value
-                .replace(/\b\w/g, char => char.toUpperCase());
+                const capitalized = e.target.value.replace(/\b\w/g, char => char.toUpperCase());
                 setPlayerName(capitalized);
-                setError('');
               }}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
             />
-            {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
           </div>
+
           <div className="flex justify-end space-x-2">
             <button
               type="button"

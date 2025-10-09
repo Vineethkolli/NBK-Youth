@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Edit2, Trash2, Clock, Check } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 
 function PlayerList({ 
   players, 
@@ -12,7 +13,6 @@ function PlayerList({
 }) {
   const [editingPlayerId, setEditingPlayerId] = useState(null);
   const [newName, setNewName] = useState('');
-  const [error, setError] = useState('');
 
   const sortPlayersByRank = (players) => {
     if (timerRequired) {
@@ -66,19 +66,19 @@ function PlayerList({
   const handleNameChange = (playerId, name) => {
     setEditingPlayerId(playerId);
     setNewName(name);
-    setError('');
   };
 
   const saveUpdatedName = async (playerId) => {
     if (!newName.trim()) return;
-    
+
     try {
       await onEdit(playerId, newName);
+      toast.success('Player name updated successfully!');
       setEditingPlayerId(null);
       setNewName('');
-      setError('');
     } catch (error) {
-      setError(error.response?.data?.message || 'Failed to update player name');
+      const message = error.response?.data?.message || 'Failed to update player name';
+      toast.error(message); 
     }
   };
 
@@ -93,16 +93,13 @@ function PlayerList({
         >
           <div className="space-y-2 flex-1">
             {editingPlayerId === player._id ? (
-              <div>
-                <input
-                  type="text"
-                  value={newName}
-                  onChange={(e) => setNewName(e.target.value)}
-                  className="form-input text-sm w-full"
-                  autoFocus
-                />
-                {error && <p className="text-sm text-red-600 mt-1">{error}</p>}
-              </div>
+              <input
+                type="text"
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                className="form-input text-sm w-full"
+                autoFocus
+              />
             ) : (
               <h3 className="font-medium">{player.name}</h3>
             )}

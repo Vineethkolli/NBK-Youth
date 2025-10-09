@@ -14,31 +14,37 @@ export const gameController = {
 
 
   createGame: async (req, res) => {
-    try {
-      const existingGame = await Game.findOne({ name: req.body.name });
-      if (existingGame) {
-        return res.status(400).json({ message: 'Game name already exists. Please choose a different name.' });
-      }
-  
-      const game = await Game.create({
-        ...req.body,
-        createdBy: req.user.id
-      });
+  try {
+    const normalizedName = req.body.name.trim().replace(/\s+/g, ' ');
 
-      await logActivity(
-        req,
-        'CREATE',
-        'Game',
-        game._id.toString(),
-        { before: null, after: game.toObject() },
-        `Game "${game.name}" created by ${req.user.name}`
-      );
+    const existingGame = await Game.findOne({
+      name: { $regex: `^${normalizedName}$`, $options: 'i' }
+    });
 
-      res.status(201).json(game);
-    } catch (error) {
-      res.status(500).json({ message: 'Failed to create game' });
+    if (existingGame) {
+      return res.status(400).json({ message: 'Game name already exists. Please choose a different name.' });
     }
-  },
+
+    const game = await Game.create({
+      ...req.body,
+      name: normalizedName,
+      createdBy: req.user.id
+    });
+
+    await logActivity(
+      req,
+      'CREATE',
+      'Game',
+      game._id.toString(),
+      { before: null, after: game.toObject() },
+      `Game "${game.name}" created by ${req.user.name}`
+    );
+
+    res.status(201).json(game);
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to create game' });
+  }
+},
   
 
 updateGame: async (req, res) => {
@@ -48,9 +54,11 @@ updateGame: async (req, res) => {
       return res.status(404).json({ message: 'Game not found' });
     }
 
+    const normalizedName = req.body.name.trim().replace(/\s+/g, ' ');
+
     const existingGame = await Game.findOne({
-      name: req.body.name,
-      _id: { $ne: req.params.id }, 
+      name: { $regex: `^${normalizedName}$`, $options: 'i' },
+      _id: { $ne: req.params.id }
     });
 
     if (existingGame) {
@@ -58,27 +66,21 @@ updateGame: async (req, res) => {
     }
 
     const originalData = originalGame.toObject();
+    originalGame.name = normalizedName;
+    Object.assign(originalGame, req.body);
 
-    const game = await Game.findByIdAndUpdate(
-      req.params.id,
-      { ...req.body },
-      { new: true }
-    );
-
-    if (!game) {
-      return res.status(404).json({ message: 'Game not found' });
-    }
+    await originalGame.save();
 
     await logActivity(
       req,
       'UPDATE',
       'Game',
-      game._id.toString(),
-      { before: originalData, after: game.toObject() },
-      `Game "${game.name}" updated by ${req.user.name}`
+      originalGame._id.toString(),
+      { before: originalData, after: originalGame.toObject() },
+      `Game "${originalGame.name}" updated by ${req.user.name}`
     );
 
-    res.json(game);
+    res.json(originalGame);
   } catch (error) {
     res.status(500).json({ message: 'Failed to update game' });
   }
@@ -112,78 +114,83 @@ updateGame: async (req, res) => {
 
 
   addPlayer: async (req, res) => {
-    try {
-      const game = await Game.findById(req.params.id);
-      if (!game) {
-        return res.status(404).json({ message: 'Game not found' });
-      }
-  
-      const isDuplicateName = game.players.some(player => player.name === req.body.name);
-      if (isDuplicateName) {
-        return res.status(400).json({ message: 'Player name already exists. Please choose a different name.' });
-      }
-  
-      game.players.push({
-        ...req.body,
-        createdBy: req.user.id
-      });
-      await game.save();
+  try {
+    const game = await Game.findById(req.params.id);
+    if (!game) return res.status(404).json({ message: 'Game not found' });
 
-      await logActivity(
-        req,
-        'CREATE',
-        'Game',
-        game._id.toString(),
-        { before: null, after: { playerName: req.body.name } },
-        `Player "${req.body.name}" added to game "${game.name}" by ${req.user.name}`
-      );
+    const normalizedPlayerName = req.body.name.trim().replace(/\s+/g, ' ');
 
-      const updatedGame = await Game.findById(req.params.id);
-      res.status(201).json(updatedGame);
-    } catch (error) {
-      res.status(500).json({ message: 'Failed to add player' });
+    const isDuplicateName = game.players.some(
+      player => player.name.trim().replace(/\s+/g, ' ').toLowerCase() === normalizedPlayerName.toLowerCase()
+    );
+
+    if (isDuplicateName) {
+      return res.status(400).json({ message: 'Player name already exists. Please choose a different name.' });
     }
-  },
+
+    game.players.push({
+      ...req.body,
+      name: normalizedPlayerName,
+      createdBy: req.user.id
+    });
+    await game.save();
+
+    await logActivity(
+      req,
+      'CREATE',
+      'Game',
+      game._id.toString(),
+      { before: null, after: { playerName: normalizedPlayerName } },
+      `Player "${normalizedPlayerName}" added to game "${game.name}" by ${req.user.name}`
+    );
+
+    const updatedGame = await Game.findById(req.params.id);
+    res.status(201).json(updatedGame);
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to add player' });
+  }
+},
 
 
-  updatePlayer: async (req, res) => {
-    try {
-      const game = await Game.findById(req.params.gameId);
-      if (!game) {
-        return res.status(404).json({ message: 'Game not found' });
-      }
-  
-      const player = game.players.id(req.params.playerId);
-      if (!player) {
-        return res.status(404).json({ message: 'Player not found' });
-      }
-  
-      const isDuplicateName = game.players.some(
-        p => p.name === req.body.name && p._id.toString() !== req.params.playerId
-      );
-      if (isDuplicateName) {
-        return res.status(400).json({ message: 'Player name already exists. Please choose a different name.' });
-      }
-  
-      const originalPlayerData = { ...player.toObject() };
+ updatePlayer: async (req, res) => {
+  try {
+    const game = await Game.findById(req.params.gameId);
+    if (!game) return res.status(404).json({ message: 'Game not found' });
 
-      Object.assign(player, req.body);
-      await game.save();
-  
-      await logActivity(
-        req,
-        'UPDATE',
-        'Game',
-        game._id.toString(),
-        { before: originalPlayerData, after: { ...player.toObject() } },
-        `Player "${player.name}" updated in game "${game.name}" by ${req.user.name}`
-      );
+    const player = game.players.id(req.params.playerId);
+    if (!player) return res.status(404).json({ message: 'Player not found' });
 
-      res.json(game);
-    } catch (error) {
-      res.status(500).json({ message: 'Failed to update player' });
+    const normalizedPlayerName = req.body.name.trim().replace(/\s+/g, ' ');
+
+    const isDuplicateName = game.players.some(
+      p => p.name.trim().replace(/\s+/g, ' ').toLowerCase() === normalizedPlayerName.toLowerCase()
+         && p._id.toString() !== req.params.playerId
+    );
+
+    if (isDuplicateName) {
+      return res.status(400).json({ message: 'Player name already exists. Please choose a different name.' });
     }
-  },
+
+    const originalPlayerData = { ...player.toObject() };
+    player.name = normalizedPlayerName;
+    Object.assign(player, req.body);
+
+    await game.save();
+
+    await logActivity(
+      req,
+      'UPDATE',
+      'Game',
+      game._id.toString(),
+      { before: originalPlayerData, after: { ...player.toObject() } },
+      `Player "${player.name}" updated in game "${game.name}" by ${req.user.name}`
+    );
+
+    res.json(game);
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to update player' });
+  }
+},
   
 
   deletePlayer: async (req, res) => {

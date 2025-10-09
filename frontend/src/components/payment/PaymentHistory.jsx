@@ -1,6 +1,6 @@
 import { toast } from 'react-hot-toast';
 import { Download } from 'lucide-react';
-import { generatePaymentReceipt } from '../../utils/paymentReceipt';
+import { generatePaymentReceipt } from './PaymentReceipt'; 
 import { formatDateTime } from '../../utils/dateTime';
 
 function PaymentHistory({ payments }) {
