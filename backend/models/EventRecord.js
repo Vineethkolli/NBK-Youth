@@ -1,6 +1,11 @@
 import mongoose from 'mongoose';
+import Counter from './Counter.js';
 
 const eventRecordSchema = new mongoose.Schema({
+  recordId: {
+    type: String,
+    unique: true
+  },
   eventName: {
     type: String,
     required: true
@@ -9,17 +14,12 @@ const eventRecordSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
-  fileUrlEnglish: {
-    type: String
+  fileUrl: {
+    type: String,
+    required: true
   },
-  filePublicIdEnglish: {
-    type: String
-  },
-  fileUrlTelugu: {
-    type: String
-  },
-  filePublicIdTelugu: {
-    type: String
+  filePublicId: {
+    type: String, 
   },
   uploadedBy: {
     type: String,
@@ -27,7 +27,17 @@ const eventRecordSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-// Compound index for unique event-year combinations (eventName + recordYear)
-eventRecordSchema.index({ eventName: 1, recordYear: 1 }, { unique: true });
+// Generate recordId as ER1, ER2, ER3, ...
+eventRecordSchema.pre('save', async function(next) {
+  if (!this.recordId) {
+    const counter = await Counter.findByIdAndUpdate(
+      'recordId',
+      { $inc: { seq: 1 } },
+      { new: true, upsert: true }
+    );
+    this.recordId = `ER${counter.seq}`;
+  }
+  next();
+});
 
 export default mongoose.model('EventRecord', eventRecordSchema);
