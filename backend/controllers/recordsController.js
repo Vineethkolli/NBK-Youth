@@ -138,6 +138,7 @@ export const recordsController = {
     }
   },
 
+
   // Event Records
   getAllEventRecords: async (req, res) => {
     try {
@@ -150,17 +151,24 @@ export const recordsController = {
 
   createEventRecord: async (req, res) => {
     try {
-      const { eventName, recordYear, fileUrl, filePublicId } = req.body;
+      const { eventName, recordYear } = req.body;
+      
+      const fileUrlEnglish = req.body.fileUrlEnglish || req.body.fileUrl;
+      const filePublicIdEnglish = req.body.filePublicIdEnglish || req.body.filePublicId;
+      const fileUrlTelugu = req.body.fileUrlTelugu || null;
+      const filePublicIdTelugu = req.body.filePublicIdTelugu || null;
 
-      if (!fileUrl || !filePublicId) {
-        return res.status(400).json({ message: 'Missing file metadata' });
+      if (!fileUrlEnglish || !filePublicIdEnglish) {
+        return res.status(400).json({ message: 'Missing english file metadata' });
       }
 
       const record = await EventRecord.create({
         eventName,
         recordYear,
-        fileUrl,
-        filePublicId,
+        fileUrlEnglish,
+        filePublicIdEnglish,
+        fileUrlTelugu,
+        filePublicIdTelugu,
         uploadedBy: req.user.registerId
       });
 
@@ -189,17 +197,35 @@ export const recordsController = {
 
       const originalData = originalRecord.toObject();
 
-      if (req.body.fileUrl && req.body.filePublicId) {
-        if (originalRecord.filePublicId) {
+      // If english file is being replaced, delete old english file from cloudinary
+      if ((req.body.fileUrlEnglish || req.body.fileUrl) && (req.body.filePublicIdEnglish || req.body.filePublicId)) {
+        const existingEnglishPublicId = originalRecord.filePublicIdEnglish || originalRecord.filePublicId;
+        if (existingEnglishPublicId) {
           try {
-            await cloudinary.uploader.destroy(originalRecord.filePublicId, { resource_type: 'raw' });
+            await cloudinary.uploader.destroy(existingEnglishPublicId, { resource_type: 'raw' });
           } catch (err) {
-            console.error('Failed to delete old Cloudinary file:', err);
+            console.error('Failed to delete old English Cloudinary file:', err);
           }
         }
       }
 
-      const record = await EventRecord.findByIdAndUpdate(req.params.id, req.body, { new: true });
+      // If telugu file is being replaced, delete old telugu file
+      if (req.body.filePublicIdTelugu || req.body.fileUrlTelugu) {
+        if (originalRecord.filePublicIdTelugu) {
+          try {
+            await cloudinary.uploader.destroy(originalRecord.filePublicIdTelugu, { resource_type: 'raw' });
+          } catch (err) {
+            console.error('Failed to delete old Telugu Cloudinary file:', err);
+          }
+        }
+      }
+
+      // Normalize legacy keys to new keys for update
+      const updatePayload = { ...req.body };
+      if (req.body.fileUrl && !req.body.fileUrlEnglish) updatePayload.fileUrlEnglish = req.body.fileUrl;
+      if (req.body.filePublicId && !req.body.filePublicIdEnglish) updatePayload.filePublicIdEnglish = req.body.filePublicId;
+
+      const record = await EventRecord.findByIdAndUpdate(req.params.id, updatePayload, { new: true });
 
       await logActivity(
         req,
@@ -226,11 +252,20 @@ export const recordsController = {
 
       const originalData = record.toObject();
 
-      if (record.filePublicId) {
+      // delete both english and telugu files if present
+      const englishPublicId = record.filePublicIdEnglish || record.filePublicId;
+      if (englishPublicId) {
         try {
-          await cloudinary.uploader.destroy(record.filePublicId, { resource_type: 'raw' });
+          await cloudinary.uploader.destroy(englishPublicId, { resource_type: 'raw' });
         } catch (err) {
-          console.error('Failed to delete file from Cloudinary:', err);
+          console.error('Failed to delete English file from Cloudinary:', err);
+        }
+      }
+      if (record.filePublicIdTelugu) {
+        try {
+          await cloudinary.uploader.destroy(record.filePublicIdTelugu, { resource_type: 'raw' });
+        } catch (err) {
+          console.error('Failed to delete Telugu file from Cloudinary:', err);
         }
       }
 
