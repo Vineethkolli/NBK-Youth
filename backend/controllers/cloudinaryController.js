@@ -17,6 +17,7 @@ export const cloudinaryController = {
       const paramsToSign = {
         timestamp,
         folder,
+        access_mode: folder === 'EventRecords' ? 'public' : undefined,
       };
 
       if (public_id) paramsToSign.public_id = public_id;
@@ -36,6 +37,7 @@ export const cloudinaryController = {
         folder,
         resource_type,
         public_id: public_id || undefined,
+        access_mode: paramsToSign.access_mode,
       });
     } catch (error) {
       console.error('Signature generation failed:', error);

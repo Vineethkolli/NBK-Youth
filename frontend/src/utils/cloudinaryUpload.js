@@ -20,7 +20,7 @@ export async function getCloudinarySignature(token, { folder, resourceType = 'au
 
 // Direct upload using XHR for real-time progress
 export async function uploadDirectToCloudinary({ file, folder, resourceType = 'auto', token, onProgress }) {
-  const { cloudName, apiKey, signature, timestamp } = await getCloudinarySignature(token, { folder, resourceType });
+  const { cloudName, apiKey, signature, timestamp, access_mode } = await getCloudinarySignature(token, { folder, resourceType });
 
   const formData = new FormData();
   formData.append('file', file);
@@ -28,6 +28,10 @@ export async function uploadDirectToCloudinary({ file, folder, resourceType = 'a
   formData.append('timestamp', timestamp);
   formData.append('signature', signature);
   formData.append('folder', folder);
+
+  if (access_mode) {
+    formData.append('access_mode', access_mode);
+  }
 
   const endpoint = `https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`;
 
