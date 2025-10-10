@@ -10,8 +10,7 @@ const eventRecordSchema = new mongoose.Schema({
     required: true
   },
   fileUrlEnglish: {
-    type: String,
-    required: true
+    type: String
   },
   filePublicIdEnglish: {
     type: String

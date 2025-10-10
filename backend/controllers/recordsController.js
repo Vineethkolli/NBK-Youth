@@ -85,7 +85,7 @@ export const recordsController = {
 
     const { eventName, year } = req.body;
 
-    // ✅ Check for duplicate (eventName + year) other than itself
+    // Check for duplicate (eventName + year) other than itself
     if (eventName && year) {
       const existing = await FinancialRecord.findOne({ eventName, year, _id: { $ne: recordId } });
       if (existing) {
@@ -172,8 +172,11 @@ export const recordsController = {
       const fileUrlTelugu = req.body.fileUrlTelugu || null;
       const filePublicIdTelugu = req.body.filePublicIdTelugu || null;
 
-      if (!fileUrlEnglish || !filePublicIdEnglish) {
-        return res.status(400).json({ message: 'Missing english file metadata' });
+      // Require at least one language file metadata (english or telugu)
+      const hasEnglish = fileUrlEnglish && filePublicIdEnglish;
+      const hasTelugu = fileUrlTelugu && filePublicIdTelugu;
+      if (!hasEnglish && !hasTelugu) {
+        return res.status(400).json({ message: 'Missing file metadata: please provide at least one English or Telugu file' });
       }
 
       // Check for duplicate (eventName + recordYear) before creating to avoid wasting Cloudinary

@@ -88,7 +88,7 @@ function Records() {
       setShowFinancialForm(false);
       setEditingFinancialRecord(null);
     } catch (error) {
-      // If duplicate (backend returns 400 with duplicate message), show single toast
+      // If duplicate (backend returns 400 with duplicate message)
       const msg = error?.response?.data?.message;
       if (error?.response?.status === 400 && msg) {
         toast.error(msg);

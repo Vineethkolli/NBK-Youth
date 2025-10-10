@@ -76,8 +76,11 @@ function EventRecordForm({ record, onClose, onSubmit }) {
         throw new Error('Event name is required');
       }
 
-      if (!record && !formData.fileEnglish) {
-        throw new Error('Please select an English PDF file');
+      // Require at least one file (English or Telugu) when creating a new record
+      if (!record && !formData.fileEnglish && !formData.fileTelugu) {
+        toast.error('Select atleast one English or Telugu pdf');
+        setIsSubmitting(false);
+        return;
       }
 
       // Check uniqueness before uploading to Cloudinary to avoid wasting storage
@@ -90,7 +93,7 @@ function EventRecordForm({ record, onClose, onSubmit }) {
         const msg = err?.response?.data?.message || 'Event record already exists';
         toast.error(msg);
         setIsSubmitting(false);
-        return; // abort without uploading
+        return; 
       }
 
       let englishMeta = null;
@@ -234,14 +237,13 @@ function EventRecordForm({ record, onClose, onSubmit }) {
 
           <div className="space-y-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700">Upload English PDF *</label>
+              <label className="block text-sm font-medium text-gray-700">Upload English PDF</label>
               <input
                 key={fileInputKey + '-eng'}
                 type="file"
                 accept=".pdf"
                 onChange={(e) => handleFileChange(e, 'english')}
                 className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
-                required={!record}
               />
             </div>
 
