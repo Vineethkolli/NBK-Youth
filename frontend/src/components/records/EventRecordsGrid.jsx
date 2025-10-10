@@ -8,66 +8,115 @@ function EventRecordsGrid({ records = [], isEditMode, onEdit, onDelete }) {
   const [previewFileUrl, setPreviewFileUrl] = useState(null); 
   const [chooserRecord, setChooserRecord] = useState(null);
   const [loadingPreview, setLoadingPreview] = useState(false);
-  const [downloadingId, setDownloadingId] = useState(null);
+  const [downloading, setDownloading] = useState(false);
 
   // Open PDF Preview 
+  const toAbsoluteUrl = (url) => {
+    if (!url) return null;
+    try {
+      // If already absolute, this will succeed
+      const u = new URL(url, window.location.href);
+      return u.href;
+    } catch (e) {
+      return url;
+    }
+  };
+
+  const isSameOrigin = (url) => {
+    try {
+      const u = new URL(url, window.location.href);
+      return u.origin === window.location.origin;
+    } catch (e) {
+      return false;
+    }
+  };
+
+  // Open PDF Preview
   const previewFile = (fileUrl, eventName, recordYear) => {
     if (!fileUrl) {
       alert("File URL not available");
       return;
     }
-    const googleViewerUrl = `https://docs.google.com/gview?url=${encodeURIComponent(fileUrl)}&embedded=true`;
-    setPreviewUrl(googleViewerUrl);
-    setPreviewFileUrl(fileUrl); 
+
+    const absoluteUrl = toAbsoluteUrl(fileUrl);
+
+    // Prefer direct same-origin preview (less likely to be blocked).
+    // For cross-origin files, fall back to Google Viewer.
+    const viewerUrl = isSameOrigin(absoluteUrl)
+      ? absoluteUrl
+      : `https://docs.google.com/gview?url=${encodeURIComponent(absoluteUrl)}&embedded=true`;
+
+    setPreviewUrl(viewerUrl);
+    setPreviewFileUrl(absoluteUrl);
     setPreviewName(eventName);
     setPreviewYear(recordYear);
     setLoadingPreview(true);
   };
 
-  // Choose which file to open/download
   const openOrDownloadWithChooser = (record, action) => {
     const eng = record.fileUrlEnglish || record.fileUrl;
     const tel = record.fileUrlTelugu;
-    if (!eng && !tel) {
-      alert("No file available for this record");
-      return;
-    }
     if (eng && tel) {
       setChooserRecord({ record, action });
     } else if (eng) {
-      action === "open"
-        ? previewFile(eng, record.eventName, record.recordYear)
-        : downloadFile(eng, record.eventName, record.recordYear, record._id);
+      if (action === 'open') previewFile(eng, record.eventName, record.recordYear);
+      else downloadFile(eng, record.eventName, record.recordYear);
     } else if (tel) {
-      action === "open"
-        ? previewFile(tel, record.eventName, record.recordYear)
-        : downloadFile(tel, record.eventName, record.recordYear, record._id);
+      if (action === 'open') previewFile(tel, record.eventName, record.recordYear);
+      else downloadFile(tel, record.eventName, record.recordYear);
+    } else {
+      alert('No file available for this record');
     }
   };
 
-  // Download PDF safely
-  const downloadFile = async (fileUrl, eventName, recordYear, recordId) => {
+  // Download PDF by fetching as blob then forcing download with correct filename
+  const downloadFile = async (fileUrl, eventName, recordYear) => {
     try {
-      setDownloadingId(recordId);
-      const resp = await fetch(fileUrl);
-      if (!resp.ok) throw new Error("Failed to download file");
+      setDownloading(true);
+      const absoluteUrl = toAbsoluteUrl(fileUrl);
 
-      const blob = await resp.blob();
-      const blobUrl = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      const safeEvent = (eventName || "Event").replace(/[/\\?%*:|"<>]/g, "_");
-      const filename = `${safeEvent}_Record_${recordYear || "unknown"}.pdf`;
-      link.href = blobUrl;
-      link.setAttribute("download", filename);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(blobUrl);
-    } catch (err) {
-      console.error(err);
+      // First try: fetch the file as blob (works when CORS allows it)
+      try {
+        const resp = await fetch(absoluteUrl, { method: "GET", credentials: "include" });
+        if (!resp.ok) throw new Error("Failed to download file");
+
+        const blob = await resp.blob();
+        const blobUrl = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        const safeEvent = (eventName || "Event").replace(/[/\\?%*:|"<>]/g, "_");
+        const filename = `${safeEvent}_Record_${recordYear || "unknown"}.pdf`;
+        link.href = blobUrl;
+        link.setAttribute("download", filename);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(blobUrl);
+        return;
+      } catch (err) {
+        // Fetch failed, likely CORS — fall through to open-in-new-tab fallback
+        console.warn("Blob download failed, falling back to opening URL:", err);
+      }
+
+      // Fallback: open file URL in a new tab so browser or server can handle download/view
+      const fallbackLink = document.createElement("a");
+      fallbackLink.href = absoluteUrl;
+      fallbackLink.target = "_blank";
+      fallbackLink.rel = "noopener noreferrer";
+      document.body.appendChild(fallbackLink);
+      fallbackLink.click();
+      document.body.removeChild(fallbackLink);
+    } catch (error) {
+                  <button
+                    onClick={() => window.open(previewFileUrl, "_blank", "noopener,noreferrer")}
+                    className="text-gray-600 hover:text-gray-900"
+                    title="Open in new tab"
+                  >
+                    <ExternalLink className="h-5 w-5" />
+                  </button>
+      console.error(error);
       alert("Error downloading file");
     } finally {
-      setDownloadingId(null);
+      setDownloading(false);
     }
   };
 
@@ -104,9 +153,9 @@ function EventRecordsGrid({ records = [], isEditMode, onEdit, onDelete }) {
                     onClick={() => openOrDownloadWithChooser(record, 'download')}
                     className="text-gray-600 hover:text-gray-900"
                     title="Download PDF"
-                    disabled={downloadingId === record._id}
+                    disabled={downloading}
                   >
-                    {downloadingId === record._id ? (
+                    {downloading ? (
                       <Loader2 className="h-5 w-5 animate-spin" />
                     ) : (
                       <Download className="h-5 w-5" />
@@ -147,58 +196,76 @@ function EventRecordsGrid({ records = [], isEditMode, onEdit, onDelete }) {
         ))}
       </div>
 
-      {/* Language choose modal */}
-      {chooserRecord && (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-5 w-[90%] max-w-xs relative">
-            <button
-              onClick={() => setChooserRecord(null)}
-              className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
-            >
-              <X className="w-5 h-5" />
-            </button>
+{/* Language choose modal */}
+{chooserRecord && (
+  <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
+    <div className="bg-white rounded-lg p-5 w-[90%] max-w-xs relative">
+      <button
+        onClick={() => setChooserRecord(null)}
+        className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
+      >
+        <X className="w-5 h-5" />
+      </button>
 
-            <h3 className="text-lg font-semibold mb-3">Choose Language</h3>
-            <p className="text-sm text-gray-600 mb-4">
-              Select which language file to {chooserRecord.action}
-            </p>
+      <h3 className="text-lg font-semibold mb-3">Choose Language</h3>
+      <p className="text-sm text-gray-600 mb-4">
+        Select which language file to {chooserRecord.action}
+      </p>
 
-            <div className="flex flex-col space-y-3">
-              {(chooserRecord.record.fileUrlEnglish || chooserRecord.record.fileUrl) && (
-                <button
-                  onClick={() => {
-                    const url = chooserRecord.record.fileUrlEnglish || chooserRecord.record.fileUrl;
-                    if (chooserRecord.action === "open")
-                      previewFile(url, chooserRecord.record.eventName, chooserRecord.record.recordYear);
-                    else
-                      downloadFile(url, chooserRecord.record.eventName, chooserRecord.record.recordYear, chooserRecord.record._id);
-                    setChooserRecord(null);
-                  }}
-                  className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
-                >
-                  English
-                </button>
-              )}
+      <div className="flex flex-col space-y-3">
+        {(chooserRecord.record.fileUrlEnglish || chooserRecord.record.fileUrl) && (
+          <button
+            onClick={() => {
+              const url =
+                chooserRecord.record.fileUrlEnglish ||
+                chooserRecord.record.fileUrl;
+              if (chooserRecord.action === "open")
+                previewFile(
+                  url,
+                  chooserRecord.record.eventName,
+                  chooserRecord.record.recordYear
+                );
+              else
+                downloadFile(
+                  url,
+                  chooserRecord.record.eventName,
+                  chooserRecord.record.recordYear
+                );
+              setChooserRecord(null);
+            }}
+            className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+          >
+            English
+          </button>
+        )}
 
-              {chooserRecord.record.fileUrlTelugu && (
-                <button
-                  onClick={() => {
-                    const url = chooserRecord.record.fileUrlTelugu;
-                    if (chooserRecord.action === "open")
-                      previewFile(url, chooserRecord.record.eventName, chooserRecord.record.recordYear);
-                    else
-                      downloadFile(url, chooserRecord.record.eventName, chooserRecord.record.recordYear, chooserRecord.record._id);
-                    setChooserRecord(null);
-                  }}
-                  className="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300"
-                >
-                  Telugu
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+        {chooserRecord.record.fileUrlTelugu && (
+          <button
+            onClick={() => {
+              const url = chooserRecord.record.fileUrlTelugu;
+              if (chooserRecord.action === "open")
+                previewFile(
+                  url,
+                  chooserRecord.record.eventName,
+                  chooserRecord.record.recordYear
+                );
+              else
+                downloadFile(
+                  url,
+                  chooserRecord.record.eventName,
+                  chooserRecord.record.recordYear
+                );
+              setChooserRecord(null);
+            }}
+            className="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300"
+          >
+            Telugu
+          </button>
+        )}
+      </div>
+    </div>
+  </div>
+)}
 
       {/* PDF Preview Modal */}
       {previewUrl && (
@@ -212,11 +279,13 @@ function EventRecordsGrid({ records = [], isEditMode, onEdit, onDelete }) {
               </div>
               <div className="flex items-center space-x-3">
                 <button
-                  onClick={() => downloadFile(previewFileUrl, previewName, previewYear, null)}
+                  onClick={() =>
+                    downloadFile(previewFileUrl, previewName, previewYear)
+                  }
                   className="text-gray-600 hover:text-gray-900"
-                  disabled={downloadingId !== null}
+                  disabled={downloading}
                 >
-                  {downloadingId !== null ? (
+                  {downloading ? (
                     <Loader2 className="h-6 w-6 animate-spin" />
                   ) : (
                     <Download className="h-6 w-6" />
@@ -237,6 +306,7 @@ function EventRecordsGrid({ records = [], isEditMode, onEdit, onDelete }) {
               </div>
             </div>
 
+            {/* PDF Viewer */}
             <div className="flex-1 relative">
               {loadingPreview && (
                 <div className="absolute inset-0 flex items-center justify-center bg-white z-10">
