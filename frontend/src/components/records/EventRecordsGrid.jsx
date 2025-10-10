@@ -11,43 +11,14 @@ function EventRecordsGrid({ records = [], isEditMode, onEdit, onDelete }) {
   const [downloading, setDownloading] = useState(false);
 
   // Open PDF Preview 
-  const toAbsoluteUrl = (url) => {
-    if (!url) return null;
-    try {
-      // If already absolute, this will succeed
-      const u = new URL(url, window.location.href);
-      return u.href;
-    } catch (e) {
-      return url;
-    }
-  };
-
-  const isSameOrigin = (url) => {
-    try {
-      const u = new URL(url, window.location.href);
-      return u.origin === window.location.origin;
-    } catch (e) {
-      return false;
-    }
-  };
-
-  // Open PDF Preview
   const previewFile = (fileUrl, eventName, recordYear) => {
     if (!fileUrl) {
       alert("File URL not available");
       return;
     }
-
-    const absoluteUrl = toAbsoluteUrl(fileUrl);
-
-    // Prefer direct same-origin preview (less likely to be blocked).
-    // For cross-origin files, fall back to Google Viewer.
-    const viewerUrl = isSameOrigin(absoluteUrl)
-      ? absoluteUrl
-      : `https://docs.google.com/gview?url=${encodeURIComponent(absoluteUrl)}&embedded=true`;
-
-    setPreviewUrl(viewerUrl);
-    setPreviewFileUrl(absoluteUrl);
+    const googleViewerUrl = `https://docs.google.com/gview?url=${encodeURIComponent(fileUrl)}&embedded=true`;
+    setPreviewUrl(googleViewerUrl);
+    setPreviewFileUrl(fileUrl); 
     setPreviewName(eventName);
     setPreviewYear(recordYear);
     setLoadingPreview(true);
@@ -73,46 +44,23 @@ function EventRecordsGrid({ records = [], isEditMode, onEdit, onDelete }) {
   const downloadFile = async (fileUrl, eventName, recordYear) => {
     try {
       setDownloading(true);
-      const absoluteUrl = toAbsoluteUrl(fileUrl);
+      const resp = await fetch(fileUrl, { method: "GET" });
+      if (!resp.ok) throw new Error("Failed to download file");
 
-      // First try: fetch the file as blob (works when CORS allows it)
-      try {
-        const resp = await fetch(absoluteUrl, { method: "GET", credentials: "include" });
-        if (!resp.ok) throw new Error("Failed to download file");
-
-        const blob = await resp.blob();
-        const blobUrl = window.URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        const safeEvent = (eventName || "Event").replace(/[/\\?%*:|"<>]/g, "_");
-        const filename = `${safeEvent}_Record_${recordYear || "unknown"}.pdf`;
-        link.href = blobUrl;
-        link.setAttribute("download", filename);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(blobUrl);
-        return;
-      } catch (err) {
-        // Fetch failed, likely CORS — fall through to open-in-new-tab fallback
-        console.warn("Blob download failed, falling back to opening URL:", err);
-      }
-
-      // Fallback: open file URL in a new tab so browser or server can handle download/view
-      const fallbackLink = document.createElement("a");
-      fallbackLink.href = absoluteUrl;
-      fallbackLink.target = "_blank";
-      fallbackLink.rel = "noopener noreferrer";
-      document.body.appendChild(fallbackLink);
-      fallbackLink.click();
-      document.body.removeChild(fallbackLink);
+      const blob = await resp.blob();
+      const blobUrl = window.URL.createObjectURL(
+        new Blob([blob], { type: "application/pdf" })
+      );
+      const link = document.createElement("a");
+      const safeEvent = (eventName || "Event").replace(/[/\\?%*:|"<>]/g, "_");
+      const filename = `${safeEvent}_Record_${recordYear || "unknown"}.pdf`;
+      link.href = blobUrl;
+      link.setAttribute("download", filename);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
     } catch (error) {
-                  <button
-                    onClick={() => window.open(previewFileUrl, "_blank", "noopener,noreferrer")}
-                    className="text-gray-600 hover:text-gray-900"
-                    title="Open in new tab"
-                  >
-                    <ExternalLink className="h-5 w-5" />
-                  </button>
       console.error(error);
       alert("Error downloading file");
     } finally {
