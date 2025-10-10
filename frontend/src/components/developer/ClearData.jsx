@@ -9,10 +9,47 @@ function ClearData() {
   const [confirmStep, setConfirmStep] = useState(1);
   const [confirmAction, setConfirmAction] = useState('');
   const [isClearing, setIsClearing] = useState(false);
+  const [entity, setEntity] = useState('All');
+  const [fromDate, setFromDate] = useState('');
+  const [toDate, setToDate] = useState('');
+
+  // Options from ActivityLog.entityType enum
+  const activityEntities = [
+    'All',
+    'User',
+    'Income',
+    'Expense',
+    'Payment',
+    'Vibe',
+    'Moment',
+    'Game',
+    'Banner',
+    'EstimatedIncome',
+    'EstimatedExpense',
+    'HiddenProfile',
+    'Slide',
+    'Event',
+    'Notification',
+    'PreviousYear',
+    'MaintenanceMode',
+    'DeveloperOptions',
+    'Committee',
+    'PaymentDetails',
+    'EventLabel',
+    'LockSettings',
+    'FinancialRecord',
+    'EventRecord',
+    'Snapshot',
+    'History'
+  ];
 
   const openConfirmDialog = (type) => {
     setConfirmAction(type);
     setConfirmStep(1);
+    // reset activity-log specific fields
+    setEntity('All');
+    setFromDate('');
+    setToDate('');
     setIsConfirmVisible(true);
   };
 
@@ -24,8 +61,18 @@ function ClearData() {
 
     setIsClearing(true);
     try {
-      await axios.delete(`${API_URL}/api/developer/clear/${confirmAction}`);
-      toast.success(`${confirmAction} data cleared successfully`);
+      if (confirmAction === 'activityLog') {
+        // Build payload only including provided fields
+        const payload = {};
+        if (entity && entity !== 'All') payload.entity = entity;
+        if (fromDate) payload.fromDate = new Date(fromDate).toISOString();
+        if (toDate) payload.toDate = new Date(toDate).toISOString();
+        await axios.delete(`${API_URL}/api/developer/clear/${confirmAction}`, { data: payload });
+        toast.success(`Activity logs cleared successfully`);
+      } else {
+        await axios.delete(`${API_URL}/api/developer/clear/${confirmAction}`);
+        toast.success(`${confirmAction} data cleared successfully`);
+      }
     } catch (error) {
       toast.error(`Failed to clear ${confirmAction} data`);
     }
@@ -90,32 +137,84 @@ function ClearData() {
           <div className="bg-white p-6 rounded shadow-lg w-80">
             <h3 className="text-lg font-medium mb-4">
               {confirmStep === 1
-                ? `Are you sure you want to clear ${confirmAction} data?`
+                ? (confirmAction === 'activityLog' ? 'Clear Activity Logs' : `Are you sure you want to clear ${confirmAction} data?`)
                 : 'Are you sure? This action is irreversible.'}
             </h3>
-            <div className="flex justify-end space-x-2">
-              <button
-                onClick={handleConfirm}
-                className={`px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 flex items-center ${
-                  isClearing ? 'opacity-50 cursor-not-allowed' : ''
-                }`}
-                disabled={isClearing}
-              >
-                {isClearing && <Loader2 className="animate-spin h-5 w-5 mr-2" />}
-                {isClearing
-                  ? 'Clearing...'
-                  : confirmStep === 1
-                  ? 'Yes, Continue'
-                  : 'Confirm'}
-              </button>
-              <button
-                onClick={closeDialog}
-                className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
-                disabled={isClearing}
-              >
-                Cancel
-              </button>
-            </div>
+
+            {/* Activity Log filter inputs shown at step 1 for activityLog */}
+{confirmStep === 1 && confirmAction === 'activityLog' && (
+  <div className="space-y-4 mb-4">
+    <div className="space-y-1">
+      <label className="text-sm font-medium text-gray-700">Entity</label>
+      <select
+        value={entity}
+        onChange={(e) => setEntity(e.target.value)}
+        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+      >
+        {activityEntities.map((opt) => (
+          <option key={opt} value={opt}>{opt}</option>
+        ))}
+      </select>
+    </div>
+
+    <div className="space-y-1">
+      <label className="text-sm font-medium text-gray-700">
+        From Date & Time <span className="text-gray-400"></span>
+      </label>
+      <input
+        type="datetime-local"
+        value={fromDate}
+        onChange={(e) => setFromDate(e.target.value)}
+        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+      />
+    </div>
+
+    <div className="space-y-1">
+      <label className="text-sm font-medium text-gray-700">
+        To Date & Time <span className="text-gray-400"></span>
+      </label>
+      <input
+        type="datetime-local"
+        value={toDate}
+        onChange={(e) => setToDate(e.target.value)}
+        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+      />
+    </div>
+
+    <p className="text-xs text-gray-500 pt-2">
+      Leave fields blank to delete <span className="font-medium text-gray-700">all records</span>.
+      If only <span className="font-medium">From Date</span> is set, records are deleted from that date to now.
+      If only <span className="font-medium">To Date</span> is set, records are deleted up to that date.
+    </p>
+  </div>
+)}
+
+{/* Buttons */}
+<div className="flex justify-end space-x-3 pt-2 mt-4">
+  <button
+    onClick={handleConfirm}
+    className={`px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center transition-all ${
+      isClearing ? 'opacity-50 cursor-not-allowed' : ''
+    }`}
+    disabled={isClearing}
+  >
+    {isClearing && <Loader2 className="animate-spin h-5 w-5 mr-2" />}
+    {isClearing
+      ? 'Clearing...'
+      : confirmStep === 1
+      ? 'Yes, Continue'
+      : (confirmAction === 'activityLog' ? 'Confirm' : 'Confirm')}
+  </button>
+
+  <button
+    onClick={closeDialog}
+    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all"
+    disabled={isClearing}
+  >
+    Cancel
+  </button>
+</div>
+
           </div>
         </div>
       )}

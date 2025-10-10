@@ -181,7 +181,7 @@ function EventRecordsGrid({ records = [], isEditMode, onEdit, onDelete }) {
                 );
               setChooserRecord(null);
             }}
-            className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+            className="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300"
           >
             English
           </button>
