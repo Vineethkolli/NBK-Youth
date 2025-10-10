@@ -45,13 +45,13 @@ export const developerController = {
 
         case 'estimatedIncome':
           await EstimatedIncome.deleteMany({});
-          await Counter.findByIdAndDelete('EIID');
+          await Counter.findByIdAndDelete('estimatedIncomeId');
           description = 'Cleared all estimated income records';
           break;
 
         case 'estimatedExpense':
           await EstimatedExpense.deleteMany({});
-          await Counter.findByIdAndDelete('EEID');
+          await Counter.findByIdAndDelete('estimatedExpenseId');
           description = 'Cleared all estimated expense records';
           break;
 
