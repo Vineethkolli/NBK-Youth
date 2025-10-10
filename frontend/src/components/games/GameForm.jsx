@@ -12,7 +12,6 @@ function GameForm({ onSubmit, onClose }) {
     e.preventDefault();
     try {
       await onSubmit(formData);
-      toast.success('Game created successfully!');
       onClose();
     } catch (error) {
       const message = error.response?.data?.message || 'Failed to create game';
