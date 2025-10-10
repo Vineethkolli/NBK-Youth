@@ -62,7 +62,6 @@ export const developerController = {
 
         case 'activityLog': {
           // Support selective deletion for activity logs.
-          // Accepts (from request body or query): entity (string, default 'All'), fromDate, toDate
           const payload = (req.body && Object.keys(req.body).length) ? req.body : (req.query || {});
           const entityFilter = payload.entity || 'All';
           const fromDateRaw = payload.fromDate;
