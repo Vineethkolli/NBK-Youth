@@ -41,7 +41,7 @@ function ClearData() {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow p-4">
+    <div className="bg-white rounded-lg shadow p-6">
       <h2 className="text-2xl font-semibold mb-4">Clear Data</h2>
       <div className="space-y-4">
         {[
@@ -66,7 +66,7 @@ function ClearData() {
               className="flex items-center px-4 py-2 text-red-600 hover:bg-red-50 rounded-md"
             >
               <Trash2 className="h-5 w-5 mr-2" />
-              Delete All {name}
+              Delete
             </button>
           </div>
         ))}

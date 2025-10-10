@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, X, Save, Database } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, Database, Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { API_URL } from '../../utils/config';
@@ -25,6 +25,12 @@ function SnapshotManager() {
     customEventName: '',
     year: new Date().getFullYear()
   });
+
+  // Delete modal states
+  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+  const [deleteConfirmStep, setDeleteConfirmStep] = useState(1);
+  const [snapshotToDelete, setSnapshotToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Generate year options
   const currentYear = new Date().getFullYear();
@@ -62,13 +68,11 @@ function SnapshotManager() {
     setIsSubmitting(true);
     try {
       const finalEventName = formData.eventName === 'Other' ? formData.customEventName : formData.eventName;
-      
       await axios.post(`${API_URL}/api/snapshots`, {
         eventName: finalEventName,
         year: formData.year,
         selectedCollections: formData.selectedCollections
       });
-
       toast.success('Snapshot created successfully');
       setShowAddForm(false);
       resetForm();
@@ -96,12 +100,10 @@ function SnapshotManager() {
 
     try {
       const finalEventName = editFormData.eventName === 'Other' ? editFormData.customEventName : editFormData.eventName;
-      
       await axios.put(`${API_URL}/api/snapshots/${editingSnapshot._id}`, {
         eventName: finalEventName,
         year: editFormData.year
       });
-
       toast.success('Snapshot updated successfully');
       setShowEditForm(false);
       setEditingSnapshot(null);
@@ -113,26 +115,37 @@ function SnapshotManager() {
     }
   };
 
-  const handleDelete = async (snapshot) => {
-  const firstConfirm = window.confirm(
-    `Are you sure you want to delete snapshot "${snapshot.eventName} ${snapshot.year}"?`
-  );
-  if (!firstConfirm) return;
+  // Open delete modal
+  const openDeleteModal = (snapshot) => {
+    setSnapshotToDelete(snapshot);
+    setDeleteConfirmStep(1);
+    setIsDeleteModalVisible(true);
+  };
 
-  const secondConfirm = window.confirm(
-    'Are you sure? This action is irreversible.'
-  );
-  if (!secondConfirm) return;
+  const handleDeleteConfirm = async () => {
+    if (deleteConfirmStep === 1) {
+      setDeleteConfirmStep(2);
+      return;
+    }
 
-  try {
-    await axios.delete(`${API_URL}/api/snapshots/${snapshot._id}`);
-    toast.success('Snapshot deleted successfully');
-    fetchSnapshots();
-  } catch (error) {
-    toast.error('Failed to delete snapshot');
-  }
-};
+    setIsDeleting(true);
+    try {
+      await axios.delete(`${API_URL}/api/snapshots/${snapshotToDelete._id}`);
+      toast.success('Snapshot deleted successfully');
+      fetchSnapshots();
+      closeDeleteModal();
+    } catch (error) {
+      toast.error('Failed to delete snapshot');
+      setIsDeleting(false);
+    }
+  };
 
+  const closeDeleteModal = () => {
+    setIsDeleteModalVisible(false);
+    setDeleteConfirmStep(1);
+    setSnapshotToDelete(null);
+    setIsDeleting(false);
+  };
 
   const resetForm = () => {
     setFormData({
@@ -210,7 +223,7 @@ function SnapshotManager() {
                       <Edit2 className="h-4 w-4" />
                     </button>
                     <button
-                      onClick={() => handleDelete(snapshot)}
+                      onClick={() => openDeleteModal(snapshot)}
                       className="text-red-600 hover:text-red-800"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -390,6 +403,38 @@ function SnapshotManager() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {isDeleteModalVisible && snapshotToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded shadow-lg w-80">
+            <h3 className="text-lg font-medium mb-4">
+              {deleteConfirmStep === 1
+                ? `Are you sure you want to delete snapshot "${snapshotToDelete.eventName} ${snapshotToDelete.year}"?`
+                : 'Are you sure? This action is irreversible.'}
+            </h3>
+            <div className="flex justify-end space-x-2">
+              <button
+                onClick={handleDeleteConfirm}
+                className={`px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 flex items-center ${
+                  isDeleting ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+                disabled={isDeleting}
+              >
+                {isDeleting && <Loader2 className="animate-spin h-5 w-5 mr-2" />}
+                {isDeleting ? 'Deleting...' : deleteConfirmStep === 1 ? 'Yes, Continue' : 'Confirm'}
+              </button>
+              <button
+                onClick={closeDeleteModal}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+                disabled={isDeleting}
+              >
+                Cancel
+              </button>
+            </div>
           </div>
         </div>
       )}
