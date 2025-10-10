@@ -11,17 +11,38 @@ function EventRecordsGrid({ records = [], isEditMode, onEdit, onDelete }) {
   const [downloading, setDownloading] = useState(false);
 
   // Open PDF Preview 
-  const previewFile = (fileUrl, eventName, recordYear) => {
+  const previewFile = async (fileUrl, eventName, recordYear) => {
     if (!fileUrl) {
       alert("File URL not available");
       return;
     }
-    const googleViewerUrl = `https://docs.google.com/gview?url=${encodeURIComponent(fileUrl)}&embedded=true`;
-    setPreviewUrl(googleViewerUrl);
-    setPreviewFileUrl(fileUrl); 
-    setPreviewName(eventName);
-    setPreviewYear(recordYear);
+    
     setLoadingPreview(true);
+    
+    // Try Google Docs viewer first
+    const googleViewerUrl = `https://docs.google.com/gview?url=${encodeURIComponent(fileUrl)}&embedded=true`;
+    
+    // First try to check if the file is accessible
+    try {
+      const response = await fetch(fileUrl, { 
+        method: 'HEAD',
+        mode: 'no-cors'
+      });
+      
+      // If file is accessible, set up preview
+      setPreviewUrl(googleViewerUrl);
+      setPreviewFileUrl(fileUrl);
+      setPreviewName(eventName);
+      setPreviewYear(recordYear);
+      
+    } catch (error) {
+      console.error("Preview error:", error);
+      // If preview fails, try direct PDF display as fallback
+      setPreviewUrl(fileUrl);
+      setPreviewFileUrl(fileUrl);
+      setPreviewName(eventName);
+      setPreviewYear(recordYear);
+    }
   };
 
   const openOrDownloadWithChooser = (record, action) => {
@@ -44,25 +65,48 @@ function EventRecordsGrid({ records = [], isEditMode, onEdit, onDelete }) {
   const downloadFile = async (fileUrl, eventName, recordYear) => {
     try {
       setDownloading(true);
-      const resp = await fetch(fileUrl, { method: "GET" });
-      if (!resp.ok) throw new Error("Failed to download file");
-
-      const blob = await resp.blob();
-      const blobUrl = window.URL.createObjectURL(
-        new Blob([blob], { type: "application/pdf" })
-      );
+      // Try direct download first
       const link = document.createElement("a");
       const safeEvent = (eventName || "Event").replace(/[/\\?%*:|"<>]/g, "_");
       const filename = `${safeEvent}_Record_${recordYear || "unknown"}.pdf`;
-      link.href = blobUrl;
+      link.href = fileUrl;
       link.setAttribute("download", filename);
+      link.setAttribute("target", "_blank");
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      window.URL.revokeObjectURL(blobUrl);
+
+      // If direct download fails, try blob method
+      try {
+        const resp = await fetch(fileUrl, { 
+          method: "GET",
+          mode: 'cors',
+          headers: {
+            'Accept': 'application/pdf'
+          }
+        });
+        if (!resp.ok) throw new Error("Failed to download file");
+
+        const blob = await resp.blob();
+        const blobUrl = window.URL.createObjectURL(
+          new Blob([blob], { type: "application/pdf" })
+        );
+        const blobLink = document.createElement("a");
+        blobLink.href = blobUrl;
+        blobLink.setAttribute("download", filename);
+        document.body.appendChild(blobLink);
+        blobLink.click();
+        document.body.removeChild(blobLink);
+        window.URL.revokeObjectURL(blobUrl);
+      } catch (blobError) {
+        console.error("Blob download failed:", blobError);
+        // If blob method fails, open in new tab as fallback
+        window.open(fileUrl, '_blank');
+      }
     } catch (error) {
       console.error(error);
-      alert("Error downloading file");
+      alert("Error downloading file. Trying alternate method...");
+      window.open(fileUrl, '_blank');
     } finally {
       setDownloading(false);
     }
