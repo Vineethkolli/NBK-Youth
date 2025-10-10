@@ -60,9 +60,56 @@ export const developerController = {
           description = 'Cleared all activities records';
           break;
 
-        case 'activityLog':
-          await ActivityLog.deleteMany({});
-          description = 'Cleared all activity logs';
+        case 'activityLog': {
+          // Support selective deletion for activity logs.
+          // Accepts (from request body or query): entity (string, default 'All'), fromDate, toDate
+          const payload = (req.body && Object.keys(req.body).length) ? req.body : (req.query || {});
+          const entityFilter = payload.entity || 'All';
+          const fromDateRaw = payload.fromDate;
+          const toDateRaw = payload.toDate;
+
+          const filter = {};
+          if (entityFilter && entityFilter !== 'All') {
+            filter.entityType = entityFilter;
+          }
+
+          // Parse and normalize dates
+          let fromDateObj = null;
+          let toDateObj = null;
+          try {
+            if (fromDateRaw) {
+              fromDateObj = new Date(fromDateRaw);
+              if (isNaN(fromDateObj.getTime())) throw new Error('Invalid fromDate');
+            }
+            if (toDateRaw) {
+              toDateObj = new Date(toDateRaw);
+              if (isNaN(toDateObj.getTime())) throw new Error('Invalid toDate');
+              // If user provided only a date (e.g. '2025-10-10'), treat toDate as end of day to be inclusive
+              if (/^\d{4}-\d{2}-\d{2}$/.test(String(toDateRaw))) {
+                toDateObj.setHours(23, 59, 59, 999);
+              }
+            }
+          } catch (err) {
+            return res.status(400).json({ message: 'Invalid date provided' });
+          }
+
+          if (fromDateObj && toDateObj) {
+            filter.createdAt = { $gte: fromDateObj, $lte: toDateObj };
+          } else if (fromDateObj) {
+            filter.createdAt = { $gte: fromDateObj };
+          } else if (toDateObj) {
+            filter.createdAt = { $lte: toDateObj };
+          }
+
+          const result = await ActivityLog.deleteMany(filter);
+          description = `Cleared ${result.deletedCount || 0} activity logs`;
+          if (entityFilter && entityFilter !== 'All') description += ` for entity '${entityFilter}'`;
+          if (fromDateObj || toDateObj) {
+            const fromStr = fromDateObj ? fromDateObj.toISOString() : 'earliest';
+            const toStr = toDateObj ? toDateObj.toISOString() : 'now';
+            description += ` in range [${fromStr} -> ${toStr}]`;
+          }
+        }
           break;
 
         case 'events':
