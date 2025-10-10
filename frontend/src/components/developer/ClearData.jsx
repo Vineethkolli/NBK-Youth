@@ -15,38 +15,14 @@ function ClearData() {
 
   // Options from ActivityLog.entityType enum
   const activityEntities = [
-    'All',
-    'User',
-    'Income',
-    'Expense',
-    'Payment',
-    'Vibe',
-    'Moment',
-    'Game',
-    'Banner',
-    'EstimatedIncome',
-    'EstimatedExpense',
-    'HiddenProfile',
-    'Slide',
-    'Event',
-    'Notification',
-    'PreviousYear',
-    'MaintenanceMode',
-    'DeveloperOptions',
-    'Committee',
-    'PaymentDetails',
-    'EventLabel',
-    'LockSettings',
-    'FinancialRecord',
-    'EventRecord',
-    'Snapshot',
-    'History'
+    'All', 'User', 'Income', 'Expense', 'Payment', 'Vibe', 'Moment', 'Game', 'Banner', 'EstimatedIncome', 'EstimatedExpense',
+    'HiddenProfile', 'Slide', 'Event', 'Notification', 'PreviousYear', 'MaintenanceMode', 'DeveloperOptions', 'Committee',
+    'PaymentDetails', 'EventLabel', 'LockSettings', 'FinancialRecord', 'EventRecord', 'Snapshot', 'History'
   ];
 
   const openConfirmDialog = (type) => {
     setConfirmAction(type);
     setConfirmStep(1);
-    // reset activity-log specific fields
     setEntity('All');
     setFromDate('');
     setToDate('');
@@ -141,7 +117,7 @@ function ClearData() {
                 : 'Are you sure? This action is irreversible.'}
             </h3>
 
-            {/* Activity Log filter inputs shown at step 1 for activityLog */}
+            {/* Activity Log filter inputs */}
 {confirmStep === 1 && confirmAction === 'activityLog' && (
   <div className="space-y-4 mb-4">
     <div className="space-y-1">
