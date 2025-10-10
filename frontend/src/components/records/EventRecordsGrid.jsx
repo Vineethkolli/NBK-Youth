@@ -10,18 +10,29 @@ function EventRecordsGrid({ records = [], isEditMode, onEdit, onDelete }) {
   const [loadingPreview, setLoadingPreview] = useState(false);
   const [downloading, setDownloading] = useState(false);
 
-  // Open PDF Preview 
+  // Open PDF Preview - try direct embedding first; fall back to Google Viewer
   const previewFile = (fileUrl, eventName, recordYear) => {
     if (!fileUrl) {
-      alert("File URL not available");
+      alert('File URL not available');
       return;
     }
+
+    // Use direct URL first — more reliable and avoids external viewer blocks.
+    // If direct embedding is blocked by CORS, the iframe will be empty and user
+    // can try Download. We keep the Google Viewer fallback commented for now.
+    const directUrl = fileUrl;
     const googleViewerUrl = `https://docs.google.com/gview?url=${encodeURIComponent(fileUrl)}&embedded=true`;
-    setPreviewUrl(googleViewerUrl);
-    setPreviewFileUrl(fileUrl); 
+
+    setPreviewUrl(directUrl);
+    setPreviewFileUrl(fileUrl);
     setPreviewName(eventName);
     setPreviewYear(recordYear);
     setLoadingPreview(true);
+
+    // Note: If deployed preview still fails, check the Cloudinary secure_url in
+    // the browser network tab — if it returns a redirect or requires auth,
+    // embedding will fail and you should enable public delivery or use
+    // authenticated/signed delivery and a server proxy to stream the file.
   };
 
   const openOrDownloadWithChooser = (record, action) => {
