@@ -28,7 +28,7 @@ export const gameController = {
     const game = await Game.create({
       ...req.body,
       name: normalizedName,
-      createdBy: req.user.id
+      registerId: req.user.registerId
     });
 
     await logActivity(
@@ -131,7 +131,7 @@ updateGame: async (req, res) => {
     game.players.push({
       ...req.body,
       name: normalizedPlayerName,
-      createdBy: req.user.id
+      registerId: req.user.registerId
     });
     await game.save();
 

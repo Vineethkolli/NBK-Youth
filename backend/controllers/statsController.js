@@ -135,7 +135,8 @@ export const statsController = {
 
       await PreviousYear.findOneAndUpdate(
         {},
-        { amount: Math.round(amount) },
+        { amount: Math.round(amount),
+          registerId: req.user?.registerId },
         { upsert: true, new: true }
       );
 

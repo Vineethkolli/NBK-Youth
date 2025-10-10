@@ -33,21 +33,20 @@ const estimatedIncomeSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
-  EIID: {
+  estimatedIncomeId: {
     type: String,
     unique: true
   }
 }, { timestamps: true });
 
-// Auto-generate EIID (EI0, EI1, EI2, ...)
 estimatedIncomeSchema.pre('save', async function (next) {
-  if (!this.EIID) {
+  if (!this.estimatedIncomeId) {
     const counter = await Counter.findByIdAndUpdate(
-      'EIID',
+      'estimatedIncomeId',
       { $inc: { seq: 1 } },
       { new: true, upsert: true }
     );
-    this.EIID = `EI${counter.seq}`;
+    this.estimatedIncomeId = `EI${counter.seq}`;
   }
   next();
 });

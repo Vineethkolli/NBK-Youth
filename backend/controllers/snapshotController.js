@@ -8,7 +8,6 @@ import { logActivity } from '../middleware/activityLogger.js';
 import Event from '../models/Event.js';
 
 export const snapshotController = {
-
   getAllSnapshots: async (req, res) => {
     try {
       const snapshots = await Snapshot.find().sort({ year: -1, eventName: 1 });
@@ -18,12 +17,11 @@ export const snapshotController = {
     }
   },
 
-
   createSnapshot: async (req, res) => {
     try {
       const { eventName, year, selectedCollections } = req.body;
 
-      // Check for duplicate eventName + year
+      // Prevent duplicates for same eventName + year
       const existingSnapshot = await Snapshot.findOne({ eventName, year });
       if (existingSnapshot) {
         return res.status(400).json({
@@ -31,7 +29,6 @@ export const snapshotController = {
         });
       }
 
-      // Fetch data for selected collections
       const collections = {};
       let stats = {};
 
@@ -45,7 +42,6 @@ export const snapshotController = {
         collections.Event = await Event.find();
       }
 
-      // Generate stats if requested
       if (selectedCollections.includes('Stats')) {
         stats = await generateStats();
       }
@@ -62,9 +58,9 @@ export const snapshotController = {
         req,
         'CREATE',
         'Snapshot',
-        snapshot.snapshotId,
+        snapshot._id,
         { before: null, after: { eventName, year, collections: selectedCollections } },
-        `Snapshot ${snapshot.snapshotId} created for ${eventName} ${year} by ${req.user.name}`
+        `Snapshot created for ${eventName} ${year} by ${req.user.name}`
       );
 
       res.status(201).json(snapshot);
@@ -78,17 +74,16 @@ export const snapshotController = {
     }
   },
 
-
   updateSnapshot: async (req, res) => {
     try {
       const { eventName, year } = req.body;
-
       const originalSnapshot = await Snapshot.findById(req.params.id);
+
       if (!originalSnapshot) {
         return res.status(404).json({ message: 'Snapshot not found' });
       }
 
-      // Check for duplicate if eventName or year changed
+      // Prevent duplicate if event/year changed
       if (eventName !== originalSnapshot.eventName || year !== originalSnapshot.year) {
         const existingSnapshot = await Snapshot.findOne({
           eventName,
@@ -103,8 +98,7 @@ export const snapshotController = {
       }
 
       const originalData = originalSnapshot.toObject();
-
-      const snapshot = await Snapshot.findByIdAndUpdate(
+      const updatedSnapshot = await Snapshot.findByIdAndUpdate(
         req.params.id,
         { eventName, year },
         { new: true }
@@ -114,17 +108,16 @@ export const snapshotController = {
         req,
         'UPDATE',
         'Snapshot',
-        snapshot.snapshotId,
-        { before: originalData, after: snapshot.toObject() },
-        `Snapshot ${snapshot.snapshotId} updated by ${req.user.name}`
+        updatedSnapshot._id,
+        { before: originalData, after: updatedSnapshot.toObject() },
+        `Snapshot updated by ${req.user.name}`
       );
 
-      res.json(snapshot);
+      res.json(updatedSnapshot);
     } catch (error) {
       res.status(500).json({ message: 'Failed to update snapshot' });
     }
   },
-
 
   deleteSnapshot: async (req, res) => {
     try {
@@ -139,23 +132,12 @@ export const snapshotController = {
         req,
         'DELETE',
         'Snapshot',
-        snapshot.snapshotId,
+        snapshot._id,
         { before: originalData, after: null },
-        `Snapshot ${snapshot.snapshotId} deleted by ${req.user.name}`
+        `Snapshot deleted by ${req.user.name}`
       );
 
       await Snapshot.findByIdAndDelete(req.params.id);
-
-      // Reorder remaining snapshots
-      const remainingSnapshots = await Snapshot.find().sort({ snapshotId: 1 });
-      for (let i = 0; i < remainingSnapshots.length; i++) {
-        const newId = `S${i + 1}`;
-        if (remainingSnapshots[i].snapshotId !== newId) {
-          remainingSnapshots[i].snapshotId = newId;
-          await remainingSnapshots[i].save();
-        }
-      }
-
       res.json({ message: 'Snapshot deleted successfully' });
     } catch (error) {
       res.status(500).json({ message: 'Failed to delete snapshot' });
@@ -163,8 +145,7 @@ export const snapshotController = {
   }
 };
 
-// Helper functions
-// calculateDateWiseStats
+// Helper Functions
 const calculateDateWiseStats = async (incomes, expenses) => {
   const dateMap = new Map();
 
@@ -184,7 +165,6 @@ const calculateDateWiseStats = async (incomes, expenses) => {
     const dayStats = dateMap.get(dateKey);
     dayStats.totalIncome += income.amount;
     dayStats.totalIncomeEntries += 1;
-
     if (income.status === 'paid') {
       dayStats.amountReceived += income.amount;
       dayStats.amountReceivedEntries += 1;
@@ -227,81 +207,63 @@ const generateStats = async () => {
     const successfulPayments = await Payment.find({ transactionStatus: 'successful' });
     const previousYear = await PreviousYear.findOne() || { amount: 0 };
 
-    const roundNumber = (num) => Math.round(num);
+    const round = num => Math.round(num);
 
-    // Budget stats
     const totalIncome = {
       count: incomes.length,
-      amount: roundNumber(incomes.reduce((sum, income) => sum + income.amount, 0))
+      amount: round(incomes.reduce((sum, i) => sum + i.amount, 0))
     };
-
-    const paidIncomes = incomes.filter(income => income.status === 'paid');
+    const paidIncomes = incomes.filter(i => i.status === 'paid');
     const amountReceived = {
       count: paidIncomes.length,
-      amount: roundNumber(paidIncomes.reduce((sum, income) => sum + income.amount, 0))
+      amount: round(paidIncomes.reduce((sum, i) => sum + i.amount, 0))
     };
-
-    const pendingIncomes = incomes.filter(income => income.status === 'not paid');
+    const pendingIncomes = incomes.filter(i => i.status === 'not paid');
     const amountPending = {
       count: pendingIncomes.length,
-      amount: roundNumber(pendingIncomes.reduce((sum, income) => sum + income.amount, 0))
+      amount: round(pendingIncomes.reduce((sum, i) => sum + i.amount, 0))
     };
-
     const totalExpenses = {
       count: expenses.length,
-      amount: roundNumber(expenses.reduce((sum, expense) => sum + expense.amount, 0)),
-      onlineAmount: roundNumber(expenses.filter(exp => exp.paymentMode === 'online')
-        .reduce((sum, exp) => sum + exp.amount, 0)),
-      cashAmount: roundNumber(expenses.filter(exp => exp.paymentMode === 'cash')
-        .reduce((sum, exp) => sum + exp.amount, 0))
+      amount: round(expenses.reduce((sum, e) => sum + e.amount, 0)),
+      onlineAmount: round(expenses.filter(e => e.paymentMode === 'online').reduce((sum, e) => sum + e.amount, 0)),
+      cashAmount: round(expenses.filter(e => e.paymentMode === 'cash').reduce((sum, e) => sum + e.amount, 0))
     };
 
-    const onlinePayments = paidIncomes.filter(income =>
-      ['online', 'web app'].includes(income.paymentMode.toLowerCase()));
+    const onlinePayments = paidIncomes.filter(i => ['online', 'web app'].includes(i.paymentMode.toLowerCase()));
     const online = {
       count: onlinePayments.length,
-      amount: roundNumber(onlinePayments.reduce((sum, inc) => sum + inc.amount, 0))
+      amount: round(onlinePayments.reduce((sum, i) => sum + i.amount, 0))
     };
-
-    const offlinePayments = paidIncomes.filter(income =>
-      income.paymentMode.toLowerCase() === 'cash');
+    const offlinePayments = paidIncomes.filter(i => i.paymentMode.toLowerCase() === 'cash');
     const offline = {
       count: offlinePayments.length,
-      amount: roundNumber(offlinePayments.reduce((sum, inc) => sum + inc.amount, 0))
+      amount: round(offlinePayments.reduce((sum, i) => sum + i.amount, 0))
     };
 
     const amountLeft = {
-      amount: roundNumber(amountReceived.amount - totalExpenses.amount),
-      onlineAmount: roundNumber(online.amount - totalExpenses.onlineAmount),
-      cashAmount: roundNumber(offline.amount - totalExpenses.cashAmount)
+      amount: round(amountReceived.amount - totalExpenses.amount),
+      onlineAmount: round(online.amount - totalExpenses.onlineAmount),
+      cashAmount: round(offline.amount - totalExpenses.cashAmount)
     };
 
-    // Villagers & Youth stats
-    const calculateGroupStats = (belongsTo) => {
-      const groupIncomes = incomes.filter(income =>
-        income.belongsTo.toLowerCase() === belongsTo.toLowerCase());
-
+    const groupStats = belongsTo => {
+      const groupIncomes = incomes.filter(i => i.belongsTo.toLowerCase() === belongsTo.toLowerCase());
       const paid = {
-        cash: roundNumber(groupIncomes.filter(i => i.status === 'paid' && i.paymentMode === 'cash')
-          .reduce((sum, i) => sum + i.amount, 0)),
-        online: roundNumber(groupIncomes.filter(i => i.status === 'paid' && i.paymentMode === 'online')
-          .reduce((sum, i) => sum + i.amount, 0)),
-        webApp: roundNumber(groupIncomes.filter(i => i.status === 'paid' && i.paymentMode === 'web app')
-          .reduce((sum, i) => sum + i.amount, 0))
+        cash: round(groupIncomes.filter(i => i.status === 'paid' && i.paymentMode === 'cash').reduce((s, i) => s + i.amount, 0)),
+        online: round(groupIncomes.filter(i => i.status === 'paid' && i.paymentMode === 'online').reduce((s, i) => s + i.amount, 0)),
+        webApp: round(groupIncomes.filter(i => i.status === 'paid' && i.paymentMode === 'web app').reduce((s, i) => s + i.amount, 0))
       };
-      paid.total = roundNumber(paid.cash + paid.online + paid.webApp);
+      paid.total = paid.cash + paid.online + paid.webApp;
 
       const pending = {
-        cash: roundNumber(groupIncomes.filter(i => i.status === 'not paid' && i.paymentMode === 'cash')
-          .reduce((sum, i) => sum + i.amount, 0)),
-        online: roundNumber(groupIncomes.filter(i => i.status === 'not paid' && i.paymentMode === 'online')
-          .reduce((sum, i) => sum + i.amount, 0)),
-        webApp: roundNumber(groupIncomes.filter(i => i.status === 'not paid' && i.paymentMode === 'web app')
-          .reduce((sum, i) => sum + i.amount, 0))
+        cash: round(groupIncomes.filter(i => i.status === 'not paid' && i.paymentMode === 'cash').reduce((s, i) => s + i.amount, 0)),
+        online: round(groupIncomes.filter(i => i.status === 'not paid' && i.paymentMode === 'online').reduce((s, i) => s + i.amount, 0)),
+        webApp: round(groupIncomes.filter(i => i.status === 'not paid' && i.paymentMode === 'web app').reduce((s, i) => s + i.amount, 0))
       };
-      pending.total = roundNumber(pending.cash + pending.online + pending.webApp);
+      pending.total = pending.cash + pending.online + pending.webApp;
 
-      const total = roundNumber(paid.total + pending.total);
+      const total = paid.total + pending.total;
       return { paid, pending, total };
     };
 
@@ -311,7 +273,7 @@ const generateStats = async () => {
         amountReceived,
         amountPending,
         totalExpenses,
-        previousYearAmount: { amount: roundNumber(previousYear.amount) },
+        previousYearAmount: { amount: round(previousYear.amount) },
         amountLeft,
         online,
         offline
@@ -320,8 +282,8 @@ const generateStats = async () => {
         totalUsers: users.length,
         successfulPayments: successfulPayments.length
       },
-      villagers: calculateGroupStats('villagers'),
-      youth: calculateGroupStats('youth'),
+      villagers: groupStats('villagers'),
+      youth: groupStats('youth'),
       dateWiseStats: await calculateDateWiseStats(incomes, expenses)
     };
   } catch (error) {

@@ -12,6 +12,10 @@ const paymentDetailsSchema = new mongoose.Schema({
   accountHolder: {
     type: String,
     required: true
+  },
+  registerId: {   
+    type: String,
+    required: true
   }
 }, { timestamps: true });
 

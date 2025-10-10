@@ -4,6 +4,10 @@ const previousYearSchema = new mongoose.Schema({
   amount: {
     type: Number,
     default: 0
+  },
+    registerId: {   
+    type: String,
+    required: true
   }
 }, { timestamps: true });
 

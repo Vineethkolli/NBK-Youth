@@ -22,21 +22,20 @@ const estimatedExpenseSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
-  EEID: {
+  estimatedExpenseId: {
     type: String,
     unique: true
   }
 }, { timestamps: true });
 
-// Auto-generate EEID (EE0, EE1, EE2, ...)
 estimatedExpenseSchema.pre('save', async function (next) {
-  if (!this.EEID) {
+  if (!this.estimatedExpenseId) {
     const counter = await Counter.findByIdAndUpdate(
-      'EEID',
+      'estimatedExpenseId',
       { $inc: { seq: 1 } },
       { new: true, upsert: true }
     );
-    this.EEID = `EE${counter.seq}`;
+    this.estimatedExpenseId = `EE${counter.seq}`;
   }
   next();
 });

@@ -8,10 +8,13 @@ const songSchema = new mongoose.Schema({
   url: {
     type: String,
     required: true
-  }
-  ,
+  },
   mediaPublicId: {
     type: String 
+  },
+  registerId: {           
+    type: String,
+    required: true
   }
 }, { timestamps: true });
 
@@ -22,9 +25,8 @@ const vibeSchema = new mongoose.Schema({
     unique: true
   },
   songs: [songSchema],
-  createdBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+  registerId: {           
+    type: String,
     required: true
   }
 }, { timestamps: true });

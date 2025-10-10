@@ -3,6 +3,8 @@ import EstimatedExpense from '../models/EstimatedExpense.js';
 import { logActivity } from '../middleware/activityLogger.js';
 
 export const estimationController = {
+  
+  // Income
   getAllEstimatedIncomes: async (req, res) => {
     try {
       const { sortOrder, sortField, belongsTo, status } = req.query;
@@ -16,7 +18,7 @@ export const estimationController = {
         sortObj[sortField] = sortOrder === 'desc' ? -1 : 1;
         query = query.sort(sortObj);
       } else {
-        query = query.sort({ EIID: 1 });
+        query = query.sort({ estimatedIncomeId: 1 });
       }
 
       const incomes = await query.exec();
@@ -30,13 +32,10 @@ export const estimationController = {
     try {
       const { name } = req.body;
 
-            // Normalize name: trim + collapse spaces
-            const normalizedName = name.trim().replace(/\s+/g, ' ');
-      
-            // Check for existing name case-insensitively
-            const existingIncome = await EstimatedIncome.findOne({
-              name: { $regex: `^${normalizedName}$`, $options: 'i' }
-            });
+      const normalizedName = name.trim().replace(/\s+/g, ' ');
+      const existingIncome = await EstimatedIncome.findOne({
+        name: { $regex: `^${normalizedName}$`, $options: 'i' }
+      });
       if (existingIncome) {
         return res.status(400).json({ message: 'Name already exists' });
       }
@@ -51,9 +50,9 @@ export const estimationController = {
         req,
         'CREATE',
         'EstimatedIncome',
-        income.EIID,
+        income.estimatedIncomeId,
         { before: null, after: income.toObject() },
-        `Estimated Income ${income.EIID} created by ${req.user.name}`
+        `Estimated Income ${income.estimatedIncomeId} created by ${req.user.name}`
       );
 
       res.status(201).json(income);
@@ -72,13 +71,12 @@ export const estimationController = {
       }
 
       let normalizedName;
-            if (name) {
-              normalizedName = name.trim().replace(/\s+/g, ' ');
-      
-              const existingIncome = await EstimatedIncome.findOne({
-                name: { $regex: `^${normalizedName}$`, $options: 'i' },
-                _id: { $ne: req.params.id }
-              });
+      if (name) {
+        normalizedName = name.trim().replace(/\s+/g, ' ');
+        const existingIncome = await EstimatedIncome.findOne({
+          name: { $regex: `^${normalizedName}$`, $options: 'i' },
+          _id: { $ne: req.params.id }
+        });
         if (existingIncome) {
           return res.status(400).json({ message: 'Name already exists' });
         }
@@ -95,9 +93,9 @@ export const estimationController = {
         req,
         'UPDATE',
         'EstimatedIncome',
-        income.EIID,
+        income.estimatedIncomeId,
         { before: originalData, after: income.toObject() },
-        `Estimated Income ${income.EIID} updated by ${req.user.name}`
+        `Estimated Income ${income.estimatedIncomeId} updated by ${req.user.name}`
       );
 
       res.json(income);
@@ -116,9 +114,9 @@ export const estimationController = {
         req,
         'DELETE',
         'EstimatedIncome',
-        income.EIID,
+        income.estimatedIncomeId,
         { before: originalData, after: null },
-        `Estimated Income ${income.EIID} deleted by ${req.user.name}`
+        `Estimated Income ${income.estimatedIncomeId} deleted by ${req.user.name}`
       );
       await EstimatedIncome.findByIdAndDelete(req.params.id);
       res.json({ message: 'Estimated income deleted successfully' });
@@ -127,9 +125,11 @@ export const estimationController = {
     }
   },
 
+  
+  // Expense
   getAllEstimatedExpenses: async (req, res) => {
     try {
-      const expenses = await EstimatedExpense.find().sort({ EEID: 1 });
+      const expenses = await EstimatedExpense.find().sort({ estimatedExpenseId: 1 });
       res.json(expenses);
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch estimated expenses' });
@@ -148,9 +148,9 @@ export const estimationController = {
         req,
         'CREATE',
         'EstimatedExpense',
-        expense.EEID,
+        expense.estimatedExpenseId,
         { before: null, after: expense.toObject() },
-        `Estimated Expense ${expense.EEID} created by ${req.user.name}`
+        `Estimated Expense ${expense.estimatedExpenseId} created by ${req.user.name}`
       );
 
       res.status(201).json(expense);
@@ -175,9 +175,9 @@ export const estimationController = {
         req,
         'UPDATE',
         'EstimatedExpense',
-        expense.EEID,
+        expense.estimatedExpenseId,
         { before: originalData, after: expense.toObject() },
-        `Estimated Expense ${expense.EEID} updated by ${req.user.name}`
+        `Estimated Expense ${expense.estimatedExpenseId} updated by ${req.user.name}`
       );
 
       res.json(expense);
@@ -196,9 +196,9 @@ export const estimationController = {
         req,
         'DELETE',
         'EstimatedExpense',
-        expense.EEID,
+        expense.estimatedExpenseId,
         { before: originalData, after: null },
-        `Estimated Expense ${expense.EEID} deleted by ${req.user.name}`
+        `Estimated Expense ${expense.estimatedExpenseId} deleted by ${req.user.name}`
       );
       await EstimatedExpense.findByIdAndDelete(req.params.id);
       res.json({ message: 'Estimated expense deleted successfully' });
@@ -207,13 +207,17 @@ export const estimationController = {
     }
   },
 
+
+  // Stats
   getEstimationStats: async (req, res) => {
     try {
       const incomes = await EstimatedIncome.find();
       const expenses = await EstimatedExpense.find();
 
       const totalEstimatedIncome = incomes.reduce((sum, i) => sum + i.presentAmount, 0);
-      const totalEstimatedPaidIncome = incomes.filter(i => i.status === 'paid').reduce((sum, i) => sum + i.presentAmount, 0);
+      const totalEstimatedPaidIncome = incomes
+        .filter(i => i.status === 'paid')
+        .reduce((sum, i) => sum + i.presentAmount, 0);
       const totalEstimatedNotPaidIncome = totalEstimatedIncome - totalEstimatedPaidIncome;
       const totalEstimatedExpense = expenses.reduce((sum, e) => sum + e.presentAmount, 0);
       const balance = totalEstimatedIncome - totalEstimatedExpense;
