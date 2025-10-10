@@ -6,7 +6,6 @@ function EventRecordsGrid({ records = [], isEditMode, onEdit, onDelete }) {
   const [previewName, setPreviewName] = useState(null);
   const [previewYear, setPreviewYear] = useState(null);
   const [previewFileUrl, setPreviewFileUrl] = useState(null); 
-  const [chooserRecord, setChooserRecord] = useState(null);
   const [loadingPreview, setLoadingPreview] = useState(false);
   const [downloading, setDownloading] = useState(false);
 
@@ -18,26 +17,10 @@ function EventRecordsGrid({ records = [], isEditMode, onEdit, onDelete }) {
     }
     const googleViewerUrl = `https://docs.google.com/gview?url=${encodeURIComponent(fileUrl)}&embedded=true`;
     setPreviewUrl(googleViewerUrl);
-    setPreviewFileUrl(fileUrl); 
+    setPreviewFileUrl(fileUrl); // keep real file url for download
     setPreviewName(eventName);
     setPreviewYear(recordYear);
     setLoadingPreview(true);
-  };
-
-  const openOrDownloadWithChooser = (record, action) => {
-    const eng = record.fileUrlEnglish || record.fileUrl;
-    const tel = record.fileUrlTelugu;
-    if (eng && tel) {
-      setChooserRecord({ record, action });
-    } else if (eng) {
-      if (action === 'open') previewFile(eng, record.eventName, record.recordYear);
-      else downloadFile(eng, record.eventName, record.recordYear);
-    } else if (tel) {
-      if (action === 'open') previewFile(tel, record.eventName, record.recordYear);
-      else downloadFile(tel, record.eventName, record.recordYear);
-    } else {
-      alert('No file available for this record');
-    }
   };
 
   // Download PDF by fetching as blob then forcing download with correct filename
@@ -79,7 +62,7 @@ function EventRecordsGrid({ records = [], isEditMode, onEdit, onDelete }) {
 
   return (
     <>
-      {/* Records Grid */}
+      {/* Grid of Records */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {records.map((record) => (
           <div
@@ -97,8 +80,15 @@ function EventRecordsGrid({ records = [], isEditMode, onEdit, onDelete }) {
                 </div>
 
                 <div className="flex items-center space-x-2">
+                  {/* Download button */}
                   <button
-                    onClick={() => openOrDownloadWithChooser(record, 'download')}
+                    onClick={() =>
+                      downloadFile(
+                        record.fileUrl,
+                        record.eventName,
+                        record.recordYear
+                      )
+                    }
                     className="text-gray-600 hover:text-gray-900"
                     title="Download PDF"
                     disabled={downloading}
@@ -132,7 +122,9 @@ function EventRecordsGrid({ records = [], isEditMode, onEdit, onDelete }) {
               </div>
 
               <button
-                onClick={() => openOrDownloadWithChooser(record, 'open')}
+                onClick={() =>
+                  previewFile(record.fileUrl, record.eventName, record.recordYear)
+                }
                 className="w-full mt-4 flex items-center justify-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
                 title="Open File (preview)"
               >
@@ -144,82 +136,11 @@ function EventRecordsGrid({ records = [], isEditMode, onEdit, onDelete }) {
         ))}
       </div>
 
-{/* Language choose modal */}
-{chooserRecord && (
-  <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
-    <div className="bg-white rounded-lg p-5 w-[90%] max-w-xs relative">
-      <button
-        onClick={() => setChooserRecord(null)}
-        className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
-      >
-        <X className="w-5 h-5" />
-      </button>
-
-      <h3 className="text-lg font-semibold mb-3">Choose Language</h3>
-      <p className="text-sm text-gray-600 mb-4">
-        Select which language file to {chooserRecord.action}
-      </p>
-
-      <div className="flex flex-col space-y-3">
-        {(chooserRecord.record.fileUrlEnglish || chooserRecord.record.fileUrl) && (
-          <button
-            onClick={() => {
-              const url =
-                chooserRecord.record.fileUrlEnglish ||
-                chooserRecord.record.fileUrl;
-              if (chooserRecord.action === "open")
-                previewFile(
-                  url,
-                  chooserRecord.record.eventName,
-                  chooserRecord.record.recordYear
-                );
-              else
-                downloadFile(
-                  url,
-                  chooserRecord.record.eventName,
-                  chooserRecord.record.recordYear
-                );
-              setChooserRecord(null);
-            }}
-            className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
-          >
-            English
-          </button>
-        )}
-
-        {chooserRecord.record.fileUrlTelugu && (
-          <button
-            onClick={() => {
-              const url = chooserRecord.record.fileUrlTelugu;
-              if (chooserRecord.action === "open")
-                previewFile(
-                  url,
-                  chooserRecord.record.eventName,
-                  chooserRecord.record.recordYear
-                );
-              else
-                downloadFile(
-                  url,
-                  chooserRecord.record.eventName,
-                  chooserRecord.record.recordYear
-                );
-              setChooserRecord(null);
-            }}
-            className="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300"
-          >
-            Telugu
-          </button>
-        )}
-      </div>
-    </div>
-  </div>
-)}
-
       {/* PDF Preview Modal */}
       {previewUrl && (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
           <div className="bg-white w-11/12 md:w-3/4 lg:w-2/3 h-5/6 rounded-lg shadow-lg overflow-hidden flex flex-col">
-          
+            {/* Header */}
             <div className="flex justify-between items-center px-4 py-2 border-b">
               <div>
                 <h2 className="font-semibold text-lg">{previewName}</h2>
