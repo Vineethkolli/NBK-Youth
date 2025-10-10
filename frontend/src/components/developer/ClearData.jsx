@@ -51,7 +51,7 @@ function ClearData() {
           { name: 'Estimated Expenses', type: 'estimatedExpense' },
           { name: 'Event Labels', type: 'eventLabels' },
           { name: 'Previous Year Amount', type: 'previousYear' },
-          { name: 'Notifications', type: 'notifications' },
+          { name: 'Notification History', type: 'notifications' },
           { name: 'Events', type: 'events' },
           { name: 'Activities', type: 'letsPlay' },
           { name: 'User Payments', type: 'payment' },

@@ -9,11 +9,17 @@ const eventRecordSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
-  fileUrl: {
+  fileUrlEnglish: {
     type: String,
     required: true
   },
-  filePublicId: {
+  filePublicIdEnglish: {
+    type: String
+  },
+  fileUrlTelugu: {
+    type: String
+  },
+  filePublicIdTelugu: {
     type: String
   },
   uploadedBy: {
