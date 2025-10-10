@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 import { X, Upload } from 'lucide-react';
 import { uploadDirectToCloudinary } from '../../utils/cloudinaryUpload';
+import axios from 'axios';
+import { toast } from 'react-hot-toast';
+import { API_URL } from '../../utils/config';
 
 const EVENT_OPTIONS = ['Sankranti', 'Ganesh Chaturthi'];
 
@@ -9,7 +12,8 @@ function EventRecordForm({ record, onClose, onSubmit }) {
     eventName: '',
     customEventName: '',
     recordYear: new Date().getFullYear(),
-    file: null,
+    fileEnglish: null,
+    fileTelugu: null,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [fileInputKey, setFileInputKey] = useState(Date.now());
@@ -33,12 +37,13 @@ function EventRecordForm({ record, onClose, onSubmit }) {
           ? ''
           : record.eventName,
         recordYear: record.recordYear,
-        file: null, // no file prefilled, only replace if uploaded
+        fileEnglish: null, 
+        fileTelugu: null,
       });
     }
   }, [record]);
 
-  const handleFileChange = (e) => {
+  const handleFileChange = (e, lang) => {
     const file = e.target.files[0];
     if (!file) return;
 
@@ -52,7 +57,8 @@ function EventRecordForm({ record, onClose, onSubmit }) {
       return;
     }
 
-    setFormData({ ...formData, file });
+    if (lang === 'english') setFormData({ ...formData, fileEnglish: file });
+    else setFormData({ ...formData, fileTelugu: file });
   };
 
   const handleSubmit = async (e) => {
@@ -70,17 +76,58 @@ function EventRecordForm({ record, onClose, onSubmit }) {
         throw new Error('Event name is required');
       }
 
-      if (!record && !formData.file) {
-        throw new Error('Please select a PDF file');
+      // Require at least one file (English or Telugu) when creating a new record
+      if (!record && !formData.fileEnglish && !formData.fileTelugu) {
+        toast.error('Select atleast one English or Telugu pdf');
+        setIsSubmitting(false);
+        return;
       }
 
-      let fileMeta = null;
-      if (formData.file) {
-        fileMeta = await uploadDirectToCloudinary({
-          file: formData.file,
+      // Check uniqueness before uploading to Cloudinary to avoid wasting storage
+      try {
+        await axios.post(`${API_URL}/api/records/event-records/check`, {
+          eventName: finalEventName,
+          recordYear: formData.recordYear
+        });
+      } catch (err) {
+        const msg = err?.response?.data?.message || 'Event record already exists';
+        toast.error(msg);
+        setIsSubmitting(false);
+        return; 
+      }
+
+      let englishMeta = null;
+      let teluguMeta = null;
+
+      const totalSize = (formData.fileEnglish ? formData.fileEnglish.size : 0) + (formData.fileTelugu ? formData.fileTelugu.size : 0);
+
+      const uploadProgressCombined = (englishPart, teluguPart) => {
+        const engSize = formData.fileEnglish ? formData.fileEnglish.size : 0;
+        const telSize = formData.fileTelugu ? formData.fileTelugu.size : 0;
+        const engWeight = totalSize > 0 ? engSize / totalSize : 0.5;
+        const telWeight = totalSize > 0 ? telSize / totalSize : 0.5;
+        const engPct = englishPart || 0;
+        const telPct = teluguPart || 0;
+        const combined = Math.round(engPct * engWeight + telPct * telWeight);
+        setUploadProgress(combined);
+      };
+
+      if (formData.fileEnglish) {
+        englishMeta = await uploadDirectToCloudinary({
+          file: formData.fileEnglish,
           folder: 'EventRecords',
           resourceType: 'raw',
-          onProgress: (p) => setUploadProgress(p),
+          onProgress: (p) => uploadProgressCombined(p, null),
+        });
+      } else if (record) {
+      }
+
+      if (formData.fileTelugu) {
+        teluguMeta = await uploadDirectToCloudinary({
+          file: formData.fileTelugu,
+          folder: 'EventRecords',
+          resourceType: 'raw',
+          onProgress: (p) => uploadProgressCombined(null, p),
         });
       }
 
@@ -88,15 +135,19 @@ function EventRecordForm({ record, onClose, onSubmit }) {
         eventName: finalEventName,
         recordYear: formData.recordYear,
       };
-      if (fileMeta) {
-        payload.fileUrl = fileMeta.url;
-        payload.filePublicId = fileMeta.publicId;
+      if (englishMeta) {
+        payload.fileUrlEnglish = englishMeta.url;
+        payload.filePublicIdEnglish = englishMeta.publicId;
+      }
+      if (teluguMeta) {
+        payload.fileUrlTelugu = teluguMeta.url;
+        payload.filePublicIdTelugu = teluguMeta.publicId;
       }
       await onSubmit(payload);
 
-      // Reset file input after success
-      setFileInputKey(Date.now());
-      setFormData((prev) => ({ ...prev, file: null }));
+  // Reset file input after success
+  setFileInputKey(Date.now());
+  setFormData((prev) => ({ ...prev, fileEnglish: null, fileTelugu: null }));
     } catch (error) {
       console.error(error);
       alert(error.message || 'Something went wrong');
@@ -184,24 +235,28 @@ function EventRecordForm({ record, onClose, onSubmit }) {
             </select>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              {record ? 'Update PDF File' : 'Upload PDF File *'}
-            </label>
+          <div className="space-y-3">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Upload English PDF</label>
+              <input
+                key={fileInputKey + '-eng'}
+                type="file"
+                accept=".pdf"
+                onChange={(e) => handleFileChange(e, 'english')}
+                className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+              />
+            </div>
 
-            <input
-              key={fileInputKey}
-              type="file"
-              accept=".pdf"
-              onChange={handleFileChange}
-              className="mt-1 block w-full text-sm text-gray-500
-                file:mr-4 file:py-2 file:px-4
-                file:rounded-full file:border-0
-                file:text-sm file:font-semibold
-                file:bg-indigo-50 file:text-indigo-700
-                hover:file:bg-indigo-100"
-              required={!record} 
-            />
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Upload Telugu PDF </label>
+              <input
+                key={fileInputKey + '-tel'}
+                type="file"
+                accept=".pdf"
+                onChange={(e) => handleFileChange(e, 'telugu')}
+                className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+              />
+            </div>
           </div>
 
           <div className="flex justify-end space-x-2">
