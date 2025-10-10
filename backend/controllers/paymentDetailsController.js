@@ -5,22 +5,22 @@ export const paymentDetailsController = {
   getPaymentDetails: async (req, res) => {
     try {
       let details = await PaymentDetails.findOne();
-      
+
       // If no details exist, create default
       if (!details) {
         details = await PaymentDetails.create({
           upiNumber: '0000000000',
           upiId: 'xxxxxxxxxx@xxx',
-          accountHolder: 'NBK Youth'
+          accountHolder: 'NBK Youth',
+          registerId: req.user?.registerId || 'System'
         });
       }
-      
+
       res.json(details);
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch payment details' });
     }
   },
-
 
   updatePaymentDetails: async (req, res) => {
     try {
@@ -28,17 +28,19 @@ export const paymentDetailsController = {
 
       let details = await PaymentDetails.findOne();
       const originalData = details ? details.toObject() : null;
-      
+
       if (details) {
         details.upiNumber = upiNumber;
         details.upiId = upiId;
         details.accountHolder = accountHolder;
+        details.registerId = req.user?.registerId; 
         await details.save();
       } else {
         details = await PaymentDetails.create({
           upiNumber,
           upiId,
-          accountHolder
+          accountHolder,
+          registerId: req.user?.registerId
         });
       }
 
@@ -50,6 +52,7 @@ export const paymentDetailsController = {
         { before: originalData, after: details.toObject() },
         `Payment details ${originalData ? 'updated' : 'created'} by ${req.user.name}`
       );
+
       res.json(details);
     } catch (error) {
       res.status(500).json({ message: 'Failed to update payment details' });

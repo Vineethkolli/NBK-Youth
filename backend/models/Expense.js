@@ -54,7 +54,7 @@ const expenseSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-// Auto-generate expenseId (E0, E1, E2, ...)
+// Auto-generate expenseId as E1, E2, ...
 expenseSchema.pre('save', async function (next) {
   if (!this.expenseId) {
     const counter = await Counter.findByIdAndUpdate(

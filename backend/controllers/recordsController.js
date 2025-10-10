@@ -4,6 +4,7 @@ import { logActivity } from '../middleware/activityLogger.js';
 import cloudinary from '../config/cloudinary.js';
 
 export const recordsController = {
+  
   // Financial Timeline
   getAllFinancialRecords: async (req, res) => {
     try {
@@ -82,11 +83,9 @@ export const recordsController = {
       }
 
       const originalData = originalRecord.toObject();
-      let updatedFields = { ...req.body };
-
       const record = await FinancialRecord.findByIdAndUpdate(
         req.params.id,
-        updatedFields,
+        req.body,
         { new: true }
       );
 
@@ -151,10 +150,8 @@ export const recordsController = {
 
   createEventRecord: async (req, res) => {
     try {
-      const body = req.body || {};
-      const { eventName, recordYear } = body;
+      const { eventName, recordYear, fileUrl, filePublicId } = req.body;
 
-      const { fileUrl, filePublicId } = body;
       if (!fileUrl || !filePublicId) {
         return res.status(400).json({ message: 'Missing file metadata' });
       }
@@ -171,9 +168,9 @@ export const recordsController = {
         req,
         'CREATE',
         'EventRecord',
-        record.recordId,
+        record._id,
         { before: null, after: record.toObject() },
-        `Event record ${record.recordId} for ${eventName} ${recordYear} uploaded by ${req.user.name}`
+        `Event record for ${eventName} ${recordYear} uploaded by ${req.user.name}`
       );
 
       res.status(201).json(record);
@@ -191,9 +188,8 @@ export const recordsController = {
       }
 
       const originalData = originalRecord.toObject();
-      let updatedFields = { ...req.body };
 
-      if (req.body && req.body.fileUrl && req.body.filePublicId) {
+      if (req.body.fileUrl && req.body.filePublicId) {
         if (originalRecord.filePublicId) {
           try {
             await cloudinary.uploader.destroy(originalRecord.filePublicId, { resource_type: 'raw' });
@@ -203,19 +199,15 @@ export const recordsController = {
         }
       }
 
-      const record = await EventRecord.findByIdAndUpdate(
-        req.params.id,
-        updatedFields,
-        { new: true }
-      );
+      const record = await EventRecord.findByIdAndUpdate(req.params.id, req.body, { new: true });
 
       await logActivity(
         req,
         'UPDATE',
         'EventRecord',
-        record.recordId,
+        record._id,
         { before: originalData, after: record.toObject() },
-        `Event record ${record.recordId} updated by ${req.user.name}`
+        `Event record for ${record.eventName} ${record.recordYear} updated by ${req.user.name}`
       );
 
       res.json(record);
@@ -237,7 +229,6 @@ export const recordsController = {
       if (record.filePublicId) {
         try {
           await cloudinary.uploader.destroy(record.filePublicId, { resource_type: 'raw' });
-          console.log(`Deleted Cloudinary file ${record.filePublicId}`);
         } catch (err) {
           console.error('Failed to delete file from Cloudinary:', err);
         }
@@ -247,9 +238,9 @@ export const recordsController = {
         req,
         'DELETE',
         'EventRecord',
-        record.recordId,
+        record._id,
         { before: originalData, after: null },
-        `Event record ${record.recordId} for ${record.eventName} ${record.recordYear} deleted by ${req.user.name}`
+        `Event record for ${record.eventName} ${record.recordYear} deleted by ${req.user.name}`
       );
 
       await EventRecord.findByIdAndDelete(req.params.id);

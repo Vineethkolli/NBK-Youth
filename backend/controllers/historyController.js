@@ -67,7 +67,7 @@ export const historyController = {
         req,
         'CREATE',
         'History',
-        snapshotName,
+        history._id,
         { before: null, after: { snapshotName, collections: selectedCollections } },
         `History "${snapshotName}" created by ${req.user.name}`
       );
@@ -97,7 +97,7 @@ export const historyController = {
         req,
         'DELETE',
         'History',
-        history.snapshotName,
+         history._id,
         { before: originalData, after: null },
         `History "${history.snapshotName}" deleted by ${req.user.name}`
       );

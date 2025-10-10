@@ -4,13 +4,7 @@ const playerSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
-    validate: {
-      validator: function (value) {
-        const game = this.ownerDocument(); 
-        return !game.players.some(player => player.name === value && player._id.toString() !== this._id.toString());
-      },
-      message: 'Player name must be unique within the game.'
-    }
+    unique: true
   },
   status: {
     type: String,
@@ -21,9 +15,8 @@ const playerSchema = new mongoose.Schema({
     type: Number, 
     default: null
   },
-  createdBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+  registerId: {            
+    type: String,         
     required: true
   }
 }, { timestamps: true });
@@ -39,9 +32,8 @@ const gameSchema = new mongoose.Schema({
     default: false
   },
   players: [playerSchema],
-  createdBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+  registerId: {           
+    type: String,
     required: true
   }
 }, { timestamps: true });
