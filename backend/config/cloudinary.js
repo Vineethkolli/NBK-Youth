@@ -21,6 +21,7 @@ export const uploadToCloudinary = async (file, folder = 'PaymentScreenshots', ty
     // Decide resource_type
     if (folder === 'EventRecords') {
       options.resource_type = 'raw';
+      options.access_mode = 'public';
     } else if (['PaymentScreenshots', 'ExpenseBills', 'ProfileImages'].includes(folder)) {
       options.resource_type = 'image';
     } else if (folder === 'Vibe') {
