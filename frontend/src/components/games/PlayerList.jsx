@@ -73,7 +73,6 @@ function PlayerList({
 
     try {
       await onEdit(playerId, newName);
-      toast.success('Player name updated successfully!');
       setEditingPlayerId(null);
       setNewName('');
     } catch (error) {

@@ -9,7 +9,6 @@ function PlayerForm({ onSubmit, onClose }) {
     e.preventDefault();
     try {
       await onSubmit(playerName);
-      toast.success(`Player "${playerName}" added successfully!`);
       onClose();
     } catch (error) {
       const message = error.response?.data?.message || 'Failed to add player';

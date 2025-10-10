@@ -80,7 +80,7 @@ function LetsPlay() {
       if (selectedGame?._id === gameId) {
         setSelectedGame(data);
       }
-      toast.success('Game updated successfully');
+      toast.success('Game name updated successfully');
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to update game');
     }
@@ -127,7 +127,7 @@ function LetsPlay() {
         prevGames.map((g) => (g._id === selectedGame._id ? data : g))
       );
       setSelectedGame(data);
-      toast.success('Player updated successfully');
+      toast.success('Player name updated successfully');
     } catch (error) {
       throw error;
     }

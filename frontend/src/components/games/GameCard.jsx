@@ -64,7 +64,6 @@ function GameCard({ game, isEditMode, onSelect, onEdit, onDelete }) {
 
     try {
       await onEdit(gameId, newGameName);
-      toast.success('Game name updated successfully!');
       setEditingGameId(null);
       setNewGameName('');
     } catch (error) {
