@@ -76,33 +76,47 @@ export const recordsController = {
   },
 
   updateFinancialRecord: async (req, res) => {
-    try {
-      const originalRecord = await FinancialRecord.findById(req.params.id);
-      if (!originalRecord) {
-        return res.status(404).json({ message: 'Financial record not found' });
-      }
-
-      const originalData = originalRecord.toObject();
-      const record = await FinancialRecord.findByIdAndUpdate(
-        req.params.id,
-        req.body,
-        { new: true }
-      );
-
-      await logActivity(
-        req,
-        'UPDATE',
-        'FinancialRecord',
-        `${record.eventName}-${record.year}`,
-        { before: originalData, after: record.toObject() },
-        `Financial record for ${record.eventName} ${record.year} updated by ${req.user.name}`
-      );
-
-      res.json(record);
-    } catch (error) {
-      res.status(500).json({ message: 'Failed to update financial record' });
+  try {
+    const recordId = req.params.id;
+    const originalRecord = await FinancialRecord.findById(recordId);
+    if (!originalRecord) {
+      return res.status(404).json({ message: 'Financial record not found' });
     }
-  },
+
+    const { eventName, year } = req.body;
+
+    // ✅ Check for duplicate (eventName + year) other than itself
+    if (eventName && year) {
+      const existing = await FinancialRecord.findOne({ eventName, year, _id: { $ne: recordId } });
+      if (existing) {
+        return res.status(400).json({
+          message: 'Financial record already exists for this event and year'
+        });
+      }
+    }
+
+    const originalData = originalRecord.toObject();
+
+    const record = await FinancialRecord.findByIdAndUpdate(recordId, req.body, { new: true });
+
+    await logActivity(
+      req,
+      'UPDATE',
+      'FinancialRecord',
+      `${record.eventName}-${record.year}`,
+      { before: originalData, after: record.toObject() },
+      `Financial record for ${record.eventName} ${record.year} updated by ${req.user.name}`
+    );
+
+    res.json(record);
+  } catch (error) {
+    if (error.code === 11000) {
+      return res.status(400).json({ message: 'Financial record already exists for this event and year' });
+    }
+    res.status(500).json({ message: 'Failed to update financial record' });
+  }
+},
+
 
   deleteFinancialRecord: async (req, res) => {
     try {
@@ -162,6 +176,12 @@ export const recordsController = {
         return res.status(400).json({ message: 'Missing english file metadata' });
       }
 
+      // Check for duplicate (eventName + recordYear) before creating to avoid wasting Cloudinary
+      const existing = await EventRecord.findOne({ eventName, recordYear });
+      if (existing) {
+        return res.status(400).json({ message: 'Event record already exists for this event and year' });
+      }
+
       const record = await EventRecord.create({
         eventName,
         recordYear,
@@ -184,6 +204,9 @@ export const recordsController = {
       res.status(201).json(record);
     } catch (error) {
       console.error('Upload error:', error);
+      if (error.code === 11000) {
+        return res.status(400).json({ message: 'Event record already exists for this event and year' });
+      }
       res.status(500).json({ message: 'Failed to upload event record' });
     }
   },
@@ -225,6 +248,16 @@ export const recordsController = {
       if (req.body.fileUrl && !req.body.fileUrlEnglish) updatePayload.fileUrlEnglish = req.body.fileUrl;
       if (req.body.filePublicId && !req.body.filePublicIdEnglish) updatePayload.filePublicIdEnglish = req.body.filePublicId;
 
+      // If eventName or recordYear are changing, check for duplicates
+      const newEventName = updatePayload.eventName || originalRecord.eventName;
+      const newRecordYear = updatePayload.recordYear || originalRecord.recordYear;
+      if ((newEventName !== originalRecord.eventName) || (newRecordYear !== originalRecord.recordYear)) {
+        const conflict = await EventRecord.findOne({ eventName: newEventName, recordYear: newRecordYear });
+        if (conflict && String(conflict._id) !== String(originalRecord._id)) {
+          return res.status(400).json({ message: 'Event record already exists for this event and year' });
+        }
+      }
+
       const record = await EventRecord.findByIdAndUpdate(req.params.id, updatePayload, { new: true });
 
       await logActivity(
@@ -239,6 +272,9 @@ export const recordsController = {
       res.json(record);
     } catch (error) {
       console.error(error);
+      if (error.code === 11000) {
+        return res.status(400).json({ message: 'Event record already exists for this event and year' });
+      }
       res.status(500).json({ message: 'Failed to update event record' });
     }
   },
@@ -292,6 +328,21 @@ export const recordsController = {
       res.json(eventNames);
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch event record names' });
+    }
+  }
+  ,
+
+  // Check if an event record exists for a given eventName+recordYear
+  checkEventRecord: async (req, res) => {
+    try {
+      const { eventName, recordYear } = req.body;
+      if (!eventName || !recordYear) return res.status(400).json({ message: 'Missing eventName or recordYear' });
+      const existing = await EventRecord.findOne({ eventName, recordYear });
+      if (existing) return res.status(400).json({ message: 'Event record already exists for this event and year' });
+      return res.json({ message: 'ok' });
+    } catch (error) {
+      console.error('checkEventRecord error:', error);
+      res.status(500).json({ message: 'Failed to check event record' });
     }
   }
 };

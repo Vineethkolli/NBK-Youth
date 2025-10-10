@@ -15,6 +15,7 @@ router.delete('/financial/:id', auth, checkRole(['developer']), recordsControlle
 // Event Records Routes
 router.get('/event-records', recordsController.getAllEventRecords);
 router.get('/event-records/event-names', recordsController.getUniqueEventRecordNames);
+router.post('/event-records/check', auth, checkRole(['developer']), recordsController.checkEventRecord);
 router.post('/event-records', auth, checkRole(['developer']), recordsController.createEventRecord);
 router.put('/event-records/:id', auth, checkRole(['developer']), recordsController.updateEventRecord);
 router.delete('/event-records/:id', auth, checkRole(['developer']), recordsController.deleteEventRecord);

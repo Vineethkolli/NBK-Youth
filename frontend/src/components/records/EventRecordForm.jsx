@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 import { X, Upload } from 'lucide-react';
 import { uploadDirectToCloudinary } from '../../utils/cloudinaryUpload';
+import axios from 'axios';
+import { toast } from 'react-hot-toast';
+import { API_URL } from '../../utils/config';
 
 const EVENT_OPTIONS = ['Sankranti', 'Ganesh Chaturthi'];
 
@@ -75,6 +78,19 @@ function EventRecordForm({ record, onClose, onSubmit }) {
 
       if (!record && !formData.fileEnglish) {
         throw new Error('Please select an English PDF file');
+      }
+
+      // Check uniqueness before uploading to Cloudinary to avoid wasting storage
+      try {
+        await axios.post(`${API_URL}/api/records/event-records/check`, {
+          eventName: finalEventName,
+          recordYear: formData.recordYear
+        });
+      } catch (err) {
+        const msg = err?.response?.data?.message || 'Event record already exists';
+        toast.error(msg);
+        setIsSubmitting(false);
+        return; // abort without uploading
       }
 
       let englishMeta = null;

@@ -88,7 +88,14 @@ function Records() {
       setShowFinancialForm(false);
       setEditingFinancialRecord(null);
     } catch (error) {
-      throw error;
+      // If duplicate (backend returns 400 with duplicate message), show single toast
+      const msg = error?.response?.data?.message;
+      if (error?.response?.status === 400 && msg) {
+        toast.error(msg);
+        return;
+      }
+      toast.error('Failed to save financial record');
+      console.error(error);
     }
   };
 
@@ -106,7 +113,13 @@ function Records() {
       setShowRecordForm(false);
       setEditingEventRecord(null);
     } catch (error) {
-      throw error;
+      const msg = error?.response?.data?.message;
+      if (error?.response?.status === 400 && msg) {
+        toast.error(msg);
+        return;
+      }
+      toast.error('Failed to save event record');
+      console.error(error);
     }
   };
 

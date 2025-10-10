@@ -28,4 +28,7 @@ const eventRecordSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
+// Compound index for unique event-year combinations (eventName + recordYear)
+eventRecordSchema.index({ eventName: 1, recordYear: 1 }, { unique: true });
+
 export default mongoose.model('EventRecord', eventRecordSchema);
