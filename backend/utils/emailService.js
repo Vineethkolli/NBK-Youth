@@ -2,7 +2,7 @@ import { google } from 'googleapis';
 import dotenv from 'dotenv';
 import { Buffer } from 'buffer';
 
-dotenv.config();
+dotenv.config({ quiet: true }); 
 
 const oAuth2Client = new google.auth.OAuth2(
     process.env.GMAIL_CLIENT_ID,

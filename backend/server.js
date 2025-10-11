@@ -36,7 +36,7 @@ import historiesRoutes from './routes/histories.js';
 import cloudinaryRoutes from './routes/cloudinary.js';
 import cron from 'node-cron';
 
-dotenv.config();
+dotenv.config({ quiet: true }); 
 
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
