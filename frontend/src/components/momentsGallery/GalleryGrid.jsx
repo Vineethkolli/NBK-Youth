@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { ArrowLeft, X, Download, Trash2, Upload, FolderOpen, Edit2, GripHorizontal } from 'lucide-react';
-import MediaGalleryReorder from './GalleryReorder';
+import GalleryReorder from './GalleryReorder';
 import MediaUploadForm from './MediaUploadForm';
-import MediaDriveForm from './CopyToServiceDriveForm';
+import CopyToServiceDriveForm from './CopyToServiceDriveForm';
 import { useAuth } from '../../context/AuthContext'; 
 
-function MediaGallery({
+function GalleryGrid({
   moment,
   onClose,
   onMediaClick,
@@ -141,7 +141,7 @@ function MediaGallery({
       </div>
 
       {isReorderMode ? (
-        <MediaGalleryReorder
+        <GalleryReorder
           mediaFiles={localMediaFiles}
           onSave={handleMediaOrderSave}
           onCancel={() => setIsReorderMode(false)}
@@ -228,7 +228,7 @@ function MediaGallery({
 
       {/* Drive Form */}
       {canManageMedia && showDriveForm && (
-        <MediaDriveForm
+        <CopyToServiceDriveForm
           momentTitle={moment.title}
           onClose={() => setShowDriveForm(false)}
           onSubmit={handleAddDriveMedia}
@@ -239,4 +239,4 @@ function MediaGallery({
   );
 }
 
-export default MediaGallery;
+export default GalleryGrid;
