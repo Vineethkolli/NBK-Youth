@@ -4,6 +4,7 @@ import MaintenanceMode from '../components/adminPanel/MaintenanceMode';
 import RoleStatistics from '../components/adminPanel/Stats';
 import BannerManager from '../components/adminPanel/BannerManager';
 import EventLabelManager from '../components/adminPanel/EventLabelManager';
+import ScheduledNotifications from '../components/adminPanel/ScheduledNotifications';
 
 function AdminPanel() {
   const { user } = useAuth();
@@ -23,6 +24,8 @@ function AdminPanel() {
 
       <PaymentDetails />
 
+      <ScheduledNotifications />
+      
       <RoleStatistics />
 
     </div>

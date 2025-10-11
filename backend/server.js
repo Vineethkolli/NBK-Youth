@@ -20,6 +20,7 @@ import homepageRoutes from './routes/homepage.js';
 import momentsRoutes from './routes/moments.js';
 import gameRoutes from './routes/games.js';
 import notificationRoutes from './routes/notifications.js';
+import scheduledNotificationRoutes from './routes/scheduledNotifications.js';
 import { createDefaultDeveloper } from './utils/setupDefaults.js';
 import maintenanceRoutes from './routes/maintenance.js';
 import estimationRoutes from './routes/estimation.js';
@@ -33,6 +34,7 @@ import recordsRoutes from './routes/records.js';
 import snapshotRoutes from './routes/snapshots.js';
 import historiesRoutes from './routes/histories.js';
 import cloudinaryRoutes from './routes/cloudinary.js';
+import cron from 'node-cron';
 
 dotenv.config();
 
@@ -79,6 +81,7 @@ app.use('/api/homepage', homepageRoutes);
 app.use('/api/moments', momentsRoutes);
 app.use('/api/games', gameRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/scheduled-notifications', scheduledNotificationRoutes);
 app.use('/api/maintenance', maintenanceRoutes);
 app.use('/api/estimation', estimationRoutes);
 app.use('/api/banners', bannerRoutes);
@@ -104,6 +107,21 @@ mongoose.connect(process.env.MONGODB_URI)
     createDefaultDeveloper();
   })
   .catch((err) => console.error('MongoDB connection error:', err));
+
+
+// Notification Scheduler run at 5:15 AM IST every day
+import { processDueNotifications } from './controllers/scheduledNotificationController.js';
+cron.schedule('58 10 * * *', async () => {
+  try {
+    console.log('Running scheduled notification job (local server time)');
+    await processDueNotifications();
+  } catch (err) {
+    console.error('Scheduled job error:', err);
+  }
+}, {
+  timezone: 'Asia/Kolkata'
+});
+
 
 // Server start
 const PORT = process.env.PORT || 5000;
