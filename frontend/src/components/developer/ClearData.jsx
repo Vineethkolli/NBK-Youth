@@ -17,7 +17,7 @@ function ClearData() {
   const activityEntities = [
     'All', 'User', 'Income', 'Expense', 'Payment', 'Vibe', 'Moment', 'Game', 'Banner', 'EstimatedIncome', 'EstimatedExpense',
     'HiddenProfile', 'Slide', 'Event', 'Notification', 'PreviousYear', 'MaintenanceMode', 'DeveloperOptions', 'Committee',
-    'PaymentDetails', 'EventLabel', 'LockSettings', 'FinancialRecord', 'EventRecord', 'Snapshot', 'History'
+    'PaymentDetails', 'EventLabel', 'LockSettings', 'FinancialRecord', 'EventRecord', 'Snapshot', 'History', 'ScheduledNotification'
   ];
 
   const openConfirmDialog = (type) => {
