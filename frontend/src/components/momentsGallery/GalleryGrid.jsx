@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { ArrowLeft, X, Download, Trash2, Upload, FolderOpen, Edit2, GripHorizontal } from 'lucide-react';
-import MediaGalleryReorder from './MediaGalleryReorder';
+import MediaGalleryReorder from './GalleryReorder';
 import MediaUploadForm from './MediaUploadForm';
-import MediaDriveForm from './MediaDriveForm';
+import MediaDriveForm from './CopyToServiceDriveForm';
 import { useAuth } from '../../context/AuthContext'; 
 
 function MediaGallery({

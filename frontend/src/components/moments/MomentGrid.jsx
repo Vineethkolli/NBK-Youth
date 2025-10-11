@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Trash2, Edit2, Check, ChevronRight } from 'lucide-react';
-import MediaPreview from './MediaPreview.jsx';
+import MediaPreview from './DriveMediaPreview.jsx';
 import MediaGallery from './MediaGallery.jsx';
-import MediaLightbox from './MediaLightbox.jsx';
+import MediaLightbox from '../momentsGallery/Lightbox.jsx';
 
 function MomentGrid({
   moments,
