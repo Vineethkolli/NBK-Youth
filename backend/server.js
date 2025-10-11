@@ -111,7 +111,7 @@ mongoose.connect(process.env.MONGODB_URI)
 
 // Notification Scheduler run at 5:15 AM IST every day
 import { processDueNotifications } from './controllers/scheduledNotificationController.js';
-cron.schedule('30 11 * * *', async () => {
+cron.schedule('15 5 * * *', async () => {
   try {
     console.log('Running scheduled notification job (local server time)');
     await processDueNotifications();
