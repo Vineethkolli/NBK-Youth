@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { ArrowLeft, X, ChevronLeft, ChevronRight, Download } from 'lucide-react';
 
-function MediaLightbox({
+function Lightbox({
   mediaFiles,
   currentIndex,
   momentTitle,
@@ -198,4 +198,4 @@ function MediaLightbox({
   );
 }
 
-export default MediaLightbox;
+export default Lightbox;

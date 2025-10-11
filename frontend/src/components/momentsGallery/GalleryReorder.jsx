@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { GripHorizontal, ArrowUp, ArrowDown } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 
-function MediaGalleryReorder({ mediaFiles, onSave, onCancel }) {
+function GalleryReorder({ mediaFiles, onSave, onCancel }) {
   const [localMediaFiles, setLocalMediaFiles] = useState([]);
   const [hasChanges, setHasChanges] = useState(false);
 
@@ -162,4 +162,4 @@ function MediaGalleryReorder({ mediaFiles, onSave, onCancel }) {
   );
 }
 
-export default MediaGalleryReorder;
+export default GalleryReorder;

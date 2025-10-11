@@ -45,7 +45,7 @@ function Moments() {
           endpoint = `${API_URL}/api/moments/drive`;
           successMessage = 'Drive media added successfully. Ensure View access is enabled.';
           break;
-        case 'drive-media':
+        case 'copy-service-drive':
           endpoint = `${API_URL}/api/moments/copy-to-service-drive`;
           successMessage = 'Drive media copied and added successfully. Ensure View access is enabled.';
           break;
@@ -78,7 +78,7 @@ function Moments() {
     }
   };
 
-  const handleDelete = async (momentId) => {
+  const handleDeleteMoment = async (momentId) => {
     if (!window.confirm('Are you sure you want to delete this moment?')) return;
 
     const promise = axios.delete(`${API_URL}/api/moments/${momentId}`);
@@ -92,7 +92,7 @@ function Moments() {
     });
   };
 
-  const handleDeleteMediaFile = async (momentId, mediaId) => {
+  const handleDeleteGallery = async (momentId, mediaId) => {
     const promise = axios.delete(`${API_URL}/api/moments/${momentId}/gallery/${mediaId}`);
     await toast.promise(promise, {
       loading: 'Deleting...',
@@ -234,7 +234,7 @@ function Moments() {
             Upload Media
           </button>
           <button
-            onClick={() => openForm('drive-media')}
+            onClick={() => openForm('copy-service-drive')}
             className="btn-primary"
           >
             <FolderOpen className="h-4 w-4 mr-2" />
@@ -280,8 +280,8 @@ function Moments() {
         <MomentGrid
           moments={moments}
           isEditMode={isEditMode}
-          onDelete={handleDelete}
-          onDeleteMediaFile={handleDeleteMediaFile}
+          onDelete={handleDeleteMoment}
+          onDeleteMediaFile={handleDeleteGallery}
           onUpdateTitle={handleUpdateTitle}
           onAddMediaToMoment={handleAddMediaToMoment}
           onAddDriveMediaToMoment={handleAddDriveMediaToMoment}

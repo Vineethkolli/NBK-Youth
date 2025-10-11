@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Trash2, Edit2, Check, ChevronRight } from 'lucide-react';
-import MediaPreview from './DriveMediaPreview.jsx';
-import MediaGallery from './MediaGallery.jsx';
-import MediaLightbox from '../momentsGallery/Lightbox.jsx';
+import DriveMediaPreview from './DriveMediaPreview.jsx';
+import GalleryGrid from '../momentsGallery/GalleryGrid.jsx';
+import Lightbox from '../momentsGallery/Lightbox.jsx';
 
 function MomentGrid({
   moments,
@@ -149,7 +149,7 @@ function MomentGrid({
                 />
               ) : moment.type === 'drive' ? (
                 <div className="relative w-full h-full">
-                  <MediaPreview
+                  <DriveMediaPreview
                     url={moment.url}
                     type={moment.url && moment.url.match(/\.(jpeg|jpg|gif|png)$/i) ? 'image' : 'video'}
                     title={moment.title}
@@ -208,7 +208,7 @@ function MomentGrid({
       </div>
 
       {expandedMoment && (
-        <MediaGallery
+        <GalleryGrid
           moment={expandedMoment}
           onClose={() => window.history.back()}
           onMediaClick={(mediaFiles, index) => openLightbox(mediaFiles, index, expandedMoment.title)}
@@ -219,7 +219,7 @@ function MomentGrid({
         />
       )}
 
-      {lightboxData && <MediaLightbox {...lightboxData} />}
+      {lightboxData && <Lightbox {...lightboxData} />}
     </>
   );
 }

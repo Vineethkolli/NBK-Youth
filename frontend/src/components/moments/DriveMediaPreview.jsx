@@ -1,6 +1,6 @@
 import { Download } from 'lucide-react';
 
-function MediaPreview({ url, type, title }) {
+function DriveMediaPreview({ url, type, title }) {
   // gets the thumbnail URL for images.
   const getImageUrl = (url) => {
     const fileId = url.match(/[?&]id=([^&]+)/)?.[1];
@@ -40,4 +40,4 @@ function MediaPreview({ url, type, title }) {
   );
 }
 
-export default MediaPreview;
+export default DriveMediaPreview;

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { X, FolderOpen, Upload } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
-function MediaDriveForm({ momentTitle, onClose, onSubmit }) {
+function CopyToServiceDriveForm({ momentTitle, onClose, onSubmit }) {
   const [driveUrl, setDriveUrl] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -90,4 +90,4 @@ function MediaDriveForm({ momentTitle, onClose, onSubmit }) {
   );
 }
 
-export default MediaDriveForm;
+export default CopyToServiceDriveForm;
