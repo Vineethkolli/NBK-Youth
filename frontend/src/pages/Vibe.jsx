@@ -202,6 +202,23 @@ function Vibe() {
       )}
 
       <MusicPlayer />
+      
+      {/* Ad free Box */}
+      <div className="flex justify-center">
+  <div className="w-full max-w-2xl text-center">
+    <div className="rounded-2xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 p-[1px] shadow-lg">
+      <div className="bg-white dark:bg-gray-900 rounded-2xl py-4 px-3 flex flex-col items-center justify-center">
+        <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-indigo-600 to-pink-500 bg-clip-text text-transparent leading-tight pb-1">
+          Enjoy Ad-Free Music 🎧
+        </h2>
+        <p className="mt-2 text-gray-600 dark:text-gray-300 text-base md:text-lg">
+          Feel the rhythm, Skip the noise
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
     </div>
   );
 }
