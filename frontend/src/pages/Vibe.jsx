@@ -211,7 +211,7 @@ function Vibe() {
         <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-indigo-600 to-pink-500 bg-clip-text text-transparent leading-tight pb-1">
           Enjoy Ad-Free Music 🎧
         </h2>
-        <p className="mt-2 text-gray-600 text-base md:text-lg">
+        <p className="mt-2 text-gray-700 text-base md:text-lg">
           Feel the rhythm, Skip the noise
         </p>
       </div>
