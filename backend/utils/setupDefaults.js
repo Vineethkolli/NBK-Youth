@@ -2,7 +2,7 @@ import User from '../models/User.js';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 
-dotenv.config();
+dotenv.config({ quiet: true }); 
 
 export const createDefaultDeveloper = async () => {
   try {

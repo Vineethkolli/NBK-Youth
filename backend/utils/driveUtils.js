@@ -5,7 +5,7 @@ import { Readable } from 'stream';
 const drive = google.drive({
   version: 'v3',
   auth: new google.auth.GoogleAuth({
-    credentials: JSON.parse(process.env.GOOGLE_DRIVE_CREDENTIALS),
+    key: JSON.parse(process.env.GOOGLE_DRIVE_CREDENTIALS),
     scopes: ['https://www.googleapis.com/auth/drive'],
   }),
 });
