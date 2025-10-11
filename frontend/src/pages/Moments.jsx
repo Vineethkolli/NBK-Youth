@@ -46,7 +46,7 @@ function Moments() {
           successMessage = 'Drive media added successfully. Ensure View access is enabled.';
           break;
         case 'drive-media':
-          endpoint = `${API_URL}/api/moments/drive-media`;
+          endpoint = `${API_URL}/api/moments/copy-to-service-drive`;
           successMessage = 'Drive media copied and added successfully. Ensure View access is enabled.';
           break;
         case 'upload':
@@ -93,7 +93,7 @@ function Moments() {
   };
 
   const handleDeleteMediaFile = async (momentId, mediaId) => {
-    const promise = axios.delete(`${API_URL}/api/moments/${momentId}/media/${mediaId}`);
+    const promise = axios.delete(`${API_URL}/api/moments/${momentId}/gallery/${mediaId}`);
     await toast.promise(promise, {
       loading: 'Deleting...',
       success: () => {
@@ -139,7 +139,7 @@ function Moments() {
 
   const handleMediaOrderSave = async (momentId, reorderedMediaFiles) => {
     try {
-      await axios.put(`${API_URL}/api/moments/${momentId}/media-order`, { mediaFiles: reorderedMediaFiles });
+      await axios.put(`${API_URL}/api/moments/${momentId}/gallery/order`, { mediaFiles: reorderedMediaFiles });
       setMoments(prevMoments =>
         prevMoments.map(moment =>
           moment._id === momentId ? { ...moment, mediaFiles: reorderedMediaFiles } : moment
@@ -162,7 +162,7 @@ function Moments() {
         }
       });
 
-      const response = await axios.post(`${API_URL}/api/moments/${momentId}/media`, data, {
+      const response = await axios.post(`${API_URL}/api/moments/${momentId}/gallery/upload`, data, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
 
@@ -189,7 +189,7 @@ function Moments() {
 
   const handleAddDriveMediaToMoment = async (momentId, driveUrl) => {
     try {
-      const response = await axios.post(`${API_URL}/api/moments/${momentId}/drive-media`, {
+      const response = await axios.post(`${API_URL}/api/moments/${momentId}/gallery/copy-to-service-drive`, {
         url: driveUrl
       });
 

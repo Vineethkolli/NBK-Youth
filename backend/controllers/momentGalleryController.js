@@ -9,8 +9,8 @@ import {
   getFilesFromFolder
 } from '../utils/driveUtils.js'; 
 
-export const momentMediaController = {
-  updateMediaOrder: async (req, res) => {
+export const galleryController = {
+  updateGalleryOrder: async (req, res) => {
     try {
       const { momentId } = req.params;
       const { mediaFiles } = req.body;
@@ -38,7 +38,7 @@ export const momentMediaController = {
     }
   },
 
-  addMediaToMoment: async (req, res) => {
+  uploadMediaGallery: async (req, res) => {
     try {
       const { momentId } = req.params;
       const files = req.files;
@@ -120,7 +120,7 @@ export const momentMediaController = {
     }
   },
 
-  addDriveMediaToMoment: async (req, res) => {
+  addCopyToServiceDriveGallery: async (req, res) => {
     try {
       const { momentId } = req.params;
       const { url } = req.body;
@@ -216,7 +216,7 @@ export const momentMediaController = {
     }
   },
   
-  deleteMediaFile: async (req, res) => {
+  deleteGalleryFile: async (req, res) => {
     try {
       const { momentId, mediaId } = req.params;
 

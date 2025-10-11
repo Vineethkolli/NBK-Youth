@@ -52,7 +52,7 @@ export const momentController = {
     }
   },
 
-  addDriveLinkMoment: async (req, res) => {
+  addDriveMoment: async (req, res) => {
     try {
       const { title, url } = req.body;
       const maxOrder = await Moment.findOne().sort('-order');
@@ -162,7 +162,7 @@ export const momentController = {
     }
   },
 
-  addDriveMediaMoment: async (req, res) => {
+  addCopyToServiceDriveMoment: async (req, res) => {
     try {
       const { title, url } = req.body;
       
@@ -283,7 +283,7 @@ export const momentController = {
     }
   },
 
-  updateTitle: async (req, res) => {
+  updateMomentTitle: async (req, res) => {
     try {
       const { id } = req.params;
       const { title } = req.body;
