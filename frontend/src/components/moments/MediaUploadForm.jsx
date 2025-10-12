@@ -10,22 +10,27 @@ export default function MediaUploadForm({ onSubmit, onClose }) {
   const [fileInputKey, setFileInputKey] = useState(Date.now());
 
   const handleFileChange = (e) => {
-    const selected = Array.from(e.target.files);
-    if (selected.length === 0) return;
+  const selected = Array.from(e.target.files);
+  if (selected.length === 0) return;
 
-    const totalSize = selected.reduce((sum, file) => sum + file.size, 0);
-    if (totalSize > 1024 * 1024 * 1024) {
-      toast.error('Total file size should be less than 1GB');
-      return;
-    }
+  if (selected.length > 20) {
+    toast.error('You can upload a maximum of 20 files at a time');
+    return;
+  }
 
-    setFiles(selected);
-    setPreviews(selected.map(file => ({
-      file,
-      url: URL.createObjectURL(file),
-      type: file.type.startsWith('image/') ? 'image' : 'video'
-    })));
-  };
+  const totalSize = selected.reduce((sum, file) => sum + file.size, 0);
+  if (totalSize > 1024 * 1024 * 1024) {
+    toast.error('Total file size should be less than 1GB');
+    return;
+  }
+
+  setFiles(selected);
+  setPreviews(selected.map(file => ({
+    file,
+    url: URL.createObjectURL(file),
+    type: file.type.startsWith('image/') ? 'image' : 'video'
+  })));
+};
 
   const removeFile = (index) => {
     URL.revokeObjectURL(previews[index].url);
@@ -75,7 +80,7 @@ export default function MediaUploadForm({ onSubmit, onClose }) {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700">Upload Files *</label>
+        <label className="block text-sm font-medium text-gray-700">Upload Files * (Max 20 files)</label>
         <input
           key={fileInputKey}
           type="file"

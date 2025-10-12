@@ -17,8 +17,8 @@ function UploadToCollectionForm({ collection, onClose, onSuccess }) {
     const files = Array.from(e.target.files);
     if (files.length === 0) return;
 
-    if (files.length > 10) {
-      toast.error('Maximum 10 files can be selected at once');
+    if (files.length > 15) {
+      toast.error('Maximum 15 files can be selected at once');
       return;
     }
 
@@ -163,7 +163,7 @@ function UploadToCollectionForm({ collection, onClose, onSuccess }) {
 
           <div>
             <label className="block text-sm font-medium text-gray-700">
-              Audio Files * (Max 10)
+              Audio Files * (Max 15 files)
             </label>
             <input
               key={fileInputKey}

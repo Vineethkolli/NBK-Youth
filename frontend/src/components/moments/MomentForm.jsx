@@ -1,4 +1,4 @@
-import { X, Youtube, Upload, FolderOpen } from 'lucide-react';
+import { X, Youtube, Upload, FolderOpen, Copy } from 'lucide-react';
 import YoutubeUploadForm from './YoutubeUploadForm';
 import DriveUploadForm from './DriveUploadForm';
 import CopyToServiceDriveForm from './CopyToServiceDriveForm';
@@ -12,7 +12,7 @@ function MomentForm({ type, onClose, onSubmit }) {
       case 'drive':
         return 'Add Drive Link';
       case 'copy-service-drive':
-        return 'Add Drive Media';
+        return 'Copy From Drive';
       case 'upload':
         return 'Upload Media';
       default:
@@ -25,8 +25,9 @@ function MomentForm({ type, onClose, onSubmit }) {
       case 'youtube':
         return <Youtube className="h-5 w-5 mr-2" />;
       case 'drive':
-      case 'copy-service-drive':
         return <FolderOpen className="h-5 w-5 mr-2" />;
+      case 'copy-service-drive':
+        return <Copy className="h-5 w-5 mr-2" />;
       case 'upload':
       default:
         return <Upload className="h-5 w-5 mr-2" />;
