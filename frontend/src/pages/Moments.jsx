@@ -51,7 +51,7 @@ if (formType === 'drive') {
   
   toast.success(
     isFolder 
-      ? 'Drive folder added successfully. All files metadata stored.' 
+      ? 'Drive folder added successfully.' 
       : 'Drive media added successfully. Ensure View access is enabled.'
   );
   
