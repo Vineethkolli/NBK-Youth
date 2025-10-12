@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FolderOpen } from 'lucide-react';
+import { Upload } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 export default function DriveUploadForm({ onSubmit, onClose }) {
@@ -19,8 +19,7 @@ export default function DriveUploadForm({ onSubmit, onClose }) {
     setIsSubmitting(true);
     try {
       await onSubmit({ title, url });
-      toast.success('Drive file added successfully'); 
-      onClose(); 
+      onClose();
     } catch (error) {
       toast.error(error.message || 'Failed to add Drive file');
     } finally {
@@ -58,11 +57,14 @@ export default function DriveUploadForm({ onSubmit, onClose }) {
       <button
         type="submit"
         disabled={isSubmitting}
-        className="w-full flex justify-center py-2 px-4 border border-transparent 
+        className="w-full flex justify-center items-center gap-2 py-2 px-4 border border-transparent 
           rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 
           hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 
           focus:ring-indigo-500 disabled:opacity-50"
       >
+        <Upload
+          className={`h-5 w-5 ${isSubmitting ? 'animate-spin' : ''}`}
+        />
         {isSubmitting ? 'Adding...' : 'Add File'}
       </button>
     </form>

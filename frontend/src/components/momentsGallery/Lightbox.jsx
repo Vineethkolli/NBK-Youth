@@ -5,8 +5,7 @@ function Lightbox({
   mediaFiles,
   currentIndex,
   momentTitle,
-  onClose,
-  onDelete
+  onClose
 }) {
   const [activeIndex, setActiveIndex] = useState(currentIndex);
   const [touchStart, setTouchStart] = useState(null);

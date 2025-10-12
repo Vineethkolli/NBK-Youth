@@ -19,18 +19,18 @@ function Moments() {
 
   useEffect(() => {
     fetchMoments();
-  }, []); // Fetch only on initial mount
+  }, []);
 
   const fetchMoments = async () => {
     try {
       const { data } = await axios.get(`${API_URL}/api/moments`);
       setMoments(data);
-    } catch (error) {
+    } catch {
       toast.error('Failed to fetch moments');
     }
   };
 
-  const handleFormSubmit = async (formData) => {
+  const handleMomentFormSubmit = async (formData) => {
     try {
       let endpoint = '';
       let successMessage = '';
@@ -47,7 +47,7 @@ function Moments() {
           break;
         case 'copy-service-drive':
           endpoint = `${API_URL}/api/moments/copy-to-service-drive`;
-          successMessage = 'Drive media copied and added successfully. Ensure View access is enabled.';
+          successMessage = 'Drive media copied and added successfully';
           break;
         case 'upload':
           endpoint = `${API_URL}/api/moments/upload`;
@@ -64,17 +64,17 @@ function Moments() {
       }
 
       await axios.post(endpoint, formData);
-      
+
       if (hasVideo) {
         toast.success('For videos, processing may take a few minutes before playback is available.', {
           duration: 4000,
         });
       }
       toast.success(successMessage);
-
-      fetchMoments(); // Refresh after creating a new moment
+      fetchMoments();
     } catch (error) {
-      throw error;
+      console.error(error);
+      toast.error('Failed to submit moment');
     }
   };
 
@@ -85,26 +85,24 @@ function Moments() {
     await toast.promise(promise, {
       loading: 'Deleting...',
       success: () => {
-        setMoments(prevMoments => prevMoments.filter(m => m._id !== momentId));
-        return 'Media deleted successfully';
+        setMoments((prev) => prev.filter((m) => m._id !== momentId));
+        return 'Moment deleted successfully';
       },
       error: 'Failed to delete moment',
     });
   };
 
-  const handleDeleteGallery = async (momentId, mediaId) => {
+  const handleDeleteGalleryFile = async (momentId, mediaId) => {
     const promise = axios.delete(`${API_URL}/api/moments/${momentId}/gallery/${mediaId}`);
     await toast.promise(promise, {
       loading: 'Deleting...',
       success: () => {
-        setMoments(prevMoments =>
-          prevMoments.map(moment => {
-            if (moment._id === momentId) {
-              const updatedMediaFiles = moment.mediaFiles.filter(mf => mf._id !== mediaId);
-              return { ...moment, mediaFiles: updatedMediaFiles };
-            }
-            return moment;
-          })
+        setMoments((prev) =>
+          prev.map((moment) =>
+            moment._id === momentId
+              ? { ...moment, mediaFiles: moment.mediaFiles.filter((mf) => mf._id !== mediaId) }
+              : moment
+          )
         );
         return 'Media deleted successfully';
       },
@@ -112,66 +110,62 @@ function Moments() {
     });
   };
 
-  const handleUpdateTitle = async (id, newTitle) => {
+  const handleUpdateMomentTitle = async (id, newTitle) => {
     try {
       await axios.patch(`${API_URL}/api/moments/${id}/title`, { title: newTitle });
-      setMoments(prevMoments =>
-          prevMoments.map(moment =>
-              moment._id === id ? { ...moment, title: newTitle } : moment
-          )
+      setMoments((prev) =>
+        prev.map((moment) => (moment._id === id ? { ...moment, title: newTitle } : moment))
       );
-      toast.success('Media updated successfully');
-    } catch (error) {
+      toast.success('Title updated successfully');
+    } catch {
       toast.error('Failed to update title');
     }
   };
 
-  const handleOrderSave = async (reorderedMoments) => {
+  const handleMomentOrderSave = async (reorderedMoments) => {
     try {
       await axios.put(`${API_URL}/api/moments/order`, { moments: reorderedMoments });
-      toast.success('Order updated successfully');
       setMoments(reorderedMoments);
       setIsReorderMode(false);
-    } catch (error) {
+      toast.success('Order updated successfully');
+    } catch {
       toast.error('Failed to update order');
     }
   };
 
-  const handleMediaOrderSave = async (momentId, reorderedMediaFiles) => {
+  const handleGalleryOrderSave = async (momentId, reorderedMediaFiles) => {
     try {
-      await axios.put(`${API_URL}/api/moments/${momentId}/gallery/order`, { mediaFiles: reorderedMediaFiles });
-      setMoments(prevMoments =>
-        prevMoments.map(moment =>
+      await axios.put(`${API_URL}/api/moments/${momentId}/gallery/order`, {
+        mediaFiles: reorderedMediaFiles,
+      });
+      setMoments((prev) =>
+        prev.map((moment) =>
           moment._id === momentId ? { ...moment, mediaFiles: reorderedMediaFiles } : moment
         )
       );
       toast.success('Media order updated successfully');
-    } catch (error) {
+    } catch {
       toast.error('Failed to update media order');
     }
   };
 
-  const handleAddMediaToMoment = async (momentId, files) => {
+  const handleUploadMediaInGallery = async (momentId, files) => {
     try {
       const data = new FormData();
       let hasVideo = false;
       files.forEach((file) => {
         data.append('files', file);
-        if (file.type.startsWith('video/')) {
-          hasVideo = true;
-        }
+        if (file.type.startsWith('video/')) hasVideo = true;
       });
 
-      const response = await axios.post(`${API_URL}/api/moments/${momentId}/gallery/upload`, data, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      const { data: updatedMoment } = await axios.post(
+        `${API_URL}/api/moments/${momentId}/gallery/upload`,
+        data,
+        { headers: { 'Content-Type': 'multipart/form-data' } }
+      );
 
-      const updatedMoment = response.data;
-
-      setMoments(prevMoments =>
-        prevMoments.map(moment =>
-          moment._id === momentId ? updatedMoment : moment
-        )
+      setMoments((prev) =>
+        prev.map((moment) => (moment._id === momentId ? updatedMoment : moment))
       );
 
       if (hasVideo) {
@@ -179,32 +173,30 @@ function Moments() {
           duration: 4000,
         });
       }
-      toast.success('Media uploaded successfully.');
-
+      toast.success('Media uploaded successfully');
       return updatedMoment;
     } catch (error) {
-      throw error;
+      console.error(error);
+      toast.error('Failed to upload media');
     }
   };
 
-  const handleAddDriveMediaToMoment = async (momentId, driveUrl) => {
+  const handleCopyToServiceDriveGallery = async (momentId, driveUrl) => {
     try {
-      const response = await axios.post(`${API_URL}/api/moments/${momentId}/gallery/copy-to-service-drive`, {
-        url: driveUrl
-      });
-
-      const updatedMoment = response.data;
-
-      setMoments(prevMoments =>
-        prevMoments.map(moment =>
-          moment._id === momentId ? updatedMoment : moment
-        )
+      const { data: updatedMoment } = await axios.post(
+        `${API_URL}/api/moments/${momentId}/gallery/copy-to-service-drive`,
+        { url: driveUrl }
       );
 
-      toast.success('Drive media added successfully.');
+      setMoments((prev) =>
+        prev.map((moment) => (moment._id === momentId ? updatedMoment : moment))
+      );
+
+      toast.success('Drive media added successfully');
       return updatedMoment;
     } catch (error) {
-      throw error;
+      console.error(error);
+      toast.error('Failed to copy drive media');
     }
   };
 
@@ -219,82 +211,61 @@ function Moments() {
     <div className="max-w-7xl mx-auto sm:px-6 lg:px-0 py-0">
       {isPrivilegedUser && (
         <div className="flex justify-start items-center mb-6 space-x-3">
-          <button
-            onClick={() => openForm('youtube')}
-            className="btn-primary"
-          >
-            <Youtube className="h-4 w-4 mr-2" />
-            Add YouTube
+          <button onClick={() => openForm('youtube')} className="btn-primary">
+            <Youtube className="h-4 w-4 mr-2" /> Add YouTube
           </button>
-           <button
-            onClick={() => openForm('upload')}
-            className="btn-primary"
-          >
-            <Upload className="h-4 w-4 mr-2" />
-            Upload Media
+          <button onClick={() => openForm('upload')} className="btn-primary">
+            <Upload className="h-4 w-4 mr-2" /> Upload Media
           </button>
-          <button
-            onClick={() => openForm('copy-service-drive')}
-            className="btn-primary"
-          >
-            <FolderOpen className="h-4 w-4 mr-2" />
-            Drive Media
+          <button onClick={() => openForm('copy-service-drive')} className="btn-primary">
+            <FolderOpen className="h-4 w-4 mr-2" /> Drive Media
           </button>
           <button
             onClick={() => setIsReorderMode(true)}
             disabled={isReorderMode}
             className={`btn-secondary ${isReorderMode ? 'opacity-50 cursor-not-allowed' : ''}`}
-            title={isReorderMode ? 'Reorder is active' : 'Enter reorder mode'}
           >
-            <GripHorizontal className="h-4 w-4 mr-2" />
-            Reorder Mode
+            <GripHorizontal className="h-4 w-4 mr-2" /> Reorder Mode
           </button>
           <button
-            onClick={() => { setIsEditMode(!isEditMode); setIsReorderMode(false); }}
+            onClick={() => {
+              setIsEditMode(!isEditMode);
+              setIsReorderMode(false);
+            }}
             className={`btn-secondary ${isEditMode ? 'bg-red-100' : ''}`}
           >
-            <Edit2 className="h-4 w-4 mr-2" />
-            {isEditMode ? 'Done' : 'Edit Mode'}
+            <Edit2 className="h-4 w-4 mr-2" /> {isEditMode ? 'Done' : 'Edit Mode'}
           </button>
-           <button
-            onClick={() => openForm('drive')}
-            className="btn-primary"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Add Drive
+          <button onClick={() => openForm('drive')} className="btn-primary">
+            <Plus className="h-4 w-4 mr-2" /> Add Drive
           </button>
-
         </div>
       )}
-      
-      <WatchMore/>
+
+      <WatchMore />
 
       {isReorderMode ? (
         <MomentReorder
           moments={moments}
-          onSave={handleOrderSave}
+          onSave={handleMomentOrderSave}
           onCancel={() => setIsReorderMode(false)}
-          onMediaOrderSave={handleMediaOrderSave}
+          onGalleryOrderSave={handleGalleryOrderSave}
         />
       ) : (
         <MomentGrid
           moments={moments}
           isEditMode={isEditMode}
-          onDelete={handleDeleteMoment}
-          onDeleteMediaFile={handleDeleteGallery}
-          onUpdateTitle={handleUpdateTitle}
-          onAddMediaToMoment={handleAddMediaToMoment}
-          onAddDriveMediaToMoment={handleAddDriveMediaToMoment}
-          onMediaOrderSave={handleMediaOrderSave}
+          onDeleteMoment={handleDeleteMoment}
+          onDeleteGalleryFile={handleDeleteGalleryFile}
+          onUpdateMomentTitle={handleUpdateMomentTitle}
+          onUploadMediaInGallery={handleUploadMediaInGallery}
+          onCopyToServiceDriveGallery={handleCopyToServiceDriveGallery}
+          onGalleryOrderSave={handleGalleryOrderSave}
         />
       )}
 
       {showForm && (
-        <MomentForm
-          type={formType}
-          onClose={() => setShowForm(false)}
-          onSubmit={handleFormSubmit}
-        />
+        <MomentForm type={formType} onClose={() => setShowForm(false)} onSubmit={handleMomentFormSubmit} />
       )}
     </div>
   );
