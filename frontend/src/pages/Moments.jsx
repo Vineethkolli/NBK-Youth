@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Edit2, Youtube, Upload, FolderOpen, GripHorizontal, Plus } from 'lucide-react';
+import { Edit2, Youtube, Upload, FolderOpen, Copy, GripHorizontal, Plus } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { API_URL } from '../utils/config';
@@ -218,7 +218,7 @@ function Moments() {
             <Upload className="h-4 w-4 mr-2" /> Upload Media
           </button>
           <button onClick={() => openForm('copy-service-drive')} className="btn-primary">
-            <FolderOpen className="h-4 w-4 mr-2" /> Drive Media
+            <Copy className="h-4 w-4 mr-2" /> Copy Drive
           </button>
           <button
             onClick={() => setIsReorderMode(true)}
@@ -237,7 +237,7 @@ function Moments() {
             <Edit2 className="h-4 w-4 mr-2" /> {isEditMode ? 'Done' : 'Edit Mode'}
           </button>
           <button onClick={() => openForm('drive')} className="btn-primary">
-            <Plus className="h-4 w-4 mr-2" /> Add Drive
+            <FolderOpen className="h-4 w-4 mr-2" /> Add Drive
           </button>
         </div>
       )}

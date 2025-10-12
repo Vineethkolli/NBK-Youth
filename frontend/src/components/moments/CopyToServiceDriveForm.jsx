@@ -57,9 +57,10 @@ export default function CopyToServiceDriveForm({ onSubmit, onClose }) {
           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
         />
         <div className="mt-2 text-xs text-gray-500 space-y-1">
-          <p>• For folders: All media files in the folder will be added</p>
-          <p>• For single files: Only that file will be added</p>
-          <p>• Make sure the file/folder has View access for everyone</p>
+          <p>• Folders: All media files will be added to My Storage</p>
+          <p>• Single files: Only the selected file will be added</p>
+          <p>• Ensure the file/folder has public View access</p>
+          <p>• You can delete from your Drive after uploading</p>
         </div>
       </div>
 
