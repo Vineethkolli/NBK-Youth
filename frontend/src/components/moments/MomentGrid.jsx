@@ -7,12 +7,12 @@ import Lightbox from '../momentsGallery/Lightbox.jsx';
 function MomentGrid({
   moments,
   isEditMode,
-  onDelete,
-  onDeleteMediaFile,
-  onUpdateTitle,
-  onAddMediaToMoment,
-  onAddDriveMediaToMoment,
-  onMediaOrderSave
+  onDeleteMoment,
+  onDeleteGalleryFile,
+  onUpdateMomentTitle,
+  onUploadMediaInGallery,
+  onCopyToServiceDriveGallery,
+  onGalleryOrderSave
 }) {
   const [editingTitleId, setEditingTitleId] = useState(null);
   const [tempTitle, setTempTitle] = useState('');
@@ -30,13 +30,12 @@ function MomentGrid({
     return () => window.removeEventListener('popstate', handlePopState);
   }, [expandedMoment, lightboxData]);
   
-  // If the expandedMoment is updated in the parent state, the local expandedMoment state reflects that change.
   useEffect(() => {
     if (expandedMoment) {
-        const updatedMoment = moments.find(m => m._id === expandedMoment._id);
-        if (updatedMoment) {
-            setExpandedMoment(updatedMoment);
-        }
+      const updatedMoment = moments.find(m => m._id === expandedMoment._id);
+      if (updatedMoment) {
+        setExpandedMoment(updatedMoment);
+      }
     }
   }, [moments, expandedMoment]);
 
@@ -67,34 +66,19 @@ function MomentGrid({
     return fileId ? `https://drive.google.com/thumbnail?id=${fileId}&sz=w600` : url;
   };
 
-  const downloadFile = (downloadUrl, name) => {
-    try {
-      const a = document.createElement('a');
-      a.href = downloadUrl;
-      a.target = '_blank';
-      a.rel = 'noopener noreferrer';
-      if (name) a.download = name;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-    } catch (err) {
-      window.open(downloadUrl, '_blank', 'noopener');
-    }
-  };
-
   const handleEditTitle = (id, currentTitle) => {
     setEditingTitleId(id);
     setTempTitle(currentTitle);
   };
 
   const handleSaveTitle = (id) => {
-    onUpdateTitle(id, tempTitle);
+    onUpdateMomentTitle(id, tempTitle);
     setEditingTitleId(null);
   };
 
   const handleDeleteClick = async (id) => {
     setDeletingId(id);
-    await onDelete(id);
+    await onDeleteMoment(id);
     setTimeout(() => setDeletingId(null), 600);
   };
 
@@ -148,13 +132,11 @@ function MomentGrid({
                   title={moment.title}
                 />
               ) : moment.type === 'drive' ? (
-                <div className="relative w-full h-full">
-                  <DriveMediaPreview
-                    url={moment.url}
-                    type={moment.url && moment.url.match(/\.(jpeg|jpg|gif|png)$/i) ? 'image' : 'video'}
-                    title={moment.title}
-                  />
-                </div>
+                <DriveMediaPreview
+                  url={moment.url}
+                  type={moment.url && moment.url.match(/\.(jpeg|jpg|gif|png)$/i) ? 'image' : 'video'}
+                  title={moment.title}
+                />
               ) : (
                 renderPreviewThumbnails(moment)
               )}
@@ -171,6 +153,7 @@ function MomentGrid({
                 </div>
               )}
             </div>
+
             <div className="p-2 flex-grow">
               {editingTitleId === moment._id ? (
                 <div className="flex items-center space-x-2">
@@ -212,10 +195,10 @@ function MomentGrid({
           moment={expandedMoment}
           onClose={() => window.history.back()}
           onMediaClick={(mediaFiles, index) => openLightbox(mediaFiles, index, expandedMoment.title)}
-          onDeleteMedia={onDeleteMediaFile}
-          onAddMedia={onAddMediaToMoment}
-          onAddDriveMedia={onAddDriveMediaToMoment}
-          onMediaOrderSave={onMediaOrderSave}
+          onDeleteGalleryFile={onDeleteGalleryFile}
+          onUploadMediaInGallery={onUploadMediaInGallery}
+          onCopyToServiceDriveGallery={onCopyToServiceDriveGallery}
+          onGalleryOrderSave={onGalleryOrderSave}
         />
       )}
 

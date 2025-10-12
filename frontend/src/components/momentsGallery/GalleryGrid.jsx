@@ -9,10 +9,10 @@ function GalleryGrid({
   moment,
   onClose,
   onMediaClick,
-  onDeleteMedia,
-  onAddMedia,
-  onAddDriveMedia,
-  onMediaOrderSave,
+  onDeleteGalleryFile,
+  onUploadMediaInGallery,
+  onCopyToServiceDriveGallery,
+  onGalleryOrderSave,
 }) {
   const { user } = useAuth(); 
   const [isEditMode, setIsEditMode] = useState(false);
@@ -60,7 +60,7 @@ function GalleryGrid({
       if (name) a.download = name;
       document.body.appendChild(a);
       a.click();
-      a.remove();
+      document.body.removeChild(a);
     } catch (err) {
       window.open(downloadUrl, '_blank', 'noopener');
     }
@@ -68,7 +68,7 @@ function GalleryGrid({
 
   const handleAddMedia = async (files) => {
     try {
-      await onAddMedia(moment._id, files);
+      await onUploadMediaInGallery(moment._id, files);
       setShowUploadForm(false);
     } catch (error) {
       console.error(error);
@@ -77,7 +77,7 @@ function GalleryGrid({
 
   const handleAddDriveMedia = async (driveUrl) => {
     try {
-      await onAddDriveMedia(moment._id, driveUrl);
+      await onCopyToServiceDriveGallery(moment._id, driveUrl);
       setShowDriveForm(false);
     } catch (error) {
       console.error(error);
@@ -85,14 +85,14 @@ function GalleryGrid({
   };
 
   const handleDeleteMedia = async (mediaId) => {
-    await onDeleteMedia(moment._id, mediaId);
+    await onDeleteGalleryFile(moment._id, mediaId);
   };
 
   const handleMediaOrderSave = async (reorderedMedia) => {
     try {
       setLocalMediaFiles(reorderedMedia);
       setIsReorderMode(false);
-      await onMediaOrderSave(moment._id, reorderedMedia);
+      await onGalleryOrderSave(moment._id, reorderedMedia);
     } catch (error) {
       console.error(error);
     }
@@ -196,7 +196,6 @@ function GalleryGrid({
                   <Download className="h-4 w-4" />
                 </button>
 
-                {/* Delete only if allowed */}
                 {canManageMedia && isEditMode && (
                   <button
                     onClick={(e) => {
@@ -217,7 +216,6 @@ function GalleryGrid({
         </div>
       )}
 
-      {/* Upload Form */}
       {canManageMedia && showUploadForm && (
         <MediaUploadForm
           momentTitle={moment.title}
@@ -226,7 +224,6 @@ function GalleryGrid({
         />
       )}
 
-      {/* Drive Form */}
       {canManageMedia && showDriveForm && (
         <CopyToServiceDriveForm
           momentTitle={moment.title}
@@ -234,7 +231,6 @@ function GalleryGrid({
           onSubmit={handleAddDriveMedia}
         />
       )}
-
     </div>
   );
 }

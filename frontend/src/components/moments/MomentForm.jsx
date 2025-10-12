@@ -7,31 +7,44 @@ import MediaUploadForm from './MediaUploadForm';
 function MomentForm({ type, onClose, onSubmit }) {
   const getFormTitle = () => {
     switch (type) {
-      case 'youtube': return 'Add YouTube Video';
-      case 'drive': return 'Add Drive Link';
-      case 'copy-service-drive': return 'Add Drive Media';
-      case 'upload': return 'Upload Media';
-      default: return 'Add Media';
+      case 'youtube':
+        return 'Add YouTube Video';
+      case 'drive':
+        return 'Add Drive Link';
+      case 'copy-service-drive':
+        return 'Add Drive Media';
+      case 'upload':
+        return 'Upload Media';
+      default:
+        return 'Add Media';
     }
   };
 
   const getFormIcon = () => {
     switch (type) {
-      case 'youtube': return <Youtube className="h-5 w-5 mr-2" />;
+      case 'youtube':
+        return <Youtube className="h-5 w-5 mr-2" />;
       case 'drive':
-      case 'copy-service-drive': return <FolderOpen className="h-5 w-5 mr-2" />;
+      case 'copy-service-drive':
+        return <FolderOpen className="h-5 w-5 mr-2" />;
       case 'upload':
-      default: return <Upload className="h-5 w-5 mr-2" />;
+      default:
+        return <Upload className="h-5 w-5 mr-2" />;
     }
   };
 
   const renderForm = () => {
     switch (type) {
-      case 'youtube': return <YoutubeUploadForm onSubmit={onSubmit} onClose={onClose} />;
-      case 'drive': return <DriveUploadForm onSubmit={onSubmit}  onClose={onClose} />;
-      case 'copy-service-drive': return <CopyToServiceDriveForm onSubmit={onSubmit}  onClose={onClose} />;
-      case 'upload': return <MediaUploadForm onSubmit={onSubmit} onClose={onClose} />;
-      default: return null;
+      case 'youtube':
+        return <YoutubeUploadForm onSubmit={onSubmit} onClose={onClose} />;
+      case 'drive':
+        return <DriveUploadForm onSubmit={onSubmit} onClose={onClose} />;
+      case 'copy-service-drive':
+        return <CopyToServiceDriveForm onSubmit={onSubmit} onClose={onClose} />;
+      case 'upload':
+        return <MediaUploadForm onSubmit={onSubmit} onClose={onClose} />;
+      default:
+        return null;
     }
   };
 

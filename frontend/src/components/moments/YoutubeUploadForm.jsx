@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { toast } from 'react-hot-toast';
+import { Upload } from 'lucide-react';
 
 export default function YoutubeUploadForm({ onSubmit, onClose }) {
   const [title, setTitle] = useState('');
@@ -18,8 +19,7 @@ export default function YoutubeUploadForm({ onSubmit, onClose }) {
     setIsSubmitting(true);
     try {
       await onSubmit({ title, url });
-      toast.success('YouTube video added successfully');
-      onClose(); // ✅ Close modal after success
+      onClose(); 
     } catch (error) {
       toast.error(error.message || 'Failed to add YouTube video');
     } finally {
@@ -48,7 +48,7 @@ export default function YoutubeUploadForm({ onSubmit, onClose }) {
           required
           value={url}
           onChange={(e) => setUrl(e.target.value)}
-          placeholder="https://youtu.be/..  or  https://www.youtube.com/.."
+          placeholder="https://youtu.be/... or https://www.youtube.com/..."
           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
         />
       </div>
@@ -56,11 +56,14 @@ export default function YoutubeUploadForm({ onSubmit, onClose }) {
       <button
         type="submit"
         disabled={isSubmitting}
-        className="w-full flex justify-center py-2 px-4 border border-transparent 
+        className="w-full flex justify-center items-center gap-2 py-2 px-4 border border-transparent 
           rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 
           hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 
-          focus:ring-indigo-500 disabled:opacity-50"
+          focus:ring-indigo-500 disabled:opacity-50 transition"
       >
+        <Upload
+          className={`h-5 w-5 ${isSubmitting ? 'animate-spin' : ''}`}
+        />
         {isSubmitting ? 'Adding...' : 'Add Video'}
       </button>
     </form>

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FolderOpen } from 'lucide-react';
+import { Upload } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 export default function CopyToServiceDriveForm({ onSubmit, onClose }) {
@@ -11,7 +11,10 @@ export default function CopyToServiceDriveForm({ onSubmit, onClose }) {
     e.preventDefault();
     if (isSubmitting) return;
 
-    if (!url.includes('drive.google.com/file/d/') && !url.includes('drive.google.com/drive/folders/')) {
+    if (
+      !url.includes('drive.google.com/file/d/') &&
+      !url.includes('drive.google.com/drive/folders/')
+    ) {
       toast.error('Please enter a valid Google Drive File or Folder URL');
       return;
     }
@@ -19,8 +22,7 @@ export default function CopyToServiceDriveForm({ onSubmit, onClose }) {
     setIsSubmitting(true);
     try {
       await onSubmit({ title, url });
-      toast.success('Drive media added successfully');
-      onClose(); // ✅ Close the modal after success
+      onClose();
     } catch (error) {
       toast.error(error.message || 'Failed to copy Drive media');
     } finally {
@@ -43,7 +45,9 @@ export default function CopyToServiceDriveForm({ onSubmit, onClose }) {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700">Google Drive File/Folder URL *</label>
+        <label className="block text-sm font-medium text-gray-700">
+          Google Drive File/Folder URL *
+        </label>
         <input
           type="url"
           required
@@ -62,11 +66,12 @@ export default function CopyToServiceDriveForm({ onSubmit, onClose }) {
       <button
         type="submit"
         disabled={isSubmitting}
-        className="w-full flex justify-center py-2 px-4 border border-transparent 
+        className="w-full flex justify-center items-center gap-2 py-2 px-4 border border-transparent 
           rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 
           hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 
           focus:ring-indigo-500 disabled:opacity-50"
       >
+        <Upload className={`h-5 w-5 ${isSubmitting ? 'animate-spin' : ''}`} />
         {isSubmitting ? 'Adding...' : 'Add Media'}
       </button>
     </form>
