@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Trash2, Edit2, Check, ChevronRight } from 'lucide-react';
+import { Trash2, RefreshCcw, Edit2, Check, ChevronRight } from 'lucide-react';
 import DriveMediaPreview from './DriveMediaPreview.jsx';
 import GalleryGrid from '../momentsGallery/GalleryGrid.jsx';
 import Lightbox from '../momentsGallery/Lightbox.jsx';
@@ -12,7 +12,8 @@ function MomentGrid({
   onUpdateMomentTitle,
   onUploadMediaInGallery,
   onCopyToServiceDriveGallery,
-  onGalleryOrderSave
+  onGalleryOrderSave,
+  onSyncDriveFolder,
 }) {
   const [editingTitleId, setEditingTitleId] = useState(null);
   const [tempTitle, setTempTitle] = useState('');
@@ -83,7 +84,7 @@ function MomentGrid({
   };
 
   const renderPreviewThumbnails = (moment) => {
-    if (moment.type === 'upload' && moment.mediaFiles?.length > 0) {
+    if ((moment.type === 'upload' || moment.type === 'drive') && moment.mediaFiles?.length > 0) {
       const firstFile = [...moment.mediaFiles].sort((a, b) => b.order - a.order)[0];
       const remainingCount = moment.mediaFiles.length - 1;
       return (
@@ -132,25 +133,45 @@ function MomentGrid({
                   title={moment.title}
                 />
               ) : moment.type === 'drive' ? (
-                <DriveMediaPreview
-                  url={moment.url}
-                  type={moment.url && moment.url.match(/\.(jpeg|jpg|gif|png)$/i) ? 'image' : 'video'}
-                  title={moment.title}
-                />
+                moment.mediaFiles && moment.mediaFiles.length > 0 ? (
+                  // Drive folder with multiple files → render like media upload
+                  renderPreviewThumbnails(moment)
+                ) : (
+                  // Single file URL → show iframe/image
+                  <DriveMediaPreview
+                    url={moment.url}
+                    type={moment.url && moment.url.match(/\.(jpeg|jpg|gif|png)$/i) ? 'image' : 'video'}
+                    title={moment.title}
+                  />
+                )
               ) : (
                 renderPreviewThumbnails(moment)
               )}
 
               {isEditMode && (
-                <div className="absolute top-2 right-2 flex space-x-2">
-                  <button
-                    onClick={() => handleDeleteClick(moment._id)}
-                    className={`p-1.5 bg-red-600 text-white rounded-full hover:bg-red-700 transition-colors ${deletingId === moment._id ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    disabled={deletingId === moment._id}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                </div>
+  <div className="absolute top-2 right-2 flex space-x-2">
+    {moment.type === 'drive' && moment.url.includes('drive.google.com/drive/folders/') && (
+  <button
+    onClick={() => {
+      if (window.confirm('Are you sure you want to sync this Drive folder?')) {
+        onSyncDriveFolder(moment._id);
+      }
+    }}
+    className="p-1.5 bg-indigo-700 text-white rounded-full hover:bg-indigo-800 transition-colors"
+  >
+    <RefreshCcw className="h-4 w-4" />
+  </button>
+)}
+    <button
+      onClick={() => handleDeleteClick(moment._id)}
+      className={`p-1.5 bg-red-600 text-white rounded-full hover:bg-red-700 transition-colors ${deletingId === moment._id ? 'opacity-50 cursor-not-allowed' : ''}`}
+      disabled={deletingId === moment._id}
+    >
+      <Trash2 className="h-4 w-4" />
+    </button>
+
+  </div>
+
               )}
             </div>
 
