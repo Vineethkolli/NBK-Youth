@@ -41,13 +41,23 @@ function Moments() {
         return;
       }
 
-      if (formType === 'drive') {
-        const endpoint = `${API_URL}/api/moments/drive`;
-        await axios.post(endpoint, formDataOrObj);
-        toast.success('Drive media added successfully. Ensure View access is enabled.');
-        fetchMoments();
-        return;
-      }
+if (formType === 'drive') {
+  const endpoint = `${API_URL}/api/moments/drive`;
+  
+  // Detect folder URL
+  const isFolder = formDataOrObj.url.includes('drive.google.com/drive/folders/');
+  
+  await axios.post(endpoint, formDataOrObj);
+  
+  toast.success(
+    isFolder 
+      ? 'Drive folder added successfully. All files metadata stored.' 
+      : 'Drive media added successfully. Ensure View access is enabled.'
+  );
+  
+  fetchMoments();
+  return;
+}
 
       if (formType === 'copy-service-drive') {
         const endpoint = `${API_URL}/api/moments/copy-to-service-drive`;
@@ -74,6 +84,23 @@ function Moments() {
       throw error;
     }
   };
+
+  const handleSyncDriveFolder = async (momentId) => {
+  try {
+    const promise = axios.post(`${API_URL}/api/moments/${momentId}/sync`);
+    await toast.promise(promise, {
+      loading: 'Syncing folder...',
+      success: 'Drive folder synced successfully!',
+      error: 'Failed to sync folder',
+    });
+
+    // After sync, refetch moments to get updated media files
+    await fetchMoments();
+  } catch (error) {
+    console.error(error);
+  }
+};
+
 
   const handleDeleteMoment = async (momentId) => {
     if (!window.confirm('Are you sure you want to delete this moment?')) return;
@@ -242,6 +269,7 @@ function Moments() {
           onUploadMediaInGallery={handleUploadMediaInGallery}
           onCopyToServiceDriveGallery={handleCopyToServiceDriveGallery}
           onGalleryOrderSave={handleGalleryOrderSave}
+          onSyncDriveFolder={handleSyncDriveFolder}
         />
       )}
 

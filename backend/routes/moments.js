@@ -10,7 +10,11 @@ const authRoles = ['developer', 'admin', 'financier'];
 router.get('/', momentController.getAllMoments);
 
 router.post('/youtube', auth, checkRole(authRoles), momentController.addYouTubeMoment);
+
 router.post('/drive', auth, checkRole(authRoles), momentController.addDriveMoment);
+// Sync (refresh) Drive folder moment
+router.post('/:id/sync', auth, checkRole(authRoles), momentController.syncDriveFolderMoment);
+
 router.post('/copy-to-service-drive', auth, checkRole(authRoles), momentController.addCopyToServiceDriveMoment);
 
 // Moment media upload from frontend
@@ -20,6 +24,7 @@ router.post('/upload/complete', auth, checkRole(authRoles), momentController.com
 router.put('/order', auth, checkRole(authRoles), momentController.updateMomentOrder);
 router.patch('/:id/title', auth, checkRole(authRoles), momentController.updateMomentTitle);
 router.delete('/:id', auth, checkRole(authRoles), momentController.deleteMoment);
+
 
 
 // Gallery Routes

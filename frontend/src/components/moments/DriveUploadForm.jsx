@@ -11,8 +11,12 @@ export default function DriveUploadForm({ onSubmit, onClose }) {
     e.preventDefault();
     if (isSubmitting) return;
 
-    if (!url.includes('drive.google.com/file/d/')) {
-      toast.error('Please enter a valid Google Drive File URL');
+    // Accept both file and folder URLs
+    if (
+      !url.includes('drive.google.com/file/d/') &&
+      !url.includes('drive.google.com/drive/folders/')
+    ) {
+      toast.error('Please enter a valid Google Drive File or Folder URL');
       return;
     }
 
@@ -21,7 +25,7 @@ export default function DriveUploadForm({ onSubmit, onClose }) {
       await onSubmit({ title, url });
       onClose();
     } catch (error) {
-      toast.error(error.message || 'Failed to add Drive file');
+      toast.error(error.message || 'Failed to add Drive media');
     } finally {
       setIsSubmitting(false);
     }
@@ -42,16 +46,18 @@ export default function DriveUploadForm({ onSubmit, onClose }) {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700">Google Drive File URL *</label>
+        <label className="block text-sm font-medium text-gray-700">Google Drive URL *</label>
         <input
           type="url"
           required
           value={url}
           onChange={(e) => setUrl(e.target.value)}
-          placeholder="https://drive.google.com/file/d/..."
+          placeholder="https://drive.google.com/file/d/... or https://drive.google.com/drive/folders/..."
           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
         />
-        <div className="mt-2 text-xs text-gray-500">• Make sure the file has View access for everyone</div>
+        <div className="mt-2 text-xs text-gray-500">
+          • File or Folder must have View access for everyone
+        </div>
       </div>
 
       <button
@@ -62,9 +68,7 @@ export default function DriveUploadForm({ onSubmit, onClose }) {
           hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 
           focus:ring-indigo-500 disabled:opacity-50"
       >
-        <FolderOpen
-          className={`h-5 w-5 ${isSubmitting ? 'animate-spin' : ''}`}
-        />
+        <FolderOpen className={`h-5 w-5 ${isSubmitting ? 'animate-spin' : ''}`} />
         {isSubmitting ? 'Adding...' : 'Add Media'}
       </button>
     </form>
