@@ -153,7 +153,7 @@ export const momentController = {
         'Moment',
         moment._id.toString(),
         { before: null, after: moment.toObject() },
-        `Upload moment "${title}" with ${files.length} files added by ${req.user.name}`
+        `Uploaded moment "${title}" with ${files.length} files added by ${req.user.name}`
       );
 
       res.status(201).json(moment);
@@ -247,12 +247,12 @@ export const momentController = {
         'Moment',
         moment._id.toString(),
         { before: null, after: moment.toObject() },
-        `Drive media moment "${title}" with ${filesToProcess.length} files added by ${req.user.name}`
+        `Drive moment "${title}" with ${filesToProcess.length} files copied and added by ${req.user.name}`
       );
 
       res.status(201).json(moment);
     } catch (error) {
-      res.status(500).json({ message: 'Failed to add Drive media moment', error: error.message });
+      res.status(500).json({ message: 'Failed to copy and add drive moment', error: error.message });
     }
   },
 
@@ -310,9 +310,9 @@ export const momentController = {
         `Moment title updated to "${title}" by ${req.user.name}`
       );
 
-      res.json({ message: 'Title updated successfully', moment });
+      res.json({ message: 'Moment title updated successfully', moment });
     } catch (error) {
-      res.status(500).json({ message: 'Failed to update title', error: error.message });
+      res.status(500).json({ message: 'Failed to update moment title', error: error.message });
     }
   },
 

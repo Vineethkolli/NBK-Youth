@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, X, Download, Trash2, Upload, FolderOpen, Edit2, GripHorizontal } from 'lucide-react';
+import { ArrowLeft, X, Download, Trash2, Upload, Copy, Edit2, GripHorizontal } from 'lucide-react';
 import GalleryReorder from './GalleryReorder';
 import MediaUploadForm from './MediaUploadForm';
 import CopyToServiceDriveForm from './CopyToServiceDriveForm';
@@ -115,7 +115,7 @@ function GalleryGrid({
                 <Upload className="h-4 w-4 mr-2" />
               </button>
               <button onClick={() => setShowDriveForm(true)} className="btn-primary">
-                <FolderOpen className="h-4 w-4 mr-2" />
+                <Copy className="h-4 w-4 mr-2" />
               </button>
               <button
                 onClick={() => setIsReorderMode(true)}

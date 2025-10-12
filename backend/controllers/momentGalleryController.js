@@ -28,13 +28,13 @@ export const galleryController = {
         'Moment',
         moment._id.toString(),
         { before: originalData, after: moment.toObject() },
-        `Media order updated for moment "${moment.title}" by ${req.user.name}`
+        `Gallery order updated for moment "${moment.title}" by ${req.user.name}`
       );
 
       const updatedMoment = await Moment.findById(momentId);
-      res.json({ message: 'Media order updated successfully', moment: updatedMoment });
+      res.json({ message: 'Gallery order updated successfully', moment: updatedMoment });
     } catch (error) {
-      res.status(500).json({ message: 'Failed to update media order' });
+      res.status(500).json({ message: 'Failed to update gallery order' });
     }
   },
 
@@ -110,13 +110,13 @@ export const galleryController = {
         'Moment',
         moment._id.toString(),
         { before: originalData, after: moment.toObject() },
-        `${files.length} media files added to moment "${moment.title}" by ${req.user.name}`
+        `${files.length} media files uploaded to moment "${moment.title}" by ${req.user.name}`
       );
 
       const updatedMoment = await Moment.findById(req.params.momentId);
       res.status(201).json(updatedMoment);
     } catch (error) {
-      res.status(500).json({ message: 'Failed to add media to moment', error: error.message });
+      res.status(500).json({ message: 'Failed to upload media to moment', error: error.message });
     }
   },
 
@@ -206,13 +206,13 @@ export const galleryController = {
         'Moment',
         moment._id.toString(),
         { before: originalData, after: moment.toObject() },
-        `${filesToProcess.length} media files added from Drive to moment "${moment.title}" by ${req.user.name}`
+        `${filesToProcess.length} media files copied and added from Drive to moment "${moment.title}" by ${req.user.name}`
       );
 
       const updatedMoment = await Moment.findById(momentId);
       res.status(201).json(updatedMoment);
     } catch (error) {
-      res.status(500).json({ message: 'Failed to add Drive media to moment', error: error.message });
+      res.status(500).json({ message: 'Failed to copy and add Drive media to moment', error: error.message });
     }
   },
   
@@ -227,7 +227,7 @@ export const galleryController = {
 
       const mediaFile = moment.mediaFiles.id(mediaId);
       if (!mediaFile) {
-        return res.status(404).json({ message: 'Media file not found' });
+        return res.status(404).json({ message: 'Gallery file not found' });
       }
 
       const originalData = moment.toObject();
@@ -251,13 +251,13 @@ export const galleryController = {
         'Moment',
         moment._id.toString(),
         { before: originalData, after: moment.toObject() },
-        `Media file "${mediaFile.name}" deleted from moment "${moment.title}" by ${req.user.name}`
+        `Gallery file "${mediaFile.name}" deleted from moment "${moment.title}" by ${req.user.name}`
       );
 
       const updatedMoment = await Moment.findById(req.params.momentId);
-      res.json({ message: 'Media file deleted successfully', moment: updatedMoment });
+      res.json({ message: 'Gallery file deleted successfully', moment: updatedMoment });
     } catch (error) {
-      res.status(500).json({ message: 'Failed to delete media file', error: error.message });
+      res.status(500).json({ message: 'Failed to delete gallery file', error: error.message });
     }
   },
 };
