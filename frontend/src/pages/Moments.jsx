@@ -220,6 +220,9 @@ function Moments() {
           <button onClick={() => openForm('copy-service-drive')} className="btn-primary">
             <Copy className="h-4 w-4 mr-2" /> Copy Drive
           </button>
+          <button onClick={() => openForm('drive')} className="btn-primary">
+            <FolderOpen className="h-4 w-4 mr-2" /> Add Drive
+          </button>
           <button
             onClick={() => setIsReorderMode(true)}
             disabled={isReorderMode}
@@ -235,9 +238,6 @@ function Moments() {
             className={`btn-secondary ${isEditMode ? 'bg-red-100' : ''}`}
           >
             <Edit2 className="h-4 w-4 mr-2" /> {isEditMode ? 'Done' : 'Edit Mode'}
-          </button>
-          <button onClick={() => openForm('drive')} className="btn-primary">
-            <FolderOpen className="h-4 w-4 mr-2" /> Add Drive
           </button>
         </div>
       )}
