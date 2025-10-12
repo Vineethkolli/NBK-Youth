@@ -104,9 +104,9 @@ function Moments() {
               : moment
           )
         );
-        return 'Media deleted successfully';
+        return 'Gallery File deleted successfully';
       },
-      error: 'Failed to delete media',
+      error: 'Failed to delete gallery file',
     });
   };
 
@@ -116,9 +116,9 @@ function Moments() {
       setMoments((prev) =>
         prev.map((moment) => (moment._id === id ? { ...moment, title: newTitle } : moment))
       );
-      toast.success('Title updated successfully');
+      toast.success('Moment title updated successfully');
     } catch {
-      toast.error('Failed to update title');
+      toast.error('Failed to update moment title');
     }
   };
 
@@ -127,9 +127,9 @@ function Moments() {
       await axios.put(`${API_URL}/api/moments/order`, { moments: reorderedMoments });
       setMoments(reorderedMoments);
       setIsReorderMode(false);
-      toast.success('Order updated successfully');
+      toast.success('Moment order updated successfully');
     } catch {
-      toast.error('Failed to update order');
+      toast.error('Failed to update moment order');
     }
   };
 
@@ -143,9 +143,9 @@ function Moments() {
           moment._id === momentId ? { ...moment, mediaFiles: reorderedMediaFiles } : moment
         )
       );
-      toast.success('Media order updated successfully');
+      toast.success('Gallery order updated successfully');
     } catch {
-      toast.error('Failed to update media order');
+      toast.error('Failed to update gallery order');
     }
   };
 
@@ -192,7 +192,7 @@ function Moments() {
         prev.map((moment) => (moment._id === momentId ? updatedMoment : moment))
       );
 
-      toast.success('Drive media added successfully');
+      toast.success('Drive media copied and added successfully');
       return updatedMoment;
     } catch (error) {
       console.error(error);

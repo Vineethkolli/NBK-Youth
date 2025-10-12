@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { toast } from 'react-hot-toast';
-import { Upload } from 'lucide-react';
+import { Youtube } from 'lucide-react';
 
 export default function YoutubeUploadForm({ onSubmit, onClose }) {
   const [title, setTitle] = useState('');
@@ -61,7 +61,7 @@ export default function YoutubeUploadForm({ onSubmit, onClose }) {
           hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 
           focus:ring-indigo-500 disabled:opacity-50 transition"
       >
-        <Upload
+        <Youtube
           className={`h-5 w-5 ${isSubmitting ? 'animate-spin' : ''}`}
         />
         {isSubmitting ? 'Adding...' : 'Add Video'}

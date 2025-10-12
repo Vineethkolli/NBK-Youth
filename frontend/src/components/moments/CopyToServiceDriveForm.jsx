@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Upload } from 'lucide-react';
+import { Copy } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 export default function CopyToServiceDriveForm({ onSubmit, onClose }) {
@@ -24,7 +24,7 @@ export default function CopyToServiceDriveForm({ onSubmit, onClose }) {
       await onSubmit({ title, url });
       onClose();
     } catch (error) {
-      toast.error(error.message || 'Failed to copy Drive media');
+      toast.error(error.message || 'Failed to copy and add Drive media');
     } finally {
       setIsSubmitting(false);
     }
@@ -72,8 +72,8 @@ export default function CopyToServiceDriveForm({ onSubmit, onClose }) {
           hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 
           focus:ring-indigo-500 disabled:opacity-50"
       >
-        <Upload className={`h-5 w-5 ${isSubmitting ? 'animate-spin' : ''}`} />
-        {isSubmitting ? 'Adding...' : 'Add Media'}
+        <Copy className={`h-5 w-5 ${isSubmitting ? 'animate-spin' : ''}`} />
+        {isSubmitting ? 'Copying...' : 'Copy Media'}
       </button>
     </form>
   );
