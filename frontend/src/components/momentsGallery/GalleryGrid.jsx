@@ -218,6 +218,7 @@ function GalleryGrid({
 
       {canManageMedia && showUploadForm && (
         <MediaUploadForm
+          momentId={moment._id}
           momentTitle={moment.title}
           onClose={() => setShowUploadForm(false)}
           onSubmit={handleAddMedia}

@@ -1,20 +1,11 @@
 import Moment from '../models/Moment.js';
 import { logActivity } from '../middleware/activityLogger.js';
-import { 
-  drive, 
-  Readable,
-  extractFileIdFromUrl, 
-  extractFolderIdFromUrl, 
-  getDirectViewUrl, 
-  createSubfolder,
-  getFilesFromFolder
-} from '../utils/driveUtils.js'; 
+import {drive, extractFileIdFromUrl, extractFolderIdFromUrl, getDirectViewUrl, createSubfolder, getFilesFromFolder } from '../utils/driveUtils.js';
+import { google } from 'googleapis'; 
 
 export const momentController = {
   getAllMoments: async (req, res) => {
     try {
-      // Sort by order (descending) first so saved reorder shows.
-      // Then fallback to createdAt descending to show newest first by default.
       const moments = await Moment.find().sort({ order: -1, createdAt: -1 });
       res.json(moments);
     } catch (error) {
@@ -83,89 +74,72 @@ export const momentController = {
     }
   },
 
-  uploadMediaMoment: async (req, res) => {
+  startuploadMediaMoment: async (req, res) => {
     try {
       const { title } = req.body;
-      const files = req.files; // Multiple files
-      if (!files || files.length === 0) {
-        return res.status(400).json({ message: 'No files uploaded' });
-      }
-
       const maxOrder = await Moment.findOne().sort('-order');
       const order = maxOrder ? maxOrder.order + 1 : 0;
 
-      // Create subfolder for this moment
       const subfolderName = `${title}_${Date.now()}`;
       const subfolderId = await createSubfolder(process.env.GOOGLE_DRIVE_FOLDER_ID, subfolderName);
 
-      const mediaFiles = [];
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        const mimeType = file.mimetype;
-        const stream = Readable.from(file.buffer);
-        
-        const driveResponse = await drive.files.create({
-          requestBody: {
-            name: `${title || 'untitled'}-${Date.now()}-${i}`,
-            mimeType,
-            parents: [subfolderId],
-          },
-          media: {
-            mimeType,
-            body: stream,
-          },
-        });
-        
-        await drive.permissions.create({
-          fileId: driveResponse.data.id,
-          requestBody: {
-            role: 'reader',
-            type: 'anyone',
-          },
-        });
-        
-        const directUrl = `https://drive.google.com/uc?export=view&id=${driveResponse.data.id}`;
-        
-        mediaFiles.push({
-          name: file.originalname,
-          url: directUrl,
-          type: file.mimetype.startsWith('image/') ? 'image' : 'video',
-          order: i,
-          mediaPublicId: driveResponse.data.id
-        });
-      }
-
-      const momentData = {
+      const moment = await Moment.create({
         title,
         type: 'upload',
-        mediaFiles,
+        mediaFiles: [],
         order,
         subfolderName,
         subfolderId,
         createdBy: req.user.registerId,
-      };
+      });
 
-      const moment = await Moment.create(momentData);
+      const jwt = new google.auth.JWT({
+        email: JSON.parse(process.env.GOOGLE_DRIVE_CREDENTIALS).client_email,
+        key: JSON.parse(process.env.GOOGLE_DRIVE_CREDENTIALS).private_key,
+        scopes: ['https://www.googleapis.com/auth/drive'],
+      });
+      const token = await jwt.authorize();
 
-      await logActivity(
-        req,
-        'CREATE',
-        'Moment',
-        moment._id.toString(),
-        { before: null, after: moment.toObject() },
-        `Uploaded moment "${title}" with ${files.length} files added by ${req.user.name}`
-      );
+      res.json({ momentId: moment._id, subfolderId, accessToken: token.access_token });
+    } catch (err) {
+      res.status(500).json({ message: 'Failed to start upload', error: err.message });
+    }
+  },
 
-      res.status(201).json(moment);
-    } catch (error) {
-      res.status(500).json({ message: 'Failed to upload media moment', error: error.message });
+  completeuploadMediaMoment: async (req, res) => {
+    try {
+      const { momentId, mediaFiles } = req.body;
+      const moment = await Moment.findById(momentId);
+      if (!moment) return res.status(404).json({ message: 'Moment not found' });
+
+      const before = moment.toObject();
+      const maxOrder = moment.mediaFiles.length > 0 ? Math.max(...moment.mediaFiles.map(m => m.order || 0)) : -1;
+
+      for (let i = 0; i < mediaFiles.length; i++) {
+        const file = mediaFiles[i];
+        moment.mediaFiles.push({
+          name: file.name,
+          url: file.url,
+          type: file.type,
+          order: maxOrder + i + 1,
+          mediaPublicId: file.id || file.mediaPublicId,
+        });
+      }
+
+      await moment.save();
+
+      await logActivity(req, 'UPDATE', 'Moment', moment._id, before, `${mediaFiles.length} media files added to "${moment.title}" by ${req.user.name}`);
+      const updated = await Moment.findById(momentId);
+      res.json({ message: 'Upload completed', moment: updated });
+    } catch (err) {
+      res.status(500).json({ message: 'Failed to complete upload', error: err.message });
     }
   },
 
   addCopyToServiceDriveMoment: async (req, res) => {
     try {
       const { title, url } = req.body;
-      
+
       const folderId = extractFolderIdFromUrl(url);
       const fileId = extractFileIdFromUrl(url);
 
@@ -332,7 +306,7 @@ export const momentController = {
             fields: 'files(id)',
           });
 
-          const deletePromises = response.data.files.map(file => 
+          const deletePromises = response.data.files.map(file =>
             drive.files.delete({ fileId: file.id }).catch(error => {
               console.error(`Failed to delete file ${file.id}:`, error);
             })
