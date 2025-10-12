@@ -1,24 +1,109 @@
 import { useState } from 'react';
 import { X, Upload } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import axios from 'axios';
+import { API_URL } from '../../utils/config'; 
 
-function MediaUploadForm({ momentTitle, onClose, onSubmit }) {
+function MediaUploadForm({ momentId, momentTitle, onClose, onSubmit }) {
   const [files, setFiles] = useState([]);
   const [filesPreview, setFilesPreview] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [fileInputKey, setFileInputKey] = useState(Date.now());
+  const [uploadPercent, setUploadPercent] = useState(0);
+
+  // Upload helpers
+  const uploadFileToDriveXHR = (file, accessToken, subfolderId, onProgress) => {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+
+      const metadata = {
+        name: file.name,
+        parents: subfolderId ? [subfolderId] : undefined,
+      };
+      const form = new FormData();
+      form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+      form.append('file', file);
+
+      xhr.open('POST', 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart');
+      xhr.setRequestHeader('Authorization', `Bearer ${accessToken}`);
+
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable && typeof onProgress === 'function') {
+          onProgress(e.loaded, e.total);
+        } else if (typeof onProgress === 'function') {
+          onProgress(e.loaded, file.size);
+        }
+      };
+
+      xhr.onload = async () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          try {
+            const res = JSON.parse(xhr.responseText);
+            const fileId = res.id;
+            try {
+              await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}/permissions`, {
+                method: 'POST',
+                headers: {
+                  Authorization: `Bearer ${accessToken}`,
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ role: 'reader', type: 'anyone' }),
+              });
+            } catch (permErr) {
+              console.error('Failed to set permission for file', file.name, permErr);
+            }
+            const directUrl = `https://drive.google.com/uc?export=view&id=${fileId}`;
+            resolve({
+              id: fileId,
+              name: file.name,
+              url: directUrl,
+              type: file.type.startsWith('image/') ? 'image' : 'video',
+              size: file.size,
+            });
+          } catch (err) {
+            reject(new Error('Invalid response from Drive upload'));
+          }
+        } else {
+          reject(new Error(`Drive upload failed: ${xhr.status} ${xhr.statusText} - ${xhr.responseText}`));
+        }
+      };
+
+      xhr.onerror = () => reject(new Error('Network error during Drive upload'));
+      xhr.send(form);
+    });
+  };
+
+  const uploadFilesSequentially = async (filesList, accessToken, subfolderId, onProgress) => {
+    const totalBytes = filesList.reduce((s, f) => s + f.size, 0);
+    let uploadedBytes = 0;
+    const uploadedFiles = [];
+
+    for (let i = 0; i < filesList.length; i++) {
+      const file = filesList[i];
+
+      const perFileProgress = (loaded ) => {
+        const combined = Math.round(((uploadedBytes + loaded) / totalBytes) * 100);
+        if (typeof onProgress === 'function') onProgress(combined);
+      };
+
+      const uploaded = await uploadFileToDriveXHR(file, accessToken, subfolderId, perFileProgress);
+      uploadedFiles.push(uploaded);
+      uploadedBytes += file.size;
+      if (typeof onProgress === 'function') onProgress(Math.round((uploadedBytes / totalBytes) * 100));
+    }
+
+    return uploadedFiles;
+  };
 
   const handleFileChange = (e) => {
     const selectedFiles = Array.from(e.target.files);
     if (selectedFiles.length === 0) return;
 
-    // Check for maximum number of files
-    if (selectedFiles.length > 20) {
-      toast.error('You can upload a maximum of 20 files at a time');
+    if (selectedFiles.length > 25) {
+      toast.error('You can upload a maximum of 25 files at a time');
       return;
     }
 
-    // Check for total size < 1GB
     const totalSize = selectedFiles.reduce((sum, file) => sum + file.size, 0);
     if (totalSize > 1024 * 1024 * 1024) {
       toast.error('Total file size should be less than 1GB');
@@ -58,14 +143,55 @@ function MediaUploadForm({ momentTitle, onClose, onSubmit }) {
       return;
     }
 
+    if (!momentId) {
+      toast.error('Missing momentId for gallery upload');
+      return;
+    }
+
     setIsSubmitting(true);
+    setUploadPercent(0);
     try {
-      await onSubmit(files);
+      // 1) start gallery upload to get subfolderId and access token
+      const startRes = await axios.post(`${API_URL}/api/moments/${momentId}/gallery/upload/start`);
+      const { subfolderId, accessToken } = startRes.data;
+
+      // 2) upload directly to Drive sequentially
+      const uploadedFiles = await uploadFilesSequentially(files, accessToken, subfolderId, (percent) => {
+        setUploadPercent(Math.round(percent));
+      });
+
+      // 3) call complete endpoint with metadata
+      const { data: updatedMoment } = await axios.post(
+        `${API_URL}/api/moments/${momentId}/gallery/upload/complete`,
+        {
+          mediaFiles: uploadedFiles.map(f => ({
+            name: f.name,
+            url: f.url,
+            type: f.type,
+            id: f.id || f.mediaPublicId
+          }))
+        }
+      );
+
+      // Let parent know about the updated moment 
+      if (typeof onSubmit === 'function') {
+        try {
+          await onSubmit(updatedMoment);
+        } catch (err) {
+          console.error('Parent onSubmit error (gallery):', err);
+        }
+      }
+
+      toast.success('Gallery Media uploaded successfully');
       onClose();
+      return updatedMoment;
     } catch (error) {
-      toast.error(error.message || 'Failed to upload media');
+      console.error(error);
+      toast.error(error?.message || 'Failed to upload media');
+      throw error;
     } finally {
       setIsSubmitting(false);
+      setUploadPercent(0);
     }
   };
 
@@ -95,7 +221,7 @@ function MediaUploadForm({ momentTitle, onClose, onSubmit }) {
 
           <div>
             <label className="block text-sm font-medium text-gray-700">
-              Upload Files * (Maximum 20 files)
+              Upload Files * (Max 25 files)
             </label>
             <input
               key={fileInputKey}
@@ -148,7 +274,7 @@ function MediaUploadForm({ momentTitle, onClose, onSubmit }) {
                        focus:ring-indigo-500 disabled:opacity-50 transition"
           >
             <Upload className={`h-5 w-5 ${isSubmitting ? 'animate-spin' : ''}`} />
-            {isSubmitting ? 'Uploading...' : 'Upload Media'}
+            {isSubmitting ? `Uploading... ${uploadPercent}%` : 'Upload Media'}
           </button>
         </form>
       </div>

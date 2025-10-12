@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Edit2, Youtube, Upload, FolderOpen, Copy, GripHorizontal, Plus } from 'lucide-react';
+import { Edit2, Youtube, Upload, FolderOpen, Copy, GripHorizontal } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { API_URL } from '../utils/config';
@@ -30,51 +30,48 @@ function Moments() {
     }
   };
 
-  const handleMomentFormSubmit = async (formData) => {
+
+  const handleMomentFormSubmit = async (formDataOrObj, progressCallback) => {
     try {
-      let endpoint = '';
-      let successMessage = '';
-      let hasVideo = false;
-
-      switch (formType) {
-        case 'youtube':
-          endpoint = `${API_URL}/api/moments/youtube`;
-          successMessage = 'YouTube video added successfully';
-          break;
-        case 'drive':
-          endpoint = `${API_URL}/api/moments/drive`;
-          successMessage = 'Drive media added successfully. Ensure View access is enabled.';
-          break;
-        case 'copy-service-drive':
-          endpoint = `${API_URL}/api/moments/copy-to-service-drive`;
-          successMessage = 'Drive media copied and added successfully';
-          break;
-        case 'upload':
-          endpoint = `${API_URL}/api/moments/upload`;
-          successMessage = 'Media uploaded successfully.';
-          for (const value of formData.values()) {
-            if (value instanceof File && value.type.startsWith('video/')) {
-              hasVideo = true;
-              break;
-            }
-          }
-          break;
-        default:
-          throw new Error('Invalid form type');
+      if (formType === 'youtube') {
+        const endpoint = `${API_URL}/api/moments/youtube`;
+        await axios.post(endpoint, formDataOrObj);
+        toast.success('YouTube video added successfully');
+        fetchMoments();
+        return;
       }
 
-      await axios.post(endpoint, formData);
-
-      if (hasVideo) {
-        toast.success('For videos, processing may take a few minutes before playback is available.', {
-          duration: 4000,
-        });
+      if (formType === 'drive') {
+        const endpoint = `${API_URL}/api/moments/drive`;
+        await axios.post(endpoint, formDataOrObj);
+        toast.success('Drive media added successfully. Ensure View access is enabled.');
+        fetchMoments();
+        return;
       }
-      toast.success(successMessage);
-      fetchMoments();
+
+      if (formType === 'copy-service-drive') {
+        const endpoint = `${API_URL}/api/moments/copy-to-service-drive`;
+        await axios.post(endpoint, formDataOrObj);
+        toast.success('Drive media copied and added successfully');
+        fetchMoments();
+        return;
+      }
+
+      if (formType === 'upload') {
+        if (formDataOrObj && formDataOrObj._id) {
+          const updatedMoment = formDataOrObj;
+          setMoments((prev) => [updatedMoment, ...prev]); 
+        } else {
+          await fetchMoments();
+        }
+        return;
+      }
+
+      throw new Error('Unsupported form type');
     } catch (error) {
       console.error(error);
-      toast.error('Failed to submit moment');
+      toast.error(error?.message || 'Failed to submit moment');
+      throw error;
     }
   };
 
@@ -149,36 +146,20 @@ function Moments() {
     }
   };
 
-  const handleUploadMediaInGallery = async (momentId, files) => {
-    try {
-      const data = new FormData();
-      let hasVideo = false;
-      files.forEach((file) => {
-        data.append('files', file);
-        if (file.type.startsWith('video/')) hasVideo = true;
-      });
 
-      const { data: updatedMoment } = await axios.post(
-        `${API_URL}/api/moments/${momentId}/gallery/upload`,
-        data,
-        { headers: { 'Content-Type': 'multipart/form-data' } }
-      );
-
-      setMoments((prev) =>
-        prev.map((moment) => (moment._id === momentId ? updatedMoment : moment))
-      );
-
-      if (hasVideo) {
-        toast.success('For videos, processing may take a few minutes before playback is available.', {
-          duration: 4000,
-        });
-      }
+  const handleUploadMediaInGallery = (arg1, arg2, arg3) => {
+    if (arg1 && typeof arg1 === 'object' && arg1._id) {
+      const updatedMoment = arg1;
+      setMoments((prev) => prev.map((m) => (m._id === updatedMoment._id ? updatedMoment : m)));
       toast.success('Media uploaded successfully');
       return updatedMoment;
-    } catch (error) {
-      console.error(error);
-      toast.error('Failed to upload media');
     }
+
+    (async () => {
+      await fetchMoments();
+    })();
+
+    return null;
   };
 
   const handleCopyToServiceDriveGallery = async (momentId, driveUrl) => {

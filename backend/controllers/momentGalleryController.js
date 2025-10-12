@@ -1,13 +1,7 @@
 import Moment from '../models/Moment.js';
 import { logActivity } from '../middleware/activityLogger.js';
-import { 
-  drive, 
-  Readable,
-  extractFileIdFromUrl, 
-  extractFolderIdFromUrl, 
-  createSubfolder,
-  getFilesFromFolder
-} from '../utils/driveUtils.js'; 
+import { drive, extractFileIdFromUrl, extractFolderIdFromUrl, createSubfolder, getFilesFromFolder } from '../utils/driveUtils.js';
+import { google } from 'googleapis'; 
 
 export const galleryController = {
   updateGalleryOrder: async (req, res) => {
@@ -38,29 +32,11 @@ export const galleryController = {
     }
   },
 
-  uploadMediaGallery: async (req, res) => {
+  startuploadMediaGallery: async (req, res) => {
     try {
       const { momentId } = req.params;
-      const files = req.files;
-      
-      if (!files || files.length === 0) {
-        return res.status(400).json({ message: 'No files uploaded' });
-      }
-
       const moment = await Moment.findById(momentId);
-      if (!moment) {
-        return res.status(404).json({ message: 'Moment not found' });
-      }
-
-      if (moment.type !== 'upload') {
-        return res.status(400).json({ message: 'Can only add media to upload type moments' });
-      }
-
-      const originalData = moment.toObject();
-
-      const maxOrder = moment.mediaFiles.length > 0 
-        ? Math.max(...moment.mediaFiles.map(m => m.order || 0))
-        : -1;
+      if (!moment) return res.status(404).json({ message: 'Moment not found' });
 
       let targetFolderId = moment.subfolderId;
       if (!targetFolderId) {
@@ -68,55 +44,51 @@ export const galleryController = {
         targetFolderId = await createSubfolder(process.env.GOOGLE_DRIVE_FOLDER_ID, subfolderName);
         moment.subfolderName = subfolderName;
         moment.subfolderId = targetFolderId;
+        if (moment.type !== 'upload') moment.type = 'upload';
+        await moment.save();
       }
 
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        const mimeType = file.mimetype;
-        const stream = Readable.from(file.buffer);
-        
-        const driveResponse = await drive.files.create({
-          requestBody: {
-            name: `${moment.title || 'untitled'}-${Date.now()}-${i}`,
-            mimeType,
-            parents: [targetFolderId],
-          },
-          media: { mimeType, body: stream },
-        });
-        
-        await drive.permissions.create({
-          fileId: driveResponse.data.id,
-          requestBody: { role: 'reader', type: 'anyone' },
-        });
-        
-        const directUrl = `https://drive.google.com/uc?export=view&id=${driveResponse.data.id}`;
-        
-        const newMediaFile = {
-          name: file.originalname,
-          url: directUrl,
-          type: file.mimetype.startsWith('image/') ? 'image' : 'video',
+      const jwt = new google.auth.JWT({
+        email: JSON.parse(process.env.GOOGLE_DRIVE_CREDENTIALS).client_email,
+        key: JSON.parse(process.env.GOOGLE_DRIVE_CREDENTIALS).private_key,
+        scopes: ['https://www.googleapis.com/auth/drive'],
+      });
+      const token = await jwt.authorize();
+
+      res.json({ subfolderId: targetFolderId, accessToken: token.access_token });
+    } catch (err) {
+      res.status(500).json({ message: 'Failed to start gallery upload', error: err.message });
+    }
+  },
+
+  completeuploadMediaGallery: async (req, res) => {
+    try {
+      const { momentId } = req.params;
+      const { mediaFiles } = req.body;
+      const moment = await Moment.findById(momentId);
+      if (!moment) return res.status(404).json({ message: 'Moment not found' });
+
+      const before = moment.toObject();
+      const maxOrder = moment.mediaFiles.length > 0 ? Math.max(...moment.mediaFiles.map(m => m.order || 0)) : -1;
+
+      for (let i = 0; i < mediaFiles.length; i++) {
+        const f = mediaFiles[i];
+        moment.mediaFiles.push({
+          name: f.name,
+          url: f.url,
+          type: f.type,
           order: maxOrder + i + 1,
-          mediaPublicId: driveResponse.data.id
-        };
-        
-        moment.mediaFiles.push(newMediaFile);
+          mediaPublicId: f.id || f.mediaPublicId,
+        });
       }
 
       await moment.save();
 
-      await logActivity(
-        req,
-        'UPDATE',
-        'Moment',
-        moment._id.toString(),
-        { before: originalData, after: moment.toObject() },
-        `${files.length} media files uploaded to moment "${moment.title}" by ${req.user.name}`
-      );
-
-      const updatedMoment = await Moment.findById(req.params.momentId);
-      res.status(201).json(updatedMoment);
-    } catch (error) {
-      res.status(500).json({ message: 'Failed to upload media to moment', error: error.message });
+      await logActivity(req, 'UPDATE', 'Moment', momentId, before, `${mediaFiles.length} new gallery files added to moment "${moment.title}" by ${req.user.name}`);
+      const updated = await Moment.findById(momentId);
+      res.json({ message: 'Gallery upload completed', moment: updated });
+    } catch (err) {
+      res.status(500).json({ message: 'Failed to complete gallery upload', error: err.message });
     }
   },
 
@@ -160,7 +132,7 @@ export const galleryController = {
         return res.status(400).json({ message: 'No media files found' });
       }
 
-      const maxOrder = moment.mediaFiles.length > 0 
+      const maxOrder = moment.mediaFiles.length > 0
         ? Math.max(...moment.mediaFiles.map(m => m.order || 0))
         : -1;
 
@@ -174,7 +146,7 @@ export const galleryController = {
 
       for (let i = 0; i < filesToProcess.length; i++) {
         const file = filesToProcess[i];
-        
+
         const copiedFile = await drive.files.copy({
           fileId: file.id,
           requestBody: { name: file.name, parents: [targetFolderId] },
@@ -186,7 +158,7 @@ export const galleryController = {
         });
 
         const directUrl = `https://drive.google.com/uc?export=view&id=${copiedFile.data.id}`;
-        
+
         const newMediaFile = {
           name: file.name,
           url: directUrl,
@@ -194,7 +166,7 @@ export const galleryController = {
           order: maxOrder + i + 1,
           mediaPublicId: copiedFile.data.id
         };
-        
+
         moment.mediaFiles.push(newMediaFile);
       }
 
@@ -215,7 +187,7 @@ export const galleryController = {
       res.status(500).json({ message: 'Failed to copy and add Drive media to moment', error: error.message });
     }
   },
-  
+
   deleteGalleryFile: async (req, res) => {
     try {
       const { momentId, mediaId } = req.params;

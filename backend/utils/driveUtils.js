@@ -1,74 +1,71 @@
 import { google } from 'googleapis';
-import { Readable } from 'stream';
 
 // Initialize Google Drive service
-const credentials = JSON.parse(process.env.GOOGLE_DRIVE_CREDENTIALS);
+let drive;
+let auth;
+try {
+  const credentials = JSON.parse(process.env.GOOGLE_DRIVE_CREDENTIALS);
 
-const auth = new google.auth.JWT({
-  email: credentials.client_email,
-  key: credentials.private_key,
-  scopes: ['https://www.googleapis.com/auth/drive'],
-});
+  auth = new google.auth.JWT({
+    email: credentials.client_email,
+    key: credentials.private_key,
+    scopes: ['https://www.googleapis.com/auth/drive'],
+  });
 
-const drive = google.drive({
-  version: 'v3',
-  auth,
-});
+  drive = google.drive({ version: 'v3', auth });
+} catch (error) {
+  console.error('Failed to initialize Google Drive:', error.message);
+  drive = google.drive({ version: 'v3' });
+}
 
-
-// Extract Google Drive file ID from URL
+// Extract file/folder IDs
 export const extractFileIdFromUrl = (url) => {
-  const directMatch = url.match(/[?&]id=([^&]+)/);
-  if (directMatch) return directMatch[1];
-
-  const fileMatch = url.match(/\/file\/d\/([^/]+)/);
-  if (fileMatch) return fileMatch[1];
-
-  return null;
+  const direct = url.match(/[?&]id=([^&]+)/);
+  if (direct) return direct[1];
+  const match = url.match(/\/file\/d\/([^/]+)/);
+  return match ? match[1] : null;
 };
 
-// Extract folder ID from URL
 export const extractFolderIdFromUrl = (url) => {
-  const folderMatch = url.match(/\/folders\/([^/?]+)/);
-  if (folderMatch) return folderMatch[1];
-  return null;
+  const match = url.match(/\/folders\/([^/?]+)/);
+  return match ? match[1] : null;
 };
 
-// Get direct view URL
+// Generate direct view URL
 export const getDirectViewUrl = (url) => {
-  const fileId = extractFileIdFromUrl(url);
-  return fileId ? `https://drive.google.com/uc?export=view&id=${fileId}` : url;
+  const id = extractFileIdFromUrl(url);
+  return id ? `https://drive.google.com/uc?export=view&id=${id}` : url;
 };
 
-// Create subfolder in Drive
-export const createSubfolder = async (parentFolderId, subfolderName) => {
+// Create subfolder
+export const createSubfolder = async (parentFolderId, name) => {
   try {
-    const response = await drive.files.create({
+    const res = await drive.files.create({
       requestBody: {
-        name: subfolderName,
+        name,
         mimeType: 'application/vnd.google-apps.folder',
         parents: [parentFolderId],
       },
     });
-    return response.data.id;
-  } catch (error) {
-    console.error('Error creating subfolder:', error);
-    throw error;
+    return res.data.id;
+  } catch (err) {
+    console.error('Error creating subfolder:', err);
+    throw err;
   }
 };
 
-// List files in a folder
+// Get files in folder
 export const getFilesFromFolder = async (folderId) => {
   try {
-    const response = await drive.files.list({
+    const res = await drive.files.list({
       q: `'${folderId}' in parents and (mimeType contains 'image/' or mimeType contains 'video/')`,
       fields: 'files(id, name, mimeType, webViewLink)',
     });
-    return response.data.files;
-  } catch (error) {
-    console.error('Error getting files from folder:', error);
-    throw error;
+    return res.data.files;
+  } catch (err) {
+    console.error('Error fetching folder files:', err);
+    throw err;
   }
 };
 
-export { drive, Readable };
+export { drive, auth };
