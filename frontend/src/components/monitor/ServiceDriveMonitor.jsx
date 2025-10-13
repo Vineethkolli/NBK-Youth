@@ -342,83 +342,42 @@ export default function ServiceDriveMonitor() {
             <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-xl">
                 <table className="min-w-full divide-y divide-gray-200 text-sm">
                     <thead className="bg-gray-100 sticky top-0">
-                        <tr>
-                            <th className="p-3 text-left font-bold text-gray-700 w-1/2 md:w-auto">Name</th>
-                            <th className="p-3 text-left font-bold text-gray-700 hidden sm:table-cell">Size</th>
-                            <th className="p-3 text-left font-bold text-gray-700 hidden md:table-cell">Modified</th>
-                            <th className="p-3 text-left font-bold text-gray-700 w-24">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-100">
-                        {loading && (
-                             <tr>
-                                 <td colSpan={4} className="p-6 text-center text-indigo-500 font-medium">Loading items...</td>
-                             </tr>
-                        )}
-                        {!loading && !hasItems && (
-                            <tr>
-                                <td colSpan={4} className="p-6 text-center text-gray-500 italic">
-                                    {showTrash ? 'Trash is empty.' : (isRoot ? 'No items found in My Drive.' : 'This folder is empty.')}
-                                </td>
-                            </tr>
-                        )}
-                        {!loading && items.map(item => (
-                            <tr key={item.id} className="hover:bg-indigo-50 transition duration-150">
-                                <td 
-                                    className={`p-3 whitespace-nowrap ${item.isFolder ? 'cursor-pointer' : 'cursor-default'}`} 
-                                    onClick={() => handleItemClick(item)}
-                                >
-                                    <div className="flex items-center space-x-3 font-medium text-gray-800">
-                                        {item.isFolder ? <Folder className="h-5 w-5 text-yellow-500" /> : <File className="h-5 w-5 text-blue-500" />}
-                                        <span className={item.isFolder ? 'hover:text-indigo-600' : ''}>{item.name}</span>
-                                    </div>
-                                </td>
-                                <td className="p-3 text-gray-600 hidden sm:table-cell">{item.size}</td>
-                                <td className="p-3 text-gray-600 hidden md:table-cell">
-                                    {item.modifiedTime ? new Date(item.modifiedTime).toLocaleDateString() : '-'}
-                                </td>
-                                <td className="p-3 whitespace-nowrap space-x-2">
-                                    {/* Download Action (Req 3 & 4) */}
-                                    <button
-                                        onClick={() => handleDownload(item)}
-                                        title={`Download ${item.isFolder ? 'Folder (Note: Zipping is complex)' : 'File'}`}
-                                        className="text-indigo-600 hover:text-indigo-800 p-1 rounded-full hover:bg-indigo-100 transition duration-150"
-                                    >
-                                        <Download className="h-4 w-4" />
-                                    </button>
-
-                                    {showTrash ? (
-                                        // Actions in Trash View: Restore, Permanent Delete
-                                        <>
-                                            <button
-                                                onClick={() => triggerAction(item.id, item.name, 'restore')}
-                                                title="Restore"
-                                                className="text-green-600 hover:text-green-800 p-1 rounded-full hover:bg-green-100 transition duration-150"
-                                            >
-                                                <RotateCcw className="h-4 w-4" />
-                                            </button>
-                                            <button
-                                                onClick={() => triggerAction(item.id, item.name, 'delete')}
-                                                title="Delete Permanently"
-                                                className="text-red-600 hover:text-red-800 p-1 rounded-full hover:bg-red-100 transition duration-150"
-                                            >
-                                                <XCircle className="h-4 w-4" />
-                                            </button>
-                                        </>
-                                    ) : (
-                                        // Actions in Main View: Trash
-                                        <button
-                                            onClick={() => triggerAction(item.id, item.name, 'trash')}
-                                            title="Move to Trash"
-                                            className="text-yellow-600 hover:text-yellow-800 p-1 rounded-full hover:bg-yellow-100 transition duration-150"
-                                        >
-                                            <Trash2 className="h-4 w-4" />
-                                        </button>
-                                    )}
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
+    <tr>
+        <th className="p-3 text-left font-bold text-gray-700">Name</th>
+        <th className="p-3 text-left font-bold text-gray-700 hidden sm:table-cell">Size</th>
+        <th className="p-3 text-left font-bold text-gray-700 hidden sm:table-cell">Count</th>
+        <th className="p-3 text-left font-bold text-gray-700 hidden md:table-cell">Modified</th>
+        <th className="p-3 text-left font-bold text-gray-700">Actions</th>
+    </tr>
+</thead>
+<tbody>
+    {items.map(item => (
+        <tr key={item.id} className="hover:bg-indigo-50 transition duration-150">
+            <td 
+                className={`p-3 whitespace-nowrap ${item.isFolder ? 'cursor-pointer' : 'cursor-default'}`} 
+                onClick={() => handleItemClick(item)}
+            >
+                <div className="flex items-center space-x-3 font-medium text-gray-800">
+                    {item.isFolder ? <Folder className="h-5 w-5 text-yellow-500" /> : <File className="h-5 w-5 text-blue-500" />}
+                    <span className={item.isFolder ? 'hover:text-indigo-600' : ''}>{item.name}</span>
+                </div>
+            </td>
+            <td className="p-3 text-gray-600 hidden sm:table-cell">{item.size}</td>
+            <td className="p-3 text-gray-600 hidden sm:table-cell">{item.count || '-'}</td>
+            <td className="p-3 text-gray-600 hidden md:table-cell">
+                {item.modifiedTime ? new Date(item.modifiedTime).toLocaleDateString() : '-'}
+            </td>
+            <td className="p-3 whitespace-nowrap space-x-2">
+                <button onClick={() => handleDownload(item)} title="Download" className="text-indigo-600 hover:text-indigo-800 p-1 rounded-full hover:bg-indigo-100 transition duration-150">
+                    <Download className="h-4 w-4" />
+                </button>
+                <button onClick={() => triggerAction(item.id, item.name, 'trash')} title="Move to Trash" className="text-red-600 hover:text-grey-800 p-1 rounded-full hover:bg-red-100 transition duration-150">
+                    <Trash2 className="h-4 w-4" />
+                </button>
+            </td>
+        </tr>
+    ))}
+</tbody>
                 </table>
             </div>
 
