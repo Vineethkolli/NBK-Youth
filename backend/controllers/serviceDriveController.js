@@ -295,25 +295,14 @@ export const deleteItemPermanent = async (req, res) => {
 
 export const downloadItem = async (req, res) => {
     const { fileId } = req.params;
-    const isFolder = req.query.isFolder === 'true';
     const itemName = req.query.itemName || fileId;
 
     try {
-        if (isFolder) {
-            console.log(`Attempted download of folder: ${itemName} (${fileId}). Recursive zipping not implemented.`);
-            return res.status(202).json({
-                message: `Folder download request acknowledged for "${itemName}". File download works directly.`,
-                downloadMocked: true
-            });
-        }
-
         const response = await drive.files.get({ fileId, alt: 'media' }, { responseType: 'stream' });
         res.setHeader('Content-Disposition', `attachment; filename="${itemName}"`);
         response.data.pipe(res);
-
     } catch (err) {
         console.error('Download Item Error:', err);
         return res.status(500).json({ message: 'Failed to download item', error: err.message });
     }
 };
-

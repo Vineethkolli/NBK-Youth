@@ -138,44 +138,65 @@ export default function ServiceDriveMonitor() {
     // --- Download Handler (Req 3 & 4) ---
 
     const handleDownload = async (item) => {
-        const url = `${API_URL}/api/monitor/item/download/${item.id}?isFolder=${item.isFolder}&itemName=${encodeURIComponent(item.name)}`;
-        
-        if (item.isFolder) {
-             // For folders, rely on the backend mock/message due to zipping complexity.
-             toast.loading(`Requesting download for folder: "${item.name}"...`);
-             try {
-                // Using axios to get the message from the backend
-                 const res = await axios.get(url);
-                 toast.dismiss();
-                 toast.success(res.data.message || `Folder download request initiated for "${item.name}".`);
-            } catch (err) {
-                toast.dismiss();
-                console.error(err);
-                toast.error(`Failed to initiate folder download.`);
-            }
-        } else {
-             // For files, initiate browser download
-            toast.loading('Preparing file download...');
-            try {
-                const response = await axios.get(url, { responseType: 'blob' });
-                const blob = new Blob([response.data]);
-                const link = document.createElement('a');
-                link.href = window.URL.createObjectURL(blob);
-                link.download = item.name;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                window.URL.revokeObjectURL(link.href);
-                toast.dismiss();
-                toast.success(`File "${item.name}" downloaded!`);
-            } catch (err) {
-                toast.dismiss();
-                console.error(err);
-                toast.error(`Failed to download file: ${item.name}`);
-            }
+    if (!item.isFolder) {
+        // Single file download
+        const url = `${API_URL}/api/monitor/item/download/${item.id}?itemName=${encodeURIComponent(item.name)}`;
+        const toastId = toast.loading(`Downloading "${item.name}"...`);
+        try {
+            const response = await axios.get(url, { responseType: 'blob' });
+            const blob = new Blob([response.data]);
+            const link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            link.download = item.name;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(link.href);
+            toast.dismiss(toastId);
+            toast.success(`File "${item.name}" downloaded!`);
+        } catch (err) {
+            toast.dismiss(toastId);
+            console.error(err);
+            toast.error(`Failed to download "${item.name}"`);
         }
-    };
+        return;
+    }
 
+    // Folder download (all files inside)
+    const toastId = toast.loading(`Downloading all files in folder "${item.name}"...`);
+    try {
+        // 1. Fetch all files inside the folder
+        const res = await axios.get(`${API_URL}/api/monitor/drive/files?parentId=${item.id}`);
+        const files = res.data.items.filter(f => !f.isFolder);
+
+        if (!files.length) {
+            toast.dismiss(toastId);
+            toast.info(`Folder "${item.name}" is empty`);
+            return;
+        }
+
+        // 2. Download each file sequentially (avoid browser overload)
+        for (const file of files) {
+            const fileUrl = `${API_URL}/api/monitor/item/download/${file.id}?itemName=${encodeURIComponent(file.name)}`;
+            const response = await axios.get(fileUrl, { responseType: 'blob' });
+            const blob = new Blob([response.data]);
+            const link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            link.download = file.name;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(link.href);
+        }
+
+        toast.dismiss(toastId);
+        toast.success(`All files in "${item.name}" downloaded!`);
+    } catch (err) {
+        toast.dismiss(toastId);
+        console.error(err);
+        toast.error(`Failed to download folder "${item.name}"`);
+    }
+};
 
     // --- Action Handlers (Trash, Restore, Delete - Req 5) ---
 
