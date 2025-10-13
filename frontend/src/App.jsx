@@ -40,6 +40,7 @@ import Committee from './pages/Committee';
 import ViniPage from './pages/vini';
 import Records from './pages/Records';
 import Histories from './pages/Histories';
+import Monitor from './pages/Monitor';
 
 function RouteTracker() {
   const location = useLocation();
@@ -95,6 +96,7 @@ function AppContent() {
           <Route path="/committee" element={<Committee />} />
           <Route path="/records" element={<Records />} />
           <Route path="/histories" element={<Histories />} />
+          <Route path="/monitor" element={<Monitor />} />
         </Route>
       </Routes>
       

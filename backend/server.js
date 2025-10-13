@@ -34,6 +34,7 @@ import recordsRoutes from './routes/records.js';
 import snapshotRoutes from './routes/snapshots.js';
 import historiesRoutes from './routes/histories.js';
 import cloudinaryRoutes from './routes/cloudinary.js';
+import monitorRoutes from './routes/monitor.js';
 import cron from 'node-cron';
 
 dotenv.config({ quiet: true }); 
@@ -94,6 +95,7 @@ app.use('/api/records', recordsRoutes);
 app.use('/api/snapshots', snapshotRoutes);
 app.use('/api/histories', historiesRoutes);
 app.use('/api/uploads', cloudinaryRoutes);
+app.use('/api/monitor', monitorRoutes);
 
 // Health check endpoint
 app.get('/', (req, res) => {
