@@ -56,9 +56,9 @@ export default function DriveUploadForm({ onSubmit, onClose }) {
           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
         />
         <div className="mt-2 text-xs text-gray-500">
-          <p>• File or folder must have view access for everyone.</p>
-          <p>• File or folder will be displayed in the app directly from your Drive.</p>
-          <p>• Deleting a file or folder in Drive will also remove it from the app.</p>
+          <p>• File or folder must have view access for everyone</p>
+          <p>• File or folder will be displayed directly from your Drive</p>
+          <p>• Deleting in your Drive will also remove it from the app</p>
         </div>
       </div>
 

@@ -109,31 +109,37 @@ function GalleryGrid({
           <h2 className="text-xl font-semibold">{moment.title}</h2>
         </div>
         <div className="flex items-center space-x-4">
-          {canManageMedia && (
-            <>
-              <button onClick={() => setShowUploadForm(true)} className="btn-primary">
-                <Upload className="h-4 w-4 mr-2" />
-              </button>
-              <button onClick={() => setShowDriveForm(true)} className="btn-primary">
-                <Copy className="h-4 w-4 mr-2" />
-              </button>
-              <button
-                onClick={() => setIsReorderMode(true)}
-                disabled={isReorderMode}
-                className={`btn-secondary ${isReorderMode ? 'opacity-50 cursor-not-allowed' : ''}`}
-                title={isReorderMode ? 'Reorder is active' : 'Enter reorder mode'}
-              >
-                <GripHorizontal className="h-4 w-4 mr-2" />
-              </button>
-              <button
-                onClick={() => { setIsEditMode(!isEditMode); setIsReorderMode(false); }}
-                className={`btn-secondary ${isEditMode ? 'bg-red-100' : ''}`}
-              >
-                <Edit2 className="h-4 w-4 mr-2" />
-                {isEditMode ? 'Done' : ''}
-              </button>
-            </>
-          )}
+         {canManageMedia && (
+  <>
+    {/* Hide Upload & Copy buttons if uploaded via Drive */}
+    {moment.type !== 'drive' && (
+      <>
+        <button onClick={() => setShowUploadForm(true)} className="btn-primary">
+          <Upload className="h-4 w-4 mr-2" />
+        </button>
+        <button onClick={() => setShowDriveForm(true)} className="btn-primary">
+          <Copy className="h-4 w-4 mr-2" />
+        </button>
+      </>
+    )}
+
+    <button
+      onClick={() => setIsReorderMode(true)}
+      disabled={isReorderMode}
+      className={`btn-secondary ${isReorderMode ? 'opacity-50 cursor-not-allowed' : ''}`}
+      title={isReorderMode ? 'Reorder is active' : 'Enter reorder mode'}
+    >
+      <GripHorizontal className="h-4 w-4 mr-2" />
+    </button>
+    <button
+      onClick={() => { setIsEditMode(!isEditMode); setIsReorderMode(false); }}
+      className={`btn-secondary ${isEditMode ? 'bg-red-100' : ''}`}
+    >
+      <Edit2 className="h-4 w-4 mr-2" />
+      {isEditMode ? 'Done' : ''}
+    </button>
+  </>
+)}
           <button onClick={onClose} className="text-gray-600 hover:text-gray-800">
             <X className="h-6 w-6" />
           </button>

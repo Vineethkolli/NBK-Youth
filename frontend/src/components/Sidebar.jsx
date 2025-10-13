@@ -1,5 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, User, History, FolderOpen, UserCog, Users, Bell, ShieldCheck, Settings, IndianRupee, DollarSign, Trash2, CheckSquare, BarChart2, Terminal, MusicIcon, CameraIcon, TrophyIcon, X, ChevronLeft, Calculator, Layers, LayoutDashboard, FileClock } from 'lucide-react';
+import { Home, User, History, FolderOpen, UserCog, Users, Bell, ShieldCheck, Settings, IndianRupee, DollarSign,
+  Trash2, CheckSquare, BarChart2, Terminal, MusicIcon, CameraIcon, TrophyIcon, X, ChevronLeft, Calculator, Layers, 
+  LayoutDashboard, FileClock, Cpu } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 function Sidebar({ isOpen, onNavigate }) {
@@ -36,7 +38,8 @@ function Sidebar({ isOpen, onNavigate }) {
     ] : []),
     ...(['developer'].includes(user?.role) ? [
         { to: '/developer-options', icon: Terminal, label: 'Developer Options' },
-        { to: '/activity-logs',     icon: FileClock, label: 'Activity Logs' }
+        { to: '/activity-logs',     icon: FileClock, label: 'Activity Logs' },
+        { to: '/monitor',     icon: Cpu, label: 'Monitor' }
       ] : []),
     { to: '/tech-stack', icon: Layers, label: 'Tech Stack' }
   ];
