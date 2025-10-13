@@ -3,69 +3,91 @@ import { google } from 'googleapis';
 // Initialize Google Drive with JWT
 let drive;
 try {
-  const credentials = JSON.parse(process.env.GOOGLE_DRIVE_CREDENTIALS);
+    const credentials = JSON.parse(process.env.GOOGLE_DRIVE_CREDENTIALS);
 
-  const auth = new google.auth.JWT({
-    email: credentials.client_email,
-    key: credentials.private_key,
-    // Full scope needed for delete/download/move operations
-    scopes: ['https://www.googleapis.com/auth/drive.metadata.readonly', 'https://www.googleapis.com/auth/drive'],
-  });
+    const auth = new google.auth.JWT({
+        email: credentials.client_email,
+        key: credentials.private_key,
+        scopes: [
+            'https://www.googleapis.com/auth/drive.metadata.readonly',
+            'https://www.googleapis.com/auth/drive'
+        ],
+    });
 
-  drive = google.drive({ version: 'v3', auth });
+    drive = google.drive({ version: 'v3', auth });
 } catch (err) {
-  console.error('Failed to initialize Google Drive:', err.message);
-  // Fallback or throw error if credentials are critical
-  drive = google.drive({ version: 'v3' }); 
+    console.error('Failed to initialize Google Drive:', err.message);
+    drive = google.drive({ version: 'v3' });
 }
 
 export { drive };
 
 // Helper to format size
 const formatSize = (bytes) => {
-    if (bytes === undefined || bytes === null || isNaN(bytes) || bytes === '0') return '-';
-    const units = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-    let i = 0;
-    let size = Number(bytes);
-    while (size >= 1024 && i < units.length - 1) {
-        size /= 1024;
-        i++;
-    }
-    return size.toFixed(2) + ' ' + units[i];
+    if (bytes === undefined || bytes === null || isNaN(bytes) || bytes === '0') return '-';
+    const units = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+    let i = 0;
+    let size = Number(bytes);
+    while (size >= 1024 && i < units.length - 1) {
+        size /= 1024;
+        i++;
+    }
+    return size.toFixed(2) + ' ' + units[i];
 };
 
-// -------------------- Fetch Drive Storage Quota --------------------
 export const getStorageQuota = async (req, res) => {
-  try {
-    const aboutRes = await drive.about.get({
-      fields: 'storageQuota,user',
-    });
+    try {
+        const aboutRes = await drive.about.get({ fields: 'storageQuota,user' });
+        const { storageQuota, user } = aboutRes.data;
 
-    const { storageQuota, user } = aboutRes.data;
+        const userData = {
+            name: user?.displayName || 'Unknown',
+            email: user?.emailAddress || 'Unknown',
+        };
 
-    const userData = {
-      name: user?.displayName || 'Unknown',
-      email: user?.emailAddress || 'Unknown',
-    };
+        const storageData = {
+            limit: storageQuota.limit ? formatSize(Number(storageQuota.limit)) : 'Unlimited/Not Set',
+            used: formatSize(Number(storageQuota.usage)),
+            driveUsed: formatSize(Number(storageQuota.usageInDrive)),
+            trashUsed: formatSize(Number(storageQuota.usageInDriveTrash)),
+        };
 
-    // Using formatSize for all size fields
-    const storageData = {
-      limit: storageQuota.limit
-        ? formatSize(Number(storageQuota.limit))
-        : 'Unlimited/Not Set',
-      used: formatSize(Number(storageQuota.usage)),
-      driveUsed: formatSize(Number(storageQuota.usageInDrive)),
-      trashUsed: formatSize(Number(storageQuota.usageInDriveTrash)),
-    };
-
-    return res.json({ user: userData, storage: storageData });
-  } catch (err) {
-    console.error('Drive Quota Error:', err);
-    return res.status(500).json({ message: 'Failed to fetch storage quota', error: err.message });
-  }
+        return res.json({ user: userData, storage: storageData });
+    } catch (err) {
+        console.error('Drive Quota Error:', err);
+        return res.status(500).json({ message: 'Failed to fetch storage quota', error: err.message });
+    }
 };
 
-// -------------------- Fetch Folder Contents (Non-Trashed) --------------------
+const calculateFolderSizeAndCount = async (folderId) => {
+    let totalSize = 0;
+    let totalCount = 0;
+
+    let nextPageToken = null;
+    const q = `'${folderId}' in parents and trashed = false`;
+
+    do {
+        const res = await drive.files.list({
+            q,
+            fields: 'nextPageToken, files(id, name, size, mimeType)',
+            pageSize: 1000,
+            pageToken: nextPageToken,
+        });
+
+        const files = res.data.files || [];
+        files.forEach(f => {
+            if (f.mimeType !== 'application/vnd.google-apps.folder') {
+                totalSize += Number(f.size || 0);
+                totalCount += 1;
+            }
+        });
+
+        nextPageToken = res.data.nextPageToken;
+    } while (nextPageToken);
+
+    return { size: totalSize, count: totalCount };
+};
+
 export const getFileList = async (req, res) => {
     const parentId = req.query.parentId || 'root';
 
@@ -73,11 +95,9 @@ export const getFileList = async (req, res) => {
         let allFiles = [];
         let nextPageToken = null;
 
-        // Query for files
         let q;
         if (parentId === 'root') {
-            // Include files whose parent is root OR has no parent (orphaned files)
-            q = "( 'root' in parents or 'root' in owners or not 'root' in parents ) and trashed = false";
+            q = "('root' in parents or 'root' in owners or not 'root' in parents) and trashed = false";
         } else {
             q = `'${parentId}' in parents and trashed = false`;
         }
@@ -96,15 +116,38 @@ export const getFileList = async (req, res) => {
             nextPageToken = response.data.nextPageToken;
         } while (nextPageToken);
 
-        // Map items for UI
-        const items = allFiles.map(f => ({
-            id: f.id,
-            name: f.name,
-            size: f.mimeType !== 'application/vnd.google-apps.folder' ? formatSize(f.size) : '-',
-            isFolder: f.mimeType === 'application/vnd.google-apps.folder',
-            mimeType: f.mimeType,
-            modifiedTime: f.modifiedTime,
-        }));
+        let items;
+
+        if (parentId === 'root') {
+            // Show only folders initially with size & count
+            items = await Promise.all(
+                allFiles
+                    .filter(f => f.mimeType === 'application/vnd.google-apps.folder')
+                    .map(async (f) => {
+                        const { size, count } = await calculateFolderSizeAndCount(f.id);
+                        return {
+                            id: f.id,
+                            name: f.name,
+                            size: formatSize(size),
+                            count,
+                            isFolder: true,
+                            mimeType: f.mimeType,
+                            modifiedTime: f.modifiedTime,
+                        };
+                    })
+            );
+        } else {
+            // Inside a folder, show all items normally
+            items = allFiles.map(f => ({
+                id: f.id,
+                name: f.name,
+                size: f.mimeType !== 'application/vnd.google-apps.folder' ? formatSize(f.size) : '-',
+                count: undefined,
+                isFolder: f.mimeType === 'application/vnd.google-apps.folder',
+                mimeType: f.mimeType,
+                modifiedTime: f.modifiedTime,
+            }));
+        }
 
         return res.json({ parentId, items });
     } catch (err) {
@@ -113,20 +156,45 @@ export const getFileList = async (req, res) => {
     }
 };
 
-// -------------------- Fetch Trash Contents --------------------
+const calculateFolderSizeAndCountTrash = async (folderId) => {
+    let totalSize = 0;
+    let totalCount = 0;
 
-// -------------------- Fetch Trash Contents --------------------
+    let nextPageToken = null;
+    const q = `'${folderId}' in parents and trashed = true`;
+
+    do {
+        const res = await drive.files.list({
+            q,
+            fields: 'nextPageToken, files(id, name, size, mimeType)',
+            pageSize: 1000,
+            pageToken: nextPageToken,
+        });
+
+        const files = res.data.files || [];
+        files.forEach(f => {
+            if (f.mimeType !== 'application/vnd.google-apps.folder') {
+                totalSize += Number(f.size || 0);
+                totalCount += 1;
+            }
+        });
+
+        nextPageToken = res.data.nextPageToken;
+    } while (nextPageToken);
+
+    return { size: totalSize, count: totalCount };
+};
+
 export const getTrashList = async (req, res) => {
+    const parentId = req.query.parentId || 'root'; // use query to drill into folders in trash
+
     try {
         let allFiles = [];
         let nextPageToken = null;
 
-        // Query: only trashed items; we fetch parents to identify children of trashed folders
-        const q = 'trashed = true';
+        const q = parentId === 'root' ? 'trashed = true' : `'${parentId}' in parents and trashed = true`;
         const fields = 'nextPageToken, files(id, name, size, mimeType, parents, modifiedTime)';
-
-        // Order items by modification date descending for easier review
-        const orderBy = 'modifiedTime desc';
+        const orderBy = 'folder, name';
 
         do {
             const resFiles = await drive.files.list({
@@ -142,37 +210,40 @@ export const getTrashList = async (req, res) => {
             nextPageToken = resFiles.data.nextPageToken;
         } while (nextPageToken);
 
-        // 1) Collect IDs of trashed folders
-        const trashedFolderIds = new Set(
-            allFiles
-                .filter(f => f.mimeType === 'application/vnd.google-apps.folder')
-                .map(f => f.id)
-        );
+        let items;
 
-        // 2) Keep:
-        //    - All trashed folders (they should always appear),
-        //    - Trashed files that are NOT children of any trashed folder.
-        const topLevelTrashedItems = allFiles.filter(item => {
-            if (item.mimeType === 'application/vnd.google-apps.folder') return true;
+        if (parentId === 'root') {
+            // Show only folders at top-level trash
+            items = await Promise.all(
+                allFiles
+                    .filter(f => f.mimeType === 'application/vnd.google-apps.folder')
+                    .map(async (f) => {
+                        const { size, count } = await calculateFolderSizeAndCountTrash(f.id);
+                        return {
+                            id: f.id,
+                            name: f.name,
+                            size: formatSize(size),
+                            count,
+                            isFolder: true,
+                            mimeType: f.mimeType,
+                            modifiedTime: f.modifiedTime,
+                        };
+                    })
+            );
+        } else {
+            // Inside a trash folder, show all items normally
+            items = allFiles.map(f => ({
+                id: f.id,
+                name: f.name,
+                size: f.mimeType !== 'application/vnd.google-apps.folder' ? formatSize(f.size) : '-',
+                count: undefined,
+                isFolder: f.mimeType === 'application/vnd.google-apps.folder',
+                mimeType: f.mimeType,
+                modifiedTime: f.modifiedTime,
+            }));
+        }
 
-            const parents = item.parents || [];
-            const isChildOfTrashedFolder = parents.some(pid => trashedFolderIds.has(pid));
-            return !isChildOfTrashedFolder;
-        });
-
-        // Map for UI
-        const items = topLevelTrashedItems.map(f => ({
-            id: f.id,
-            name: f.name,
-            size: f.mimeType !== 'application/vnd.google-apps.folder' ? formatSize(f.size) : '-',
-            isFolder: f.mimeType === 'application/vnd.google-apps.folder',
-            mimeType: f.mimeType,
-            modifiedTime: f.modifiedTime,
-            parents: f.parents || [],
-        }));
-
-        return res.json({ items });
-
+        return res.json({ parentId, items });
     } catch (err) {
         console.error('Trash List Error:', err);
         return res.status(500).json({ message: 'Failed to fetch trash list', error: err.message });
@@ -180,79 +251,69 @@ export const getTrashList = async (req, res) => {
 };
 
 
-// -------------------- Trash Item --------------------
 export const trashItem = async (req, res) => {
-  const { fileId } = req.params;
-  try {
-    const confirm = req.body.confirm;
-    if (!confirm) return res.status(400).json({ message: 'Confirmation required to move to trash' });
+    const { fileId } = req.params;
+    try {
+        const confirm = req.body.confirm;
+        if (!confirm) return res.status(400).json({ message: 'Confirmation required to move to trash' });
 
-    await drive.files.update({ fileId, requestBody: { trashed: true } });
-    return res.json({ message: 'Item moved to trash' });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ message: 'Failed to trash item', error: err.message });
-  }
+        await drive.files.update({ fileId, requestBody: { trashed: true } });
+        return res.json({ message: 'Item moved to trash' });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: 'Failed to trash item', error: err.message });
+    }
 };
 
-// -------------------- Restore Item --------------------
 export const restoreItem = async (req, res) => {
-  const { fileId } = req.params;
-  try {
-    const confirm = req.body.confirm;
-    if (!confirm) return res.status(400).json({ message: 'Confirmation required to restore item' });
+    const { fileId } = req.params;
+    try {
+        const confirm = req.body.confirm;
+        if (!confirm) return res.status(400).json({ message: 'Confirmation required to restore item' });
 
-    await drive.files.update({ fileId, requestBody: { trashed: false } });
-    return res.json({ message: 'Item restored' });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ message: 'Failed to restore item', error: err.message });
-  }
+        await drive.files.update({ fileId, requestBody: { trashed: false } });
+        return res.json({ message: 'Item restored' });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: 'Failed to restore item', error: err.message });
+    }
 };
 
-// -------------------- Permanently Delete Item --------------------
 export const deleteItemPermanent = async (req, res) => {
-  const { fileId } = req.params;
-  try {
-    const confirm = req.body.confirm;
-    if (!confirm) return res.status(400).json({ message: 'Confirmation required to delete permanently' });
+    const { fileId } = req.params;
+    try {
+        const confirm = req.body.confirm;
+        if (!confirm) return res.status(400).json({ message: 'Confirmation required to delete permanently' });
 
-    await drive.files.delete({ fileId });
-    return res.json({ message: 'Item permanently deleted' });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ message: 'Failed to delete item permanently', error: err.message });
-  }
+        await drive.files.delete({ fileId });
+        return res.json({ message: 'Item permanently deleted' });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: 'Failed to delete item permanently', error: err.message });
+    }
 };
 
-// -------------------- Download Item --------------------
 export const downloadItem = async (req, res) => {
-    const { fileId } = req.params;
-    const isFolder = req.query.isFolder === 'true';
-    const itemName = req.query.itemName || fileId;
+    const { fileId } = req.params;
+    const isFolder = req.query.isFolder === 'true';
+    const itemName = req.query.itemName || fileId;
 
-    try {
-        if (isFolder) {
-            // For folders, we return a success message as recursive zipping of folders is complex 
-            // and cannot be implemented simply in this environment.
-            console.log(`Attempted download of folder: ${itemName} (${fileId}). Recursive zipping not implemented in this mock.`);
-            return res.status(202).json({ 
-                message: `Folder download request acknowledged for "${itemName}". Full folder zipping is complex and cannot be implemented in this demonstration. File download works directly.`,
-                downloadMocked: true 
-            });
-        }
+    try {
+        if (isFolder) {
+            console.log(`Attempted download of folder: ${itemName} (${fileId}). Recursive zipping not implemented.`);
+            return res.status(202).json({
+                message: `Folder download request acknowledged for "${itemName}". File download works directly.`,
+                downloadMocked: true
+            });
+        }
 
-        // Handle direct file download
-        const response = await drive.files.get({ fileId, alt: 'media' }, { responseType: 'stream' });
+        const response = await drive.files.get({ fileId, alt: 'media' }, { responseType: 'stream' });
+        res.setHeader('Content-Disposition', `attachment; filename="${itemName}"`);
+        response.data.pipe(res);
 
-        // Set headers for download
-        res.setHeader('Content-Disposition', `attachment; filename="${itemName}"`);
-        
-        // Pipe the file data to the response
-        response.data.pipe(res);
-
-    } catch (err) {
-        console.error('Download Item Error:', err);
-        return res.status(500).json({ message: 'Failed to download item', error: err.message });
-    }
+    } catch (err) {
+        console.error('Download Item Error:', err);
+        return res.status(500).json({ message: 'Failed to download item', error: err.message });
+    }
 };
+
