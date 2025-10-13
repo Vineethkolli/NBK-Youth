@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import axios from 'axios';
-import { RefreshCcw, Trash2, RotateCcw, XCircle, Folder, File, Download, Home } from 'lucide-react';
+import { RefreshCcw, Trash2, Folder, File, Download, Home } from 'lucide-react';
 import { API_URL } from '../../utils/config';
 import { toast } from 'react-hot-toast';
 
-// --- Custom Confirmation Modal Component ---
+// Confirmation Modal
 const ConfirmationModal = ({ isOpen, title, message, onConfirm, onCancel, confirmText, isDestructive }) => {
     if (!isOpen) return null;
 
@@ -32,14 +32,15 @@ const ConfirmationModal = ({ isOpen, title, message, onConfirm, onCancel, confir
     );
 };
 
-// --- Main Component ---
+// Main Component
 export default function ServiceDriveMonitor() {
     const [quotaData, setQuotaData] = useState(null);
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showTrash, setShowTrash] = useState(false);
+    const [processingItems, setProcessingItems] = useState({});
     
-    // Navigation State: currentFolderId is the ID of the folder being viewed.
+    // Navigation State currentFolderId is the ID of the folder being viewed.
     const [currentFolderId, setCurrentFolderId] = useState('root');
     const [pathHistory, setPathHistory] = useState([{ id: 'root', name: 'My Drive' }]);
 
@@ -57,8 +58,7 @@ export default function ServiceDriveMonitor() {
         action: '',
     });
 
-    // --- Data Fetching Functions ---
-
+    // Data Fetching Functions
     const fetchStorageQuota = useCallback(async () => {
         try {
             const res = await axios.get(`${API_URL}/api/monitor/drive/quota`);
@@ -77,12 +77,11 @@ export default function ServiceDriveMonitor() {
         } catch (err) {
             console.error('Failed to fetch items:', err);
             toast.error('Failed to fetch folder contents');
-            // Fallback to root if the folder is inaccessible
             if (currentFolderId !== 'root') handleNavigation('root'); 
         } finally {
             setLoading(false);
         }
-    }, [currentFolderId]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [currentFolderId]); 
 
     const fetchTrashItems = useCallback(async () => {
         setLoading(true);
@@ -110,10 +109,9 @@ export default function ServiceDriveMonitor() {
         fetchData();
     }, [fetchData]);
 
-    // --- Navigation Handlers ---
-
+    // Navigation Handlers
     const handleNavigation = useCallback((itemId, itemName) => {
-        if (showTrash) setShowTrash(false); // Exit trash view if navigating
+        if (showTrash) setShowTrash(false); 
         if (itemId === currentFolderId) return;
 
         setCurrentFolderId(itemId);
@@ -135,15 +133,15 @@ export default function ServiceDriveMonitor() {
         }
     };
     
-    // --- Download Handler (Req 3 & 4) ---
+// Download Handler
+const handleDownload = async (item) => {
+    if (processingItems[item.id]) return;
+    setProcessingItems(prev => ({ ...prev, [item.id]: true }));
 
-    const handleDownload = async (item) => {
-    if (!item.isFolder) {
-        // Single file download
-        const url = `${API_URL}/api/monitor/item/download/${item.id}?itemName=${encodeURIComponent(item.name)}`;
-        const toastId = toast.loading(`Downloading "${item.name}"...`);
-        try {
-            const response = await axios.get(url, { responseType: 'blob' });
+    const toastId = toast.loading(item.isFolder ? `Downloading folder "${item.name}"...` : `Downloading "${item.name}"...`);
+    try {
+        if (!item.isFolder) {
+            const response = await axios.get(`${API_URL}/api/monitor/item/download/${item.id}?itemName=${encodeURIComponent(item.name)}`, { responseType: 'blob' });
             const blob = new Blob([response.data]);
             const link = document.createElement('a');
             link.href = window.URL.createObjectURL(blob);
@@ -152,54 +150,32 @@ export default function ServiceDriveMonitor() {
             link.click();
             document.body.removeChild(link);
             window.URL.revokeObjectURL(link.href);
-            toast.dismiss(toastId);
-            toast.success(`File "${item.name}" downloaded!`);
-        } catch (err) {
-            toast.dismiss(toastId);
-            console.error(err);
-            toast.error(`Failed to download "${item.name}"`);
+        } else {
+            const res = await axios.get(`${API_URL}/api/monitor/drive/files?parentId=${item.id}`);
+            const files = res.data.items.filter(f => !f.isFolder);
+            for (const file of files) {
+                const response = await axios.get(`${API_URL}/api/monitor/item/download/${file.id}?itemName=${encodeURIComponent(file.name)}`, { responseType: 'blob' });
+                const blob = new Blob([response.data]);
+                const link = document.createElement('a');
+                link.href = window.URL.createObjectURL(blob);
+                link.download = file.name;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(link.href);
+            }
         }
-        return;
-    }
-
-    // Folder download (all files inside)
-    const toastId = toast.loading(`Downloading all files in folder "${item.name}"...`);
-    try {
-        // 1. Fetch all files inside the folder
-        const res = await axios.get(`${API_URL}/api/monitor/drive/files?parentId=${item.id}`);
-        const files = res.data.items.filter(f => !f.isFolder);
-
-        if (!files.length) {
-            toast.dismiss(toastId);
-            toast.info(`Folder "${item.name}" is empty`);
-            return;
-        }
-
-        // 2. Download each file sequentially (avoid browser overload)
-        for (const file of files) {
-            const fileUrl = `${API_URL}/api/monitor/item/download/${file.id}?itemName=${encodeURIComponent(file.name)}`;
-            const response = await axios.get(fileUrl, { responseType: 'blob' });
-            const blob = new Blob([response.data]);
-            const link = document.createElement('a');
-            link.href = window.URL.createObjectURL(blob);
-            link.download = file.name;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            window.URL.revokeObjectURL(link.href);
-        }
-
-        toast.dismiss(toastId);
-        toast.success(`All files in "${item.name}" downloaded!`);
+        toast.success(item.isFolder ? `Folder "${item.name}" downloaded!` : `File "${item.name}" downloaded!`);
     } catch (err) {
-        toast.dismiss(toastId);
         console.error(err);
-        toast.error(`Failed to download folder "${item.name}"`);
+        toast.error(`Failed to download "${item.name}"`);
+    } finally {
+        toast.dismiss(toastId);
+        setProcessingItems(prev => ({ ...prev, [item.id]: false }));
     }
 };
 
-    // --- Action Handlers (Trash, Restore, Delete - Req 5) ---
-
+    // Action Handlers Trash, Restore, Delete
     const triggerAction = (itemId, itemName, action) => {
         const isDestructive = action === 'delete';
         const title = isDestructive ? 'Permanent Delete' : (action === 'trash' ? 'Move to Trash' : 'Restore Item');
@@ -225,50 +201,39 @@ export default function ServiceDriveMonitor() {
         setModal({
             ...modal,
             title: 'Final Warning: Irreversible Action',
-            message: `Are you absolutely sure? This action is truly irreversible and will permanently delete "${itemName}".`,
+            message: `Are you sure? This action is irreversible and will permanently delete "${itemName}".`,
             confirmText: 'DELETE PERMANENTLY',
             onConfirm: () => handleActionExecution(itemId, itemName, 'delete'),
             isDestructive: true,
         });
     };
 
-    // Execute API action
-    const handleActionExecution = async (itemId, itemName, action) => {
-        setModal({ ...modal, isOpen: false }); // Close modal before API call
-        
-        try {
-            let url = '';
-            let method = '';
-            let data = {};
+   const handleActionExecution = async (itemId, itemName, action) => {
+    if (processingItems[itemId]) return;
+    setProcessingItems(prev => ({ ...prev, [itemId]: true }));
+    setModal({ ...modal, isOpen: false });
 
-            if (action === 'trash') {
-                url = `${API_URL}/api/monitor/item/trash/${itemId}`;
-                method = 'PUT';
-                data = { confirm: true };
-            } else if (action === 'restore') {
-                url = `${API_URL}/api/monitor/item/restore/${itemId}`;
-                method = 'PUT';
-                data = { confirm: true };
-            } else if (action === 'delete') {
-                url = `${API_URL}/api/monitor/item/delete/${itemId}`;
-                method = 'DELETE';
-                data = { confirm: true };
-            } else {
-                return; 
-            }
+    try {
+        let url = '', method = '', data = {};
+        if (action === 'trash') { url = `${API_URL}/api/monitor/item/trash/${itemId}`; method = 'PUT'; data = { confirm: true }; }
+        else if (action === 'restore') { url = `${API_URL}/api/monitor/item/restore/${itemId}`; method = 'PUT'; data = { confirm: true }; }
+        else if (action === 'delete') { url = `${API_URL}/api/monitor/item/delete/${itemId}`; method = 'DELETE'; data = { confirm: true }; }
+        else return;
 
-            await axios({ url, method, data });
+        const toastId = toast.loading(`${action === 'delete' ? 'Deleting' : action === 'trash' ? 'Trashing' : 'Restoring'} "${itemName}"...`);
+        await axios({ url, method, data });
+        toast.dismiss(toastId);
+        toast.success(`Item "${itemName}" successfully ${action}d!`);
+        fetchData();
+    } catch (err) {
+        console.error(err);
+        toast.error(`Failed to ${action} "${itemName}"`);
+    } finally {
+        setProcessingItems(prev => ({ ...prev, [itemId]: false }));
+    }
+};
 
-            toast.success(`Item "${itemName}" successfully ${action}d!`);
-            fetchData(); // Refresh list
-        } catch (err) {
-            console.error(err);
-            toast.error(`Failed to ${action} item "${itemName}"`);
-        }
-    };
-
-    // --- Rendering ---
-
+    // Rendering
     const currentPath = useMemo(() => {
         // Only show breadcrumbs if not in trash view
         if (showTrash) return <h3 className="text-xl font-semibold text-gray-700">Trash Bin</h3>;
@@ -304,7 +269,6 @@ export default function ServiceDriveMonitor() {
                 Service Drive Monitor
             </h2>
 
-            {/* Quota Display (Always Visible) */}
             <div className="flex flex-col md:flex-row md:justify-between md:items-start space-y-4 md:space-y-0 md:space-x-4">
                 <div className="flex flex-col space-y-1 text-sm text-gray-700 p-4 bg-gray-50 rounded-xl w-full md:w-1/3 shadow-inner border border-gray-100">
                     <p className="font-bold text-gray-900 truncate">User: {quotaData?.user.name || 'N/A'}</p>
@@ -325,19 +289,15 @@ export default function ServiceDriveMonitor() {
                 </div>
             </div>
             
-            {/* Navigation and Control Buttons (Always Visible) */}
             <div className="flex flex-col sm:flex-row justify-between items-center py-2 border-b border-gray-200">
-                {/* Breadcrumb / Current Path */}
                 <div className='mb-2 sm:mb-0'>{currentPath}</div>
 
                 <div className="flex space-x-3">
-                    {/* Toggle Trash Button */}
                     <button
                         onClick={() => {
                             setShowTrash(!showTrash);
-                            // When viewing trash, currentFolderId is irrelevant for API, but for state clarity:
                             if (!showTrash) setCurrentFolderId('trash-view'); 
-                            else handleNavigation('root'); // Go back to root when hiding trash
+                            else handleNavigation('root'); 
                         }}
                         className={`flex items-center space-x-2 px-3 py-2 rounded-lg font-medium transition duration-200 shadow-md ${
                             showTrash ? 'bg-indigo-600 text-white hover:bg-indigo-700' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
@@ -347,7 +307,6 @@ export default function ServiceDriveMonitor() {
                         <span>{showTrash ? 'Exit Trash' : 'View Trash'}</span>
                     </button>
 
-                    {/* Refresh Button */}
                     <button
                         onClick={fetchData}
                         className="flex items-center space-x-2 bg-green-600 text-white px-3 py-2 rounded-lg hover:bg-green-700 transition duration-200 shadow-md"
@@ -359,7 +318,6 @@ export default function ServiceDriveMonitor() {
                 </div>
             </div>
 
-            {/* File/Folder Table */}
             <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-xl">
                 <table className="min-w-full divide-y divide-gray-200 text-sm">
                     <thead className="bg-gray-100 sticky top-0">
@@ -389,12 +347,23 @@ export default function ServiceDriveMonitor() {
                 {item.modifiedTime ? new Date(item.modifiedTime).toLocaleDateString() : '-'}
             </td>
             <td className="p-3 whitespace-nowrap space-x-2">
-                <button onClick={() => handleDownload(item)} title="Download" className="text-indigo-600 hover:text-indigo-800 p-1 rounded-full hover:bg-indigo-100 transition duration-150">
-                    <Download className="h-4 w-4" />
-                </button>
-                <button onClick={() => triggerAction(item.id, item.name, 'trash')} title="Move to Trash" className="text-red-600 hover:text-grey-800 p-1 rounded-full hover:bg-red-100 transition duration-150">
-                    <Trash2 className="h-4 w-4" />
-                </button>
+<button
+    onClick={() => handleDownload(item)}
+    title="Download"
+    className={`text-indigo-600 hover:text-indigo-800 p-1 rounded-full transition duration-150 ${processingItems[item.id] ? 'cursor-not-allowed opacity-50' : 'hover:bg-indigo-100'}`}
+    disabled={processingItems[item.id]}
+>
+    {processingItems[item.id] ? <span className="animate-spin inline-block w-4 h-4 border-2 border-indigo-600 border-t-transparent rounded-full"></span> : <Download className="h-4 w-4" />}
+</button>
+
+<button
+    onClick={() => triggerAction(item.id, item.name, 'trash')}
+    title="Move to Trash"
+    className={`text-red-600 hover:text-gray-800 p-1 rounded-full transition duration-150 ${processingItems[item.id] ? 'cursor-not-allowed opacity-50' : 'hover:bg-red-100'}`}
+    disabled={processingItems[item.id]}
+>
+    {processingItems[item.id] ? <span className="animate-spin inline-block w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full"></span> : <Trash2 className="h-4 w-4" />}
+</button>
             </td>
         </tr>
     ))}
@@ -402,7 +371,6 @@ export default function ServiceDriveMonitor() {
                 </table>
             </div>
 
-            {/* Confirmation Modal (Req 5) */}
             <ConfirmationModal 
                 isOpen={modal.isOpen}
                 title={modal.title}
