@@ -1,168 +1,437 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import axios from 'axios';
-import { RefreshCcw, Trash2, RotateCcw, XCircle } from 'lucide-react';
+import { RefreshCcw, Trash2, RotateCcw, XCircle, Folder, File, Download, Home } from 'lucide-react';
 import { API_URL } from '../../utils/config';
 import { toast } from 'react-hot-toast';
 
+// --- Custom Confirmation Modal Component ---
+const ConfirmationModal = ({ isOpen, title, message, onConfirm, onCancel, confirmText, isDestructive }) => {
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50">
+            <div className={`bg-white rounded-xl p-6 shadow-2xl max-w-sm w-full transform transition-all duration-300 scale-100`}>
+                <h3 className={`text-xl font-bold mb-3 ${isDestructive ? 'text-red-600' : 'text-gray-800'}`}>{title}</h3>
+                <p className="text-gray-600 mb-6">{message}</p>
+                <div className="flex justify-end space-x-3">
+                    <button
+                        onClick={onCancel}
+                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition duration-150 shadow-sm"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        onClick={onConfirm}
+                        className={`px-4 py-2 text-sm font-medium text-white rounded-lg transition duration-150 shadow-md ${isDestructive ? 'bg-red-600 hover:bg-red-700' : 'bg-indigo-600 hover:bg-indigo-700'}`}
+                    >
+                        {confirmText || 'Confirm'}
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// --- Main Component ---
 export default function ServiceDriveMonitor() {
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [showTrash, setShowTrash] = useState(false);
+    const [quotaData, setQuotaData] = useState(null);
+    const [items, setItems] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [showTrash, setShowTrash] = useState(false);
+    
+    // Navigation State: currentFolderId is the ID of the folder being viewed.
+    const [currentFolderId, setCurrentFolderId] = useState('root');
+    const [pathHistory, setPathHistory] = useState([{ id: 'root', name: 'My Drive' }]);
 
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      const res = await axios.get(`${API_URL}/api/monitor/drive`);
-      // Include trashed info for folders
-      setData(res.data);
-      toast.success('Drive data synced');
-    } catch (err) {
-      console.error(err);
-      toast.error('Failed to fetch Drive data');
-    } finally {
-      setLoading(false);
-    }
-  };
+    // Modal State
+    const [modal, setModal] = useState({
+        isOpen: false,
+        title: '',
+        message: '',
+        onConfirm: () => {},
+        onCancel: () => setModal({ ...modal, isOpen: false }),
+        confirmText: 'Confirm',
+        isDestructive: false,
+        itemId: null,
+        itemName: '',
+        action: '',
+    });
 
-  useEffect(() => {
-    fetchData(); // Auto fetch on mount
-  }, []);
+    // --- Data Fetching Functions ---
 
-  const handleTrash = async (fileId) => {
-    try {
-      await axios.put(`${API_URL}/api/monitor/folder/trash/${fileId}`);
-      toast.success('Folder moved to trash');
-      fetchData();
-    } catch (err) {
-      console.error(err);
-      toast.error('Failed to trash folder');
-    }
-  };
+    const fetchStorageQuota = useCallback(async () => {
+        try {
+            const res = await axios.get(`${API_URL}/api/monitor/drive/quota`);
+            setQuotaData(res.data);
+        } catch (err) {
+            console.error('Failed to fetch quota:', err);
+            toast.error('Failed to fetch Drive storage quota');
+        }
+    }, []);
 
-  const handleRestore = async (fileId) => {
-    try {
-      await axios.put(`${API_URL}/api/monitor/folder/restore/${fileId}`);
-      toast.success('Folder restored');
-      fetchData();
-    } catch (err) {
-      console.error(err);
-      toast.error('Failed to restore folder');
-    }
-  };
+    const fetchCurrentItems = useCallback(async () => {
+        setLoading(true);
+        try {
+            const res = await axios.get(`${API_URL}/api/monitor/drive/files?parentId=${currentFolderId}`);
+            setItems(res.data.items);
+        } catch (err) {
+            console.error('Failed to fetch items:', err);
+            toast.error('Failed to fetch folder contents');
+            // Fallback to root if the folder is inaccessible
+            if (currentFolderId !== 'root') handleNavigation('root'); 
+        } finally {
+            setLoading(false);
+        }
+    }, [currentFolderId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const handleDeletePermanent = async (fileId) => {
-    try {
-      await axios.delete(`${API_URL}/api/monitor/folder/delete/${fileId}`);
-      toast.success('Folder permanently deleted');
-      fetchData();
-    } catch (err) {
-      console.error(err);
-      toast.error('Failed to delete folder permanently');
-    }
-  };
+    const fetchTrashItems = useCallback(async () => {
+        setLoading(true);
+        try {
+            const res = await axios.get(`${API_URL}/api/monitor/drive/trash`);
+            setItems(res.data.items);
+        } catch (err) {
+            console.error('Failed to fetch trash items:', err);
+            toast.error('Failed to fetch trash contents');
+        } finally {
+            setLoading(false);
+        }
+    }, []);
 
-  if (loading) return <p>Loading Drive data...</p>;
-  if (!data) return null;
+    const fetchData = useCallback(() => {
+        fetchStorageQuota();
+        if (showTrash) {
+            fetchTrashItems();
+        } else {
+            fetchCurrentItems();
+        }
+    }, [fetchStorageQuota, fetchCurrentItems, fetchTrashItems, showTrash]);
 
-  const { user, storage, folders } = data;
+    useEffect(() => {
+        fetchData();
+    }, [fetchData]);
 
-  // Filter folders based on trashed toggle
-  const visibleFolders = folders.filter(f => (showTrash ? f.trashed : !f.trashed));
+    // --- Navigation Handlers ---
 
-  return (
-    <div className="bg-white p-4 rounded-lg shadow space-y-4">
-      <h2 className="text-2xl font-semibold mb-4">Service Drive Storage</h2>
+    const handleNavigation = useCallback((itemId, itemName) => {
+        if (showTrash) setShowTrash(false); // Exit trash view if navigating
+        if (itemId === currentFolderId) return;
 
-      <div className="flex justify-between items-center">
-        <div>
-          <p><strong>User:</strong> {user.name}</p>
-          <p><strong>Email:</strong> {user.email}</p>
-        </div>
-        <div className="flex space-x-2">
-          <button
-            onClick={() => setShowTrash(!showTrash)}
-            className="bg-gray-200 text-gray-800 px-3 py-1 rounded-md hover:bg-gray-300"
-          >
-            {showTrash ? 'Hide Trash' : 'Show Trash'}
-          </button>
-          <button
-            onClick={fetchData}
-            className="flex items-center space-x-2 bg-indigo-600 text-white px-3 py-1 rounded-md hover:bg-indigo-700"
-          >
-            <RefreshCcw className="h-4 w-4" />
-            <span>Sync</span>
-          </button>
-        </div>
-      </div>
+        setCurrentFolderId(itemId);
 
-      <div>
-        <h3 className="font-semibold mb-2">Storage</h3>
-        <ul className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
-          <li><strong>Limit:</strong> {storage.limit}</li>
-          <li><strong>Used:</strong> {storage.used}</li>
-          <li><strong>Drive Used:</strong> {storage.driveUsed}</li>
-          <li><strong>Trash Used:</strong> {storage.trashUsed}</li>
-        </ul>
-      </div>
+        // Update path history for breadcrumbs
+        const index = pathHistory.findIndex(p => p.id === itemId);
+        if (index !== -1) {
+            // Navigate back (breadcrumb click)
+            setPathHistory(pathHistory.slice(0, index + 1));
+        } else if (itemName) {
+            // Navigate forward (folder click)
+            setPathHistory([...pathHistory, { id: itemId, name: itemName }]);
+        }
+    }, [currentFolderId, pathHistory, showTrash]);
 
-      <div>
-        <h3 className="font-semibold mb-2">Folder Usage</h3>
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse text-sm">
-            <thead>
-              <tr className="bg-gray-200">
-                <th className="p-2 text-left">Folder Name</th>
-                <th className="p-2 text-left">Size (GB)</th>
-                <th className="p-2 text-left">Files</th>
-                <th className="p-2 text-left">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {visibleFolders.length === 0 && (
-                <tr>
-                  <td colSpan={4} className="p-2 text-center">No folders found</td>
-                </tr>
-              )}
-              {visibleFolders.map(f => (
-                <tr key={f.id} className="border-b hover:bg-gray-50">
-                  <td className="p-2">{f.name}</td>
-                  <td className="p-2">{f.sizeGB.toFixed(2)}</td>
-                  <td className="p-2">{f.fileCount}</td>
-                  <td className="p-2 flex space-x-2">
-                    {!f.trashed && (
-                      <button
-                        onClick={() => handleTrash(f.id)}
-                        className="flex items-center space-x-1 text-yellow-600 hover:text-yellow-800"
-                      >
+    const handleItemClick = (item) => {
+        if (item.isFolder) {
+            handleNavigation(item.id, item.name);
+        }
+    };
+    
+    // --- Download Handler (Req 3 & 4) ---
+
+    const handleDownload = async (item) => {
+        const url = `${API_URL}/api/monitor/item/download/${item.id}?isFolder=${item.isFolder}&itemName=${encodeURIComponent(item.name)}`;
+        
+        if (item.isFolder) {
+             // For folders, rely on the backend mock/message due to zipping complexity.
+             toast.loading(`Requesting download for folder: "${item.name}"...`);
+             try {
+                // Using axios to get the message from the backend
+                 const res = await axios.get(url);
+                 toast.dismiss();
+                 toast.success(res.data.message || `Folder download request initiated for "${item.name}".`);
+            } catch (err) {
+                toast.dismiss();
+                console.error(err);
+                toast.error(`Failed to initiate folder download.`);
+            }
+        } else {
+             // For files, initiate browser download
+            toast.loading('Preparing file download...');
+            try {
+                const response = await axios.get(url, { responseType: 'blob' });
+                const blob = new Blob([response.data]);
+                const link = document.createElement('a');
+                link.href = window.URL.createObjectURL(blob);
+                link.download = item.name;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(link.href);
+                toast.dismiss();
+                toast.success(`File "${item.name}" downloaded!`);
+            } catch (err) {
+                toast.dismiss();
+                console.error(err);
+                toast.error(`Failed to download file: ${item.name}`);
+            }
+        }
+    };
+
+
+    // --- Action Handlers (Trash, Restore, Delete - Req 5) ---
+
+    const triggerAction = (itemId, itemName, action) => {
+        const isDestructive = action === 'delete';
+        const title = isDestructive ? 'Permanent Delete' : (action === 'trash' ? 'Move to Trash' : 'Restore Item');
+        
+        let message = `Are you sure you want to ${action === 'delete' ? 'permanently delete' : action} "${itemName}"?`;
+        
+        setModal({
+            isOpen: true,
+            title: title,
+            message: message,
+            confirmText: isDestructive ? 'Yes, Continue' : `Yes, ${action.charAt(0).toUpperCase() + action.slice(1)}`,
+            isDestructive: isDestructive,
+            itemId: itemId,
+            itemName: itemName,
+            action: action,
+            onConfirm: () => isDestructive ? handlePermanentDeleteConfirmation(itemId, itemName) : handleActionExecution(itemId, itemName, action),
+            onCancel: () => setModal({ ...modal, isOpen: false }),
+        });
+    };
+    
+    // Step 2 Confirmation for Permanent Delete
+    const handlePermanentDeleteConfirmation = (itemId, itemName) => {
+        setModal({
+            ...modal,
+            title: 'Final Warning: Irreversible Action',
+            message: `Are you absolutely sure? This action is truly irreversible and will permanently delete "${itemName}".`,
+            confirmText: 'DELETE PERMANENTLY',
+            onConfirm: () => handleActionExecution(itemId, itemName, 'delete'),
+            isDestructive: true,
+        });
+    };
+
+    // Execute API action
+    const handleActionExecution = async (itemId, itemName, action) => {
+        setModal({ ...modal, isOpen: false }); // Close modal before API call
+        
+        try {
+            let url = '';
+            let method = '';
+            let data = {};
+
+            if (action === 'trash') {
+                url = `${API_URL}/api/monitor/item/trash/${itemId}`;
+                method = 'PUT';
+                data = { confirm: true };
+            } else if (action === 'restore') {
+                url = `${API_URL}/api/monitor/item/restore/${itemId}`;
+                method = 'PUT';
+                data = { confirm: true };
+            } else if (action === 'delete') {
+                url = `${API_URL}/api/monitor/item/delete/${itemId}`;
+                method = 'DELETE';
+                data = { confirm: true };
+            } else {
+                return; 
+            }
+
+            await axios({ url, method, data });
+
+            toast.success(`Item "${itemName}" successfully ${action}d!`);
+            fetchData(); // Refresh list
+        } catch (err) {
+            console.error(err);
+            toast.error(`Failed to ${action} item "${itemName}"`);
+        }
+    };
+
+    // --- Rendering ---
+
+    const currentPath = useMemo(() => {
+        // Only show breadcrumbs if not in trash view
+        if (showTrash) return <h3 className="text-xl font-semibold text-gray-700">Trash Bin</h3>;
+
+        return (
+            <div className="flex items-center space-x-2 text-sm whitespace-nowrap overflow-x-auto py-1">
+                {pathHistory.map((p, index) => (
+                    <span key={p.id} className="flex items-center">
+                        <button
+                            onClick={() => handleNavigation(p.id, p.name)}
+                            className={`px-1 rounded-md transition duration-150 flex items-center ${
+                                index === pathHistory.length - 1
+                                    ? 'text-indigo-600 font-bold'
+                                    : 'text-gray-500 hover:text-indigo-600 hover:bg-indigo-50'
+                            }`}
+                        >
+                            {p.id === 'root' ? <Home className="w-4 h-4 mr-1"/> : null}
+                            {p.name}
+                        </button>
+                        {index < pathHistory.length - 1 && <span className="text-gray-400 mx-1">/</span>}
+                    </span>
+                ))}
+            </div>
+        );
+    }, [pathHistory, showTrash, handleNavigation]);
+
+    const isRoot = currentFolderId === 'root';
+    const hasItems = items.length > 0;
+
+    return (
+        <div className="bg-white p-4 sm:p-6 rounded-xl shadow-lg space-y-6 max-w-7xl mx-auto font-sans">
+            <h2 className="text-3xl font-extrabold text-gray-900 border-b pb-3 mb-4">
+                Service Drive Monitor
+            </h2>
+
+            {/* Quota Display (Always Visible) */}
+            <div className="flex flex-col md:flex-row md:justify-between md:items-start space-y-4 md:space-y-0 md:space-x-4">
+                <div className="flex flex-col space-y-1 text-sm text-gray-700 p-4 bg-gray-50 rounded-xl w-full md:w-1/3 shadow-inner border border-gray-100">
+                    <p className="font-bold text-gray-900 truncate">User: {quotaData?.user.name || 'N/A'}</p>
+                    <p className="truncate">Email: {quotaData?.user.email || 'N/A'}</p>
+                </div>
+                
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 text-sm w-full md:w-2/3">
+                    {['limit', 'used', 'driveUsed', 'trashUsed'].map((key) => (
+                        <div key={key} className="p-3 bg-indigo-50 rounded-xl flex flex-col justify-center shadow-md">
+                            <span className="text-xs font-medium text-indigo-600 uppercase">
+                                {key.replace(/([A-Z])/g, ' $1').trim()}
+                            </span>
+                            <span className="font-bold text-gray-900 text-lg">
+                                {quotaData?.storage[key] || '...'}
+                            </span>
+                        </div>
+                    ))}
+                </div>
+            </div>
+            
+            {/* Navigation and Control Buttons (Always Visible) */}
+            <div className="flex flex-col sm:flex-row justify-between items-center py-2 border-b border-gray-200">
+                {/* Breadcrumb / Current Path */}
+                <div className='mb-2 sm:mb-0'>{currentPath}</div>
+
+                <div className="flex space-x-3">
+                    {/* Toggle Trash Button */}
+                    <button
+                        onClick={() => {
+                            setShowTrash(!showTrash);
+                            // When viewing trash, currentFolderId is irrelevant for API, but for state clarity:
+                            if (!showTrash) setCurrentFolderId('trash-view'); 
+                            else handleNavigation('root'); // Go back to root when hiding trash
+                        }}
+                        className={`flex items-center space-x-2 px-3 py-2 rounded-lg font-medium transition duration-200 shadow-md ${
+                            showTrash ? 'bg-indigo-600 text-white hover:bg-indigo-700' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                        }`}
+                    >
                         <Trash2 className="h-4 w-4" />
-                        <span>Trash</span>
-                      </button>
-                    )}
-                    {f.trashed && (
-                      <>
-                        <button
-                          onClick={() => handleRestore(f.id)}
-                          className="flex items-center space-x-1 text-green-600 hover:text-green-800"
-                        >
-                          <RotateCcw className="h-4 w-4" />
-                          <span>Restore</span>
-                        </button>
-                        <button
-                          onClick={() => handleDeletePermanent(f.id)}
-                          className="flex items-center space-x-1 text-red-600 hover:text-red-800"
-                        >
-                          <XCircle className="h-4 w-4" />
-                          <span>Delete</span>
-                        </button>
-                      </>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                        <span>{showTrash ? 'Exit Trash' : 'View Trash'}</span>
+                    </button>
+
+                    {/* Refresh Button */}
+                    <button
+                        onClick={fetchData}
+                        className="flex items-center space-x-2 bg-green-600 text-white px-3 py-2 rounded-lg hover:bg-green-700 transition duration-200 shadow-md"
+                        disabled={loading}
+                    >
+                        <RefreshCcw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+                        <span>{loading ? 'Syncing...' : 'Sync'}</span>
+                    </button>
+                </div>
+            </div>
+
+            {/* File/Folder Table */}
+            <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-xl">
+                <table className="min-w-full divide-y divide-gray-200 text-sm">
+                    <thead className="bg-gray-100 sticky top-0">
+                        <tr>
+                            <th className="p-3 text-left font-bold text-gray-700 w-1/2 md:w-auto">Name</th>
+                            <th className="p-3 text-left font-bold text-gray-700 hidden sm:table-cell">Size</th>
+                            <th className="p-3 text-left font-bold text-gray-700 hidden md:table-cell">Modified</th>
+                            <th className="p-3 text-left font-bold text-gray-700 w-24">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-100">
+                        {loading && (
+                             <tr>
+                                 <td colSpan={4} className="p-6 text-center text-indigo-500 font-medium">Loading items...</td>
+                             </tr>
+                        )}
+                        {!loading && !hasItems && (
+                            <tr>
+                                <td colSpan={4} className="p-6 text-center text-gray-500 italic">
+                                    {showTrash ? 'Trash is empty.' : (isRoot ? 'No items found in My Drive.' : 'This folder is empty.')}
+                                </td>
+                            </tr>
+                        )}
+                        {!loading && items.map(item => (
+                            <tr key={item.id} className="hover:bg-indigo-50 transition duration-150">
+                                <td 
+                                    className={`p-3 whitespace-nowrap ${item.isFolder ? 'cursor-pointer' : 'cursor-default'}`} 
+                                    onClick={() => handleItemClick(item)}
+                                >
+                                    <div className="flex items-center space-x-3 font-medium text-gray-800">
+                                        {item.isFolder ? <Folder className="h-5 w-5 text-yellow-500" /> : <File className="h-5 w-5 text-blue-500" />}
+                                        <span className={item.isFolder ? 'hover:text-indigo-600' : ''}>{item.name}</span>
+                                    </div>
+                                </td>
+                                <td className="p-3 text-gray-600 hidden sm:table-cell">{item.size}</td>
+                                <td className="p-3 text-gray-600 hidden md:table-cell">
+                                    {item.modifiedTime ? new Date(item.modifiedTime).toLocaleDateString() : '-'}
+                                </td>
+                                <td className="p-3 whitespace-nowrap space-x-2">
+                                    {/* Download Action (Req 3 & 4) */}
+                                    <button
+                                        onClick={() => handleDownload(item)}
+                                        title={`Download ${item.isFolder ? 'Folder (Note: Zipping is complex)' : 'File'}`}
+                                        className="text-indigo-600 hover:text-indigo-800 p-1 rounded-full hover:bg-indigo-100 transition duration-150"
+                                    >
+                                        <Download className="h-4 w-4" />
+                                    </button>
+
+                                    {showTrash ? (
+                                        // Actions in Trash View: Restore, Permanent Delete
+                                        <>
+                                            <button
+                                                onClick={() => triggerAction(item.id, item.name, 'restore')}
+                                                title="Restore"
+                                                className="text-green-600 hover:text-green-800 p-1 rounded-full hover:bg-green-100 transition duration-150"
+                                            >
+                                                <RotateCcw className="h-4 w-4" />
+                                            </button>
+                                            <button
+                                                onClick={() => triggerAction(item.id, item.name, 'delete')}
+                                                title="Delete Permanently"
+                                                className="text-red-600 hover:text-red-800 p-1 rounded-full hover:bg-red-100 transition duration-150"
+                                            >
+                                                <XCircle className="h-4 w-4" />
+                                            </button>
+                                        </>
+                                    ) : (
+                                        // Actions in Main View: Trash
+                                        <button
+                                            onClick={() => triggerAction(item.id, item.name, 'trash')}
+                                            title="Move to Trash"
+                                            className="text-yellow-600 hover:text-yellow-800 p-1 rounded-full hover:bg-yellow-100 transition duration-150"
+                                        >
+                                            <Trash2 className="h-4 w-4" />
+                                        </button>
+                                    )}
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+
+            {/* Confirmation Modal (Req 5) */}
+            <ConfirmationModal 
+                isOpen={modal.isOpen}
+                title={modal.title}
+                message={modal.message}
+                onConfirm={modal.onConfirm}
+                onCancel={modal.onCancel}
+                confirmText={modal.confirmText}
+                isDestructive={modal.isDestructive}
+            />
         </div>
-      </div>
-    </div>
-  );
+    );
 }

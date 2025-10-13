@@ -1,18 +1,30 @@
 import express from 'express';
 import { auth, checkRole } from '../middleware/auth.js';
-import {
-  getDriveMonitorData,
-  trashFolder,
-  restoreFolder,
-  deleteFolderPermanent
+import { 
+    getStorageQuota, 
+    getFileList,
+    getTrashList,
+    trashItem, 
+    restoreItem, 
+    deleteItemPermanent,
+    downloadItem
 } from '../controllers/serviceDriveController.js';
 
 const router = express.Router();
 
-router.get('/drive', auth, checkRole(['developer']), getDriveMonitorData);
+// Storage quota and user info (can be fetched once)
+router.get('/drive/quota', auth, checkRole(['developer']), getStorageQuota);
 
-router.put('/folder/trash/:fileId', auth, checkRole(['developer']), trashFolder);
-router.put('/folder/restore/:fileId', auth, checkRole(['developer']), restoreFolder);
-router.delete('/folder/delete/:fileId', auth, checkRole(['developer']), deleteFolderPermanent);
+// File and folder list for a given parentId
+router.get('/drive/files', auth, checkRole(['developer']), getFileList);
+
+// Trashed items list
+router.get('/drive/trash', auth, checkRole(['developer']), getTrashList);
+
+// Item actions
+router.put('/item/trash/:fileId', auth, checkRole(['developer']), trashItem);
+router.put('/item/restore/:fileId', auth, checkRole(['developer']), restoreItem);
+router.delete('/item/delete/:fileId', auth, checkRole(['developer']), deleteItemPermanent);
+router.get('/item/download/:fileId', auth, checkRole(['developer']), downloadItem); // Use GET for download
 
 export default router;
