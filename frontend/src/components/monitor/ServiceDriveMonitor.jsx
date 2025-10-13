@@ -1,11 +1,10 @@
-// ========= frontend/components/ServiceDriveMonitor.jsx (UPDATED) =========
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import axios from 'axios';
 import { RefreshCcw, Trash2, Folder, File, Download, Home } from 'lucide-react';
 import { API_URL } from '../../utils/config';
 import { toast } from 'react-hot-toast';
 
-// Confirmation Modal component (unchanged, included for completeness)
+// Confirmation Modal component
 const ConfirmationModal = ({ isOpen, title, message, onConfirm, onCancel, confirmText, isDestructive }) => {
   if (!isOpen) return null;
 
@@ -108,9 +107,8 @@ export default function ServiceDriveMonitor() {
 
   const handleNavigation = useCallback((itemId, itemName) => {
     if (showTrash) {
-      // navigating inside trash
       fetchTrashItems(itemId === 'root' ? 'root' : itemId);
-      // update breadcrumb
+
       if (itemId === 'root') {
         setPathHistory([{ id: 'root', name: 'Trash' }]);
       } else if (itemName) {
@@ -136,7 +134,6 @@ export default function ServiceDriveMonitor() {
   const handleItemClick = (item) => {
     if (item.isFolder) {
       if (showTrash) {
-        // drill into trashed folder
         handleNavigation(item.id, item.name);
       } else {
         handleNavigation(item.id, item.name);
@@ -150,18 +147,36 @@ export default function ServiceDriveMonitor() {
 
     const toastId = toast.loading(item.isFolder ? `Downloading folder "${item.name}"...` : `Downloading "${item.name}"...`);
     try {
-      if (!item.isFolder) {
-        const response = await axios.get(`${API_URL}/api/monitor/item/download/${item.id}?itemName=${encodeURIComponent(item.name)}`, { responseType: 'blob' });
-        const blob = new Blob([response.data]);
-        const link = document.createElement('a');
-        link.href = window.URL.createObjectURL(blob);
-        link.download = item.name;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(link.href);
-      } else {
-        // For folders, download children files (non-recursive) - if user expects zips, implement server-side zipping.
+     if (item.isFolder) {
+  // Fetch files in the folder
+  const endpoint = showTrash
+    ? `${API_URL}/api/monitor/drive/trash?parentId=${item.id}`
+    : `${API_URL}/api/monitor/drive/files?parentId=${item.id}`;
+
+  const res = await axios.get(endpoint);
+  const files = res.data.items.filter(f => !f.isFolder);
+
+  if (files.length === 0) {
+    toast('No files to download in this folder');
+  } else {
+    for (const file of files) {
+      const response = await axios.get(
+        `${API_URL}/api/monitor/item/download/${file.id}?itemName=${encodeURIComponent(file.name)}`,
+        { responseType: 'blob' }
+      );
+      const blob = new Blob([response.data]);
+      const link = document.createElement('a');
+      link.href = window.URL.createObjectURL(blob);
+      link.download = file.name;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(link.href);
+    }
+  }
+}
+else {
+        // For folders, download children files
         const res = await axios.get(`${API_URL}/api/monitor/drive/files?parentId=${item.id}`);
         const files = res.data.items.filter(f => !f.isFolder);
         for (const file of files) {
@@ -186,7 +201,7 @@ export default function ServiceDriveMonitor() {
     }
   };
 
-  // Action Handlers: trash and permanent delete only. Restore removed.
+  // Action Handlers trash and permanent delete
   const triggerAction = (itemId, itemName, action) => {
     const isDestructive = action === 'delete';
     const title = isDestructive ? 'Permanent Delete' : 'Move to Trash';
@@ -232,7 +247,6 @@ export default function ServiceDriveMonitor() {
     }
   };
 
-  // Empty trash handler
   const handleEmptyTrash = () => {
     setModal({
       isOpen: true,
@@ -258,29 +272,32 @@ export default function ServiceDriveMonitor() {
   };
 
   const currentPath = useMemo(() => {
-    if (showTrash) return <h3 className="text-xl font-semibold text-gray-700">Trash Bin</h3>;
+  const rootName = showTrash ? 'Trash' : 'My Drive';
+  const RootIcon = showTrash ? Trash2 : Home; 
 
-    return (
-      <div className="flex items-center space-x-2 text-sm whitespace-nowrap overflow-x-auto py-1">
-        {pathHistory.map((p, index) => (
-          <span key={p.id} className="flex items-center">
-            <button
-              onClick={() => handleNavigation(p.id, p.name)}
-              className={`px-1 rounded-md transition duration-150 flex items-center ${
-                index === pathHistory.length - 1
-                  ? 'text-indigo-600 font-bold'
-                  : 'text-gray-500 hover:text-indigo-600 hover:bg-indigo-50'
-              }`}
-            >
-              {p.id === 'root' ? <Home className="w-4 h-4 mr-1"/> : null}
-              {p.name}
-            </button>
-            {index < pathHistory.length - 1 && <span className="text-gray-400 mx-1">/</span>}
-          </span>
-        ))}
-      </div>
-    );
-  }, [pathHistory, showTrash, handleNavigation]);
+  return (
+    <div className="flex items-center space-x-2 text-sm whitespace-nowrap overflow-x-auto py-1">
+      {pathHistory.map((p, index) => (
+        <span key={p.id} className="flex items-center">
+          <button
+            onClick={() => handleNavigation(p.id, p.name)}
+            className={`px-1 rounded-md transition duration-150 flex items-center ${
+              index === pathHistory.length - 1
+                ? 'text-indigo-600 font-bold'
+                : 'text-gray-500 hover:text-indigo-600 hover:bg-indigo-50'
+            }`}
+          >
+            {index === 0 ? <RootIcon className="w-4 h-4 mr-1" /> : null}
+            {index === 0 ? rootName : p.name}
+          </button>
+          {index < pathHistory.length - 1 && (
+            <span className="text-gray-400 mx-1">/</span>
+          )}
+        </span>
+      ))}
+    </div>
+  );
+}, [pathHistory, showTrash, handleNavigation]);
 
   const isRoot = currentFolderId === 'root';
   const hasItems = items.length > 0;
@@ -316,11 +333,9 @@ export default function ServiceDriveMonitor() {
               const entering = !showTrash;
               setShowTrash(entering);
               if (entering) {
-                // enter trash
                 setPathHistory([{ id: 'root', name: 'Trash' }]);
                 fetchTrashItems('root');
               } else {
-                // exit trash
                 setPathHistory([{ id: 'root', name: 'My Drive' }]);
                 setCurrentFolderId('root');
                 fetchCurrentItems();
@@ -345,15 +360,20 @@ export default function ServiceDriveMonitor() {
         </div>
       </div>
 
-      {showTrash && (
-        <div className="flex items-center justify-between bg-yellow-50 border border-yellow-100 rounded-md p-3">
-          <div className="text-sm text-gray-800">Items in trash are deleted forever after 30 days.</div>
-          <div>
-            <button onClick={handleEmptyTrash} className="px-3 py-2 bg-red-600 text-white rounded-lg shadow-md hover:bg-red-700">Empty Trash</button>
-          </div>
-        </div>
-      )}
-
+     {showTrash && (
+  <div className="flex items-center justify-between bg-yellow-50 border border-yellow-100 rounded-md px-2 py-1 mt-1">
+    <div className="text-sm text-gray-800 flex items-center">
+      Items in trash are deleted forever after 30 days.
+    </div>
+    <button
+      onClick={handleEmptyTrash}
+      className="flex items-center gap-1 px-2 py-1.5 bg-red-600 text-white rounded-lg shadow-md hover:bg-red-700 transition"
+    >
+      <Trash2 className="w-4 h-4" />
+      Empty Trash
+    </button>
+  </div>
+)}
       <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-xl">
         <table className="min-w-full divide-y divide-gray-200 text-sm">
           <thead className="bg-gray-100 sticky top-0">

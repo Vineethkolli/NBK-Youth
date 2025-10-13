@@ -1,11 +1,8 @@
-// ========= controllers/serviceDriveController.js =========
 import { google } from 'googleapis';
 
-// Initialize Google Drive with JWT
 let drive;
 try {
   const credentials = JSON.parse(process.env.GOOGLE_DRIVE_CREDENTIALS);
-
   const auth = new google.auth.JWT({
     email: credentials.client_email,
     key: credentials.private_key,
@@ -162,11 +159,10 @@ const calculateFolderSizeAndCountTrash = async (folderId) => {
 };
 
 export const getTrashList = async (req, res) => {
-  // parentId parameter is used to drill into a trashed folder.
   const parentId = req.query.parentId || 'root';
 
   try {
-    // Step 1: fetch all trashed items (we need the full set to decide what to show at root)
+    // Fetch all trashed items
     let allFiles = [];
     let nextPageToken = null;
     const qAll = 'trashed = true';
@@ -192,9 +188,9 @@ export const getTrashList = async (req, res) => {
     let items;
 
     if (parentId === 'root') {
-      // At trash root: show all trashed folders + trashed files that are NOT children of a trashed folder.
+      // show all trashed folders + trashed files that are NOT children of a trashed folder.
       const rootVisible = allFiles.filter(f => {
-        if (f.mimeType === 'application/vnd.google-apps.folder') return true; // always show trashed folders at top
+        if (f.mimeType === 'application/vnd.google-apps.folder') return true; 
 
         // else file: show if none of its parents are in trashedFolderIds
         const parents = f.parents || [];
@@ -202,7 +198,6 @@ export const getTrashList = async (req, res) => {
         return !hasTrashedParent;
       });
 
-      // For folders, calculate sizes/counts of trashed children
       items = await Promise.all(
         rootVisible.map(async (f) => {
           if (f.mimeType === 'application/vnd.google-apps.folder') {
@@ -218,7 +213,6 @@ export const getTrashList = async (req, res) => {
             };
           }
 
-          // normal file at top-level trash
           return {
             id: f.id,
             name: f.name,
@@ -231,7 +225,7 @@ export const getTrashList = async (req, res) => {
         })
       );
     } else {
-      // Drill into a trashed folder: show trashed items whose parents include this folder
+      // Show trashed items whose parents include this folder
       const children = allFiles.filter(f => (f.parents || []).includes(parentId));
 
       items = children.map(f => ({
@@ -266,11 +260,9 @@ export const trashItem = async (req, res) => {
   }
 };
 
-// Note: restore functionality removed by design per requirements
-
 // Permanently delete an item. If folder, recursively delete its trashed children first.
 const deleteFileRecursiveIfFolder = async (fileId) => {
-  // check if folder
+
   const meta = await drive.files.get({ fileId, fields: 'id, mimeType' }).catch(() => null);
   if (!meta || !meta.data) return;
 
@@ -306,13 +298,12 @@ export const deleteItemPermanent = async (req, res) => {
   }
 };
 
-// Empty entire trash (permanently delete all trashed items)
+// Permanently delete all trashed items
 export const emptyTrash = async (req, res) => {
   try {
     const confirm = req.body.confirm;
     if (!confirm) return res.status(400).json({ message: 'Confirmation required to empty trash' });
 
-    // List all trashed items and delete them recursively
     let nextPageToken = null;
     const q = 'trashed = true';
 
