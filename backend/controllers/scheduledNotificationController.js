@@ -162,9 +162,12 @@ export const sendScheduledNow = async (req, res) => {
 export const processDueNotifications = async () => {
   try {
     const now = new Date();
+    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+
     const due = await ScheduledNotification.find({
-      scheduledAt: { $lte: now },
-      $or: [{ status: 'PENDING' }, { frequency: 'YEARLY' }],
+      scheduledAt: { $gte: startOfDay, $lte: endOfDay },
+      status: 'PENDING',
     });
 
     if (!due.length) return;
@@ -196,7 +199,7 @@ export const processDueNotifications = async () => {
 
         const beforeSend = doc.toObject();
         doc.sendHistory.push({ sentAt: new Date() });
-        if (doc.frequency === 'ONCE') doc.status = 'SENT';
+        doc.status = 'SENT';
         await doc.save();
 
         await NotificationHistory.create({
@@ -205,15 +208,17 @@ export const processDueNotifications = async () => {
           recipients: eligibleRegisterIds,
           sentBy: 'SYSTEM_SCHEDULER',
         });
-const fakeReq = { user: { registerId: 'SYSTEM_SCHEDULER' } };
+
+        const fakeReq = { user: { registerId: 'SYSTEM_SCHEDULER' } };
         await logActivity(
-  fakeReq,  
-  'UPDATE',
-  'ScheduledNotification',
-  'System_Scheduler',
-  { before: beforeSend, after: doc.toObject() },
-  `System sent scheduled notification "${doc.title}"`
-);
+          fakeReq,
+          'UPDATE',
+          'ScheduledNotification',
+          'System_Scheduler',
+          { before: beforeSend, after: doc.toObject() },
+          `System sent scheduled notification "${doc.title}"`
+        );
+
       } catch (err) {
         console.error('Error processing scheduled doc', doc._id, err);
       }
