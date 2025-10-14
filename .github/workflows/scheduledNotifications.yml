@@ -19,6 +19,7 @@ jobs:
 
       - name: Install dependencies
         run: npm install mongoose web-push dotenv
+        working-directory: backend
 
       - name: Run Scheduler
         env:
