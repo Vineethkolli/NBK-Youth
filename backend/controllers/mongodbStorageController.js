@@ -10,34 +10,42 @@ export const mongodbStorageController = {
       const serverStatus = await adminDb.serverStatus();
       const dbs = await adminDb.listDatabases();
 
-      // Connections info (limit max for Free Tier)
       const connections = serverStatus.connections;
-      const maxConnections = 100; // Free-tier limit
+      const maxConnections = 500; 
 
-      // Prepare databases info
+      const userDatabases = dbs.databases.filter(
+        (d) => !['admin', 'local'].includes(d.name)
+      );
+
+      // Prepare databases info with storage
       const databasesInfo = await Promise.all(
-        dbs.databases.map(async (dbData) => {
+        userDatabases.map(async (dbData) => {
           const dbInstance = client.db(dbData.name);
           let collectionsCount = 0;
+          let totalSize = 0;
           try {
-            collectionsCount = (await dbInstance.listCollections().toArray()).length;
+            const collections = await dbInstance.listCollections().toArray();
+            collectionsCount = collections.length;
+            for (const coll of collections) {
+              const stats = await dbInstance.command({ collStats: coll.name });
+              totalSize += (stats.size || 0) + (stats.totalIndexSize || 0);
+            }
           } catch {}
           return {
             name: dbData.name,
             collections: collectionsCount,
-            storage: dbData.sizeOnDisk,
+            storage: totalSize,
           };
         })
       );
 
+      // Total storage used - sum of user databases
+      const totalStorageUsed = databasesInfo.reduce((sum, d) => sum + d.storage, 0);
+
       res.json({
-        cluster: {
-          name: conn.name,
-          state: conn.readyState === 1 ? 'running' : 'idle',
-        },
         quota: {
-          storageUsed: dbs.databases.reduce((sum, d) => sum + d.sizeOnDisk, 0),
-          storageLimit: 512 * 1024 * 1024, // Free-tier 512MB
+          storageUsed: totalStorageUsed,
+          storageLimit: 512 * 1024 * 1024, 
           connections: {
             active: connections.current,
             max: maxConnections,
@@ -47,12 +55,11 @@ export const mongodbStorageController = {
       });
     } catch (err) {
       console.error(err);
-      res.status(500).json({ error: 'Failed to fetch cluster info' });
+      res.status(500).json({ error: 'Failed to fetch MongoDB info' });
     }
   },
 
-
-  // Collections info for a specific database (default DB)
+  // Collections info for a specific database
   getCollectionsInfo: async (req, res) => {
     try {
       const dbName = req.query.dbName || mongoose.connection.db.databaseName;
@@ -65,14 +72,12 @@ export const mongodbStorageController = {
         let stats = {};
         try {
           stats = await db.command({ collStats: coll.name });
-        } catch (e) {
-          console.warn(`Cannot get stats for collection ${coll.name}:`, e.message);
-        }
-
+        } catch (e) {}
         result.push({
           name: coll.name,
           documents: stats.count || 0,
-          storage: stats.size || 0,
+          storage: stats.storageSize || 0,
+          indexes: stats.nindexes || 0, 
           indexSize: stats.totalIndexSize || 0,
         });
       }

@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import { RefreshCcw } from 'lucide-react';
+import { RefreshCcw, FileText } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { API_URL } from '../../utils/config';
 
 export default function MongoDBMonitor() {
-  const [clusterInfo, setClusterInfo] = useState(null);
+  const [quota, setQuota] = useState(null);
+  const [databases, setDatabases] = useState([]);
   const [collections, setCollections] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -13,10 +14,14 @@ export default function MongoDBMonitor() {
     setLoading(true);
     try {
       const resCluster = await axios.get(`${API_URL}/api/monitor/mongodb/cluster`);
-      setClusterInfo(resCluster.data);
+      setQuota(resCluster.data.quota);
+      setDatabases(resCluster.data.databases || []);
 
-      const resColl = await axios.get(`${API_URL}/api/monitor/mongodb/collections`);
-      setCollections(resColl.data.collections || []);
+      const defaultDb = resCluster.data.databases?.[0]?.name;
+      if (defaultDb) {
+        const resColl = await axios.get(`${API_URL}/api/monitor/mongodb/collections?dbName=${defaultDb}`);
+        setCollections(resColl.data.collections || []);
+      }
     } catch (err) {
       console.error(err);
       toast.error('Failed to fetch MongoDB data');
@@ -45,24 +50,32 @@ export default function MongoDBMonitor() {
     <div className="bg-white p-6 rounded-xl shadow-lg max-w-6xl mx-auto space-y-6 font-sans">
       <h2 className="text-3xl font-semibold border-b pb-3 mb-4">MongoDB Monitor</h2>
 
-      {/* Cluster Info & Quota */}
-      {clusterInfo && (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 text-sm w-full md:w-2/3">
+      {/* Storage & Databases Info */}
+      {quota && (
+        <div className="grid grid-cols-2 lg:grid-cols-6 gap-3 text-sm w-full md:w-full">
           <div className="p-3 bg-indigo-50 rounded-xl flex flex-col justify-center shadow-md">
-            <div className="text-xs font-medium text-indigo-600 uppercase">Cluster</div>
-            <div className="font-bold text-gray-900 text-lg">{clusterInfo.cluster.name}</div>
-            <div className="text-gray-600 text-xs">{clusterInfo.cluster.state}</div>
+            <div className="text-xs font-medium text-indigo-600 uppercase">Storage Limit</div>
+            <div className="font-bold text-gray-900 text-lg">{formatBytes(quota.storageLimit)}</div>
           </div>
           <div className="p-3 bg-indigo-50 rounded-xl flex flex-col justify-center shadow-md">
             <div className="text-xs font-medium text-indigo-600 uppercase">Storage Used</div>
-            <div className="font-bold text-gray-900 text-lg">{formatBytes(clusterInfo.quota.storageUsed)}</div>
+            <div className="font-bold text-gray-900 text-lg">{formatBytes(quota.storageUsed)}</div>
           </div>
           <div className="p-3 bg-indigo-50 rounded-xl flex flex-col justify-center shadow-md">
             <div className="text-xs font-medium text-indigo-600 uppercase">Connections</div>
             <div className="font-bold text-gray-900 text-lg">
-              {clusterInfo.quota.connections.active} / {clusterInfo.quota.connections.max}
+              {quota.connections.active} / {quota.connections.max}
             </div>
           </div>
+
+          {databases.map((db) => (
+            <div key={db.name} className="p-3 bg-indigo-50 rounded-xl flex flex-col justify-center shadow-md">
+              <div className="text-xs font-medium text-indigo-600 uppercase">Collections</div>
+              <div className="font-bold text-gray-900 text-lg">
+                {db.collections}
+              </div>
+            </div>
+          ))}
         </div>
       )}
 
@@ -82,21 +95,24 @@ export default function MongoDBMonitor() {
         <table className="min-w-full divide-y divide-gray-200 text-sm">
           <thead className="bg-gray-100 sticky top-0">
             <tr>
-              <th className="p-3 text-left font-bold text-gray-700">S.No.</th>
+              <th className="p-3 text-center font-bold text-gray-700">S.No.</th>
               <th className="p-3 text-left font-bold text-gray-700">Collection Name</th>
               <th className="p-3 text-center font-bold text-gray-700">Documents</th>
-              <th className="p-3 text-center font-bold text-gray-700">Storage</th>
-              <th className="p-3 text-center font-bold text-gray-700">Index Size</th>
+              <th className="p-3 text-left font-bold text-gray-700">Storage</th>
+              <th className="p-3 text-center font-bold text-gray-700">Indexes</th>
+              <th className="p-3 text-left font-bold text-gray-700">Index Size</th>
             </tr>
           </thead>
           <tbody>
             {collections.map((c, idx) => (
               <tr key={c.name} className="hover:bg-indigo-50 transition cursor-default">
                 <td className="p-3 text-gray-600 text-center">{idx + 1}</td>
-                <td className="p-3 text-gray-800">{c.name}</td>
+                <td className="p-3 text-gray-800 flex items-center gap-2">
+                    <FileText className="w-5 h-5 text-indigo-500" />{c.name}</td>
                 <td className="p-3 text-center text-gray-600">{c.documents}</td>
-                <td className="p-3 text-center text-gray-600">{formatBytes(c.storage)}</td>
-                <td className="p-3 text-center text-gray-600">{formatBytes(c.indexSize)}</td>
+                <td className="p-3 text-left text-gray-600">{formatBytes(c.storage)}</td>
+                <td className="p-3 text-center text-gray-600">{c.indexes}</td>
+                <td className="p-3 text-left text-gray-600">{formatBytes(c.indexSize)}</td>
               </tr>
             ))}
             {collections.length === 0 && (
