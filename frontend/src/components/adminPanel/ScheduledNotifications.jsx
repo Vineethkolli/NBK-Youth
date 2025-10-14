@@ -111,7 +111,7 @@ function ScheduledNotifications() {
         <div>
         <h2 className="text-2xl font-semibold">Scheduled Notifications</h2>
           <p className="text-sm text-gray-600 mb-2">
-    Notifications will be sent automatically at 7 AM of scheduled date
+    Notifications will be sent automatically at 7 AM - 7.15 AM of scheduled date
   </p> </div>
         <div className="flex gap-2">
           <button

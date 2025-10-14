@@ -58,6 +58,11 @@ export const updateScheduledNotification = async (req, res) => {
     const oldDoc = await ScheduledNotification.findById(id);
     if (!oldDoc) return res.status(404).json({ error: 'Not found' });
 
+    // Reset status to PENDING if scheduled date changed
+    if (updates.scheduledAt && new Date(updates.scheduledAt).getTime() !== oldDoc.scheduledAt.getTime()) {
+      updates.status = 'PENDING';
+    }
+
     const doc = await ScheduledNotification.findByIdAndUpdate(id, updates, { new: true });
 
     await logActivity(
