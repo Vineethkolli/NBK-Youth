@@ -110,6 +110,21 @@ mongoose.connect(process.env.MONGODB_URI)
   })
   .catch((err) => console.error('MongoDB connection error:', err));
 
+
+// Notification Scheduler run at 5:15 AM IST every day
+import { processDueNotifications } from './controllers/scheduledNotificationController.js';
+cron.schedule('15 5 * * *', async () => {
+  try {
+    console.log('Running scheduled notification job (local server time)');
+    await processDueNotifications();
+  } catch (err) {
+    console.error('Scheduled job error:', err);
+  }
+}, {
+  timezone: 'Asia/Kolkata'
+});
+
+
 // Server start
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
