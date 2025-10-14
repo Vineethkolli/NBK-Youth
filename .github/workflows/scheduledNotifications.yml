@@ -18,10 +18,11 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
-        run: npm install mongoose web-push dotenv
-        working-directory: backend
+        working-directory: backend   # <--- Add this here
+        run: npm ci                  # Use npm ci if package-lock.json exists
 
       - name: Run Scheduler
+        working-directory: backend
         env:
           MONGO_URI: ${{ secrets.MONGO_URI }}
           VAPID_PUBLIC_KEY: ${{ secrets.VAPID_PUBLIC_KEY }}
