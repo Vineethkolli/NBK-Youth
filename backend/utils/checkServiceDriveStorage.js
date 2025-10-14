@@ -1,4 +1,4 @@
-//commad: node utils/checkServiceDriveStorage.js
+// Command: node utils/checkServiceDriveStorage.js
 
 import 'dotenv/config';
 import { google } from 'googleapis';
@@ -12,7 +12,7 @@ const drive = google.drive({
   }),
 });
 
-// Check overall storage quota
+// Check overall storage
 async function checkStorage() {
   try {
     const res = await drive.about.get({
@@ -43,14 +43,14 @@ async function checkStorage() {
   }
 }
 
-// List all files in Drive
-async function listAllFiles() {
+// List files based on trashed state
+async function listFiles(trashed = false) {
   let files = [];
   let pageToken = null;
 
   do {
     const res = await drive.files.list({
-      q: 'trashed=false',
+      q: `trashed=${trashed}`,
       fields: 'nextPageToken, files(id, name, size, parents, mimeType)',
       pageSize: 1000,
       pageToken,
@@ -63,14 +63,14 @@ async function listAllFiles() {
   return files;
 }
 
-// Build a map of all folders
-async function buildFolderMap() {
+// Build folder map based on trashed state
+async function buildFolderMap(trashed = false) {
   let folders = {};
   let pageToken = null;
 
   do {
     const res = await drive.files.list({
-      q: "mimeType='application/vnd.google-apps.folder' and trashed=false",
+      q: `mimeType='application/vnd.google-apps.folder' and trashed=${trashed}`,
       fields: 'nextPageToken, files(id, name, parents)',
       pageSize: 1000,
       pageToken,
@@ -86,10 +86,13 @@ async function buildFolderMap() {
   return folders;
 }
 
-// Calculate storage usage and file count by folder
-async function calculateUsage() {
+// Calculate and print info
+async function calculateUsage(trashed = false) {
   try {
-    const [allFiles, folders] = await Promise.all([listAllFiles(), buildFolderMap()]);
+    const [allFiles, folders] = await Promise.all([
+      listFiles(trashed),
+      buildFolderMap(trashed),
+    ]);
 
     let usageByFolder = {};
     let fileCountByFolder = {};
@@ -98,7 +101,6 @@ async function calculateUsage() {
 
     for (const file of allFiles) {
       if (file.mimeType === 'application/vnd.google-apps.folder') continue;
-
       const size = Number(file.size || 0);
       const parent = file.parents?.[0];
 
@@ -111,18 +113,19 @@ async function calculateUsage() {
       }
     }
 
-    console.log('📦 Storage usage by folders:');
+    console.log(trashed ? '\n🗑️ Files & Folders in Trash:' : '\n📁 Files & Folders in Drive:');
+
     for (const [folderId, size] of Object.entries(usageByFolder)) {
       const name = folders[folderId]?.name || '(Unknown Folder)';
       const count = fileCountByFolder[folderId] || 0;
       console.log(
-        `📁 ${name} (${folderId}): ${(size / 1024 ** 3).toFixed(2)} GB, ${count} files`
+        `📂 ${name} (${folderId}): ${(size / 1024 ** 3).toFixed(2)} GB, ${count} files`
       );
     }
 
     if (rootUsage > 0) {
       console.log(
-        `🗂 Files directly in My Drive root: ${(rootUsage / 1024 ** 3).toFixed(2)} GB, ${rootFileCount} files`
+        `📄 Files directly in ${trashed ? 'Trash root' : 'My Drive root'}: ${(rootUsage / 1024 ** 3).toFixed(2)} GB, ${rootFileCount} files`
       );
     }
   } catch (err) {
@@ -130,8 +133,8 @@ async function calculateUsage() {
   }
 }
 
-// Run both functions
 (async () => {
   await checkStorage();
-  await calculateUsage();
+  await calculateUsage(false); 
+  await calculateUsage(true); 
 })();
