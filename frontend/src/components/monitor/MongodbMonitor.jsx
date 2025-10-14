@@ -6,13 +6,17 @@ import { API_URL } from '../../utils/config';
 
 export default function MongoDBMonitor() {
   const [clusterInfo, setClusterInfo] = useState(null);
+  const [collections, setCollections] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`${API_URL}/api/monitor/mongodb/cluster`);
-      setClusterInfo(res.data);
+      const resCluster = await axios.get(`${API_URL}/api/monitor/mongodb/cluster`);
+      setClusterInfo(resCluster.data);
+
+      const resColl = await axios.get(`${API_URL}/api/monitor/mongodb/collections`);
+      setCollections(resColl.data.collections || []);
     } catch (err) {
       console.error(err);
       toast.error('Failed to fetch MongoDB data');
@@ -41,9 +45,9 @@ export default function MongoDBMonitor() {
     <div className="bg-white p-6 rounded-xl shadow-lg max-w-6xl mx-auto space-y-6 font-sans">
       <h2 className="text-3xl font-semibold border-b pb-3 mb-4">MongoDB Monitor</h2>
 
-      {/* Cluster Info */}
+      {/* Cluster Info & Quota */}
       {clusterInfo && (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 text-sm w-full md:w-full">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 text-sm w-full md:w-2/3">
           <div className="p-3 bg-indigo-50 rounded-xl flex flex-col justify-center shadow-md">
             <div className="text-xs font-medium text-indigo-600 uppercase">Cluster</div>
             <div className="font-bold text-gray-900 text-lg">{clusterInfo.cluster.name}</div>
@@ -52,10 +56,6 @@ export default function MongoDBMonitor() {
           <div className="p-3 bg-indigo-50 rounded-xl flex flex-col justify-center shadow-md">
             <div className="text-xs font-medium text-indigo-600 uppercase">Storage Used</div>
             <div className="font-bold text-gray-900 text-lg">{formatBytes(clusterInfo.quota.storageUsed)}</div>
-          </div>
-          <div className="p-3 bg-indigo-50 rounded-xl flex flex-col justify-center shadow-md">
-            <div className="text-xs font-medium text-indigo-600 uppercase">Storage Limit</div>
-            <div className="font-bold text-gray-900 text-lg">{formatBytes(clusterInfo.quota.storageLimit)}</div>
           </div>
           <div className="p-3 bg-indigo-50 rounded-xl flex flex-col justify-center shadow-md">
             <div className="text-xs font-medium text-indigo-600 uppercase">Connections</div>
@@ -77,38 +77,38 @@ export default function MongoDBMonitor() {
         </button>
       </div>
 
-      {/* Databases Table */}
-      {clusterInfo && (
-        <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-xl">
-          <table className="min-w-full divide-y divide-gray-200 text-sm">
-            <thead className="bg-gray-100 sticky top-0">
-              <tr>
-                <th className="p-3 text-left font-bold text-gray-700">S.No.</th>
-                <th className="p-3 text-left font-bold text-gray-700">Database Name</th>
-                <th className="p-3 text-center font-bold text-gray-700">Collections</th>
-                <th className="p-3 text-center font-bold text-gray-700">Storage</th>
+      {/* Collections Table */}
+      <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-xl">
+        <table className="min-w-full divide-y divide-gray-200 text-sm">
+          <thead className="bg-gray-100 sticky top-0">
+            <tr>
+              <th className="p-3 text-left font-bold text-gray-700">S.No.</th>
+              <th className="p-3 text-left font-bold text-gray-700">Collection Name</th>
+              <th className="p-3 text-center font-bold text-gray-700">Documents</th>
+              <th className="p-3 text-center font-bold text-gray-700">Storage</th>
+              <th className="p-3 text-center font-bold text-gray-700">Index Size</th>
+            </tr>
+          </thead>
+          <tbody>
+            {collections.map((c, idx) => (
+              <tr key={c.name} className="hover:bg-indigo-50 transition cursor-default">
+                <td className="p-3 text-gray-600 text-center">{idx + 1}</td>
+                <td className="p-3 text-gray-800">{c.name}</td>
+                <td className="p-3 text-center text-gray-600">{c.documents}</td>
+                <td className="p-3 text-center text-gray-600">{formatBytes(c.storage)}</td>
+                <td className="p-3 text-center text-gray-600">{formatBytes(c.indexSize)}</td>
               </tr>
-            </thead>
-            <tbody>
-              {clusterInfo.databases.map((db, idx) => (
-                <tr key={db.name} className="hover:bg-indigo-50 transition cursor-default">
-                  <td className="p-3 text-center text-gray-600">{idx + 1}</td>
-                  <td className="p-3 text-gray-800">{db.name}</td>
-                  <td className="p-3 text-center text-gray-600">{db.collections}</td>
-                  <td className="p-3 text-center text-gray-600">{formatBytes(db.storage)}</td>
-                </tr>
-              ))}
-              {clusterInfo.databases.length === 0 && (
-                <tr>
-                  <td colSpan={4} className="p-4 text-center text-gray-500">
-                    {loading ? 'Loading databases...' : 'No databases found'}
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      )}
+            ))}
+            {collections.length === 0 && (
+              <tr>
+                <td colSpan={5} className="p-4 text-center text-gray-500">
+                  {loading ? 'Loading collections...' : 'No collections found'}
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
