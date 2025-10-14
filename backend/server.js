@@ -35,7 +35,9 @@ import snapshotRoutes from './routes/snapshots.js';
 import historiesRoutes from './routes/histories.js';
 import cloudinaryRoutes from './routes/cloudinary.js';
 import monitorRoutes from './routes/monitor.js';
+import { processDueNotifications } from './controllers/scheduledNotificationController.js';
 import cron from 'node-cron';
+
 
 dotenv.config({ quiet: true }); 
 
@@ -110,12 +112,10 @@ mongoose.connect(process.env.MONGODB_URI)
   })
   .catch((err) => console.error('MongoDB connection error:', err));
 
-
-// Notification Scheduler run at 5:15 AM IST every day
-import { processDueNotifications } from './controllers/scheduledNotificationController.js';
-cron.schedule('15 5 * * *', async () => {
+// Notification Scheduler runs at 7:00, 7:05, 7:10, 7:15 AM IST IST every day
+cron.schedule('0,5,10,15 19 * * *', async () => {
   try {
-    console.log('Running scheduled notification job (local server time)');
+    console.log('Running scheduled notifications');
     await processDueNotifications();
   } catch (err) {
     console.error('Scheduled job error:', err);
@@ -123,7 +123,6 @@ cron.schedule('15 5 * * *', async () => {
 }, {
   timezone: 'Asia/Kolkata'
 });
-
 
 // Server start
 const PORT = process.env.PORT || 5000;
