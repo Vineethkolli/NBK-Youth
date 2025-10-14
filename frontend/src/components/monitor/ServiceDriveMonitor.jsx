@@ -396,7 +396,7 @@ else {
       >
         <div className="flex items-center space-x-3 font-medium text-gray-800">
           {item.isFolder ? (
-            <Folder className="h-5 w-5 text-yellow-500" />
+            <Folder className="h-5 w-5 text-indigo-500" />
           ) : (
             <File className="h-5 w-5 text-blue-500" />
           )}

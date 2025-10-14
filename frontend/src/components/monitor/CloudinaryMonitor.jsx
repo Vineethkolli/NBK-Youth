@@ -83,7 +83,7 @@ export default function CloudinaryMonitor() {
               <tr key={f.folder} className="hover:bg-indigo-50 transition cursor-pointer">
                 <td className="p-3 text-gray-600 text-center">{idx + 1}</td>
                 <td className="p-3 text-gray-800 flex items-center gap-2">
-  <Folder className="w-5 h-5 text-yellow-500" />
+  <Folder className="w-5 h-5 text-indigo-500" />
   {f.folder === 'root' ? 'Home' : f.folder.split('/').pop()}
 </td>
                 <td className="p-3 text-gray-600">{f.sizeReadable}</td>
