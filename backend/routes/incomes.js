@@ -9,7 +9,6 @@ router.get('/', auth, incomeController.getIncomes);
 router.get('/verification', auth, checkRole(['developer', 'financier']), incomeController.getVerificationData);
 
 router.post('/', auth, checkRole(['admin','developer', 'financier']), incomeController.createIncome);
-
 router.put('/:id', auth, checkRole(['admin','developer', 'financier']), incomeController.updateIncome);
 
 router.patch('/:id/verify', auth, checkRole(['developer', 'financier']), incomeController.updateVerificationStatus);
