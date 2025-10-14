@@ -313,7 +313,7 @@ else {
         </div>
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 text-sm w-full md:w-2/3">
-          {['limit', 'used', 'driveUsed', 'trashUsed'].map((key) => (
+          {['storageLimit', 'storageUsed', 'driveUsed', 'trashUsed'].map((key) => (
             <div key={key} className="p-3 bg-indigo-50 rounded-xl flex flex-col justify-center shadow-md">
               <span className="text-xs font-medium text-indigo-600 uppercase">
                 {key.replace(/([A-Z])/g, ' $1').trim()}

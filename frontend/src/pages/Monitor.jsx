@@ -1,5 +1,6 @@
 import ServiceDriveMonitor from '../components/monitor/ServiceDriveMonitor';
 import CloudinaryMonitor from '../components/monitor/CloudinaryMonitor';
+import MongoDBMonitor from '../components/monitor/MongodbMonitor';
 
 export default function Monitor() {
   return (
@@ -8,6 +9,8 @@ export default function Monitor() {
       <ServiceDriveMonitor />
 
       <CloudinaryMonitor />
+
+      <MongoDBMonitor />
 
     </div>
   );
