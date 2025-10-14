@@ -2,8 +2,8 @@ name: Keep MongoDB Atlas Alive
 
 on:
   schedule:
-    # Runs at 00:00 on 2nd day of each month
-    - cron: '0 0 2 * *'
+    # Runs at 2:00 AM IST on 2nd day of every month
+    - cron: '30 20 1 * *'
   workflow_dispatch: # manual trigger
 
 jobs:

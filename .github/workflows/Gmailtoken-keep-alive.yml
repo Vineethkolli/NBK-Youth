@@ -2,8 +2,11 @@ name: Keep Gmail Token Alive
 
 on:
   schedule:
-    # Runs at 00:00 on 1st day of Jan, Apr, Jul, Oct
-    - cron: '0 0 1 1,4,7,10 *'
+    # Runs at 1:00 AM IST on 2nd day of Jan, Apr, Jul, Oct
+    - cron: '30 19 1 1 *'  
+    - cron: '30 19 1 4 *'  
+    - cron: '30 19 1 7 *'  
+    - cron: '30 19 1 10 *' 
   workflow_dispatch: # manual trigger
 
 jobs:

@@ -3,6 +3,7 @@ import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import { Trash2, Edit2, Send, Plus, X } from 'lucide-react';
 import { API_URL } from '../../utils/config';
+import { formatDateTime } from '../../utils/dateTime';
 
 function ScheduledNotifications() {
   const [items, setItems] = useState([]);
@@ -48,8 +49,8 @@ function ScheduledNotifications() {
       const payload = {
         title: title.trim(),
         message: message.trim(),
-        scheduledAt: new Date(scheduledAt).toISOString(),
-        frequency,
+       scheduledAt: new Date(formData.scheduledAt).toISOString(),
+      frequency,
       };
 
       if (editingId) {
@@ -164,7 +165,7 @@ function ScheduledNotifications() {
               <div>
                 <label className="block text-sm font-medium text-gray-700">Schedule (Date) *</label>
                 <input
-                  type="date"
+                  type="datetime-local"
                   required
                   value={formData.scheduledAt}
                   onChange={(e) => setFormData({ ...formData, scheduledAt: e.target.value })}
@@ -212,10 +213,14 @@ function ScheduledNotifications() {
               <div className="font-medium">Title: {it.title}</div>
               <div className="font-medium">Message: {it.message}</div>
               <div className="text-xs text-gray-500">Frequency: {it.frequency === 'YEARLY' ? 'Yearly' : 'Once'}</div>
-              <div className="text-xs text-gray-500">Scheduled: {new Date(it.scheduledAt).toLocaleDateString()}</div>
               <div className="text-xs text-gray-500">
-                Status: {it.sendHistory && it.sendHistory.length ? `Sent (${it.sendHistory.map(s => new Date(s.sentAt).toLocaleDateString()).join(', ')})` : 'Not Sent'}
-              </div>
+  Scheduled: {formatDateTime(it.scheduledAt)}
+</div>
+<div className="text-xs text-gray-500">
+  Status: {it.sendHistory && it.sendHistory.length 
+    ? `Sent (${it.sendHistory.map(s => formatDateTime(s.sentAt)).join(', ')})` 
+    : 'Not Sent'}
+</div>
             </div>
             {showActions && (
               <div className="flex items-center gap-2">
