@@ -2,6 +2,7 @@ import express from 'express';
 import { auth, checkRole } from '../middleware/auth.js';
 import { serviceDriveStorageController } from '../controllers/serviceDriveStorageController.js';
 import { cloudinaryStorageController } from '../controllers/cloudinaryStorageController.js';
+import { mongodbStorageController } from '../controllers/mongodbStorageController.js';
 
 const router = express.Router();
 
@@ -18,5 +19,10 @@ router.delete('/item/trash/empty', auth, checkRole(['developer']), serviceDriveS
 // Cloudinary Monitor Routes
 router.get('/cloudinary/quota', auth, checkRole(['developer']), cloudinaryStorageController.getStorageQuota);
 router.get('/cloudinary/folders', auth, checkRole(['developer']), cloudinaryStorageController.listCloudinaryFolders);
+
+
+// MongoDB Monitor Routes
+router.get('/mongodb/cluster', auth, checkRole(['developer']), mongodbStorageController.getClusterInfo);
+router.get('/mongodb/collections', auth, checkRole(['developer']), mongodbStorageController.getCollectionsInfo);
 
 export default router;

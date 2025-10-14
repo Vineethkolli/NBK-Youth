@@ -47,11 +47,11 @@ export default function CloudinaryMonitor() {
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 text-sm w-full md:w-2/3">
         <div className="p-3 bg-indigo-50 rounded-xl flex flex-col justify-center shadow-md">
-          <div className="text-xs font-medium text-indigo-600 uppercase">Limit</div>
+          <div className="text-xs font-medium text-indigo-600 uppercase">Storage Limit</div>
           <div className="font-bold text-gray-900 text-lg">{quota?.lifetime?.storageLimitReadable ?? '...'}</div>
         </div>
         <div className="p-3 bg-indigo-50 rounded-xl flex flex-col justify-center shadow-md">
-          <div className="text-xs font-medium text-indigo-600 uppercase">Used</div>
+          <div className="text-xs font-medium text-indigo-600 uppercase">Storage Used</div>
           <div className="font-bold text-gray-900 text-lg">{quota?.lifetime?.storageUsedReadable ?? '...'}</div>
         </div>
       </div>

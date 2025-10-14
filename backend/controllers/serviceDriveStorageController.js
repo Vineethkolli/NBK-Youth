@@ -100,10 +100,10 @@ export const serviceDriveStorageController = {
       };
 
       const storageData = {
-        limit: storageQuota.limit
+        storageLimit: storageQuota.limit
           ? formatSize(Number(storageQuota.limit))
           : 'Unlimited/Not Set',
-        used: formatSize(Number(storageQuota.usage)),
+        storageUsed: formatSize(Number(storageQuota.usage)),
         driveUsed: formatSize(Number(storageQuota.usageInDrive)),
         trashUsed: formatSize(Number(storageQuota.usageInDriveTrash)),
       };
