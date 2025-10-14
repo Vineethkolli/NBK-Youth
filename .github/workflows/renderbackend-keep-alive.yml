@@ -2,12 +2,8 @@ name: Keep Render Backend Alive
 
 on:
   schedule:
-    # Cron times in UTC (IST = UTC +5:30)
-    - cron: '30 23 * * *'   # 5:00 AM IST
-    - cron: '30 3  * * *'   # 9:00 AM IST
-    - cron: '30 7  * * *'   # 1:00 PM IST
-    - cron: '30 11 * * *'   # 5:00 PM IST
-    - cron: '30 15 * * *'   # 9:00 PM IST
+    # Runs every hour at 50 IST Ex:1:50AM, 2:50AM,...
+    - cron: '20 0-23 * * *'
   workflow_dispatch: # manual trigger
 
 jobs:
