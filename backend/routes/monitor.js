@@ -3,6 +3,7 @@ import { auth, checkRole } from '../middleware/auth.js';
 import { serviceDriveStorageController } from '../controllers/serviceDriveStorageController.js';
 import { cloudinaryStorageController } from '../controllers/cloudinaryStorageController.js';
 import { mongodbStorageController } from '../controllers/mongodbStorageController.js';
+import { githubActionsController } from '../controllers/githubActionsController.js';
 
 const router = express.Router();
 
@@ -24,5 +25,9 @@ router.get('/cloudinary/folders', auth, checkRole(['developer']), cloudinaryStor
 // MongoDB Monitor Routes
 router.get('/mongodb/cluster', auth, checkRole(['developer']), mongodbStorageController.getClusterInfo);
 router.get('/mongodb/collections', auth, checkRole(['developer']), mongodbStorageController.getCollectionsInfo);
+
+
+// GitHub Actions Monitor Routes
+router.get('/github/actions', auth, checkRole(['developer']), githubActionsController.getWorkflows);
 
 export default router;
