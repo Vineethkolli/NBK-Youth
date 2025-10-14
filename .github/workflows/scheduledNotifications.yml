@@ -18,9 +18,9 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
-        working-directory: backend   # <--- Add this here
-        run: npm ci                  # Use npm ci if package-lock.json exists
-
+        run: npm install mongoose web-push dotenv
+        working-directory: backend
+        
       - name: Run Scheduler
         working-directory: backend
         env:
