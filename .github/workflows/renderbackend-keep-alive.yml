@@ -18,10 +18,10 @@ jobs:
           for i in $(seq 1 $MAX_RETRIES); do
             RESPONSE=$(curl -s --max-time 120 -o /dev/null -w "%{http_code}" "$BACKEND_URL")
             if [ "$RESPONSE" -ge 200 ] && [ "$RESPONSE" -lt 400 ]; then
-              echo "Backend is awake ✅ (HTTP $RESPONSE)"
+              echo "Backend is awake (HTTP $RESPONSE)"
               exit 0
             else
-              echo "Ping failed ❌ (HTTP $RESPONSE), retrying in 10s..."
+              echo "Ping failed (HTTP $RESPONSE), retrying in 10s..."
               sleep 10
             fi
           done
