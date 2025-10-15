@@ -154,6 +154,7 @@ function GalleryGrid({
   };
 
   const isAllSelected = localMediaFiles.length > 0 && selectedFiles.length === localMediaFiles.length;
+  const selectionModeActive = selectedFiles.length > 0; // NEW: whether to show circles for all files
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-90 flex flex-col z-50">
@@ -272,7 +273,12 @@ function GalleryGrid({
                   <div
                     className="aspect-square bg-gray-100 rounded-lg overflow-hidden cursor-pointer"
                     onClick={() => {
-                      if (selectedFiles.length === 0) onMediaClick(localMediaFiles, index); // only open lightbox if no selection
+                      // if any selection is active, clicking the file toggles selection
+                      if (selectionModeActive) {
+                        toggleFileSelect(file);
+                      } else {
+                        onMediaClick(localMediaFiles, index); // only open lightbox if no selection
+                      }
                     }}
                     onTouchStart={() => handleLongPressStart(file)}
                     onTouchEnd={handleLongPressEnd}
@@ -292,8 +298,13 @@ function GalleryGrid({
 
                     {/* Selection Circle */}
                     <div
-                      className={`absolute top-2 left-2 w-6 h-6 rounded-full border-2 border-white flex items-center justify-center bg-black bg-opacity-50 text-white transition-opacity opacity-0 group-hover:opacity-100 ${
-                        isSelected ? 'opacity-100 bg-indigo-600 border-indigo-500' : ''
+                      className={`absolute top-2 left-2 w-6 h-6 rounded-full border-2 border-white flex items-center justify-center transition-opacity ${
+                        // show circle always when selection mode is active OR on hover; selected gets indigo bg
+                        isSelected
+                          ? 'opacity-100 bg-indigo-600 border-indigo-500 text-white'
+                          : selectionModeActive
+                          ? 'opacity-100 border-gray-300 bg-black bg-opacity-50 text-white'
+                          : 'opacity-0 group-hover:opacity-100 bg-black bg-opacity-50 text-white'
                       }`}
                       onMouseDown={(e) => e.preventDefault()} // prevent accidental lightbox click
                       onClick={(e) => {
