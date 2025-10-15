@@ -35,4 +35,6 @@ router.post('/:momentId/gallery/upload/complete', auth, checkRole(authRoles), ga
 router.put('/:momentId/gallery/order', auth, checkRole(authRoles), galleryController.updateGalleryOrder);
 router.delete('/:momentId/gallery/:mediaId', auth, checkRole(authRoles), galleryController.deleteGalleryFile);
 
+router.get('/download/:fileId', galleryController.downloadMediaFile);
+
 export default router;
