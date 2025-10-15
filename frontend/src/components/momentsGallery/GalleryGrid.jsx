@@ -10,6 +10,7 @@ import { API_URL } from '../../utils/config';
 function GalleryGrid({
   moment,
   onClose,
+  onMediaClick, // this triggers lightbox
   onDeleteGalleryFile,
   onUploadMediaInGallery,
   onCopyToServiceDriveGallery,
@@ -144,9 +145,7 @@ function GalleryGrid({
 
   const handleLongPressStart = (file) => {
     longPressTimeout.current = setTimeout(() => {
-      if (!selectedFiles.find((f) => f._id === file._id)) {
-        setSelectedFiles([...selectedFiles, file]);
-      }
+      toggleFileSelect(file);
     }, 500);
   };
 
@@ -265,13 +264,16 @@ function GalleryGrid({
       ) : (
         <div className="flex-1 overflow-y-auto p-4">
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {localMediaFiles?.map((file) => {
+            {localMediaFiles?.map((file, index) => {
               const isSelected = selectedFiles.find((f) => f._id === file._id);
               return (
                 <div key={file._id} className="relative group">
+                  {/* Thumbnail */}
                   <div
                     className="aspect-square bg-gray-100 rounded-lg overflow-hidden cursor-pointer"
-                    onClick={() => toggleFileSelect(file)}
+                    onClick={() => {
+                      if (selectedFiles.length === 0) onMediaClick(localMediaFiles, index); // only open lightbox if no selection
+                    }}
                     onTouchStart={() => handleLongPressStart(file)}
                     onTouchEnd={handleLongPressEnd}
                     onTouchMove={handleLongPressEnd}
@@ -287,10 +289,17 @@ function GalleryGrid({
                         e.target.src = 'https://placehold.co/400x400/eeeeee/cccccc?text=Error';
                       }}
                     />
+
+                    {/* Selection Circle */}
                     <div
                       className={`absolute top-2 left-2 w-6 h-6 rounded-full border-2 border-white flex items-center justify-center bg-black bg-opacity-50 text-white transition-opacity opacity-0 group-hover:opacity-100 ${
                         isSelected ? 'opacity-100 bg-indigo-600 border-indigo-500' : ''
                       }`}
+                      onMouseDown={(e) => e.preventDefault()} // prevent accidental lightbox click
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleFileSelect(file);
+                      }}
                     >
                       {isSelected && <CheckCircle className="h-4 w-4" />}
                     </div>
