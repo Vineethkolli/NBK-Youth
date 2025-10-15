@@ -28,7 +28,7 @@ export default function GithubActionsMonitor() {
 
   return (
     <div className="bg-white p-6 rounded-xl shadow-lg max-w-6xl mx-auto space-y-6 font-sans">
-      <h2 className="text-3xl font-semibold border-b pb-3 mb-4">GitHub Actions Monitor</h2>
+      <h2 className="text-3xl font-semibold text-gray-900 border-b pb-3 mb-4">GitHub Actions Monitor</h2>
 
       {/* Metrics Summary */}
       {data.metrics && (
@@ -56,7 +56,7 @@ export default function GithubActionsMonitor() {
       {/* Workflows Table */}
       <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-xl">
         <table className="min-w-full divide-y divide-gray-200 text-sm">
-          <thead className="bg-gray-100">
+          <thead className="bg-gray-100 sticky top-0">
             <tr>
               <th className="p-3 text-left font-bold text-gray-700">Workflow</th>
               <th className="p-3 text-left font-bold text-gray-700">State</th>

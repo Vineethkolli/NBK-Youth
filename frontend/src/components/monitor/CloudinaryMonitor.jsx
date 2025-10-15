@@ -43,7 +43,7 @@ export default function CloudinaryMonitor() {
 
   return (
     <div className="bg-white p-6 rounded-xl shadow-lg max-w-6xl mx-auto space-y-6 font-sans">
-      <h2 className="text-3xl font-semibold border-b pb-3 mb-4">Cloudinary Monitor</h2>
+      <h2 className="text-3xl font-semibold text-gray-900 border-b pb-3 mb-4">Cloudinary Monitor</h2>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 text-sm w-full md:w-2/3">
         <div className="p-3 bg-indigo-50 rounded-xl flex flex-col justify-center shadow-md">

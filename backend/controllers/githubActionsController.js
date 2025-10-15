@@ -1,6 +1,5 @@
 import axios from 'axios';
 import yaml from 'js-yaml';
-import cronParser from 'cron-parser';
 import { DateTime } from 'luxon';
 
 export const githubActionsController = {
@@ -9,7 +8,8 @@ export const githubActionsController = {
       const owner = process.env.GITHUB_OWNER;
       const repo = process.env.GITHUB_REPO;
       const token = process.env.GITHUB_TOKEN;
-      const headers = token && token.trim() !== '' ? { Authorization: `Bearer ${token}` } : {};
+      const headers =
+        token && token.trim() !== '' ? { Authorization: `Bearer ${token}` } : {};
       const apiBase = `https://api.github.com/repos/${owner}/${repo}/actions`;
 
       const { data: workflowsData } = await axios.get(`${apiBase}/workflows`, { headers });
@@ -34,22 +34,14 @@ export const githubActionsController = {
         const parsed = yaml.load(yamlContent);
         const schedules = parsed?.on?.schedule || [];
 
-        // Next 5 runs
-        const nextRuns = [];
-        for (const s of schedules) {
-          if (s.cron) {
-            try {
-              const interval = cronParser.parseExpression(s.cron, { utc: true });
-              for (let i = 0; i < 5; i++) {
-                const next = DateTime.fromJSDate(interval.next().toDate()).setZone('Asia/Kolkata');
-                nextRuns.push(next.toFormat('dd MMM yyyy, hh:mm a'));
-              }
-            } catch {}
-          }
-        }
+        // Skip next run calculations (cron-parser removed)
+        const nextRuns = []; // intentionally left empty
 
         // Previous runs
-        const { data: runsData } = await axios.get(`${apiBase}/workflows/${wf.id}/runs?per_page=100`, { headers });
+        const { data: runsData } = await axios.get(
+          `${apiBase}/workflows/${wf.id}/runs?per_page=100`,
+          { headers }
+        );
         const prevRuns = [];
         for (const r of runsData.workflow_runs || []) {
           totalRuns++;
@@ -78,8 +70,10 @@ export const githubActionsController = {
             id: r.id,
             status: r.status,
             conclusion: r.conclusion,
-            created_at: DateTime.fromISO(r.created_at).setZone('Asia/Kolkata').toFormat('dd MMM yyyy, hh:mm a'),
-            url: r.html_url
+            created_at: DateTime.fromISO(r.created_at)
+              .setZone('Asia/Kolkata')
+              .toFormat('dd MMM yyyy, hh:mm a'),
+            url: r.html_url,
           });
         }
 
@@ -88,19 +82,27 @@ export const githubActionsController = {
           name: wf.name,
           path: wf.path,
           state: wf.state,
-          nextRuns,
-          prevRuns: prevRuns.slice(0, 5)
+          nextRuns, // still included as empty array for compatibility
+          prevRuns: prevRuns.slice(0, 5),
         });
       }
 
       const metrics = {
-        avgRunTime: allJobDurations.length ? `${(allJobDurations.reduce((a,b)=>a+b,0)/allJobDurations.length).toFixed(1)}s` : '0s',
-        avgQueueTime: allQueueTimes.length ? `${(allQueueTimes.reduce((a,b)=>a+b,0)/allQueueTimes.length).toFixed(1)}s` : '0s',
-        failureRate: totalRuns ? `${((failedJobsCount/totalRuns)*100).toFixed(1)}%` : '0%',
+        avgRunTime: allJobDurations.length
+          ? `${(allJobDurations.reduce((a, b) => a + b, 0) / allJobDurations.length).toFixed(1)}s`
+          : '0s',
+        avgQueueTime: allQueueTimes.length
+          ? `${(allQueueTimes.reduce((a, b) => a + b, 0) / allQueueTimes.length).toFixed(1)}s`
+          : '0s',
+        failureRate: totalRuns
+          ? `${((failedJobsCount / totalRuns) * 100).toFixed(1)}%`
+          : '0%',
         failedJobMinutes: failedJobsMinutes.toFixed(1),
         totalMinutes: totalJobMinutes.toFixed(1),
         totalRuns,
-        lastUpdated: DateTime.now().setZone('Asia/Kolkata').toFormat('dd MMM yyyy, hh:mm a')
+        lastUpdated: DateTime.now()
+          .setZone('Asia/Kolkata')
+          .toFormat('dd MMM yyyy, hh:mm a'),
       };
 
       res.json({ metrics, workflows: result });
@@ -108,5 +110,5 @@ export const githubActionsController = {
       console.error('Error fetching GitHub Actions data:', err.response?.data || err.message);
       res.status(500).json({ error: 'Failed to fetch GitHub Actions data' });
     }
-  }
+  },
 };
