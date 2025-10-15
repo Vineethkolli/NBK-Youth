@@ -1,35 +1,36 @@
-import { useState, useEffect } from 'react';
-import { ArrowLeft, X, Download, Trash2, Upload, Copy, Edit2, GripHorizontal } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { ArrowLeft, X, Download, Trash2, Upload, Copy, Edit2, GripHorizontal, CheckCircle } from 'lucide-react';
 import GalleryReorder from './GalleryReorder';
 import MediaUploadForm from './MediaUploadForm';
 import CopyToServiceDriveForm from './CopyToServiceDriveForm';
-import { useAuth } from '../../context/AuthContext'; 
+import { useAuth } from '../../context/AuthContext';
+import { toast } from 'react-hot-toast';
+import { API_URL } from '../../utils/config';
 
 function GalleryGrid({
   moment,
   onClose,
-  onMediaClick,
   onDeleteGalleryFile,
   onUploadMediaInGallery,
   onCopyToServiceDriveGallery,
   onGalleryOrderSave,
 }) {
-  const { user } = useAuth(); 
+  const { user } = useAuth();
   const [isEditMode, setIsEditMode] = useState(false);
   const [isReorderMode, setIsReorderMode] = useState(false);
   const [showUploadForm, setShowUploadForm] = useState(false);
   const [showDriveForm, setShowDriveForm] = useState(false);
   const [localMediaFiles, setLocalMediaFiles] = useState([]);
+  const [selectedFiles, setSelectedFiles] = useState([]);
 
+  const longPressTimeout = useRef(null);
   const allowedRoles = ['admin', 'developer', 'financier'];
   const canManageMedia = user && allowedRoles.includes(user.role);
 
   useEffect(() => {
     if (moment && moment.mediaFiles) {
       const sorted = [...moment.mediaFiles].sort((a, b) => {
-        if (a.order !== undefined && b.order !== undefined) {
-          return b.order - a.order;
-        }
+        if (a.order !== undefined && b.order !== undefined) return b.order - a.order;
         return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
       });
       setLocalMediaFiles(sorted);
@@ -42,27 +43,37 @@ function GalleryGrid({
     return `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`;
   };
 
-  const getDriveDownloadUrl = (url) => {
-    if (!url) return '';
-    const fileId = url.match(/[?&]id=([^&]+)/)?.[1]
-      || url.match(/\/file\/d\/([^\/]+)/)?.[1]
-      || url.match(/open\?id=([^&]+)/)?.[1];
+  const getBackendDownloadUrl = (url) => {
+    const fileId =
+      url.match(/[?&]id=([^&]+)/)?.[1] ||
+      url.match(/\/file\/d\/([^\/]+)/)?.[1] ||
+      url.match(/open\?id=([^&]+)/)?.[1];
     if (!fileId) return url;
-    return `https://drive.google.com/uc?export=download&id=${fileId}`;
+    return `${API_URL}/api/moments/download/${fileId}`;
   };
 
-  const downloadFile = (downloadUrl, name) => {
+  const downloadFiles = async (files) => {
+    if (!files.length) return;
+    const toastId = toast.loading('Downloading...');
     try {
-      const a = document.createElement('a');
-      a.href = downloadUrl;
-      a.target = '_blank';
-      a.rel = 'noopener noreferrer';
-      if (name) a.download = name;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    } catch (err) {
-      window.open(downloadUrl, '_blank', 'noopener');
+      for (const file of files) {
+        const backendUrl = getBackendDownloadUrl(file.url);
+        const response = await fetch(backendUrl);
+        if (!response.ok) throw new Error('Download failed');
+        const blob = await response.blob();
+        const downloadUrl = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = downloadUrl;
+        link.download = file.name || 'file';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setTimeout(() => window.URL.revokeObjectURL(downloadUrl), 1000);
+      }
+      toast.success('Files downloaded successfully', { id: toastId });
+    } catch (error) {
+      console.error('Download error:', error);
+      toast.error('Download failed. Please try again.', { id: toastId });
     }
   };
 
@@ -86,6 +97,39 @@ function GalleryGrid({
 
   const handleDeleteMedia = async (mediaId) => {
     await onDeleteGalleryFile(moment._id, mediaId);
+    setSelectedFiles(selectedFiles.filter((f) => f._id !== mediaId));
+    setLocalMediaFiles(localMediaFiles.filter((f) => f._id !== mediaId));
+  };
+
+  const bulkDeleteFiles = async () => {
+    if (!selectedFiles.length) return;
+    const count = selectedFiles.length;
+    const confirmMsg = `Are you sure you want to delete ${count} file${count > 1 ? 's' : ''}? This action cannot be undone.`;
+    if (!window.confirm(confirmMsg)) return;
+
+    const toastId = toast.loading('Deleting...');
+    try {
+      for (const f of selectedFiles) {
+        await onDeleteGalleryFile(moment._id, f._id);
+      }
+      setLocalMediaFiles((prev) => prev.filter((p) => !selectedFiles.find((s) => s._id === p._id)));
+      setSelectedFiles([]);
+      toast.success(`${count} file${count > 1 ? 's' : ''} deleted`, { id: toastId });
+    } catch (err) {
+      console.error('Bulk delete error:', err);
+      toast.error('Failed to delete files. Try again.', { id: toastId });
+    }
+  };
+
+  const toggleFileSelect = (file) => {
+    setSelectedFiles((prev) =>
+      prev.find((f) => f._id === file._id) ? prev.filter((f) => f._id !== file._id) : [...prev, file]
+    );
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedFiles.length === localMediaFiles.length) setSelectedFiles([]);
+    else setSelectedFiles([...localMediaFiles]);
   };
 
   const handleMediaOrderSave = async (reorderedMedia) => {
@@ -98,6 +142,20 @@ function GalleryGrid({
     }
   };
 
+  const handleLongPressStart = (file) => {
+    longPressTimeout.current = setTimeout(() => {
+      if (!selectedFiles.find((f) => f._id === file._id)) {
+        setSelectedFiles([...selectedFiles, file]);
+      }
+    }, 500);
+  };
+
+  const handleLongPressEnd = () => {
+    clearTimeout(longPressTimeout.current);
+  };
+
+  const isAllSelected = localMediaFiles.length > 0 && selectedFiles.length === localMediaFiles.length;
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-90 flex flex-col z-50">
       {/* Header */}
@@ -106,46 +164,98 @@ function GalleryGrid({
           <button onClick={onClose} className="text-gray-600 hover:text-gray-800">
             <ArrowLeft className="h-6 w-6" />
           </button>
-          <h2 className="text-xl font-semibold">{moment.title}</h2>
-        </div>
-        <div className="flex items-center space-x-4">
-         {canManageMedia && (
-  <>
-    {/* Hide Upload & Copy buttons if uploaded via Drive */}
-    {moment.type !== 'drive' && (
-      <>
-        <button onClick={() => setShowUploadForm(true)} className="btn-primary">
-          <Upload className="h-4 w-4 mr-2" />
-        </button>
-        <button onClick={() => setShowDriveForm(true)} className="btn-primary">
-          <Copy className="h-4 w-4 mr-2" />
-        </button>
-      </>
-    )}
 
-    <button
-      onClick={() => setIsReorderMode(true)}
-      disabled={isReorderMode}
-      className={`btn-secondary ${isReorderMode ? 'opacity-50 cursor-not-allowed' : ''}`}
-      title={isReorderMode ? 'Reorder is active' : 'Enter reorder mode'}
-    >
-      <GripHorizontal className="h-4 w-4 mr-2" />
-    </button>
-    <button
-      onClick={() => { setIsEditMode(!isEditMode); setIsReorderMode(false); }}
-      className={`btn-secondary ${isEditMode ? 'bg-red-100' : ''}`}
-    >
-      <Edit2 className="h-4 w-4 mr-2" />
-      {isEditMode ? 'Done' : ''}
-    </button>
-  </>
-)}
-          <button onClick={onClose} className="text-gray-600 hover:text-gray-800">
-            <X className="h-6 w-6" />
-          </button>
+          {selectedFiles.length > 0 ? (
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={toggleSelectAll}
+                className="flex flex-col items-center justify-center w-10"
+                title={isAllSelected ? 'Deselect all' : 'Select all'}
+              >
+                <div
+                  className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
+                    isAllSelected ? 'bg-indigo-600 border-indigo-500 text-white' : 'border-gray-300 bg-black bg-opacity-50 text-white'
+                  }`}
+                >
+                  {isAllSelected && <CheckCircle className="h-4 w-4" />}
+                </div>
+                <span className="text-xs mt-1">All</span>
+              </button>
+              <div className="text-xl font-medium">{selectedFiles.length} selected</div>
+            </div>
+          ) : (
+            <h2 className="text-xl font-semibold">{moment.title}</h2>
+          )}
+        </div>
+
+        <div className="flex items-center space-x-4">
+          {selectedFiles.length > 0 ? (
+            <div className="flex items-center space-x-3">
+              <button
+                onClick={() => downloadFiles(selectedFiles)}
+                className="p-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 flex items-center"
+                title="Download selected"
+              >
+                <Download className="h-4 w-4" />
+              </button>
+              <button
+                onClick={bulkDeleteFiles}
+                className="p-2 bg-red-600 text-white rounded hover:bg-red-700 flex items-center"
+                title="Delete selected"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => setSelectedFiles([])}
+                className="text-red-600 hover:text-red-700 font-semibold"
+                title="Cancel selection"
+              >
+                Cancel
+              </button>
+            </div>
+          ) : (
+            <>
+              {canManageMedia && (
+                <>
+                  {moment.type !== 'drive' && (
+                    <>
+                      <button onClick={() => setShowUploadForm(true)} className="btn-primary">
+                        <Upload className="h-4 w-4 mr-2" />
+                      </button>
+                      <button onClick={() => setShowDriveForm(true)} className="btn-primary">
+                        <Copy className="h-4 w-4 mr-2" />
+                      </button>
+                    </>
+                  )}
+                  <button
+                    onClick={() => setIsReorderMode(true)}
+                    disabled={isReorderMode}
+                    className={`btn-secondary ${isReorderMode ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    title={isReorderMode ? 'Reorder is active' : 'Enter reorder mode'}
+                  >
+                    <GripHorizontal className="h-4 w-4 mr-2" />
+                  </button>
+                  <button
+                    onClick={() => {
+                      setIsEditMode(!isEditMode);
+                      setIsReorderMode(false);
+                    }}
+                    className={`btn-secondary ${isEditMode ? 'bg-red-100' : ''}`}
+                  >
+                    <Edit2 className="h-4 w-4 mr-2" />
+                    {isEditMode ? 'Done' : ''}
+                  </button>
+                </>
+              )}
+              <button onClick={onClose} className="text-gray-600 hover:text-gray-800">
+                <X className="h-6 w-6" />
+              </button>
+            </>
+          )}
         </div>
       </div>
 
+      {/* Gallery grid / reorder */}
       {isReorderMode ? (
         <GalleryReorder
           mediaFiles={localMediaFiles}
@@ -155,22 +265,36 @@ function GalleryGrid({
       ) : (
         <div className="flex-1 overflow-y-auto p-4">
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {localMediaFiles?.map((file, index) => (
-              <div key={file._id} className="relative group">
-                <div
-                  className="aspect-square bg-gray-100 rounded-lg overflow-hidden cursor-pointer"
-                  onClick={() => onMediaClick(localMediaFiles, index)}
-                >
-                  <div className="relative w-full h-full">
+            {localMediaFiles?.map((file) => {
+              const isSelected = selectedFiles.find((f) => f._id === file._id);
+              return (
+                <div key={file._id} className="relative group">
+                  <div
+                    className="aspect-square bg-gray-100 rounded-lg overflow-hidden cursor-pointer"
+                    onClick={() => toggleFileSelect(file)}
+                    onTouchStart={() => handleLongPressStart(file)}
+                    onTouchEnd={handleLongPressEnd}
+                    onTouchMove={handleLongPressEnd}
+                  >
                     <img
                       src={getThumbnailUrl(file.url)}
                       alt={file.name}
-                      className="w-full h-full object-cover hover:scale-105 transition-transform"
+                      className={`w-full h-full object-cover transition-transform ${
+                        isSelected ? 'ring-4 ring-indigo-500' : 'group-hover:scale-105'
+                      }`}
                       onError={(e) => {
                         e.target.onerror = null;
                         e.target.src = 'https://placehold.co/400x400/eeeeee/cccccc?text=Error';
                       }}
                     />
+                    <div
+                      className={`absolute top-2 left-2 w-6 h-6 rounded-full border-2 border-white flex items-center justify-center bg-black bg-opacity-50 text-white transition-opacity opacity-0 group-hover:opacity-100 ${
+                        isSelected ? 'opacity-100 bg-indigo-600 border-indigo-500' : ''
+                      }`}
+                    >
+                      {isSelected && <CheckCircle className="h-4 w-4" />}
+                    </div>
+
                     {file.type === 'video' && (
                       <div className="absolute bottom-2 left-2 flex items-center space-x-1 bg-black bg-opacity-70 rounded-full px-2 py-1">
                         <div className="w-0 h-0 border-l-[6px] border-l-white border-t-[4px] border-t-transparent border-b-[4px] border-b-transparent"></div>
@@ -178,46 +302,24 @@ function GalleryGrid({
                       </div>
                     )}
                   </div>
+
+                  {canManageMedia && isEditMode && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (window.confirm('Are you sure you want to delete this media?')) {
+                          handleDeleteMedia(file._id);
+                        }
+                      }}
+                      className="absolute top-2 right-2 p-2 bg-red-600 text-white rounded-full hover:bg-red-700 transition-colors"
+                      title="Delete"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  )}
                 </div>
-
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    const dl = getDriveDownloadUrl(file.url);
-                    if (/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-                      const link = document.createElement('a');
-                      link.href = dl;
-                      link.download = file.name;
-                      link.target = '_blank';
-                      document.body.appendChild(link);
-                      link.click();
-                      document.body.removeChild(link);
-                    } else {
-                      downloadFile(dl, file.name);
-                    }
-                  }}
-                  className="absolute bottom-2 right-2 p-2 bg-black bg-opacity-50 text-white rounded-full hover:bg-opacity-75 transition-opacity opacity-0 group-hover:opacity-100"
-                  title="Download"
-                >
-                  <Download className="h-4 w-4" />
-                </button>
-
-                {canManageMedia && isEditMode && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (window.confirm('Are you sure you want to delete this media?')) {
-                        handleDeleteMedia(file._id);
-                      }
-                    }}
-                    className="absolute top-2 right-2 p-2 bg-red-600 text-white rounded-full hover:bg-red-700 transition-colors"
-                    title="Delete"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                )}
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
