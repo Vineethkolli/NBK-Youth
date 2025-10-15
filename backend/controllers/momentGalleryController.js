@@ -233,4 +233,40 @@ export const galleryController = {
       res.status(500).json({ message: 'Failed to delete gallery file', error: error.message });
     }
   },
+
+  downloadMediaFile: async (req, res) => {
+    try {
+      const { fileId } = req.params;
+
+      if (!fileId) {
+        return res.status(400).json({ message: 'File ID is required' });
+      }
+
+      const fileInfo = await drive.files.get({
+        fileId,
+        fields: 'name, mimeType',
+      });
+
+      const fileName = fileInfo.data.name || 'download';
+      const mimeType = fileInfo.data.mimeType || 'application/octet-stream';
+
+      const driveResponse = await drive.files.get(
+        { fileId, alt: 'media' },
+        { responseType: 'stream' }
+      );
+
+      res.setHeader('Content-Type', mimeType);
+      res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+
+      driveResponse.data
+        .on('error', (err) => {
+          console.error('Error streaming file:', err);
+          res.status(500).end();
+        })
+        .pipe(res);
+    } catch (error) {
+      console.error('Download failed:', error);
+      res.status(500).json({ message: 'Failed to download file', error: error.message });
+    }
+  },
 };
