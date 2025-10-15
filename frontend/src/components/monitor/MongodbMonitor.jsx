@@ -48,7 +48,7 @@ export default function MongoDBMonitor() {
 
   return (
     <div className="bg-white p-6 rounded-xl shadow-lg max-w-6xl mx-auto space-y-6 font-sans">
-      <h2 className="text-3xl font-semibold text-gray-900 border-b pb-3 mb-4">MongoDB Monitor</h2>
+      <h2 className="text-2xl font-semibold text-gray-900 border-b pb-3 mb-4">MongoDB Monitor</h2>
 
       {/* Storage & Databases Info */}
       <div className="grid grid-cols-2 lg:grid-cols-6 gap-3 text-sm w-full md:w-full">
