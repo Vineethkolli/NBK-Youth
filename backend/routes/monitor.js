@@ -28,6 +28,8 @@ router.get('/mongodb/collections', auth, checkRole(['developer']), mongodbStorag
 
 
 // GitHub Actions Monitor Routes
-router.get('/github/actions', auth, checkRole(['developer']), githubActionsController.getWorkflows);
+router.get('/github/actions/all', auth, checkRole(['developer']), githubActionsController.getAllData);
+router.get('/github/actions/metrics', auth, checkRole(['developer']), githubActionsController.getMetricsOnly);
+router.get('/github/actions/workflows', auth, checkRole(['developer']), githubActionsController.getWorkflowsOnly);
 
 export default router;
