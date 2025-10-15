@@ -117,8 +117,8 @@ mongoose.connect(process.env.MONGODB_URI)
   .catch((err) => console.error('MongoDB connection error:', err));
 
 
-// Notification Scheduler runs at 7:00, 7:05, 7:10, 7:15 AM IST IST every day
-cron.schedule('0,5,10,15 7 * * *', async () => {
+// Notification Scheduler runs at 7:00, 7:05, 7:15, 7:35, 7:55 AM IST IST every day
+cron.schedule('0,5,15,35,55 7 * * *', async () => {
   try {
     console.log('Running scheduled notifications');
     await processDueNotifications();
@@ -129,8 +129,8 @@ cron.schedule('0,5,10,15 7 * * *', async () => {
   timezone: 'Asia/Kolkata'
 });
 
-// Yearly Reset Cron: 00:00, 00:05, 00:10, 00:15 IST on Jan 1
-cron.schedule('0,5,10,15 0 1 1 *', async () => {
+// Yearly Reset Cron: 00:00, 00:05, 00:15, 00:35, 00:55 AM IST on Jan 1
+cron.schedule('0,5,15,35,55 0 1 1 *', async () => {
   try {
     console.log('Running yearly notification reset');
     const now = new Date();
