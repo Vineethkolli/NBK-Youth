@@ -8,14 +8,14 @@ export const registerServiceWorker = async () => {
   if ('serviceWorker' in navigator) {
     try {
       const registration = await navigator.serviceWorker.register('/sw.js');
-      console.log('Service Worker registered:', registration);
+      // console.log('Service Worker registered:', registration);
       return registration;
     } catch (error) {
-      console.error('Service Worker registration failed:', error);
+      // console.error('Service Worker registration failed:', error);
       throw error;
     }
   } else {
-    throw new Error('Service Worker not supported');
+    // throw new Error('Service Worker not supported');
   }
 };
 

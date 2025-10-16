@@ -5,6 +5,7 @@ import { SiYoutube, SiInstagram } from "react-icons/si";
 import TechStackDetails from "../components/techstack/Technologies";
 import MindMap from "../components/techstack/MindMap";
 import Access from '../components/techstack/Access';
+import { toast } from 'react-hot-toast';
 
 function TechStack() {
   const [websites] = useState([
@@ -32,21 +33,21 @@ function TechStack() {
     },
   ];
 
+// Share function 
+const handleShare = (url) => {
+  if (navigator.share) {
+    navigator.share({
+      title: "NBK Youth",
+      text: "NBK Youth Gangavaram",
+      url,
+    }).catch(() => {
+      toast.error("Failed to share. Please try again.");
+    });
+  } else {
+    toast.error("Share not supported on this browser.");
+  }
+};
 
-  // Share function using Web Share API
-  const handleShare = (url) => {
-    if (navigator.share) {
-      navigator
-        .share({
-          title: "NBK Youth",
-          text: "NBK Youth Gangavaram",
-          url,
-        })
-        .catch((error) => console.log("Error sharing", error));
-    } else {
-      alert("Share not supported on this browser.");
-    }
-  };
 
   return (
 <div className="space-y-6">
