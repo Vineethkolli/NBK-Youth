@@ -51,7 +51,6 @@ export const unsubscribe = async (req, res) => {
       { "subscriptions.endpoint": endpoint },
       { $pull: { subscriptions: { endpoint } } }
     );
-    console.log('Unsubscribed:', endpoint);
     res.status(200).json({ message: 'Unsubscribed successfully' });
   } catch (error) {
     console.error('Error unsubscribing:', error);
@@ -99,7 +98,6 @@ export const sendNotification = async (req, res) => {
           if (error.statusCode === 410 || error.statusCode === 404) {
             user.subscriptions = user.subscriptions.filter((s) => s.endpoint !== sub.endpoint);
             await user.save();
-            console.log('Deleted expired subscription:', sub.endpoint);
           } else {
             console.error('Error sending notification:', error);
           }

@@ -34,9 +34,9 @@ function NotificationAutoRegister() {
             subscription: newSubscription,
           });
 
-          console.log('Auto-subscribed for push notifications.');
+          // console.log('Auto-subscribed for push notifications.');
         } else {
-          console.log('Already subscribed.');
+          // console.log('Already subscribed.');
         }
       } catch (err) {
         console.error('Auto-subscription failed:', err);

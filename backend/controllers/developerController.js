@@ -175,9 +175,6 @@ const deleteCloudinaryFolder = async (folder) => {
     const publicIds = resources.map((r) => r.public_id);
     if (publicIds.length > 0) {
       await cloudinary.api.delete_resources(publicIds);
-      console.log(`Deleted ${publicIds.length} files from Cloudinary folder: ${folder}`);
-    } else {
-      console.log(`No files found in Cloudinary folder: ${folder}`);
     }
   } catch (error) {
     console.error(`Error deleting Cloudinary folder ${folder}:`, error);

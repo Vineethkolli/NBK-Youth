@@ -1,5 +1,5 @@
 # API Analysis 
-Total APIs: 29 APIs
+Total APIs: 29
 Total endpoints: 180
 
 # End Points

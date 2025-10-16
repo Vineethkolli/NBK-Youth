@@ -94,7 +94,7 @@ export const LanguageProvider = ({ children }) => {
           language: newLanguage,
         });
       } catch (error) {
-        console.error('Failed to update language on server:', error);
+        console.error('Failed to update language on server', error);
       }
     }
     setLanguage(newLanguage);
