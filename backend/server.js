@@ -102,10 +102,16 @@ app.use('/api/uploads', cloudinaryRoutes);
 app.use('/api/monitor', monitorRoutes);
 
 
-// Health check endpoint
+// Health check
 app.get('/', (req, res) => {
   res.json({ status: 'API is running' });
 });
+
+// Cron Health check
+app.get('/health', (req, res) => {
+  res.status(200).send('Ok');
+});
+
 
 // MongoDB connection
 mongoose.connect(process.env.MONGODB_URI)
