@@ -120,23 +120,20 @@ export default function GithubActionsMonitor() {
       </div>
 
       {/* Metrics Row 1 */}
-      {metrics && (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 text-sm w-full md:w-2/3">
-          <MetricCard label="Total Workflows" value={metrics.totalWorkflows} />
-          <MetricCard label="Total Minutes" value={`${metrics.totalMinutes} mins`} />
-          <MetricCard label="Total Job Runs" value={metrics.totalRuns} />
-        </div>
-      )}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 text-sm w-full md:w-2/3">
+      <MetricCard label="Total Workflows" value={metrics ? metrics.totalWorkflows : "..."} />
+      <MetricCard label="Total Minutes" value={metrics ? `${metrics.totalMinutes} mins` : "..."} />
+      <MetricCard label="Total Job Runs" value={metrics ? metrics.totalRuns : "..."} /> 
+      </div>
 
       {/* Metrics Row 2 */}
-      {metrics && (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 text-sm w-full md:w-2/3">
-          <MetricCard label="Avg Job Run Time" value={metrics.avgRunTime} />
-          <MetricCard label="Avg Job Queue Time" value={metrics.avgQueueTime} />
-          <MetricCard label="Job Failure Rate" value={metrics.failureRate} />
-          <MetricCard label="Failed Job Usage" value={`${metrics.failedJobMinutes} mins`} />
-        </div>
-      )}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 text-sm w-full md:w-2/3">
+      <MetricCard label="Avg Job Run Time" value={metrics ? metrics.avgRunTime : "..."} />
+      <MetricCard label="Avg Job Queue Time" value={metrics ? metrics.avgQueueTime : "..."} />
+      <MetricCard label="Job Failure Rate" value={metrics ? metrics.failureRate : "..."} />
+      <MetricCard label="Failed Job Usage" value={metrics ? `${metrics.failedJobMinutes} mins` : "..."} />
+      </div>
+
 {/* Workflows Table */}
 <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-xl">
   <table className="min-w-full divide-y divide-gray-200 text-sm">
