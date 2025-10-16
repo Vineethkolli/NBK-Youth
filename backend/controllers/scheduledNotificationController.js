@@ -5,10 +5,9 @@ import NotificationHistory from '../models/NotificationHistory.js';
 import webpush from 'web-push';
 import { logActivity } from '../middleware/activityLogger.js';
 
-
 export const createScheduledNotification = async (req, res) => {
   try {
-    const { title, message, scheduledAt, frequency } = req.body;
+    const { title, message, scheduledAt } = req.body;
     if (!title || !message || !scheduledAt)
       return res.status(400).json({ error: 'Missing required fields' });
 
@@ -16,7 +15,6 @@ export const createScheduledNotification = async (req, res) => {
       title,
       message,
       scheduledAt: new Date(scheduledAt),
-      frequency: frequency === 'YEARLY' ? 'YEARLY' : 'ONCE',
       createdBy: req.user?.registerId || 'SYSTEM',
       status: 'PENDING',
       sendHistory: [],

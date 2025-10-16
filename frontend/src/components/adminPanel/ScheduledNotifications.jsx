@@ -10,7 +10,6 @@ function ScheduledNotifications() {
     title: '',
     message: '',
     scheduledAt: '',
-    frequency: 'ONCE',
   });
   const [editingId, setEditingId] = useState(null);
   const [showForm, setShowForm] = useState(false);
@@ -29,7 +28,7 @@ function ScheduledNotifications() {
   useEffect(() => { fetch(); }, []);
 
   const resetForm = () => {
-    setFormData({ title: '', message: '', scheduledAt: '', frequency: 'ONCE' });
+    setFormData({ title: '', message: '', scheduledAt: '' });
     setEditingId(null);
   };
 
@@ -37,8 +36,8 @@ function ScheduledNotifications() {
     e.preventDefault();
     if (isSubmitting) return;
 
-    const { title, message, scheduledAt, frequency } = formData;
-    if (!title.trim() || !message.trim() || !scheduledAt || !frequency) {
+    const { title, message, scheduledAt } = formData;
+    if (!title.trim() || !message.trim() || !scheduledAt) {
       toast.error('Please fill all mandatory fields');
       return;
     }
@@ -49,7 +48,6 @@ function ScheduledNotifications() {
         title: title.trim(),
         message: message.trim(),
         scheduledAt: new Date(scheduledAt).toISOString(),
-        frequency,
       };
 
       if (editingId) {
@@ -171,18 +169,6 @@ function ScheduledNotifications() {
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Frequency *</label>
-                <select
-                  required
-                  value={formData.frequency}
-                  onChange={(e) => setFormData({ ...formData, frequency: e.target.value })}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                >
-                  <option value="ONCE">Only this time</option>
-                  <option value="YEARLY">Every year</option>
-                </select>
-              </div>
               <div className="flex justify-end gap-2 mt-3">
                 <button
                   type="button"
@@ -211,7 +197,6 @@ function ScheduledNotifications() {
             <div>
               <div className="font-medium">Title: {it.title}</div>
               <div className="font-medium">Message: {it.message}</div>
-              <div className="text-xs text-gray-500">Frequency: {it.frequency === 'YEARLY' ? 'Yearly' : 'Once'}</div>
               <div className="text-xs text-gray-500">Scheduled: {new Date(it.scheduledAt).toLocaleDateString()}</div>
               <div className="text-xs text-gray-500">
                 Status: {it.sendHistory && it.sendHistory.length ? `Sent (${it.sendHistory.map(s => new Date(s.sentAt).toLocaleDateString()).join(', ')})` : 'Not Sent'}

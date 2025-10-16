@@ -36,7 +36,6 @@ import historiesRoutes from './routes/histories.js';
 import cloudinaryRoutes from './routes/cloudinary.js';
 import monitorRoutes from './routes/monitor.js';
 import { processDueNotifications } from './controllers/scheduledNotificationController.js';
-import ScheduledNotification from './models/ScheduledNotification.js';
 import cron from 'node-cron';
 
 
@@ -124,32 +123,6 @@ cron.schedule('0,5,15,35,55 7 * * *', async () => {
     await processDueNotifications();
   } catch (err) {
     console.error('Scheduled job error:', err);
-  }
-}, {
-  timezone: 'Asia/Kolkata'
-});
-
-// Yearly Reset Cron: 00:00, 00:05, 00:15, 00:35, 00:55 AM IST on Jan 1
-cron.schedule('0,5,15,35,55 0 1 1 *', async () => {
-  try {
-    console.log('Running yearly notification reset');
-    const now = new Date();
-    const currentYear = now.getFullYear();
-    // Find all yearly notifications scheduled in past or current year
-    const notifications = await ScheduledNotification.find({
-      frequency: 'YEARLY',
-      scheduledAt: { $lt: new Date(currentYear + 1, 0, 1) } // before Jan 1 next year
-    });
-    for (const notif of notifications) {
-      const oldScheduledAt = new Date(notif.scheduledAt);
-      // Move to next year (keep same month/day)
-      notif.scheduledAt = new Date(currentYear + 1, oldScheduledAt.getMonth(), oldScheduledAt.getDate());
-      notif.status = 'PENDING';
-      await notif.save();
-      console.log(`Yearly notifications reset successfully`);
-    }
-  } catch (err) {
-    console.error('Error resetting yearly notifications', err);
   }
 }, {
   timezone: 'Asia/Kolkata'
