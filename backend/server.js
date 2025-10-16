@@ -5,6 +5,8 @@ import mongoose from 'mongoose';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import webpush from 'web-push';
+import cron from 'node-cron';
+
 import authRoutes from './routes/auth.js';
 import userRoutes from './routes/users.js';
 import paymentRoutes from './routes/payment.js';
@@ -21,7 +23,6 @@ import momentsRoutes from './routes/moments.js';
 import gameRoutes from './routes/games.js';
 import notificationRoutes from './routes/notifications.js';
 import scheduledNotificationRoutes from './routes/scheduledNotifications.js';
-import { createDefaultDeveloper } from './utils/setupDefaults.js';
 import maintenanceRoutes from './routes/maintenance.js';
 import estimationRoutes from './routes/estimation.js';
 import bannerRoutes from './routes/banners.js';
@@ -36,39 +37,37 @@ import historiesRoutes from './routes/histories.js';
 import cloudinaryRoutes from './routes/cloudinary.js';
 import monitorRoutes from './routes/monitor.js';
 import { processDueNotifications } from './controllers/scheduledNotificationController.js';
-import cron from 'node-cron';
+import { createDefaultDeveloper } from './utils/setupDefaults.js';
 
-
-dotenv.config({ quiet: true }); 
-
+dotenv.config({ quiet: true });
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Set VAPID details
-if (!process.env.PUBLIC_VAPID_KEY || !process.env.PRIVATE_VAPID_KEY) {
-  console.error('Missing VAPID keys in environment variables');
-  process.exit(1);
-}
+// Environment variables validation
+const requiredVars = [ 'FRONTEND_URL', 'MONGODB_URI', 'JWT_SECRET', 'PUBLIC_VAPID_KEY', 'PRIVATE_VAPID_KEY',
+  'CLOUDINARY_CLOUD_NAME', 'CLOUDINARY_API_KEY', 'CLOUDINARY_API_SECRET', 'GOOGLE_DRIVE_CREDENTIALS', 'GOOGLE_DRIVE_FOLDER_ID' ];
+requiredVars.forEach(v => {
+  if (!process.env[v]) {
+    console.error(`Missing required environment variable: ${v}`);
+    process.exit(1);
+  }
+});
 
-webpush.setVapidDetails(
-  'mailto:youremail@example.com',
+// Web Push Configuration
+webpush.setVapidDetails( 'mailto:gangavaramnbkyouth@gmail.com',
   process.env.PUBLIC_VAPID_KEY,
   process.env.PRIVATE_VAPID_KEY
 );
 
-
 // Middleware
-app.use(cors({
-  origin: process.env.FRONTEND_URL || '*',
-  credentials: true
-}));
-app.use(express.json({ limit: '300mb' }));
-app.use(express.urlencoded({ extended: true, limit: '300mb' }));
+app.use(cors({ origin: process.env.FRONTEND_URL, credentials: true }));
+
+app.use(express.json({ limit: '10mb' }));      
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Serve static files
 app.use('/assets', express.static(path.join(__dirname, 'public/assets')));
-
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -101,26 +100,20 @@ app.use('/api/histories', historiesRoutes);
 app.use('/api/uploads', cloudinaryRoutes);
 app.use('/api/monitor', monitorRoutes);
 
+// Health Check
+app.get('/', (req, res) => res.json({ status: 'API is running' }));
+app.get('/health', (req, res) => res.status(200).send('Ok'));
 
-// Health check
-app.get('/', (req, res) => {
-  res.json({ status: 'API is running' });
-});
-
-// Cron Health check
-app.get('/health', (req, res) => {
-  res.status(200).send('Ok');
-});
-
-
-// MongoDB connection
+// MongoDB Connection
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => {
     console.log('Connected to MongoDB');
     createDefaultDeveloper();
   })
-  .catch((err) => console.error('MongoDB connection error:', err));
-
+  .catch(err => {
+    console.error('MongoDB connection error:', err);
+    process.exit(1); 
+  });
 
 // Notification Scheduler runs at 7:00, 7:05, 7:15, 7:35, 7:55 AM IST IST every day
 cron.schedule('0,5,15,35,55 7 * * *', async () => {
@@ -134,9 +127,17 @@ cron.schedule('0,5,15,35,55 7 * * *', async () => {
   timezone: 'Asia/Kolkata'
 });
 
-
-// Server start
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+// Error Handling Middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ error: 'Internal server error' });
 });
+
+// 404 Handler
+app.use((req, res) => {
+  res.status(404).json({ error: 'Endpoint not found' });
+});
+
+// Start Server
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
