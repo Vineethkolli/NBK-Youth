@@ -1,0 +1,29 @@
+name: Keep MongoDB Atlas Alive
+
+on:
+  schedule:
+    # Runs at 2:00 AM IST on 2nd day of every month
+    - cron: '30 20 1 * *'
+  workflow_dispatch: # manual trigger
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install mongodb
+        working-directory: backend
+
+      - name: Run Keep-Alive Script
+        run: node utils/keepMongodbAlive.js
+        working-directory: backend
+        env:
+          MONGO_URI: ${{ secrets.MONGO_URI }}
