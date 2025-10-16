@@ -39,7 +39,7 @@ async function checkStorage() {
       `   Trash Used: ${(storageQuota.usageInDriveTrash / 1024 ** 3).toFixed(2)} GB`
     );
   } catch (error) {
-    console.error('❌ Failed to get storage info:', error.response?.data || error.message);
+    console.error(' Failed to get storage info:', error.response?.data || error.message);
   }
 }
 
@@ -129,7 +129,7 @@ async function calculateUsage(trashed = false) {
       );
     }
   } catch (err) {
-    console.error('❌ Error calculating usage:', err.message);
+    console.error(' Error calculating usage:', err.message);
   }
 }
 
