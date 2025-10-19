@@ -1,7 +1,8 @@
 export default {
   content: [
     './index.html',
-    './src/**/*.{js,jsx,ts,tsx}', 
+    './public/**/*.html',
+    './src/**/*.{html,js,jsx,ts,tsx,vue,svelte}',
   ],
   theme: {
     extend: {},
