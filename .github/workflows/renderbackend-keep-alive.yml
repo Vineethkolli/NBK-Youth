@@ -2,8 +2,8 @@ name: Keep Render Backend Alive
 
 on:
   schedule:
-    # Runs every hour at 50 IST Ex:1:50AM, 2:50AM,...
-    - cron: '20 0-23 * * *'
+    # Runs every half an hour
+    - cron: '*/30 * * * *'
   workflow_dispatch: # manual trigger
 
 jobs:
@@ -14,7 +14,7 @@ jobs:
         env:
           BACKEND_URL: ${{ secrets.RENDER_BACKEND_URL }}
         run: |
-          MAX_RETRIES=3
+          MAX_RETRIES=2
           for i in $(seq 1 $MAX_RETRIES); do
             RESPONSE=$(curl -s --max-time 120 -o /dev/null -w "%{http_code}" "$BACKEND_URL")
             if [ "$RESPONSE" -ge 200 ] && [ "$RESPONSE" -lt 400 ]; then
