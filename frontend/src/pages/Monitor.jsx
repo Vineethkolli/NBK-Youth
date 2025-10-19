@@ -19,19 +19,6 @@ export default function Monitor() {
           Status
         </a>
       </div>
-      <div className="bg-white border border-blue-200 rounded-xl shadow-md p-4 flex items-center justify-between">
-        <div>
-          <h2 className="text-xl font-semibold text-indigo-600 mb-1">Uptime Robot Monitor</h2>
-        </div>
-        <a
-          href="https://stats.uptimerobot.com/yQ9W2XXUVS"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="px-5 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-all"
-        >
-          Status
-        </a>
-      </div>
 
       <ServiceDriveMonitor />
 
