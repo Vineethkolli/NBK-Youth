@@ -5,6 +5,7 @@ import axios from 'axios';
 import { API_URL } from '../../utils/config';
 import { useAuth } from '../../context/AuthContext';
 import SlidesOrder from './SlidesOrder';
+import { uploadDirectToCloudinary } from '../../utils/cloudinaryUpload';
 
 function Slideshow({ isEditing }) {
   const [slides, setSlides] = useState([]);
@@ -125,7 +126,6 @@ function Slideshow({ isEditing }) {
     setIsUploading(true);
 
     try {
-      const { uploadDirectToCloudinary } = await import('../../utils/cloudinaryUpload');
       const uploaded = await uploadDirectToCloudinary({
         file,
         folder: 'HomepageSlides',
