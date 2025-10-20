@@ -75,7 +75,7 @@ function DashboardLayout() {
             className={`flex flex-col items-center justify-center w-1/3 ${sidebarOpen ? 'text-indigo-600' : 'text-gray-600'}`}
           >
             {sidebarOpen ? (
-              <div className="bg-indigo-600 rounded-full p-3 -mt-8">
+              <div className="bg-indigo-600 rounded-full p-2 -mt-4">
                 <Menu className="h-6 w-6 text-white" />
               </div>
             ) : (
@@ -90,7 +90,7 @@ function DashboardLayout() {
             className={`flex flex-col items-center justify-center w-1/3 ${isActive('/') ? 'text-indigo-600' : 'text-gray-600'}`}
           >
             {isActive('/') ? (
-              <div className="bg-indigo-600 rounded-full p-3 -mt-8">
+              <div className="bg-indigo-600 rounded-full p-2 -mt-4">
                 <Home className="h-6 w-6 text-white" />
               </div>
             ) : (
@@ -105,7 +105,7 @@ function DashboardLayout() {
             className={`flex flex-col items-center justify-center w-1/3 ${budgetOpen ? 'text-indigo-600' : 'text-gray-600'}`}
           >
             {budgetOpen ? (
-              <div className="bg-indigo-600 rounded-full p-3 -mt-8">
+              <div className="bg-indigo-600 rounded-full p-2 -mt-4">
                 <Wallet className="h-6 w-6 text-white" />
               </div>
             ) : (
