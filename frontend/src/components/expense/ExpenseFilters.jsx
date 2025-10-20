@@ -1,4 +1,4 @@
-import { Filter, ArrowDown, ArrowUp, Calendar, X } from 'lucide-react';
+import { Filter, Calendar, X } from 'lucide-react';
 import { useRef } from 'react';
 import { formatDateTime } from '../../utils/dateTime';
 

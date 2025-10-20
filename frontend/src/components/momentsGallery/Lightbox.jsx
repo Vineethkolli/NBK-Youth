@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, X, ChevronLeft, ChevronRight, Download, Loader2 } from 'lucide-react';
+import { ArrowLeft, X, ChevronLeft, ChevronRight, Download } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { API_URL } from '../../utils/config';
 

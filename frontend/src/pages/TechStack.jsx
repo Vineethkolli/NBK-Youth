@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { ExternalLink } from "lucide-react";
 import { FaShareAlt } from "react-icons/fa";
 import { SiYoutube, SiInstagram } from "react-icons/si";

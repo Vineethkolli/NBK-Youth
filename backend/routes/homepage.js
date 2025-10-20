@@ -1,4 +1,3 @@
-
 import express from 'express';
 import { auth, checkRole } from '../middleware/auth.js';
 import { homepageController } from '../controllers/homepageController.js';

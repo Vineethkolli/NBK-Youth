@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import { useRef } from 'react';
 import { Printer } from 'lucide-react';
 import { formatDateTime } from '../../utils/dateTime';
 import { useEventLabel } from '../../context/EventLabelContext';

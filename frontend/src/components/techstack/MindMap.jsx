@@ -1,4 +1,3 @@
-import React from "react";
 
 const roleNodes = [
   { name: "Developer", color: "bg-green-500" },

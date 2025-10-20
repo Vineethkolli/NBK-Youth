@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Eye, EyeOff, Plus, Search, Edit2, Trash2 } from 'lucide-react';
+import { Plus, Search } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import ExpenseTable from '../components/expense/ExpenseTable';

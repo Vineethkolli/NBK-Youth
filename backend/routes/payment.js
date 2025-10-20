@@ -1,4 +1,3 @@
-
 import express from 'express';
 import PaymentController from '../controllers/paymentController.js';
 import { auth, checkRole } from '../middleware/auth.js';

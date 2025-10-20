@@ -1,6 +1,5 @@
 import Payment from '../models/Payment.js';
 import Income from '../models/Income.js';
-import cloudinary from '../config/cloudinary.js';
 import { logActivity } from '../middleware/activityLogger.js';
 
 const PaymentController = {

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Plus, Edit2, FileText, Calendar, TrendingUp, TrendingDown } from 'lucide-react';
+import { Plus, Edit2, FileText, TrendingUp } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { API_URL } from '../utils/config';
