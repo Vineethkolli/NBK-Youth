@@ -4,29 +4,56 @@ import { logActivity } from '../middleware/activityLogger.js';
 
 export const estimationController = {
   
-  // Income
-  getAllEstimatedIncomes: async (req, res) => {
-    try {
-      const { sortOrder, sortField, belongsTo, status } = req.query;
-      let query = EstimatedIncome.find();
+// Income
+getAllEstimatedIncomes: async (req, res) => {
+  try {
+    const { sortOrder, sortField, belongsTo, status, search } = req.query;
+    let query = EstimatedIncome.find();
 
-      if (belongsTo) query = query.where('belongsTo', belongsTo);
-      if (status) query = query.where('status', status);
+    // Filters
+    if (belongsTo) query = query.where('belongsTo', belongsTo);
+    if (status) query = query.where('status', status);
 
-      if (sortOrder && sortField) {
-        const sortObj = {};
-        sortObj[sortField] = sortOrder === 'desc' ? -1 : 1;
-        query = query.sort(sortObj);
-      } else {
-        query = query.sort({ estimatedIncomeId: 1 });
+    // Search
+    if (search) {
+      const searchRegex = new RegExp(search.trim(), 'i'); 
+      const searchNumber = Number(search);
+      let numberCondition = {};
+
+      if (!isNaN(searchNumber)) {
+        numberCondition = {
+          $expr: {
+            $regexMatch: { input: { $toString: "$presentAmount" }, regex: searchNumber.toString() }
+          }
+        };
       }
 
-      const incomes = await query.exec();
-      res.json(incomes);
-    } catch (error) {
-      res.status(500).json({ message: 'Failed to fetch estimated incomes' });
+      if (!isNaN(searchNumber)) {
+        query = query.or([
+          { name: { $regex: searchRegex } },
+          numberCondition
+        ]);
+      } else {
+        query = query.or([{ name: { $regex: searchRegex } }]);
+      }
     }
-  },
+
+    // Sorting
+    if (sortOrder && sortField) {
+      const sortObj = {};
+      sortObj[sortField] = sortOrder === 'desc' ? -1 : 1;
+      query = query.sort(sortObj);
+    } else {
+      query = query.sort({ estimatedIncomeId: 1 });
+    }
+
+    const incomes = await query.exec();
+    res.json(incomes);
+  } catch (error) {
+    console.error('Error fetching estimated incomes:', error);
+    res.status(500).json({ message: 'Failed to fetch estimated incomes' });
+  }
+},
 
   createEstimatedIncome: async (req, res) => {
     try {
@@ -128,13 +155,50 @@ export const estimationController = {
   
   // Expense
   getAllEstimatedExpenses: async (req, res) => {
-    try {
-      const expenses = await EstimatedExpense.find().sort({ estimatedExpenseId: 1 });
-      res.json(expenses);
-    } catch (error) {
-      res.status(500).json({ message: 'Failed to fetch estimated expenses' });
+  try {
+    const { sortOrder, sortField, search } = req.query;
+
+    let query = EstimatedExpense.find();
+
+    if (search) {
+      const searchRegex = new RegExp(search.trim(), 'i'); 
+
+      const searchNumber = Number(search);
+      let numberCondition = {};
+
+      if (!isNaN(searchNumber)) {
+        numberCondition = { 
+          $expr: { $regexMatch: { input: { $toString: "$presentAmount" }, regex: searchNumber.toString() } }
+        };
+      }
+
+      if (!isNaN(searchNumber)) {
+        query = query.or([
+          { purpose: { $regex: searchRegex } },
+          numberCondition
+        ]);
+      } else {
+        query = query.or([{ purpose: { $regex: searchRegex } }]);
+      }
     }
-  },
+
+    // Sorting
+    if (sortOrder && sortField) {
+      const sortObj = {};
+      sortObj[sortField] = sortOrder === 'desc' ? -1 : 1;
+      query = query.sort(sortObj);
+    } else {
+      query = query.sort({ estimatedExpenseId: 1 });
+    }
+
+    const expenses = await query.exec();
+    res.json(expenses);
+  } catch (error) {
+    console.error('Error fetching estimated expenses:', error);
+    res.status(500).json({ message: 'Failed to fetch estimated expenses' });
+  }
+},
+
 
   createEstimatedExpense: async (req, res) => {
     try {
