@@ -355,7 +355,13 @@ export default function BannerManager() {
                   type="file"
                   accept="image/*"
                   onChange={(e) => handleFileChange(e, 'image')}
-                  className="mt-1 block w-full"
+                  className="mt-1 block w-full text-sm text-gray-700
+          file:mr-4 file:py-2 file:px-4
+          file:rounded-full file:border-0
+          file:text-sm file:font-semibold
+          file:bg-indigo-50 file:text-indigo-700
+          hover:file:bg-indigo-100
+          disabled:opacity-50 disabled:cursor-not-allowed"
                   disabled={!!formData.video}
                 />
                 {formData.image && (
@@ -392,7 +398,13 @@ export default function BannerManager() {
                   type="file"
                   accept="video/*"
                   onChange={(e) => handleFileChange(e, 'video')}
-                  className="mt-1 block w-full"
+                  className="mt-1 block w-full text-sm text-gray-700
+          file:mr-4 file:py-2 file:px-4
+          file:rounded-full file:border-0
+          file:text-sm file:font-semibold
+          file:bg-indigo-50 file:text-indigo-700
+          hover:file:bg-indigo-100
+          disabled:opacity-50 disabled:cursor-not-allowed"
                   disabled={!!formData.image}
                 />
                 {formData.video && (
@@ -442,7 +454,7 @@ export default function BannerManager() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label className="block text-sm font-medium text-gray-700 whitespace-nowrap">
                     Duration (seconds)
                   </label>
                   <input

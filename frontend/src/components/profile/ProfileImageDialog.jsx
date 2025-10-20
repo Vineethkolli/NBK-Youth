@@ -141,14 +141,13 @@ function ProfileImageDialog({ image, onClose, onUpload }) {
                 accept="image/*"
                 onChange={handleFileSelect}
                 disabled={isUploading || isDeleting}
-                className="block w-full text-sm text-gray-500
-                  file:mr-4 file:py-2 file:px-4
-                  file:rounded-full file:border-0
-                  file:text-sm file:font-semibold
-                  file:bg-indigo-50 file:text-indigo-700
-                  hover:file:bg-indigo-100
-                  disabled:opacity-50 disabled:cursor-not-allowed pr-32"
-                style={{ zIndex: 2 }}
+                className="mt-1 block w-full text-sm text-gray-500
+                file:mr-4 file:py-2 file:px-4
+                file:rounded-full file:border-0
+                file:text-sm file:font-semibold
+                file:bg-indigo-50 file:text-indigo-700
+                hover:file:bg-indigo-100
+                disabled:opacity-50 disabled:cursor-not-allowed"
               />
             </div>
 

@@ -304,7 +304,7 @@ else {
 
   return (
     <div className="bg-white p-4 sm:p-6 rounded-xl shadow-lg space-y-6 max-w-7xl mx-auto font-sans">
-      <h2 className="text-2xl font-semibold text-gray-900 border-b pb-3 mb-4">Service Drive Monitor</h2>
+      <h2 className="text-2xl font-semibold text-gray-900 pb-3 mb-4">Service Drive Monitor</h2>
 
       <div className="flex flex-col md:flex-row md:justify-between md:items-start space-y-4 md:space-y-0 md:space-x-4">
         <div className="flex flex-col space-y-1 text-sm text-gray-700 p-4 bg-gray-50 rounded-xl w-full md:w-1/3 shadow-inner border border-gray-100">
