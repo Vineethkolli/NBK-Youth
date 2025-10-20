@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Filter, Plus } from 'lucide-react';
+import { Filter, Plus, Search } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { API_URL } from '../../utils/config';
@@ -13,7 +13,10 @@ import { useLanguage } from '../../context/LanguageContext';
 function IncomeSection({ refreshStats }) {
   const { language } = useLanguage();
   const PrintComponent = language === 'te' ? IncomeTeluguPrint : IncomePrint;
+
+  const { user } = useAuth();
   const [incomes, setIncomes] = useState([]);
+  const [search, setSearch] = useState('');
   const [incomeFilters, setIncomeFilters] = useState({
     status: '',
     belongsTo: '',
@@ -21,8 +24,6 @@ function IncomeSection({ refreshStats }) {
     sortOrder: ''
   });
 
-    const { user } = useAuth();
-    
   const [incomeColumns, setIncomeColumns] = useState({
     sno: true,
     registerId: false,
@@ -35,28 +36,26 @@ function IncomeSection({ refreshStats }) {
   });
 
   useEffect(() => {
-  if (user?.role && ['developer', 'financier', 'admin'].includes(user.role)) {
-    setIncomeColumns(prev => ({
-      ...prev,
-      registerId: false,
-    }));
-  }
-}, [user?.role]);
-
+    if (user?.role && ['developer', 'financier', 'admin'].includes(user.role)) {
+      setIncomeColumns(prev => ({
+        ...prev,
+        registerId: false,
+      }));
+    }
+  }, [user?.role]);
 
   const [showForm, setShowForm] = useState(false);
-  const [formMode, setFormMode] = useState('add'); 
+  const [formMode, setFormMode] = useState('add');
   const [currentRecord, setCurrentRecord] = useState(null);
 
   useEffect(() => {
     fetchIncomes();
-  }, [incomeFilters]);
+  }, [incomeFilters, search]);
 
   const fetchIncomes = async () => {
     try {
-      const { data } = await axios.get(`${API_URL}/api/estimation/income`, {
-        params: incomeFilters
-      });
+      const params = { ...incomeFilters, search };
+      const { data } = await axios.get(`${API_URL}/api/estimation/income`, { params });
       setIncomes(data);
     } catch (error) {
       toast.error('Failed to fetch income data');
@@ -64,9 +63,7 @@ function IncomeSection({ refreshStats }) {
   };
 
   const handleIncomeDelete = async (id) => {
-    const confirmDelete = window.confirm("Are you sure you want to delete this income?");
-    if (!confirmDelete) return;
-
+    if (!window.confirm("Are you sure you want to delete this income?")) return;
     try {
       await axios.delete(`${API_URL}/api/estimation/income/${id}`);
       setIncomes(incomes.filter(income => income._id !== id));
@@ -76,58 +73,55 @@ function IncomeSection({ refreshStats }) {
     }
   };
 
-  const handleAdd = () => {
-    setFormMode('add');
-    setCurrentRecord(null);
-    setShowForm(true);
-  };
-
-  const handleEdit = (record) => {
-    setFormMode('edit');
-    setCurrentRecord(record);
-    setShowForm(true);
-  };
+  const handleAdd = () => { setFormMode('add'); setCurrentRecord(null); setShowForm(true); };
+  const handleEdit = (record) => { setFormMode('edit'); setCurrentRecord(record); setShowForm(true); };
 
   const handleFormSubmit = async (formData) => {
     try {
       const payload = { ...formData, registerId: user?.registerId };
+      let data;
       if (formMode === 'add') {
-        const { data } = await axios.post(`${API_URL}/api/estimation/income`, payload);
+        ({ data } = await axios.post(`${API_URL}/api/estimation/income`, payload));
         setIncomes([data, ...incomes]);
       } else if (formMode === 'edit') {
-        const { data } = await axios.put(`${API_URL}/api/estimation/income/${currentRecord._id}`, formData);
-        setIncomes(incomes.map(income => income._id === currentRecord._id ? data : income));
+        ({ data } = await axios.put(`${API_URL}/api/estimation/income/${currentRecord._id}`, payload));
+        setIncomes(incomes.map(i => i._id === currentRecord._id ? data : i));
       }
       setShowForm(false);
       fetchIncomes();
       if (refreshStats) refreshStats();
     } catch (error) {
-      if (error.response && error.response.data && error.response.data.message) {
-        toast.error(error.response.data.message);
-      } else {
-        toast.error('Failed to submit form');
-      }
+      toast.error(error.response?.data?.message || 'Failed to submit form');
     }
   };
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-end items-center space-x-3">
-  {['developer', 'financier', 'admin'].includes(user?.role) && (
-  <button onClick={handleAdd} className="btn-secondary flex items-center">
-    <Plus className="h-4 w-4 mr-1 inline" />
-    <span>Add</span>
-  </button>
-)}
-  <PrintComponent 
-    incomes={incomes} 
-    visibleColumns={incomeColumns} 
-    incomeFilters={incomeFilters} 
-  />
+      <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center">
+  <div className="flex-1 relative max-w-xs"> 
+    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+    <input
+      type="text"
+      placeholder="Search by name, present amount..."
+      value={search}
+      onChange={(e) => setSearch(e.target.value)}
+      className="pl-10 pr-4 py-1 w-full border rounded-lg"
+    />
+  </div>
 </div>
+        <div className="flex items-center space-x-3">
+          {['developer', 'financier', 'admin'].includes(user?.role) && (
+            <button onClick={handleAdd} className="btn-secondary flex items-center">
+              <Plus className="h-4 w-4 mr-1 inline" />
+              Add
+            </button>
+          )}
+          <PrintComponent incomes={incomes} visibleColumns={incomeColumns} />
+        </div>
+      </div>
 
-      
-      {/* Filters Row */}
+      {/* Filters */}
       <div className="flex items-center space-x-4">
         <Filter className="h-5 w-5 text-gray-400" />
         <select
@@ -158,38 +152,27 @@ function IncomeSection({ refreshStats }) {
           <option value="not paid">Not Paid</option>
         </select>
       </div>
-      
+
       {/* Table and Visible Columns */}
       <div className="bg-white rounded-lg shadow">
         <div className="p-4 border-b">
           <h2 className="font-medium">Visible Columns</h2>
           <div className="mt-2 flex flex-wrap gap-2">
             {Object.entries(incomeColumns).map(([column, isVisible]) => {
-  if (column === 'sno') return null; // Hide sno from the toggles
-
-  // Only allow registerId column toggle for certain roles
-  if (
-    column === 'registerId' &&
-    !['developer', 'financier', 'admin'].includes(user?.role)
-  ) {
-    return null;
-  }
-
-  return (
-    <label key={column} className="inline-flex items-center">
-      <input
-        type="checkbox"
-        checked={isVisible}
-        onChange={() =>
-          setIncomeColumns({ ...incomeColumns, [column]: !isVisible })
-        }
-        className="form-checkbox"
-      />
-      <span className="ml-2 text-sm">{column}</span>
-    </label>
-  );
-})}
-
+              if (column === 'sno') return null;
+              if (column === 'registerId' && !['developer', 'financier', 'admin'].includes(user?.role)) return null;
+              return (
+                <label key={column} className="inline-flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={isVisible}
+                    onChange={() => setIncomeColumns({ ...incomeColumns, [column]: !isVisible })}
+                    className="form-checkbox"
+                  />
+                  <span className="ml-2 text-sm">{column}</span>
+                </label>
+              );
+            })}
           </div>
         </div>
 

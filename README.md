@@ -85,7 +85,7 @@ NBK-Youth is designed to streamline content, finance, and user management in a u
    Archive and manage past events and financial transactions with timeline views for easy reference and future auditing.
 
 - **⏱️ Keep-Alive & Automation:**  
-   GitHub Actions used to keep Backend server, MongoDB, and OTP refresh token endpoints alive.  
+   GitHub Actions used to keep Backend server and OTP refresh token endpoints alive.  
 
 - **☁️ Google Cloud Integration:**  
    A Service Account is used for storing media on Google Drive, and OAuth credentials are used for sending OTPs.  
@@ -94,8 +94,7 @@ NBK-Youth is designed to streamline content, finance, and user management in a u
   - Chat with data using natural language.  
   - **Gemini API**: For reasoning, summarization, and context understanding.  
   - **Hugging Face models**: For embeData chunking + embeddings for previous records of data.  
-  - Future expansion: multimodal support (text, audio, image).  
-
+  
 ---
 
 ## 🧱 Tech Stack
