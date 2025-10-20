@@ -43,16 +43,21 @@ function NotificationAutoRegister() {
       }
     };
 
-    // Only run if Service Worker is supported
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker
-        .register('/sw.js')
-        .then(() => registerAndSubscribe())
-        .catch((err) => console.error('SW registration failed:', err));
+      if (navigator.serviceWorker.controller) {
+        // SW already active, just subscribe
+        registerAndSubscribe();
+      } else {
+        // Register SW first, then subscribe
+        navigator.serviceWorker
+          .register('/sw.js')
+          .then(() => registerAndSubscribe())
+          .catch((err) => console.error('SW registration failed:', err));
+      }
     }
   }, [user]);
 
-  return null; 
+  return null;
 }
 
 export default NotificationAutoRegister;
