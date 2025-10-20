@@ -7,6 +7,7 @@ const ACTION_OPTIONS = ['CREATE', 'UPDATE', 'DELETE', 'VERIFY', 'RESTORE'];
 function LogFilters({ filters, onChange }) {
   const startRef = useRef(null);
   const endRef = useRef(null);
+  const actionRef = useRef(null); // Ref for the Actions dropdown
   const [showActionDropdown, setShowActionDropdown] = useState(false);
   const [selectedActions, setSelectedActions] = useState(ACTION_OPTIONS);
 
@@ -21,7 +22,6 @@ function LogFilters({ filters, onChange }) {
   };
 
   const isAllSelected = selectedActions.length === ACTION_OPTIONS.length;
-
   const toggleAllActions = () => {
     setSelectedActions(isAllSelected ? [] : ACTION_OPTIONS);
   };
@@ -40,15 +40,27 @@ function LogFilters({ filters, onChange }) {
     onChange({ ...filters, [field]: '' });
   };
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (actionRef.current && !actionRef.current.contains(event.target)) {
+        setShowActionDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   return (
     <div className="flex flex-wrap items-center gap-2 sm:gap-4 relative">
       <div className="flex items-center">
         <Filter className="h-5 w-5 text-gray-400 mr-2" />
-        <span className="text-sm font-medium">Filters:</span>
       </div>
 
       {/* Action Checkboxes */}
-      <div className="relative">
+      <div className="relative" ref={actionRef}>
         <button
           onClick={() => setShowActionDropdown((prev) => !prev)}
           className="form-select flex items-center gap-1"

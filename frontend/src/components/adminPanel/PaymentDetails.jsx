@@ -62,18 +62,17 @@ function PaymentDetails({ onUpdate }) {
         ) : (
           <div className="flex space-x-2">
             <button
+              onClick={handleCancel}
+              className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-gray-300  hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+            <button
               onClick={handleSave}
-              className="flex items-center px-3 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+              className="flex items-center px-3 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
             >
               <Save className="h-4 w-4 mr-2" />
               Save
-            </button>
-            <button
-              onClick={handleCancel}
-              className="flex items-center px-3 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700"
-            >
-              <X className="h-4 w-4 mr-2" />
-              Cancel
             </button>
           </div>
         )}

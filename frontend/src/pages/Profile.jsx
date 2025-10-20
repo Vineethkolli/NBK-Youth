@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
-import { LogOut, Save, Eye, EyeOff } from 'lucide-react';
+import { LogOut, Save, Eye, EyeOff, Edit2 } from 'lucide-react';
 import { API_URL } from '../utils/config';
 import ProfileImage from '../components/profile/ProfileImage';
 import ProfileImageDialog from '../components/profile/ProfileImageDialog';
@@ -142,7 +142,7 @@ function Profile() {
       <div className="bg-white shadow overflow-hidden sm:rounded-lg">
         <div className="px-4 py-5 sm:px-6 flex justify-between items-center">
           <h3 className="text-lg leading-6 font-medium text-gray-900">
-            Profile Information
+            Profile
             {user.category === 'youth' && (
               <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-300 text-yellow-900">
                 Youth
@@ -150,12 +150,6 @@ function Profile() {
             )}
           </h3>
           <div className="space-x-2">
-            <button
-              onClick={() => setIsEditing(!isEditing)}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
-            >
-              {isEditing ? 'Cancel' : 'Edit Profile'}
-            </button>
             <button
               onClick={signout}
               className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700"
@@ -223,7 +217,7 @@ function Profile() {
                   className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
                 >
                   <Save className="mr-2 h-4 w-4" />
-                  Save Changes
+                  Save
                 </button>
               </form>
             ) : (
@@ -253,10 +247,16 @@ function Profile() {
           </div>
         </div>
 
-        <div className="px-4 py-5 sm:px-6">
+        <div className="px-4 py-5 sm:px-6 space-x-2">
+           <button
+  onClick={() => setIsEditing(!isEditing)}
+  className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-gray-300  hover:bg-gray-50">
+  <Edit2 className="mr-2 h-4 w-4" />
+  {isEditing ? 'Cancel' : 'Edit Profile'}
+</button>
           <button
             onClick={() => setIsChangingPassword(!isChangingPassword)}
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
+            className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
           >
             {isChangingPassword ? 'Cancel' : 'Change Password'}
           </button>

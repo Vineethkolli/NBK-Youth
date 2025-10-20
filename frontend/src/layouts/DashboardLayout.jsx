@@ -68,7 +68,7 @@ function DashboardLayout() {
 
       {/* Mobile Bottom Navigation */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t md:hidden">
-        <div className="flex justify-around items-center h-16">
+        <div className="flex justify-around items-center h-14">
           {/* Menu Button */}
           <button
             onClick={toggleSidebar}
@@ -115,46 +115,48 @@ function DashboardLayout() {
           </button>
 
           {/* Budget Popup Menu */}
-          {budgetOpen && (
-            <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2">
-              <div className="relative">
-                <div className="flex items-end justify-center space-x-4 mb-4">
-                  {/* Stats Button */}
-                  <button
-                    onClick={() => handleNavigation('/stats')}
-                    className="transform -translate-y-16 -translate-x-8"
-                  >
-                    <div className={`rounded-full p-4 flex flex-col items-center justify-center w-16 h-16 shadow-lg ${isActive('/stats') ? 'bg-indigo-600 text-white' : 'bg-white text-gray-600'}`}>
-                      <BarChart2 className="h-6 w-6" />
-                      <span className="text-xs mt-1">Stats</span>
-                    </div>
-                  </button>
+          {/* Budget Popup Menu */}
+{budgetOpen && (
+  <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2">
+    <div className="relative">
+      <div className="flex items-end justify-center space-x-2 mb-6">
+        {/* Stats Button */}
+        <button
+          onClick={() => handleNavigation('/stats')}
+          className="transform -translate-y-12 -translate-x-4"
+        >
+          <div className={`rounded-full p-4 flex flex-col items-center justify-center w-16 h-16 shadow-lg ${isActive('/stats') ? 'bg-indigo-600 text-white' : 'bg-white text-gray-600'}`}>
+            <BarChart2 className="h-6 w-6" />
+            <span className="text-xs mt-1">Stats</span>
+          </div>
+        </button>
 
-                  {/* Income Button */}
-                  <button
-                    onClick={() => handleNavigation('/income')}
-                    className="transform -translate-y-20"
-                  >
-                    <div className={`rounded-full p-4 flex flex-col items-center justify-center w-16 h-16 shadow-lg ${isActive('/income') ? 'bg-indigo-600 text-white' : 'bg-white text-gray-600'}`}>
-                      <IndianRupee className="h-6 w-6" />
-                      <span className="text-xs mt-1">Income</span>
-                    </div>
-                  </button>
+        {/* Income Button */}
+        <button
+          onClick={() => handleNavigation('/income')}
+          className="transform -translate-y-16"
+        >
+          <div className={`rounded-full p-4 flex flex-col items-center justify-center w-16 h-16 shadow-lg ${isActive('/income') ? 'bg-indigo-600 text-white' : 'bg-white text-gray-600'}`}>
+            <IndianRupee className="h-6 w-6" />
+            <span className="text-xs mt-1">Income</span>
+          </div>
+        </button>
 
-                  {/* Expense Button */}
-                  <button
-                    onClick={() => handleNavigation('/expense')}
-                    className="transform -translate-y-16 translate-x-8"
-                  >
-                    <div className={`rounded-full p-4 flex flex-col items-center justify-center w-16 h-16 shadow-lg ${isActive('/expense') ? 'bg-indigo-600 text-white' : 'bg-white text-gray-600'}`}>
-                      <DollarSign className="h-6 w-6" />
-                      <span className="text-xs mt-1">Expense</span>
-                    </div>
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
+        {/* Expense Button */}
+        <button
+          onClick={() => handleNavigation('/expense')}
+          className="transform -translate-y-12 translate-x-4"
+        >
+          <div className={`rounded-full p-4 flex flex-col items-center justify-center w-16 h-16 shadow-lg ${isActive('/expense') ? 'bg-indigo-600 text-white' : 'bg-white text-gray-600'}`}>
+            <DollarSign className="h-6 w-6" />
+            <span className="text-xs mt-1">Expense</span>
+          </div>
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
         </div>
       </div>
     </div>
