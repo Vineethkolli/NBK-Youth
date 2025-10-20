@@ -259,46 +259,47 @@ function PaymentForm({ onSubmit }) {
 
           <div className="space-y-4">
             <p className="text-center text-sm text-gray-600">
-              Please make payment through UPI ID/Mobile/QR Code and upload the screenshot below
+              Please make payment and upload the screenshot below
             </p>
             
             <div className="flex flex-col items-center space-y-4">
-              <div className="relative w-full">
-                <input
-                  key={screenshotInputKey}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleScreenshotUpload}
-                  className="block w-full text-sm text-gray-500
-                    file:mr-4 file:py-2 file:px-4
-                    file:rounded-md file:border-0
-                    file:text-sm file:font-semibold
-                    file:bg-indigo-50 file:text-indigo-700
-                    hover:file:bg-indigo-100 pr-32"
-                  style={{ zIndex: 2 }}
-                />
-              </div>
-              {screenshotPreview && (
-                <div className="mt-2 relative h-32 w-48">
-                  <img
-                    src={screenshotPreview}
-                    alt="Screenshot Preview"
-                    className="h-full w-full object-contain border rounded"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setScreenshot(null);
-                      setScreenshotPreview(null);
-                      setScreenshotInputKey(Date.now());
-                    }}
-                    className="absolute top-0 right-0 bg-black bg-opacity-70 text-white p-1 rounded-full"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                </div>
-              )}
-            </div>
+  <div className="w-full">
+    <label className="block text-sm font-medium text-gray-700">Payment Screenshot *</label>
+    <input
+      key={screenshotInputKey}
+      type="file"
+      accept="image/*"
+      onChange={handleScreenshotUpload}
+      className="mt-1 block w-full text-sm text-gray-500
+        file:mr-4 file:py-2 file:px-4
+        file:rounded-full file:border-0
+        file:text-sm file:font-semibold
+        file:bg-indigo-50 file:text-indigo-700
+        hover:file:bg-indigo-100"
+    />
+  </div>
+
+  {screenshotPreview && (
+    <div className="mt-2 relative inline-block">
+      <img
+        src={screenshotPreview}
+        alt="Screenshot Preview"
+        className="h-20 w-20 object-cover border rounded"
+      />
+      <button
+        type="button"
+        onClick={() => {
+          setScreenshot(null);
+          setScreenshotPreview(null);
+          setScreenshotInputKey(Date.now());
+        }}
+        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+      >
+        <X className="h-3 w-3" />
+      </button>
+    </div>
+  )}
+</div>
 
             <button
   onClick={handleSubmit}

@@ -9,6 +9,7 @@ function EventRecordsGrid({ records = [], isEditMode, onEdit, onDelete }) {
   const [chooserRecord, setChooserRecord] = useState(null);
   const [loadingPreview, setLoadingPreview] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
 
   // Open PDF Preview 
   const previewFile = (fileUrl, eventName, recordYear) => {
@@ -68,6 +69,15 @@ function EventRecordsGrid({ records = [], isEditMode, onEdit, onDelete }) {
     }
   };
 
+    const handleDelete = async (id) => {
+    try {
+      setDeletingId(id);
+      await onDelete(id);
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   if (!records || records.length === 0) {
     return (
       <div className="text-center py-12">
@@ -120,11 +130,20 @@ function EventRecordsGrid({ records = [], isEditMode, onEdit, onDelete }) {
                         <Edit2 className="h-4 w-4" />
                       </button>
                       <button
-                        onClick={() => onDelete(record._id)}
-                        className="text-red-600 hover:text-red-800"
+                        onClick={() => handleDelete(record._id)}
+                        className={`text-red-600 hover:text-red-800 ${
+                          deletingId === record._id
+                            ? "opacity-50 cursor-not-allowed"
+                            : ""
+                        }`}
                         title="Delete"
+                        disabled={deletingId === record._id}
                       >
-                        <Trash2 className="h-4 w-4" />
+                        {deletingId === record._id ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Trash2 className="h-4 w-4" />
+                        )}
                       </button>
                     </>
                   )}

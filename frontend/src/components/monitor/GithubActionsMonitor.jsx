@@ -68,7 +68,7 @@ export default function GithubActionsMonitor() {
 
   return (
     <div className="bg-white p-6 rounded-xl shadow-lg max-w-6xl mx-auto space-y-6 font-sans">
-      <h2 className="text-2xl font-semibold text-gray-900 border-b pb-3 mb-4">GitHub Actions Monitor</h2>
+      <h2 className="text-2xl font-semibold text-gray-900 pb-3 mb-4">GitHub Actions Monitor</h2>
 
       {/* Filters */}
       <div className="flex flex-wrap gap-3 items-center">
