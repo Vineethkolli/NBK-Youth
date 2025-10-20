@@ -162,25 +162,37 @@ function Stats() {
               <div>
                 <p className="font-semibold">Previous Year Amount</p>
                 {(user?.role === 'developer' || user?.role === 'financier' || user?.role === 'admin') && isEditingPreviousYear ? (
-                  <div className="flex items-center space-x-2">
-                    <input
-                      type="number"
-                      value={previousYearAmount}
-                      onChange={(e) => setPreviousYearAmount(Number(e.target.value))}
-                      className="w-full rounded border-gray-300"
-                      disabled={lockSettings.isLocked}
-                    />
-                    <button
-                      onClick={handlePreviousYearUpdate}
-                      className={`px-2 py-1 bg-green-500 text-white rounded ${
-                        lockSettings.isLocked ? 'opacity-100 cursor-not-allowed' : ''
-                      }`}
-                      disabled={lockSettings.isLocked}
-                    >
-                      Save
-                    </button>
-                  </div>
-                ) : (
+  <div className="flex flex-col space-y-2">
+    <input
+      type="number"
+      value={previousYearAmount}
+      onChange={(e) => setPreviousYearAmount(Number(e.target.value))}
+      className="w-full rounded border-gray-300"
+      disabled={lockSettings.isLocked}
+    />
+    <div className="flex space-x-2">
+      <button
+        onClick={() => {
+          setIsEditingPreviousYear(false);
+          setPreviousYearAmount(stats.budgetStats.previousYearAmount.amount);
+        }}
+        className="px-2 py-1 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-gray-300  hover:bg-gray-50"
+        disabled={lockSettings.isLocked}
+      >
+        Cancel
+      </button>
+      <button
+        onClick={handlePreviousYearUpdate}
+        className={`px-2 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition ${
+          lockSettings.isLocked ? 'opacity-100 cursor-not-allowed' : ''
+        }`}
+        disabled={lockSettings.isLocked}
+      >
+        Save
+      </button>
+    </div>
+  </div>
+) : (
                   <div className={`flex items-center space-x-2 ${lockSettings.isLocked ? ' pointer-events-none' : ''}`}>
                     <p className="text-lg font-bold">
                       {formatAmount(stats.budgetStats.previousYearAmount.amount)}
