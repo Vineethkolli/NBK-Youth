@@ -2,32 +2,41 @@ NBK YOUTH (WEB APP)
 Designed and Developed by KOLLI VINEETH
 Started on OCT 2024
 
+Frontend 188 files, Backend 117 files
 DIRECTORY STRUCTURE
 |   
+|   .gitignore
 |   README.md
 |   
-+---backend
++---.github
+|   \---workflows
+|           gmailtoken-keep-alive.yml
+|           renderbackend-keep-alive.yml
+|           
++---backend 
 |   |   .env
 |   |   .gitignore
 |   |   package-lock.json
 |   |   package.json
+|   |   Readme.md
 |   |   server.js
 |   |   
 |   +---config
 |   |       cloudinary.js
-|   |       roles.js
 |   |       
 |   +---controllers
 |   |       activityLogController.js
 |   |       authController.js
 |   |       bannerController.js
-|   |       collectionController.js
+|   |       cloudinaryController.js
+|   |       cloudinaryStorageController.js
 |   |       committeeController.js
 |   |       developerController.js
 |   |       estimationController.js
 |   |       eventLabelController.js
 |   |       expenseController.js
 |   |       gameController.js
+|   |       githubActionsController.js
 |   |       hiddenProfileController.js
 |   |       historyController.js
 |   |       homepageController.js
@@ -35,15 +44,19 @@ DIRECTORY STRUCTURE
 |   |       lockSettingsController.js
 |   |       maintenanceController.js
 |   |       momentController.js
-|   |       momentMediaController.js
+|   |       momentGalleryController.js
+|   |       mongodbStorageController.js
 |   |       notificationController.js
 |   |       paymentController.js
 |   |       paymentDetailsController.js
 |   |       recordsController.js
+|   |       scheduledNotificationController.js
+|   |       serviceDriveStorageController.js
 |   |       snapshotController.js
 |   |       statsController.js
 |   |       usersController.js
 |   |       verificationController.js
+|   |       vibeController.js
 |   |       viniController.js
 |   |       
 |   +---middleware
@@ -54,7 +67,6 @@ DIRECTORY STRUCTURE
 |   |       ActivityLog.js
 |   |       Banner.js
 |   |       ChatHistory.js
-|   |       Collection.js
 |   |       Committee.js
 |   |       Counter.js
 |   |       EstimatedExpense.js
@@ -79,15 +91,17 @@ DIRECTORY STRUCTURE
 |   |       PreviousYear.js
 |   |       ProcessedChunk.js
 |   |       ProcessedRecords.js
+|   |       ScheduledNotification.js
 |   |       Slide.js
 |   |       Snapshot.js
 |   |       User.js
+|   |       Vibe.js
 |   |       
 |   +---routes
 |   |       activityLogs.js
 |   |       auth.js
 |   |       banners.js
-|   |       collections.js
+|   |       cloudinary.js
 |   |       committee.js
 |   |       developer.js
 |   |       estimation.js
@@ -101,14 +115,17 @@ DIRECTORY STRUCTURE
 |   |       lockSettings.js
 |   |       maintenance.js
 |   |       moments.js
+|   |       monitor.js
 |   |       notifications.js
 |   |       payment.js
 |   |       paymentDetails.js
 |   |       records.js
+|   |       scheduledNotifications.js
 |   |       snapshots.js
 |   |       stats.js
 |   |       users.js
 |   |       verification.js
+|   |       vibe.js
 |   |       vini.js
 |   |       
 |   +---services
@@ -117,8 +134,11 @@ DIRECTORY STRUCTURE
 |   |       viniService.js
 |   |       
 |   \---utils
+|           checkServiceDriveStorage.js
 |           driveUtils.js
 |           emailService.js
+|           getRefreshToken.js
+|           keepRefreshTokenAlive.js
 |           setupDefaults.js
 |           
 \---frontend
@@ -149,6 +169,7 @@ DIRECTORY STRUCTURE
     |           180.png
     |           192.png
     |           32.png
+    |           384.png
     |           512.png
     |           96.png
     |           notificationlogo.png
@@ -175,10 +196,10 @@ DIRECTORY STRUCTURE
         |   +---adminPanel
         |   |       BannerManager.jsx
         |   |       EventLabelManager.jsx
-        |   |       LockManager.jsx
         |   |       MaintenanceMode.jsx
         |   |       PaymentDetails.jsx
         |   |       PopupBanner.jsx
+        |   |       ScheduledNotifications.jsx
         |   |       Stats.jsx
         |   |       
         |   +---auth
@@ -194,6 +215,7 @@ DIRECTORY STRUCTURE
         |   |       
         |   +---developer
         |   |       ClearData.jsx
+        |   |       LockManager.jsx
         |   |       ProcessedDataManager.jsx
         |   |       SnapshotManager.jsx
         |   |       
@@ -249,16 +271,28 @@ DIRECTORY STRUCTURE
         |   |       IncomeTeluguPrint.jsx
         |   |       
         |   +---moments
-        |   |       MediaDriveForm.jsx
-        |   |       MediaGallery.jsx
-        |   |       MediaGalleryReorder.jsx
-        |   |       MediaLightbox.jsx
-        |   |       MediaPreview.jsx
+        |   |       CopyToServiceDriveForm.jsx
+        |   |       DriveMediaPreview.jsx
+        |   |       DriveUploadForm.jsx
         |   |       MediaUploadForm.jsx
         |   |       MomentForm.jsx
         |   |       MomentGrid.jsx
         |   |       MomentReorder.jsx
         |   |       WatchMore.jsx
+        |   |       YoutubeUploadForm.jsx
+        |   |       
+        |   +---momentsGallery
+        |   |       CopyToServiceDriveForm.jsx
+        |   |       GalleryGrid.jsx
+        |   |       GalleryReorder.jsx
+        |   |       Lightbox.jsx
+        |   |       MediaUploadForm.jsx
+        |   |       
+        |   +---monitor
+        |   |       CloudinaryMonitor.jsx
+        |   |       GithubActionsMonitor.jsx
+        |   |       MongodbMonitor.jsx
+        |   |       ServiceDriveMonitor.jsx
         |   |       
         |   +---notifications
         |   |       NotificationAutoRegister.jsx
@@ -268,6 +302,7 @@ DIRECTORY STRUCTURE
         |   +---payment
         |   |       PaymentForm.jsx
         |   |       PaymentHistory.jsx
+        |   |       PaymentReceipt.jsx
         |   |       
         |   +---profile
         |   |       ProfileImage.jsx
@@ -301,8 +336,9 @@ DIRECTORY STRUCTURE
         |   |       CollectionManager.jsx
         |   |       FloatingMusicIcon.jsx
         |   |       MusicPlayer.jsx
-        |   |       SearchBar.jsx
+        |   |       Search.jsx
         |   |       SongItem.jsx
+        |   |       UploadToCollection.jsx
         |   |       
         |   \---vini
         |           ChatWidget.jsx
@@ -334,6 +370,7 @@ DIRECTORY STRUCTURE
         |       LetsPlay.jsx
         |       Maintenance.jsx
         |       Moments.jsx
+        |       Monitor.jsx
         |       Notifications.jsx
         |       PayOnline.jsx
         |       Profile.jsx
@@ -351,13 +388,10 @@ DIRECTORY STRUCTURE
         |       
         \---utils
                 analytics.js
+                cloudinaryUpload.js
                 config.js
                 dateTime.js
-                gameUtils.js
                 notifications.js
-                paymentReceipt.js
-                roles.js
-                search.js
                 songQueue.js
                 vapidKeys.js
                 

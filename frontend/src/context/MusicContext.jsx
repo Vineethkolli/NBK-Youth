@@ -5,18 +5,17 @@ export const useMusicPlayer = () => useContext(MusicContext);
 
 export function MusicProvider({ children }) {
   const audioRef = useRef(new Audio());
-  const [currentSong, setCurrentSong]     = useState(null);
-  const [isPlaying, setIsPlaying]         = useState(false);
-  const [songQueue, setSongQueue]         = useState([]);
+  const [currentSong, setCurrentSong] = useState(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [songQueue, setSongQueue] = useState([]);
   const [currentSongIndex, setCurrentSongIndex] = useState(0);
-  const [progress, setProgress]           = useState(0);
-  const [duration, setDuration]           = useState(0);
+  const [progress, setProgress] = useState(0);
+  const [duration, setDuration] = useState(0);
 
   // playback controls
   const handleSongSelect = (song, queue) => {
     const idx = queue.findIndex(s => s._id === song._id);
     if (idx < 0) return;
-
     setSongQueue(queue);
     setCurrentSongIndex(idx);
     setCurrentSong(queue[idx]);
@@ -28,7 +27,7 @@ export function MusicProvider({ children }) {
     const next = (currentSongIndex + 1) % songQueue.length;
     setCurrentSongIndex(next);
     setCurrentSong(songQueue[next]);
-    setIsPlaying(true); // ensure playback continues
+    setIsPlaying(true);
   };
 
   const handlePrevious = () => {
@@ -36,7 +35,7 @@ export function MusicProvider({ children }) {
     const prev = (currentSongIndex - 1 + songQueue.length) % songQueue.length;
     setCurrentSongIndex(prev);
     setCurrentSong(songQueue[prev]);
-    setIsPlaying(true); // ensure playback continues
+    setIsPlaying(true);
   };
 
   const togglePlay = () => setIsPlaying(p => !p);
@@ -48,7 +47,8 @@ export function MusicProvider({ children }) {
   };
 
   const closeMusicPlayer = () => {
-    audioRef.current.pause();
+    const audio = audioRef.current;
+    audio.pause();
     setCurrentSong(null);
     setIsPlaying(false);
     setSongQueue([]);
@@ -62,7 +62,7 @@ export function MusicProvider({ children }) {
     }
   };
 
-  // sync audio element when song or play/pause changes
+  // sync audio element with current song and play/pause state
   useEffect(() => {
     const audio = audioRef.current;
 
@@ -78,21 +78,18 @@ export function MusicProvider({ children }) {
 
     isPlaying ? audio.play() : audio.pause();
 
-    const onTimeUpdate    = () => setProgress(audio.currentTime);
-    const onLoadedMeta    = () => setDuration(audio.duration);
-    const onEnded         = () => {
-      handleNext();
-      setIsPlaying(true); // auto-play next song after completion
-    };
+    const onTimeUpdate = () => setProgress(audio.currentTime);
+    const onLoadedMeta = () => setDuration(audio.duration);
+    const onEnded = () => handleNext();
 
-    audio.addEventListener('timeupdate',    onTimeUpdate);
+    audio.addEventListener('timeupdate', onTimeUpdate);
     audio.addEventListener('loadedmetadata', onLoadedMeta);
-    audio.addEventListener('ended',          onEnded);
+    audio.addEventListener('ended', onEnded);
 
     return () => {
-      audio.removeEventListener('timeupdate',    onTimeUpdate);
+      audio.removeEventListener('timeupdate', onTimeUpdate);
       audio.removeEventListener('loadedmetadata', onLoadedMeta);
-      audio.removeEventListener('ended',          onEnded);
+      audio.removeEventListener('ended', onEnded);
     };
   }, [currentSong, isPlaying]);
 
@@ -100,7 +97,9 @@ export function MusicProvider({ children }) {
   useEffect(() => {
     if (!('mediaSession' in navigator)) return;
 
-    if (currentSong) {
+    const setHandlers = () => {
+      if (!currentSong) return;
+
       navigator.mediaSession.metadata = new MediaMetadata({
         title: currentSong.name,
         artist: currentSong.collectionName,
@@ -116,22 +115,28 @@ export function MusicProvider({ children }) {
 
       navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
 
-      navigator.mediaSession.setActionHandler('play',    () => { if (!isPlaying) togglePlay(); });
-      navigator.mediaSession.setActionHandler('pause',   () => { if (isPlaying)  togglePlay(); });
+      navigator.mediaSession.setActionHandler('play', () => { if (!isPlaying) togglePlay(); });
+      navigator.mediaSession.setActionHandler('pause', () => { if (isPlaying) togglePlay(); });
       navigator.mediaSession.setActionHandler('previoustrack', handlePrevious);
-      navigator.mediaSession.setActionHandler('nexttrack',     handleNext);
-    }
+      navigator.mediaSession.setActionHandler('nexttrack', handleNext);
+    };
 
-    navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
+    setHandlers();
+
+    return () => {
+      // Cleanup MediaSession handlers on unmount
+      navigator.mediaSession.setActionHandler('play', null);
+      navigator.mediaSession.setActionHandler('pause', null);
+      navigator.mediaSession.setActionHandler('previoustrack', null);
+      navigator.mediaSession.setActionHandler('nexttrack', null);
+      navigator.mediaSession.metadata = null;
+      navigator.mediaSession.playbackState = 'none';
+    };
   }, [currentSong, isPlaying]);
 
-  // update MediaSession playback position
+  // update MediaSession position
   useEffect(() => {
-    if (
-      'mediaSession' in navigator &&
-      currentSong &&
-      duration > 0
-    ) {
+    if ('mediaSession' in navigator && currentSong && duration > 0) {
       try {
         navigator.mediaSession.setPositionState({
           duration,
@@ -144,7 +149,7 @@ export function MusicProvider({ children }) {
     }
   }, [progress, duration, currentSong]);
 
-  // keep playbackState alive on visibility change 
+  // keep playbackState alive on visibility change
   useEffect(() => {
     const onVisChange = () => {
       if (document.hidden && currentSong && 'mediaSession' in navigator) {
@@ -155,7 +160,7 @@ export function MusicProvider({ children }) {
     return () => document.removeEventListener('visibilitychange', onVisChange);
   }, [currentSong, isPlaying]);
 
-  // restore playbackState when window is focused 
+  // restore playbackState on window focus
   useEffect(() => {
     const handleFocus = () => {
       if (currentSong && 'mediaSession' in navigator) {
