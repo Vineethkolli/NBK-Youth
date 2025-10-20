@@ -29,7 +29,7 @@ function Home() {
   return (
     <div>
 
-      <div className="max-w-7xl mx-auto sm:px-6 lg:px-0 space-y-8">
+      <div className="space-y-8">
         {['developer', 'financier', 'admin'].includes(user?.role) && (
           <div className="flex justify-end">
             <button
