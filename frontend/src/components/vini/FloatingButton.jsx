@@ -3,7 +3,7 @@ import React from 'react';
 function FloatingButton({ isOpen, setIsOpen }) {
   return (
     <div
-      className={`fixed bottom-24 right-4 z-50 transition-all duration-300 ${
+      className={`fixed bottom-24 right-2 z-50 transition-all duration-300 ${
         isOpen ? "scale-0 opacity-0" : "scale-100 opacity-100"
       }`}
     >
