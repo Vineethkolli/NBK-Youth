@@ -150,17 +150,19 @@ function Slideshow({ isEditing }) {
   };
 
   const handleDelete = async (id) => {
-    setIsDeleting(currentSlide);
-    try {
-      await axios.delete(`${API_URL}/api/homepage/slides/${id}`);
-      toast.success('Slide deleted successfully');
-      await fetchSlides();
-    } catch {
-      toast.error('Failed to delete slide');
-    } finally {
-      setIsDeleting(null);
-    }
-  };
+  const confirmDelete = window.confirm("Are you sure you want to delete this slide?");
+  if (!confirmDelete) return;
+  setIsDeleting(currentSlide);
+  try {
+    await axios.delete(`${API_URL}/api/homepage/slides/${id}`);
+    toast.success('Slide deleted successfully');
+    await fetchSlides();
+  } catch {
+    toast.error('Failed to delete slide');
+  } finally {
+    setIsDeleting(null);
+  }
+};
 
   const nextSlide = () =>
     setCurrentSlide(prev => (prev + 1) % slides.length);
