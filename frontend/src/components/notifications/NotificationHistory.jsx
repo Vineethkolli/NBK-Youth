@@ -1,4 +1,3 @@
-import React from 'react';
 import Linkify from 'react-linkify';
 import { ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
 import { formatDateTime } from '../../utils/dateTime';

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Download, Share2 } from 'lucide-react';
+import { Download } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 let deferredPrompt;

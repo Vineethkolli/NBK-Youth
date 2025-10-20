@@ -13,7 +13,7 @@ function ClearData() {
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
 
-  // Options from ActivityLog.entityType enum
+  // Options from ActivityLog entityTypes
   const activityEntities = [
     'All', 'User', 'Income', 'Expense', 'Payment', 'Vibe', 'Moment', 'Game', 'Banner', 'EstimatedIncome', 'EstimatedExpense',
     'HiddenProfile', 'Slide', 'Event', 'Notification', 'PreviousYear', 'MaintenanceMode', 'DeveloperOptions', 'Committee',

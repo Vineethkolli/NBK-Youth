@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Plus, Edit2, Trash2, X, GripHorizontal, ArrowUp, ArrowDown, Check } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, GripHorizontal, ArrowUp, ArrowDown } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';

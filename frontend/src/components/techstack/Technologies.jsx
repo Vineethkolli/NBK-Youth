@@ -1,10 +1,7 @@
-import React from "react";
-import { 
-  SiVercel, SiRender, SiMongodb, SiGmail, SiCloudinary, SiGoogledrive,
-  SiReact, SiTailwindcss, SiVite, SiNodedotjs, SiExpress, SiGoogleanalytics, SiPostman,
-  SiGit, SiGithub, SiGoogletranslate, SiGoogle, SiOpenai, SiYoutube, SiGithubcopilot,
-  SiHuggingface, SiGooglecloud 
-} from "react-icons/si";
+
+import { SiVercel, SiRender, SiMongodb, SiGmail, SiCloudinary, SiGoogledrive, SiReact, SiTailwindcss, SiVite, 
+  SiNodedotjs, SiExpress, SiGoogleanalytics, SiPostman, SiGit, SiGithub, SiGoogletranslate, SiGoogle, SiOpenai, 
+  SiYoutube, SiGithubcopilot, SiHuggingface, SiGooglecloud } from "react-icons/si";
 import { FaCode, FaWhatsapp, FaRobot, FaClock } from "react-icons/fa";
 import Footer from "../Footer";
 

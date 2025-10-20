@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Plus, Edit2, Printer, Trash2, Search, Filter, BarChart2, IndianRupee, DollarSign, CalendarDays } from 'lucide-react';
+import { Plus, Edit2, Trash2, Search, Filter, BarChart2, IndianRupee, DollarSign, CalendarDays } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { API_URL } from '../utils/config';

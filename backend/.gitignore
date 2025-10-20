@@ -40,7 +40,7 @@ coverage
 ._*
 Thumbs.db
 
-# Optional npm cache directory
+# npm cache directory
 .npm
 
 # Debugging tools

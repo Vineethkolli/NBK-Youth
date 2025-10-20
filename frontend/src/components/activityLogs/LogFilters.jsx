@@ -7,7 +7,7 @@ const ACTION_OPTIONS = ['CREATE', 'UPDATE', 'DELETE', 'VERIFY', 'RESTORE'];
 function LogFilters({ filters, onChange }) {
   const startRef = useRef(null);
   const endRef = useRef(null);
-  const actionRef = useRef(null); // Ref for the Actions dropdown
+  const actionRef = useRef(null); 
   const [showActionDropdown, setShowActionDropdown] = useState(false);
   const [selectedActions, setSelectedActions] = useState(ACTION_OPTIONS);
 

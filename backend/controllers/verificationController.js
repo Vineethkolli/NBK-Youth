@@ -1,7 +1,6 @@
 import Income from '../models/Income.js';
 import Expense from '../models/Expense.js';
 import Payment from '../models/Payment.js'; 
-import PaymentController from './paymentController.js';
 import { logActivity } from '../middleware/activityLogger.js';
 
 export const verificationController = {

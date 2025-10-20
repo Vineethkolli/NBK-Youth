@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { toast } from 'react-hot-toast';
 import { API_URL } from './config';
 import { urlBase64ToUint8Array } from './vapidKeys';
 

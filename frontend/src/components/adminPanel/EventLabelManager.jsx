@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, Save, X, Tag } from 'lucide-react';
+import { Plus, Edit2, Trash2, Tag } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { API_URL } from '../../utils/config';

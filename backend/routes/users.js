@@ -1,7 +1,8 @@
 
 import express from 'express';
 import { auth, checkRole } from '../middleware/auth.js';
-import { updateProfileImage, deleteProfileImage, getAllUsers, updateProfile, updateUserCategory, deleteUser, updateUserRole, getProfile, updateLanguage } from '../controllers/usersController.js';
+import { updateProfileImage, deleteProfileImage, getAllUsers, updateProfile, updateUserCategory, deleteUser,
+     updateUserRole, getProfile, updateLanguage } from '../controllers/usersController.js';
 
 const router = express.Router();
 

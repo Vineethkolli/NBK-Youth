@@ -1,14 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import { useAuth } from '../../context/AuthContext';
 import { Bell } from 'lucide-react';
-import {
-  getSubscription,
-  subscribeToPush,
-  isIos,
-  isInStandaloneMode,
-  registerServiceWorker
-} from '../../utils/notifications';
+import { getSubscription, subscribeToPush, isIos, isInStandaloneMode, registerServiceWorker } from '../../utils/notifications';
 
 const NotificationSettings = () => {
   const { user } = useAuth();

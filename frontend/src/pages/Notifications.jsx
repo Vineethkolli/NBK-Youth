@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import NotificationSettings from '../components/settings/NotificationSettings';
 import NotificationForm from '../components/notifications/NotificationForm';
 import NotificationHistory from '../components/notifications/NotificationHistory';
