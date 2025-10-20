@@ -36,11 +36,6 @@ export default defineConfig({
       workbox: {
         runtimeCaching: [
           {
-            urlPattern: ({ url }) => url.origin === 'https://nbkyouth.vercel.app',
-            handler: 'NetworkFirst',
-            options: { cacheName: 'api-cache' }
-          },
-          {
             urlPattern: ({ url }) => url.origin === location.origin,
             handler: 'StaleWhileRevalidate',
             options: { cacheName: 'assets-cache' }
