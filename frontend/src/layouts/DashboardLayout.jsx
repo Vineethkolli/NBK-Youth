@@ -29,7 +29,17 @@ function DashboardLayout() {
   };
 
   // Disable body scroll when sidebar is open
-
+  useEffect(() => {
+    if (sidebarOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    // Cleanup on component unmount in case sidebar is still open
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [sidebarOpen]);
 
   return (
     <div className="flex h-screen bg-gray-100 relative overflow-hidden">
