@@ -20,8 +20,7 @@ self.addEventListener('push', (event) => {
     body: data.body || 'Default message',
     icon: '/logo/192.png',
     badge: '/logo/notificationlogo.png',
-    requireInteraction: true,
-    vibrate: [200, 100, 200],
+    requireInteraction: true
   };
   event.waitUntil(self.registration.showNotification(title, options));
 });
