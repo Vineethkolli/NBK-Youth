@@ -189,7 +189,8 @@ export const processDueNotifications = async () => {
           user.subscriptions.map(async sub => {
             try {
               await webpush.sendNotification(sub, payload, {
-                urgency: 'high'
+                urgency: 'high',
+                TTL: 1296000 // 15 days
               });
             } catch (error) {
               if (error.statusCode === 410 || error.statusCode === 404) {

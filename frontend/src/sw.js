@@ -22,12 +22,6 @@ self.addEventListener('push', (event) => {
     badge: '/logo/notificationlogo.png',
     requireInteraction: true,
     vibrate: [200, 100, 200],
-    renotify: true,
-    silent: false,
-    data: {
-      url: '/notifications',
-      timestamp: Date.now(),
-    },
   };
   event.waitUntil(self.registration.showNotification(title, options));
 });
