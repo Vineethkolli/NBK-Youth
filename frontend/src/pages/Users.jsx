@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
-import { Trash2, Bell, BellOff } from 'lucide-react';
+import { Trash2, Bell, BellOff, Edit2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { API_URL } from '../utils/config';
+import UpdateUserForm from '../components/users/UpdateUserForm';
 
 function Users() {
   const [users, setUsers] = useState([]);
   const [search, setSearch] = useState('');
   const { user: currentUser } = useAuth();
+  const [editingUser, setEditingUser] = useState(null);
 
   useEffect(() => {
     fetchUsers();
@@ -138,7 +140,14 @@ function Users() {
                     )}
                   </td>
                   {currentUser.role === 'developer' && (
-          <td className="px-4 py-3 whitespace-nowrap text-sm">
+          <td className="px-4 py-3 whitespace-nowrap text-sm space-x-2">
+            <button
+              onClick={() => setEditingUser(user)}
+              disabled={user.email === 'gangavaramnbkyouth@gmail.com'}
+              className="text-indigo-600 hover:text-indigo-900 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Edit2 className="h-5 w-5" />
+            </button>
             <button
               onClick={() => handleDeleteUser(user._id)}
               disabled={user.email === 'gangavaramnbkyouth@gmail.com'}
@@ -153,7 +162,17 @@ function Users() {
             </tbody>
           </table>
         </div>
-      </div>
+      </div> {editingUser && (
+        <UpdateUserForm
+          user={editingUser}
+          onClose={() => setEditingUser(null)}
+          onUpdated={(updatedUser) => {
+            setUsers((prev) =>
+              prev.map((u) => (u._id === updatedUser._id ? updatedUser : u))
+            );
+          }}
+        />
+      )}
     </div>
   );
 }
