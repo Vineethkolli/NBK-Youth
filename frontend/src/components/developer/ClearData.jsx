@@ -110,7 +110,7 @@ function ClearData() {
       {/* Two-step Confirmation Modal */}
       {isConfirmVisible && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white p-6 rounded shadow-lg w-80">
+          <div className="bg-white p-6 rounded shadow-lg w-90">
             <h3 className="text-lg font-medium mb-4">
               {confirmStep === 1
                 ? (confirmAction === 'activityLog' ? 'Clear Activity Logs' : `Are you sure you want to clear ${confirmAction} data?`)

@@ -410,7 +410,7 @@ function SnapshotManager() {
       {/* Delete Confirmation Modal */}
       {isDeleteModalVisible && snapshotToDelete && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white p-6 rounded shadow-lg w-80">
+          <div className="bg-white p-6 rounded shadow-lg w-90">
             <h3 className="text-lg font-medium mb-4">
               {deleteConfirmStep === 1
                 ? `Are you sure you want to delete snapshot "${snapshotToDelete.eventName} ${snapshotToDelete.year}"?`
