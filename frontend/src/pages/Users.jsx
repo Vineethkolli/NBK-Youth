@@ -5,12 +5,14 @@ import { Trash2, Bell, BellOff, Edit2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { API_URL } from '../utils/config';
 import UpdateUserForm from '../components/users/UpdateUserForm';
+import DeleteUserConfirm from '../components/users/DeleteUserForm';
 
 function Users() {
   const [users, setUsers] = useState([]);
   const [search, setSearch] = useState('');
   const { user: currentUser } = useAuth();
   const [editingUser, setEditingUser] = useState(null);
+  const [userToDelete, setUserToDelete] = useState(null);
 
   useEffect(() => {
     fetchUsers();
@@ -18,9 +20,11 @@ function Users() {
 
   const fetchUsers = async () => {
     try {
-      const { data } = await axios.get(`${API_URL}/api/users${search ? `?search=${search}` : ''}`);
+      const { data } = await axios.get(
+        `${API_URL}/api/users${search ? `?search=${search}` : ''}`
+      );
       setUsers(data);
-    } catch (error) {
+    } catch {
       toast.error('Failed to fetch users');
     }
   };
@@ -45,18 +49,7 @@ function Users() {
     }
   };
 
-  const handleDeleteUser = async (userId) => {
-    if (!window.confirm('Are you sure you want to delete this user?')) return;
-    try {
-      await axios.delete(`${API_URL}/api/users/${userId}`);
-      toast.success('User deleted successfully');
-      fetchUsers();
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to delete user');
-    }
-  };
-
-  if (currentUser.role == 'user') {
+  if (currentUser.role === 'user') {
     return <div>Access denied</div>;
   }
 
@@ -86,47 +79,64 @@ function Users() {
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
                 <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Notifications</th>
                 {currentUser.role === 'developer' && (
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>)}
-            </tr>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    Actions
+                  </th>
+                )}
+              </tr>
             </thead>
+
             <tbody className="bg-white divide-y divide-gray-200">
               {users.map((user) => (
                 <tr key={user._id}>
                   <td className="px-4 py-3 whitespace-nowrap text-sm">{user.registerId}</td>
-                 <td className="px-4 py-3 whitespace-nowrap text-sm">
-  {user.name}{' '}
-  {(user.role === 'admin' || user.role === 'developer' || user.role === 'financier') && (
-    <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-red-300 text-red-900 ml-1">
-      {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
-    </span>
-  )}
-  {user.category === 'youth' && (
-    <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-yellow-300 text-yellow-900 ml-1">
-      Y
-    </span>
-  )}
-</td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm">{user.email || 'N/A'}</td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm">{user.phoneNumber}</td>
+
                   <td className="px-4 py-3 whitespace-nowrap text-sm">
-  <select
-    value={user.role}
-    onChange={(e) => handleRoleChange(user._id, e.target.value)}
-    disabled={user.email === 'gangavaramnbkyouth@gmail.com'}
-    className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
-  >
-    <option value="user">User</option>
-    <option value="admin">Admin</option>
-    <option value="financier">Financier</option>
-    <option value="developer">Developer</option>
-  </select>
-</td>
+                    {user.name}{' '}
+                    {(user.role === 'admin' ||
+                      user.role === 'developer' ||
+                      user.role === 'financier') && (
+                      <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-red-300 text-red-900 ml-1">
+                        {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                      </span>
+                    )}
+                    {user.category === 'youth' && (
+                      <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-yellow-300 text-yellow-900 ml-1">
+                        Y
+                      </span>
+                    )}
+                  </td>
+
+                  <td className="px-4 py-3 whitespace-nowrap text-sm">
+                    {user.email || 'N/A'}
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap text-sm">
+                    {user.phoneNumber || 'N/A'}
+                  </td>
+
+                  <td className="px-4 py-3 whitespace-nowrap text-sm">
+                    <select
+                      value={user.role}
+                      onChange={(e) => handleRoleChange(user._id, e.target.value)}
+                      disabled={user.email === 'gangavaramnbkyouth@gmail.com'}
+                      className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 
+                                 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 
+                                 sm:text-sm rounded-md"
+                    >
+                      <option value="user">User</option>
+                      <option value="admin">Admin</option>
+                      <option value="financier">Financier</option>
+                      <option value="developer">Developer</option>
+                    </select>
+                  </td>
                   <td className="px-4 py-3 whitespace-nowrap text-sm">
                     <select
                       value={user.category}
                       onChange={(e) => handleCategoryChange(user._id, e.target.value)}
                       disabled={user.email === 'gangavaramnbkyouth@gmail.com'}
-                      className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+                      className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 
+                                 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 
+                                 sm:text-sm rounded-md"
                     >
                       <option value="youth">Youth</option>
                       <option value="general">General</option>
@@ -140,29 +150,31 @@ function Users() {
                     )}
                   </td>
                   {currentUser.role === 'developer' && (
-          <td className="px-4 py-3 whitespace-nowrap text-sm space-x-2">
-            <button
-              onClick={() => setEditingUser(user)}
-              disabled={user.email === 'gangavaramnbkyouth@gmail.com'}
-              className="text-indigo-600 hover:text-indigo-900 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <Edit2 className="h-5 w-5" />
-            </button>
-            <button
-              onClick={() => handleDeleteUser(user._id)}
-              disabled={user.email === 'gangavaramnbkyouth@gmail.com'}
-              className="text-red-600 hover:text-red-900 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <Trash2 className="h-5 w-5" />
-            </button>
-          </td>
-        )}
+                    <td className="px-4 py-3 whitespace-nowrap text-sm space-x-2">
+                      <button
+                        onClick={() => setEditingUser(user)}
+                        disabled={user.email === 'gangavaramnbkyouth@gmail.com'}
+                        className="text-indigo-600 hover:text-indigo-900 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <Edit2 className="h-5 w-5" />
+                      </button>
+                      <button
+                        onClick={() => setUserToDelete(user)}
+                        disabled={user.email === 'gangavaramnbkyouth@gmail.com'}
+                        className="text-red-600 hover:text-red-900 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <Trash2 className="h-5 w-5" />
+                      </button>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
-      </div> {editingUser && (
+      </div>
+
+      {editingUser && (
         <UpdateUserForm
           user={editingUser}
           onClose={() => setEditingUser(null)}
@@ -170,6 +182,22 @@ function Users() {
             setUsers((prev) =>
               prev.map((u) => (u._id === updatedUser._id ? updatedUser : u))
             );
+          }}
+        />
+      )}
+
+      {userToDelete && (
+        <DeleteUserConfirm
+          user={userToDelete}
+          onClose={() => setUserToDelete(null)}
+          onConfirm={async (user) => {
+            try {
+              await axios.delete(`${API_URL}/api/users/${user._id}`);
+              toast.success(`User "${user.name}" deleted successfully`);
+              fetchUsers();
+            } catch (error) {
+              toast.error(error.response?.data?.message || 'Failed to delete user');
+            }
           }}
         />
       )}
