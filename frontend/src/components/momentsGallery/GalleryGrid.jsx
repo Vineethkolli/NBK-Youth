@@ -157,7 +157,7 @@ function GalleryGrid({
   const selectionModeActive = selectedFiles.length > 0; // NEW: whether to show circles for all files
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-90 flex flex-col z-50">
+    <div className="fixed inset-0 bg-black/90 flex flex-col z-50">
       {/* Header */}
       <div className="bg-white p-4 flex items-center justify-between">
         <div className="flex items-center space-x-4">
@@ -174,7 +174,7 @@ function GalleryGrid({
               >
                 <div
                   className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
-                    isAllSelected ? 'bg-indigo-600 border-indigo-500 text-white' : 'border-gray-300 bg-black bg-opacity-50 text-white'
+                    isAllSelected ? 'bg-indigo-600 border-indigo-500 text-white' : 'border-gray-300 bg-black/50 text-white'
                   }`}
                 >
                   {isAllSelected && <CheckCircle className="h-4 w-4" />}
@@ -303,8 +303,8 @@ function GalleryGrid({
                         isSelected
                           ? 'opacity-100 bg-indigo-600 border-indigo-500 text-white'
                           : selectionModeActive
-                          ? 'opacity-100 border-gray-300 bg-black bg-opacity-50 text-white'
-                          : 'opacity-0 group-hover:opacity-100 bg-black bg-opacity-50 text-white'
+                          ? 'opacity-100 border-gray-300 bg-black/50 text-white'
+                          : 'opacity-0 group-hover:opacity-100 bg-black/50 text-white'
                       }`}
                       onMouseDown={(e) => e.preventDefault()} // prevent accidental lightbox click
                       onClick={(e) => {
@@ -316,7 +316,7 @@ function GalleryGrid({
                     </div>
 
                     {file.type === 'video' && (
-                      <div className="absolute bottom-2 left-2 flex items-center space-x-1 bg-black bg-opacity-70 rounded-full px-2 py-1">
+                      <div className="absolute bottom-2 left-2 flex items-center space-x-1 bg-black/70 rounded-full px-2 py-1">
                         <div className="w-0 h-0 border-l-[6px] border-l-white border-t-[4px] border-t-transparent border-b-[4px] border-b-transparent"></div>
                         <span className="text-white text-xs font-medium">Video</span>
                       </div>

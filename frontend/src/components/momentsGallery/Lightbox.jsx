@@ -108,7 +108,7 @@ function Lightbox({ mediaFiles, currentIndex, momentTitle, onClose }) {
       onTouchEnd={handleTouchEnd}
     >
       {/* Header */}
-      <div className="bg-black bg-opacity-75 text-white p-4 flex items-center justify-between">
+      <div className="bg-black/75 text-white p-4 flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <button onClick={onClose} className="text-white hover:text-gray-300">
             <ArrowLeft className="h-6 w-6" />
@@ -155,7 +155,7 @@ function Lightbox({ mediaFiles, currentIndex, momentTitle, onClose }) {
             <button
               onClick={handlePrevious}
               disabled={activeIndex === 0}
-              className={`absolute left-4 top-1/2 transform -translate-y-1/2 p-3 bg-black bg-opacity-50 text-white rounded-full transition-opacity ${
+              className={`absolute left-4 top-1/2 transform -translate-y-1/2 p-3 bg-black/50 text-white rounded-full transition-opacity ${
                 activeIndex === 0
                   ? 'opacity-30 cursor-not-allowed'
                   : 'hover:bg-opacity-75'
@@ -166,7 +166,7 @@ function Lightbox({ mediaFiles, currentIndex, momentTitle, onClose }) {
             <button
               onClick={handleNext}
               disabled={activeIndex === mediaFiles.length - 1}
-              className={`absolute right-4 top-1/2 transform -translate-y-1/2 p-3 bg-black bg-opacity-50 text-white rounded-full transition-opacity ${
+              className={`absolute right-4 top-1/2 transform -translate-y-1/2 p-3 bg-black/50 text-white rounded-full transition-opacity ${
                 activeIndex === mediaFiles.length - 1
                   ? 'opacity-30 cursor-not-allowed'
                   : 'hover:bg-opacity-75'
@@ -188,7 +188,7 @@ function Lightbox({ mediaFiles, currentIndex, momentTitle, onClose }) {
       </div>
 
       {/* Footer */}
-      <div className="bg-black bg-opacity-75 text-white p-4 flex items-center justify-between">
+      <div className="bg-black/75 text-white p-4 flex items-center justify-between">
         <div>
           <p className="font-medium notranslate">{currentMedia.name}</p>
         </div>

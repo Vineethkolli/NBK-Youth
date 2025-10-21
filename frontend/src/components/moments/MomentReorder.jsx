@@ -81,7 +81,7 @@ function MomentReorder({ moments, onSave, onCancel }) {
             }}
           />
           {remaining > 0 && (
-            <div className="absolute bottom-2 right-2 px-2 py-1 bg-black bg-opacity-70 text-white text-sm rounded">
+            <div className="absolute bottom-2 right-2 px-2 py-1 bg-black/70 text-white text-sm rounded">
               +{remaining} more
             </div>
           )}

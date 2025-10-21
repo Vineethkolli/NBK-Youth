@@ -304,7 +304,7 @@ export default function BannerManager() {
 
       {/* Banner Form */}
       {showForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-2xl">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-medium">
@@ -379,7 +379,7 @@ export default function BannerManager() {
                         // If editing and there was an old image, set deleteImage flag
                         deleteImage: f._id && f.image && !(f.image instanceof File) ? true : undefined
                       }))}
-                      className="absolute top-0 right-0 bg-black bg-opacity-50 text-white p-1 rounded-full"
+                      className="absolute top-0 right-0 bg-black/50 text-white p-1 rounded-full"
                     >
                       <X className="h-4 w-4" />
                     </button>
@@ -422,7 +422,7 @@ export default function BannerManager() {
                         // If editing and there was an old video, set deleteVideo flag
                         deleteVideo: f._id && f.video && !(f.video instanceof File) ? true : undefined
                       }))}
-                      className="absolute top-0 right-0 bg-black bg-opacity-50 text-white p-1 rounded-full"
+                      className="absolute top-0 right-0 bg-black/50 text-white p-1 rounded-full"
                     >
                       <X className="h-4 w-4" />
                     </button>

@@ -101,14 +101,14 @@ function MomentGrid({
           <div className="absolute top-0 right-0 h-full w-1/5 bg-gradient-to-l from-white/90 to-transparent" />
           <button
             onClick={(e) => { e.stopPropagation(); if (!isEditMode) openGallery(moment); }}
-            className="absolute top-1/2 right-3 -translate-y-1/2 p-2 bg-black bg-opacity-70 text-white rounded-full hover:bg-opacity-90 transition cursor-pointer"
+            className="absolute top-1/2 right-3 -translate-y-1/2 p-2 bg-black/70  text-white rounded-full hover:bg-opacity-90 transition cursor-pointer"
           >
             <ChevronRight className="h-5 w-5" />
           </button>
           {remainingCount > 0 && (
             <button
               onClick={(e) => { e.stopPropagation(); if (!isEditMode) openGallery(moment); }}
-              className="absolute bottom-3 right-2 px-2 py-1 bg-black bg-opacity-70 text-white text-sm font-semibold rounded hover:bg-opacity-90 transition"
+              className="absolute bottom-3 right-2 px-2 py-1 bg-black/70 text-white text-sm font-semibold rounded hover:bg-opacity-90 transition"
             >
               See All (+{remainingCount})
             </button>
