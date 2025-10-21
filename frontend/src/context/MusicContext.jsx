@@ -4,13 +4,26 @@ const MusicContext = createContext();
 export const useMusicPlayer = () => useContext(MusicContext);
 
 export function MusicProvider({ children }) {
-  const audioRef = useRef(new Audio());
+  const audioRef = useRef(null);
   const [currentSong, setCurrentSong]     = useState(null);
   const [isPlaying, setIsPlaying]         = useState(false);
   const [songQueue, setSongQueue]         = useState([]);
   const [currentSongIndex, setCurrentSongIndex] = useState(0);
   const [progress, setProgress]           = useState(0);
   const [duration, setDuration]           = useState(0);
+
+  useEffect(() => {
+    audioRef.current = new Audio();
+
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = '';
+        audioRef.current.load();
+        audioRef.current = null;
+      }
+    };
+  }, []);
 
   // playback controls
   const handleSongSelect = (song, queue) => {
@@ -28,7 +41,7 @@ export function MusicProvider({ children }) {
     const next = (currentSongIndex + 1) % songQueue.length;
     setCurrentSongIndex(next);
     setCurrentSong(songQueue[next]);
-    setIsPlaying(true); // ensure playback continues
+    setIsPlaying(true);
   };
 
   const handlePrevious = () => {
@@ -36,7 +49,7 @@ export function MusicProvider({ children }) {
     const prev = (currentSongIndex - 1 + songQueue.length) % songQueue.length;
     setCurrentSongIndex(prev);
     setCurrentSong(songQueue[prev]);
-    setIsPlaying(true); // ensure playback continues
+    setIsPlaying(true);
   };
 
   const togglePlay = () => setIsPlaying(p => !p);
@@ -65,6 +78,7 @@ export function MusicProvider({ children }) {
   // sync audio element when song or play/pause changes
   useEffect(() => {
     const audio = audioRef.current;
+    if (!audio) return;
 
     if (!currentSong) {
       audio.pause();
@@ -76,23 +90,36 @@ export function MusicProvider({ children }) {
       audio.load();
     }
 
-    isPlaying ? audio.play() : audio.pause();
+    const playPromise = isPlaying ? audio.play() : audio.pause();
+    if (playPromise && typeof playPromise.catch === 'function') {
+      playPromise.catch((error) => {
+        console.warn('Audio playback error:', error);
+      });
+    }
 
-    const onTimeUpdate    = () => setProgress(audio.currentTime);
-    const onLoadedMeta    = () => setDuration(audio.duration);
-    const onEnded         = () => {
+    const onTimeUpdate = () => setProgress(audio.currentTime);
+    const onLoadedMeta = () => setDuration(audio.duration);
+    const onEnded = () => {
       handleNext();
-      setIsPlaying(true); // auto-play next song after completion
+      setIsPlaying(true);
+    };
+    const onError = (e) => {
+      console.error('Audio error:', e);
+      setIsPlaying(false);
     };
 
-    audio.addEventListener('timeupdate',    onTimeUpdate);
+    audio.addEventListener('timeupdate', onTimeUpdate);
     audio.addEventListener('loadedmetadata', onLoadedMeta);
-    audio.addEventListener('ended',          onEnded);
+    audio.addEventListener('ended', onEnded);
+    audio.addEventListener('error', onError);
 
     return () => {
-      audio.removeEventListener('timeupdate',    onTimeUpdate);
-      audio.removeEventListener('loadedmetadata', onLoadedMeta);
-      audio.removeEventListener('ended',          onEnded);
+      if (audio) {
+        audio.removeEventListener('timeupdate', onTimeUpdate);
+        audio.removeEventListener('loadedmetadata', onLoadedMeta);
+        audio.removeEventListener('ended', onEnded);
+        audio.removeEventListener('error', onError);
+      }
     };
   }, [currentSong, isPlaying]);
 
