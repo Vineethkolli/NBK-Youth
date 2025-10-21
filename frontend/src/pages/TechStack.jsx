@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { ExternalLink } from "lucide-react";
-import { FaShareAlt } from "react-icons/fa";
+import { ExternalLink, Share2 } from "lucide-react";
 import { SiYoutube, SiInstagram } from "react-icons/si";
 import TechStackDetails from "../components/techstack/Technologies";
 import MindMap from "../components/techstack/MindMap";
@@ -89,7 +88,7 @@ const handleShare = (url) => {
                   window.open(site.url, "_blank", "noopener,noreferrer")
                 }
               />
-              <FaShareAlt
+              <Share2
                 className="h-4 w-4 cursor-pointer hover:text-indigo-600"
                 title="Share Link"
                 onClick={() => handleShare(site.url)}

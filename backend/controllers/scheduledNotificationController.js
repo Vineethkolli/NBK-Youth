@@ -118,7 +118,9 @@ export const sendScheduledNow = async (req, res) => {
     const notifications = subscriptionUsers.flatMap(user =>
       user.subscriptions.map(async sub => {
         try {
-          await webpush.sendNotification(sub, payload);
+          await webpush.sendNotification(sub, payload, {
+            urgency: 'high'
+          });
         } catch (error) {
           if (error.statusCode === 410 || error.statusCode === 404) {
             user.subscriptions = user.subscriptions.filter(s => s.endpoint !== sub.endpoint);
@@ -186,7 +188,9 @@ export const processDueNotifications = async () => {
         const notifications = subscriptionUsers.flatMap(user =>
           user.subscriptions.map(async sub => {
             try {
-              await webpush.sendNotification(sub, payload);
+              await webpush.sendNotification(sub, payload, {
+                urgency: 'high'
+              });
             } catch (error) {
               if (error.statusCode === 410 || error.statusCode === 404) {
                 user.subscriptions = user.subscriptions.filter(s => s.endpoint !== sub.endpoint);

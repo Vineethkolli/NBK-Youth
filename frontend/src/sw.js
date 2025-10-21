@@ -11,7 +11,8 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(clients.claim());
 });
 
-// Notification logic
+
+// Notification logic with high priority
 self.addEventListener('push', (event) => {
   const data = event.data ? event.data.json() : {};
   const title = data.title || 'Default Title';
@@ -19,6 +20,14 @@ self.addEventListener('push', (event) => {
     body: data.body || 'Default message',
     icon: '/logo/192.png',
     badge: '/logo/notificationlogo.png',
+    requireInteraction: true,
+    vibrate: [200, 100, 200],
+    renotify: true,
+    silent: false,
+    data: {
+      url: '/notifications',
+      timestamp: Date.now(),
+    },
   };
   event.waitUntil(self.registration.showNotification(title, options));
 });

@@ -92,7 +92,9 @@ export const sendNotification = async (req, res) => {
     const notifications = subscriptionUsers.flatMap((user) =>
       user.subscriptions.map(async (sub) => {
         try {
-          await webpush.sendNotification(sub, payload);
+          await webpush.sendNotification(sub, payload, {
+            urgency: 'high'
+          });
         } catch (error) {
           // If subscription is expired or invalid, remove it from the user's subscriptions
           if (error.statusCode === 410 || error.statusCode === 404) {
