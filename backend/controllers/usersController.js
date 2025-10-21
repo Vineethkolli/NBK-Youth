@@ -337,3 +337,49 @@ export const updateLanguage = async (req, res) => {
     res.status(500).json({ message: 'Failed to update language preference' });
   }
 };
+
+
+export const updateUserProfile = async (req, res) => {
+  try {
+    const { name, email, phoneNumber } = req.body;
+    const userToUpdate = await User.findById(req.params.userId);
+    if (!userToUpdate) return res.status(404).json({ message: 'User not found' });
+
+    // Protect default developer account
+    if (userToUpdate.email === 'gangavaramnbkyouth@gmail.com' && email !== 'gangavaramnbkyouth@gmail.com') {
+      return res.status(403).json({ message: 'Cannot change default developer email' });
+    }
+
+    // Check unique email & phone
+    if (email && email !== userToUpdate.email) {
+      const exists = await User.findOne({ email });
+      if (exists) return res.status(400).json({ message: 'Email already in use' });
+    }
+
+    if (phoneNumber && phoneNumber !== userToUpdate.phoneNumber) {
+      const exists = await User.findOne({ phoneNumber });
+      if (exists) return res.status(400).json({ message: 'Phone number already in use' });
+    }
+
+    const originalData = { name: userToUpdate.name, email: userToUpdate.email, phoneNumber: userToUpdate.phoneNumber };
+
+    userToUpdate.name = name || userToUpdate.name;
+    userToUpdate.email = email || userToUpdate.email;
+    userToUpdate.phoneNumber = phoneNumber || userToUpdate.phoneNumber;
+
+    await userToUpdate.save();
+
+    await logActivity(
+      req,
+      'UPDATE',
+      'User',
+      userToUpdate.registerId,
+      { before: originalData, after: { name, email, phoneNumber } },
+      `User ${userToUpdate.name} updated by ${req.user.name}`
+    );
+
+    res.json(userToUpdate);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
