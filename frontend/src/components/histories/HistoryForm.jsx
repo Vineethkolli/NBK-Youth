@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { X } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 const COLLECTION_OPTIONS = ['Stats', 'Income', 'Expense', 'Event'];
@@ -6,7 +7,7 @@ const COLLECTION_OPTIONS = ['Stats', 'Income', 'Expense', 'Event'];
 function HistoryForm({ snapshots, onClose, onSubmit }) {
   const [formData, setFormData] = useState({
     snapshotName: '',
-    selectedCollections: [ ]
+    selectedCollections: []
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -21,7 +22,6 @@ function HistoryForm({ snapshots, onClose, onSubmit }) {
 
   const getSelectedSnapshot = () => {
     if (!formData.snapshotName) return null;
-    // snapshotName is "<eventName> <year>". eventName may contain spaces.
     const parts = formData.snapshotName.trim().split(' ');
     const year = parts.pop();
     const eventName = parts.join(' ');
@@ -33,13 +33,10 @@ function HistoryForm({ snapshots, onClose, onSubmit }) {
     if (!snapshot) return [];
 
     const available = [];
-    
-    // Check for Stats
     if (snapshot.stats && Object.keys(snapshot.stats).length > 0) {
       available.push('Stats');
     }
-    
-    // Check for collections
+
     Object.keys(snapshot.collections || {}).forEach(key => {
       if (snapshot.collections[key] && snapshot.collections[key].length > 0) {
         if (key === 'Income') available.push('Income');
@@ -73,28 +70,38 @@ function HistoryForm({ snapshots, onClose, onSubmit }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-full max-w-md">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">Add History</h2>
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+            <X className="h-6 w-6" />
+          </button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">Select Snapshot *</label>
+            <label className="block text-sm font-medium text-gray-700">
+              Select Snapshot *
+            </label>
             <select
               required
               value={formData.snapshotName}
-              onChange={(e) => setFormData({ 
-                ...formData, 
-                snapshotName: e.target.value,
-                selectedCollections: [] // Reset collections when snapshot changes
-              })}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  snapshotName: e.target.value,
+                  selectedCollections: []
+                })
+              }
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
             >
               <option value="">Select Snapshot</option>
-              {snapshots.map(snapshot => (
-                <option key={snapshot._id} value={`${snapshot.eventName} ${snapshot.year}`}>
+              {snapshots.map((snapshot) => (
+                <option
+                  key={snapshot._id}
+                  value={`${snapshot.eventName} ${snapshot.year}`}
+                >
                   {snapshot.eventName} {snapshot.year}
                 </option>
               ))}
@@ -103,9 +110,11 @@ function HistoryForm({ snapshots, onClose, onSubmit }) {
 
           {formData.snapshotName && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Collections *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Collections *
+              </label>
               <div className="space-y-2 max-h-40 overflow-y-auto border rounded-md p-3">
-                {getAvailableCollections().map(collection => (
+                {getAvailableCollections().map((collection) => (
                   <label key={collection} className="flex items-center">
                     <input
                       type="checkbox"
@@ -113,12 +122,16 @@ function HistoryForm({ snapshots, onClose, onSubmit }) {
                       onChange={() => handleCollectionToggle(collection)}
                       className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
                     />
-                    <span className="ml-2 text-sm text-gray-900">{collection}</span>
+                    <span className="ml-2 text-sm text-gray-900">
+                      {collection}
+                    </span>
                   </label>
                 ))}
               </div>
               {getAvailableCollections().length === 0 && (
-                <p className="text-sm text-gray-500">No collections available in this snapshot</p>
+                <p className="text-sm text-gray-500">
+                  No collections available in this snapshot
+                </p>
               )}
             </div>
           )}

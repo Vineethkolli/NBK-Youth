@@ -115,7 +115,7 @@ function GalleryReorder({ mediaFiles, onSave, onCancel }) {
                         
                         {/* Video indicator - Bottom Left */}
                         {file.type === 'video' && (
-                          <div className="absolute bottom-2 left-2 flex items-center space-x-1 bg-black bg-opacity-70 rounded-full px-2 py-1">
+                          <div className="absolute bottom-2 left-2 flex items-center space-x-1 bg-black/70 rounded-full px-2 py-1">
                             <div className="w-0 h-0 border-l-[4px] border-l-white border-t-[2px] border-t-transparent border-b-[2px] border-b-transparent"></div>
                             <span className="text-white text-xs">Video</span>
                           </div>

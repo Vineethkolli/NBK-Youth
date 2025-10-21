@@ -165,7 +165,7 @@ function EventRecordsGrid({ records = [], isEditMode, onEdit, onDelete }) {
 
 {/* Language choose modal */}
 {chooserRecord && (
-  <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
+  <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
     <div className="bg-white rounded-lg p-5 w-[90%] max-w-xs relative">
       <button
         onClick={() => setChooserRecord(null)}
@@ -236,7 +236,7 @@ function EventRecordsGrid({ records = [], isEditMode, onEdit, onDelete }) {
 
       {/* PDF Preview Modal */}
       {previewUrl && (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
           <div className="bg-white w-11/12 md:w-3/4 lg:w-2/3 h-5/6 rounded-lg shadow-lg overflow-hidden flex flex-col">
           
             <div className="flex justify-between items-center px-4 py-2 border-b">

@@ -71,7 +71,7 @@ function ProfileImageDialog({ image, onClose, onUpload }) {
     }
   };
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 max-w-lg w-full mx-4">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-medium">Profile Image</h3>
@@ -98,7 +98,7 @@ function ProfileImageDialog({ image, onClose, onUpload }) {
                         setPreviewUrl(null);
                         setFileInputKey(Date.now());
                       }}
-                      className="absolute top-2 right-2 bg-black bg-opacity-50 text-white p-1 rounded-full"
+                      className="absolute top-2 right-2 bg-black/50 text-white p-1 rounded-full"
                     >
                       <X className="h-4 w-4" />
                     </button>

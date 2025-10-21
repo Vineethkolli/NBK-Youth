@@ -238,7 +238,7 @@ function SnapshotManager() {
 
       {/* Add Form Modal */}
       {showAddForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-medium">Create Snapshot</h3>
@@ -332,7 +332,7 @@ function SnapshotManager() {
 
       {/* Edit Form Modal */}
       {showEditForm && editingSnapshot && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-medium">Edit Snapshot</h3>
@@ -409,7 +409,7 @@ function SnapshotManager() {
 
       {/* Delete Confirmation Modal */}
       {isDeleteModalVisible && snapshotToDelete && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="bg-white p-6 rounded shadow-lg w-80">
             <h3 className="text-lg font-medium mb-4">
               {deleteConfirmStep === 1
