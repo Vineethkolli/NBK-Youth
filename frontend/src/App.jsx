@@ -44,6 +44,7 @@ import ViniPage from './pages/vini';
 import ProtectedRoute from './components/ProtectedRoute';
 import PopupBanner from './components/adminPanel/PopupBanner';
 import FloatingMusicIcon from './components/vibe/FloatingMusicIcon';
+import OfflineIndicator from './components/common/OfflineIndicator';
 
 
 // Google Analytics routes tracking
@@ -116,6 +117,7 @@ function AppContent() {
 
       {user && <ViniPage />}
       {user && <FloatingMusicIcon />}
+      <OfflineIndicator />
     </>
   );
 }
@@ -126,7 +128,15 @@ function App() {
   useEffect(() => {
     initializeAnalytics();
 
-    if (navigator.serviceWorker) {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js', { scope: '/' })
+        .then((registration) => {
+          console.log('Service Worker registered:', registration.scope);
+        })
+        .catch((error) => {
+          console.error('Service Worker registration failed:', error);
+        });
+
       navigator.serviceWorker.addEventListener('controllerchange', () => {
         // Reload the page to apply the new version
         window.location.reload();

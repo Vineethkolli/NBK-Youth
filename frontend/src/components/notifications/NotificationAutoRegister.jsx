@@ -33,22 +33,14 @@ function NotificationAutoRegister() {
             registerId: user.registerId,
             subscription: newSubscription,
           });
-
-          // console.log('Auto-subscribed for push notifications.');
-        } else {
-          // console.log('Already subscribed.');
         }
       } catch (err) {
         console.error('Auto-subscription failed:', err);
       }
     };
 
-    // Only run if Service Worker is supported
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker
-        .register('/sw.js')
-        .then(() => registerAndSubscribe())
-        .catch((err) => console.error('SW registration failed:', err));
+      registerAndSubscribe();
     }
   }, [user]);
 

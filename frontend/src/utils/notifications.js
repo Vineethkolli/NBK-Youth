@@ -2,20 +2,12 @@ import axios from 'axios';
 import { API_URL } from './config';
 import { urlBase64ToUint8Array } from './vapidKeys';
 
-// Register Service Worker
-export const registerServiceWorker = async () => {
+// Get the service worker registration
+export const getServiceWorkerRegistration = async () => {
   if ('serviceWorker' in navigator) {
-    try {
-      const registration = await navigator.serviceWorker.register('/sw.js');
-      // console.log('Service Worker registered:', registration);
-      return registration;
-    } catch (error) {
-      // console.error('Service Worker registration failed:', error);
-      throw error;
-    }
-  } else {
-    // throw new Error('Service Worker not supported');
+    return await navigator.serviceWorker.ready;
   }
+  throw new Error('Service Worker not supported');
 };
 
 // Get current push subscription
