@@ -93,7 +93,8 @@ export const sendNotification = async (req, res) => {
       user.subscriptions.map(async (sub) => {
         try {
           await webpush.sendNotification(sub, payload, {
-            urgency: 'high'
+            urgency: 'high',
+            TTL: 1296000 // 15 days
           });
         } catch (error) {
           // If subscription is expired or invalid, remove it from the user's subscriptions
