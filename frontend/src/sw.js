@@ -1,6 +1,24 @@
 import { precacheAndRoute } from 'workbox-precaching';
+import { registerRoute, setCatchHandler } from 'workbox-routing';
+import { NetworkFirst } from 'workbox-strategies';
 
 precacheAndRoute(self.__WB_MANIFEST || []);
+
+// Offline fallback page
+registerRoute(
+  ({ request }) => request.mode === 'navigate',
+  new NetworkFirst({
+    cacheName: 'pages-cache',
+  })
+);
+
+setCatchHandler(async ({ event }) => {
+  if (event.request.mode === 'navigate') {
+    return caches.match('/offline.html');
+  }
+  return Response.error();
+});
+
 
 // Force the new service worker to activate immediately
 self.addEventListener('install', (event) => {

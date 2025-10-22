@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Offline - NBK Youth</title>
+  <link rel="icon" href="/logo/192.png" />
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Roboto, sans-serif;
+      background: radial-gradient(circle at top, #0f172a, #020617);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
+      padding: 20px;
+      overflow: hidden;
+    }
+
+    .app-logo {
+      width: 90px;
+      height: 90px;
+      border-radius: 20%;
+      margin-bottom: 2px;
+      box-shadow: 0 0 25px rgba(56, 189, 248, 0.4);
+    }
+
+    h2 {
+      margin: 8px 0;
+      font-weight: 700;
+      color: #38bdf8;
+      letter-spacing: 1px;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    @keyframes blink {
+      50% { opacity: 0.3; }
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      margin: 25px 0 10px;
+      letter-spacing: 0.5px;
+    }
+
+    p {
+      font-size: 1rem;
+      color: #cbd5e1;
+      max-width: 350px;
+      line-height: 1.6;
+    }
+
+    /* Enhanced Try Again Button */
+    button {
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.5);
+      padding: 14px 30px;
+      border-radius: 12px;
+      color: #38bdf8;
+      font-size: 1rem;
+      margin-top: 30px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
+      transition: all 0.3s ease;
+    }
+
+    button::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(56,189,248,0.3) 10%, transparent 10.01%);
+      background-size: 10% 10%;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    button:hover::before {
+      opacity: 0.2;
+    }
+
+    button:hover {
+      color: #fff;
+      background: linear-gradient(90deg, #0ea5e9, #38bdf8);
+      box-shadow: 0 0 20px rgba(56,189,248,0.6);
+      transform: scale(1.05);
+    }
+
+    .reload-icon {
+      display: inline-block;
+      margin-right: 8px;
+    }
+
+    .status {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 20px;
+      gap: 10px;
+      opacity: 0.8;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #ef4444;
+      animation: blink 1.2s infinite;
+    }
+  </style>
+</head>
+<body>
+  <img src="/logo/192.png" alt="App Logo" class="app-logo" />
+  <h2>NBK Youth</h2>
+  <h1>You’re Offline</h1>
+  <p>
+    Oops! It seems your internet connection is lost.<br>
+    Please reconnect to continue using <strong>NBK Youth</strong>.
+  </p>
+  <div class="status">
+    <div class="dot"></div>
+    <span>No Internet Connection</span>
+  </div>
+  <button onclick="window.location.reload()">
+     Try Again
+  </button>
+</body>
+</html>
