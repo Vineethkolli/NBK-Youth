@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 import { initializeAnalytics, trackPageView } from './utils/analytics';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { HiddenProfileProvider } from './context/HiddenProfileContext';
@@ -138,9 +139,10 @@ function App() {
         });
 
       navigator.serviceWorker.addEventListener('controllerchange', () => {
-        // Reload the page to apply the new version
-        window.location.reload();
-      });
+      // Reload the page to apply the new version
+      toast.success('New version available! Refreshing...');
+      setTimeout(() => window.location.reload(), 1000);
+    });
     }
   }, []);
 
