@@ -44,7 +44,7 @@ const OfflineIndicator = () => {
       ) : (
         <>
           <WifiOff className="h-5 w-5" />
-          <span className="font-medium">No internet connection</span>
+          <span className="font-medium">No internet </span>
         </>
       )}
     </div>
