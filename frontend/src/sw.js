@@ -1,27 +1,35 @@
-import { precacheAndRoute } from 'workbox-precaching';
-import { setCacheNameDetails } from 'workbox-core';
+import { precacheAndRoute, matchPrecache } from 'workbox-precaching';
+import { registerRoute } from 'workbox-routing';
+import { NetworkFirst } from 'workbox-strategies';
 
-// Define the name of your specific offline cache
-setCacheNameDetails({
-  prefix: 'nbkyouth',
-  suffix: 'v1',
-  precache: 'precache',
-  runtime: 'runtime'
-});
-
-// The path to your offline page file, which must be precached
-const OFFLINE_URL = '/offline.html';
-
+// Precache the __WB_MANIFEST (includes files from includeAssets)
 precacheAndRoute(self.__WB_MANIFEST || []);
 
-// Force the new service worker to activate immediately
-self.addEventListener('install', (event) => {
-  self.skipWaiting();
+// Activate immediately
+self.addEventListener('install', (event) => self.skipWaiting());
+self.addEventListener('activate', (event) => event.waitUntil(clients.claim()));
+
+// Navigation fallback: try network first; if it fails, serve precached offline.html
+const networkFirstHandler = new NetworkFirst({
+  cacheName: 'pages-cache',
 });
 
-self.addEventListener('activate', (event) => {
-  event.waitUntil(clients.claim());
-});
+registerRoute(
+  // match navigation requests
+  ({ request }) => request.mode === 'navigate',
+  // custom handler: prefer network, else cached page, else offline.html
+  async (args) => {
+    try {
+      const response = await networkFirstHandler.handle(args);
+      if (response) return response;
+      // if networkFirst returned nothing, try precached offline page
+      return matchPrecache('/offline.html');
+    } catch (err) {
+      // on exception return offline page
+      return matchPrecache('/offline.html');
+    }
+  }
+);
 
 
 // Notification logic with high priority

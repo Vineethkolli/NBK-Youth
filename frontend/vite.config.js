@@ -10,6 +10,11 @@ export default defineConfig({
       srcDir: 'src',
       filename: 'sw.js',
       registerType: 'autoUpdate',
+      includeAssets: [
+        '/offline.html',
+        '/logo/192.png',
+        '/logo/notificationlogo.png'
+      ],
       manifest: {
         name: 'NBK Youth',
         short_name: 'NBK Youth',
@@ -19,24 +24,11 @@ export default defineConfig({
         display: 'standalone',
         start_url: '/',
         icons: [
-          {
-            src: '/logo/192.png',
-            sizes: '192x192',
-            type: 'image/png',
-            purpose: 'any maskable',
-          },
-          {
-            src: '/logo/512.png',
-            sizes: '512x512',
-            type: 'image/png',
-            purpose: 'any maskable',
-          }
+          { src: '/logo/192.png', sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
+          { src: '/logo/512.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
         ]
       },
       workbox: {
-        additionalManifestEntries: [
-          { url: '/offline.html', revision: null }
-        ],
         runtimeCaching: [
           {
             urlPattern: ({ url }) => url.origin === location.origin,
