@@ -1,24 +1,18 @@
 import { precacheAndRoute } from 'workbox-precaching';
-import { registerRoute, setCatchHandler } from 'workbox-routing';
-import { NetworkFirst } from 'workbox-strategies';
+import { setCacheNameDetails } from 'workbox-core';
 
-precacheAndRoute(self.__WB_MANIFEST || []);
-
-// Offline fallback page
-registerRoute(
-  ({ request }) => request.mode === 'navigate',
-  new NetworkFirst({
-    cacheName: 'pages-cache',
-  })
-);
-
-setCatchHandler(async ({ event }) => {
-  if (event.request.mode === 'navigate') {
-    return caches.match('/offline.html');
-  }
-  return Response.error();
+// Define the name of your specific offline cache
+setCacheNameDetails({
+  prefix: 'nbkyouth',
+  suffix: 'v1',
+  precache: 'precache',
+  runtime: 'runtime'
 });
 
+// The path to your offline page file, which must be precached
+const OFFLINE_URL = '/offline.html';
+
+precacheAndRoute(self.__WB_MANIFEST || []);
 
 // Force the new service worker to activate immediately
 self.addEventListener('install', (event) => {
