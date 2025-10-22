@@ -80,7 +80,7 @@ function FloatingMusicIcon() {
 
   return (
     <div
-      className={`fixed z-50 w-12 h-12 bg-gradient-to-r from-indigo-500 to-purple-600
+      className={`fixed z-50 w-11 h-11 bg-gradient-to-r from-indigo-500 to-purple-600
                   rounded-full shadow-lg select-none transition-transform
                   ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
       style={{ left: position.x, top: position.y, touchAction: 'none' }}
@@ -91,10 +91,10 @@ function FloatingMusicIcon() {
       <div className="w-full h-full flex items-center justify-center text-white">
         {isPlaying ? (
           <div className="flex space-x-0.5 items-center justify-center">
-            {[20, 16, 12, 16].map((h, i) => (
+            {[20, 16, 12, 10].map((h, i) => (
               <div
                 key={i}
-                className="w-1 bg-white rounded-full animate-bounce"
+                className="w-1 bg-white rounded-full animate-bounce animate-pulse"
                 style={{
                   height: `${h}px`,
                   animationDelay: `${i * 150}ms`,
@@ -119,7 +119,7 @@ function FloatingMusicIcon() {
       </div>
 
       {isPlaying && (
-        <div className="absolute inset-0 rounded-full border-2 border-white opacity-30 animate-ping" />
+        <div className="absolute inset-0 rounded-full border-9 border-white animate-ping" />
       )}
     </div>
   );

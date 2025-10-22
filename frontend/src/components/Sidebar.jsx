@@ -52,7 +52,7 @@ function Sidebar({ isOpen, onNavigate }) {
 
   return (
 <div
-  className={`fixed top-14 left-0 h-[calc(100vh-4rem)] bg-white shadow-lg transition-transform duration-300 ease-in-out transform ${
+  className={`fixed top-14 left-0 h-[calc(100vh-3rem)] bg-white shadow-lg transition-transform duration-300 ease-in-out transform ${
     isOpen ? 'translate-x-0' : '-translate-x-full'
   } md:translate-x-0 z-10 overflow-y-scroll`}
   style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}
