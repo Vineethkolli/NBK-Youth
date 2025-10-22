@@ -1,10 +1,5 @@
-import { precacheAndRoute, cleanupOutdatedCaches } from 'workbox-precaching';
-import { registerRoute } from 'workbox-routing';
-import { StaleWhileRevalidate, CacheFirst, NetworkFirst } from 'workbox-strategies';
-import { ExpirationPlugin } from 'workbox-expiration';
-import { CacheableResponsePlugin } from 'workbox-cacheable-response';
+import { precacheAndRoute } from 'workbox-precaching';
 
-cleanupOutdatedCaches();
 precacheAndRoute(self.__WB_MANIFEST || []);
 
 // Force the new service worker to activate immediately
@@ -16,63 +11,8 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(clients.claim());
 });
 
-// Cache API responses with network-first strategy
-registerRoute(
-  ({ url }) => url.pathname.startsWith('/api/'),
-  new NetworkFirst({
-    cacheName: 'api-cache',
-    plugins: [
-      new ExpirationPlugin({
-        maxEntries: 100,
-        maxAgeSeconds: 60 * 60,
-      }),
-      new CacheableResponsePlugin({
-        statuses: [0, 200],
-      }),
-    ],
-  })
-);
 
-// Cache images with cache-first strategy
-registerRoute(
-  ({ request }) => request.destination === 'image',
-  new CacheFirst({
-    cacheName: 'images-cache',
-    plugins: [
-      new ExpirationPlugin({
-        maxEntries: 200,
-        maxAgeSeconds: 30 * 24 * 60 * 60,
-      }),
-    ],
-  })
-);
-
-// Cache fonts and static assets
-registerRoute(
-  ({ request }) => request.destination === 'font' || request.destination === 'style',
-  new CacheFirst({
-    cacheName: 'static-assets',
-    plugins: [
-      new ExpirationPlugin({
-        maxEntries: 50,
-        maxAgeSeconds: 365 * 24 * 60 * 60,
-      }),
-    ],
-  })
-);
-
-// Offline fallback
-self.addEventListener('fetch', (event) => {
-  if (event.request.mode === 'navigate') {
-    event.respondWith(
-      fetch(event.request).catch(() => {
-        return caches.match('/') || new Response('Offline');
-      })
-    );
-  }
-});
-
-// Enhanced notification with high priority
+// Notification logic with high priority
 self.addEventListener('push', (event) => {
   const data = event.data ? event.data.json() : {};
   const title = data.title || 'Default Title';
@@ -80,7 +20,7 @@ self.addEventListener('push', (event) => {
     body: data.body || 'Default message',
     icon: '/logo/192.png',
     badge: '/logo/notificationlogo.png',
-    requireInteraction: true,
+    requireInteraction: true
   };
   event.waitUntil(self.registration.showNotification(title, options));
 });
