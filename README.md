@@ -68,7 +68,7 @@ NBK-Youth is designed to streamline content, finance, and user management in a u
   Handle income, expenses, estimation, verification, recycle bin, and budgeting with visual statistics.
 
 - **🖼️ Media & Content:**  
-  Slides, banners, YouTube & Drive media uploads, moments and songs music player.
+  Slides, banners, Service Drive media uploads, moments and songs music player.
 
 - **🔔 Notifications & Utilities:**  
   Web push notifications, site maintenance toggle, log tracking, PDF exports, and QR generator.
