@@ -119,7 +119,7 @@ function FloatingMusicIcon() {
       </div>
 
       {isPlaying && (
-        <div className="absolute inset-0 rounded-full border-9 border-white animate-ping" />
+        <div className="absolute inset-0 rounded-full border-2 border-white animate-ping" />
       )}
     </div>
   );
