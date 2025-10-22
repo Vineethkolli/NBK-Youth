@@ -24,7 +24,6 @@ export default defineConfig({
         ]
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,png,jpg,jpeg,svg,gif,woff,woff2}'],
         runtimeCaching: [
           {
             urlPattern: ({ url }) => url.origin === location.origin,
@@ -32,8 +31,7 @@ export default defineConfig({
             options: { cacheName: 'assets-cache' }
           }
         ]
-      },
-      includeAssets: ['offline.html', 'logo/192.png']
+      }
     })
   ]
 });
