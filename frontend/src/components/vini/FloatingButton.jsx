@@ -8,7 +8,7 @@ function FloatingButton({ isOpen, setIsOpen }) {
     >
       <button
         onClick={() => setIsOpen(true)}
-        className="w-12 h-12 flex items-center justify-center 
+        className="w-11 h-11 flex items-center justify-center 
                rounded-full bg-gradient-to-br from-purple-600 via-indigo-600 to-blue-600 
                text-white font-bold shadow-lg hover:shadow-2xl 
                transform hover:scale-110 transition-all duration-300 relative"
