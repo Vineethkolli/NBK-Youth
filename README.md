@@ -43,7 +43,7 @@
 
 ## 🔍 Overview
 
-**NBK-Youth** is a full-stack, secure, and scalable web application. It combines a robust **React + Vite** frontend with a feature-rich **Node.js + Express** backend, powered by **MongoDB**, **Web Push**, **Cloudinary**, and **PWA** support. It's under active development with frequent updates, new features, and ongoing improvements.
+**NBK-Youth** is a full-stack, secure, and scalable web application. It combines a robust **React + Vite** frontend with a feature-rich **Node.js + Express** backend, powered by **MongoDB**, **Google Cloud**, **Cloudinary**  and **PWA** support. It's under active development with frequent updates, new features, and ongoing improvements.
 
 ---
 
@@ -68,7 +68,7 @@ NBK-Youth is designed to streamline content, finance, and user management in a u
   Handle income, expenses, estimation, verification, recycle bin, and budgeting with visual statistics.
 
 - **🖼️ Media & Content:**  
-  Slides, banners, Service Drive media uploads, moments and songs music player.
+  Slides, banners, Cloudinary & Drive media uploads, moments and songs music player.
 
 - **🔔 Notifications & Utilities:**  
   Web push notifications, site maintenance toggle, log tracking, PDF exports, and QR generator.
@@ -91,7 +91,7 @@ NBK-Youth is designed to streamline content, finance, and user management in a u
 - **🤖 Vini AI**  
   - Chat with data using natural language.  
   - **Gemini API**: For reasoning, summarization, and context understanding.  
-  - **Hugging Face models**: For embeData chunking + embeddings for previous records of data.  
+  - **Hugging Face models**: For data chunking + embeddings for previous records of data.  
   
 ---
 
