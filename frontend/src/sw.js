@@ -1,26 +1,6 @@
-import { precacheAndRoute, matchPrecache } from 'workbox-precaching';
-import { registerRoute, NavigationRoute } from 'workbox-routing';
-import { NetworkFirst } from 'workbox-strategies';
+import { precacheAndRoute } from 'workbox-precaching';
 
-// Precache all files from your vite build + the offline.html
 precacheAndRoute(self.__WB_MANIFEST || []);
-
-
-// Use a Network First strategy for all navigation requests
-const networkFirst = new NetworkFirst({
-  cacheName: 'navigation-cache',
-});
-
-const navigationHandler = async (params) => {
-  try {
-    return await networkFirst.handle(params);
-  } catch (error) {
-    return matchPrecache('/offline.html');
-  }
-};
-
-registerRoute(new NavigationRoute(navigationHandler));
-
 
 // Force the new service worker to activate immediately
 self.addEventListener('install', (event) => {
