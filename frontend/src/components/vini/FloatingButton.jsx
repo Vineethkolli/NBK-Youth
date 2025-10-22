@@ -106,7 +106,7 @@ function FloatingButton({ isOpen, setIsOpen }) {
 
   return (
     <div
-      className={`fixed z-50 w-11 h-11 bg-gradient-to-r from-indigo-500 to-purple-600
+      className={`fixed z-50 w-11 h-11 bg-gradient-to-r from-indigo-600 to-purple-700
                   rounded-full shadow-lg select-none transition-transform
                   ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}
                   ${isOpen ? 'scale-0 opacity-0 pointer-events-none' : 'scale-100 opacity-100'}`}
