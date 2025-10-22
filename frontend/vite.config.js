@@ -10,6 +10,7 @@ export default defineConfig({
       srcDir: 'src',
       filename: 'sw.js',
       registerType: 'autoUpdate',
+      includeAssets: ['offline.html', 'logo/192.png'],
       manifest: {
         name: 'NBK Youth',
         short_name: 'NBK Youth',
@@ -24,18 +25,13 @@ export default defineConfig({
         ]
       },
       workbox: {
-        additionalManifestEntries: [{ url: '/offline.html', revision: null }],
         runtimeCaching: [
           {
             urlPattern: ({ url }) => url.origin === location.origin,
             handler: 'StaleWhileRevalidate',
             options: { cacheName: 'assets-cache' }
           }
-        ],
-        fallbacks: {
-          // This will serve /offline.html for any failed navigation request
-          html: '/offline.html',
-        }
+        ]
       }
     })
   ]
