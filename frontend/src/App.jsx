@@ -47,6 +47,7 @@ import PopupBanner from './components/adminPanel/PopupBanner';
 import FloatingMusicIcon from './components/vibe/FloatingMusicIcon';
 import OfflineIndicator from './components/common/OfflineIndicator';
 
+
 // Google Analytics routes tracking
 function RouteTracker() {
   const location = useLocation();
@@ -57,6 +58,7 @@ function RouteTracker() {
 
   return null;
 }
+
 
 // Main App Content
 function AppContent() {
@@ -121,34 +123,25 @@ function AppContent() {
   );
 }
 
+
 // Root App Wrapper
 function App() {
   useEffect(() => {
     initializeAnalytics();
 
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker
-        .register('/sw.js', { scope: '/' })
-        .then((registration) => {
-          // Listen for updates to the service worker
-          registration.onupdatefound = () => {
-            const newWorker = registration.installing;
-
-            if (newWorker) {
-              newWorker.addEventListener('statechange', () => {
-                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                  toast.success('New version available! Reloading...');
-                  window.location.reload(); // Reload the page to apply the new version
-                }
-              });
-            }
-          };
-        })
+      navigator.serviceWorker.register('/sw.js', { scope: '/' })
         .catch((error) => {
           console.error('Service Worker registration failed:', error);
         });
+
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        toast.success('New version available! Refreshing...');
+        setTimeout(() => window.location.reload(), 1000);
+      });
     }
   }, []);
+
 
   return (
     <AuthProvider>
