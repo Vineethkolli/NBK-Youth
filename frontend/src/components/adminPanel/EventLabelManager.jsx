@@ -87,35 +87,37 @@ function EventLabelManager() {
           Event Label
         </h2>
         <div className="flex items-center space-x-2">
-          {eventLabel ? (
-            <div className="flex items-center space-x-2">
-              <button
-                onClick={handleEdit}
-                className="flex items-center px-3 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-grey-700"
-              >
-                <Edit2 className="h-4 w-4 mr-2" />
-                Edit
-              </button>
-              {isEditing && (
-                <button
-                  onClick={handleDelete}
-                  className="flex items-center px-3 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Delete
-                </button>
-              )}
-            </div>
-          ) : (
-            <button
-              onClick={handleAdd}
-              className="flex items-center px-3 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Add
-            </button>
-          )}
-        </div>
+  {eventLabel ? (
+    <div className="flex items-center space-x-2">
+      {!isEditing && (
+        <button
+          onClick={handleEdit}
+          className="flex items-center px-3 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
+        >
+          <Edit2 className="h-4 w-4 mr-2" />
+          Edit
+        </button>
+      )}
+      {isEditing && (
+        <button
+          onClick={handleDelete}
+          className="flex items-center px-3 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+        >
+          <Trash2 className="h-4 w-4 mr-2" />
+          Delete
+        </button>
+      )}
+    </div>
+  ) : (
+    <button
+      onClick={handleAdd}
+      className="flex items-center px-3 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+    >
+      <Plus className="h-4 w-4 mr-2" />
+      Add
+    </button>
+  )}
+</div>
       </div>
 
       {eventLabel && !showForm && (

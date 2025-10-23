@@ -190,7 +190,6 @@ function ProcessedDataManager() {
     <div className="bg-white rounded-lg shadow p-6">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-semibold flex items-center">
-          <Database className="h-5 w-5 mr-2" />
           Processed Data
         </h2>
         <div className="flex space-x-2">

@@ -74,15 +74,15 @@ function ClearData() {
           { name: 'Estimated Expenses', type: 'estimatedExpense' },
           { name: 'Event Labels', type: 'eventLabels' },
           { name: 'Previous Year Amount', type: 'previousYear' },
-          { name: 'Notification History', type: 'notifications' },
-          { name: 'Events', type: 'events' },
+          { name: 'Event Timeline', type: 'events' },
           { name: 'Activities', type: 'letsPlay' },
           { name: 'User Payments', type: 'payment' },
+          { name: 'Notification History', type: 'notifications' },
           { name: 'Activity Logs', type: 'activityLog' },
         ].map(({ name, type }) => (
           <div key={type} className="flex items-center justify-between">
             <div>
-              <h3 className="font-medium">{name} Data</h3>
+              <h3 className="font-medium">{name}</h3>
             </div>
             <button
               onClick={() => openConfirmDialog(type)}

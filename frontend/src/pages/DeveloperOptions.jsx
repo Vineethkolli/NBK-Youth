@@ -21,7 +21,7 @@ function DeveloperOptions() {
   }
 
   const handleResetRoles = async () => {
-    if (!window.confirm('Are you sure you want to reset all non-developer roles to "user"?')) {
+    if (!window.confirm('Are you sure you want to reset all roles except developer to "user"?')) {
       return;
     }
     setIsResetting(true);
@@ -40,7 +40,7 @@ function DeveloperOptions() {
     <div className="space-y-6">
       <div className="bg-white border border-indigo-200 rounded-xl shadow-md p-4 flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-semibold text-indigo-600 mb-1">Backend Health Monitor</h2>
+          <h2 className="text-xl font-semibold mb-1">Backend Health Monitor</h2>
         </div>
         <a
           href="https://r4styp9l.status.cron-job.org/"
