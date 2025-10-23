@@ -6,7 +6,7 @@ import GithubActionsMonitor from '../components/monitor/GithubActionsMonitor';
 export default function Monitor() {
   return (
     <div className="max-w-1xl mx-auto space-y-6">
-      <div className="bg-white border border-blue-200 rounded-xl shadow-md p-4 flex items-center justify-between">
+      <div className="bg-white border border-indigo-200 rounded-xl shadow-md p-4 flex items-center justify-between">
         <div>
           <h2 className="text-xl font-semibold text-indigo-600 mb-1">Backend Health Monitor</h2>
         </div>

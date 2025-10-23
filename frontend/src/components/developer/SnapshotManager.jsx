@@ -218,7 +218,7 @@ function SnapshotManager() {
                   <div className="flex space-x-2">
                     <button
                       onClick={() => handleEdit(snapshot)}
-                      className="text-blue-600 hover:text-blue-800"
+                      className="text-indigo-600 hover:text-indigo-800"
                     >
                       <Edit2 className="h-4 w-4" />
                     </button>
@@ -397,7 +397,7 @@ function SnapshotManager() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+                  className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
                 >
                   {isSubmitting ? 'Updating...' : 'Update'}
                 </button>

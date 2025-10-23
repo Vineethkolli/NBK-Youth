@@ -124,7 +124,7 @@ function EventRecordsGrid({ records = [], isEditMode, onEdit, onDelete }) {
                     <>
                       <button
                         onClick={() => onEdit(record)}
-                        className="text-blue-600 hover:text-blue-800"
+                        className="text-indigo-600 hover:text-indigo-800"
                         title="Edit"
                       >
                         <Edit2 className="h-4 w-4" />

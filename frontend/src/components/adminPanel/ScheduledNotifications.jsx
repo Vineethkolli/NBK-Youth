@@ -205,7 +205,7 @@ function ScheduledNotifications() {
             {showActions && (
               <div className="flex items-center gap-2">
                 <button title="Send Now" onClick={() => handleSendNow(it._id)} className="p-2 bg-green-100 rounded hover:bg-green-200"><Send className="h-4 w-4" /></button>
-                <button title="Edit" onClick={() => handleEdit(it)} className="p-2 bg-blue-100 rounded hover:bg-blue-200"><Edit2 className="h-4 w-4" /></button>
+                <button title="Edit" onClick={() => handleEdit(it)} className="p-2 bg-indigo-100 rounded hover:bg-indigo-200"><Edit2 className="h-4 w-4" /></button>
                 <button title="Delete" onClick={() => handleDelete(it._id)} className="p-2 bg-red-100 bg-red-200"><Trash2 className="h-4 w-4" /></button>
               </div>
             )}

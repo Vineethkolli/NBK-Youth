@@ -1,4 +1,5 @@
-import { Edit2, Trash2, Upload } from 'lucide-react';
+import { Edit2, Trash2, Upload, Loader2 } from 'lucide-react';
+import { useState } from 'react';
 import SongItem from './SongItem';
 
 function CollectionItem({
@@ -13,33 +14,57 @@ function CollectionItem({
   onSongDelete,
   onUploadToCollection
 }) {
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDelete = async () => {
+    if (isDeleting) return;
+    setIsDeleting(true);
+    try {
+      await onDelete(collection);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <div className="bg-white rounded-lg shadow p-6">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold">{collection.name}</h2>
-        <div className="flex space-x-2">
+        <div className="flex space-x-2 items-center">
           {uploadMode && (
             <button
               onClick={() => onUploadToCollection(collection)}
               className="text-gray-800"
               title="Upload to this collection"
+              disabled={isDeleting}
             >
               <Upload className="h-5 w-5" />
             </button>
           )}
+
           {isEditMode && (
             <>
               <button
-                onClick={() => onEdit(collection)}
-                className="text-blue-600 hover:text-blue-800"
+                onClick={() => !isDeleting && onEdit(collection)}
+                className={`text-indigo-600 hover:text-indigo-800 transition-opacity ${
+                  isDeleting ? 'opacity-50 pointer-events-none' : ''
+                }`}
+                disabled={isDeleting}
               >
                 <Edit2 className="h-4 w-4" />
               </button>
               <button
-                onClick={() => onDelete(collection)}
-                className="text-red-600 hover:text-red-800"
+                onClick={handleDelete}
+                className={`text-red-600 hover:text-red-800 transition-opacity ${
+                  isDeleting ? 'opacity-50 pointer-events-none' : ''
+                }`}
+                disabled={isDeleting}
               >
-                <Trash2 className="h-4 w-4" />
+                {isDeleting ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Trash2 className="h-4 w-4" />
+                )}
               </button>
             </>
           )}

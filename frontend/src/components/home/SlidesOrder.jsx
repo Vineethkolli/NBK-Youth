@@ -110,7 +110,7 @@ function SlidesOrder({
                           className={`relative bg-white border-2 rounded-lg overflow-hidden transition-all duration-200 $
                             snapshot.isDragging
                               ? 'ring-2 ring-indigo-500'
-                              : 'border-gray-200 hover:border-blue-300 hover:shadow-md'
+                              : 'border-gray-200 hover:border-indigo-300 hover:shadow-md'
                           }`}
                         >
                           {/* Order Number Badge */}

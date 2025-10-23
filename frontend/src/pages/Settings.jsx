@@ -24,7 +24,7 @@ function Settings() {
               onClick={() => changeLanguage('en')}
               className={`px-4 py-2 rounded-md notranslate ${
                 language === 'en' 
-                  ? 'bg-blue-600 text-white' 
+                  ? 'bg-indigo-600 text-white' 
                   : 'bg-gray-200 text-gray-700'
               }`}
             >
@@ -34,7 +34,7 @@ function Settings() {
               onClick={() => changeLanguage('te')}
               className={`px-4 py-2 rounded-md ${
                 language === 'te' 
-                  ? 'bg-blue-600 text-white' 
+                  ? 'bg-indigo-600 text-white' 
                   : 'bg-gray-200 text-gray-700'
               }`}
             >
@@ -63,7 +63,7 @@ function Settings() {
 
       <div className="text-center text-gray-500 text-sm mt-4">WEB APP Version 8.0 </div>
       <div className="text-center text-gray-500 text-sm mt-4">
-        For any queries, write an email to <a href="mailto:gangavaramnbkyouth@gmail.com" className=" hover:text-blue-600">gangavaramnbkyouth@gmail.com</a>
+        For any queries, write an email to <a href="mailto:gangavaramnbkyouth@gmail.com" className=" hover:text-indigo-600">gangavaramnbkyouth@gmail.com</a>
       </div>
       
       <Footer />

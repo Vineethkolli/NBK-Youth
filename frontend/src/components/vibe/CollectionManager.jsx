@@ -174,7 +174,7 @@ function CollectionManager({ collections, onUpdate, isEditMode, onEditModeToggle
 
             <button
               onClick={onUploadModeToggle}
-              className={`btn-secondary ${uploadMode ? 'bg-blue-100' : ''}`}
+              className={`btn-secondary ${uploadMode ? 'bg-indigo-100' : ''}`}
             >
               <Upload className="h-4 w-4 mr-2" />
               {uploadMode ? 'Done' : 'Upload Mode'}

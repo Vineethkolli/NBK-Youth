@@ -118,7 +118,7 @@ function VerificationTable({ data, type, onVerifyLogUpdate, onUpdatePayment, isL
             href={item.billImage}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-blue-600 hover:text-blue-800"
+            className="text-indigo-600 hover:text-indigo-800"
           >
             View Bill
           </a>
@@ -306,7 +306,7 @@ function VerificationTable({ data, type, onVerifyLogUpdate, onUpdatePayment, isL
                         <button
                           onClick={() => handleEdit(item)}
                           disabled={isLocked}
-                          className={`text-blue-600 hover:text-blue-900 ${
+                          className={`text-indigo-600 hover:text-indigo-900 ${
                             isLocked ? 'cursor-not-allowed opacity-50' : ''
                           }`}
                           title="Edit"

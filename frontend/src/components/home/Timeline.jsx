@@ -30,15 +30,18 @@ function Timeline({ events, isEditing, onUpdate }) {
     }
   };
 
-  const handleDelete = async (id) => {
-    try {
-      await axios.delete(`${API_URL}/api/homepage/events/${id}`);
-      toast.success('Event deleted successfully');
-      onUpdate();
-    } catch (error) {
-      toast.error('Failed to delete event');
-    }
-  };
+const handleDelete = async (id) => {
+  const confirm = window.confirm('Are you sure you want to delete this event?');
+  if (!confirm) return; 
+
+  try {
+    await axios.delete(`${API_URL}/api/homepage/events/${id}`);
+    toast.success('Event deleted successfully');
+    onUpdate();
+  } catch (error) {
+    toast.error('Failed to delete event');
+  }
+};
 
 
   return (
@@ -104,7 +107,7 @@ function Timeline({ events, isEditing, onUpdate }) {
             type="submit"
             className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700"
           >
-            Add Event
+            Add
           </button>
         </div>
       </form>

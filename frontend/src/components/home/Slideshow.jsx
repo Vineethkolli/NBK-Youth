@@ -338,7 +338,7 @@ function Slideshow({ isEditing }) {
           </label>
           <button
             onClick={() => setIsEditingOrder(!isEditingOrder)}
-            className={`inline-flex items-center px-2 py-1 rounded-md shadow-sm transition-colors ${isEditingOrder ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-white text-gray-800 hover:bg-gray-50'}`}
+            className={`inline-flex items-center px-2 py-1 rounded-md shadow-sm transition-colors ${isEditingOrder ? 'bg-indigo-600 text-white hover:bg-indigo-700' : 'bg-white text-gray-800 hover:bg-gray-50'}`}
           >
             <GripHorizontal className="h-4 w-4 mr-1" />
             {isEditingOrder ? 'Ordering...' : 'Reorder'}

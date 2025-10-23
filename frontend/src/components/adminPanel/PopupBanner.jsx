@@ -89,7 +89,7 @@ function PopupBanner() {
         <button
           key={idx}
           onClick={() => window.open(part, '_blank')}
-          className="inline-flex items-center px-1 py-0.5 bg-blue-100 text-blue-600 rounded hover:bg-blue-200"
+          className="inline-flex items-center px-1 py-0.5 bg-indigo-100 text-indigo-600 rounded hover:bg-indigo-200"
         >
           Open <ExternalLink className="w-4 h-4" />
         </button>

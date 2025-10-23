@@ -56,7 +56,7 @@ function EstimatedExpenseTable({
               )}
               
               <td className="px-6 py-4 whitespace-nowrap text-sm">
-                <button onClick={() => onEdit(expense)} className="text-blue-600 hover:text-blue-900">
+                <button onClick={() => onEdit(expense)} className="text-indigo-600 hover:text-indigo-900">
                   <Edit2 className="h-5 w-5" />
                 </button>
                 <button onClick={() => onDelete(expense._id)} className="text-red-600 hover:text-red-900 ml-2">

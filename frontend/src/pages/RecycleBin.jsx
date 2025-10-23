@@ -34,6 +34,7 @@ function RecycleBin() {
   };
 
   const handleRestoreIncome = async (id) => {
+    if (!window.confirm('Are you sure you want to restore this income?')) return;
     setLoadingIncomeId(id);
     try {
       await axios.post(`${API_URL}/api/incomes/restore/${id}`);
@@ -47,7 +48,7 @@ function RecycleBin() {
   };
 
   const handlePermanentDeleteIncome = async (id) => {
-    if (!window.confirm('Are you sure? This action cannot be undone!')) return;
+    if (!window.confirm('Are you sure you want to permanently delete this income?')) return;
     setLoadingIncomeId(id);
     try {
       await axios.delete(`${API_URL}/api/incomes/permanent/${id}`);
@@ -61,6 +62,7 @@ function RecycleBin() {
   };
 
   const handleRestoreExpense = async (id) => {
+    if (!window.confirm('Are you sure you want to restore this expense?')) return;
     setLoadingExpenseId(id);
     try {
       await axios.post(`${API_URL}/api/expenses/restore/${id}`);
@@ -74,7 +76,7 @@ function RecycleBin() {
   };
 
   const handlePermanentDeleteExpense = async (id) => {
-    if (!window.confirm('Are you sure? This action cannot be undone!')) return;
+    if (!window.confirm('Are you sure you want to permanently delete this expense?')) return;
     setLoadingExpenseId(id);
     try {
       await axios.delete(`${API_URL}/api/expenses/permanent/${id}`);
@@ -255,7 +257,7 @@ function RecycleBin() {
                           href={item.billImage}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-blue-600 hover:text-blue-800"
+                          className="text-indigo-600 hover:text-indigo-800"
                         >
                           View Bill
                         </a>
