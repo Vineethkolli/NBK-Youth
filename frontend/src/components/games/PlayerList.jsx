@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Edit2, Trash2, Clock } from 'lucide-react';
-import { toast } from 'react-hot-toast';
-import EditNameModal from './UpdateForm';
+import EditNameModal from '../common/UpdateNameForm';
 
 function PlayerList({ 
   players, 

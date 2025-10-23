@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Edit2, Trash2, ChevronRight } from 'lucide-react';
-import EditNameModal from './UpdateForm';
+import EditNameModal from '../common/UpdateNameForm';
 
 function GameCard({ game, isEditMode, onSelect, onEdit, onDelete }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
