@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Edit2, Trash2, ChevronRight, Check } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
@@ -6,25 +6,49 @@ function GameCard({ game, isEditMode, onSelect, onEdit, onDelete }) {
   const [editingGameId, setEditingGameId] = useState(null);
   const [newGameName, setNewGameName] = useState('');
 
-  // Top Player Sorting
+  // Cancel unsaved edits when edit mode is turned off
+  useEffect(() => {
+    if (!isEditMode && editingGameId) {
+      setEditingGameId(null);
+      setNewGameName('');
+    }
+  }, [isEditMode, editingGameId]);
+
+  const handleNameEdit = (gameId, name) => {
+    setEditingGameId(gameId);
+    setNewGameName(name);
+  };
+
+  const saveGameName = async (gameId) => {
+    if (!newGameName.trim()) return;
+    try {
+      await onEdit(gameId, newGameName);
+      setEditingGameId(null);
+      setNewGameName('');
+    } catch (error) {
+      const message = error.response?.data?.message || 'Failed to update game name';
+      toast.error(message);
+    }
+  };
+
   const sortPlayersByTime = (players) => {
     return [...players]
-      .filter(player => player.timeCompleted)
+      .filter((player) => player.timeCompleted)
       .sort((a, b) => a.timeCompleted - b.timeCompleted)
       .slice(0, 3);
   };
 
   const sortPlayersByWinnerStatus = (players) => {
-    const winners = players.filter(p => p.status === 'winner-1st');
-    const secondPlace = players.filter(p => p.status === 'winner-2nd');
-    const thirdPlace = players.filter(p => p.status === 'winner-3rd');
+    const winners = players.filter((p) => p.status === 'winner-1st');
+    const secondPlace = players.filter((p) => p.status === 'winner-2nd');
+    const thirdPlace = players.filter((p) => p.status === 'winner-3rd');
     return [...winners, ...secondPlace, ...thirdPlace];
   };
 
   const getTopPlayers = (game) => {
     if (game.timerRequired) {
       const topPlayers = sortPlayersByTime(game.players);
-      return topPlayers.map(p => ({ ...p, timeCompleted: undefined }));
+      return topPlayers.map((p) => ({ ...p, timeCompleted: undefined }));
     }
     return sortPlayersByWinnerStatus(game.players);
   };
@@ -36,7 +60,7 @@ function GameCard({ game, isEditMode, onSelect, onEdit, onDelete }) {
       const colors = [
         'bg-yellow-400 text-yellow-900',
         'bg-gray-300 text-gray-800',
-        'bg-orange-400 text-orange-900'
+        'bg-orange-400 text-orange-900',
       ];
       return colors[index] || 'bg-gray-200 text-gray-700';
     }
@@ -54,25 +78,6 @@ function GameCard({ game, isEditMode, onSelect, onEdit, onDelete }) {
     }
   };
 
-  const handleNameEdit = (gameId, name) => {
-    setEditingGameId(gameId);
-    setNewGameName(name);
-  };
-
-  const saveGameName = async (gameId) => {
-    if (!newGameName.trim()) return;
-
-    try {
-      await onEdit(gameId, newGameName);
-      setEditingGameId(null);
-      setNewGameName('');
-    } catch (error) {
-      const message = error.response?.data?.message || 'Failed to update game name';
-      toast.error(message);
-    }
-  };
-
-
   return (
     <div className="bg-white rounded-lg shadow p-4">
       <div className="flex justify-between items-start mb-2">
@@ -82,7 +87,6 @@ function GameCard({ game, isEditMode, onSelect, onEdit, onDelete }) {
               type="text"
               value={newGameName}
               onChange={(e) => setNewGameName(e.target.value)}
-              onBlur={() => saveGameName(game._id)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') saveGameName(game._id);
                 if (e.key === 'Escape') {
@@ -142,7 +146,8 @@ function GameCard({ game, isEditMode, onSelect, onEdit, onDelete }) {
               {player.name}
               {game.timerRequired && player.timeCompleted && (
                 <span className="text-xs text-gray-500 ml-1">
-                  ({Math.floor(player.timeCompleted / 60000)}m {Math.floor((player.timeCompleted % 60000) / 1000)}s)
+                  ({Math.floor(player.timeCompleted / 60000)}m{' '}
+                  {Math.floor((player.timeCompleted % 60000) / 1000)}s)
                 </span>
               )}
             </span>

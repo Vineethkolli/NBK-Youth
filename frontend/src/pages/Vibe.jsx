@@ -55,7 +55,7 @@ function Vibe() {
 
   // Collection operations
   const handleCollectionEdit = async (collection) => {
-  const newName = prompt('Enter new collection name:', collection.name);
+  const newName = prompt('Update Collection Name', collection.name);
   if (!newName || newName === collection.name) return;
 
   // Check if a collection with same name (case-insensitive) already exists
@@ -94,7 +94,7 @@ function Vibe() {
 
   // Song operations
   const handleSongEdit = async (song) => {
-    const newName = prompt('Enter new song name:', song.name);
+    const newName = prompt('Update Song Name', song.name);
     if (!newName || newName === song.name) return;
 
     try {
