@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Edit2, Trash2, Clock, Check } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
@@ -13,6 +13,14 @@ function PlayerList({
 }) {
   const [editingPlayerId, setEditingPlayerId] = useState(null);
   const [newName, setNewName] = useState('');
+
+  // Cancel unsaved edits when edit mode is turned off
+  useEffect(() => {
+    if (!isEditMode && editingPlayerId) {
+      setEditingPlayerId(null);
+      setNewName('');
+    }
+  }, [isEditMode, editingPlayerId]);
 
   const sortPlayersByRank = (players) => {
     if (timerRequired) {
@@ -70,14 +78,13 @@ function PlayerList({
 
   const saveUpdatedName = async (playerId) => {
     if (!newName.trim()) return;
-
     try {
       await onEdit(playerId, newName);
       setEditingPlayerId(null);
       setNewName('');
     } catch (error) {
       const message = error.response?.data?.message || 'Failed to update player name';
-      toast.error(message); 
+      toast.error(message);
     }
   };
 
@@ -96,6 +103,13 @@ function PlayerList({
                 type="text"
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') saveUpdatedName(player._id);
+                  if (e.key === 'Escape') {
+                    setEditingPlayerId(null);
+                    setNewName('');
+                  }
+                }}
                 className="form-input text-sm w-full"
                 autoFocus
               />
