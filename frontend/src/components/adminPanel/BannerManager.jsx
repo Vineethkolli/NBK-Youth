@@ -242,7 +242,7 @@ export default function BannerManager() {
           <button
             onClick={() => setIsEditing(!isEditing)}
             className={`px-2 py-2 rounded-md ${
-              isEditing ? 'bg-red-600 text-white' : 'bg-gray-200 text-gray-700'
+              isEditing ? 'bg-gray-200 text-gray-700' : 'bg-gray-200 text-gray-700'
             }`}
           ><Edit2 className="inline-block mr-1 h-4 w-4 mr-1 " />
             {isEditing ? 'Done' : 'Edit'}
