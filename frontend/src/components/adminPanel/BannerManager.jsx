@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, X, ExternalLink} from 'lucide-react';
+import { Plus, Edit2, Trash2,  Loader2, X, ExternalLink} from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { uploadDirectToCloudinary } from '../../utils/cloudinaryUpload';
@@ -26,12 +26,12 @@ function StatusToggle({ banner, onToggle }) {
 }
 
 
-
 export default function BannerManager() {
   const [banners, setBanners] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [deleting, setDeleting] = useState({});
   const [formData, setFormData] = useState({
     title: '',
     message: '',
@@ -157,13 +157,18 @@ export default function BannerManager() {
   };
 
   const handleDelete = async (id) => {
+    if (deleting[id]) return; 
     if (!window.confirm('Are you sure you want to delete this banner?')) return;
+
+    setDeleting((prev) => ({ ...prev, [id]: true }));
     try {
       await axios.delete(`${API_URL}/api/banners/${id}`);
       toast.success('Banner deleted successfully');
       fetchBanners();
     } catch {
       toast.error('Failed to delete banner');
+    } finally {
+      setDeleting((prev) => ({ ...prev, [id]: false }));
     }
   };
 
@@ -197,7 +202,7 @@ export default function BannerManager() {
         <button
           key={idx}
           onClick={() => window.open(part, '_blank')}
-          className="inline-flex items-center px-1 py-0.5 bg-blue-100 text-blue-600 rounded hover:bg-blue-200"
+          className="inline-flex items-center px-1 py-0.5 bg-indigo-100 text-indigo-600 rounded hover:bg-indigo-200"
         >
           Open <ExternalLink className="w-4 h-4 ml-1" />
         </button>
@@ -284,16 +289,17 @@ export default function BannerManager() {
               <div className="flex gap-2">
                 <button
                   onClick={() => handleEdit(banner)}
-                  className="text-blue-600 hover:text-blue-800"
+                  className="text-indigo-600 hover:text-indigo-800"
                 >
                   <Edit2 className="h-5 w-5" />
                 </button>
                 <button
-                  onClick={() => handleDelete(banner._id)}
-                  className="text-red-600 hover:text-red-800"
-                >
-                  <Trash2 className="h-5 w-5" />
-                </button>
+              onClick={() => handleDelete(banner._id)}
+              disabled={deleting[banner._id]}
+              className={`p-2 rounded ${deleting[banner._id] ? 'opacity-50 cursor-not-allowed' : 'hover:bg-red-100'}`}
+            >
+              {deleting[banner._id] ? <Loader2 className="animate-spin h-5 w-5 text-red-600" /> : <Trash2 className="h-5 w-5 text-red-600" />}
+            </button>
               </div>
             ) : (
               <StatusToggle banner={banner} onToggle={handleToggleStatus} />
@@ -484,10 +490,8 @@ export default function BannerManager() {
                 <button
   type="submit"
   disabled={submitting}
-  className={`px-4 py-2 rounded-md ${
-    submitting
-      ? 'bg-gray-400 text-gray-700 cursor-not-allowed'
-      : 'bg-indigo-600 text-white hover:bg-indigo-700'
+  className={`px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 ${
+                  submitting ? 'opacity-50 cursor-not-allowed' : ''
   }`}
 >
   {submitting

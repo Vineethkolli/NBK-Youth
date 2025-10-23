@@ -125,7 +125,7 @@ function ClearData() {
       <select
         value={entity}
         onChange={(e) => setEntity(e.target.value)}
-        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
       >
         {activityEntities.map((opt) => (
           <option key={opt} value={opt}>{opt}</option>
@@ -141,7 +141,7 @@ function ClearData() {
         type="datetime-local"
         value={fromDate}
         onChange={(e) => setFromDate(e.target.value)}
-        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
       />
     </div>
 
@@ -153,7 +153,7 @@ function ClearData() {
         type="datetime-local"
         value={toDate}
         onChange={(e) => setToDate(e.target.value)}
-        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
       />
     </div>
 

@@ -205,8 +205,14 @@ function IncomeForm({ income, onClose, onSuccess }) {
                 isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
               }`}
             >
-              {income ? 'Update' : 'Add'} 
-            </button>
+  {isSubmitting ? (
+    <>
+      {income ? 'Updating...' : 'Adding...'}
+    </>
+  ) : (
+    income ? 'Update' : 'Add'
+  )}
+</button>
           </div>
         </form>
       </div>

@@ -1,8 +1,7 @@
 import { useState } from 'react';
-import { X, Upload, Camera, Trash2 } from 'lucide-react';
+import { X, Upload, Camera, Trash2, Loader2 } from 'lucide-react';
 import { uploadDirectToCloudinary } from '../../utils/cloudinaryUpload';
 import { useAuth } from '../../context/AuthContext';
-
 
 function ProfileImageDialog({ image, onClose, onUpload }) {
   const { user } = useAuth();
@@ -55,7 +54,7 @@ function ProfileImageDialog({ image, onClose, onUpload }) {
 
   const handleDelete = async () => {
     if (!image) return;
-    
+
     if (!window.confirm('Are you sure you want to delete your profile image?')) {
       return;
     }
@@ -70,6 +69,7 @@ function ProfileImageDialog({ image, onClose, onUpload }) {
       setIsDeleting(false);
     }
   };
+
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 max-w-lg w-full mx-4">
@@ -114,11 +114,15 @@ function ProfileImageDialog({ image, onClose, onUpload }) {
                   <button
                     onClick={handleDelete}
                     disabled={isDeleting}
-                    className="absolute top-2 right-2 bg-red-600 text-white rounded-full p-2 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className={`absolute top-2 right-2 rounded-full p-2 shadow-lg transition-colors text-white ${
+                      isDeleting
+                        ? 'bg-red-600 opacity-50 pointer-events-none'
+                        : 'bg-red-600 hover:bg-red-700'
+                    }`}
                     title="Delete profile image"
                   >
                     {isDeleting ? (
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
                       <Trash2 className="h-4 w-4" />
                     )}
@@ -152,24 +156,23 @@ function ProfileImageDialog({ image, onClose, onUpload }) {
             </div>
 
             {selectedImage && (
-  <button
-    onClick={handleUpload}
-    disabled={isUploading || isDeleting}
-    className={`inline-flex items-center px-4 py-2 border border-transparent 
-      text-sm font-medium rounded-md text-white bg-indigo-600 
-      hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed`}
-  >
-    {isUploading ? (
-      <>
-        <Upload className="h-4 w-4 mr-2 animate-spin" />
-        Uploading{uploadProgress > 0 ? ` ${uploadProgress}%` : '...'}
-      </>
-    ) : (
-      'Update'
-    )}
-  </button>
-)}
-            
+              <button
+                onClick={handleUpload}
+                disabled={isUploading || isDeleting}
+                className={`inline-flex items-center px-4 py-2 border border-transparent 
+                  text-sm font-medium rounded-md text-white bg-indigo-600 
+                  hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed`}
+              >
+                {isUploading ? (
+                  <>
+                    <Upload className="h-4 w-4 mr-2 animate-spin" />
+                    Uploading{uploadProgress > 0 ? ` ${uploadProgress}%` : '...'}
+                  </>
+                ) : (
+                  'Update'
+                )}
+              </button>
+            )}
           </div>
         </div>
       </div>

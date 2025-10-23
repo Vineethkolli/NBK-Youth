@@ -398,7 +398,7 @@ else {
           {item.isFolder ? (
             <Folder className="h-5 w-5 text-indigo-500" />
           ) : (
-            <File className="h-5 w-5 text-blue-500" />
+            <File className="h-5 w-5 text-indigo-500" />
           )}
           <span className={item.isFolder ? 'hover:text-indigo-600' : ''}>{item.name}</span>
         </div>

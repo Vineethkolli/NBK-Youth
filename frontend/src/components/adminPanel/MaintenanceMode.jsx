@@ -52,7 +52,7 @@ function MaintenanceMode() {
                 ? undefined
                 : (e) => setLocalExpectedBackAt(e.target.value)
             }
-            className="mt-0.5 block border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+            className="mt-0.5 block border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
             readOnly={isMaintenanceMode}
             disabled={isMaintenanceMode}
           />

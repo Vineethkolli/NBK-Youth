@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, X, Download, Trash2, Upload, Copy, Edit2, GripHorizontal, CheckCircle } from 'lucide-react';
+import { ArrowLeft, X, Download, Trash2, Loader2, Upload, Copy, Edit2, GripHorizontal, CheckCircle } from 'lucide-react';
 import GalleryReorder from './GalleryReorder';
 import MediaUploadForm from './MediaUploadForm';
 import CopyToServiceDriveForm from './CopyToServiceDriveForm';
@@ -23,6 +23,8 @@ function GalleryGrid({
   const [showDriveForm, setShowDriveForm] = useState(false);
   const [localMediaFiles, setLocalMediaFiles] = useState([]);
   const [selectedFiles, setSelectedFiles] = useState([]);
+  const [deletingFiles, setDeletingFiles] = useState({});
+
 
   const longPressTimeout = useRef(null);
   const allowedRoles = ['admin', 'developer', 'financier'];
@@ -324,19 +326,35 @@ function GalleryGrid({
                   </div>
 
                   {canManageMedia && isEditMode && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (window.confirm('Are you sure you want to delete this media?')) {
-                          handleDeleteMedia(file._id);
-                        }
-                      }}
-                      className="absolute top-2 right-2 p-2 bg-red-600 text-white rounded-full hover:bg-red-700 transition-colors"
-                      title="Delete"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  )}
+  <button
+    onClick={async (e) => {
+      e.stopPropagation();
+      if (deletingFiles[file._id]) return; 
+
+      const confirmed = window.confirm('Are you sure you want to delete this media?');
+      if (!confirmed) return;
+
+      setDeletingFiles((prev) => ({ ...prev, [file._id]: true }));
+
+      try {
+        await handleDeleteMedia(file._id);
+      } finally {
+        setDeletingFiles((prev) => ({ ...prev, [file._id]: false }));
+      }
+    }}
+    className={`absolute top-2 right-2 p-2 rounded-full transition-colors ${
+      deletingFiles[file._id] ? 'bg-red-400 cursor-not-allowed' : 'bg-red-600 hover:bg-red-700'
+    }`}
+    title="Delete"
+    disabled={deletingFiles[file._id]}
+  >
+    {deletingFiles[file._id] ? (
+      <Loader2 className="h-4 w-4 animate-spin text-white" />
+    ) : (
+      <Trash2 className="h-4 w-4 text-white" />
+    )}
+  </button>
+)}
                 </div>
               );
             })}

@@ -38,7 +38,7 @@ function DeveloperOptions() {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white border border-blue-200 rounded-xl shadow-md p-4 flex items-center justify-between">
+      <div className="bg-white border border-indigo-200 rounded-xl shadow-md p-4 flex items-center justify-between">
         <div>
           <h2 className="text-xl font-semibold text-indigo-600 mb-1">Backend Health Monitor</h2>
         </div>
@@ -67,7 +67,7 @@ function DeveloperOptions() {
           disabled={isResetting}
           className={`flex items-center px-4 py-2 rounded-md text-white ${
             isResetting
-              ? 'bg-gray-400 cursor-not-allowed'
+              ? 'bg-red-300 cursor-not-allowed'
               : 'bg-red-600 hover:bg-red-700'
           }`}
         >

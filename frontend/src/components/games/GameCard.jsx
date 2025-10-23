@@ -113,7 +113,7 @@ function GameCard({ game, isEditMode, onSelect, onEdit, onDelete }) {
             ) : (
               <button
                 onClick={() => handleNameEdit(game._id, game.name)}
-                className="text-blue-600 hover:text-blue-800"
+                className="text-indigo-600 hover:text-indigo-800"
               >
                 <Edit2 className="h-4 w-4" />
               </button>

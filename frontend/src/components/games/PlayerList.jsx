@@ -44,7 +44,7 @@ function PlayerList({
       const seconds = Math.floor((player.timeCompleted % 60000) / 1000);
       const ms = player.timeCompleted % 1000;
       text = `${minutes}m ${seconds}s ${ms}ms`;
-      bgColor = 'bg-blue-100 text-blue-800';
+      bgColor = 'bg-indigo-100 text-indigo-800';
     } else if (player.status) {
       if (player.status === 'eliminated') {
         bgColor = 'bg-red-100 text-red-800';
@@ -139,7 +139,7 @@ function PlayerList({
                 ) : (
                   <button
                     onClick={() => handleNameChange(player._id, player.name)}
-                    className="text-blue-600 hover:text-blue-800"
+                    className="text-indigo-600 hover:text-indigo-800"
                   >
                     <Edit2 className="h-4 w-4" />
                   </button>

@@ -106,8 +106,8 @@ function MomentReorder({ moments, onSave, onCancel }) {
 
   return (
     <div className="space-y-4">
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex flex-col items-center space-y-3">
-        <p className="text-blue-800 text-sm text-center">
+      <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4 flex flex-col items-center space-y-3">
+        <p className="text-indigo-800 text-sm text-center">
           <GripHorizontal className="h-4 w-4 inline mb-1" /> Drag or use arrows
           to change order of moments.
         </p>
@@ -162,7 +162,7 @@ function MomentReorder({ moments, onSave, onCancel }) {
                             renderPreviewThumbnails(moment)
                           )}
                         </div>
-                        <div className="absolute top-2 left-2 bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">
+                        <div className="absolute top-2 left-2 bg-indigo-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">
                           {index + 1}
                         </div>
                       </div>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Trash2, FolderOpen, RefreshCcw, Edit2, Check, ChevronRight } from 'lucide-react';
+import { Trash2, Loader2, FolderOpen, RefreshCcw, Edit2, Check, ChevronRight } from 'lucide-react';
 import DriveMediaPreview from './DriveMediaPreview.jsx';
 import GalleryGrid from '../momentsGallery/GalleryGrid.jsx';
 import Lightbox from '../momentsGallery/Lightbox.jsx';
@@ -152,7 +152,7 @@ function MomentGrid({
   <div className="absolute top-2 right-2 flex items-center space-x-2">
     {/* Drive Indicator (left side of buttons) */}
     {moment.type === 'drive' && (
-      <div className="flex items-center bg-blue-600 text-white text-xs font-medium px-2 py-1 rounded-full mr-2 shadow-sm">
+      <div className="flex items-center bg-indigo-600 text-white text-xs font-medium px-2 py-1 rounded-full mr-2 shadow-sm">
         <FolderOpen className="h-4 w-4 mr-1"/>
         Drive
       </div>
@@ -175,19 +175,20 @@ function MomentGrid({
     {/* Delete button */}
     <button
       onClick={() => handleDeleteClick(moment._id)}
-      className={`p-1.5 bg-red-600 text-white rounded-full hover:bg-red-700 transition-colors ${
-        deletingId === moment._id ? 'opacity-50 cursor-not-allowed' : ''
+      className={`p-1.5 bg-red-600 text-white rounded-full transition-colors ${
+        deletingId === moment._id ? 'opacity-50 cursor-not-allowed' : 'hover:bg-red-700'
       }`}
       disabled={deletingId === moment._id}
     >
-      <Trash2 className="h-4 w-4" />
+      {deletingId === moment._id ? (
+        <Loader2 className="h-4 w-4 animate-spin" />
+      ) : (
+        <Trash2 className="h-4 w-4" />
+      )}
     </button>
   </div>
 )}
-
-
             </div>
-
             <div className="p-2 flex-grow">
               {editingTitleId === moment._id ? (
                 <div className="flex items-center space-x-2">

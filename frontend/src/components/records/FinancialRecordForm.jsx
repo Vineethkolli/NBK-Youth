@@ -269,10 +269,10 @@ function FinancialRecordForm({ record, onClose, onSubmit }) {
               {isSubmitting
                 ? record
                   ? 'Updating...'
-                  : 'Creating...'
+                  : 'Adding...'
                 : record
                 ? 'Update'
-                : 'Create'}
+                : 'Add'}
             </button>
           </div>
         </form>
