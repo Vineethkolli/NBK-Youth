@@ -40,7 +40,7 @@ function CollectionManager({ collections, onUpdate, isEditMode, onEditModeToggle
         return toast.error('All songs must have a file');
       }
       if (song.file.size > 90 * 1024 * 1024) {
-        return toast.error(`Song "${song.name}" must be smaller than 90MB`);
+        return toast.error(`Song "${song.name}" exceeds 90MB limit. File must be under 90MB.`);
       }
     }
   
@@ -118,7 +118,7 @@ function CollectionManager({ collections, onUpdate, isEditMode, onEditModeToggle
       }
 
       if (file.size > 90 * 1024 * 1024) {
-        toast.error(`File "${file.name}" must be smaller than 90MB`);
+        toast.error(`File "${file.name}" exceeds 90MB limit. File must be under 90MB.`);
         continue;
       }
 

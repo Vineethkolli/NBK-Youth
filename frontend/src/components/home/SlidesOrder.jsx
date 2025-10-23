@@ -114,7 +114,7 @@ function SlidesOrder({
                           }`}
                         >
                           {/* Order Number Badge */}
-                          <div className="absolute top-1 left-1 bg-gray-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold z-10">
+                          <div className="absolute top-1 left-1 bg-indigo-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold z-10">
                             {index + 1}
                           </div>
 

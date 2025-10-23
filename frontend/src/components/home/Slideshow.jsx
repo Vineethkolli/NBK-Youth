@@ -5,25 +5,21 @@ import axios from 'axios';
 import { API_URL } from '../../utils/config';
 import { useAuth } from '../../context/AuthContext';
 import SlidesOrder from './SlidesOrder';
-import { uploadDirectToCloudinary } from '../../utils/cloudinaryUpload';
+import SlidesUpload from './SlidesUpload';
 
 function Slideshow({ isEditing }) {
   const [slides, setSlides] = useState([]);
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [isUploading, setIsUploading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(null);
   const [isEditingOrder, setIsEditingOrder] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
+  const [isUploadOpen, setIsUploadOpen] = useState(false);
 
   // Playback state
   const [isMuted, setIsMuted] = useState(true);
   const [isPlaying, setIsPlaying] = useState(true);
 
   const videoRef = useRef(null);
-
-  // Touch tracking
   const touchStartX = useRef(0);
-  const touchStartY = useRef(0);
   const touchEndX = useRef(0);
   const swipeThreshold = 50;
   const { user } = useAuth();
@@ -40,7 +36,7 @@ function Slideshow({ isEditing }) {
     }
   }, [slides, currentSlide]);
 
-  // Auto-advance logic
+  // Auto timeout logic
   useEffect(() => {
     let timeout;
     const slide = slides[currentSlide];
@@ -55,9 +51,9 @@ function Slideshow({ isEditing }) {
           video.autoplay = true;
           video.playsInline = true;
 
-          // Try autoplay with sound first
           video.muted = false;
-          video.play()
+          video
+            .play()
             .then(() => {
               setIsMuted(false);
               setIsPlaying(true);
@@ -70,7 +66,6 @@ function Slideshow({ isEditing }) {
 
           video.onended = nextSlide;
 
-          // Detect pause → change slide after 3s
           const handlePause = () => {
             setIsPlaying(false);
             timeout = setTimeout(() => {
@@ -113,98 +108,54 @@ function Slideshow({ isEditing }) {
     }
   }
 
-  const handleFileUpload = async e => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (file.size > 90 * 1024 * 1024) {
-      toast.error('File size should be less than 90MB');
-      return;
-    }
-
-    const type = file.type.startsWith('image/') ? 'image' : 'video';
-    setIsUploading(true);
-
+  const handleDelete = async (id) => {
+    const confirmDelete = window.confirm('Are you sure you want to delete this slide?');
+    if (!confirmDelete) return;
+    setIsDeleting(currentSlide);
     try {
-      const uploaded = await uploadDirectToCloudinary({
-        file,
-        folder: 'HomepageSlides',
-        resourceType: type,
-        onProgress: (progress) => setUploadProgress(progress),
-      });      
-
-      await axios.post(`${API_URL}/api/homepage/slides`, {
-        type,
-        url: uploaded.url,
-        mediaPublicId: uploaded.publicId,
-      });
-      toast.success('Slide added successfully');
+      await axios.delete(`${API_URL}/api/homepage/slides/${id}`);
+      toast.success('Slide deleted successfully');
       await fetchSlides();
     } catch {
-      toast.error('Failed to upload slide');
+      toast.error('Failed to delete slide');
     } finally {
-      setIsUploading(false);
-      setUploadProgress(0);
-      e.target.value = '';
+      setIsDeleting(null);
     }
   };
 
-  const handleDelete = async (id) => {
-  const confirmDelete = window.confirm("Are you sure you want to delete this slide?");
-  if (!confirmDelete) return;
-  setIsDeleting(currentSlide);
-  try {
-    await axios.delete(`${API_URL}/api/homepage/slides/${id}`);
-    toast.success('Slide deleted successfully');
-    await fetchSlides();
-  } catch {
-    toast.error('Failed to delete slide');
-  } finally {
-    setIsDeleting(null);
-  }
-};
-
-  const nextSlide = () =>
-    setCurrentSlide(prev => (prev + 1) % slides.length);
-
-  const previousSlide = () =>
-    setCurrentSlide(prev => (prev - 1 + slides.length) % slides.length);
+  const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % slides.length);
+  const previousSlide = () => setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
 
   // Touch handlers
-  const handleTouchStart = e => {
+  const handleTouchStart = (e) => {
     touchStartX.current = e.touches[0].clientX;
-    touchStartY.current = e.touches[0].clientY;
     touchEndX.current = e.touches[0].clientX;
   };
 
-  const handleTouchMove = e => {
+  const handleTouchMove = (e) => {
     touchEndX.current = e.touches[0].clientX;
   };
 
   const handleTouchEnd = () => {
     const deltaX = touchStartX.current - touchEndX.current;
-
     if (Math.abs(deltaX) > swipeThreshold) {
       deltaX > 0 ? nextSlide() : previousSlide();
     }
   };
 
   const toggleMute = () => {
-    setIsMuted(m => !m);
+    setIsMuted((m) => !m);
     if (videoRef.current) {
       videoRef.current.muted = !videoRef.current.muted;
     }
   };
 
   const togglePlay = () => {
-    setIsPlaying(p => {
+    setIsPlaying((p) => {
       const video = videoRef.current;
       if (video) {
-        if (p) {
-          video.pause();
-        } else {
-          video.play().catch(() => {});
-        }
+        if (p) video.pause();
+        else video.play().catch(() => {});
       }
       return !p;
     });
@@ -215,27 +166,18 @@ function Slideshow({ isEditing }) {
       <div className="h-96 bg-gray-100 rounded-lg flex items-center justify-center">
         {isEditing ? (
           <div className="text-center">
-            <input
-              type="file"
-              accept="image/*,video/*"
-              onChange={handleFileUpload}
-              className="hidden"
-              id="slide-upload"
-              disabled={isUploading}
+            <button
+              onClick={() => setIsUploadOpen(true)}
+              className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md"
+            >
+              <Plus className="h-5 w-5 mr-2" />
+              Add Slides
+            </button>
+            <SlidesUpload
+              open={isUploadOpen}
+              onClose={() => setIsUploadOpen(false)}
+              onUploaded={fetchSlides}
             />
-           <label
-  htmlFor="slide-upload"
-  className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md cursor-pointer"
->
-  {isUploading ? (
-    <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-  ) : (
-    <Plus className="h-5 w-5 mr-2" />
-  )}
-  {isUploading
-    ? `Adding... ${uploadProgress > 0 ? `${uploadProgress}%` : ''}`
-    : 'Add Slide'}
-</label>
           </div>
         ) : (
           <p className="text-gray-500">No slides available</p>
@@ -254,11 +196,7 @@ function Slideshow({ isEditing }) {
       onTouchEnd={handleTouchEnd}
     >
       {slide.type === 'image' ? (
-        <img
-          src={slide.url}
-          alt="Slide"
-          className="w-full h-full object-cover"
-        />
+        <img src={slide.url} alt="Slide" className="w-full h-full object-cover" />
       ) : (
         <video
           ref={videoRef}
@@ -272,9 +210,9 @@ function Slideshow({ isEditing }) {
         />
       )}
 
+      {/* Controls for non-editing mode (mute/play) */}
       {!isEditing && slide.type === 'video' && (
         <div className="absolute bottom-3 right-3 flex space-x-2 bg-black/30 backdrop-blur-md p-1 rounded-full shadow-lg">
-          {/* Mute/Unmute Button */}
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -282,14 +220,9 @@ function Slideshow({ isEditing }) {
             }}
             className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-all duration-200 text-white shadow-md active:scale-95"
           >
-            {isMuted ? (
-              <VolumeX className="h-5 w-5" strokeWidth={2.5} />
-            ) : (
-              <Volume2 className="h-5 w-5" strokeWidth={2.5} />
-            )}
+            {isMuted ? <VolumeX className="h-5 w-5" strokeWidth={2.5} /> : <Volume2 className="h-5 w-5" strokeWidth={2.5} />}
           </button>
 
-          {/* Play/Pause Button */}
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -297,48 +230,32 @@ function Slideshow({ isEditing }) {
             }}
             className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-all duration-200 text-white shadow-md active:scale-95"
           >
-            {isPlaying ? (
-              <Pause className="h-5 w-5" strokeWidth={2.5} />
-            ) : (
-              <Play className="h-5 w-5" strokeWidth={2.5} />
-            )}
+            {isPlaying ? <Pause className="h-5 w-5" strokeWidth={2.5} /> : <Play className="h-5 w-5" strokeWidth={2.5} />}
           </button>
         </div>
       )}
 
+      {/* Editing tools */}
       {isEditing && (
         <div
           className="absolute top-2 right-2 space-x-2"
-          onTouchStart={e => e.stopPropagation()}
-          onTouchMove={e => e.stopPropagation()}
-          onTouchEnd={e => e.stopPropagation()}
+          onTouchStart={(e) => e.stopPropagation()}
+          onTouchMove={(e) => e.stopPropagation()}
+          onTouchEnd={(e) => e.stopPropagation()}
         >
-          <input
-            type="file"
-            accept="image/*,video/*"
-            onChange={handleFileUpload}
-            className="hidden"
-            id="slide-upload"
-            disabled={isUploading}
-          />
-          <label
-            htmlFor="slide-upload"
-            className={`inline-flex items-center px-2 py-1 rounded-md shadow-sm bg-white ${isUploading ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
+          <button
+            onClick={() => setIsUploadOpen(true)}
+            className="inline-flex items-center px-2 py-1 rounded-md shadow-sm bg-white text-gray-800 hover:bg-gray-50"
           >
-            {isUploading ? (
-  <>
-    <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-    Adding... {uploadProgress > 0 ? `${uploadProgress}%` : ''}
-  </>
-) : (
-  <>
-    <Plus className="h-4 w-4 mr-1" /> Add
-  </>
-)}
-          </label>
+            <Plus className="h-4 w-4 mr-1" /> Add
+          </button>
+          <SlidesUpload open={isUploadOpen} onClose={() => setIsUploadOpen(false)} onUploaded={fetchSlides} />
+
           <button
             onClick={() => setIsEditingOrder(!isEditingOrder)}
-            className={`inline-flex items-center px-2 py-1 rounded-md shadow-sm transition-colors ${isEditingOrder ? 'bg-indigo-600 text-white hover:bg-indigo-700' : 'bg-white text-gray-800 hover:bg-gray-50'}`}
+            className={`inline-flex items-center px-2 py-1 rounded-md shadow-sm transition-colors ${
+              isEditingOrder ? 'bg-indigo-600 text-white hover:bg-indigo-700' : 'bg-white text-gray-800 hover:bg-gray-50'
+            }`}
           >
             <GripHorizontal className="h-4 w-4 mr-1" />
             {isEditingOrder ? 'Ordering...' : 'Reorder'}
@@ -346,7 +263,9 @@ function Slideshow({ isEditing }) {
 
           <button
             onClick={() => handleDelete(slide._id)}
-            className={`inline-flex items-center px-2 py-1 rounded-md shadow-sm bg-red-600 text-white ${isDeleting === currentSlide ? 'cursor-not-allowed opacity-50' : ''}`}
+            className={`inline-flex items-center px-2 py-1 rounded-md shadow-sm bg-red-600 text-white ${
+              isDeleting === currentSlide ? 'cursor-not-allowed opacity-50' : ''
+            }`}
             disabled={isDeleting === currentSlide}
           >
             {isDeleting === currentSlide ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Trash2 className="h-4 w-4 mr-1" />}
@@ -373,20 +292,11 @@ function Slideshow({ isEditing }) {
       )}
 
       {isEditingOrder ? (
-        <SlidesOrder
-          slides={slides}
-          setSlides={setSlides}
-          setCurrentSlide={setCurrentSlide}
-          setIsEditingOrder={setIsEditingOrder}
-        />
+        <SlidesOrder slides={slides} setSlides={setSlides} setCurrentSlide={setCurrentSlide} setIsEditingOrder={setIsEditingOrder} />
       ) : (
         <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
           {slides.map((_, idx) => (
-            <button
-              key={idx}
-              onClick={() => setCurrentSlide(idx)}
-              className={`w-2 h-2 rounded-full ${idx === currentSlide ? 'bg-white' : 'bg-white/50'}`}
-            />
+            <button key={idx} onClick={() => setCurrentSlide(idx)} className={`w-2 h-2 rounded-full ${idx === currentSlide ? 'bg-white' : 'bg-white/50'}`} />
           ))}
         </div>
       )}
