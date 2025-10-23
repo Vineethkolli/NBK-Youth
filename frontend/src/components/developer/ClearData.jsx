@@ -166,7 +166,14 @@ function ClearData() {
 )}
 
 {/* Buttons */}
-<div className="flex justify-end space-x-3 pt-2 mt-4">
+<div className="flex justify-end space-x-4 pt-2 mt-4">
+  <button
+    onClick={closeDialog}
+    className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+    disabled={isClearing}
+  >
+    Cancel
+  </button>
   <button
     onClick={handleConfirm}
     className={`px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center transition-all ${
@@ -180,14 +187,6 @@ function ClearData() {
       : confirmStep === 1
       ? 'Yes, Continue'
       : (confirmAction === 'activityLog' ? 'Confirm' : 'Confirm')}
-  </button>
-
-  <button
-    onClick={closeDialog}
-    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all"
-    disabled={isClearing}
-  >
-    Cancel
   </button>
 </div>
 

@@ -259,7 +259,7 @@ function EventRecordForm({ record, onClose, onSubmit }) {
             </div>
           </div>
 
-          <div className="flex justify-end space-x-2">
+          <div className="flex justify-end space-x-4">
             <button
               type="button"
               onClick={onClose}

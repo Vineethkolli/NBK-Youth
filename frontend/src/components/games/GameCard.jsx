@@ -1,35 +1,13 @@
 import { useState, useEffect } from 'react';
-import { Edit2, Trash2, ChevronRight, Check } from 'lucide-react';
-import { toast } from 'react-hot-toast';
+import { Edit2, Trash2, ChevronRight } from 'lucide-react';
+import EditNameModal from './UpdateForm';
 
 function GameCard({ game, isEditMode, onSelect, onEdit, onDelete }) {
-  const [editingGameId, setEditingGameId] = useState(null);
-  const [newGameName, setNewGameName] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Cancel unsaved edits when edit mode is turned off
   useEffect(() => {
-    if (!isEditMode && editingGameId) {
-      setEditingGameId(null);
-      setNewGameName('');
-    }
-  }, [isEditMode, editingGameId]);
-
-  const handleNameEdit = (gameId, name) => {
-    setEditingGameId(gameId);
-    setNewGameName(name);
-  };
-
-  const saveGameName = async (gameId) => {
-    if (!newGameName.trim()) return;
-    try {
-      await onEdit(gameId, newGameName);
-      setEditingGameId(null);
-      setNewGameName('');
-    } catch (error) {
-      const message = error.response?.data?.message || 'Failed to update game name';
-      toast.error(message);
-    }
-  };
+    if (!isEditMode) setIsModalOpen(false);
+  }, [isEditMode]);
 
   const sortPlayersByTime = (players) => {
     return [...players]
@@ -79,27 +57,11 @@ function GameCard({ game, isEditMode, onSelect, onEdit, onDelete }) {
   };
 
   return (
+    <>
     <div className="bg-white rounded-lg shadow p-4">
       <div className="flex justify-between items-start mb-2">
         <div>
-          {editingGameId === game._id ? (
-            <input
-              type="text"
-              value={newGameName}
-              onChange={(e) => setNewGameName(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') saveGameName(game._id);
-                if (e.key === 'Escape') {
-                  setEditingGameId(null);
-                  setNewGameName('');
-                }
-              }}
-              className="form-input text-lg font-medium w-full"
-              autoFocus
-            />
-          ) : (
-            <h3 className="text-lg font-medium">{game.name}</h3>
-          )}
+          <h3 className="text-lg font-medium">{game.name}</h3>
           <p className="text-sm text-gray-500">
             {game.players.length} player{game.players.length !== 1 && 's'}
           </p>
@@ -107,21 +69,13 @@ function GameCard({ game, isEditMode, onSelect, onEdit, onDelete }) {
 
         {isEditMode && (
           <div className="flex space-x-2">
-            {editingGameId === game._id ? (
-              <button
-                onClick={() => saveGameName(game._id)}
-                className="text-green-600 hover:text-green-800"
-              >
-                <Check className="h-5 w-5" />
-              </button>
-            ) : (
-              <button
-                onClick={() => handleNameEdit(game._id, game.name)}
-                className="text-indigo-600 hover:text-indigo-800"
-              >
-                <Edit2 className="h-4 w-4" />
-              </button>
-            )}
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="text-indigo-600 hover:text-indigo-800"
+            >
+              <Edit2 className="h-4 w-4" />
+            </button>
+
             <button
               onClick={() => onDelete(game)}
               className="text-red-600 hover:text-red-800"
@@ -163,6 +117,16 @@ function GameCard({ game, isEditMode, onSelect, onEdit, onDelete }) {
         <ChevronRight className="h-4 w-4" />
       </button>
     </div>
+    <EditNameModal
+      isOpen={isModalOpen}
+      title="Update Game"
+      initialValue={game.name}
+      onClose={() => setIsModalOpen(false)}
+      onSubmit={async (newName) => {
+        await onEdit(game._id, newName);
+      }}
+    />
+    </>
   );
 }
 

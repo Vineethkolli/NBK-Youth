@@ -66,10 +66,10 @@ function SlidesOrder({
         <div className="p-3 border-b bg-gray-50">
           <div className="flex justify-between items-center">
             <h3 className="text-lg font-semibold">Reorder Slides</h3>
-            <div className="flex space-x-2">
+            <div className="flex space-x-4">
               <button
                 onClick={cancelOrder}
-                className="flex items-center px-2 py-1 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
+                className="px-2 py-1 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
               >
                 Cancel
               </button>

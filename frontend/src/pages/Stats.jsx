@@ -176,7 +176,7 @@ function Stats() {
           setIsEditingPreviousYear(false);
           setPreviousYearAmount(stats.budgetStats.previousYearAmount.amount);
         }}
-        className="px-2 py-1 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-gray-300  hover:bg-gray-50"
+        className="px-2 py-1 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
         disabled={lockSettings.isLocked}
       >
         Cancel
