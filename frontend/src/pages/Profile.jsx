@@ -247,7 +247,7 @@ function Profile() {
           </div>
         </div>
 
-        <div className="px-4 py-5 sm:px-6 space-x-2">
+        <div className="px-4 py-5 sm:px-6 space-x-4">
            <button
   onClick={() => setIsEditing(!isEditing)}
   className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-gray-300  hover:bg-gray-50">

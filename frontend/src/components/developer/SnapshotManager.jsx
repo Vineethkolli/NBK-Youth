@@ -309,11 +309,11 @@ function SnapshotManager() {
                 </div>
               </div>
 
-              <div className="flex justify-end space-x-2">
+              <div className="flex justify-end space-x-4">
                 <button
                   type="button"
                   onClick={() => setShowAddForm(false)}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                  className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
                 >
                   Cancel
                 </button>
@@ -386,11 +386,11 @@ function SnapshotManager() {
                 </select>
               </div>
 
-              <div className="flex justify-end space-x-2">
+              <div className="flex justify-end space-x-4">
                 <button
                   type="button"
                   onClick={() => setShowEditForm(false)}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                  className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
                 >
                   Cancel
                 </button>
@@ -416,7 +416,14 @@ function SnapshotManager() {
                 ? `Are you sure you want to delete snapshot "${snapshotToDelete.eventName} ${snapshotToDelete.year}"?`
                 : 'Are you sure? This action is irreversible.'}
             </h3>
-            <div className="flex justify-end space-x-2">
+            <div className="flex justify-end space-x-4 pt-2 mt-4">
+              <button
+                onClick={closeDeleteModal}
+                className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                disabled={isDeleting}
+              >
+                Cancel
+              </button>
               <button
                 onClick={handleDeleteConfirm}
                 className={`px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 flex items-center ${
@@ -426,13 +433,6 @@ function SnapshotManager() {
               >
                 {isDeleting && <Loader2 className="animate-spin h-5 w-5 mr-2" />}
                 {isDeleting ? 'Deleting...' : deleteConfirmStep === 1 ? 'Yes, Continue' : 'Confirm'}
-              </button>
-              <button
-                onClick={closeDeleteModal}
-                className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
-                disabled={isDeleting}
-              >
-                Cancel
               </button>
             </div>
           </div>

@@ -60,10 +60,10 @@ function GalleryReorder({ mediaFiles, onSave, onCancel }) {
         <p className="text-indigo-800 text-sm text-center">
           <GripHorizontal className="h-4 w-4 inline mb-1" /> Drag or use arrows to change order of media files.
         </p>
-        <div className="flex justify-center space-x-3">
+        <div className="flex justify-center space-x-4">
           <button
             onClick={onCancel}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-md transition"
+            className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
           >
             Cancel
           </button>

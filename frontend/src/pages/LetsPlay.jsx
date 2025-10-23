@@ -80,9 +80,9 @@ function LetsPlay() {
       if (selectedGame?._id === gameId) {
         setSelectedGame(data);
       }
-      toast.success('Game name updated successfully');
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to update game');
+      // Let the caller (modal) handle showing the error and keep the form open
+      throw error;
     }
   };
 
