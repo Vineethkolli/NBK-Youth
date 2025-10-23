@@ -4,6 +4,7 @@ import CollectionManager from '../components/vibe/CollectionManager';
 import CollectionItem from '../components/vibe/CollectionItem';
 import MusicPlayer from '../components/vibe/MusicPlayer';
 import UploadToCollectionForm from '../components/vibe/UploadToCollection';
+import EditNameModal from '../components/common/UpdateNameForm';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { API_URL } from '../utils/config';
@@ -20,6 +21,13 @@ function Vibe() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showUploadForm, setShowUploadForm] = useState(false);
   const [selectedCollection, setSelectedCollection] = useState(null);
+  const [editModalState, setEditModalState] = useState({
+    isOpen: false,
+    type: null, // 'collection' or 'song'
+    itemId: null,
+    initialValue: '',
+    isUpdating: false
+  });
 
   useEffect(() => {
     fetchCollections();
@@ -54,32 +62,45 @@ function Vibe() {
   };
 
   // Collection operations
-  const handleCollectionEdit = async (collection) => {
-  const newName = prompt('Update Collection Name', collection.name);
-  if (!newName || newName === collection.name) return;
-
-  // Check if a collection with same name (case-insensitive) already exists
-  const nameExists = collections.some(c =>
-    c._id !== collection._id && c.name.toLowerCase() === newName.trim().toLowerCase()
-  );
-
-  if (nameExists) {
-    toast.error('Failed to update collection');
-    toast.error('A collection with this name already exists');
-    return;
-  }
-
-  try {
-    await axios.put(`${API_URL}/api/collections/${collection._id}`, {
-      name: newName.trim()
+  const handleCollectionEdit = (collection) => {
+    setEditModalState({
+      isOpen: true,
+      type: 'collection',
+      itemId: collection._id,
+      initialValue: collection.name,
+      isUpdating: false
     });
-    toast.success('Collection updated successfully');
-    fetchCollections();
-  } catch (error) {
-    toast.error('Failed to update collection');
-  }
-};
+  };
 
+    const handleCollectionNameUpdate = async (newName) => {
+    const collection = collections.find(c => c._id === editModalState.itemId);
+    if (!collection || newName === collection.name) {
+      setEditModalState(prev => ({ ...prev, isOpen: false }));
+      return;
+    }
+
+    // Check if a collection with same name (case-insensitive) already exists
+    const nameExists = collections.some(c =>
+      c._id !== collection._id && c.name.toLowerCase() === newName.trim().toLowerCase()
+    );
+
+    if (nameExists) {
+      throw new Error('Collection name already exists. Please choose a different name.');
+    }
+
+    setEditModalState(prev => ({ ...prev, isUpdating: true }));
+    try {
+      await axios.put(`${API_URL}/api/collections/${collection._id}`, {
+        name: newName.trim()
+      });
+      toast.success('Collection updated successfully');
+      fetchCollections();
+      setEditModalState(prev => ({ ...prev, isOpen: false, isUpdating: false }));
+    } catch (error) {
+      setEditModalState(prev => ({ ...prev, isUpdating: false }));
+      throw error;
+    }
+  };
 
   const handleCollectionDelete = async (collection) => {
     if (!window.confirm('Are you sure you want to delete this collection?')) return;
@@ -93,25 +114,47 @@ function Vibe() {
   };
 
   // Song operations
-  const handleSongEdit = async (song) => {
-    const newName = prompt('Update Song Name', song.name);
-    if (!newName || newName === song.name) return;
+  const handleSongEdit = (song) => {
+    const collection = collections.find(c => 
+      c.songs.some(s => s._id === song._id)
+    );
 
+    if (!collection) {
+      toast.error('Collection not found');
+      return;
+    }
+
+    setEditModalState({
+      isOpen: true,
+      type: 'song',
+      itemId: song._id,
+      initialValue: song.name,
+      isUpdating: false,
+      collectionId: collection._id
+    });
+  };
+
+  const handleSongNameUpdate = async (newName) => {
+    const collection = collections.find(c => c._id === editModalState.collectionId);
+    const song = collection?.songs.find(s => s._id === editModalState.itemId);
+
+    if (!collection || !song || newName === song.name) {
+      setEditModalState(prev => ({ ...prev, isOpen: false }));
+      return;
+    }
+
+    setEditModalState(prev => ({ ...prev, isUpdating: true }));
     try {
-      const collection = collections.find(c => 
-        c.songs.some(s => s._id === song._id)
-      );
-
-      if (!collection) throw new Error('Song not found');
-
       await axios.put(
         `${API_URL}/api/collections/${collection._id}/songs/${song._id}`,
-        { name: newName }
+        { name: newName.trim() }
       );
       toast.success('Song updated successfully');
       fetchCollections();
+      setEditModalState(prev => ({ ...prev, isOpen: false, isUpdating: false }));
     } catch (error) {
-      toast.error('Failed to update song');
+      setEditModalState(prev => ({ ...prev, isUpdating: false }));
+      throw error;
     }
   };
 
@@ -159,12 +202,12 @@ function Vibe() {
           isEditMode={isEditMode}
           onEditModeToggle={() => {
             setIsEditMode(!isEditMode);
-            setUploadMode(false); // Exit upload mode when entering edit mode
+            setUploadMode(false);
           }}
           uploadMode={uploadMode}
           onUploadModeToggle={() => {
             setUploadMode(!uploadMode);
-            setIsEditMode(false); // Exit edit mode when entering upload mode
+            setIsEditMode(false); 
           }}
         />
       </div>
@@ -203,20 +246,29 @@ function Vibe() {
       
       {/* Ad free Box */}
       <div className="flex justify-center">
-  <div className="w-full max-w-2xl text-center">
-    <div className="rounded-2xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 p-[1px] shadow-lg">
-      <div className="bg-white  rounded-2xl py-4 px-3 flex flex-col items-center justify-center">
-        <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-indigo-600 to-pink-500 bg-clip-text text-transparent leading-tight pb-1">
-          Enjoy Ad-Free Music 🎧
-        </h2>
-        <p className="mt-2 text-gray-700 text-base md:text-lg">
-          Feel the rhythm, Skip the noise
-        </p>
+        <div className="w-full max-w-2xl text-center">
+          <div className="rounded-2xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 p-[1px] shadow-lg">
+            <div className="bg-white  rounded-2xl py-4 px-3 flex flex-col items-center justify-center">
+              <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-indigo-600 to-pink-500 bg-clip-text text-transparent leading-tight pb-1">
+                Enjoy Ad-Free Music 🎧
+              </h2>
+              <p className="mt-2 text-gray-700 text-base md:text-lg">
+                Feel the rhythm, Skip the noise
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
-</div>
 
+      {/* Edit Name Modal */}
+      <EditNameModal
+        isOpen={editModalState.isOpen}
+        title={`Update ${editModalState.type === 'collection' ? 'Collection' : 'Song'}`}
+        initialValue={editModalState.initialValue}
+        onSubmit={editModalState.type === 'collection' ? handleCollectionNameUpdate : handleSongNameUpdate}
+        onClose={() => setEditModalState(prev => ({ ...prev, isOpen: false }))}
+        isUpdating={editModalState.isUpdating}
+      />
     </div>
   );
 }
