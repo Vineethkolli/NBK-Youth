@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useMusicPlayer } from '../../context/MusicContext';
 
 function FloatingMusicIcon() {
   const { currentSong, isPlaying } = useMusicPlayer();
   const navigate = useNavigate();
-  const location = useLocation();
 
   const [position, setPosition] = useState({ x: 20, y: 100 });
   const [isDragging, setIsDragging] = useState(false);
@@ -76,7 +75,7 @@ function FloatingMusicIcon() {
     };
   }, [isDragging, dragOffset]);
 
-  if (!currentSong || location.pathname === '/vibe') return null;
+  if (!currentSong) return null;
 
   return (
     <div

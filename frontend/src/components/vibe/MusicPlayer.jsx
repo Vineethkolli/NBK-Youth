@@ -67,7 +67,7 @@ export default function MusicPlayer() {
               max={duration}
               value={progress}
               onChange={e => seek(+e.target.value)}
-              className="flex-1 h-1 bg-gray-200 rounded-lg cursor-pointer"
+              className="flex-1 h-1 bg-gray-200 rounded-lg cursor-pointer accent-indigo-600"
             />
             <span className="text-xs text-gray-500 w-10">{formatTime(duration)}</span>
           </div>
