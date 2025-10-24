@@ -47,7 +47,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import PopupBanner from './components/adminPanel/PopupBanner';
 import FloatingMusicIcon from './components/vibe/FloatingMusicIcon';
 import OfflineIndicator from './components/common/OfflineIndicator';
-
+import ScrollToTop from './components/common/ScrollToTop';
 
 // Google Analytics routes tracking
 function RouteTracker() {
@@ -155,6 +155,7 @@ function App() {
                 <MusicProvider>
                   <Router>
                     <AppContent />
+                    <ScrollToTop />
                   </Router>
                 </MusicProvider>
               </LockProvider>
