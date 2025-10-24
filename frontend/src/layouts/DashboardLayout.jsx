@@ -70,11 +70,13 @@ function DashboardLayout() {
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t md:hidden">
         <div className="flex justify-around items-center h-14">
           {/* Menu Button */}
+          
+          {/* Home Button */}
           <button
-            onClick={toggleSidebar}
-            className={`flex flex-col items-center justify-center w-1/3 ${sidebarOpen ? 'text-indigo-600' : 'text-gray-600'}`}
+            onClick={() => handleNavigation('/menu')}
+            className={`flex flex-col items-center justify-center w-1/3 ${isActive('/menu') ? 'text-indigo-600' : 'text-gray-600'}`}
           >
-            {sidebarOpen ? (
+            {isActive('/menu') ? (
               <div className="bg-indigo-600 rounded-full p-2 -mt-4">
                 <Menu className="h-6 w-6 text-white" />
               </div>
@@ -83,7 +85,7 @@ function DashboardLayout() {
             )}
             <span className="text-xs mt-1">Menu</span>
           </button>
-
+          
           {/* Home Button */}
           <button
             onClick={() => handleNavigation('/')}
