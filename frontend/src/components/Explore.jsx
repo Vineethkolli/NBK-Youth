@@ -4,7 +4,7 @@ import { Home, User, History, FolderOpen, UserCog, Users, Bell, ShieldCheck, Set
   FileClock, Cpu } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
-function Menu() {
+function Explore() {
   const { user } = useAuth();
 
   const pages = [
@@ -64,4 +64,4 @@ function Menu() {
   );
 }
 
-export default Menu;
+export default Explore;
