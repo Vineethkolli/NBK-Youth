@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Outlet, useLocation } from 'react-router-dom';
-import { Menu, Home, BarChart2, IndianRupee, DollarSign, Wallet } from 'lucide-react';
+import { Users, LayoutGrid, Home, BarChart2, IndianRupee, DollarSign, Wallet, CameraIcon } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
 import InstallApp from '../components/home/InstallApp';
@@ -69,23 +69,37 @@ function DashboardLayout() {
       {/* Mobile Bottom Navigation */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t md:hidden">
         <div className="flex justify-around items-center h-14">
-          {/* Menu Button */}
-          
-          {/* Home Button */}
+
+          {/* Committee Button */}
           <button
-            onClick={() => handleNavigation('/menu')}
-            className={`flex flex-col items-center justify-center w-1/3 ${isActive('/menu') ? 'text-indigo-600' : 'text-gray-600'}`}
+            onClick={() => handleNavigation('/committee')}
+            className={`flex flex-col items-center justify-center w-1/3 ${isActive('/committee') ? 'text-indigo-600' : 'text-gray-600'}`}
           >
-            {isActive('/menu') ? (
+            {isActive('/committee') ? (
               <div className="bg-indigo-600 rounded-full p-2 -mt-4">
-                <Menu className="h-6 w-6 text-white" />
+                <Users className="h-6 w-6 text-white" />
               </div>
             ) : (
-              <Menu className="h-6 w-6" />
+              <Users className="h-6 w-6" />
             )}
-            <span className="text-xs mt-1">Menu</span>
+            <span className="text-xs mt-1">Committee</span>
           </button>
-          
+
+          {/* Explore Button */}
+          <button
+            onClick={() => handleNavigation('/explore')}
+            className={`flex flex-col items-center justify-center w-1/3 ${isActive('/explore') ? 'text-indigo-600' : 'text-gray-600'}`}
+          >
+            {isActive('/explore') ? (
+              <div className="bg-indigo-600 rounded-full p-2 -mt-4">
+                <LayoutGrid className="h-6 w-6 text-white" />
+              </div>
+            ) : (
+              <LayoutGrid className="h-6 w-6" />
+            )}
+            <span className="text-xs mt-1">Explore</span>
+          </button>
+
           {/* Home Button */}
           <button
             onClick={() => handleNavigation('/')}
@@ -99,6 +113,21 @@ function DashboardLayout() {
               <Home className="h-6 w-6" />
             )}
             <span className="text-xs mt-1">Home</span>
+          </button>
+
+          {/* Moments Button */}
+          <button
+            onClick={() => handleNavigation('/moments')}
+            className={`flex flex-col items-center justify-center w-1/3 ${isActive('/moments') ? 'text-indigo-600' : 'text-gray-600'}`}
+          >
+            {isActive('/moments') ? (
+              <div className="bg-indigo-600 rounded-full p-2 -mt-4">
+                <CameraIcon className="h-6 w-6 text-white" />
+              </div>
+            ) : (
+              <CameraIcon className="h-6 w-6" />
+            )}
+            <span className="text-xs mt-1">Moments</span>
           </button>
 
           {/* Budget Button */}
