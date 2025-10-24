@@ -35,7 +35,6 @@ function DashboardLayout() {
     } else {
       document.body.style.overflow = '';
     }
-    // Cleanup on component unmount in case sidebar is still open
     return () => {
       document.body.style.overflow = '';
     };
@@ -50,8 +49,6 @@ function DashboardLayout() {
 
       <Header toggleSidebar={toggleSidebar} />
       <Sidebar isOpen={sidebarOpen} onNavigate={closeSidebar} />
-
-      {/* Overlay that closes sidebar when clicked */}
       {sidebarOpen && (
         <div
           onClick={closeSidebar}
@@ -67,13 +64,13 @@ function DashboardLayout() {
       </main>
 
       {/* Mobile Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t md:hidden">
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t md:hidden z-10">
         <div className="flex justify-around items-center h-14">
 
           {/* Committee Button */}
           <button
             onClick={() => handleNavigation('/committee')}
-            className={`flex flex-col items-center justify-center w-1/3 ${isActive('/committee') ? 'text-indigo-600' : 'text-gray-600'}`}
+            className={`flex flex-col items-center justify-center w-1/5 ${isActive('/committee') ? 'text-indigo-600' : 'text-gray-600'}`}
           >
             {isActive('/committee') ? (
               <div className="bg-indigo-600 rounded-full p-2 -mt-4">
@@ -88,7 +85,7 @@ function DashboardLayout() {
           {/* Explore Button */}
           <button
             onClick={() => handleNavigation('/explore')}
-            className={`flex flex-col items-center justify-center w-1/3 ${isActive('/explore') ? 'text-indigo-600' : 'text-gray-600'}`}
+            className={`flex flex-col items-center justify-center w-1/5 ${isActive('/explore') ? 'text-indigo-600' : 'text-gray-600'}`}
           >
             {isActive('/explore') ? (
               <div className="bg-indigo-600 rounded-full p-2 -mt-4">
@@ -103,7 +100,7 @@ function DashboardLayout() {
           {/* Home Button */}
           <button
             onClick={() => handleNavigation('/')}
-            className={`flex flex-col items-center justify-center w-1/3 ${isActive('/') ? 'text-indigo-600' : 'text-gray-600'}`}
+            className={`flex flex-col items-center justify-center w-1/5 ${isActive('/') ? 'text-indigo-600' : 'text-gray-600'}`}
           >
             {isActive('/') ? (
               <div className="bg-indigo-600 rounded-full p-2 -mt-4">
@@ -118,7 +115,7 @@ function DashboardLayout() {
           {/* Moments Button */}
           <button
             onClick={() => handleNavigation('/moments')}
-            className={`flex flex-col items-center justify-center w-1/3 ${isActive('/moments') ? 'text-indigo-600' : 'text-gray-600'}`}
+            className={`flex flex-col items-center justify-center w-1/5 ${isActive('/moments') ? 'text-indigo-600' : 'text-gray-600'}`}
           >
             {isActive('/moments') ? (
               <div className="bg-indigo-600 rounded-full p-2 -mt-4">
@@ -133,7 +130,7 @@ function DashboardLayout() {
           {/* Budget Button */}
           <button
             onClick={handleBudgetClick}
-            className={`flex flex-col items-center justify-center w-1/3 ${budgetOpen ? 'text-indigo-600' : 'text-gray-600'}`}
+            className={`flex flex-col items-center justify-center w-1/5 ${budgetOpen ? 'text-indigo-600' : 'text-gray-600'}`}
           >
             {budgetOpen ? (
               <div className="bg-indigo-600 rounded-full p-2 -mt-4">
@@ -145,15 +142,16 @@ function DashboardLayout() {
             <span className="text-xs mt-1">Budget</span>
           </button>
 
-          {/* Budget Popup Menu */}
+          {/* Budget Popup */}
           {budgetOpen && (
-            <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2">
+            <div className="absolute bottom-16 left-1/2 transform -translate-x-1/2 z-20 pointer-events-none">
               <div className="relative">
                 <div className="flex items-end justify-center space-x-2 mb-4">
+                  
                   {/* Stats Button */}
                   <button
                     onClick={() => handleNavigation('/stats')}
-                    className="transform -translate-y-16 -translate-x-8"
+                    className="transform translate-y-2 -translate-x-8 pointer-events-auto"
                   >
                     <div className={`rounded-full p-4 flex flex-col items-center justify-center w-16 h-16 shadow-lg ${isActive('/stats') ? 'bg-indigo-600 text-white' : 'bg-white text-gray-600'}`}>
                       <BarChart2 className="h-6 w-6" />
@@ -164,7 +162,7 @@ function DashboardLayout() {
                   {/* Income Button */}
                   <button
                     onClick={() => handleNavigation('/income')}
-                    className="transform -translate-y-20"
+                    className="transform -translate-y-2 pointer-events-auto"
                   >
                     <div className={`rounded-full p-4 flex flex-col items-center justify-center w-16 h-16 shadow-lg ${isActive('/income') ? 'bg-indigo-600 text-white' : 'bg-white text-gray-600'}`}>
                       <IndianRupee className="h-6 w-6" />
@@ -175,7 +173,7 @@ function DashboardLayout() {
                   {/* Expense Button */}
                   <button
                     onClick={() => handleNavigation('/expense')}
-                    className="transform -translate-y-16 translate-x-8"
+                    className="transform translate-y-2 translate-x-8 pointer-events-auto"
                   >
                     <div className={`rounded-full p-4 flex flex-col items-center justify-center w-16 h-16 shadow-lg ${isActive('/expense') ? 'bg-indigo-600 text-white' : 'bg-white text-gray-600'}`}>
                       <DollarSign className="h-6 w-6" />

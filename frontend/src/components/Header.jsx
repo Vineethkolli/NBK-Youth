@@ -5,7 +5,7 @@ function Header({ toggleSidebar }) {
   const navigate = useNavigate();
 
   const handleMenuClick = () => {
-    // Only allow toggle on small screens (<768px)
+    // Only allow toggle on small screens
     if (window.innerWidth < 768) {
       toggleSidebar();
     }
@@ -38,7 +38,6 @@ function Header({ toggleSidebar }) {
         </div>
 
          <div className="flex items-center space-x-2">
-          {/* Notifications Button */}
           <button
             onClick={() => navigate('/notifications')}
             className="p-2 hover:bg-gray-100 rounded-full"
@@ -47,7 +46,6 @@ function Header({ toggleSidebar }) {
             <Bell className="h-6 w-6" />
           </button>
 
-          {/* Profile Button */}
           <button
             onClick={() => navigate('/profile')}
             className="p-2 hover:bg-gray-100 rounded-full"
