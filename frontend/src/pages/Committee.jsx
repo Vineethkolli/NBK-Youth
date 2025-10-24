@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Plus, Edit2, Trash2, X, GripHorizontal, ArrowUp, ArrowDown } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, GripHorizontal, ArrowUp, ArrowDown, Loader2 } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
@@ -17,6 +17,8 @@ function Committee() {
   const [hasChanges, setHasChanges] = useState(false);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [registerId, setRegisterId] = useState('');
+  const [deletingId, setDeletingId] = useState(null);
+  const [isAdding, setIsAdding] = useState(false);
 
   useEffect(() => { fetchMembers(); }, []);
   useEffect(() => { setLocalMembers([...members]); setHasChanges(false); }, [members]);
@@ -73,29 +75,37 @@ function Committee() {
   };
 
   const handleAddMember = async e => {
-    e.preventDefault();
-    if (!registerId.trim()) return toast.error('Enter a register ID');
-    try {
-      await axios.post(`${API_URL}/api/committee`, { registerId });
-      toast.success('Member added');
-      setShowAddDialog(false);
-      setRegisterId('');
-      fetchMembers();
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to add member');
-    }
-  };
+  e.preventDefault();
+  if (!registerId.trim()) return toast.error('Enter a register ID');
+
+  try {
+    setIsAdding(true);
+    await axios.post(`${API_URL}/api/committee`, { registerId });
+    toast.success('Member added');
+    setShowAddDialog(false);
+    setRegisterId('');
+    fetchMembers();
+  } catch (err) {
+    toast.error(err.response?.data?.message || 'Failed to add member');
+  } finally {
+    setIsAdding(false);
+  }
+};
 
   const handleRemove = async id => {
-    if (!window.confirm('Remove this member?')) return;
-    try {
-      await axios.delete(`${API_URL}/api/committee/${id}`);
-      toast.success('Member removed');
-      fetchMembers();
-    } catch {
-      toast.error('Failed to remove');
-    }
-  };
+  if (!window.confirm('Remove this member?')) return;
+
+  try {
+    setDeletingId(id);
+    await axios.delete(`${API_URL}/api/committee/${id}`);
+    toast.success('Member removed');
+    fetchMembers();
+  } catch {
+    toast.error('Failed to remove');
+  } finally {
+    setDeletingId(null);
+  }
+};
 
   return (
     <div className="space-y-6">
@@ -192,9 +202,16 @@ function Committee() {
                         {isEditMode && (
   <button
     onClick={() => handleRemove(m._id)}
-    className="absolute top-2 right-2 bg-red-600 text-white rounded-full p-2 hover:bg-red-700 transition-colors shadow-lg"
+    disabled={deletingId === m._id}
+    className={`absolute top-2 right-2 rounded-full p-2 shadow-lg transition-colors ${
+      deletingId === m._id ? 'bg-red-400 cursor-not-allowed' : 'bg-red-600 hover:bg-red-700'
+    } text-white`}
   >
-    <Trash2 className="h-4 w-4" />
+    {deletingId === m._id ? (
+      <Loader2 className="h-4 w-4 animate-spin" />
+    ) : (
+      <Trash2 className="h-4 w-4" />
+    )}
   </button>
 )}
                       </div>
@@ -245,7 +262,13 @@ function Committee() {
               </div>
               <div className="flex justify-end space-x-2">
                 <button type="button" onClick={() => setShowAddDialog(false)} className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">Cancel</button>
-                <button type="submit" className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">Add</button>
+                <button
+  type="submit"
+  disabled={isAdding}
+  className={`px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 ${isAdding ? 'opacity-50 cursor-not-allowed' : ''}`}
+>
+  {isAdding ? 'Adding...' : 'Add'}
+</button>
               </div>
             </form>
           </div>

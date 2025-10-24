@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Plus, Edit2, Trash2, Search, Filter, BarChart2, IndianRupee, DollarSign, CalendarDays } from 'lucide-react';
+import { Plus, Edit2, Trash2, Loader2, Search, Filter, BarChart2, IndianRupee, DollarSign, CalendarDays } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { API_URL } from '../utils/config';
@@ -24,10 +24,8 @@ function Histories() {
   const [snapshots, setSnapshots] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [showBelongsTo, setShowBelongsTo] = useState(false);
-  const [filters, setFilters] = useState({
-    sort: 'desc',
-    belongsTo: ''
-  });
+  const [filters, setFilters] = useState({ sort: 'desc', belongsTo: '' });
+  const [deletingId, setDeletingId] = useState(null); 
 
   const isPrivilegedUser = ['developer'].includes(user?.role);
   const PrintComponent = language === 'te' ? TeluguPrint : EnglishPrint;
@@ -65,19 +63,16 @@ function Histories() {
       setShowForm(false);
       fetchHistories();
     } catch (error) {
-      if (error.response?.status === 400) {
-        toast.error(error.response.data.message);
-      } else {
-        toast.error('Failed to create history');
-      }
+      toast.error(error.response?.status === 400 ? error.response.data.message : 'Failed to create history');
       throw error;
     }
   };
 
   const handleDelete = async (historyId) => {
     if (!window.confirm('Are you sure you want to delete this history?')) return;
-    
+
     try {
+      setDeletingId(historyId);
       await axios.delete(`${API_URL}/api/histories/${historyId}`);
       toast.success('History deleted successfully');
       fetchHistories();
@@ -86,26 +81,21 @@ function Histories() {
       }
     } catch (error) {
       toast.error('Failed to delete history');
+    } finally {
+      setDeletingId(null);
     }
   };
 
   const getCurrentData = () => {
     if (!selectedHistory) return null;
-    
     const snapshot = selectedHistory.snapshotData;
     if (!snapshot) return null;
-
     switch (activeTab) {
-      case 'stats':
-        return snapshot.stats || {};
-      case 'income':
-        return snapshot.collections?.Income || [];
-      case 'expense':
-        return snapshot.collections?.Expense || [];
-      case 'events':
-        return snapshot.collections?.Event || [];
-      default:
-        return null;
+      case 'stats': return snapshot.stats || {};
+      case 'income': return snapshot.collections?.Income || [];
+      case 'expense': return snapshot.collections?.Expense || [];
+      case 'events': return snapshot.collections?.Event || [];
+      default: return null;
     }
   };
 
@@ -116,26 +106,21 @@ function Histories() {
     if (activeTab === 'income' || activeTab === 'expense') {
       let filtered = Array.isArray(data) ? [...data] : [];
 
-      // Apply search
       if (searchQuery) {
-        filtered = filtered.filter(item => {
-          const searchLower = searchQuery.toLowerCase();
-          return (
-            item.name?.toLowerCase().includes(searchLower) ||
-            item.purpose?.toLowerCase().includes(searchLower) ||
-            item.incomeId?.toLowerCase().includes(searchLower) ||
-            item.expenseId?.toLowerCase().includes(searchLower) ||
-            item.amount?.toString().includes(searchQuery)
-          );
-        });
+        const searchLower = searchQuery.toLowerCase();
+        filtered = filtered.filter(item =>
+          item.name?.toLowerCase().includes(searchLower) ||
+          item.purpose?.toLowerCase().includes(searchLower) ||
+          item.incomeId?.toLowerCase().includes(searchLower) ||
+          item.expenseId?.toLowerCase().includes(searchLower) ||
+          item.amount?.toString().includes(searchQuery)
+        );
       }
 
-      // Apply filters
       if (filters.belongsTo && activeTab === 'income') {
         filtered = filtered.filter(item => item.belongsTo === filters.belongsTo);
       }
 
-      // Apply sorting
       if (filters.sort) {
         filtered.sort((a, b) => {
           const aAmount = Number(a.amount) || 0;
@@ -154,38 +139,23 @@ function Histories() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-semibold">Histories</h1>
-
         <div className="flex items-center space-x-3">
           {isPrivilegedUser && (
             <>
-              <button
-                onClick={() => setShowForm(true)}
-                className="btn-primary flex items-center"
-              >
-                <Plus className="h-4 w-4 mr-1" />
-                Add
+              <button onClick={() => setShowForm(true)} className="btn-primary flex items-center">
+                <Plus className="h-4 w-4 mr-1" /> Add
               </button>
 
-              <button
-                onClick={() => setIsEditMode(!isEditMode)}
-                className={`btn-secondary flex items-center ${isEditMode ? 'bg-red-100' : ''}`}
-              >
-                <Edit2 className="h-4 w-4 mr-1" />
-                {isEditMode ? 'Done' : 'Edit'}
+              <button onClick={() => setIsEditMode(!isEditMode)} className={`btn-secondary flex items-center ${isEditMode ? 'bg-red-100' : ''}`}>
+                <Edit2 className="h-4 w-4 mr-1" /> {isEditMode ? 'Done' : 'Edit'}
               </button>
             </>
           )}
-
-          <PrintComponent
-            selectedHistory={selectedHistory}
-            activeTab={activeTab}
-            data={filteredData()}
-            showBelongsTo={showBelongsTo}
-          />
+          <PrintComponent selectedHistory={selectedHistory} activeTab={activeTab} data={filteredData()} showBelongsTo={showBelongsTo} />
         </div>
       </div>
 
-      {/* Event List */}
+      {/* Histories Grid */}
       <div className="bg-white rounded-lg shadow p-2">
         {histories.length === 0 ? (
           <p className="text-gray-500 text-center py-4">No event histories available</p>
@@ -195,21 +165,21 @@ function Histories() {
               <div key={history._id} className="relative">
                 <button
                   onClick={() => setSelectedHistory(history)}
-                  className={`w-full p-2 rounded-lg border-2 transition-colors ${
-                    selectedHistory?._id === history._id
-                      ? 'border-indigo-500 bg-indigo-50'
-                      : 'border-gray-200 hover:border-gray-300'
-                  }`}
+                  className={`w-full p-2 rounded-lg border-2 transition-colors ${selectedHistory?._id === history._id ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200 hover:border-gray-300'}`}
                 >
                   <div className="text-sm font-medium">{history.snapshotName}</div>
                 </button>
+
                 {isEditMode && (
                   <button
-  onClick={() => handleDelete(history._id)}
-  className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full p-1 hover:bg-red-700"
->
-  <Trash2 className="w-4 h-4" />
-</button>
+                    onClick={() => handleDelete(history._id)}
+                    disabled={deletingId === history._id}
+                    className={`absolute -top-2 -right-2 bg-red-600 text-white rounded-full p-1 flex items-center justify-center ${
+                      deletingId === history._id ? 'opacity-50 cursor-not-allowed' : 'hover:bg-red-700'
+                    }`}
+                  >
+                    {deletingId === history._id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                  </button>
                 )}
               </div>
             ))}
@@ -217,60 +187,26 @@ function Histories() {
         )}
       </div>
 
-      {/* Data Tabs */}
+      {/* Tabs & Content */}
       {selectedHistory && (
         <div className="space-y-4">
           <div className="flex space-x-4">
-            <button
-              onClick={() => setActiveTab('stats')}
-              className={`px-2 py-2 rounded-md font-semibold flex items-center ${
-                activeTab === 'stats'
-                  ? 'bg-indigo-600 text-white'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              }`}
-            >
-              <BarChart2 className="h-4 w-4 mr-2" />
-              Stats
-            </button>
-
-            <button
-              onClick={() => setActiveTab('income')}
-              className={`px-2 py-2 rounded-md font-semibold flex items-center ${
-                activeTab === 'income'
-                  ? 'bg-indigo-600 text-white'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              }`}
-            >
-              <IndianRupee className="h-4 w-4 mr-2" />
-              Income
-            </button>
-
-            <button
-              onClick={() => setActiveTab('expense')}
-              className={`px-2 py-2 rounded-md font-semibold flex items-center ${
-                activeTab === 'expense'
-                  ? 'bg-indigo-600 text-white'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              }`}
-            >
-              <DollarSign className="h-4 w-4 mr-2" />
-              Expense
-            </button>
-
-            <button
-              onClick={() => setActiveTab('events')}
-              className={`px-2 py-2 rounded-md font-semibold flex items-center ${
-                activeTab === 'events'
-                  ? 'bg-indigo-600 text-white'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              }`}
-            >
-              <CalendarDays className="h-4 w-4 mr-0" />
-              
-            </button>
+            {[
+              { key: 'stats', label: 'Stats', icon: <BarChart2 className="h-4 w-4 mr-2" /> },
+              { key: 'income', label: 'Income', icon: <IndianRupee className="h-4 w-4 mr-2" /> },
+              { key: 'expense', label: 'Expense', icon: <DollarSign className="h-4 w-4 mr-2" /> },
+              { key: 'events', label: '', icon: <CalendarDays className="h-4 w-4 mr-0" /> },
+            ].map(tab => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                className={`px-2 py-2 rounded-md font-semibold flex items-center ${activeTab === tab.key ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+              >
+                {tab.icon} {tab.label}
+              </button>
+            ))}
           </div>
 
-          {/* Search and Filters for Income/Expense */}
           {(activeTab === 'income' || activeTab === 'expense') && (
             <div className="space-y-3">
               <div className="relative">
@@ -290,11 +226,7 @@ function Histories() {
                   <span className="text-sm font-medium">Filters:</span>
                 </div>
 
-                <select
-                  value={filters.sort}
-                  onChange={(e) => setFilters({ ...filters, sort: e.target.value })}
-                  className="form-select"
-                >
+                <select value={filters.sort} onChange={(e) => setFilters({ ...filters, sort: e.target.value })} className="form-select">
                   <option value="">Sort</option>
                   <option value="desc">Descending</option>
                   <option value="asc">Ascending</option>
@@ -302,22 +234,14 @@ function Histories() {
 
                 {activeTab === 'income' && (
                   <>
-                    <select
-                      value={filters.belongsTo}
-                      onChange={(e) => setFilters({ ...filters, belongsTo: e.target.value })}
-                      className="form-select"
-                    >
+                    <select value={filters.belongsTo} onChange={(e) => setFilters({ ...filters, belongsTo: e.target.value })} className="form-select">
                       <option value="">Belongs To</option>
                       <option value="villagers">Villagers</option>
                       <option value="youth">Youth</option>
                     </select>
 
                     <label className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
-                        checked={showBelongsTo}
-                        onChange={(e) => setShowBelongsTo(e.target.checked)}
-                      />
+                      <input type="checkbox" checked={showBelongsTo} onChange={(e) => setShowBelongsTo(e.target.checked)} />
                       <span className="text-sm"></span>
                     </label>
                   </>
@@ -326,50 +250,16 @@ function Histories() {
             </div>
           )}
 
-          {/* Content */}
           <div className="bg-white rounded-lg shadow">
-            <div data-snapshot-name style={{ display: 'none' }}>
-              {selectedHistory?.snapshotName}
-            </div>
-            {activeTab === 'stats' && (
-              <HistoryStats 
-                stats={getCurrentData()} 
-                snapshotName={selectedHistory.snapshotName}
-              />
-            )}
-            {activeTab === 'income' && (
-              <HistoryIncome 
-                incomes={filteredData()} 
-                snapshotName={selectedHistory.snapshotName}
-                showBelongsTo={showBelongsTo}
-              />
-            )}
-            {activeTab === 'expense' && (
-              <HistoryExpense 
-                expenses={filteredData()} 
-                snapshotName={selectedHistory.snapshotName}
-              />
-            )}
-            {activeTab === 'events' && (
-              <HistoryEvents 
-                events={getCurrentData()} 
-                snapshotName={selectedHistory.snapshotName}
-              />
-            )}
+            {activeTab === 'stats' && <HistoryStats stats={getCurrentData()} snapshotName={selectedHistory.snapshotName} />}
+            {activeTab === 'income' && <HistoryIncome incomes={filteredData()} snapshotName={selectedHistory.snapshotName} showBelongsTo={showBelongsTo} />}
+            {activeTab === 'expense' && <HistoryExpense expenses={filteredData()} snapshotName={selectedHistory.snapshotName} />}
+            {activeTab === 'events' && <HistoryEvents events={getCurrentData()} snapshotName={selectedHistory.snapshotName} />}
           </div>
         </div>
       )}
 
-      {/* Form Modal */}
-      {showForm && (
-        <HistoryForm
-          snapshots={snapshots}
-          onClose={() => setShowForm(false)}
-          onSubmit={handleFormSubmit}
-        />
-      )}
-
-      
+      {showForm && <HistoryForm snapshots={snapshots} onClose={() => setShowForm(false)} onSubmit={handleFormSubmit} />}
     </div>
   );
 }

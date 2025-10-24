@@ -2,48 +2,51 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
-import { LogOut, Save, Eye, EyeOff, Edit2 } from 'lucide-react';
+import { LogOut, Edit2 } from 'lucide-react';
 import { API_URL } from '../utils/config';
-import ProfileImage from '../components/profile/ProfileImage';
 import ProfileImageDialog from '../components/profile/ProfileImageDialog';
+import ProfileDetails from '../components/profile/ProfileDetails';
+import PasswordChangeForm from '../components/profile/PasswordChangeForm';
 
 function Profile() {
   const { user, signout, updateUserData } = useAuth();
+
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
+  const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [showImageDialog, setShowImageDialog] = useState(false);
+
   const [userData, setUserData] = useState({
     name: user?.name || '',
     email: user?.email || '',
     phoneNumber: user?.phoneNumber || '',
     profileImage: user?.profileImage || null
   });
+
   const [passwordData, setPasswordData] = useState({
     currentPassword: '',
     newPassword: '',
     confirmPassword: ''
   });
+
   const [showPasswords, setShowPasswords] = useState({
     currentPassword: false,
     newPassword: false,
     confirmPassword: false,
   });
-  
+
   const togglePasswordVisibility = (field) => {
-    setShowPasswords((prev) => ({
-      ...prev,
-      [field]: !prev[field],
-    }));
+    setShowPasswords((prev) => ({ ...prev, [field]: !prev[field] }));
   };
 
   useEffect(() => {
     if (user) {
       setUserData({
-        name: user.name,
+        name: user.name || '',
         email: user.email || '',
-        phoneNumber: user.phoneNumber,
-        profileImage: user.profileImage
+        phoneNumber: user.phoneNumber || '',
+        profileImage: user.profileImage || null
       });
     }
   }, [user]);
@@ -57,8 +60,8 @@ function Profile() {
   };
 
   const handleUpdateProfile = async (e) => {
-    e.preventDefault();
-    
+    e?.preventDefault?.();
+
     // Email validation (if provided)
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (userData.email && !emailRegex.test(userData.email)) {
@@ -72,30 +75,32 @@ function Profile() {
     }
 
     try {
+      setIsUpdatingProfile(true);
       const { data } = await axios.patch(`${API_URL}/api/users/profile`, userData);
       updateUserData(data);
       toast.success('Profile updated successfully');
       setIsEditing(false);
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to update profile');
+    } finally {
+      setIsUpdatingProfile(false);
     }
   };
 
   const handleImageUpload = async (imageData) => {
     try {
       if (imageData === null) {
-        // Handle deletion
-        const { data } = await axios.delete(`${API_URL}/api/users/profile/image`);
-        setUserData({ ...userData, profileImage: null });
+        await axios.delete(`${API_URL}/api/users/profile/image`);
+        setUserData((p) => ({ ...p, profileImage: null }));
         updateUserData({ ...user, profileImage: null });
         toast.success('Profile image deleted successfully');
       } else {
-        // Handle upload/update (imageData contains direct-upload metadata)
+        // imageData include profileImage, profileImagePublicId
         const { data } = await axios.post(
           `${API_URL}/api/users/profile/image`,
           imageData
         );
-        setUserData({ ...userData, profileImage: data.profileImage });
+        setUserData((p) => ({ ...p, profileImage: data.profileImage }));
         updateUserData({ ...user, profileImage: data.profileImage });
         toast.success('Profile image updated successfully');
       }
@@ -106,16 +111,16 @@ function Profile() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e?.preventDefault?.();
 
     if (passwordData.newPassword.length < 4) {
       return toast.error('Password must be at least 4 characters long');
     }
-    
+
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       return toast.error('New passwords do not match');
     }
-    setIsUpdatingPassword(true); 
+    setIsUpdatingPassword(true);
     try {
       await axios.post(`${API_URL}/api/auth/change-password`, {
         currentPassword: passwordData.currentPassword,
@@ -131,7 +136,7 @@ function Profile() {
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to update password');
     } finally {
-      setIsUpdatingPassword(false); 
+      setIsUpdatingPassword(false);
     }
   };
 
@@ -139,7 +144,7 @@ function Profile() {
 
   return (
     <div className="max-w-3xl mx-auto">
-      <div className="bg-white shadow overflow-hidden sm:rounded-lg">
+      <div className="bg-white shadow overflow-hidden rounded-lg">
         <div className="px-4 py-5 sm:px-6 flex justify-between items-center">
           <h3 className="text-lg leading-6 font-medium text-gray-900">
             Profile
@@ -162,13 +167,6 @@ function Profile() {
 
         <div className="border-t border-gray-200">
           <div className="px-4 py-5 sm:px-6">
-            <div className="flex justify-center mb-6">
-              <ProfileImage
-                image={userData.profileImage}
-                onClick={() => setShowImageDialog(true)}
-              />
-            </div>
-
             {showImageDialog && (
               <ProfileImageDialog
                 image={userData.profileImage}
@@ -177,83 +175,27 @@ function Profile() {
               />
             )}
 
-            {isEditing ? (
-              <form onSubmit={handleUpdateProfile} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Name</label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={userData.name}
-                    onChange={handleUserDataChange}
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Email</label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={userData.email}
-                    onChange={handleUserDataChange}
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Phone Number</label>
-                  <input
-                    type="tel"
-                    name="phoneNumber"
-                    value={userData.phoneNumber}
-                    onChange={handleUserDataChange}
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
-                >
-                  <Save className="mr-2 h-4 w-4" />
-                  Save
-                </button>
-              </form>
-            ) : (
-              <dl className="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2">
-                <div className="sm:col-span-1">
-                  <dt className="text-sm font-medium text-gray-500">Register ID</dt>
-                  <dd className="mt-1 text-sm text-gray-900 notranslate">{user.registerId}</dd>
-                </div>
-                <div className="sm:col-span-1">
-                  <dt className="text-sm font-medium text-gray-500">Name</dt>
-                  <dd className="mt-1 text-sm text-gray-900">{user.name}</dd>
-                </div>
-                <div className="sm:col-span-1">
-                  <dt className="text-sm font-medium text-gray-500">Role</dt>
-                  <dd className="mt-1 text-sm text-gray-900">{user.role}</dd>
-                </div>
-                <div className="sm:col-span-1">
-                  <dt className="text-sm font-medium text-gray-500">Email</dt>
-                  <dd className="mt-1 text-sm text-gray-900">{user.email || 'Not provided'}</dd>
-                </div>
-                <div className="sm:col-span-1">
-                  <dt className="text-sm font-medium text-gray-500">Phone number</dt>
-                  <dd className="mt-1 text-sm text-gray-900">{user.phoneNumber}</dd>
-                </div>
-              </dl>
-            )}
+            <ProfileDetails
+              user={user}
+              isEditing={isEditing}
+              userData={userData}
+              handleUserDataChange={handleUserDataChange}
+              handleUpdateProfile={handleUpdateProfile}
+              isUpdatingProfile={isUpdatingProfile}
+              onImageClick={() => setShowImageDialog(true)}
+            />
           </div>
         </div>
 
         <div className="px-4 py-5 sm:px-6 space-x-4">
-           <button
-  onClick={() => setIsEditing(!isEditing)}
-  className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-gray-300  hover:bg-gray-50">
-  <Edit2 className="mr-2 h-4 w-4" />
-  {isEditing ? 'Cancel' : 'Edit Profile'}
-</button>
+          <button
+            onClick={() => setIsEditing(!isEditing)}
+            className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-gray-300  hover:bg-gray-50"
+          >
+            <Edit2 className="mr-2 h-4 w-4" />
+            {isEditing ? 'Cancel' : 'Edit Profile'}
+          </button>
+
           <button
             onClick={() => setIsChangingPassword(!isChangingPassword)}
             className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
@@ -264,83 +206,14 @@ function Profile() {
 
         {isChangingPassword && (
           <div className="px-4 py-5 sm:px-6">
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Current Password
-                </label>
-                <div className="relative">
-                  <input
-                    type={showPasswords.currentPassword ? 'text' : 'password'}
-                    name="currentPassword"
-                    required
-                    value={passwordData.currentPassword}
-                    onChange={handlePasswordChange}
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => togglePasswordVisibility('currentPassword')}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
-                  >
-                    {showPasswords.currentPassword ? <EyeOff /> : <Eye />}
-                  </button>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  New Password
-                </label>
-                <div className="relative">
-                  <input
-                    type={showPasswords.newPassword ? 'text' : 'password'}
-                    name="newPassword"
-                    required
-                    value={passwordData.newPassword}
-                    onChange={handlePasswordChange}
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => togglePasswordVisibility('newPassword')}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
-                  >
-                    {showPasswords.newPassword ? <EyeOff /> : <Eye />}
-                  </button>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Confirm New Password
-                </label>
-                <div className="relative">
-                  <input
-                    type={showPasswords.confirmPassword ? 'text' : 'password'}
-                    name="confirmPassword"
-                    required
-                    value={passwordData.confirmPassword}
-                    onChange={handlePasswordChange}
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => togglePasswordVisibility('confirmPassword')}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
-                  >
-                    {showPasswords.confirmPassword ? <EyeOff /> : <Eye />}
-                  </button>
-                </div>
-              </div>
-              <button
-                type="submit"
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
-                disabled={isUpdatingPassword}
-              >
-                {isUpdatingPassword ? 'Updating...' : 'Update Password'}
-              </button>
-            </form>
+            <PasswordChangeForm
+              passwordData={passwordData}
+              showPasswords={showPasswords}
+              togglePasswordVisibility={togglePasswordVisibility}
+              handlePasswordChange={handlePasswordChange}
+              handleSubmit={handleSubmit}
+              isUpdatingPassword={isUpdatingPassword}
+            />
           </div>
         )}
       </div>

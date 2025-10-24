@@ -12,6 +12,7 @@ function PaymentDetails({ onUpdate }) {
   });
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({ ...paymentDetails });
+  const [isSaving, setIsSaving] = useState(false); 
 
   useEffect(() => {
     fetchPaymentDetails();
@@ -30,15 +31,16 @@ function PaymentDetails({ onUpdate }) {
 
   const handleSave = async () => {
     try {
+      setIsSaving(true); 
       const { data } = await axios.put(`${API_URL}/api/payment-details`, editForm);
       setPaymentDetails(data);
       setIsEditing(false);
       toast.success('Payment details updated successfully');
-      if (onUpdate) {
-        onUpdate(data);
-      }
+      if (onUpdate) onUpdate(data);
     } catch (error) {
       toast.error('Failed to update payment details');
+    } finally {
+      setIsSaving(false); 
     }
   };
 
@@ -54,7 +56,7 @@ function PaymentDetails({ onUpdate }) {
         {!isEditing ? (
           <button
             onClick={() => setIsEditing(true)}
-            className="flex items-center px-3 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-grey-700"
+            className="flex items-center px-3 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
           >
             <Edit2 className="h-4 w-4 mr-2" />
             Edit
@@ -69,10 +71,13 @@ function PaymentDetails({ onUpdate }) {
             </button>
             <button
               onClick={handleSave}
-              className="flex items-center px-3 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+              className={`flex items-center px-3 py-2 rounded-md text-white bg-indigo-600 hover:bg-indigo-700 transition ${
+                isSaving ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
+              disabled={isSaving} 
             >
               <Save className="h-4 w-4 mr-2" />
-              Save
+              {isSaving ? 'Saving...' : 'Save'}
             </button>
           </div>
         )}

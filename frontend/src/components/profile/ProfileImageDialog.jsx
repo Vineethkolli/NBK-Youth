@@ -42,6 +42,7 @@ function ProfileImageDialog({ image, onClose, onUpload }) {
         token: user?.token,
         onProgress: (p) => setUploadProgress(p),
       });
+
       await onUpload({ profileImage: uploaded.url, profileImagePublicId: uploaded.publicId });
     } catch (error) {
       console.error('Error uploading image:', error);
@@ -61,7 +62,7 @@ function ProfileImageDialog({ image, onClose, onUpload }) {
 
     setIsDeleting(true);
     try {
-      await onUpload(null); // Pass null to indicate deletion
+      await onUpload(null); 
     } catch (error) {
       console.error('Error deleting image:', error);
       alert('Failed to delete image');

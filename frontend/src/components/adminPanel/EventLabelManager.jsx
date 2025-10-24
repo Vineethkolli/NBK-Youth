@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, Tag } from 'lucide-react';
+import { Plus, Edit2, Trash2, Tag, Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { API_URL } from '../../utils/config';
@@ -10,6 +10,7 @@ function EventLabelManager() {
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({ label: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false); 
 
   useEffect(() => {
     fetchEventLabel();
@@ -40,7 +41,6 @@ function EventLabelManager() {
         await axios.post(`${API_URL}/api/event-label`, formData);
         toast.success('Event label created successfully');
       }
-      
       setShowForm(false);
       setIsEditing(false);
       setFormData({ label: '' });
@@ -61,15 +61,18 @@ function EventLabelManager() {
   const handleDelete = async () => {
     if (!window.confirm('Are you sure you want to delete this event label?')) return;
 
+    setIsDeleting(true);
     try {
       await axios.delete(`${API_URL}/api/event-label/${eventLabel._id}`);
       toast.success('Event label deleted successfully');
       setEventLabel(null);
       setIsEditing(false);
-      setShowForm(false);           
-    setFormData({ label: '' }); 
+      setShowForm(false);
+      setFormData({ label: '' });
     } catch (error) {
       toast.error('Failed to delete event label');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -87,37 +90,41 @@ function EventLabelManager() {
           Event Label
         </h2>
         <div className="flex items-center space-x-2">
-  {eventLabel ? (
-    <div className="flex items-center space-x-2">
-      {!isEditing && (
-        <button
-          onClick={handleEdit}
-          className="flex items-center px-3 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
-        >
-          <Edit2 className="h-4 w-4 mr-2" />
-          Edit
-        </button>
-      )}
-      {isEditing && (
-        <button
-          onClick={handleDelete}
-          className="flex items-center px-3 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
-        >
-          <Trash2 className="h-4 w-4 mr-2" />
-          Delete
-        </button>
-      )}
-    </div>
-  ) : (
-    <button
-      onClick={handleAdd}
-      className="flex items-center px-3 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
-    >
-      <Plus className="h-4 w-4 mr-2" />
-      Add
-    </button>
-  )}
-</div>
+          {eventLabel ? (
+            <div className="flex items-center space-x-2">
+              {!isEditing && (
+                <button
+                  onClick={handleEdit}
+                  className="flex items-center px-3 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
+                >
+                  <Edit2 className="h-4 w-4 mr-2" />
+                  Edit
+                </button>
+              )}
+              {isEditing && (
+                <button
+                  onClick={handleDelete}
+                  disabled={isDeleting} 
+                  className={`flex items-center px-2 py-2 rounded-md ${
+                    isDeleting
+                      ? 'bg-red-400 cursor-not-allowed opacity-50'
+                      : 'bg-red-600 hover:bg-red-700 text-white'
+                  }`}
+                >
+                  {isDeleting ? <Loader2 className="h-5 w-5 animate-spin" /> : <Trash2 className="h-5 w-5" />}
+                </button>
+              )}
+            </div>
+          ) : (
+            <button
+              onClick={handleAdd}
+              className="flex items-center px-3 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add
+            </button>
+          )}
+        </div>
       </div>
 
       {eventLabel && !showForm && (
@@ -168,7 +175,7 @@ function EventLabelManager() {
                   isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
                 }`}
               >
-                {isSubmitting ? 'Saving...' : (eventLabel ? 'Update' : 'Create')}
+                {isSubmitting ? (eventLabel ? 'Updating...' : 'Creating...') : eventLabel ? 'Update' : 'Create'}
               </button>
             </div>
           </form>

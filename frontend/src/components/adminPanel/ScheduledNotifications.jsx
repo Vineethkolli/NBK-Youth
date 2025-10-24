@@ -1,20 +1,17 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
-import { Trash2, Edit2, Send, Plus, X } from 'lucide-react';
+import { Trash2, Edit2, Send, Plus, X, Loader2 } from 'lucide-react';
 import { API_URL } from '../../utils/config';
 
 function ScheduledNotifications() {
   const [items, setItems] = useState([]);
-  const [formData, setFormData] = useState({
-    title: '',
-    message: '',
-    scheduledAt: '',
-  });
+  const [formData, setFormData] = useState({ title: '', message: '', scheduledAt: '' });
   const [editingId, setEditingId] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [showActions, setShowActions] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [deletingId, setDeletingId] = useState(null); 
 
   const fetch = async () => {
     try {
@@ -82,13 +79,16 @@ function ScheduledNotifications() {
   };
 
   const handleDelete = async (id) => {
-    if (!confirm('Delete this scheduled item?')) return;
+    if (!confirm('Are you sure to delete this scheduled item?')) return;
+    setDeletingId(id);
     try {
       await axios.delete(`${API_URL}/api/scheduled-notifications/${id}`);
       toast.success('Deleted successfully');
       fetch();
     } catch {
       toast.error('Failed to delete');
+    } finally {
+      setDeletingId(null); 
     }
   };
 
@@ -107,10 +107,11 @@ function ScheduledNotifications() {
     <div className="p-6 bg-white rounded-lg shadow">
       <div className="flex justify-between items-center mb-4">
         <div>
-        <h2 className="text-2xl font-semibold">Scheduled Notifications</h2>
+          <h2 className="text-2xl font-semibold">Scheduled Notifications</h2>
           <p className="text-sm text-gray-600 mb-2">
-    Notifications will be sent automatically at 7 AM - 8 AM of scheduled date
-  </p> </div>
+            Notifications will be sent automatically at 7 AM - 8 AM of scheduled date
+          </p>
+        </div>
         <div className="flex gap-2">
           <button
             onClick={() => { resetForm(); setShowForm(true); setShowActions(false); }}
@@ -121,7 +122,7 @@ function ScheduledNotifications() {
           {items.length > 0 && (
             <button
               onClick={() => setShowActions(!showActions)}
-              className="flex items-center px-3 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-grey-700"
+              className="flex items-center px-3 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
             >
               <Edit2 className="h-4 w-4 mr-2" /> {showActions ? 'Done' : 'Edit'}
             </button>
@@ -206,7 +207,14 @@ function ScheduledNotifications() {
               <div className="flex items-center gap-2">
                 <button title="Send Now" onClick={() => handleSendNow(it._id)} className="p-2 bg-green-100 rounded hover:bg-green-200"><Send className="h-4 w-4" /></button>
                 <button title="Edit" onClick={() => handleEdit(it)} className="p-2 bg-indigo-100 rounded hover:bg-indigo-200"><Edit2 className="h-4 w-4" /></button>
-                <button title="Delete" onClick={() => handleDelete(it._id)} className="p-2 bg-red-100 bg-red-200"><Trash2 className="h-4 w-4" /></button>
+                <button
+                  title="Delete"
+                  onClick={() => handleDelete(it._id)}
+                  disabled={deletingId === it._id}
+                  className={`p-2 bg-red-100 rounded hover:bg-red-200 flex items-center justify-center ${deletingId === it._id ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  {deletingId === it._id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                </button>
               </div>
             )}
           </div>
