@@ -48,6 +48,8 @@ import PopupBanner from './components/adminPanel/PopupBanner';
 import FloatingMusicIcon from './components/vibe/FloatingMusicIcon';
 import OfflineIndicator from './components/common/OfflineIndicator';
 import ScrollToTop from './components/common/ScrollToTop';
+import ErrorBoundary from './components/common/ErrorBoundary';
+
 
 // Google Analytics routes tracking
 function RouteTracker() {
@@ -154,8 +156,10 @@ function App() {
               <LockProvider>
                 <MusicProvider>
                   <Router>
-                    <AppContent />
-                    <ScrollToTop />
+                    <ErrorBoundary>
+                      <AppContent />
+                      <ScrollToTop />
+                    </ErrorBoundary>
                   </Router>
                 </MusicProvider>
               </LockProvider>
