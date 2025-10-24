@@ -1,25 +1,30 @@
 import { useState } from 'react';
-import { Edit2, Trash2, TrendingUp, TrendingDown, Minus, Calendar, Banknote, ChevronDown, ChevronUp } from 'lucide-react';
+import { Edit2, Trash2, Loader2, TrendingUp, TrendingDown, Minus, Calendar, Banknote, ChevronDown, ChevronUp } from 'lucide-react';
 
 function FinancialTimeline({ records, isEditMode, onEdit, onDelete }) {
-  const [expandedRecords, setExpandedRecords] = useState({}); 
+  const [expandedRecords, setExpandedRecords] = useState({});
+  const [deletingId, setDeletingId] = useState(null); 
 
   const toggleRecord = (id) => {
     setExpandedRecords((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
-  // Calculate differences between consecutive years
+  const handleDelete = async (id) => {
+    setDeletingId(id);
+    try {
+      await onDelete(id);
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   const calculateDifference = (currentRecord, previousRecord) => {
     if (!previousRecord) return null;
     return currentRecord.amountLeft - previousRecord.maturityAmount;
   };
 
-  // Calculate interest
-  const calculateInterest = (record) => {
-    return record.maturityAmount - record.amountLeft;
-  };
+  const calculateInterest = (record) => record.maturityAmount - record.amountLeft;
 
-  // Format amount with Indian numbering
   const formatAmount = (amount) => {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
@@ -29,47 +34,23 @@ function FinancialTimeline({ records, isEditMode, onEdit, onDelete }) {
     }).format(amount || 0);
   };
 
-  // Utility to format date as dd-mm-yyyy
-const formatDate = (dateString) => {
-  if (!dateString) return '';
-  const date = new Date(dateString);
-  const day = String(date.getDate()).padStart(2, '0');
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const year = date.getFullYear();
-  return `${day}-${month}-${year}`;
-};
+  const formatDate = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+  };
 
-  // Get difference color and icon
   const getDifferenceDisplay = (difference) => {
     if (difference === null) return null;
-
-    if (difference > 0) {
-      return {
-        color: 'text-green-600',
-        icon: <TrendingUp className="h-4 w-4" />,
-        text: `+${formatAmount(difference)}`
-      };
-    } else if (difference < 0) {
-      return {
-        color: 'text-red-600',
-        icon: <TrendingDown className="h-4 w-4" />,
-        text: formatAmount(difference)
-      };
-    } else {
-      return {
-        color: 'text-gray-600',
-        icon: <Minus className="h-4 w-4" />,
-        text: formatAmount(0)
-      };
-    }
+    if (difference > 0) return { color: 'text-green-600', icon: <TrendingUp className="h-4 w-4" />, text: `+${formatAmount(difference)}` };
+    if (difference < 0) return { color: 'text-red-600', icon: <TrendingDown className="h-4 w-4" />, text: formatAmount(difference) };
+    return { color: 'text-gray-600', icon: <Minus className="h-4 w-4" />, text: formatAmount(0) };
   };
 
-  // Get interest color
-  const getInterestColor = (interest) => {
-    if (interest > 0) return 'text-green-600';
-    if (interest < 0) return 'text-red-600';
-    return 'text-gray-600';
-  };
+  const getInterestColor = (interest) => (interest > 0 ? 'text-green-600' : interest < 0 ? 'text-red-600' : 'text-gray-600');
 
   if (records.length === 0) {
     return (
@@ -83,12 +64,11 @@ const formatDate = (dateString) => {
   return (
     <div className="bg-white rounded-lg shadow p-6">
       <div className="relative">
-        {/* Timeline line */}
         <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gray-300"></div>
 
         <div className="space-y-8">
           {records.map((record, index) => {
-            const previousRecord = records[index + 1]; // Next in array (previous year)
+            const previousRecord = records[index + 1];
             const difference = calculateDifference(record, previousRecord);
             const interest = calculateInterest(record);
             const differenceDisplay = getDifferenceDisplay(difference);
@@ -98,7 +78,6 @@ const formatDate = (dateString) => {
               <div key={record._id} className="relative">
                 <div className="absolute left-6 w-4 h-4 bg-indigo-600 rounded-full border-4 border-white shadow"></div>
 
-                {/* Content */}
                 <div className="ml-16">
                   <div className="flex items-center justify-between mb-2">
                     <h3 className="text-xl font-semibold text-gray-900">
@@ -107,6 +86,7 @@ const formatDate = (dateString) => {
                         <span className="text-sm text-gray-500">(Event {record.status})</span>
                       )}
                     </h3>
+
                     {isEditMode && (
                       <div className="flex space-x-2">
                         <button
@@ -116,79 +96,64 @@ const formatDate = (dateString) => {
                           <Edit2 className="h-4 w-4" />
                         </button>
                         <button
-                          onClick={() => onDelete(record._id)}
-                          className="text-red-600 hover:text-red-800"
+                          onClick={() => handleDelete(record._id)}
+                          disabled={deletingId === record._id}
+                          className={`flex items-center justify-center text-red-600 hover:text-red-800 ${
+                            deletingId === record._id ? 'opacity-50 cursor-not-allowed' : ''
+                          }`}
                         >
-                          <Trash2 className="h-4 w-4" />
+                          {deletingId === record._id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
                         </button>
                       </div>
                     )}
                   </div>
 
                   <div className="bg-gray-50 rounded-lg p-4 space-y-4">
-  {/* Money stats */}
-  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-    <div>
-      <p className="text-sm text-gray-500">Amount Left</p>
-      <p className="text-lg font-semibold">{formatAmount(record.amountLeft)}</p>
-    </div>
-    <div>
-      <p className="text-sm text-gray-500">Interest</p>
-      <p className={`text-lg font-semibold ${getInterestColor(interest)}`}>
-        {interest > 0 ? '+' : ''}
-        {formatAmount(interest)}
-      </p>
-    </div>
-    <div>
-      <p className="text-sm text-gray-500">Maturity Amount</p>
-      <p className="text-lg font-semibold">{formatAmount(record.maturityAmount)}</p>
-    </div>
-  </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <p className="text-sm text-gray-500">Amount Left</p>
+                        <p className="text-lg font-semibold">{formatAmount(record.amountLeft)}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-500">Interest</p>
+                        <p className={`text-lg font-semibold ${getInterestColor(interest)}`}>
+                          {interest > 0 ? '+' : ''}
+                          {formatAmount(interest)}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-500">Maturity Amount</p>
+                        <p className="text-lg font-semibold">{formatAmount(record.maturityAmount)}</p>
+                      </div>
+                    </div>
 
-  {/* Deposit / FD toggle */}
-{(record.fdStartDate || record.fdMaturityDate || record.fdAccount) && (
-  <div>
-    <button
-      onClick={() => toggleRecord(record._id)}
-      className="flex items-center space-x-2 text-indigo-600"
-    >
-      <Banknote className="h-4 w-4" />
-      <span>Deposit Details</span>
-      {isExpanded ? (
-        <ChevronUp className="h-4 w-4" />
-      ) : (
-        <ChevronDown className="h-4 w-4" />
-      )}
-    </button>
+                    {(record.fdStartDate || record.fdMaturityDate || record.fdAccount) && (
+                      <div>
+                        <button
+                          onClick={() => toggleRecord(record._id)}
+                          className="flex items-center space-x-2 text-indigo-600"
+                        >
+                          <Banknote className="h-4 w-4" />
+                          <span>Deposit Details</span>
+                          {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                        </button>
 
-    {isExpanded && (
-      <div className="mt-2 grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-700">
-        {record.fdStartDate && (
-          <p><span className="font-medium">FD Start:</span> {formatDate(record.fdStartDate)}</p>
-        )}
-        {record.fdMaturityDate && (
-          <p><span className="font-medium">FD Maturity:</span> {formatDate(record.fdMaturityDate)}</p>
-        )}
-        {record.fdAccount && (
-          <p><span className="font-medium">FD Account:</span> {record.fdAccount}</p>
-        )}
-      </div>
-    )}
-  </div>
-)}
+                        {isExpanded && (
+                          <div className="mt-2 grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-700">
+                            {record.fdStartDate && <p><span className="font-medium">FD Start:</span> {formatDate(record.fdStartDate)}</p>}
+                            {record.fdMaturityDate && <p><span className="font-medium">FD Maturity:</span> {formatDate(record.fdMaturityDate)}</p>}
+                            {record.fdAccount && <p><span className="font-medium">FD Account:</span> {record.fdAccount}</p>}
+                          </div>
+                        )}
+                      </div>
+                    )}
 
-
-  {record.remarks && (
-    <p>
-      <span className="text-lg font-semibold"></span> {record.remarks}
-    </p>
-  )}
-</div>
+                    {record.remarks && <p>{record.remarks}</p>}
+                  </div>
                 </div>
 
-                {/* Difference indicator between years */}
                 {differenceDisplay && index < records.length - 1 && (
-                  <div className="absolute rightt-10 ">
+                  <div className="absolute right-10">
                     <div className={`flex items-center space-x-1 px-2 py-1 rounded-full bg-white shadow-sm border ${differenceDisplay.color}`}>
                       {differenceDisplay.icon}
                       <span className="text-xs font-medium">{differenceDisplay.text}</span>
