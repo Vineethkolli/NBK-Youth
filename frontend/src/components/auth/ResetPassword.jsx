@@ -2,12 +2,15 @@ import { useState } from 'react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { API_URL } from '../../utils/config';
+import { Eye, EyeOff } from 'lucide-react';
 
 function ResetPassword({ resetToken, onSuccess }) {
   const [passwords, setPasswords] = useState({
     newPassword: '',
     confirmPassword: ''
   });
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e) => {
@@ -38,6 +41,14 @@ function ResetPassword({ resetToken, onSuccess }) {
     }
   };
 
+  const toggleNewPasswordVisibility = () => {
+    setShowNewPassword((prev) => !prev);
+  };
+
+  const toggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword((prev) => !prev);
+  };
+
   return (
     <div className="space-y-6">
       <div className="text-center">
@@ -48,26 +59,40 @@ function ResetPassword({ resetToken, onSuccess }) {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
+        <div className="relative">
           <input
-            type="password"
+            type={showNewPassword ? 'text' : 'password'}
             required
             value={passwords.newPassword}
             onChange={(e) => setPasswords({ ...passwords, newPassword: e.target.value })}
             placeholder="New Password"
             className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
           />
+          <button
+            type="button"
+            onClick={toggleNewPasswordVisibility}
+            className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700"
+          >
+            {showNewPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+          </button>
         </div>
 
-        <div>
+        <div className="relative">
           <input
-            type="password"
+            type={showConfirmPassword ? 'text' : 'password'}
             required
             value={passwords.confirmPassword}
             onChange={(e) => setPasswords({ ...passwords, confirmPassword: e.target.value })}
             placeholder="Confirm New Password"
             className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
           />
+          <button
+            type="button"
+            onClick={toggleConfirmPasswordVisibility}
+            className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700"
+          >
+            {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+          </button>
         </div>
 
         <button
