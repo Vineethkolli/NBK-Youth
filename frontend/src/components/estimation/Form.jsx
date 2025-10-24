@@ -2,24 +2,26 @@ import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 
 function EstimationForm({ type, mode, data, onSubmit, onClose }) {
-  const initialState = type === 'income'
-    ? {
-        name: '',
-        previousAmount: '',
-        presentAmount: '',
-        belongsTo: 'youth',    
-        status: 'not paid',    
-        others: ''
-      }
-    : {
-        purpose: '',
-        previousAmount: '',
-        presentAmount: '',
-        contact: '',
-        others: ''
-      };
+  const initialState =
+    type === 'income'
+      ? {
+          name: '',
+          previousAmount: '',
+          presentAmount: '',
+          belongsTo: 'youth',
+          status: 'not paid',
+          others: '',
+        }
+      : {
+          purpose: '',
+          previousAmount: '',
+          presentAmount: '',
+          contact: '',
+          others: '',
+        };
 
   const [formData, setFormData] = useState(initialState);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (mode === 'edit' && data) {
@@ -31,15 +33,22 @@ function EstimationForm({ type, mode, data, onSubmit, onClose }) {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSubmit(formData);
+    try {
+      setIsSubmitting(true);
+      await onSubmit(formData);
+      onClose();
+    } catch (error) {
+      console.error(error);
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -49,15 +58,18 @@ function EstimationForm({ type, mode, data, onSubmit, onClose }) {
           <h2 className="text-xl font-semibold">
             {mode === 'add' ? 'Add' : 'Edit'} {type === 'income' ? 'Income' : 'Expense'}
           </h2>
-          <button onClick={onClose} className="text-gray-600 hover:text-gray-900">
+          <button onClick={onClose} className="text-gray-600 hover:text-gray-900" disabled={isSubmitting}>
             <X className="h-6 w-6" />
           </button>
         </div>
+
         <form onSubmit={handleSubmit} className="space-y-4">
           {type === 'income' ? (
             <>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Name<span className="text-black-500">*</span></label>
+                <label className="block text-sm font-medium text-gray-700">
+                  Name<span className="text-black-500">*</span>
+                </label>
                 <input
                   type="text"
                   name="name"
@@ -65,6 +77,7 @@ function EstimationForm({ type, mode, data, onSubmit, onClose }) {
                   onChange={handleChange}
                   className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
                   required
+                  disabled={isSubmitting}
                 />
               </div>
               <div>
@@ -75,6 +88,7 @@ function EstimationForm({ type, mode, data, onSubmit, onClose }) {
                   value={formData.previousAmount}
                   onChange={handleChange}
                   className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
+                  disabled={isSubmitting}
                 />
               </div>
               <div>
@@ -85,6 +99,7 @@ function EstimationForm({ type, mode, data, onSubmit, onClose }) {
                   value={formData.presentAmount}
                   onChange={handleChange}
                   className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
+                  disabled={isSubmitting}
                 />
               </div>
               <div>
@@ -95,6 +110,7 @@ function EstimationForm({ type, mode, data, onSubmit, onClose }) {
                   onChange={handleChange}
                   className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
                   required
+                  disabled={isSubmitting}
                 >
                   <option value="youth">Youth</option>
                   <option value="villagers">Villagers</option>
@@ -108,6 +124,7 @@ function EstimationForm({ type, mode, data, onSubmit, onClose }) {
                   onChange={handleChange}
                   className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
                   required
+                  disabled={isSubmitting}
                 >
                   <option value="not paid">Not Paid</option>
                   <option value="paid">Paid</option>
@@ -121,13 +138,16 @@ function EstimationForm({ type, mode, data, onSubmit, onClose }) {
                   value={formData.others}
                   onChange={handleChange}
                   className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
+                  disabled={isSubmitting}
                 />
               </div>
             </>
           ) : (
             <>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Purpose<span className="text-black-500">*</span></label>
+                <label className="block text-sm font-medium text-gray-700">
+                  Purpose<span className="text-black-500">*</span>
+                </label>
                 <input
                   type="text"
                   name="purpose"
@@ -135,6 +155,7 @@ function EstimationForm({ type, mode, data, onSubmit, onClose }) {
                   onChange={handleChange}
                   className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
                   required
+                  disabled={isSubmitting}
                 />
               </div>
               <div>
@@ -145,6 +166,7 @@ function EstimationForm({ type, mode, data, onSubmit, onClose }) {
                   value={formData.previousAmount}
                   onChange={handleChange}
                   className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
+                  disabled={isSubmitting}
                 />
               </div>
               <div>
@@ -155,6 +177,7 @@ function EstimationForm({ type, mode, data, onSubmit, onClose }) {
                   value={formData.presentAmount}
                   onChange={handleChange}
                   className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
+                  disabled={isSubmitting}
                 />
               </div>
               <div>
@@ -165,16 +188,30 @@ function EstimationForm({ type, mode, data, onSubmit, onClose }) {
                   value={formData.others}
                   onChange={handleChange}
                   className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
+                  disabled={isSubmitting}
                 />
               </div>
             </>
           )}
+
           <div className="flex justify-end space-x-4">
-            <button type="button" onClick={onClose} className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+              disabled={isSubmitting}
+            >
               Cancel
             </button>
-            <button type="submit" className="px-4 py-2 bg-indigo-600 text-white rounded-md">
-              {mode === 'add' ? 'Add' : 'Update'}
+            <button
+              type="submit"
+              className={`px-4 py-2 flex items-center justify-center text-white bg-indigo-600 rounded-md hover:bg-indigo-700 ${
+                isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ?  mode === 'add' ? 'Adding...' : 'Updating...' : mode === 'add' ? 'Add' : 'Update'}
+              
             </button>
           </div>
         </form>

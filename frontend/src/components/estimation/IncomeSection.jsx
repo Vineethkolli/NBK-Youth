@@ -37,10 +37,7 @@ function IncomeSection({ refreshStats }) {
 
   useEffect(() => {
     if (user?.role && ['developer', 'financier', 'admin'].includes(user.role)) {
-      setIncomeColumns(prev => ({
-        ...prev,
-        registerId: false,
-      }));
+      setIncomeColumns(prev => ({ ...prev, registerId: false }));
     }
   }, [user?.role]);
 
@@ -67,6 +64,7 @@ function IncomeSection({ refreshStats }) {
     try {
       await axios.delete(`${API_URL}/api/estimation/income/${id}`);
       setIncomes(incomes.filter(income => income._id !== id));
+      toast.success('Income deleted successfully');
       if (refreshStats) refreshStats();
     } catch (error) {
       toast.error('Failed to delete income');
@@ -83,9 +81,11 @@ function IncomeSection({ refreshStats }) {
       if (formMode === 'add') {
         ({ data } = await axios.post(`${API_URL}/api/estimation/income`, payload));
         setIncomes([data, ...incomes]);
+        toast.success('Income added successfully');
       } else if (formMode === 'edit') {
         ({ data } = await axios.put(`${API_URL}/api/estimation/income/${currentRecord._id}`, payload));
         setIncomes(incomes.map(i => i._id === currentRecord._id ? data : i));
+        toast.success('Income updated successfully');
       }
       setShowForm(false);
       fetchIncomes();
@@ -98,18 +98,17 @@ function IncomeSection({ refreshStats }) {
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <div className="flex justify-between items-center">
-  <div className="flex-1 relative max-w-xs"> 
-    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-    <input
-      type="text"
-      placeholder="Search by name, present amount..."
-      value={search}
-      onChange={(e) => setSearch(e.target.value)}
-      className="pl-10 pr-4 py-1 w-full border rounded-lg"
-    />
-  </div>
-</div>
+        <div className="flex-1 relative max-w-xs">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Search by name, present amount..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-10 pr-4 py-1 w-full border rounded-lg"
+          />
+        </div>
+
         <div className="flex items-center space-x-3">
           {['developer', 'financier', 'admin'].includes(user?.role) && (
             <button onClick={handleAdd} className="btn-secondary flex items-center">
@@ -153,7 +152,7 @@ function IncomeSection({ refreshStats }) {
         </select>
       </div>
 
-      {/* Table and Visible Columns */}
+      {/* Table */}
       <div className="bg-white rounded-lg shadow">
         <div className="p-4 border-b">
           <h2 className="font-medium">Visible Columns</h2>

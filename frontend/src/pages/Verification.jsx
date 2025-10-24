@@ -1,18 +1,18 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useLockSettings } from '../context/LockContext';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
-import VerificationTable from '../components/verification/VerificationTable';
-import VerificationFilters from '../components/verification/VerificationFilters';
 import { API_URL } from '../utils/config';
+import VerificationTable from '../components/verification/VerificationTable';
 import EventLabelDisplay from '../components/common/EventLabelDisplay';
 import LockIndicator from '../components/common/LockIndicator';
-import { useLockSettings } from '../context/LockContext';
-import { IndianRupee, DollarSign, ShieldCheck } from 'lucide-react'; 
+import { IndianRupee, DollarSign, ShieldCheck, Filter } from 'lucide-react';
 
 function Verification() {
   const { user } = useAuth();
   const { lockSettings } = useLockSettings();
+
   const [activeTab, setActiveTab] = useState('income');
   const [incomeData, setIncomeData] = useState([]);
   const [expenseData, setExpenseData] = useState([]);
@@ -28,13 +28,9 @@ function Verification() {
   const fetchData = async () => {
     try {
       let endpoint;
-      if (activeTab === 'income') {
-        endpoint = 'incomes/verification';
-      } else if (activeTab === 'expense') {
-        endpoint = 'expenses/verification';
-      } else {
-        endpoint = 'payments/verification/data';
-      }
+      if (activeTab === 'income') endpoint = 'incomes/verification';
+      else if (activeTab === 'expense') endpoint = 'expenses/verification';
+      else endpoint = 'payments/verification/data';
 
       const { data } = await axios.get(`${API_URL}/api/${endpoint}`, { params: filters });
 
@@ -57,7 +53,7 @@ function Verification() {
         verifyLog,
         registerId: user.registerId
       });
-      
+
       toast.success('Verification status updated successfully');
       fetchData();
     } catch (error) {
@@ -116,10 +112,25 @@ function Verification() {
         </div>
       </div>
 
-      <div className="my-4">
-        <VerificationFilters filters={filters} onChange={setFilters} />
+      {/* Filters Section */}
+      <div className="my-4 flex items-center space-x-4">
+        <div className="flex items-center">
+          <Filter className="h-5 w-5 text-gray-400 mr-2" />
+          <span className="text-sm font-medium">Filters:</span>
+        </div>
+
+        <select
+          value={filters.verifyLog}
+          onChange={(e) => setFilters({ ...filters, verifyLog: e.target.value })}
+          className="form-select"
+        >
+          <option value="not verified">Not Verified</option>
+          <option value="verified">Verified</option>
+          <option value="rejected">Rejected</option>
+        </select>
       </div>
 
+      {/* Verification Table */}
       <div className="bg-white rounded-lg shadow">
         <VerificationTable
           data={
