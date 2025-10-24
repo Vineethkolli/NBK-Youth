@@ -44,15 +44,13 @@ function Explore() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 py-10 px-4">
-      <div className="max-w-6xl mx-auto">
-
+    <div className="py-2">
         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4">
           {pages.map(({ to, icon: Icon, label }) => (
             <Link
               key={to}
               to={to}
-              className="flex flex-col items-center justify-center bg-white shadow-sm hover:shadow-md rounded-xl py-5 px-3 text-center transition-all hover:-translate-y-1"
+              className="flex flex-col items-center justify-center bg-white shadow-lg hover:shadow-2xl rounded-xl py-6 px-3 text-center transition-all hover:-translate-y-1 hover:scale-105 duration-300"
             >
               <Icon className="h-10 w-10 text-indigo-500 mb-2" />
               <span className="text-sm font-medium text-gray-700">{label}</span>
@@ -60,7 +58,6 @@ function Explore() {
           ))}
         </div>
       </div>
-    </div>
   );
 }
 
