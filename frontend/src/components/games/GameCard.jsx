@@ -1,13 +1,25 @@
 import { useState, useEffect } from 'react';
-import { Edit2, Trash2, ChevronRight } from 'lucide-react';
+import { Edit2, Trash2, ChevronRight, Loader2 } from 'lucide-react';
 import EditNameModal from '../common/UpdateNameForm';
 
 function GameCard({ game, isEditMode, onSelect, onEdit, onDelete }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (!isEditMode) setIsModalOpen(false);
   }, [isEditMode]);
+
+  const handleDelete = async () => {
+    try {
+      setDeleting(true);
+      await onDelete(game);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   const sortPlayersByTime = (players) => {
     return [...players]
@@ -58,74 +70,79 @@ function GameCard({ game, isEditMode, onSelect, onEdit, onDelete }) {
 
   return (
     <>
-    <div className="bg-white rounded-lg shadow p-4">
-      <div className="flex justify-between items-start mb-2">
-        <div>
-          <h3 className="text-lg font-medium">{game.name}</h3>
-          <p className="text-sm text-gray-500">
-            {game.players.length} player{game.players.length !== 1 && 's'}
-          </p>
+      <div className="bg-white rounded-lg shadow p-4">
+        <div className="flex justify-between items-start mb-2">
+          <div>
+            <h3 className="text-lg font-medium">{game.name}</h3>
+            <p className="text-sm text-gray-500">
+              {game.players.length} player{game.players.length !== 1 && 's'}
+            </p>
+          </div>
+
+          {isEditMode && (
+            <div className="flex space-x-2">
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="text-indigo-600 hover:text-indigo-800"
+                disabled={deleting}
+              >
+                <Edit2 className="h-4 w-4" />
+              </button>
+
+              <button
+                onClick={handleDelete}
+                className={`text-red-600 hover:text-red-800 flex items-center justify-center ${
+                  deleting ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+                disabled={deleting}
+              >
+                {deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+              </button>
+            </div>
+          )}
         </div>
 
-        {isEditMode && (
-          <div className="flex space-x-2">
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className="text-indigo-600 hover:text-indigo-800"
-            >
-              <Edit2 className="h-4 w-4" />
-            </button>
-
-            <button
-              onClick={() => onDelete(game)}
-              className="text-red-600 hover:text-red-800"
-            >
-              <Trash2 className="h-4 w-4" />
-            </button>
-          </div>
-        )}
-      </div>
-
-      <div className="mb-4 flex flex-wrap gap-2">
-        {topPlayers.map((player, index) => (
-          <div key={player._id} className="inline-flex items-center">
-            <div
-              className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${getRankBadge(index, player)}`}
-            >
-              <span translate="no">
-                {game.timerRequired ? index + 1 : player.status.split('-')[1][0]}
+        <div className="mb-4 flex flex-wrap gap-2">
+          {topPlayers.map((player, index) => (
+            <div key={player._id} className="inline-flex items-center">
+              <div
+                className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${getRankBadge(index, player)}`}
+              >
+                <span translate="no">
+                  {game.timerRequired ? index + 1 : player.status.split('-')[1][0]}
+                </span>
+              </div>
+              <span className="ml-1 text-sm">
+                {player.name}
+                {game.timerRequired && player.timeCompleted && (
+                  <span className="text-xs text-gray-500 ml-1">
+                    ({Math.floor(player.timeCompleted / 60000)}m{' '}
+                    {Math.floor((player.timeCompleted % 60000) / 1000)}s)
+                  </span>
+                )}
               </span>
             </div>
-            <span className="ml-1 text-sm">
-              {player.name}
-              {game.timerRequired && player.timeCompleted && (
-                <span className="text-xs text-gray-500 ml-1">
-                  ({Math.floor(player.timeCompleted / 60000)}m{' '}
-                  {Math.floor((player.timeCompleted % 60000) / 1000)}s)
-                </span>
-              )}
-            </span>
-          </div>
-        ))}
+          ))}
+        </div>
+
+        <button
+          onClick={() => onSelect(game)}
+          className="w-full flex items-center justify-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+        >
+          <span className="mr-2">Players</span>
+          <ChevronRight className="h-4 w-4" />
+        </button>
       </div>
 
-      <button
-        onClick={() => onSelect(game)}
-        className="w-full flex items-center justify-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
-      >
-        <span className="mr-2">Players</span>
-        <ChevronRight className="h-4 w-4" />
-      </button>
-    </div>
-    <EditNameModal
-      isOpen={isModalOpen}
-      title="Update Game"
-      initialValue={game.name}
-      onClose={() => setIsModalOpen(false)}
-      onSubmit={async (newName) => {
-        await onEdit(game._id, newName);
-      }}
-    />
+      <EditNameModal
+        isOpen={isModalOpen}
+        title="Update Game"
+        initialValue={game.name}
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={async (newName) => {
+          await onEdit(game._id, newName);
+        }}
+      />
     </>
   );
 }

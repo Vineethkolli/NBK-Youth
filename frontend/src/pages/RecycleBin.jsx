@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Trash2, RefreshCw,  IndianRupee, DollarSign } from 'lucide-react';
+import { Trash2, RefreshCw,  IndianRupee, DollarSign, Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { API_URL } from '../utils/config';
@@ -12,8 +12,11 @@ function RecycleBin() {
   const { lockSettings } = useLockSettings();
   const [deletedIncomes, setDeletedIncomes] = useState([]);
   const [deletedExpenses, setDeletedExpenses] = useState([]);
-  const [loadingIncomeId, setLoadingIncomeId] = useState(null);
-  const [loadingExpenseId, setLoadingExpenseId] = useState(null);
+  const [loadingRestoreIncomeId, setLoadingRestoreIncomeId] = useState(null);
+  const [loadingDeleteIncomeId, setLoadingDeleteIncomeId] = useState(null);
+  const [loadingRestoreExpenseId, setLoadingRestoreExpenseId] = useState(null);
+  const [loadingDeleteExpenseId, setLoadingDeleteExpenseId] = useState(null);
+
   const [activeBin, setActiveBin] = useState('income'); 
 
   useEffect(() => {
@@ -34,60 +37,61 @@ function RecycleBin() {
   };
 
   const handleRestoreIncome = async (id) => {
-    if (!window.confirm('Are you sure you want to restore this income?')) return;
-    setLoadingIncomeId(id);
-    try {
-      await axios.post(`${API_URL}/api/incomes/restore/${id}`);
-      toast.success('Income restored successfully');
-      fetchDeletedItems();
-    } catch (error) {
-      toast.error('Failed to restore income');
-    } finally {
-      setLoadingIncomeId(null);
-    }
-  };
+  if (!window.confirm('Are you sure you want to restore this income?')) return;
+  setLoadingRestoreIncomeId(id);
+  try {
+    await axios.post(`${API_URL}/api/incomes/restore/${id}`);
+    toast.success('Income restored successfully');
+    fetchDeletedItems();
+  } catch {
+    toast.error('Failed to restore income');
+  } finally {
+    setLoadingRestoreIncomeId(null);
+  }
+};
 
-  const handlePermanentDeleteIncome = async (id) => {
-    if (!window.confirm('Are you sure you want to permanently delete this income?')) return;
-    setLoadingIncomeId(id);
-    try {
-      await axios.delete(`${API_URL}/api/incomes/permanent/${id}`);
-      toast.success('Income permanently deleted');
-      fetchDeletedItems();
-    } catch (error) {
-      toast.error('Failed to delete income permanently');
-    } finally {
-      setLoadingIncomeId(null);
-    }
-  };
+const handlePermanentDeleteIncome = async (id) => {
+  if (!window.confirm('Are you sure you want to permanently delete this income?')) return;
+  setLoadingDeleteIncomeId(id);
+  try {
+    await axios.delete(`${API_URL}/api/incomes/permanent/${id}`);
+    toast.success('Income permanently deleted');
+    fetchDeletedItems();
+  } catch {
+    toast.error('Failed to delete income permanently');
+  } finally {
+    setLoadingDeleteIncomeId(null);
+  }
+};
 
   const handleRestoreExpense = async (id) => {
-    if (!window.confirm('Are you sure you want to restore this expense?')) return;
-    setLoadingExpenseId(id);
-    try {
-      await axios.post(`${API_URL}/api/expenses/restore/${id}`);
-      toast.success('Expense restored successfully');
-      fetchDeletedItems();
-    } catch (error) {
-      toast.error('Failed to restore expense');
-    } finally {
-      setLoadingExpenseId(null);
-    }
-  };
+  if (!window.confirm('Are you sure you want to restore this expense?')) return;
+  setLoadingRestoreExpenseId(id);
+  try {
+    await axios.post(`${API_URL}/api/expenses/restore/${id}`);
+    toast.success('Expense restored successfully');
+    fetchDeletedItems();
+  } catch {
+    toast.error('Failed to restore expense');
+  } finally {
+    setLoadingRestoreExpenseId(null);
+  }
+};
 
-  const handlePermanentDeleteExpense = async (id) => {
-    if (!window.confirm('Are you sure you want to permanently delete this expense?')) return;
-    setLoadingExpenseId(id);
-    try {
-      await axios.delete(`${API_URL}/api/expenses/permanent/${id}`);
-      toast.success('Expense permanently deleted');
-      fetchDeletedItems();
-    } catch (error) {
-      toast.error('Failed to delete expense permanently');
-    } finally {
-      setLoadingExpenseId(null);
-    }
-  };
+const handlePermanentDeleteExpense = async (id) => {
+  if (!window.confirm('Are you sure you want to permanently delete this expense?')) return;
+  setLoadingDeleteExpenseId(id);
+  try {
+    await axios.delete(`${API_URL}/api/expenses/permanent/${id}`);
+    toast.success('Expense permanently deleted');
+    fetchDeletedItems();
+  } catch {
+    toast.error('Failed to delete expense permanently');
+  } finally {
+    setLoadingDeleteExpenseId(null);
+  }
+};
+
 
   return (
     <div className="space-y-6">
@@ -152,7 +156,6 @@ function RecycleBin() {
 
             <tbody className="bg-white divide-y divide-gray-200">
               {deletedIncomes.map((item) => {
-                const isLoading = loadingIncomeId === item._id;
                 return (
                   <tr key={item._id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap text-sm">{item.incomeId}</td>
@@ -187,26 +190,26 @@ function RecycleBin() {
                         }`}
                       >
                         <button
-                          onClick={() => handleRestoreIncome(item._id)}
-                          disabled={isLoading || lockSettings.isLocked}
-                          className={`text-indigo-600 hover:text-indigo-900 ${
-                            isLoading ? 'opacity-50 cursor-not-allowed' : ''
-                          }`}
-                          title={lockSettings.isLocked ? 'Locked - cannot restore' : 'Restore'}
-                        >
-                          <RefreshCw className="h-5 w-5" />
-                        </button>
+  onClick={() => handleRestoreIncome(item._id)}
+  disabled={loadingRestoreIncomeId === item._id || lockSettings.isLocked}
+  className={`text-indigo-600 hover:text-indigo-900 ${
+    loadingRestoreIncomeId === item._id ? 'opacity-50 cursor-not-allowed' : ''
+  }`}
+  title={lockSettings.isLocked ? 'Locked - cannot restore' : 'Restore'}
+>
+  {loadingRestoreIncomeId === item._id ? <Loader2 className="h-5 w-5 animate-spin" /> : <RefreshCw className="h-5 w-5" />}
+</button>
 
-                        <button
-                          onClick={() => handlePermanentDeleteIncome(item._id)}
-                          disabled={isLoading || lockSettings.isLocked}
-                          className={`text-red-600 hover:text-red-900 ${
-                            isLoading ? 'opacity-50 cursor-not-allowed' : ''
-                          }`}
-                          title={lockSettings.isLocked ? 'Locked - cannot delete' : 'Delete permanently'}
-                        >
-                          <Trash2 className="h-5 w-5" />
-                        </button>
+<button
+  onClick={() => handlePermanentDeleteIncome(item._id)}
+  disabled={loadingDeleteIncomeId === item._id || lockSettings.isLocked}
+  className={`text-red-600 hover:text-red-900 ${
+    loadingDeleteIncomeId === item._id ? 'opacity-50 cursor-not-allowed' : ''
+  }`}
+  title={lockSettings.isLocked ? 'Locked - cannot delete' : 'Delete permanently'}
+>
+  {loadingDeleteIncomeId === item._id ? <Loader2 className="h-5 w-5 animate-spin" /> : <Trash2 className="h-5 w-5" />}
+</button>
                       </div>
                     </td>
                   </tr>
@@ -240,7 +243,6 @@ function RecycleBin() {
 
             <tbody className="bg-white divide-y divide-gray-200">
               {deletedExpenses.map((item) => {
-                const isLoading = loadingExpenseId === item._id;
                 return (
                   <tr key={item._id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap text-sm">{item.expenseId}</td>
@@ -274,26 +276,26 @@ function RecycleBin() {
                         }`}
                       >
                         <button
-                          onClick={() => handleRestoreExpense(item._id)}
-                          disabled={isLoading || lockSettings.isLocked}
-                          className={`text-indigo-600 hover:text-indigo-900 ${
-                            isLoading ? 'opacity-50 cursor-not-allowed' : ''
-                          }`}
-                          title={lockSettings.isLocked ? 'Locked - cannot restore' : 'Restore'}
-                        >
-                          <RefreshCw className="h-5 w-5" />
-                        </button>
+  onClick={() => handleRestoreExpense(item._id)}
+  disabled={loadingRestoreExpenseId === item._id || lockSettings.isLocked}
+  className={`text-indigo-600 hover:text-indigo-900 ${
+    loadingRestoreExpenseId === item._id ? 'opacity-50 cursor-not-allowed' : ''
+  }`}
+  title={lockSettings.isLocked ? 'Locked - cannot restore' : 'Restore'}
+>
+  {loadingRestoreExpenseId === item._id ? <Loader2 className="h-5 w-5 animate-spin" /> : <RefreshCw className="h-5 w-5" />}
+</button>
 
-                        <button
-                          onClick={() => handlePermanentDeleteExpense(item._id)}
-                          disabled={isLoading || lockSettings.isLocked}
-                          className={`text-red-600 hover:text-red-900 ${
-                            isLoading ? 'opacity-50 cursor-not-allowed' : ''
-                          }`}
-                          title={lockSettings.isLocked ? 'Locked - cannot delete' : 'Delete permanently'}
-                        >
-                          <Trash2 className="h-5 w-5" />
-                        </button>
+<button
+  onClick={() => handlePermanentDeleteExpense(item._id)}
+  disabled={loadingDeleteExpenseId === item._id || lockSettings.isLocked}
+  className={`text-red-600 hover:text-red-900 ${
+    loadingDeleteExpenseId === item._id ? 'opacity-50 cursor-not-allowed' : ''
+  }`}
+  title={lockSettings.isLocked ? 'Locked - cannot delete' : 'Delete permanently'}
+>
+  {loadingDeleteExpenseId === item._id ? <Loader2 className="h-5 w-5 animate-spin" /> : <Trash2 className="h-5 w-5" />}
+</button>
                       </div>
                     </td>
                   </tr>

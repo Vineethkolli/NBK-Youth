@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Edit2, Trash2, Clock } from 'lucide-react';
+import { Edit2, Trash2, Clock, Loader2 } from 'lucide-react';
 import EditNameModal from '../common/UpdateNameForm';
 
 function PlayerList({ 
@@ -14,6 +14,7 @@ function PlayerList({
   const [modalPlayerId, setModalPlayerId] = useState(null);
   const [modalInitialName, setModalInitialName] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [deletingId, setDeletingId] = useState(null); 
 
   useEffect(() => {
     if (!isEditMode && modalPlayerId) {
@@ -92,74 +93,92 @@ function PlayerList({
     }
   };
 
+  const handleDelete = async (playerId) => {
+    try {
+      setDeletingId(playerId);
+      await onDelete(playerId);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   return (
     <>
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {sortPlayersByRank(players).map((player) => (
-        <div
-          key={player._id}
-          className={`bg-white rounded-lg shadow p-4 flex justify-between items-center ${
-            (player.timeCompleted || player.status) ? 'border-l-4 border-green-500' : ''
-          }`}
-        >
-          <div className="space-y-2 flex-1">
-            <h3 className="font-medium">{player.name}</h3>
-            {getStatusBadge(player)}
-          </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {sortPlayersByRank(players).map((player) => (
+          <div
+            key={player._id}
+            className={`bg-white rounded-lg shadow p-4 flex justify-between items-center ${
+              (player.timeCompleted || player.status) ? 'border-l-4 border-green-500' : ''
+            }`}
+          >
+            <div className="space-y-2 flex-1">
+              <h3 className="font-medium">{player.name}</h3>
+              {getStatusBadge(player)}
+            </div>
 
-          <div className="flex items-center space-x-2">
-            {timerRequired ? (
-              <button
-                onClick={() => onTimeUpdate(player)}
-                className="text-gray-600 hover:text-gray-800"
-              >
-                <Clock className="h-5 w-5" />
-              </button>
-            ) : (
-              <select
-                value={player.status || ''}
-                onChange={(e) => onStatusUpdate(player._id, e.target.value)}
-                className="form-select text-sm"
-              >
-                <option value="">Select Status</option>
-                <option value="eliminated">Eliminated</option>
-                <option value="winner-1st">Winner (1st)</option>
-                <option value="winner-2nd">Winner (2nd)</option>
-                <option value="winner-3rd">Winner (3rd)</option>
-              </select>
-            )}
+            <div className="flex items-center space-x-2">
+              {timerRequired ? (
+                <button
+                  onClick={() => onTimeUpdate(player)}
+                  className="text-gray-600 hover:text-gray-800"
+                  disabled={deletingId === player._id}
+                >
+                  <Clock className="h-5 w-5" />
+                </button>
+              ) : (
+                <select
+                  value={player.status || ''}
+                  onChange={(e) => onStatusUpdate(player._id, e.target.value)}
+                  className="form-select text-sm"
+                  disabled={deletingId === player._id}
+                >
+                  <option value="">Select Status</option>
+                  <option value="eliminated">Eliminated</option>
+                  <option value="winner-1st">Winner (1st)</option>
+                  <option value="winner-2nd">Winner (2nd)</option>
+                  <option value="winner-3rd">Winner (3rd)</option>
+                </select>
+              )}
 
-            {isEditMode && (
-              <>
-                <button
-                  onClick={() => handleNameChange(player._id, player.name)}
-                  className="text-indigo-600 hover:text-indigo-800"
-                >
-                  <Edit2 className="h-4 w-4" />
-                </button>
-                <button
-                  onClick={() => onDelete(player._id)}
-                  className="text-red-600 hover:text-red-800"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
-              </>
-            )}
+              {isEditMode && (
+                <>
+                  <button
+                    onClick={() => handleNameChange(player._id, player.name)}
+                    className="text-indigo-600 hover:text-indigo-800"
+                    disabled={deletingId === player._id}
+                  >
+                    <Edit2 className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(player._id)}
+                    className={`text-red-600 hover:text-red-800 flex items-center justify-center ${
+                      deletingId === player._id ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}
+                    disabled={deletingId === player._id}
+                  >
+                    {deletingId === player._id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                  </button>
+                </>
+              )}
+            </div>
           </div>
-        </div>
-      ))}
-    </div>
-    <EditNameModal
-      isOpen={isModalOpen}
-      title="Update Player"
-      initialValue={modalInitialName}
-      onClose={() => {
-        setIsModalOpen(false);
-        setModalPlayerId(null);
-        setModalInitialName('');
-      }}
-      onSubmit={handleModalSubmit}
-    />
+        ))}
+      </div>
+
+      <EditNameModal
+        isOpen={isModalOpen}
+        title="Update Player"
+        initialValue={modalInitialName}
+        onClose={() => {
+          setIsModalOpen(false);
+          setModalPlayerId(null);
+          setModalInitialName('');
+        }}
+        onSubmit={handleModalSubmit}
+      />
     </>
   );
 }

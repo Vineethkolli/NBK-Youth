@@ -33,10 +33,7 @@ function ExpenseSection({ refreshStats }) {
 
   useEffect(() => {
     if (user?.role && ['developer', 'financier', 'admin'].includes(user.role)) {
-      setExpenseColumns(prev => ({
-        ...prev,
-        registerId: false,
-      }));
+      setExpenseColumns(prev => ({ ...prev, registerId: false }));
     }
   }, [user?.role]);
 
@@ -53,7 +50,6 @@ function ExpenseSection({ refreshStats }) {
       const params = { ...expenseFilters, search };
       const { data } = await axios.get(`${API_URL}/api/estimation/expense`, { params });
 
-      // Client-side sorting
       let sortedData = data;
       if (expenseFilters.sortOrder) {
         const { sortField, sortOrder } = expenseFilters;
@@ -75,6 +71,7 @@ function ExpenseSection({ refreshStats }) {
     try {
       await axios.delete(`${API_URL}/api/estimation/expense/${id}`);
       setExpenses(expenses.filter(expense => expense._id !== id));
+      toast.success('Expense deleted successfully');
       if (refreshStats) refreshStats();
     } catch (error) {
       toast.error('Failed to delete expense');
@@ -91,9 +88,11 @@ function ExpenseSection({ refreshStats }) {
       if (formMode === 'add') {
         ({ data } = await axios.post(`${API_URL}/api/estimation/expense`, payload));
         setExpenses([data, ...expenses]);
+        toast.success('Expense added successfully');
       } else if (formMode === 'edit') {
         ({ data } = await axios.put(`${API_URL}/api/estimation/expense/${currentRecord._id}`, payload));
         setExpenses(expenses.map(e => e._id === currentRecord._id ? data : e));
+        toast.success('Expense updated successfully');
       }
       setShowForm(false);
       fetchExpenses();
@@ -106,18 +105,17 @@ function ExpenseSection({ refreshStats }) {
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <div className="flex justify-between items-center">
-  <div className="flex-1 relative max-w-xs"> 
-    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-    <input
-      type="text"
-      placeholder="Search by purpose, present amount..."
-      value={search}
-      onChange={(e) => setSearch(e.target.value)}
-      className="pl-10 pr-4 py-1 w-full border rounded-lg"
-    />
-  </div>
-</div>
+        <div className="flex-1 relative max-w-xs">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Search by purpose, present amount..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-10 pr-4 py-1 w-full border rounded-lg"
+          />
+        </div>
+
         <div className="flex items-center space-x-3">
           {['developer', 'financier', 'admin'].includes(user?.role) && (
             <button onClick={handleAdd} className="btn-secondary flex items-center">

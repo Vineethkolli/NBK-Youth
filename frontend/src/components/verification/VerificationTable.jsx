@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CheckCircle, XCircle, AlertCircle, Edit2, Save } from 'lucide-react';
+import { CheckCircle, XCircle, AlertCircle, Edit2, Save, Loader2 } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
 import { formatDateTime } from '../../utils/dateTime';
@@ -10,6 +10,9 @@ function VerificationTable({ data, type, onVerifyLogUpdate, onUpdatePayment, isL
     name: '',
     belongsTo: ''
   });
+
+  // loadingAction: { id: string|null, type: 'verify'|'notVerified'|'reject'|'save'|null }
+  const [loadingAction, setLoadingAction] = useState({ id: null, type: null });
 
   const getVerifyLogColor = (status) => {
     switch (status) {
@@ -23,8 +26,8 @@ function VerificationTable({ data, type, onVerifyLogUpdate, onUpdatePayment, isL
   };
 
   const sendWhatsAppMessage = (payment) => {
-    if (isLocked) return; // Block sending if locked
-    const countryCode = '+91'; 
+    if (isLocked) return; 
+    const countryCode = '+91';
     const phoneNumber = payment.phoneNumber;
     const name = payment.name;
     let message;
@@ -47,7 +50,7 @@ function VerificationTable({ data, type, onVerifyLogUpdate, onUpdatePayment, isL
   };
 
   const handleEdit = (payment) => {
-    if (isLocked) return; // Block editing if locked
+    if (isLocked) return; 
     setEditingPayment(payment._id);
     setEditForm({
       name: payment.name,
@@ -56,7 +59,8 @@ function VerificationTable({ data, type, onVerifyLogUpdate, onUpdatePayment, isL
   };
 
   const handleSave = async (paymentId) => {
-    if (isLocked) return; // Block saving if locked
+    if (isLocked) return; 
+    setLoadingAction({ id: paymentId, type: 'save' });
     try {
       await onUpdatePayment(paymentId, editForm);
       setEditingPayment(null);
@@ -67,23 +71,42 @@ function VerificationTable({ data, type, onVerifyLogUpdate, onUpdatePayment, isL
       } else {
         toast.error('Failed to update payment details');
       }
+    } finally {
+      setLoadingAction({ id: null, type: null });
     }
   };
 
-  const handleVerify = async (paymentId) => {
-    if (isLocked) return; // Block verification if locked
-    if (window.confirm('This will create a new income entry. Are you sure?')) {
-      try {
-        await onVerifyLogUpdate(paymentId, 'verified');
-        toast.success('Payment verified and income entry created successfully');
-      } catch (error) {
-        if (error.response?.data?.existingName) {
-          toast.error(`A user with name "${error.response.data.existingName}" already exists. Please update the name before verifying.`);
-          handleEdit({ _id: paymentId, name: error.response.data.existingName });
-        } else {
-          toast.error('Failed to verify payment');
-        }
+  // For payment verifies needs confirm + existingName handling
+  const handlePaymentVerify = async (paymentId) => {
+    if (isLocked) return;
+    if (!window.confirm('This will create a new income entry. Are you sure?')) return;
+
+    setLoadingAction({ id: paymentId, type: 'verify' });
+    try {
+      await onVerifyLogUpdate(paymentId, 'verified');
+      toast.success('Payment verified and income entry created successfully');
+    } catch (error) {
+      if (error.response?.data?.existingName) {
+        toast.error(`A user with name "${error.response.data.existingName}" already exists. Please update the name before verifying.`);
+        handleEdit({ _id: paymentId, name: error.response.data.existingName });
+      } else {
+        toast.error('Failed to verify payment');
       }
+    } finally {
+      setLoadingAction({ id: null, type: null });
+    }
+  };
+
+  // Generic verifier for income/expense or "not verified" and "rejected" actions
+  const handleGenericVerify = async (id, status) => {
+    if (isLocked) return;
+    setLoadingAction({ id, type: status === 'verified' ? 'verify' : status === 'not verified' ? 'notVerified' : 'reject' });
+    try {
+      await onVerifyLogUpdate(id, status);
+    } catch (error) {
+      toast.error('Failed to update verification status');
+    } finally {
+      setLoadingAction({ id: null, type: null });
     }
   };
 
@@ -140,8 +163,9 @@ function VerificationTable({ data, type, onVerifyLogUpdate, onUpdatePayment, isL
             type="text"
             value={editForm.name}
             onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-            className="w-full border rounded px-2 py-1"
-            disabled={isLocked}
+            className="border rounded px-2 py-1 w-auto min-w-[120px] inline-block"
+            style={{ width: `${editForm.name.length + 1}ch` }}
+            disabled={isLocked || (loadingAction.id === item._id)}
           />
         ) : (
           item.name
@@ -156,7 +180,7 @@ function VerificationTable({ data, type, onVerifyLogUpdate, onUpdatePayment, isL
             value={editForm.belongsTo}
             onChange={(e) => setEditForm({ ...editForm, belongsTo: e.target.value })}
             className="w-full border rounded px-2 py-1"
-            disabled={isLocked}
+            disabled={isLocked || (loadingAction.id === item._id)}
           >
             <option value="villagers">Villagers</option>
             <option value="youth">Youth</option>
@@ -253,109 +277,116 @@ function VerificationTable({ data, type, onVerifyLogUpdate, onUpdatePayment, isL
           {renderTableHeaders()}
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
-          {data.map((item) => (
-            <tr key={item._id} className="hover:bg-gray-50">
-              {type === 'income' && renderIncomeColumns(item)}
-              {type === 'expense' && renderExpenseColumns(item)}
-              {type === 'payment' && renderPaymentColumns(item)}
-              <td className="px-6 py-4 whitespace-nowrap text-sm">
-                {formatDateTime(item.createdAt)}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap">
-                <div className="flex items-center space-x-2">
-                  <span
-                    className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      getVerifyLogColor(item.verifyLog)
-                    }`}
-                  >
-                    {item.verifyLog}
-                  </span>
-                  {type === 'payment' &&
-                    (item.verifyLog === 'verified' || item.verifyLog === 'rejected') && (
-                      <button
-                        onClick={() => sendWhatsAppMessage(item)}
-                        disabled={isLocked || !item.phoneNumber}
-                        className={`${getWhatsAppIconColor(item)} transition-colors duration-200 ${
-                          isLocked ? 'cursor-not-allowed opacity-50' : ''
-                        }`}
-                        title={item.phoneNumber ? 'Send WhatsApp message' : 'No phone number available'}
-                        type="button"
-                      >
-                        <FaWhatsapp className="h-5 w-5" />
-                      </button>
-                    )}
-                </div>
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap">
-                <div className="flex space-x-2">
-                  {type === 'payment' && item.verifyLog !== 'verified' && (
-                    <>
-                      {editingPayment === item._id ? (
+          {data.map((item) => {
+            const rowLoading = loadingAction.id === item._id;
+            return (
+              <tr key={item._id} className="hover:bg-gray-50">
+                {type === 'income' && renderIncomeColumns(item)}
+                {type === 'expense' && renderExpenseColumns(item)}
+                {type === 'payment' && renderPaymentColumns(item)}
+                <td className="px-6 py-4 whitespace-nowrap text-sm">
+                  {formatDateTime(item.createdAt)}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="flex items-center space-x-2">
+                    <span
+                      className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                        getVerifyLogColor(item.verifyLog)
+                      }`}
+                    >
+                      {item.verifyLog}
+                    </span>
+                    {type === 'payment' &&
+                      (item.verifyLog === 'verified' || item.verifyLog === 'rejected') && (
                         <button
-                          onClick={() => handleSave(item._id)}
-                          disabled={isLocked}
-                          className={`text-green-600 hover:text-green-900 ${
-                            isLocked ? 'cursor-not-allowed opacity-50' : ''
-                          }`}
-                          title="Save"
+                          onClick={() => sendWhatsAppMessage(item)}
+                          disabled={isLocked || !item.phoneNumber || rowLoading}
+                          className={`${getWhatsAppIconColor(item)} transition-colors duration-200 ${isLocked || rowLoading ? 'cursor-not-allowed opacity-50' : ''}`}
+                          title={item.phoneNumber ? 'Send WhatsApp message' : 'No phone number available'}
                           type="button"
                         >
-                          <Save className="h-5 w-5" />
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() => handleEdit(item)}
-                          disabled={isLocked}
-                          className={`text-indigo-600 hover:text-indigo-900 ${
-                            isLocked ? 'cursor-not-allowed opacity-50' : ''
-                          }`}
-                          title="Edit"
-                          type="button"
-                        >
-                          <Edit2 className="h-5 w-5" />
+                          <FaWhatsapp className="h-5 w-5" />
                         </button>
                       )}
-                    </>
-                  )}
-                  <button
-                    onClick={() =>
-                      type === 'payment' ? handleVerify(item._id) : onVerifyLogUpdate(item._id, 'verified')
-                    }
-                    disabled={isLocked}
-                    className={`text-green-600 hover:text-green-900 ${
-                      isLocked ? 'cursor-not-allowed opacity-50' : ''
-                    }`}
-                    title="Verify"
-                    type="button"
-                  >
-                    <CheckCircle className="h-5 w-5" />
-                  </button>
-                  <button
-                    onClick={() => onVerifyLogUpdate(item._id, 'not verified')}
-                    disabled={isLocked}
-                    className={`text-yellow-600 hover:text-yellow-900 ${
-                      isLocked ? 'cursor-not-allowed opacity-50' : ''
-                    }`}
-                    title="Mark as Not Verified"
-                    type="button"
-                  >
-                    <AlertCircle className="h-5 w-5" />
-                  </button>
-                  <button
-                    onClick={() => onVerifyLogUpdate(item._id, 'rejected')}
-                    disabled={isLocked}
-                    className={`text-red-600 hover:text-red-900 ${
-                      isLocked ? 'cursor-not-allowed opacity-50' : ''
-                    }`}
-                    title="Reject"
-                    type="button"
-                  >
-                    <XCircle className="h-5 w-5" />
-                  </button>
-                </div>
-              </td>
-            </tr>
-          ))}
+                  </div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="flex space-x-2">
+                    {type === 'payment' && item.verifyLog !== 'verified' && (
+                      <>
+                        {editingPayment === item._id ? (
+                          <button
+                            onClick={() => handleSave(item._id)}
+                            disabled={isLocked || rowLoading}
+                            className={`text-green-600 hover:text-green-900 ${isLocked || rowLoading ? 'cursor-not-allowed opacity-50' : ''}`}
+                            title="Save"
+                            type="button"
+                          >
+                            {rowLoading && loadingAction.type === 'save' ? (
+                              <Loader2 className="h-5 w-5 animate-spin" />
+                            ) : (
+                              <Save className="h-5 w-5" />
+                            )}
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => handleEdit(item)}
+                            disabled={isLocked || rowLoading}
+                            className={`text-indigo-600 hover:text-indigo-900 ${isLocked || rowLoading ? 'cursor-not-allowed opacity-50' : ''}`}
+                            title="Edit"
+                            type="button"
+                          >
+                            <Edit2 className="h-5 w-5" />
+                          </button>
+                        )}
+                      </>
+                    )}
+                    <button
+                      onClick={() =>
+                        type === 'payment' ? handlePaymentVerify(item._id) : handleGenericVerify(item._id, 'verified')
+                      }
+                      disabled={isLocked || rowLoading}
+                      className={`text-green-600 hover:text-green-900 ${isLocked || rowLoading ? 'cursor-not-allowed opacity-50' : ''}`}
+                      title="Verify"
+                      type="button"
+                    >
+                      {rowLoading && loadingAction.type === 'verify' ? (
+                        <Loader2 className="h-5 w-5 animate-spin" />
+                      ) : (
+                        <CheckCircle className="h-5 w-5" />
+                      )}
+                    </button>
+                    <button
+                      onClick={() => handleGenericVerify(item._id, 'not verified')}
+                      disabled={isLocked || rowLoading}
+                      className={`text-yellow-600 hover:text-yellow-900 ${isLocked || rowLoading ? 'cursor-not-allowed opacity-50' : ''}`}
+                      title="Mark as Not Verified"
+                      type="button"
+                    >
+                      {rowLoading && loadingAction.type === 'notVerified' ? (
+                        <Loader2 className="h-5 w-5 animate-spin" />
+                      ) : (
+                        <AlertCircle className="h-5 w-5" />
+                      )}
+                    </button>
+                    <button
+                      onClick={() => handleGenericVerify(item._id, 'rejected')}
+                      disabled={isLocked || rowLoading}
+                      className={`text-red-600 hover:text-red-900 ${isLocked || rowLoading ? 'cursor-not-allowed opacity-50' : ''}`}
+                      title="Reject"
+                      type="button"
+                    >
+                      {rowLoading && loadingAction.type === 'reject' ? (
+                        <Loader2 className="h-5 w-5 animate-spin" />
+                      ) : (
+                        <XCircle className="h-5 w-5" />
+                      )}
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>
