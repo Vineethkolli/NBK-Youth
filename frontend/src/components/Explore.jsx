@@ -82,7 +82,6 @@ function Explore() {
         (section) =>
           section.pages.length > 0 && (
             <div key={section.title}>
-              {/* Section Title with Icon */}
               <div className="flex items-center gap-2 mb-2 border-b border-gray-200 pb-1">
                 <section.icon className="h-5 w-5 text-indigo-600" />
                 <h2 className="text-lg sm:text-xl font-semibold text-gray-800">
@@ -90,25 +89,22 @@ function Explore() {
                 </h2>
               </div>
 
-              {/* Grid for Icons */}
               <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4">
                 {section.pages.map(({ to, icon: Icon, label }) => (
                   <Link
                     key={to}
                     to={to}
-                    className="flex flex-col items-center justify-center bg-gradient-to-br from-white to-indigo-50 shadow-md hover:shadow-xl rounded-2xl py-6 px-3 text-center transition-all hover:-translate-y-1 hover:scale-105 duration-300 border border-gray-100"
+                    className="flex flex-col items-center justify-center bg-gradient-to-br from-white to-indigo-50 shadow-md hover:shadow-xl rounded-2xl py-4 px-3 text-center transition-all hover:-translate-y-1 hover:scale-105 duration-300 border border-gray-100"
                   >
                     <div className="p-3 bg-indigo-100 rounded-full mb-2 shadow-inner">
-                      <Icon className="h-7 w-7 text-indigo-600" />
+                      <Icon className="h-8 w-8 text-indigo-600" />
                     </div>
                     <span className="text-sm font-medium text-gray-700">{label}</span>
                   </Link>
                 ))}
               </div>
             </div>
-            
-          )
-          
+          )          
       )}
         <Footer />
     </div>
