@@ -41,7 +41,7 @@ function DashboardLayout() {
   }, [sidebarOpen]);
 
   return (
-    <div className="flex bg-gray-100 relative overflow-hidden">
+    <div className="flex h-screen bg-gray-100 relative overflow-hidden">
       {/* Overlay Install Prompt */}
       <InstallApp />
       <NotificationPrompt />
