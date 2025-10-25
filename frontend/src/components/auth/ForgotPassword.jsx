@@ -46,7 +46,9 @@ function ForgotPassword({ onBack, onOTPSent }) {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full py-2 px-4 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50"
+          className={`w-full flex justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 ${
+                isLoading ? 'opacity-50 cursor-not-allowed' : ''
+          }`}
         >
           {isLoading ? 'Sending...' : 'Send OTP'}
         </button>
