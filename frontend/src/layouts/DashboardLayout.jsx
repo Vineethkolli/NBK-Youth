@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Outlet, useLocation } from 'react-router-dom';
 import { Users, LayoutGrid, Home, BarChart2, IndianRupee, DollarSign, Wallet, CameraIcon } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
@@ -12,6 +12,7 @@ function DashboardLayout() {
   const [budgetOpen, setBudgetOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const mainContentRef = useRef(null);
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
   const closeSidebar = () => setSidebarOpen(false);
@@ -27,6 +28,12 @@ function DashboardLayout() {
     setBudgetOpen(false);
     closeSidebar();
   };
+
+  useEffect(() => {
+    if (mainContentRef.current) {
+      mainContentRef.current.scrollTo(0, 0); // Scroll the element to top on route change
+    }
+  }, [location.pathname]);
 
   // Disable body scroll when sidebar is open
   useEffect(() => {
@@ -57,6 +64,7 @@ function DashboardLayout() {
       )}
 
       <main
+      ref={mainContentRef}
         className={`flex-1 overflow-auto p-4 mt-12 md:ml-64 pb-20 min-h-[calc(100vh-3rem)] ${sidebarOpen ? 'pointer-events-none' : ''}`}
         style={{ WebkitOverflowScrolling: 'touch' }}
       >

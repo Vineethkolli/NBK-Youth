@@ -47,7 +47,6 @@ import ProtectedRoute from './components/ProtectedRoute';
 import PopupBanner from './components/adminPanel/PopupBanner';
 import FloatingMusicIcon from './components/vibe/FloatingMusicIcon';
 import OfflineIndicator from './components/common/OfflineIndicator';
-import ScrollToTop from './components/common/ScrollToTop';
 import ErrorBoundary from './components/common/ErrorBoundary';
 
 
@@ -158,7 +157,6 @@ function App() {
                   <Router>
                     <ErrorBoundary>
                       <AppContent />
-                      <ScrollToTop />
                     </ErrorBoundary>
                   </Router>
                 </MusicProvider>
