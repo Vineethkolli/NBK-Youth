@@ -97,7 +97,7 @@ function Explore() {
                     className="flex flex-col items-center justify-center bg-gradient-to-br from-white to-indigo-50 shadow-md hover:shadow-xl rounded-2xl py-4 px-3 text-center transition-all hover:-translate-y-1 hover:scale-105 duration-300 border border-gray-100"
                   >
                     <div className="p-3 bg-indigo-100 rounded-full mb-2 shadow-inner">
-                      <Icon className="h-8 w-8 text-indigo-600" />
+                      <Icon className="h-7 w-7 text-indigo-600" />
                     </div>
                     <span className="text-sm font-medium text-gray-700">{label}</span>
                   </Link>
