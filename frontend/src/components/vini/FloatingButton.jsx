@@ -9,7 +9,7 @@ function FloatingButton({ isOpen, setIsOpen }) {
     const windowHeight = window.innerHeight;
 
     // Calculate initial X (left position): windowWidth - rightOffset - buttonWidth
-    const rightOffset = 12;
+    const rightOffset = 10;
     const initialX = windowWidth - rightOffset - BUTTON_SIZE_PX;
 
     // Calculate initial Y (top position): windowHeight - bottomOffset - buttonHeight
