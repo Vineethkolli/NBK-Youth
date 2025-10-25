@@ -107,20 +107,20 @@ export const searchCurrentData = async (query) => {
           { name: { $regex: query, $options: 'i' } },
           { incomeId: { $regex: query, $options: 'i' } }
         ]
-      }).limit(50),
+      }),
       Expense.find({
         isDeleted: false,
         $or: [
           { purpose: { $regex: query, $options: 'i' } },
           { name: { $regex: query, $options: 'i' } }
         ]
-      }).limit(50),
+      }),
       User.find({
         $or: [
           { name: { $regex: query, $options: 'i' } },
           { registerId: { $regex: query, $options: 'i' } }
         ]
-      }).limit(10)
+      })
     ]);
 
     return { incomes, expenses, users };
