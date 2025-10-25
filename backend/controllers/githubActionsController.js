@@ -83,12 +83,6 @@ async function fetchJobs(jobs_url) {
   return data.jobs || [];
 }
 
-function isInCurrentMonth(isoString) {
-  if (!isoString) return false;
-  const dt = DateTime.fromISO(isoString).setZone('Asia/Kolkata');
-  const now = DateTime.now().setZone('Asia/Kolkata');
-  return dt.year === now.year && dt.month === now.month;
-}
 
 export const githubActionsController = {
 
@@ -171,76 +165,80 @@ export const githubActionsController = {
   },
 
   getMetricsOnly: async (req, res) => {
-    try {
-      const filter = (req.query.filter || 'currentMonth').toLowerCase();
-      const workflowFilter = req.query.workflow || 'all';
+  try {
+    const workflowFilter = req.query.workflow || 'all';
+    const workflows = await fetchWorkflows();
 
-      const workflows = await fetchWorkflows();
-      const workflowsToProcess =
-        workflowFilter === 'all' ? workflows : workflows.filter((w) => String(w.id) === String(workflowFilter));
+    const workflowsToProcess =
+      workflowFilter === 'all'
+        ? workflows
+        : workflows.filter((w) => String(w.id) === String(workflowFilter));
 
-      let totalJobMinutes = 0,
-        totalRuns = 0,
-        failedJobsMinutes = 0,
-        failedJobsCount = 0,
-        allJobDurations = [],
-        allQueueTimes = [];
+    let totalJobMinutes = 0,
+      totalRuns = 0,
+      failedJobsMinutes = 0,
+      failedJobsCount = 0,
+      allJobDurations = [],
+      allQueueTimes = [];
 
-      const workflowRunPromises = workflowsToProcess.map(async (wf) => {
-        const runs = await fetchRuns(wf);
-        const runsToUse =
-          filter === 'currentmonth' ? runs.filter((r) => isInCurrentMonth(r.created_at)) : runs;
-        return runsToUse.slice(0, 100).map((r) => ({ ...r, workflowId: wf.id }));
-      });
+    const workflowRunPromises = workflowsToProcess.map(async (wf) => {
+      const runs = await fetchRuns(wf);
+      // Always use only the latest 100 runs per workflow
+      return (runs || []).slice(0, 100).map((r) => ({ ...r, workflowId: wf.id }));
+    });
 
-      const runsNested = await Promise.all(workflowRunPromises);
-      const allSelectedRuns = runsNested.flat();
+    const runsNested = await Promise.all(workflowRunPromises);
+    const allSelectedRuns = runsNested.flat();
 
-      const jobFetchPromises = allSelectedRuns.map(async (r) => {
-        totalRuns++;
-        const runCreatedDT = DateTime.fromISO(r.created_at).setZone('Asia/Kolkata');
-        const jobs = await fetchJobs(r.jobs_url);
-        for (const job of jobs || []) {
-          if (!job.started_at || !job.completed_at) continue;
-          const started = DateTime.fromISO(job.started_at);
-          const completed = DateTime.fromISO(job.completed_at);
-          const durationSec = Math.max(0, completed.diff(started, 'seconds').seconds || 0);
-          const queueTime = started.diff(runCreatedDT, 'seconds').seconds || 0;
+    const jobFetchPromises = allSelectedRuns.map(async (r) => {
+      totalRuns++;
+      const runCreatedDT = DateTime.fromISO(r.created_at).setZone('Asia/Kolkata');
+      const jobs = await fetchJobs(r.jobs_url);
+      for (const job of jobs || []) {
+        if (!job.started_at || !job.completed_at) continue;
+        const started = DateTime.fromISO(job.started_at);
+        const completed = DateTime.fromISO(job.completed_at);
+        const durationSec = Math.max(0, completed.diff(started, 'seconds').seconds || 0);
+        const queueTime = started.diff(runCreatedDT, 'seconds').seconds || 0;
 
-          allJobDurations.push(durationSec);
-          allQueueTimes.push(queueTime);
-          totalJobMinutes += durationSec / 60;
+        allJobDurations.push(durationSec);
+        allQueueTimes.push(queueTime);
+        totalJobMinutes += durationSec / 60;
 
-          if (job.conclusion !== 'success') {
-            failedJobsCount++;
-            failedJobsMinutes += durationSec / 60;
-          }
+        if (job.conclusion !== 'success') {
+          failedJobsCount++;
+          failedJobsMinutes += durationSec / 60;
         }
-      });
+      }
+    });
 
-      await Promise.all(jobFetchPromises);
+    await Promise.all(jobFetchPromises);
 
-      const metrics = {
-        totalWorkflows: workflows.length,
-        totalRuns,
-        totalMinutes: totalJobMinutes.toFixed(1),
-        failedJobMinutes: failedJobsMinutes.toFixed(1),
-        avgRunTime: allJobDurations.length
-          ? (allJobDurations.reduce((a, b) => a + b, 0) / allJobDurations.length).toFixed(1) + 's'
-          : '0s',
-        avgQueueTime: allQueueTimes.length
-          ? (allQueueTimes.reduce((a, b) => a + b, 0) / allQueueTimes.length).toFixed(1) + 's'
-          : '0s',
-        failureRate: totalRuns ? ((failedJobsCount / totalRuns) * 100).toFixed(1) + '%' : '0%',
-        lastUpdated: DateTime.now().setZone('Asia/Kolkata').toFormat('dd MMM yyyy, hh:mm a'),
-      };
+    const metrics = {
+      totalWorkflows: workflows.length,
+      totalRuns,
+      totalMinutes: totalJobMinutes.toFixed(1),
+      failedJobMinutes: failedJobsMinutes.toFixed(1),
+      avgRunTime: allJobDurations.length
+        ? (allJobDurations.reduce((a, b) => a + b, 0) / allJobDurations.length).toFixed(1) + 's'
+        : '0s',
+      avgQueueTime: allQueueTimes.length
+        ? (allQueueTimes.reduce((a, b) => a + b, 0) / allQueueTimes.length).toFixed(1) + 's'
+        : '0s',
+      failureRate: totalRuns
+        ? ((failedJobsCount / totalRuns) * 100).toFixed(1) + '%'
+        : '0%',
+      lastUpdated: DateTime.now()
+        .setZone('Asia/Kolkata')
+        .toFormat('dd MMM yyyy, hh:mm a'),
+    };
 
-      return res.json({ metrics });
-    } catch (err) {
-      console.error('getMetricsOnly error:', err.response?.data || err.message);
-      return res.status(500).json({ error: 'Failed to fetch metrics' });
-    }
-  },
+    return res.json({ metrics });
+  } catch (err) {
+    console.error('getMetricsOnly error:', err.response?.data || err.message);
+    return res.status(500).json({ error: 'Failed to fetch metrics' });
+  }
+},
 
   getWorkflowsOnly: async (req, res) => {
     try {
