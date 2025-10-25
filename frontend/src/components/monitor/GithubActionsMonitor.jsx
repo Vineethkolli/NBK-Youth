@@ -65,7 +65,7 @@ export default function GithubActionsMonitor() {
       <h2 className="text-2xl font-semibold text-gray-900 pb-3 mb-4">GitHub Actions Monitor</h2>
        <p className="text-gray-500 text-sm flex items-center gap-1">
         <Info className="w-4 h-4 text-blue-500" />
-        Data below is calculated from the last 100 job runs
+        Data is from the last 100 jobs
       </p>
 
       {/* Controls */}
