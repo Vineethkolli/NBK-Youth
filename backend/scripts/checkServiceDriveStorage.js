@@ -1,4 +1,4 @@
-// Command: node utils/checkServiceDriveStorage.js
+// Command: node scripts/checkServiceDriveStorage.js
 
 import 'dotenv/config';
 import { google } from 'googleapis';

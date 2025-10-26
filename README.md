@@ -36,6 +36,7 @@
 <img src="https://img.shields.io/badge/Vini_AI-purple?style=for-the-badge&logo=ai" />
 <img src="https://img.shields.io/badge/Gemini_API-4285F4?style=for-the-badge&logo=api&logoColor=white" />
 <img src="https://img.shields.io/badge/HuggingFace-yellow?style=for-the-badge&logo=huggingface&logoColor=black" />
+<img src="https://img.shields.io/badge/GitHub_Actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white" />
 
 </div>
 
@@ -83,7 +84,10 @@ NBK-Youth is designed to streamline content, finance, and user management in a u
    Archive and manage past events and financial transactions with timeline views for easy reference and future auditing.
 
 - **⏱️ Keep-Alive & Automation:**  
-   GitHub Actions used to keep Backend server and OTP refresh token endpoints alive.  
+   GitHub Actions used to keep Backend server and OTP refresh token endpoints alive. 
+
+- **🗄️ Data Backup:**  
+   Automated MongoDB backups using GitHub Actions, stored securely as GitHub artifacts.
 
 - **☁️ Google Cloud Integration:**  
    A Service Account is used for storing media on Google Drive, and OAuth credentials are used for sending OTPs.  
