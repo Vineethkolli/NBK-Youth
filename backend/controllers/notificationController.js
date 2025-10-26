@@ -1,5 +1,5 @@
 import webpush from 'web-push';
-import Subscription from '../models/Notification.js'; 
+import Subscription from '../models/Notification.js';
 import User from '../models/User.js';
 import NotificationHistory from '../models/NotificationHistory.js';
 import { logActivity } from '../middleware/activityLogger.js';
@@ -59,15 +59,15 @@ export const unsubscribe = async (req, res) => {
 };
 
 export const sendNotification = async (req, res) => {
-  const { title, body, target, registerId } = req.body;
-  const senderRegisterId = req.user.registerId; 
-  const payload = JSON.stringify({ title, body });
+  const { title, body, link, target, registerId } = req.body;
+  const senderRegisterId = req.user.registerId;
+
+  const payload = JSON.stringify({ title, body, link });
 
   try {
     let eligibleRegisterIds = [];
     let subscriptionUsers = [];
 
-    // Determine eligible users based on target criteria using the User collection
     if (target === 'All') {
       const allUsers = await User.find({}, 'registerId');
       eligibleRegisterIds = allUsers.map((user) => user.registerId);
@@ -89,31 +89,43 @@ export const sendNotification = async (req, res) => {
       return res.status(404).json({ error: 'No eligible users found for the selected target' });
     }
 
-    const notifications = subscriptionUsers.flatMap((user) =>
-      user.subscriptions.map(async (sub) => {
-        try {
-          await webpush.sendNotification(sub, payload, {
-            urgency: 'high',
-            TTL: 1296000 // 15 days
-          });
-        } catch (error) {
-          // If subscription is expired or invalid, remove it from the user's subscriptions
-          if (error.statusCode === 410 || error.statusCode === 404) {
-            user.subscriptions = user.subscriptions.filter((s) => s.endpoint !== sub.endpoint);
-            await user.save();
-          } else {
-            console.error('Error sending notification:', error);
-          }
+    const notifications = subscriptionUsers.map(async (user) => {
+  let hasRemoved = false;
+
+  // Send notifications for all subscriptions
+  await Promise.all(
+    user.subscriptions.map(async (sub) => {
+      try {
+        await webpush.sendNotification(sub, payload, { 
+          urgency: 'high', 
+          TTL: 1296000 // 15 days 
+        });
+      } catch (error) {
+        if (error.statusCode === 410 || error.statusCode === 404) {
+          // Mark subscription for removal
+          hasRemoved = true;
+          sub._remove = true; // temporary flag
+        } else {
+          console.error('Error sending notification:', error);
         }
-      })
-    );
+      }
+    })
+  );
 
-    await Promise.all(notifications);
+  // Remove invalid subscriptions once
+  if (hasRemoved) {
+    user.subscriptions = user.subscriptions.filter((s) => !s._remove);
+    await user.save(); // save only once
+  }
+});
 
-    // Create notification history with sender information
+await Promise.all(notifications);
+
+
     await NotificationHistory.create({
       title,
       body,
+      link: link || undefined,
       recipients: eligibleRegisterIds,
       sentBy: senderRegisterId,
     });
@@ -122,8 +134,8 @@ export const sendNotification = async (req, res) => {
       req,
       'CREATE',
       'Notification',
-       Date.now(),
-      { before: null, after: { title, body, target, recipientCount: eligibleRegisterIds.length } },
+      Date.now(),
+      { before: null, after: { title, body, link, target, recipientCount: eligibleRegisterIds.length } },
       `Notification "${title}" sent to ${target} (${eligibleRegisterIds.length} recipients) by ${req.user.name}`
     );
 
@@ -134,14 +146,12 @@ export const sendNotification = async (req, res) => {
   }
 };
 
-// Fetch Notification History for a User based on eligibility
 export const getNotificationHistory = async (req, res) => {
   try {
     const { registerId } = req.query;
     if (!registerId) {
       return res.status(400).json({ error: 'registerId is required' });
     }
-    // Find notifications where the recipients array includes the given registerId
     const history = await NotificationHistory.find({ recipients: registerId }).sort({ createdAt: -1 });
     res.status(200).json(history);
   } catch (error) {
@@ -150,7 +160,7 @@ export const getNotificationHistory = async (req, res) => {
   }
 };
 
-// Helper functions to fetch registerIds based on role or category using the User collection
+// Helper functions
 const getRoleBasedRegisterIds = async (roles) => {
   try {
     const users = await User.find({ role: { $in: roles } }, 'registerId');
