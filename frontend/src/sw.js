@@ -30,24 +30,22 @@ self.addEventListener('push', (event) => {
   event.waitUntil(self.registration.showNotification(title, options));
 });
 
+// Handle notification click events
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
 
-  // Default to the notifications page if no link is provided
   const link = event.notification.data?.link || '/notifications';
-
-  // Check if it's an external link
   const isExternal = link.startsWith('http');
 
+  const targetLink = isExternal ? link : new URL(link, self.location.origin).href;
+
   event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
-      if (clientList.length > 0 && !isExternal) {
-        // App is open and it's an internal link then navigate to the link
-        const client = clientList[0];
-        return client.focus().then(() => client.navigate(link));
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clientList => {
+      const client = clientList.find(c => 'focus' in c) || clientList[0];
+      if (client && !isExternal) {
+        return client.focus().then(() => client.navigate(targetLink));
       } else {
-        // App is closed or the link is external. Open a new window to target URL
-        return clients.openWindow(link);
+        return self.clients.openWindow(targetLink);
       }
     })
   );
