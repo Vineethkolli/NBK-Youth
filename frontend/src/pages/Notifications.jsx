@@ -34,6 +34,7 @@ function Notifications() {
       _id: Math.random().toString(36).slice(2),
       title: notificationData.title,
       body: notificationData.body,
+      link: notificationData.link || '',
       target: notificationData.target,
       sentBy: user?.registerId || 'System',
       createdAt: new Date().toISOString(),

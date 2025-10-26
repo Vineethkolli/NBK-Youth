@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
-import { API_URL } from '../../utils/config';
-import { useAuth } from '../../context/AuthContext';
+import { API_URL } from '../../utils/config'; 
+import { useAuth } from '../../context/AuthContext'; 
 
 function NotificationForm({ onSuccess }) {
   const { user } = useAuth();
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
+  const [link, setLink] = useState(''); 
   const [isLoading, setIsLoading] = useState(false);
   const [target, setTarget] = useState('All');
   const [registerId, setRegisterId] = useState('');
@@ -21,7 +22,7 @@ function NotificationForm({ onSuccess }) {
 
     setIsLoading(true);
     try {
-      const requestData = { title, body, target };
+      const requestData = { title, body, link, target };
       if (target === 'Specific User') {
         if (!registerId) {
           toast.error('Please enter Register ID for the specific user');
@@ -39,6 +40,7 @@ function NotificationForm({ onSuccess }) {
 
       setTitle('');
       setBody('');
+      setLink(''); 
       setRegisterId('');
       toast.success(`Notification sent successfully to ${target}`);
     } catch (error) {
@@ -54,7 +56,7 @@ function NotificationForm({ onSuccess }) {
       <h2 className="text-xl font-semibold mb-4">Send Notification</h2>
       <form onSubmit={sendNotification} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700">Title</label>
+          <label className="block text-sm font-medium text-gray-700">Title *</label>
           <input
             type="text"
             value={title}
@@ -65,13 +67,24 @@ function NotificationForm({ onSuccess }) {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">Message</label>
+          <label className="block text-sm font-medium text-gray-700">Message *</label>
           <textarea
             value={body}
             onChange={(e) => setBody(e.target.value)}
             rows={2}
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
             required
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Link</label>
+          <input
+            type="text"
+            placeholder="Ex: /vibe or https://example.com"
+            value={link}
+            onChange={(e) => setLink(e.target.value)}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
           />
         </div>
 

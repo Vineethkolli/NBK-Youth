@@ -5,15 +5,17 @@ import NotificationHistory from '../models/NotificationHistory.js';
 import webpush from 'web-push';
 import { logActivity } from '../middleware/activityLogger.js';
 
+// Create Scheduled Notification
 export const createScheduledNotification = async (req, res) => {
   try {
-    const { title, message, scheduledAt } = req.body;
+    const { title, message, link, scheduledAt } = req.body;
     if (!title || !message || !scheduledAt)
       return res.status(400).json({ error: 'Missing required fields' });
 
     const doc = await ScheduledNotification.create({
       title,
       message,
+      link: link?.trim() || '',
       scheduledAt: new Date(scheduledAt),
       createdBy: req.user?.registerId || 'SYSTEM',
       status: 'PENDING',
@@ -36,7 +38,7 @@ export const createScheduledNotification = async (req, res) => {
   }
 };
 
-
+// List Scheduled Notifications
 export const listScheduledNotifications = async (req, res) => {
   try {
     const docs = await ScheduledNotification.find().sort({ scheduledAt: -1 });
@@ -47,7 +49,7 @@ export const listScheduledNotifications = async (req, res) => {
   }
 };
 
-
+// Update Scheduled Notification
 export const updateScheduledNotification = async (req, res) => {
   try {
     const { id } = req.params;
@@ -60,6 +62,8 @@ export const updateScheduledNotification = async (req, res) => {
     if (updates.scheduledAt && new Date(updates.scheduledAt).getTime() !== oldDoc.scheduledAt.getTime()) {
       updates.status = 'PENDING';
     }
+
+    if (updates.link !== undefined) updates.link = updates.link.trim();
 
     const doc = await ScheduledNotification.findByIdAndUpdate(id, updates, { new: true });
 
@@ -79,7 +83,7 @@ export const updateScheduledNotification = async (req, res) => {
   }
 };
 
-
+// Delete Scheduled Notification
 export const deleteScheduledNotification = async (req, res) => {
   try {
     const { id } = req.params;
@@ -101,7 +105,6 @@ export const deleteScheduledNotification = async (req, res) => {
   }
 };
 
-
 // Send Manually
 export const sendScheduledNow = async (req, res) => {
   try {
@@ -109,7 +112,7 @@ export const sendScheduledNow = async (req, res) => {
     const doc = await ScheduledNotification.findById(id);
     if (!doc) return res.status(404).json({ error: 'Not found' });
 
-    const payload = JSON.stringify({ title: doc.title, body: doc.message });
+    const payload = JSON.stringify({ title: doc.title, body: doc.message, link: doc.link || '' });
 
     const allUsers = await User.find({}, 'registerId');
     const eligibleRegisterIds = allUsers.map(u => u.registerId);
@@ -118,9 +121,7 @@ export const sendScheduledNow = async (req, res) => {
     const notifications = subscriptionUsers.flatMap(user =>
       user.subscriptions.map(async sub => {
         try {
-          await webpush.sendNotification(sub, payload, {
-            urgency: 'high'
-          });
+          await webpush.sendNotification(sub, payload, { urgency: 'high' });
         } catch (error) {
           if (error.statusCode === 410 || error.statusCode === 404) {
             user.subscriptions = user.subscriptions.filter(s => s.endpoint !== sub.endpoint);
@@ -142,6 +143,7 @@ export const sendScheduledNow = async (req, res) => {
     await NotificationHistory.create({
       title: doc.title,
       body: doc.message,
+      link: doc.link || '',
       recipients: eligibleRegisterIds,
       sentBy: req.user?.registerId || 'SYSTEM',
     });
@@ -162,8 +164,7 @@ export const sendScheduledNow = async (req, res) => {
   }
 };
 
-
-// Scheduled Notifications
+// Scheduled Notifications Processor
 export const processDueNotifications = async () => {
   try {
     const now = new Date();
@@ -179,7 +180,7 @@ export const processDueNotifications = async () => {
 
     for (const doc of due) {
       try {
-        const payload = JSON.stringify({ title: doc.title, body: doc.message });
+        const payload = JSON.stringify({ title: doc.title, body: doc.message, link: doc.link || '' });
 
         const allUsers = await User.find({}, 'registerId');
         const eligibleRegisterIds = allUsers.map(u => u.registerId);
@@ -188,10 +189,7 @@ export const processDueNotifications = async () => {
         const notifications = subscriptionUsers.flatMap(user =>
           user.subscriptions.map(async sub => {
             try {
-              await webpush.sendNotification(sub, payload, {
-                urgency: 'high',
-                TTL: 1296000 // 15 days
-              });
+              await webpush.sendNotification(sub, payload, { urgency: 'high', TTL: 1296000 });
             } catch (error) {
               if (error.statusCode === 410 || error.statusCode === 404) {
                 user.subscriptions = user.subscriptions.filter(s => s.endpoint !== sub.endpoint);
@@ -213,6 +211,7 @@ export const processDueNotifications = async () => {
         await NotificationHistory.create({
           title: doc.title,
           body: doc.message,
+          link: doc.link || '',
           recipients: eligibleRegisterIds,
           sentBy: 'SYSTEM_SCHEDULER',
         });

@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 const scheduledNotificationSchema = new mongoose.Schema({
   title: { type: String, required: true },
   message: { type: String, required: true },
+  link: { type: String, required: false },
   scheduledAt: { type: Date, required: true },
   createdBy: { type: String },
   status: { type: String, enum: ['PENDING', 'SENT'], default: 'PENDING' },

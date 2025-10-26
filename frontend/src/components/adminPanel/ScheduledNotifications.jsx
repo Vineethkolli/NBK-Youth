@@ -6,12 +6,12 @@ import { API_URL } from '../../utils/config';
 
 function ScheduledNotifications() {
   const [items, setItems] = useState([]);
-  const [formData, setFormData] = useState({ title: '', message: '', scheduledAt: '' });
+  const [formData, setFormData] = useState({ title: '', message: '', link: '', scheduledAt: '' });
   const [editingId, setEditingId] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [showActions, setShowActions] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [deletingId, setDeletingId] = useState(null); 
+  const [deletingId, setDeletingId] = useState(null);
 
   const fetch = async () => {
     try {
@@ -25,7 +25,7 @@ function ScheduledNotifications() {
   useEffect(() => { fetch(); }, []);
 
   const resetForm = () => {
-    setFormData({ title: '', message: '', scheduledAt: '' });
+    setFormData({ title: '', message: '', link: '', scheduledAt: '' });
     setEditingId(null);
   };
 
@@ -33,7 +33,7 @@ function ScheduledNotifications() {
     e.preventDefault();
     if (isSubmitting) return;
 
-    const { title, message, scheduledAt } = formData;
+    const { title, message, link, scheduledAt } = formData;
     if (!title.trim() || !message.trim() || !scheduledAt) {
       toast.error('Please fill all mandatory fields');
       return;
@@ -44,6 +44,7 @@ function ScheduledNotifications() {
       const payload = {
         title: title.trim(),
         message: message.trim(),
+        link: link.trim(),
         scheduledAt: new Date(scheduledAt).toISOString(),
       };
 
@@ -71,6 +72,7 @@ function ScheduledNotifications() {
     setFormData({
       title: item.title,
       message: item.message,
+      link: item.link || '',
       scheduledAt: new Date(item.scheduledAt).toISOString().slice(0, 10),
       frequency: item.frequency || 'ONCE',
     });
@@ -88,7 +90,7 @@ function ScheduledNotifications() {
     } catch {
       toast.error('Failed to delete');
     } finally {
-      setDeletingId(null); 
+      setDeletingId(null);
     }
   };
 
@@ -161,6 +163,16 @@ function ScheduledNotifications() {
                 />
               </div>
               <div>
+                <label className="block text-sm font-medium text-gray-700">Link</label>
+                <input
+                  type="text"
+                  placeholder="Ex: /vibe or https://example.com"
+                  value={formData.link}
+                  onChange={(e) => setFormData({ ...formData, link: e.target.value })}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                />
+              </div>
+              <div>
                 <label className="block text-sm font-medium text-gray-700">Schedule (Date) *</label>
                 <input
                   type="date"
@@ -198,6 +210,19 @@ function ScheduledNotifications() {
             <div>
               <div className="font-medium">Title: {it.title}</div>
               <div className="font-medium">Message: {it.message}</div>
+              {it.link && (
+  <div className="text-xs">
+    <span className="text-black">Link: </span>
+    <a
+      href={it.link.startsWith('http') ? it.link : `${window.location.origin}${it.link}`}
+      target={it.link.startsWith('http') ? '_blank' : '_self'}
+      rel="noopener noreferrer"
+      className="text-blue-600 underline hover:text-blue-800"
+    >
+      {it.link}
+    </a>
+  </div>
+)}
               <div className="text-xs text-gray-500">Scheduled: {new Date(it.scheduledAt).toLocaleDateString()}</div>
               <div className="text-xs text-gray-500">
                 Status: {it.sendHistory && it.sendHistory.length ? `Sent (${it.sendHistory.map(s => new Date(s.sentAt).toLocaleDateString()).join(', ')})` : 'Not Sent'}
