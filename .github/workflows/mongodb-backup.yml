@@ -1,0 +1,41 @@
+name: MongoDB Backup Daily
+
+on:
+  schedule:
+    # Runs daily at 2 AM IST
+    - cron: '30 20 * * *'
+  workflow_dispatch: # allows manual trigger
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180  # max allowed runtime 3 hours
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Install MongoDB Tools
+        run: sudo apt-get update && sudo apt-get install -y mongodb-database-tools
+
+      # Dump MongoDB database
+      - name: Dump MongoDB
+        env:
+          MONGO_URI: ${{ secrets.MONGO_URI }}
+        run: |
+          BACKUP_DATE=$(TZ="Asia/Kolkata" date +%d-%m-%Y)
+          BACKUP_DIR=backup-$BACKUP_DATE
+          mkdir -p $BACKUP_DIR
+          echo "Dumping MongoDB to $BACKUP_DIR ..."
+          start_time=$(date +%s)
+          mongodump --uri="$MONGO_URI" --out="$BACKUP_DIR"
+          end_time=$(date +%s)
+          duration=$((end_time - start_time))
+          echo "MongoDB dump completed in ${duration} seconds."
+
+      # Upload the backup as GitHub artifact
+      - name: Upload Backup Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: mongodb-backup-$BACKUP_DATE
+          path: backup-*
