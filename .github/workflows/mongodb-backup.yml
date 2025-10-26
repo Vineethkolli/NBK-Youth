@@ -1,4 +1,4 @@
-name: Backup Test
+name: Mongodb Backup Daily
 
 on:
   schedule:
