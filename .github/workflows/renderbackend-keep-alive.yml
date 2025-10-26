@@ -2,9 +2,9 @@ name: Keep Render Backend Alive
 
 on:
   schedule:
-    # Runs every half an hour
+    # Runs every 30 minutes
     - cron: '*/30 * * * *'
-  workflow_dispatch: # manual trigger
+  workflow_dispatch: # allows manual trigger
 
 jobs:
   wakeup:
@@ -16,12 +16,12 @@ jobs:
         run: |
           MAX_RETRIES=2
           for i in $(seq 1 $MAX_RETRIES); do
-            RESPONSE=$(curl -s --max-time 120 -o /dev/null -w "%{http_code}" "$BACKEND_URL")
+            RESPONSE=$(curl -s --max-time 180 -o /dev/null -w "%{http_code}" "$BACKEND_URL" || true)
             if [ "$RESPONSE" -ge 200 ] && [ "$RESPONSE" -lt 400 ]; then
               echo "Backend is awake (HTTP $RESPONSE)"
               exit 0
             else
-              echo "Ping failed (HTTP $RESPONSE), retrying in 10s..."
+              echo "Ping failed (HTTP $RESPONSE), retrying in 10s... (Attempt $i/$MAX_RETRIES)"
               sleep 10
             fi
           done
