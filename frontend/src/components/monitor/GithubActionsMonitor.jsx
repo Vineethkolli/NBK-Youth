@@ -120,7 +120,7 @@ export default function GithubActionsMonitor() {
               <th className="p-3 text-center font-bold text-gray-700">S.No</th>
               <th className="p-3 text-left font-bold text-gray-700">Workflow Name</th>
               <th className="p-3 text-left font-bold text-gray-700">Schedule</th>
-              <th className="p-3 text-left font-bold text-gray-700">Previous 100 Runs</th>
+              <th className="p-3 text-left font-bold text-gray-700">Last 5 Runs</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">

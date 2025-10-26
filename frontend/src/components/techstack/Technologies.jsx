@@ -52,7 +52,7 @@ const infrastructure = [
     category: "Automation / CI",
     name: "GitHub Actions",
     icon: <SiGithub className="h-12 w-12 text-gray-800" />,
-    description: "Keeps backend, MongoDB, and OTP endpoints alive",
+    description: "Keeps server running, with automated MongoDB backups stored as artifacts",
   },
 ];
 
