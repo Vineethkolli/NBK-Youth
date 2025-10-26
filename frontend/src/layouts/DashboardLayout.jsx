@@ -1,18 +1,19 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect,  useRef, useLayoutEffect} from 'react';
 import { useNavigate, Outlet, useLocation } from 'react-router-dom';
 import { Users, LayoutGrid, Home, BarChart2, IndianRupee, DollarSign, Wallet, CameraIcon } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
-import InstallApp from '../components/home/InstallApp';
-import NotificationPrompt from '../components/home/NotificationPrompt';
+import InstallApp from '../components/common/InstallApp';
+import NotificationPrompt from '../components/common/NotificationPrompt';
 import NotificationAutoRegister from '../components/notifications/NotificationAutoRegister';
 
 function DashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [budgetOpen, setBudgetOpen] = useState(false);
+  const [isMobileDevice, setIsMobileDevice] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const mainContentRef = useRef(null);
+  const mainRef = useRef(null);
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
   const closeSidebar = () => setSidebarOpen(false);
@@ -29,11 +30,20 @@ function DashboardLayout() {
     closeSidebar();
   };
 
-  useEffect(() => {
-    if (mainContentRef.current) {
-      mainContentRef.current.scrollTo(0, 0); // Scroll the element to top on route change
+    useLayoutEffect(() => {
+    if (mainRef.current) {
+      mainRef.current.scrollTo({ top: 0, left: 0, behavior: 'auto' });  // Scroll to top on route change
+    } else {
+      window.scrollTo(0, 0);
     }
   }, [location.pathname]);
+
+    useEffect(() => {
+    // Detect mobile/tablet devices
+    const ua = navigator.userAgent;
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|Windows Phone/i.test(ua);
+    setIsMobileDevice(isMobile);
+  }, []);
 
   // Disable body scroll when sidebar is open
   useEffect(() => {
@@ -47,11 +57,12 @@ function DashboardLayout() {
     };
   }, [sidebarOpen]);
 
+
   return (
     <div className="flex h-screen bg-gray-100 relative overflow-hidden">
       {/* Overlay Install Prompt */}
-      <InstallApp />
-      <NotificationPrompt />
+      {isMobileDevice && <InstallApp />}
+      {isMobileDevice && <NotificationPrompt />}
       <NotificationAutoRegister />
 
       <Header toggleSidebar={toggleSidebar} />
@@ -64,7 +75,7 @@ function DashboardLayout() {
       )}
 
       <main
-      ref={mainContentRef}
+      ref={mainRef}
         className={`flex-1 overflow-auto p-4 mt-12 md:ml-64 pb-20 min-h-[calc(100vh-3rem)] ${sidebarOpen ? 'pointer-events-none' : ''}`}
         style={{ WebkitOverflowScrolling: 'touch' }}
       >
