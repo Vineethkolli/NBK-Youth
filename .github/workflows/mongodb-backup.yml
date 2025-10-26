@@ -22,13 +22,17 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y mongodb-database-tools
 
+      # Get current date in IST
+      - name: Set backup date
+        id: set-date
+        run: echo "backup_date=$(TZ='Asia/Kolkata' date +'%d-%m-%Y')" >> $GITHUB_OUTPUT
+
       # Dump MongoDB database
       - name: Dump MongoDB
         env:
           MONGO_URI: ${{ secrets.MONGO_URI }}
         run: |
-          BACKUP_DATE=$(TZ="Asia/Kolkata" date +%d-%m-%Y)
-          BACKUP_DIR=backup-$BACKUP_DATE
+          BACKUP_DIR=backup-${{ steps.set-date.outputs.backup_date }}
           mkdir -p $BACKUP_DIR
           echo "Dumping MongoDB to $BACKUP_DIR ..."
           start_time=$(date +%s)
@@ -41,5 +45,5 @@ jobs:
       - name: Upload Backup Artifact
         uses: actions/upload-artifact@v5
         with:
-          name: mongodb-backup-$BACKUP_DATE
+          name: mongodb-backup-${{ steps.set-date.outputs.backup_date }}
           path: backup-*
