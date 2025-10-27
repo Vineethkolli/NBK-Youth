@@ -30,32 +30,35 @@ export const getDeviceInfo = async () => {
 
   // Prefer Client Hints
   if (navigator.userAgentData) {
-    try {
-      const uaData = navigator.userAgentData;
-      const brands = uaData.brands || uaData.uaList || [];
-      if (brands.length) {
-        browserName = brands[0].brand || 'unknown';
-        browserVersion = brands[0].version || 'unknown';
+  try {
+    const uaData = navigator.userAgentData;
+    const brands = uaData.brands || uaData.uaList || [];
+    if (brands.length) {
+      const realBrand = brands.find(b => b.brand && !/^not\?a_brand$/i.test(b.brand));
+      if (realBrand) {
+        browserName = realBrand.brand;
+        browserVersion = realBrand.version || 'unknown';
       }
-
-      deviceType = uaData.mobile ? 'mobile' : 'desktop';
-
-      const high = await uaData.getHighEntropyValues?.([
-        'platform',
-        'platformVersion',
-        'model',
-        'uaFullVersion'
-      ]).catch(() => ({}));
-
-      if (high) {
-        osName = high.platform || osName;
-        osVersion = String(high.platformVersion || osVersion);
-        deviceIdentifier = sanitize(high.model);
-        browserVersion = String(high.uaFullVersion || browserVersion);
-      }
-    } catch {
     }
+
+    deviceType = uaData.mobile ? 'mobile' : 'desktop';
+
+    const high = await uaData.getHighEntropyValues?.([
+      'platform',
+      'platformVersion',
+      'model',
+      'uaFullVersion'
+    ]).catch(() => ({}));
+
+    if (high) {
+      osName = high.platform || osName;
+      osVersion = String(high.platformVersion || osVersion);
+      deviceIdentifier = sanitize(high.model);
+      browserVersion = String(high.uaFullVersion || browserVersion);
+    }
+  } catch {
   }
+}
 
   // Browser detection
   if (browserName === 'unknown') {
