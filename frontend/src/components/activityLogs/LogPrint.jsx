@@ -1,13 +1,17 @@
+import { useState } from 'react';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { Printer } from 'lucide-react';
+import { Printer, Loader2 } from 'lucide-react';
 import axios from 'axios';
 import { API_URL } from '../../utils/config';
 import { toast } from 'react-hot-toast';
 import { formatDateTime } from '../../utils/dateTime'; 
 
 const ActivityLogPrint = ({ filters, search }) => {
+  const [loading, setLoading] = useState(false);
+
   const handlePrint = async () => {
+    setLoading(true);
     try {
       const params = new URLSearchParams({
         search,
@@ -54,15 +58,43 @@ const ActivityLogPrint = ({ filters, search }) => {
         if (log.changes) {
           if (log.changes.before) {
             beforeLines.push('Before:');
-            Object.entries(log.changes.before).forEach(
-              ([key, value]) => beforeLines.push(`  ${key}: ${value}`)
-            );
+            Object.entries(log.changes.before).forEach(([key, value]) => {
+              if (key === 'deviceInfo' && typeof value === 'object') {
+                beforeLines.push(`  ${key}:`);
+                Object.entries(value).forEach(([k, v]) => {
+                  if (k === 'browser' && typeof v === 'object') {
+                    beforeLines.push(`    browser:`);
+                    Object.entries(v).forEach(([bk, bv]) => {
+                      beforeLines.push(`      ${bk}: ${bv}`);
+                    });
+                  } else {
+                    beforeLines.push(`    ${k}: ${v}`);
+                  }
+                });
+              } else {
+                beforeLines.push(`  ${key}: ${value}`);
+              }
+            });
           }
           if (log.changes.after) {
             afterLines.push('After:');
-            Object.entries(log.changes.after).forEach(
-              ([key, value]) => afterLines.push(`  ${key}: ${value}`)
-            );
+            Object.entries(log.changes.after).forEach(([key, value]) => {
+              if (key === 'deviceInfo' && typeof value === 'object') {
+                afterLines.push(`  ${key}:`);
+                Object.entries(value).forEach(([k, v]) => {
+                  if (k === 'browser' && typeof v === 'object') {
+                    afterLines.push(`    browser:`);
+                    Object.entries(v).forEach(([bk, bv]) => {
+                      afterLines.push(`      ${bk}: ${bv}`);
+                    });
+                  } else {
+                    afterLines.push(`    ${k}: ${v}`);
+                  }
+                });
+              } else {
+                afterLines.push(`  ${key}: ${value}`);
+              }
+            });
           }
         } else {
           beforeLines.push('No Changes');
@@ -101,7 +133,7 @@ const ActivityLogPrint = ({ filters, search }) => {
         styles: { fontSize: 10 },
       });
 
-      // Footer: timestamp on left, page number on right
+      // Footer
       const pageCount = doc.getNumberOfPages();
       for (let i = 1; i <= pageCount; i++) {
         doc.setPage(i);
@@ -112,16 +144,28 @@ const ActivityLogPrint = ({ filters, search }) => {
       }
 
       doc.save('Activity_Logs_Report.pdf');
-
+      toast.success('Report printed successfully');
     } catch (err) {
       toast.error('Failed to fetch all logs for printing');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <button onClick={handlePrint} className="btn-secondary flex items-center">
-      <Printer className="h-4 w-4 mr-1 inline" />
-      <span>Print</span>
+    <button
+      onClick={handlePrint}
+      disabled={loading}
+      className={`btn-secondary flex items-center ${
+        loading ? 'opacity-50 cursor-not-allowed' : ''
+      }`}
+    >
+      {loading ? (
+        <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+      ) : (
+        <Printer className="h-4 w-4 mr-1" />
+      )}
+      <span>{loading ? 'Printing...' : 'Print'}</span>
     </button>
   );
 };
