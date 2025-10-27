@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { toast } from 'react-hot-toast';
-import { initializeAnalytics, trackPageView } from './utils/analytics';
+import { initializeAnalytics, trackPageView, setAnalyticsUser, clearAnalyticsUser } from './utils/analytics';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { HiddenProfileProvider } from './context/HiddenProfileContext';
 import { LanguageProvider } from './context/LanguageContext';
@@ -66,6 +66,14 @@ function RouteTracker() {
 function AppContent() {
   const { user } = useAuth();
   const { isMaintenanceMode } = useMaintenanceMode();
+
+  useEffect(() => {
+    if (user && user.registerid) {
+      setAnalyticsUser(user.registerid);
+    } else {
+      clearAnalyticsUser();
+    }
+  }, [user]); 
 
   if (isMaintenanceMode && user?.role !== 'developer') {
     return <MaintenancePage />;
