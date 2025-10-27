@@ -68,8 +68,8 @@ function AppContent() {
   const { isMaintenanceMode } = useMaintenanceMode();
 
   useEffect(() => {
-    if (user && user.registerid) {
-      setAnalyticsUser(user.registerid);
+    if (user && user.registerId) {
+      setAnalyticsUser(user.registerId);
     } else {
       clearAnalyticsUser();
     }
