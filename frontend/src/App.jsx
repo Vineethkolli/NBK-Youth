@@ -141,19 +141,15 @@ function App() {
     initializeAnalytics();
 
     if ('serviceWorker' in navigator) {
-      const isAlreadyControlled = !!navigator.serviceWorker.controller;
-      navigator.serviceWorker
-        .register('/sw.js', { scope: '/' })
+      navigator.serviceWorker.register('/sw.js', { scope: '/' })
         .catch((error) => {
           console.error('Service Worker registration failed:', error);
         });
 
-      if (isAlreadyControlled) {
-        navigator.serviceWorker.addEventListener('controllerchange', () => {
-          toast.success('New version available! Refreshing...');
-          setTimeout(() => window.location.reload(), 1000);
-        });
-      }
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        toast.success('New version available! Refreshing...');
+        setTimeout(() => window.location.reload(), 1000);
+      });
     }
   }, []);
 
