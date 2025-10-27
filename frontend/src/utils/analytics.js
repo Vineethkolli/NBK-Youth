@@ -2,10 +2,8 @@ import ReactGA from 'react-ga4';
 
 const MEASUREMENT_ID = import.meta.env.VITE_GA_MEASUREMENT_ID;
 
-// Flag to avoid re-initializing GA
+// Avoid re-initializing GA
 let initialized = false;
-// Stored register id (e.g. operations user id) to attach to GA hits
-let registerId = null;
 
 export const initializeAnalytics = () => {
   if (!MEASUREMENT_ID || initialized) return;
@@ -13,21 +11,27 @@ export const initializeAnalytics = () => {
     ReactGA.initialize(MEASUREMENT_ID);
     initialized = true;
   } catch (err) {
+    console.error("Failed to initialize GA:", err);
   }
 };
 
-// Allow other parts of the app to set the register id (user id) so that
-// GA hits (pageviews/events) are attributed to this id. Call this after
-// the operations user logs in or when the id becomes available.
-export const setRegisterId = (id) => {
-  if (!id) return;
-  registerId = id;
+// Call function when the user logs in and have their registerId
+export const setAnalyticsUser = (userId) => {
+  if (!initialized || !userId) return;
+  try {
+    ReactGA.set({ userId: userId });
+  } catch (err) {
+    console.error("Failed to set GA User ID:", err);
+  }
+};
+
+// Call this when the user logs out
+export const clearAnalyticsUser = () => {
   if (!initialized) return;
   try {
-    // Set both common variants so it works with different GA setups.
-    ReactGA.set({ user_id: id, userId: id });
+    ReactGA.set({ userId: null });
   } catch (err) {
-    // swallow errors silently as analytics should not break app flow
+    console.error("Failed to clear GA User ID:", err);
   }
 };
 
@@ -35,10 +39,8 @@ export const setRegisterId = (id) => {
 export const trackPageView = (path) => {
   if (!initialized) return;
   try {
-    // Include registerId (user_id) when present so pageviews are attributed
-    // to the operations/user making the request.
-    const payload = { hitType: 'pageview', page: path };
-    if (registerId) payload.user_id = registerId;
-    ReactGA.send(payload);
-  } catch {}
+    ReactGA.send({ hitType: 'pageview', page: path });
+  } catch (err) {
+    console.error("Failed to track page view:", err);
+  }
 };
