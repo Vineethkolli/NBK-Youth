@@ -31,12 +31,34 @@ export const signUp = async (req, res) => {
     });
 
     await logActivity(
-      { user: { registerId: user.registerId, name: user.name }, ip: req.ip, get: req.get.bind(req) },
+      { 
+        user: { registerId: user.registerId, name: user.name }
+      },
       'CREATE',
       'User',
       user.registerId,
-      { before: null, after: { name: user.name, email: user.email, phoneNumber: user.phoneNumber, role: user.role } },
-      `User ${user.name} registered with phone ${user.phoneNumber}`
+      { 
+        before: null, 
+        after: { 
+          name: user.name, 
+          email: user.email, 
+          phoneNumber: user.phoneNumber, 
+          role: user.role,
+          deviceInfo: req.body.deviceInfo || {
+            type: 'unknown',
+            deviceType: 'unknown',
+            deviceModel: 'unknown',
+            platform: 'unknown',
+            browser: {
+              name: 'unknown',
+              version: 'unknown',
+              osName: 'unknown',
+              osVersion: 'unknown'
+            }
+          }
+        } 
+      },
+      `User ${user.name} signed up`
     );
 
     const token = jwt.sign(
@@ -78,11 +100,29 @@ export const signIn = async (req, res) => {
     }
 
     await logActivity(
-      { user: { registerId: user.registerId, name: user.name }, ip: req.ip, get: req.get.bind(req) },
+      { 
+        user: { registerId: user.registerId, name: user.name }
+      },
       'UPDATE',
       'User',
       user.registerId,
-      { before: null, after: null },
+      { 
+        before: null, 
+        after: {
+          deviceInfo: req.body.deviceInfo || {
+            type: 'unknown',
+            deviceType: 'unknown',
+            deviceModel: 'unknown',
+            platform: 'unknown',
+            browser: {
+              name: 'unknown',
+              version: 'unknown',
+              osName: 'unknown',
+              osVersion: 'unknown'
+            }
+          }
+        }
+      },
       `User ${user.name} signed in`
     );
 
@@ -166,7 +206,7 @@ export const resetPassword = async (req, res) => {
     await user.save();
 
     await logActivity(
-      { user: { registerId: user.registerId, name: user.name }, ip: req.ip, get: req.get.bind(req) },
+      { user: { registerId: user.registerId, name: user.name } },
       'UPDATE',
       'User',
       user.registerId,

@@ -62,7 +62,7 @@ const PaymentController = {
       await newPayment.save();
 
       await logActivity(
-        { user: { registerId, name }, ip: req.ip, get: req.get.bind(req) },
+        { user: { registerId, name } },
         'CREATE',
         'Payment',
         newPayment.paymentId,
