@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 import { API_URL } from '../utils/config';
+import { getDeviceInfo } from '../utils/deviceInfo';
 
 const AuthContext = createContext();
 
@@ -47,10 +48,12 @@ export const AuthProvider = ({ children }) => {
 
   const signin = async (identifier, password) => {
     const language = localStorage.getItem('preferredLanguage') || 'en';
+    const deviceInfo = await getDeviceInfo();
     const { data } = await axios.post(`${API_URL}/api/auth/signin`, {
       identifier,
       password,
       language,
+      deviceInfo,
     });
     localStorage.setItem('token', data.token);
     if (data.user.language) {
@@ -62,9 +65,11 @@ export const AuthProvider = ({ children }) => {
 
   const signup = async (userData) => {
     const language = localStorage.getItem('preferredLanguage') || 'en';
+    const deviceInfo = await getDeviceInfo();
     const { data } = await axios.post(`${API_URL}/api/auth/signup`, {
       ...userData,
       language,
+      deviceInfo,
     });
 
     localStorage.setItem('token', data.token);
