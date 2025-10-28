@@ -139,16 +139,10 @@ function AppContent() {
 function App() {
   useEffect(() => {
     initializeAnalytics();
-
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js', { scope: '/' })
-        .catch((error) => {
-          console.error('Service Worker registration failed:', error);
-        });
-
+    if (navigator.serviceWorker) {
       navigator.serviceWorker.addEventListener('controllerchange', () => {
-        toast.success('New version available! Refreshing...');
-        setTimeout(() => window.location.reload(), 1000);
+        // reload the page to apply the new version
+        window.location.reload();
       });
     }
   }, []);

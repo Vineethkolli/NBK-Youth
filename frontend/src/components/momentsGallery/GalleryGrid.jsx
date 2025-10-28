@@ -10,7 +10,7 @@ import { API_URL } from '../../utils/config';
 function GalleryGrid({
   moment,
   onClose,
-  onMediaClick, // this triggers lightbox
+  onMediaClick,
   onDeleteGalleryFile,
   onUploadMediaInGallery,
   onCopyToServiceDriveGallery,
@@ -200,13 +200,15 @@ function GalleryGrid({
               >
                 <Download className="h-4 w-4" />
               </button>
-              <button
-                onClick={bulkDeleteFiles}
-                className="p-2 bg-red-600 text-white rounded hover:bg-red-700 flex items-center"
-                title="Delete selected"
-              >
-                <Trash2 className="h-4 w-4" />
-              </button>
+              {canManageMedia && (
+  <button
+    onClick={bulkDeleteFiles}
+    className="p-2 bg-red-600 text-white rounded hover:bg-red-700 flex items-center"
+    title="Delete selected"
+  >
+    <Trash2 className="h-4 w-4" />
+  </button>
+)}
               <button
                 onClick={() => setSelectedFiles([])}
                 className="text-red-600 hover:text-red-700 font-semibold"
