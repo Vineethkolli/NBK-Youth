@@ -104,23 +104,16 @@ app.use('/api/monitor', monitorRoutes);
 app.get('/', (req, res) => res.json({ status: 'API is running' }));
 app.get('/health', (req, res) => res.status(200).send('Ok'));
 
-// MongoDB Connection with latency tracking
-const startTime = Date.now();
-
+// MongoDB Connection
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => {
-    const endTime = Date.now();
-    const latency = endTime - startTime;
-    console.log(`✅ Connected to MongoDB (${latency} ms)`);
+    console.log('Connected to MongoDB');
     createDefaultDeveloper();
   })
   .catch(err => {
-    const endTime = Date.now();
-    const latency = endTime - startTime;
-    console.error(`❌ MongoDB connection error after ${latency} ms:`, err);
-    process.exit(1);
+    console.error('MongoDB connection error:', err);
+    process.exit(1); 
   });
-
 
 // Notification Scheduler runs at 7:00, 7:15, 7:35, 7:55 AM IST IST every day
 cron.schedule('0,15,35,55 7 * * *', async () => {
