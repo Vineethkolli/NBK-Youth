@@ -54,7 +54,7 @@ function Sidebar({ isOpen, onNavigate }) {
     <div
       className={`fixed top-14 left-0 h-[calc(100vh-3rem)] bg-white shadow-lg transition-transform duration-300 ease-in-out transform ${
         isOpen ? 'translate-x-0' : '-translate-x-full'
-      } lg:translate-x-0 z-10 overflow-y-scroll`}
+      } xl:translate-x-0 z-10 overflow-y-scroll`}
       style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}
     >
       <div className="w-60 h-full flex flex-col">
@@ -82,7 +82,7 @@ function Sidebar({ isOpen, onNavigate }) {
           })}
           <button
             onClick={onNavigate}
-            className="text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-12 py-2 text-sm font-medium rounded-md mt-2 lg:hidden"
+            className="text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-12 py-2 text-sm font-medium rounded-md mt-2 xl:hidden"
           >
             <X className="mr-3 h-6 w-6 text-gray-800" />
             <span>Close</span>
@@ -91,7 +91,7 @@ function Sidebar({ isOpen, onNavigate }) {
       </div>
       <button
         onClick={onNavigate}
-        className="absolute top-1/2 right-0 transform -translate-y-1/2 bg-gray-200 hover:bg-gray-300 text-gray-800 p-2 rounded-full shadow-md z-20 lg:hidden"
+        className="absolute top-1/2 right-0 transform -translate-y-1/2 bg-gray-200 hover:bg-gray-300 text-gray-800 p-2 rounded-full shadow-md z-20 xl:hidden"
       >
         <ChevronLeft className="h-6 w-6" />
       </button>
