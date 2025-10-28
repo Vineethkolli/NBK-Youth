@@ -50,7 +50,6 @@ import OfflineIndicator from './components/common/OfflineIndicator';
 import ErrorBoundary from './components/common/ErrorBoundary';
 
 
-// Main App Content
 function AppContent() {
   const { user } = useAuth();
   const { isMaintenanceMode } = useMaintenanceMode();
@@ -129,20 +128,21 @@ function AppContent() {
 // Root App Wrapper
 function App() {
   useEffect(() => {
-    initializeAnalytics();
+  initializeAnalytics();
 
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js', { scope: '/' })
-        .catch((error) => {
-          console.error('Service Worker registration failed:', error);
-        });
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js', { scope: '/' })
+      .catch((error) => console.error('Service Worker registration failed:', error));
 
+    // Only reload if a service worker was already controlling the page
+    if (navigator.serviceWorker.controller) {
       navigator.serviceWorker.addEventListener('controllerchange', () => {
         toast.success('New version available! Refreshing...');
         setTimeout(() => window.location.reload(), 1000);
       });
     }
-  }, []);
+  }
+}, []);
 
 
   return (
