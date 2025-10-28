@@ -53,6 +53,7 @@ function Users() {
     return <div>Access denied</div>;
   }
 
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
@@ -78,6 +79,7 @@ function Users() {
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
                 <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Notifications</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Language</th>
                 {currentUser.role === 'developer' && (
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                     Actions
@@ -89,8 +91,9 @@ function Users() {
             <tbody className="bg-white divide-y divide-gray-200">
               {users.map((user) => (
                 <tr key={user._id}>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm">{user.registerId}</td>
-
+                  <td className="px-4 py-3 whitespace-nowrap text-sm notranslate">
+                    {user.registerId}
+                  </td>
                   <td className="px-4 py-3 whitespace-nowrap text-sm">
                     {user.name}{' '}
                     {(user.role === 'admin' ||
@@ -106,14 +109,13 @@ function Users() {
                       </span>
                     )}
                   </td>
-
-                  <td className="px-4 py-3 whitespace-nowrap text-sm">
+                  <td className="px-4 py-3 whitespace-nowrap text-sm notranslate">
                     {user.email || 'N/A'}
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm">
+
+                  <td className="px-4 py-3 whitespace-nowrap text-sm notranslate">
                     {user.phoneNumber || 'N/A'}
                   </td>
-
                   <td className="px-4 py-3 whitespace-nowrap text-sm">
                     <select
                       value={user.role}
@@ -129,6 +131,7 @@ function Users() {
                       <option value="developer">Developer</option>
                     </select>
                   </td>
+
                   <td className="px-4 py-3 whitespace-nowrap text-sm">
                     <select
                       value={user.category}
@@ -142,6 +145,7 @@ function Users() {
                       <option value="general">General</option>
                     </select>
                   </td>
+
                   <td className="px-4 py-3 whitespace-nowrap text-center">
                     {user.notificationsEnabled ? (
                       <Bell className="h-5 w-5 text-green-600" title="Notifications Enabled" />
@@ -149,6 +153,11 @@ function Users() {
                       <BellOff className="h-5 w-5 text-gray-400" title="Notifications Disabled" />
                     )}
                   </td>
+
+                  <td className="px-4 py-3 whitespace-nowrap text-sm">
+                    {user.language === 'te' ? 'Telugu' : user.language === 'en' ? 'English' : 'N/A'}
+                  </td>             
+
                   {currentUser.role === 'developer' && (
                     <td className="px-4 py-3 whitespace-nowrap text-sm space-x-2">
                       <button
