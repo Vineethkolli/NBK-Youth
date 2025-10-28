@@ -124,12 +124,12 @@ function PaymentDetails({ onUpdate }) {
           <>
             <div className="p-4 bg-gray-50 rounded-lg">
               <p className="text-sm text-gray-500">UPI Number</p>
-              <p className="font-medium">{paymentDetails.upiNumber}</p>
+              <p className="font-medium notranslate">{paymentDetails.upiNumber}</p>
             </div>
 
             <div className="p-4 bg-gray-50 rounded-lg">
               <p className="text-sm text-gray-500">UPI ID</p>
-              <p className="font-medium">{paymentDetails.upiId}</p>
+              <p className="font-medium notranslate">{paymentDetails.upiId}</p>
             </div>
 
             <div className="p-4 bg-gray-50 rounded-lg">

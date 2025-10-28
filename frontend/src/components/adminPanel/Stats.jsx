@@ -121,10 +121,12 @@ const RoleStatistics = () => {
     <div className="bg-white rounded-lg shadow p-6 space-y-6">
       <h2 className="text-2xl font-semibold mb-4">Statistics</h2>
 
-      {/* Total Users */}
       <div className="flex items-center p-4 bg-gray-50 rounded-lg">
         <Users className="h-5 w-5 text-gray-600 mr-2" />
-        <h3 className="font-medium text-lg">Total Users: {stats.totalUsers}</h3>
+        <h3 className="font-medium text-lg">
+          Total Users: <span className="notranslate">{stats.totalUsers}</span>
+          </h3>
+
       </div>
 
       {/* Role Stats */}
@@ -137,8 +139,8 @@ const RoleStatistics = () => {
               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 capitalize">
                 {role}
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm">{count}</td>
-              <td className="px-6 py-4 text-sm">{role === 'user' ? '' : registerIds.join(', ')}</td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{count}</td>
+              <td className="px-6 py-4 text- notranslate">{role === 'user' ? '' : registerIds.join(', ')}</td>
             </tr>
           ))
         )}
@@ -152,7 +154,7 @@ const RoleStatistics = () => {
           Object.entries(stats.categoryStats).map(([category, count]) => (
             <tr key={category}>
               <td className="px-6 py-4 whitespace-nowrap text-sm capitalize">{category}</td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm">{count}</td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{count}</td>
             </tr>
           ))
         )}
@@ -169,13 +171,13 @@ const RoleStatistics = () => {
     <>
       <tr>
         <td className="px-6 py-4 whitespace-nowrap text-sm">Telugu</td>
-        <td className="px-6 py-4 whitespace-nowrap text-sm">{stats.languageStats.telugu.count}</td>
-        <td className="px-6 py-4 text-sm">{stats.languageStats.telugu.registerIds.join(', ')}</td>
+        <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{stats.languageStats.telugu.count}</td>
+        <td className="px-6 py-4 text-sm notranslate">{stats.languageStats.telugu.registerIds.join(', ')}</td>
       </tr>
       <tr>
         <td className="px-6 py-4 whitespace-nowrap text-sm">English</td>
-        <td className="px-6 py-4 whitespace-nowrap text-sm">{stats.languageStats.english.count}</td>
-        <td className="px-6 py-4 text-sm"></td>
+        <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{stats.languageStats.english.count}</td>
+        <td className="px-6 py-4 text-sm notranslate"></td>
       </tr>
     </>
   )}
@@ -193,13 +195,13 @@ const RoleStatistics = () => {
           <>
             <tr>
               <td className="px-6 py-4 whitespace-nowrap text-sm">Disabled</td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm">{stats.notificationStats.disabled.count}</td>
-              <td className="px-6 py-4 text-sm">{stats.notificationStats.disabled.registerIds.join(', ')}</td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{stats.notificationStats.disabled.count}</td>
+              <td className="px-6 py-4 text-sm notranslate">{stats.notificationStats.disabled.registerIds.join(', ')}</td>
             </tr>
             <tr>
               <td className="px-6 py-4 whitespace-nowrap text-sm">Enabled</td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm">{stats.notificationStats.enabled.count}</td>
-              <td className="px-6 py-4 text-sm">{stats.notificationStats.enabled.registerIds.join(', ')}</td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{stats.notificationStats.enabled.count}</td>
+              <td className="px-6 py-4 text-sm notranslate">{stats.notificationStats.enabled.registerIds.join(', ')}</td>
             </tr>
           </>
         )}

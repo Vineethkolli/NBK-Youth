@@ -73,30 +73,30 @@ const handleShare = (url) => {
     </div>
 
     {/* Website Links Section */}
-    <div className="space-y-4">
-        {websites.map((site) => (
-          <div
-            key={site.name}
-            className="flex items-center justify-between text-gray-700 "
-          >
-            <span>{site.name}</span>
-            <div className="flex items-center space-x-2 "><br></br>
-              <ExternalLink
-                className="h-4 w-4 cursor-pointer hover:text-indigo-600"
-                title="Open Link"
-                onClick={() =>
-                  window.open(site.url, "_blank", "noopener,noreferrer")
-                }
-              />
-              <Share2
-                className="h-4 w-4 cursor-pointer hover:text-indigo-600"
-                title="Share Link"
-                onClick={() => handleShare(site.url)}
-              />
-            </div>
-          </div>
-        ))}
+<div className="space-y-4">
+  {websites.map((site) => (
+    <div
+      key={site.name}
+      className="flex items-center justify-between text-gray-700"
+    >
+      <div className="flex items-center space-x-3">
+        <span>{site.name}</span>
+        <ExternalLink
+          className="h-4 w-4 cursor-pointer hover:text-indigo-600"
+          title="Open Link"
+          onClick={() =>
+            window.open(site.url, "_blank", "noopener,noreferrer")
+          }
+        />
+        <Share2
+          className="h-4 w-4 cursor-pointer hover:text-indigo-600"
+          title="Share Link"
+          onClick={() => handleShare(site.url)}
+        />
       </div>
+    </div>
+  ))}
+</div>
 
     <div className="space-y-4"><br></br>  
   </div>  

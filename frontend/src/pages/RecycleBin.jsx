@@ -158,16 +158,16 @@ const handlePermanentDeleteExpense = async (id) => {
               {deletedIncomes.map((item) => {
                 return (
                   <tr key={item._id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">{item.incomeId}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">{item.registerId}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{item.incomeId}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{item.registerId}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">{formatDateTime(item.createdAt)}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                       {item.paidDate ? formatDateTime(item.paidDate) : '-'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">{item.name}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">{item.email}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">{item.phoneNumber}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">{item.amount}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{item.email}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{item.phoneNumber}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{item.amount}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
                         className={`px-2 inline-flex text-xs font-semibold rounded-full ${
@@ -245,12 +245,12 @@ const handlePermanentDeleteExpense = async (id) => {
               {deletedExpenses.map((item) => {
                 return (
                   <tr key={item._id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">{item.expenseId}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">{item.registerId}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{item.expenseId}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{item.registerId}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">{formatDateTime(item.createdAt)}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">{item.name}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">{item.phoneNumber}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">{item.amount}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{item.phoneNumber}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{item.amount}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">{item.purpose}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">{item.paymentMode}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">

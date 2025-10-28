@@ -112,15 +112,15 @@ function VerificationTable({ data, type, onVerifyLogUpdate, onUpdatePayment, isL
 
   const renderIncomeColumns = (item) => (
     <>
-      <td className="px-6 py-4 whitespace-nowrap text-sm">{item.incomeId}</td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm">{item.registerId}</td>
+      <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{item.incomeId}</td>
+      <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{item.registerId}</td>
       <td className="px-6 py-4 whitespace-nowrap text-sm">
         {item.paidDate ? formatDateTime(item.paidDate) : '-'}
       </td>
       <td className="px-6 py-4 whitespace-nowrap text-sm">{item.name}</td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm">{item.email || '-'}</td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm">{item.phoneNumber || '-'}</td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm">{item.amount}</td>
+      <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{item.email || '-'}</td>
+      <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{item.phoneNumber || '-'}</td>
+      <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{item.amount}</td>
       <td className="px-6 py-4 whitespace-nowrap text-sm">{item.status}</td>
       <td className="px-6 py-4 whitespace-nowrap text-sm">{item.paymentMode}</td>
       <td className="px-6 py-4 whitespace-nowrap text-sm">{item.belongsTo}</td>
@@ -129,11 +129,11 @@ function VerificationTable({ data, type, onVerifyLogUpdate, onUpdatePayment, isL
 
   const renderExpenseColumns = (item) => (
     <>
-      <td className="px-6 py-4 whitespace-nowrap text-sm">{item.expenseId}</td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm">{item.registerId}</td>
+      <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{item.expenseId}</td>
+      <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{item.registerId}</td>
       <td className="px-6 py-4 whitespace-nowrap text-sm">{item.name}</td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm">{item.phoneNumber || '-'}</td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm">{item.amount}</td>
+      <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{item.phoneNumber || '-'}</td>
+      <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{item.amount}</td>
       <td className="px-6 py-4 whitespace-nowrap text-sm">{item.purpose}</td>
       <td className="px-6 py-4 whitespace-nowrap text-sm">
         {item.billImage ? (
@@ -155,8 +155,8 @@ function VerificationTable({ data, type, onVerifyLogUpdate, onUpdatePayment, isL
 
   const renderPaymentColumns = (item) => (
     <>
-      <td className="px-6 py-4 whitespace-nowrap text-sm">{item.paymentId}</td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm">{item.registerId}</td>
+      <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{item.paymentId}</td>
+      <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{item.registerId}</td>
       <td className="px-6 py-4 whitespace-nowrap text-sm">
         {editingPayment === item._id ? (
           <input
@@ -171,9 +171,9 @@ function VerificationTable({ data, type, onVerifyLogUpdate, onUpdatePayment, isL
           item.name
         )}
       </td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm">{item.email || '-'}</td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm">{item.phoneNumber}</td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm">{item.amount}</td>
+      <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{item.email || '-'}</td>
+      <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{item.phoneNumber}</td>
+      <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{item.amount}</td>
       <td className="px-6 py-4 whitespace-nowrap text-sm">
         {editingPayment === item._id ? (
           <select
