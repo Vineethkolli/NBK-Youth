@@ -50,22 +50,11 @@ import OfflineIndicator from './components/common/OfflineIndicator';
 import ErrorBoundary from './components/common/ErrorBoundary';
 
 
-// Google Analytics routes tracking
-function RouteTracker() {
-  const location = useLocation();
-
-  useEffect(() => {
-    trackPageView(location.pathname + location.search);
-  }, [location]);
-
-  return null;
-}
-
-
 // Main App Content
 function AppContent() {
   const { user } = useAuth();
   const { isMaintenanceMode } = useMaintenanceMode();
+  const location = useLocation(); 
 
   useEffect(() => {
     if (user && user.registerId) {
@@ -73,15 +62,17 @@ function AppContent() {
     } else {
       clearAnalyticsUser();
     }
-  }, [user]); 
+    const path = location.pathname + location.search;
+    trackPageView(path);
+  }, [user, location]); 
 
   if (isMaintenanceMode && user?.role !== 'developer') {
     return <MaintenancePage />;
   }
 
+
   return (
     <>
-      <RouteTracker />
       <Toaster position="top-right" />
       <PopupBanner />
 
