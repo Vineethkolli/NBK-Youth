@@ -99,6 +99,14 @@ function Slideshow({ isEditing }) {
     };
   }, [currentSlide, slides, isEditing, isEditingOrder]);
 
+  useEffect(() => {
+    const video = videoRef.current;
+    if (isEditing && video && !video.paused) {
+      video.pause();
+      setIsPlaying(false);
+    }
+  }, [isEditing]);
+
   async function fetchSlides() {
     try {
       const { data } = await axios.get(`${API_URL}/api/homepage/slides`);
