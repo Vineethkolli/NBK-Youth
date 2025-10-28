@@ -5,10 +5,7 @@ function Header({ toggleSidebar }) {
   const navigate = useNavigate();
 
   const handleMenuClick = () => {
-    // Only allow toggle on small screens
-    if (window.innerWidth < 768) {
-      toggleSidebar();
-    }
+    toggleSidebar();
   };
 
   return (
@@ -26,7 +23,7 @@ function Header({ toggleSidebar }) {
           {/* Explore visible only in large screens */}
           <button
             onClick={() => navigate('/explore')}
-            className="hidden md:flex p-2 hover:bg-gray-100 rounded-lg"
+            className="hidden lg:flex p-2 hover:bg-gray-100 rounded-lg"
             aria-label="Explore"
           >
             <LayoutGrid className="h-6 w-6" />

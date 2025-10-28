@@ -162,15 +162,15 @@ const RoleStatistics = () => {
           ['Language', 'Count'],
           <>
             <tr>
-              <td className="px-6 py-4 whitespace-nowrap text-sm">Telugu</td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">
-                {stats.languageStats.telugu.count}
-              </td>
-            </tr>
-            <tr>
               <td className="px-6 py-4 whitespace-nowrap text-sm">English</td>
               <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">
                 {stats.languageStats.english.count}
+              </td>
+            </tr>
+            <tr>
+              <td className="px-6 py-4 whitespace-nowrap text-sm">Telugu</td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">
+                {stats.languageStats.telugu.count}
               </td>
             </tr>
           </>
@@ -187,15 +187,15 @@ const RoleStatistics = () => {
           ['Status', 'Count'],
           <>
             <tr>
-              <td className="px-6 py-4 whitespace-nowrap text-sm">Disabled</td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">
-                {stats.notificationStats.disabled.count}
-              </td>
-            </tr>
-            <tr>
               <td className="px-6 py-4 whitespace-nowrap text-sm">Enabled</td>
               <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">
                 {stats.notificationStats.enabled.count}
+              </td>
+            </tr>
+            <tr>
+              <td className="px-6 py-4 whitespace-nowrap text-sm">Disabled</td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">
+                {stats.notificationStats.disabled.count}
               </td>
             </tr>
           </>

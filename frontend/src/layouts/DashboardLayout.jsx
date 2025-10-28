@@ -1,4 +1,4 @@
-import { useState, useEffect,  useRef, useLayoutEffect} from 'react';
+import { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { useNavigate, Outlet, useLocation } from 'react-router-dom';
 import { Users, LayoutGrid, Home, BarChart2, IndianRupee, DollarSign, Wallet, CameraIcon } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
@@ -30,18 +30,19 @@ function DashboardLayout() {
     closeSidebar();
   };
 
-    useLayoutEffect(() => {
+  useLayoutEffect(() => {
     if (mainRef.current) {
-      mainRef.current.scrollTo({ top: 0, left: 0, behavior: 'auto' });  // Scroll to top on route change
+      mainRef.current.scrollTo({ top: 0, left: 0, behavior: 'auto' }); // Scroll to top on route change
     } else {
       window.scrollTo(0, 0);
     }
   }, [location.pathname]);
 
-    useEffect(() => {
-    // Detect mobile/tablet devices
+  // Device detection
+  useEffect(() => {
     const ua = navigator.userAgent;
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|Windows Phone/i.test(ua);
+    const isIpadOS = navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|Windows Phone/i.test(ua) || isIpadOS;
     setIsMobileDevice(isMobile);
   }, []);
 
@@ -75,15 +76,15 @@ function DashboardLayout() {
       )}
 
       <main
-      ref={mainRef}
-        className={`flex-1 overflow-auto p-4 mt-12 md:ml-64 pb-20 min-h-[calc(100vh-3rem)] ${sidebarOpen ? 'pointer-events-none' : ''}`}
+        ref={mainRef}
+        className={`flex-1 overflow-auto p-4 mt-12 lg:ml-64 pb-20 min-h-[calc(100vh-3rem)] ${sidebarOpen ? 'pointer-events-none' : ''}`}
         style={{ WebkitOverflowScrolling: 'touch' }}
       >
         <Outlet />
       </main>
 
       {/* Mobile Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t md:hidden z-10">
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t lg:hidden z-10">
         <div className="flex justify-around items-center h-14">
 
           {/* Committee Button */}
