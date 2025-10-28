@@ -15,7 +15,7 @@
     "axios": "^1.11.0",
     "jspdf": "^3.0.2",
     "jspdf-autotable": "^5.0.2",
-    "lucide-react": "^0.547.0",
+    "lucide-react": "^0.548.0",
     "qrcode.react": "^4.2.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
