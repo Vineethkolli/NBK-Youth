@@ -8,18 +8,18 @@ const RoleStatistics = () => {
   const [stats, setStats] = useState({
     totalUsers: 0,
     languageStats: {
-      english: { count: 0, registerIds: [] },
-      telugu: { count: 0, registerIds: [] }
+      english: { count: 0 },
+      telugu: { count: 0 }
     },
     notificationStats: {
-      enabled: { count: 0, registerIds: [] },
-      disabled: { count: 0, registerIds: [] }
+      enabled: { count: 0 },
+      disabled: { count: 0 }
     },
     roleStats: {
       admin: { count: 0, registerIds: [] },
       developer: { count: 0, registerIds: [] },
       financier: { count: 0, registerIds: [] },
-      user: { count: 0, registerIds: [] } 
+      user: { count: 0, registerIds: [] }
     },
     categoryStats: {
       youth: 0,
@@ -33,18 +33,18 @@ const RoleStatistics = () => {
       const newStats = {
         totalUsers: data.length,
         languageStats: {
-          english: { count: 0, registerIds: [] },
-          telugu: { count: 0, registerIds: [] }
+          english: { count: 0 },
+          telugu: { count: 0 }
         },
         notificationStats: {
-          enabled: { count: 0, registerIds: [] },
-          disabled: { count: 0, registerIds: [] }
+          enabled: { count: 0 },
+          disabled: { count: 0 }
         },
         roleStats: {
           developer: { count: 0, registerIds: [] },
           financier: { count: 0, registerIds: [] },
           admin: { count: 0, registerIds: [] },
-          user: { count: 0, registerIds: [] } 
+          user: { count: 0, registerIds: [] }
         },
         categoryStats: {
           youth: 0,
@@ -54,22 +54,14 @@ const RoleStatistics = () => {
 
       data.forEach((user) => {
         // Language stats
-        if (user.language === 'te') {
-          newStats.languageStats.telugu.count++;
-          newStats.languageStats.telugu.registerIds.push(user.registerId);
-        } else {
-          newStats.languageStats.english.count++;
-          newStats.languageStats.english.registerIds.push(user.registerId);
-        }
+        if (user.language === 'te') newStats.languageStats.telugu.count++;
+        else newStats.languageStats.english.count++;
 
         // Notification stats
-        if (user.notificationsEnabled) {
+        if (user.notificationsEnabled)
           newStats.notificationStats.enabled.count++;
-          newStats.notificationStats.enabled.registerIds.push(user.registerId);
-        } else {
+        else
           newStats.notificationStats.disabled.count++;
-          newStats.notificationStats.disabled.registerIds.push(user.registerId);
-        }
 
         // Role stats
         const role = user.role;
@@ -110,9 +102,7 @@ const RoleStatistics = () => {
             ))}
           </tr>
         </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
-          {rows}
-        </tbody>
+        <tbody className="bg-white divide-y divide-gray-200">{rows}</tbody>
       </table>
     </div>
   );
@@ -121,12 +111,12 @@ const RoleStatistics = () => {
     <div className="bg-white rounded-lg shadow p-6 space-y-6">
       <h2 className="text-2xl font-semibold mb-4">Statistics</h2>
 
+      {/* Total Users */}
       <div className="flex items-center p-4 bg-gray-50 rounded-lg">
         <Users className="h-5 w-5 text-gray-600 mr-2" />
         <h3 className="font-medium text-lg">
           Total Users: <span className="notranslate">{stats.totalUsers}</span>
-          </h3>
-
+        </h3>
       </div>
 
       {/* Role Stats */}
@@ -140,7 +130,9 @@ const RoleStatistics = () => {
                 {role}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{count}</td>
-              <td className="px-6 py-4 text- notranslate">{role === 'user' ? '' : registerIds.join(', ')}</td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">
+                {role === 'user' ? '' : registerIds.join(', ')}
+              </td>
             </tr>
           ))
         )}
@@ -161,28 +153,29 @@ const RoleStatistics = () => {
       </div>
 
       {/* Language Stats */}
-<div>
-  <div className="flex items-center mb-3">
-    <Languages className="h-5 w-5 text-gray-600 mr-2" />
-    <h3 className="font-medium text-lg">Languages</h3>
-  </div>
-  {renderTable(
-    ['Language', 'Count', 'Register IDs'],
-    <>
-      <tr>
-        <td className="px-6 py-4 whitespace-nowrap text-sm">Telugu</td>
-        <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{stats.languageStats.telugu.count}</td>
-        <td className="px-6 py-4 text-sm notranslate">{stats.languageStats.telugu.registerIds.join(', ')}</td>
-      </tr>
-      <tr>
-        <td className="px-6 py-4 whitespace-nowrap text-sm">English</td>
-        <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{stats.languageStats.english.count}</td>
-        <td className="px-6 py-4 text-sm notranslate"></td>
-      </tr>
-    </>
-  )}
-</div>
-
+      <div>
+        <div className="flex items-center mb-3">
+          <Languages className="h-5 w-5 text-gray-600 mr-2" />
+          <h3 className="font-medium text-lg">Languages</h3>
+        </div>
+        {renderTable(
+          ['Language', 'Count'],
+          <>
+            <tr>
+              <td className="px-6 py-4 whitespace-nowrap text-sm">Telugu</td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">
+                {stats.languageStats.telugu.count}
+              </td>
+            </tr>
+            <tr>
+              <td className="px-6 py-4 whitespace-nowrap text-sm">English</td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">
+                {stats.languageStats.english.count}
+              </td>
+            </tr>
+          </>
+        )}
+      </div>
 
       {/* Notification Stats */}
       <div>
@@ -191,17 +184,19 @@ const RoleStatistics = () => {
           <h3 className="font-medium text-lg">Notifications</h3>
         </div>
         {renderTable(
-          ['Status', 'Count', 'Register IDs'],
+          ['Status', 'Count'],
           <>
             <tr>
               <td className="px-6 py-4 whitespace-nowrap text-sm">Disabled</td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{stats.notificationStats.disabled.count}</td>
-              <td className="px-6 py-4 text-sm notranslate">{stats.notificationStats.disabled.registerIds.join(', ')}</td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">
+                {stats.notificationStats.disabled.count}
+              </td>
             </tr>
             <tr>
               <td className="px-6 py-4 whitespace-nowrap text-sm">Enabled</td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{stats.notificationStats.enabled.count}</td>
-              <td className="px-6 py-4 text-sm notranslate">{stats.notificationStats.enabled.registerIds.join(', ')}</td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">
+                {stats.notificationStats.enabled.count}
+              </td>
             </tr>
           </>
         )}
