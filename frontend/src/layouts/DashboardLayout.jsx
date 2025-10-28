@@ -40,11 +40,13 @@ function DashboardLayout() {
 
   // Device detection
   useEffect(() => {
-    const ua = navigator.userAgent;
-    const isIpadOS = navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|Windows Phone/i.test(ua) || isIpadOS;
-    setIsMobileDevice(isMobile);
-  }, []);
+  const ua = navigator.userAgent;
+  const isMobile =
+    /Android|webOS|iPhone|iPad|iPod|Windows Phone/i.test(ua) ||
+    (navigator.userAgentData?.platform === 'macOS' && navigator.maxTouchPoints > 1);
+
+  setIsMobileDevice(isMobile);
+}, []);
 
   // Disable body scroll when sidebar is open
   useEffect(() => {
