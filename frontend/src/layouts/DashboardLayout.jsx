@@ -77,14 +77,14 @@ function DashboardLayout() {
 
       <main
         ref={mainRef}
-        className={`flex-1 overflow-auto p-4 mt-12 lg:ml-64 pb-20 min-h-[calc(100vh-3rem)] ${sidebarOpen ? 'pointer-events-none' : ''}`}
+        className={`flex-1 overflow-auto p-4 mt-12 xl:ml-64 pb-20 min-h-[calc(100vh-3rem)] ${sidebarOpen ? 'pointer-events-none' : ''}`}
         style={{ WebkitOverflowScrolling: 'touch' }}
       >
         <Outlet />
       </main>
 
       {/* Mobile Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t lg:hidden z-10">
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t xl:hidden z-10">
         <div className="flex justify-around items-center h-14">
 
           {/* Committee Button */}

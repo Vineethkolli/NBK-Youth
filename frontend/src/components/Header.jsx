@@ -23,7 +23,7 @@ function Header({ toggleSidebar }) {
           {/* Explore visible only in large screens */}
           <button
             onClick={() => navigate('/explore')}
-            className="hidden lg:flex p-2 hover:bg-gray-100 rounded-lg"
+            className="hidden xl:flex p-2 hover:bg-gray-100 rounded-lg"
             aria-label="Explore"
           >
             <LayoutGrid className="h-6 w-6" />
