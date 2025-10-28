@@ -130,7 +130,7 @@ const RoleStatistics = () => {
                 {role}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{count}</td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">
+              <td className="px-6 py-4 text-sm notranslate">
                 {role === 'user' ? '' : registerIds.join(', ')}
               </td>
             </tr>
