@@ -50,20 +50,16 @@ function Slideshow({ isEditing }) {
         if (video) {
           video.autoplay = true;
           video.playsInline = true;
+          video.muted = true;
+          setIsMuted(true);
 
-          video.muted = false;
-          video
-            .play()
-            .then(() => {
-              setIsMuted(false);
-              setIsPlaying(true);
-            })
-            .catch(() => {
-              video.muted = true;
-              setIsMuted(true);
-              video.play().catch(() => {});
-            });
-
+video
+  .play()
+  .then(() => {
+    setIsPlaying(true);
+  })
+  .catch((err) => {
+  });
           video.onended = nextSlide;
 
           const handlePause = () => {
@@ -198,11 +194,17 @@ function Slideshow({ isEditing }) {
 
   return (
     <div
-      className="relative h-96 bg-black rounded-lg overflow-hidden group"
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
-    >
+  className="relative h-96 bg-black rounded-lg overflow-hidden group"
+  onTouchStart={handleTouchStart}
+  onTouchMove={handleTouchMove}
+  onTouchEnd={handleTouchEnd}
+  onClick={(e) => {
+    if (!isEditing && slide.type === 'video') {
+      e.stopPropagation();
+      toggleMute();
+    }
+  }}
+>
       {slide.type === 'image' ? (
         <img src={slide.url} alt="Slide" className="w-full h-full object-cover" />
       ) : (
