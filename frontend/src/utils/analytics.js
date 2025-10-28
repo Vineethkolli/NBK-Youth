@@ -29,7 +29,7 @@ export const setAnalyticsUser = (userId) => {
 export const clearAnalyticsUser = () => {
   if (!initialized) return;
   try {
-    ReactGA.set({ user_id: null });
+    ReactGA.set({ user_id: null }); 
   } catch (err) {
     console.error("Failed to clear GA User ID:", err);
   }
