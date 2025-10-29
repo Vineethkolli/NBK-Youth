@@ -12,7 +12,7 @@ function ExpenseTable({
   isLocked = false
 }) {
   const [deletingId, setDeletingId] = useState(null); 
-  const canViewPhoneNumber = ['developer', 'financier', 'admin'].includes(userRole);
+  const canView = ['developer', 'financier', 'admin'].includes(userRole);
 
   const handleDelete = async (id) => {
     try {
@@ -30,9 +30,7 @@ function ExpenseTable({
           <tr>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">S.No</th>
             {visibleColumns.expenseId && <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Expense ID</th>}
-            {(userRole === 'developer' || userRole === 'financier') && visibleColumns.registerId && (
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Register ID</th>
-            )}
+            {canView && visibleColumns.registerId && <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Register ID</th>}
             {visibleColumns.dateTime && <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date & Time</th>}
             {visibleColumns.purpose && <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Purpose</th>}
             {visibleColumns.amount && <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>}
@@ -40,7 +38,7 @@ function ExpenseTable({
             {visibleColumns.paymentMode && <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Payment Mode</th>}
             {visibleColumns.verifyLog && <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Verify Log</th>}
             {visibleColumns.name && <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Spender Name</th>}
-            {canViewPhoneNumber && visibleColumns.phoneNumber && <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Phone Number</th>}
+            {canView && visibleColumns.phoneNumber && <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Phone Number</th>}
             {isPrivilegedUser && <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>}
           </tr>
         </thead>
@@ -49,7 +47,7 @@ function ExpenseTable({
             <tr key={expense._id}>
               <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{index + 1}</td>
               {visibleColumns.expenseId && <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{expense.expenseId}</td>}
-              {(userRole === 'developer' || userRole === 'financier') && visibleColumns.registerId && <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{expense.registerId}</td>}
+              {canView && visibleColumns.registerId && <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{expense.registerId}</td>}
               {visibleColumns.dateTime && <td className="px-6 py-4 whitespace-nowrap text-sm">{formatDateTime(expense.createdAt)}</td>}
               {visibleColumns.purpose && <td className="px-6 py-4 whitespace-nowrap text-sm">{expense.purpose}</td>}
               {visibleColumns.amount && <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{expense.amount}</td>}
@@ -81,7 +79,7 @@ function ExpenseTable({
                 </td>
               )}
               {visibleColumns.name && <td className="px-6 py-4 whitespace-nowrap text-sm">{expense.name}</td>}
-              {canViewPhoneNumber && visibleColumns.phoneNumber && <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{expense.phoneNumber}</td>}
+              {canView && visibleColumns.phoneNumber && <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{expense.phoneNumber}</td>}
               {isPrivilegedUser && (
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   <div className="flex space-x-2">
