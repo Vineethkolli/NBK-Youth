@@ -14,7 +14,7 @@ router.put('/:id', auth, checkRole(['admin','developer', 'financier']), incomeCo
 router.patch('/:id/verify', auth, checkRole(['developer', 'financier']), incomeController.updateVerificationStatus);
 
 // Soft delete income (move to recycle bin)
-router.delete('/:id', auth, checkRole(['developer', 'financier']), incomeController.deleteIncome);
+router.delete('/:id', auth, checkRole(['developer', 'financier', 'admin']), incomeController.deleteIncome);
 
 router.get('/recycle-bin', auth, checkRole(['developer', 'financier']), incomeController.getRecycleBin);
 

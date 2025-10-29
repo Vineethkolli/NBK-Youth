@@ -27,7 +27,7 @@ function Income() {
     sort: '',
     startDate: '',
     endDate: '',
-    dateFilter: 'entryDate'
+    dateFilter: 'entryDate',
   });
   const [visibleColumns, setVisibleColumns] = useState({
     incomeId: false,
@@ -35,8 +35,6 @@ function Income() {
     entryDate: false,
     paidDate: false,
     name: true,
-  //email: false,
-  //phoneNumber: false,
     amount: true,
     status: true,
     paymentMode: false,
@@ -44,10 +42,11 @@ function Income() {
     verifyLog: false,
   });
   const [showForm, setShowForm] = useState(false);
-  const [hiddenProfiles, setHiddenProfiles] = useState(new Set());
   const [editingIncome, setEditingIncome] = useState(null);
   const { language } = useLanguage();
   const PrintComponent = language === 'te' ? TeluguPrint : EnglishPrint;
+
+  const isPrivilegedUser = ['developer', 'financier', 'admin'].includes(user?.role);
 
   useEffect(() => {
     fetchIncomes();
@@ -55,51 +54,25 @@ function Income() {
 
   const fetchIncomes = async () => {
     try {
-      const params = new URLSearchParams({
-        search,
-        ...filters
-      });
+      const params = new URLSearchParams({ search, ...filters });
       const { data } = await axios.get(`${API_URL}/api/incomes?${params}`);
-      
-      // Sort the data if sort filter is applied
+
       if (filters.sort) {
-        data.sort((a, b) => {
-          if (filters.sort === 'desc') {
-            return b.amount - a.amount;
-          }
-          return a.amount - b.amount;
-        });
+        data.sort((a, b) =>
+          filters.sort === 'desc' ? b.amount - a.amount : a.amount - b.amount
+        );
       }
-      
+
       setIncomes(data);
-    } catch (error) {
+    } catch {
       toast.error('Failed to fetch incomes');
     }
   };
 
-  const handleFilterChange = (newFilters) => {
-    setFilters(newFilters);
-  };
+  const handleFilterChange = (newFilters) => setFilters(newFilters);
 
   const handleColumnToggle = (column) => {
-    setVisibleColumns((prev) => ({
-      ...prev,
-      [column]: !prev[column]
-    }));
-  };
-
-  const handlePrivacyToggle = (incomeId) => {
-    if (!['developer', 'financier'].includes(user?.role)) return;
-
-    setHiddenProfiles((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(incomeId)) {
-        newSet.delete(incomeId);
-      } else {
-        newSet.add(incomeId);
-      }
-      return newSet;
-    });
+    setVisibleColumns((prev) => ({ ...prev, [column]: !prev[column] }));
   };
 
   const handleEdit = (income) => {
@@ -108,54 +81,49 @@ function Income() {
   };
 
   const handleDelete = async (incomeId) => {
-    if (user?.role === 'admin') return;
-
     if (!window.confirm('Are you sure you want to move this item to recycle bin?')) return;
 
     try {
       await axios.delete(`${API_URL}/api/incomes/${incomeId}`);
       toast.success('Income moved to recycle bin');
       fetchIncomes();
-    } catch (error) {
+    } catch {
       toast.error('Failed to delete income');
     }
   };
 
+  return (
+    <div className="space-y-6">
+      <div className="space-y-2">
+        <div className="flex justify-between items-center">
+          <h1 className="text-2xl font-semibold">Income</h1>
 
-return (
-  <div className="space-y-6">
-    <div className="space-y-2">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-semibold">Income</h1>
+          <div className="flex items-center space-x-3">
+            {isPrivilegedUser && (
+              <button
+                onClick={() => setShowForm(!showForm)}
+                disabled={lockSettings.isLocked}
+                className={`btn-secondary flex items-center ${
+                  lockSettings.isLocked ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+                title={lockSettings.isLocked ? 'Locked - cannot add' : ''}
+              >
+                <Plus className="h-4 w-4 mr-1 inline" />
+                Add
+              </button>
+            )}
+            <PrintComponent incomes={incomes} visibleColumns={visibleColumns} />
+          </div>
+        </div>
 
-        <div className="flex items-center space-x-3">
-          {['developer', 'admin', 'financier'].includes(user?.role) && (
-            <button
-              onClick={() => setShowForm(!showForm)}
-              disabled={lockSettings.isLocked} // disabled if locked
-              className={`btn-secondary flex items-center ${
-                lockSettings.isLocked ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
-              title={lockSettings.isLocked ? 'Locked - cannot add' : ''}
-            >
-              <Plus className="h-4 w-4 mr-1 inline" />
-              Add
-            </button>
-          )}
-          <PrintComponent incomes={incomes} visibleColumns={visibleColumns} />
+        <div className="flex items-center">
+          <LockIndicator />
+          <EventLabelDisplay />
         </div>
       </div>
 
-      {/* Below heading: lock indicator + event label side by side */}
-      <div className="flex items-center">
-        <LockIndicator />
-        <EventLabelDisplay />
-      </div>
-    </div>
-
-    {/* Search and filters */}
-    <div className="space-y-3">
-      <div className="flex-1">
+      {/* Search & Filters */}
+      <div className="space-y-3">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
           <input
@@ -166,25 +134,24 @@ return (
             className="pl-10 pr-4 py-2 w-full border rounded-lg"
           />
         </div>
-      </div>
-      <IncomeFilters
-        filters={filters}
-        visibleColumns={visibleColumns}
-        onChange={handleFilterChange}
-        onColumnToggle={handleColumnToggle}
-      />
-    </div>
 
-    <div className="bg-white rounded-lg shadow">
+        <IncomeFilters
+          filters={filters}
+          visibleColumns={visibleColumns}
+          onChange={handleFilterChange}
+          onColumnToggle={handleColumnToggle}
+        />
+      </div>
+
+      {/* Visible Columns */}
+      <div className="bg-white rounded-lg shadow">
         <div className="p-4 border-b">
           <h2 className="font-medium">Visible Columns</h2>
           <div className="mt-2 flex flex-wrap gap-2">
             {Object.entries(visibleColumns).map(([column, isVisible]) => {
-              // Check visibility for specific columns based on user role
               if (
-                (column === 'registerId' && !['developer', 'financier'].includes(user?.role)) ||
-                (column === 'email' && !['admin', 'developer', 'financier'].includes(user?.role)) ||
-                (column === 'phoneNumber' && !['admin', 'developer', 'financier'].includes(user?.role))
+                ['registerId', 'email', 'phoneNumber'].includes(column) &&
+                !isPrivilegedUser
               ) {
                 return null;
               }
@@ -203,35 +170,32 @@ return (
           </div>
         </div>
 
-      <IncomeTable
-        incomes={incomes}
-        visibleColumns={visibleColumns}
-        hiddenProfiles={hiddenProfiles}
-        onPrivacyToggle={handlePrivacyToggle}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-        isPrivilegedUser={true}
-        userRole={user?.role}
-        isLocked={lockSettings.isLocked}
-      />
-    </div>
+        <IncomeTable
+          incomes={incomes}
+          visibleColumns={visibleColumns}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          isPrivilegedUser={isPrivilegedUser}
+          isLocked={lockSettings.isLocked}
+        />
+      </div>
 
-    {showForm && !lockSettings.isLocked && (
-      <IncomeForm
-        income={editingIncome}
-        onClose={() => {
-          setShowForm(false);
-          setEditingIncome(null);
-        }}
-        onSuccess={() => {
-          fetchIncomes();
-          setShowForm(false);
-          setEditingIncome(null);
-        }}
-      />
-    )}
-  </div>
-);
+      {showForm && !lockSettings.isLocked && (
+        <IncomeForm
+          income={editingIncome}
+          onClose={() => {
+            setShowForm(false);
+            setEditingIncome(null);
+          }}
+          onSuccess={() => {
+            fetchIncomes();
+            setShowForm(false);
+            setEditingIncome(null);
+          }}
+        />
+      )}
+    </div>
+  );
 }
 
 export default Income;

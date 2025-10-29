@@ -35,15 +35,16 @@ function Expense() {
     paymentMode: false,
     bill: false,
     name: false,
-  //phoneNumber: false,
     verifyLog: false
   });
 
   const [showForm, setShowForm] = useState(false);
-  const [hiddenProfiles, setHiddenProfiles] = useState(new Set());
   const [editingExpense, setEditingExpense] = useState(null);
   const { language } = useLanguage();
   const PrintComponent = language === 'te' ? TeluguPrint : EnglishPrint;
+
+  const isPrivilegedUser = ['developer', 'financier'].includes(user?.role);
+  const canView = ['developer', 'financier', 'admin'].includes(user?.role);
 
   useEffect(() => {
     fetchExpenses();
@@ -76,27 +77,13 @@ function Expense() {
     }));
   };
 
-  const handlePrivacyToggle = (expenseId) => {
-    if (!['developer', 'financier'].includes(user?.role)) return;
-
-    setHiddenProfiles((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(expenseId)) {
-        newSet.delete(expenseId);
-      } else {
-        newSet.add(expenseId);
-      }
-      return newSet;
-    });
-  };
-
   const handleEdit = (expense) => {
     setEditingExpense(expense);
     setShowForm(true);
   };
 
   const handleDelete = async (expenseId) => {
-    if (!['developer', 'financier'].includes(user?.role)) return;
+    if (!isPrivilegedUser) return;
     if (!window.confirm('Are you sure you want to move this item to recycle bin?')) return;
     try {
       await axios.delete(`${API_URL}/api/expenses/${expenseId}`);
@@ -107,119 +94,106 @@ function Expense() {
     }
   };
 
-return (
-  <div className="space-y-6">
-    <div className="space-y-2">
-      {/* Top row */}
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-semibold">Expense</h1>
+  return (
+    <div className="space-y-6">
+      <div className="space-y-2">
+        <div className="flex justify-between items-center">
+          <h1 className="text-2xl font-semibold">Expense</h1>
 
-        <div className="flex items-center space-x-3">
-          {['developer', 'financier'].includes(user?.role) && (
-            <button
-              onClick={() => setShowForm(!showForm)}
-              disabled={lockSettings.isLocked}
-              className={`btn-secondary flex items-center ${
-                lockSettings.isLocked ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
-              title={lockSettings.isLocked ? 'Locked - cannot add' : ''}
-            >
-              <Plus className="h-4 w-4 mr-1 inline" />
-              Add
-            </button>
-          )}
-          <PrintComponent expenses={expenses} visibleColumns={visibleColumns} />
+          <div className="flex items-center space-x-3">
+            {isPrivilegedUser && (
+              <button
+                onClick={() => setShowForm(!showForm)}
+                disabled={lockSettings.isLocked}
+                className={`btn-secondary flex items-center ${
+                  lockSettings.isLocked ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+                title={lockSettings.isLocked ? 'Locked - cannot add' : ''}
+              >
+                <Plus className="h-4 w-4 mr-1 inline" />
+                Add
+              </button>
+            )}
+            <PrintComponent expenses={expenses} visibleColumns={visibleColumns} />
+          </div>
+        </div>
+
+        <div className="flex items-center">
+          <LockIndicator />
+          <EventLabelDisplay />
         </div>
       </div>
 
-      {/* Below heading: lock indicator + event label side by side */}
-      <div className="flex items-center">
-        <LockIndicator />
-        <EventLabelDisplay />
-      </div>
-    </div>
+      {/* Search and Filters */}
+      <div className="space-y-3">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Search by ID, name, amount, purpose..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-10 pr-4 py-2 w-full border rounded-lg"
+          />
+        </div>
 
-    {/* Search and filters */}
-    <div className="space-y-3">
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-        <input
-          type="text"
-          placeholder="Search by ID, name, amount, purpose..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="pl-10 pr-4 py-2 w-full border rounded-lg"
+        <ExpenseFilters
+          filters={filters}
+          visibleColumns={visibleColumns}
+          onChange={handleFilterChange}
+          onColumnToggle={handleColumnToggle}
         />
       </div>
 
-      <ExpenseFilters
-        filters={filters}
-        visibleColumns={visibleColumns}
-        onChange={handleFilterChange}
-        onColumnToggle={handleColumnToggle}
-      />
-    </div>
-
-    {/* Visible Columns toggles */}
-    <div className="bg-white rounded-lg shadow">
-      <div className="p-4 border-b">
-        <h2 className="font-medium">Visible Columns</h2>
-        <div className="mt-2 flex flex-wrap gap-2">
-          {Object.entries(visibleColumns).map(([column, isVisible]) => {
-            if (column === 'registerId' && !['developer', 'financier'].includes(user?.role))
-              return null;
-            if (
-              column === 'phoneNumber' &&
-              !['admin', 'developer', 'financier'].includes(user?.role)
-            )
-              return null;
-            return (
-              <label key={column} className="inline-flex items-center">
-                <input
-                  type="checkbox"
-                  checked={isVisible}
-                  onChange={() => handleColumnToggle(column)}
-                  className="form-checkbox"
-                />
-                <span className="ml-2 text-sm">{column}</span>
-              </label>
-            );
-          })}
+      {/* Visible Columns */}
+      <div className="bg-white rounded-lg shadow">
+        <div className="p-4 border-b">
+          <h2 className="font-medium">Visible Columns</h2>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {Object.entries(visibleColumns).map(([column, isVisible]) => {
+              if (['registerId', 'phoneNumber'].includes(column) && !canView) return null;
+              return (
+                <label key={column} className="inline-flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={isVisible}
+                    onChange={() => handleColumnToggle(column)}
+                    className="form-checkbox"
+                  />
+                  <span className="ml-2 text-sm">{column}</span>
+                </label>
+              );
+            })}
+          </div>
         </div>
+
+        <ExpenseTable
+          expenses={expenses}
+          visibleColumns={visibleColumns}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          isPrivilegedUser={isPrivilegedUser}
+          userRole={user?.role}
+          isLocked={lockSettings.isLocked}
+        />
       </div>
 
-      {/* Expense Table */}
-      <ExpenseTable
-        expenses={expenses}
-        visibleColumns={visibleColumns}
-        hiddenProfiles={hiddenProfiles}
-        onPrivacyToggle={handlePrivacyToggle}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-        isPrivilegedUser={['developer', 'financier'].includes(user?.role)}
-        userRole={user?.role}
-        isLocked={lockSettings.isLocked}
-      />
+      {showForm && !lockSettings.isLocked && (
+        <ExpenseForm
+          expense={editingExpense}
+          onClose={() => {
+            setShowForm(false);
+            setEditingExpense(null);
+          }}
+          onSuccess={() => {
+            fetchExpenses();
+            setShowForm(false);
+            setEditingExpense(null);
+          }}
+        />
+      )}
     </div>
-
-    {/* Expense Form modal */}
-    {showForm && !lockSettings.isLocked && (
-      <ExpenseForm
-        expense={editingExpense}
-        onClose={() => {
-          setShowForm(false);
-          setEditingExpense(null);
-        }}
-        onSuccess={() => {
-          fetchExpenses();
-          setShowForm(false);
-          setEditingExpense(null);
-        }}
-      />
-    )}
-  </div>
-);
-
+  );
 }
 
 export default Expense;
