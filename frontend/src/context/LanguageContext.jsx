@@ -22,6 +22,8 @@ export const LanguageProvider = ({ children }) => {
   const [language, setLanguage] = useState(
     localStorage.getItem('preferredLanguage') || 'en'
   );
+  const [isChanging, setIsChanging] = useState(false);
+  const [changingTo, setChangingTo] = useState(null);
 
   useEffect(() => {
     let storedLang;
@@ -35,58 +37,90 @@ export const LanguageProvider = ({ children }) => {
     initializeTranslation(storedLang);
   }, [user]);
 
+  // Initialize translation and return a Promise that resolves when the
+  // language switch (for Telugu) has been applied. This lets callers show
+  // a loading indicator until the translation is ready.
   const initializeTranslation = (lang) => {
-    if (lang === 'te') {
-      // Remove any existing Google Translate script and clear container
-      const existingScript = document.getElementById('google-translate-script');
-      if (existingScript) {
-        existingScript.remove();
-      }
-      const container = createTranslationContainer();
-      container.innerHTML = '';
+    return new Promise((resolve) => {
+      if (lang === 'te') {
+        // Remove any existing Google Translate script and clear container
+        const existingScript = document.getElementById('google-translate-script');
+        if (existingScript) {
+          existingScript.remove();
+        }
+        const container = createTranslationContainer();
+        container.innerHTML = '';
 
-      // Load Google Translate script
-      const script = document.createElement('script');
-      script.id = 'google-translate-script';
-      script.src =
-        'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
-      script.async = true;
-      document.body.appendChild(script);
-
-      // Define the callback for Google Translate
-      window.googleTranslateElementInit = () => {
-        new window.google.translate.TranslateElement(
-          {
-            pageLanguage: 'en',
-            includedLanguages: 'te,en',
-            autoDisplay: false,
-          },
-          'google_translate_element'
-        );
-        // Poll until the language dropdown is available, then switch to Telugu
-        const interval = setInterval(() => {
-          const selectLang = document.querySelector('.goog-te-combo');
-          if (selectLang) {
-            selectLang.value = 'te';
-            selectLang.dispatchEvent(new Event('change'));
-            clearInterval(interval);
+        // Define the callback for Google Translate
+        window.googleTranslateElementInit = () => {
+          try {
+            new window.google.translate.TranslateElement(
+              {
+                pageLanguage: 'en',
+                includedLanguages: 'te,en',
+                autoDisplay: false,
+              },
+              'google_translate_element'
+            );
+          } catch (err) {
+            // ignore and resolve so UI doesn't hang
+            console.error('Translate element init error', err);
+            resolve();
           }
-        }, 500);
-      };
-    } else {
-      // For English, remove translation elements if they exist
-      const container = document.getElementById('google_translate_element');
-      if (container) container.innerHTML = '';
 
-      const script = document.getElementById('google-translate-script');
-      if (script) script.remove();
+          // Poll until the language dropdown is available, then switch to Telugu
+          const interval = setInterval(() => {
+            const selectLang = document.querySelector('.goog-te-combo');
+            if (selectLang) {
+              selectLang.value = 'te';
+              selectLang.dispatchEvent(new Event('change'));
+              clearInterval(interval);
+              resolve();
+            }
+          }, 500);
 
-      const gtFrame = document.querySelector('iframe.goog-te-banner-frame');
-      if (gtFrame) gtFrame.style.display = 'none';
-    }
+          // Fallback: resolve after 10s so we don't block forever
+          setTimeout(() => {
+            try {
+              const selectLang = document.querySelector('.goog-te-combo');
+              if (selectLang) {
+                selectLang.value = 'te';
+                selectLang.dispatchEvent(new Event('change'));
+              }
+            } catch (e) {
+              /* ignore */
+            }
+            resolve();
+          }, 10000);
+        };
+
+        // Load Google Translate script
+        const script = document.createElement('script');
+        script.id = 'google-translate-script';
+        script.src =
+          'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+        script.async = true;
+        document.body.appendChild(script);
+      } else {
+        // For English, remove translation elements if they exist and resolve
+        const container = document.getElementById('google_translate_element');
+        if (container) container.innerHTML = '';
+
+        const script = document.getElementById('google-translate-script');
+        if (script) script.remove();
+
+        const gtFrame = document.querySelector('iframe.goog-te-banner-frame');
+        if (gtFrame) gtFrame.style.display = 'none';
+        resolve();
+      }
+    });
   };
 
   const changeLanguage = async (newLanguage) => {
+    // Indicate we're starting a language change so UI can show loaders
+    setIsChanging(true);
+    setChangingTo(newLanguage);
+
     localStorage.setItem('preferredLanguage', newLanguage);
     if (user) {
       try {
@@ -97,8 +131,19 @@ export const LanguageProvider = ({ children }) => {
         console.error('Failed to update language on server', error);
       }
     }
+
+    // Wait until translation initialization completes (for Telugu)
+    try {
+      await initializeTranslation(newLanguage);
+    } catch (e) {
+      console.error('initializeTranslation error', e);
+    }
+
     setLanguage(newLanguage);
-    initializeTranslation(newLanguage);
+    // Reset loading flags
+    setIsChanging(false);
+    setChangingTo(null);
+
     if (newLanguage === 'en') {
       // Reloading the page ensures that the default (English) state is applied
       window.location.reload();
@@ -106,7 +151,9 @@ export const LanguageProvider = ({ children }) => {
   };
 
   return (
-    <LanguageContext.Provider value={{ language, changeLanguage }}>
+    <LanguageContext.Provider
+      value={{ language, changeLanguage, isChanging, changingTo }}
+    >
       {children}
     </LanguageContext.Provider>
   );

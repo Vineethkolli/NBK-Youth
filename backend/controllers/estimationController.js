@@ -44,7 +44,7 @@ getAllEstimatedIncomes: async (req, res) => {
       sortObj[sortField] = sortOrder === 'desc' ? -1 : 1;
       query = query.sort(sortObj);
     } else {
-      query = query.sort({ estimatedIncomeId: 1 });
+      query = query.sort({ createdAt: -1 });
     }
 
     const incomes = await query.exec();
@@ -188,7 +188,7 @@ getAllEstimatedIncomes: async (req, res) => {
       sortObj[sortField] = sortOrder === 'desc' ? -1 : 1;
       query = query.sort(sortObj);
     } else {
-      query = query.sort({ estimatedExpenseId: 1 });
+      query = query.sort({ createdAt: -1 });
     }
 
     const expenses = await query.exec();
