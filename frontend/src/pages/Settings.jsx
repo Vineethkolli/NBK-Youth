@@ -22,9 +22,9 @@ function Settings() {
           <div className="flex space-x-4">
             <button
               onClick={() => changeLanguage('en')}
-              disabled={isChanging}
+              disabled={isChanging || language === 'en'}
               className={`px-4 py-2 rounded-md notranslate ${
-                language === 'en' ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700'
+                language === 'en' ? 'bg-indigo-600 text-white cursor-not-allowed' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
               } ${isChanging ? 'opacity-60 cursor-not-allowed' : ''}`}
             >
               {isChanging && changingTo === 'en' ? (
@@ -34,9 +34,9 @@ function Settings() {
             </button>
             <button
               onClick={() => changeLanguage('te')}
-              disabled={isChanging}
+              disabled={isChanging || language === 'te'}
               className={`px-4 py-2 rounded-md ${
-                language === 'te' ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700'
+                language === 'te' ? 'bg-indigo-600 text-white cursor-not-allowed' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
               } ${isChanging ? 'opacity-60 cursor-not-allowed' : ''}`}
             >
               {isChanging && changingTo === 'te' ? (
