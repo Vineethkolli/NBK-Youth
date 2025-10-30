@@ -1,11 +1,11 @@
-import { Download, Languages, Bell } from 'lucide-react';
+import { Download, Languages, Bell, Loader2 } from 'lucide-react';
 import InstallApp from '../components/settings/InstallApp';
 import Footer from '../components/Footer';
 import Notifications from '../components/settings/NotificationSettings';
 import { useLanguage } from '../context/LanguageContext';
 
 function Settings() {
-  const { language, changeLanguage } = useLanguage();
+  const { language, changeLanguage, isChanging, changingTo } = useLanguage();
 
   return (
     <div className="max-w-1xl mx-auto">
@@ -20,24 +20,28 @@ function Settings() {
 </h3>
 
           <div className="flex space-x-4">
-            <button 
+            <button
               onClick={() => changeLanguage('en')}
+              disabled={isChanging}
               className={`px-4 py-2 rounded-md notranslate ${
-                language === 'en' 
-                  ? 'bg-indigo-600 text-white' 
-                  : 'bg-gray-200 text-gray-700'
-              }`}
+                language === 'en' ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700'
+              } ${isChanging ? 'opacity-60 cursor-not-allowed' : ''}`}
             >
+              {isChanging && changingTo === 'en' ? (
+                <Loader2 className="inline-block h-4 w-4 animate-spin mr-2" />
+              ) : null}
               English
             </button>
-            <button 
+            <button
               onClick={() => changeLanguage('te')}
+              disabled={isChanging}
               className={`px-4 py-2 rounded-md ${
-                language === 'te' 
-                  ? 'bg-indigo-600 text-white' 
-                  : 'bg-gray-200 text-gray-700'
-              }`}
+                language === 'te' ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700'
+              } ${isChanging ? 'opacity-60 cursor-not-allowed' : ''}`}
             >
+              {isChanging && changingTo === 'te' ? (
+                <Loader2 className="inline-block h-4 w-4 animate-spin mr-2" />
+              ) : null}
               తెలుగు
             </button>
           </div>
