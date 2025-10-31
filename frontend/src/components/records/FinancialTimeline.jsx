@@ -153,13 +153,13 @@ function FinancialTimeline({ records, isEditMode, onEdit, onDelete }) {
                 </div>
 
                 {differenceDisplay && index < records.length - 1 && (
-                  <div className="absolute right-10">
-                    <div className={`flex items-center space-x-1 px-2 py-1 rounded-full bg-white shadow-sm border ${differenceDisplay.color}`}>
-                      {differenceDisplay.icon}
-                      <span className="text-xs font-medium">{differenceDisplay.text}</span>
-                    </div>
-                  </div>
-                )}
+  <div className="absolute left-8 transform -translate-x-1/2 top-full flex justify-center">
+    <div className={`flex items-center space-x-1 px-2 py-1 rounded-full bg-white shadow-sm border ${differenceDisplay.color}`}>
+      {differenceDisplay.icon}
+      <span className="text-xs font-medium">{differenceDisplay.text}</span>
+    </div>
+  </div>
+)}
               </div>
             );
           })}
