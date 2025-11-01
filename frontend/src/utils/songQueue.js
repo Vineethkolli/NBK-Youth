@@ -16,7 +16,7 @@ export const createSongQueue = (collections) => {
 };
 
 // Helper function to find next song index
-export const getNextSongIndex = (currentIndex, queue, currentCollectionId) => {
+export const getNextSongIndex = (currentIndex, queue) => {
   // If we're at the end of the queue, start from beginning
   if (currentIndex >= queue.length - 1) {
     return 0;
