@@ -14,9 +14,7 @@ function DeveloperOptions() {
 
   if (user?.role !== 'developer') {
     return (
-      <div className="min-h-screen flex items-center justify-center text-red-600 text-lg font-semibold">
-        Access Denied
-      </div>
+      <div>Access denied</div>
     );
   }
 

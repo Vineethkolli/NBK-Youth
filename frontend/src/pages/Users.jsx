@@ -14,6 +14,10 @@ function Users() {
   const [editingUser, setEditingUser] = useState(null);
   const [userToDelete, setUserToDelete] = useState(null);
 
+  if (currentUser.role === 'user') {
+    return <div>Access denied</div>;
+  }
+
   useEffect(() => {
     fetchUsers();
   }, [search]);
@@ -48,10 +52,6 @@ function Users() {
       toast.error(error.response?.data?.message || 'Failed to update category');
     }
   };
-
-  if (currentUser.role === 'user') {
-    return <div>Access denied</div>;
-  }
 
 
   return (

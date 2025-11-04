@@ -1,9 +1,15 @@
+import { useAuth } from '../context/AuthContext';
 import ServiceDriveMonitor from '../components/monitor/ServiceDriveMonitor';
 import CloudinaryMonitor from '../components/monitor/CloudinaryMonitor';
 import MongoDBMonitor from '../components/monitor/MongodbMonitor';
 import GithubActionsMonitor from '../components/monitor/GithubActionsMonitor';
 
 export default function Monitor() {
+  
+  const { user } = useAuth();
+  
+  if (!['developer'].includes(user?.role)) return <div>Access denied</div>;
+  
   return (
     <div className="max-w-1xl mx-auto space-y-6">
       <div className="bg-white border border-indigo-200 rounded-xl shadow-md p-4 flex items-center justify-between">

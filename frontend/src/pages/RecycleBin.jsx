@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
 import { Trash2, RefreshCw,  IndianRupee, DollarSign, Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
@@ -9,6 +10,7 @@ import LockIndicator from '../components/common/LockIndicator';
 import { useLockSettings } from '../context/LockContext';
 
 function RecycleBin() {
+  const { user } = useAuth();
   const { lockSettings } = useLockSettings();
   const [deletedIncomes, setDeletedIncomes] = useState([]);
   const [deletedExpenses, setDeletedExpenses] = useState([]);
@@ -18,6 +20,8 @@ function RecycleBin() {
   const [loadingDeleteExpenseId, setLoadingDeleteExpenseId] = useState(null);
 
   const [activeBin, setActiveBin] = useState('income'); 
+
+  if (!['developer', 'financier'].includes(user?.role)) return <div>Access denied</div>;
 
   useEffect(() => {
     fetchDeletedItems();

@@ -21,6 +21,8 @@ function Verification() {
     verifyLog: 'not verified'
   });
 
+  if (!['developer', 'financier'].includes(user?.role)) return <div>Access denied</div>;
+
   useEffect(() => {
     fetchData();
   }, [activeTab, filters]);
@@ -74,8 +76,6 @@ function Verification() {
       throw error;
     }
   };
-
-  if (!['developer', 'financier'].includes(user?.role)) return <div>Access denied</div>;
 
   const tabIcons = {
     income: <IndianRupee size={18} />,
