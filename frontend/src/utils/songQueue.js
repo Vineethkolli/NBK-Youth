@@ -36,3 +36,26 @@ export const getPreviousSongIndex = (currentIndex, queue) => {
 export const findSongIndex = (song, queue) => {
   return queue.findIndex(s => s._id === song._id);
 };
+
+
+// Helper function to filter collections and songs based on search query
+export const filterCollections = (collections, searchQuery) => {
+  if (!searchQuery) return collections;
+
+  const query = searchQuery.toLowerCase();
+
+  return collections
+    .map((collection) => {
+      const collectionMatches = collection.name.toLowerCase().includes(query);
+      const filteredSongs = collection.songs.filter((song) =>
+        song.name.toLowerCase().includes(query)
+      );
+
+      if (collectionMatches) return collection;
+      if (filteredSongs.length > 0)
+        return { ...collection, songs: filteredSongs };
+
+      return null;
+    })
+    .filter(Boolean);
+};

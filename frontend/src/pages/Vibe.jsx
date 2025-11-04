@@ -7,9 +7,8 @@ import EditNameModal from '../components/common/UpdateNameForm';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { API_URL } from '../utils/config';
-import { createSongQueue } from '../utils/songQueue';
+import { createSongQueue, filterCollections } from '../utils/songQueue';
 import { Search } from 'lucide-react';
-import { filterCollections } from '../utils/songSearch';
 import { useMusicPlayer } from '../context/MusicContext';
 
 function Vibe() {
