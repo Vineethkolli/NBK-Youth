@@ -337,15 +337,23 @@ export const recordsController = {
 
   // Check if an event record exists for a given eventName+recordYear
   checkEventRecord: async (req, res) => {
-    try {
-      const { eventName, recordYear } = req.body;
-      if (!eventName || !recordYear) return res.status(400).json({ message: 'Missing eventName or recordYear' });
-      const existing = await EventRecord.findOne({ eventName, recordYear });
-      if (existing) return res.status(400).json({ message: 'Event record already exists for this event and year' });
-      return res.json({ message: 'ok' });
-    } catch (error) {
-      console.error('checkEventRecord error:', error);
-      res.status(500).json({ message: 'Failed to check event record' });
+  try {
+    const { eventName, recordYear, recordId } = req.body;
+
+    if (!eventName || !recordYear) {
+      return res.status(400).json({ message: 'Missing eventName or recordYear' });
     }
+
+    const existing = await EventRecord.findOne({ eventName, recordYear });
+
+    if (existing && (!recordId || String(existing._id) !== String(recordId))) {
+      return res.status(400).json({ message: 'Event record already exists for this event and year' });
+    }
+
+    return res.json({ message: 'ok' });
+  } catch (error) {
+    console.error('checkEventRecord error:', error);
+    res.status(500).json({ message: 'Failed to check event record' });
   }
+}
 };

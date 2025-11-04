@@ -83,18 +83,19 @@ function EventRecordForm({ record, onClose, onSubmit }) {
         return;
       }
 
-      // Check uniqueness before uploading to Cloudinary to avoid wasting storage
-      try {
-        await axios.post(`${API_URL}/api/records/event-records/check`, {
-          eventName: finalEventName,
-          recordYear: formData.recordYear
-        });
-      } catch (err) {
-        const msg = err?.response?.data?.message || 'Event record already exists';
-        toast.error(msg);
-        setIsSubmitting(false);
-        return; 
-      }
+      // Check uniqueness before uploading to Cloudinary 
+try {
+  await axios.post(`${API_URL}/api/records/event-records/check`, {
+    eventName: finalEventName,
+    recordYear: formData.recordYear,
+    recordId: record?._id || null, 
+  });
+} catch (err) {
+  const msg = err?.response?.data?.message || 'Event record already exists';
+  toast.error(msg);
+  setIsSubmitting(false);
+  return;
+}
 
       let englishMeta = null;
       let teluguMeta = null;
