@@ -13,6 +13,7 @@ import { LockProvider } from './context/LockContext';
 
 import AuthLayout from './layouts/AuthLayout';
 import DashboardLayout from './layouts/DashboardLayout';
+import Explore from './components/Explore';
 
 import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
@@ -41,7 +42,7 @@ import Records from './pages/Records';
 import Histories from './pages/Histories';
 import Monitor from './pages/Monitor';
 import ViniPage from './pages/vini';
-import Explore from './components/Explore';
+import Developing from './pages/Developing';
 
 import ProtectedRoute from './components/ProtectedRoute';
 import PopupBanner from './components/adminPanel/PopupBanner';
@@ -114,6 +115,7 @@ function AppContent() {
           <Route path="/histories" element={<Histories />} />
           <Route path="/monitor" element={<Monitor />} />
           <Route path="/explore" element={<Explore />} />
+          <Route path="/developing" element={<Developing />} />
         </Route>
       </Routes>
 
