@@ -1,5 +1,3 @@
-import { Download } from 'lucide-react';
-
 function DriveMediaPreview({ url, type, title }) {
   // gets the thumbnail URL for images.
   const getImageUrl = (url) => {

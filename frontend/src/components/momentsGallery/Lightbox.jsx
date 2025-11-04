@@ -57,7 +57,6 @@ function Lightbox({ mediaFiles, currentIndex, momentTitle, onClose }) {
     return `${API_URL}/api/moments/download/${fileId}`;
   };
 
-  // ✅ Download with loading toast
   const handleDownload = async (url, filename) => {
     const backendUrl = getBackendDownloadUrl(url);
     const toastId = toast.loading('Downloading...');

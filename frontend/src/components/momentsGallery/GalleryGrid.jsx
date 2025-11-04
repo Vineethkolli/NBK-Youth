@@ -273,7 +273,6 @@ function GalleryGrid({
               const isSelected = selectedFiles.find((f) => f._id === file._id);
               return (
                 <div key={file._id} className="relative group">
-                  {/* Thumbnail */}
                   <div
                     className="aspect-square bg-gray-100 rounded-lg overflow-hidden cursor-pointer"
                     onClick={() => {
