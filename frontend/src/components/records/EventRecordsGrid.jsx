@@ -8,7 +8,7 @@ function EventRecordsGrid({ records = [], isEditMode, onEdit, onDelete }) {
   const [previewFileUrl, setPreviewFileUrl] = useState(null); 
   const [chooserRecord, setChooserRecord] = useState(null);
   const [loadingPreview, setLoadingPreview] = useState(false);
-  const [downloading, setDownloading] = useState(false);
+  const [downloadingId, setDownloadingId] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
 
   // Open PDF Preview 
@@ -32,42 +32,42 @@ function EventRecordsGrid({ records = [], isEditMode, onEdit, onDelete }) {
       setChooserRecord({ record, action });
     } else if (eng) {
       if (action === 'open') previewFile(eng, record.eventName, record.recordYear);
-      else downloadFile(eng, record.eventName, record.recordYear);
+      else downloadFile(eng, record.eventName, record.recordYear, record._id);
     } else if (tel) {
       if (action === 'open') previewFile(tel, record.eventName, record.recordYear);
-      else downloadFile(tel, record.eventName, record.recordYear);
+      else downloadFile(tel, record.eventName, record.recordYear, record._id);
     } else {
       alert('No file available for this record');
     }
   };
 
   // Download PDF by fetching as blob then forcing download with correct filename
-  const downloadFile = async (fileUrl, eventName, recordYear) => {
-    try {
-      setDownloading(true);
-      const resp = await fetch(fileUrl, { method: "GET" });
-      if (!resp.ok) throw new Error("Failed to download file");
+  const downloadFile = async (fileUrl, eventName, recordYear, recordId) => {
+  try {
+    setDownloadingId(recordId);
+    const resp = await fetch(fileUrl, { method: "GET" });
+    if (!resp.ok) throw new Error("Failed to download file");
 
-      const blob = await resp.blob();
-      const blobUrl = window.URL.createObjectURL(
-        new Blob([blob], { type: "application/pdf" })
-      );
-      const link = document.createElement("a");
-      const safeEvent = (eventName || "Event").replace(/[/\\?%*:|"<>]/g, "_");
-      const filename = `${safeEvent}_Record_${recordYear || "unknown"}.pdf`;
-      link.href = blobUrl;
-      link.setAttribute("download", filename);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(blobUrl);
-    } catch (error) {
-      console.error(error);
-      alert("Error downloading file");
-    } finally {
-      setDownloading(false);
-    }
-  };
+    const blob = await resp.blob();
+    const blobUrl = window.URL.createObjectURL(
+      new Blob([blob], { type: "application/pdf" })
+    );
+    const link = document.createElement("a");
+    const safeEvent = (eventName || "Event").replace(/[/\\?%*:|"<>]/g, "_");
+    const filename = `${safeEvent}_Record_${recordYear || "unknown"}.pdf`;
+    link.href = blobUrl;
+    link.setAttribute("download", filename);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(blobUrl);
+  } catch (error) {
+    console.error(error);
+    alert("Error downloading file");
+  } finally {
+    setDownloadingId(null);
+  }
+};
 
     const handleDelete = async (id) => {
     try {
@@ -108,17 +108,17 @@ function EventRecordsGrid({ records = [], isEditMode, onEdit, onDelete }) {
 
                 <div className="flex items-center space-x-2">
                   <button
-                    onClick={() => openOrDownloadWithChooser(record, 'download')}
-                    className="text-gray-600 hover:text-gray-900"
-                    title="Download PDF"
-                    disabled={downloading}
-                  >
-                    {downloading ? (
-                      <Loader2 className="h-5 w-5 animate-spin" />
-                    ) : (
-                      <Download className="h-5 w-5" />
-                    )}
-                  </button>
+  onClick={() => openOrDownloadWithChooser(record, 'download')}
+  className="text-gray-600 hover:text-gray-900"
+  title="Download PDF"
+  disabled={downloadingId === record._id}
+>
+  {downloadingId === record._id ? (
+    <Loader2 className="h-5 w-5 animate-spin" />
+  ) : (
+    <Download className="h-5 w-5" />
+  )}
+</button>
 
                   {isEditMode && (
                     <>
@@ -194,10 +194,11 @@ function EventRecordsGrid({ records = [], isEditMode, onEdit, onDelete }) {
                 );
               else
                 downloadFile(
-                  url,
-                  chooserRecord.record.eventName,
-                  chooserRecord.record.recordYear
-                );
+  url,
+  chooserRecord.record.eventName,
+  chooserRecord.record.recordYear,
+  chooserRecord.record._id
+);
               setChooserRecord(null);
             }}
             className="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300"
@@ -246,18 +247,18 @@ function EventRecordsGrid({ records = [], isEditMode, onEdit, onDelete }) {
               </div>
               <div className="flex items-center space-x-3">
                 <button
-                  onClick={() =>
-                    downloadFile(previewFileUrl, previewName, previewYear)
-                  }
-                  className="text-gray-600 hover:text-gray-900"
-                  disabled={downloading}
-                >
-                  {downloading ? (
-                    <Loader2 className="h-6 w-6 animate-spin" />
-                  ) : (
-                    <Download className="h-6 w-6" />
-                  )}
-                </button>
+  onClick={() =>
+    downloadFile(previewFileUrl, previewName, previewYear, 'preview')
+  }
+  className="text-gray-600 hover:text-gray-900"
+  disabled={downloadingId === 'preview'}
+>
+  {downloadingId === 'preview' ? (
+    <Loader2 className="h-6 w-6 animate-spin" />
+  ) : (
+    <Download className="h-6 w-6" />
+  )}
+</button>
                 <button
                   onClick={() => {
                     setPreviewUrl(null);
