@@ -1,5 +1,3 @@
-import { formatDateTime } from '../../utils/dateTime';
-
 function HistoryIncome({ incomes, snapshotName, showBelongsTo }) {
   if (!incomes || incomes.length === 0) {
     return (

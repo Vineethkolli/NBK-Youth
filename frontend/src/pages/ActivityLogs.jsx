@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
 import { Search, Clock, BarChart3 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
@@ -11,7 +10,6 @@ import LogPrint from '../components/activityLogs/LogPrint';
 import LogStatsPrint from '../components/activityLogs/LogStatsPrint';
 
 function ActivityLogs() {
-  const { user } = useAuth();
   const [logs, setLogs] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(false);

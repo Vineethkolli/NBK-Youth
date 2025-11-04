@@ -3,7 +3,6 @@ import { Plus, Trash2, ArrowLeft, ArrowRight, Loader2, GripHorizontal, VolumeX, 
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { API_URL } from '../../utils/config';
-import { useAuth } from '../../context/AuthContext';
 import SlidesOrder from './SlidesOrder';
 import SlidesUpload from './SlidesUpload';
 
@@ -22,7 +21,6 @@ function Slideshow({ isEditing }) {
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
   const swipeThreshold = 50;
-  const { user } = useAuth();
 
   useEffect(() => {
     fetchSlides();
@@ -93,7 +91,7 @@ video
         videoRef.current.onended = null;
       }
     };
-  }, [currentSlide, slides, isEditing, isEditingOrder]);
+  }, [currentSlide, slides, isEditing, isEditingOrder, nextSlide]);
 
   useEffect(() => {
     const video = videoRef.current;

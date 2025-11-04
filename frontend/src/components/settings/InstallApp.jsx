@@ -93,7 +93,7 @@ function InstallApp() {
           <div>
             <h3 className="text-lg font-medium">Download App</h3>
             <p className="text-sm text-gray-500">
-              Click "Download Now" to get better performance.
+              Click &quot;Download Now&quot; to get better performance.
             </p>
           </div>
           <button

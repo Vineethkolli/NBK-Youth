@@ -12,7 +12,7 @@ class ErrorBoundary extends React.Component {
     };
   }
 
-  static getDerivedStateFromError(error) {
+  static getDerivedStateFromError() {
     return { hasError: true };
   }
 
@@ -40,7 +40,7 @@ class ErrorBoundary extends React.Component {
           <div className="bg-white shadow-xl rounded-2xl p-8 max-w-md text-center">
             <h1 className="text-2xl font-bold mb-4 text-red-600">Oops! Something went wrong</h1>
             <p className="text-gray-700 mb-6">
-              We couldn't load this part of the app. You can try reloading or go back home.
+              We couldn&apos;t load this part of the app. You can try reloading or go back home.
             </p>
 
             <div className="flex flex-wrap justify-center gap-4 mb-4">

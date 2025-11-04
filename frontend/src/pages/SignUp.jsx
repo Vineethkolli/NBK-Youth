@@ -36,7 +36,7 @@ function SignUp() {
     }
 
     // Phone number validation
-    const phoneRegex = /^(?=(?:.*\d){8,})[\+\-\d\s\(\)]*$/;
+    const phoneRegex = /^(?=(?:.*\d){8,})[+\-\d\s()]*$/;
     if (!phoneRegex.test(formData.phoneNumber)) {
       return toast.error('Please enter a valid phone number');
     }

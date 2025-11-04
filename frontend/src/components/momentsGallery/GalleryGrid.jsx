@@ -49,7 +49,7 @@ function GalleryGrid({
   const getBackendDownloadUrl = (url) => {
     const fileId =
       url.match(/[?&]id=([^&]+)/)?.[1] ||
-      url.match(/\/file\/d\/([^\/]+)/)?.[1] ||
+      url.match(/\/file\/d\/([^/]+)/)?.[1] ||
       url.match(/open\?id=([^&]+)/)?.[1];
     if (!fileId) return url;
     return `${API_URL}/api/moments/download/${fileId}`;

@@ -31,7 +31,7 @@ function Moments() {
   };
 
 
-  const handleMomentFormSubmit = async (formDataOrObj, progressCallback) => {
+  const handleMomentFormSubmit = async (formDataOrObj) => {
     try {
       if (formType === 'youtube') {
         const endpoint = `${API_URL}/api/moments/youtube`;
@@ -174,7 +174,7 @@ if (formType === 'drive') {
   };
 
 
-  const handleUploadMediaInGallery = (arg1, arg2, arg3) => {
+  const handleUploadMediaInGallery = (arg1) => {
     if (arg1 && typeof arg1 === 'object' && arg1._id) {
       const updatedMoment = arg1;
       setMoments((prev) => prev.map((m) => (m._id === updatedMoment._id ? updatedMoment : m)));

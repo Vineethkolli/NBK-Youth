@@ -299,9 +299,6 @@ else {
   );
 }, [pathHistory, showTrash, handleNavigation]);
 
-  const isRoot = currentFolderId === 'root';
-  const hasItems = items.length > 0;
-
   return (
     <div className="bg-white p-4 sm:p-6 rounded-xl shadow-lg space-y-6 max-w-7xl mx-auto font-sans">
       <h2 className="text-2xl font-semibold text-gray-900 pb-3 mb-4">Service Drive Monitor</h2>

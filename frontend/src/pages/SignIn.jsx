@@ -137,7 +137,7 @@ function SignIn() {
 
         <div className="text-sm text-center">
           <p className="text-black">
-            Don't have an account?{' '}
+            Don&apos;t have an account?{' '}
             <a href="/signup" className="font-medium text-green-600 hover:text-green-500">
               Sign up
             </a>

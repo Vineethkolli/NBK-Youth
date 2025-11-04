@@ -54,11 +54,11 @@ const NotificationSettings = () => {
         <div>
           <h3 className="text-lg font-medium">Notifications Permission</h3>
           <p className="text-sm text-gray-500">
-            Click "Allow" to receive real-time updates.
+            Click &quot;Allow&quot; to receive real-time updates.
           </p>
           {showResetPrompt && (
             <p className="mt-2 text-sm text-red-600">
-              Notifications are blocked. Reset permissions by clearing the app data in your settings or clicking the info "i" icon near the URL bar.
+              Notifications are blocked. Reset permissions by clearing the app data in your settings or clicking the info &quot;i&quot; icon near the URL bar.
             </p>
           )}
         </div>

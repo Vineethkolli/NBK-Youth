@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
 import CollectionManager from '../components/vibe/CollectionManager';
 import CollectionItem from '../components/vibe/CollectionItem';
 import MusicPlayer from '../components/vibe/MusicPlayer';
@@ -13,7 +12,6 @@ import SearchBar, { filterCollections } from '../components/vibe/Search';
 import { useMusicPlayer } from '../context/MusicContext';
 
 function Vibe() {
-  const { user } = useAuth();
   const { currentSong, handleSongSelect } = useMusicPlayer();
   const [collections, setCollections] = useState([]);
   const [isEditMode, setIsEditMode] = useState(false);

@@ -3,14 +3,13 @@ import { precacheAndRoute } from 'workbox-precaching';
 precacheAndRoute(self.__WB_MANIFEST || []);
 
 // Force the new service worker to activate immediately
-self.addEventListener('install', (event) => {
+self.addEventListener('install', () => {
   self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
-  event.waitUntil(clients.claim());
+  event.waitUntil(self.clients.claim());
 });
-
 
 // Notification logic with high priority
 self.addEventListener('push', (event) => {
@@ -23,8 +22,8 @@ self.addEventListener('push', (event) => {
     badge: '/logo/notificationlogo.png',
     requireInteraction: true,
     data: {
-      link: data.link 
-    }
+      link: data.link,
+    },
   };
 
   event.waitUntil(self.registration.showNotification(title, options));
@@ -36,12 +35,11 @@ self.addEventListener('notificationclick', (event) => {
 
   const link = event.notification.data?.link || '/notifications';
   const isExternal = link.startsWith('http');
-
   const targetLink = isExternal ? link : new URL(link, self.location.origin).href;
 
   event.waitUntil(
-    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clientList => {
-      const client = clientList.find(c => 'focus' in c) || clientList[0];
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      const client = clientList.find((c) => 'focus' in c) || clientList[0];
       if (client && !isExternal) {
         return client.focus().then(() => client.navigate(targetLink));
       } else {
@@ -55,20 +53,17 @@ self.addEventListener('notificationclick', (event) => {
 // Handle vibe song actions when app is in background
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'MEDIA_SESSION_ACTION') {
-    // Forward media session actions to the main app
     event.waitUntil(
-      clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
         if (clientList.length > 0) {
-          // Focus the existing window and navigate to vibe page
           const client = clientList[0];
           client.focus();
           client.postMessage({
             type: 'NAVIGATE_TO_VIBE',
-            action: event.data.action
+            action: event.data.action,
           });
         } else {
-          // Open new window to vibe page
-          clients.openWindow('/vibe');
+          self.clients.openWindow('/vibe');
         }
       })
     );

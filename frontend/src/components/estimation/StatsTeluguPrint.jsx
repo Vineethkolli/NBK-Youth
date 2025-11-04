@@ -12,11 +12,6 @@ const StatsTeluguPrint = ({ stats, budgetStats }) => {
       maximumFractionDigits: 0,
     }).format(amount)}</span>`;
 
-  const displayAmountWithShortage = (amount) =>
-    amount < 0
-      ? `<span translate="no">${formatAmount(amount)} (Shortage)</span>`
-      : formatAmount(amount);
-
   const handlePrint = () => {
     const renderedLabel = document.getElementById('event-label-display')?.innerText?.trim();
     const content = printRef.current.innerHTML;

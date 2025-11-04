@@ -4,7 +4,7 @@ import { Printer } from 'lucide-react';
 import { formatDateTime } from '../../utils/dateTime';
 import { useEventLabel } from '../../context/EventLabelContext';
 
-const ExpensePrint = ({ expenses, visibleColumns, userRole }) => {
+const ExpensePrint = ({ expenses, visibleColumns }) => {
   const { eventLabel } = useEventLabel();
 
   const handlePrint = () => {

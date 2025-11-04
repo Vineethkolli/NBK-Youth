@@ -13,15 +13,6 @@ const StatsPrint = ({ stats, budgetStats }) => {
     }).format(amount);
   };
 
-  const formatAmountAsString = (amount) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(amount);
-  };
-
   const handlePrint = () => {
     const doc = new jsPDF();
     let yPos = 20;

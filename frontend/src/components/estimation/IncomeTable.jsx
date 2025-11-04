@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Edit2, Trash2, Loader2 } from 'lucide-react';
 
-function EstimatedIncomeTable({ incomes, visibleColumns, onAdd, onEdit, onDelete }) {
+function EstimatedIncomeTable({ incomes, visibleColumns, onEdit, onDelete }) {
   const [deletingId, setDeletingId] = useState(null);
 
   const handleDelete = async (id) => {

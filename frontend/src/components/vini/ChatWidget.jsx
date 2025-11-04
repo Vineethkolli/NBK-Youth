@@ -245,7 +245,7 @@ function ChatWidget({ isOpen, setIsOpen }) {
           <div className="text-center text-gray-500 py-8 space-y-2">
             <Cpu className="h-12 w-12 mx-auto mb-2 text-gray-300" />
             <p className="text-sm font-medium">
-              Hi! I'm <span className="text-purple-600">VINI</span>, NBK Youth AI Assistant 🤖
+              Hi! I&apos;m <span className="text-purple-600">VINI</span>, NBK Youth AI Assistant 🤖
             </p>
             <p className="text-xs">
               Currently in development stage.

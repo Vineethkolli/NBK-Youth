@@ -2,7 +2,7 @@ import axios from 'axios';
 import { API_URL } from './config';
 
 // Get Cloudinary signature
-export async function getCloudinarySignature(token, { folder, resourceType = 'auto', publicId, eager, overwrite }) {
+export async function getCloudinarySignature(token, { folder, publicId, eager, overwrite }) {
   const res = await axios.post(
     `${API_URL}/api/uploads/sign`,
     {

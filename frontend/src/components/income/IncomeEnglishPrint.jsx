@@ -5,7 +5,7 @@ import { useHiddenProfiles } from '../../context/HiddenProfileContext';
 import { formatDateTime } from '../../utils/dateTime';
 import { useEventLabel } from '../../context/EventLabelContext';
 
-const IncomePrint = ({ incomes, visibleColumns, userRole }) => {
+const IncomePrint = ({ incomes, visibleColumns }) => {
   const { hiddenProfiles } = useHiddenProfiles();
   const { eventLabel } = useEventLabel();
 

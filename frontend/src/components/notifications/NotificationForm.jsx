@@ -1,11 +1,9 @@
 import { useState } from 'react';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
-import { API_URL } from '../../utils/config'; 
-import { useAuth } from '../../context/AuthContext'; 
+import { API_URL } from '../../utils/config';
 
 function NotificationForm({ onSuccess }) {
-  const { user } = useAuth();
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
   const [link, setLink] = useState(''); 

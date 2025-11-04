@@ -2,8 +2,6 @@ import { useState } from 'react';
 import { X } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
-const COLLECTION_OPTIONS = ['Stats', 'Income', 'Expense', 'Event'];
-
 function HistoryForm({ snapshots, onClose, onSubmit }) {
   const [formData, setFormData] = useState({
     snapshotName: '',
@@ -60,13 +58,11 @@ function HistoryForm({ snapshots, onClose, onSubmit }) {
     }
 
     setIsSubmitting(true);
-    try {
-      await onSubmit(formData);
-    } catch (error) {
-      throw error;
-    } finally {
-      setIsSubmitting(false);
-    }
+try {
+  await onSubmit(formData);
+} finally {
+  setIsSubmitting(false);
+}
   };
 
   return (

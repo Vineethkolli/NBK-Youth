@@ -96,9 +96,7 @@ function Users() {
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap text-sm">
                     {user.name}{' '}
-                    {(user.role === 'admin' ||
-                      user.role === 'developer' ||
-                      user.role === 'financier') && (
+                    {['developer', 'financier', 'admin'].includes(user?.role) && (
                       <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-red-300 text-red-900 ml-1">
                         {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
                       </span>

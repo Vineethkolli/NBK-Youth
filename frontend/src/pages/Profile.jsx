@@ -69,7 +69,7 @@ function Profile() {
     }
 
     // Phone number validation
-    const phoneRegex = /^(?=(?:.*\d){8,})[\+\-\d\s\(\)]*$/;
+    const phoneRegex = /^(?=(?:.*\d){8,})[+\-\d\s()]*$/;;
     if (!phoneRegex.test(userData.phoneNumber)) {
       return toast.error('Please enter a valid phone number');
     }

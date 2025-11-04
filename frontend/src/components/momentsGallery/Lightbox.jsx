@@ -33,7 +33,7 @@ function Lightbox({ mediaFiles, currentIndex, momentTitle, onClose }) {
   const extractFileId = (url) => {
     return (
       url.match(/[?&]id=([^&]+)/)?.[1] ||
-      url.match(/\/file\/d\/([^\/]+)/)?.[1] ||
+      url.match(/\/file\/d\/([^/]+)/)?.[1] ||
       url.match(/open\?id=([^&]+)/)?.[1] ||
       null
     );

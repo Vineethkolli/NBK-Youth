@@ -37,9 +37,7 @@ export const LanguageProvider = ({ children }) => {
     initializeTranslation(storedLang);
   }, [user]);
 
-  // Initialize translation and return a Promise that resolves when the
-  // language switch (for Telugu) has been applied. This lets callers show
-  // a loading indicator until the translation is ready.
+  // Initialize translation
   const initializeTranslation = (lang) => {
     return new Promise((resolve) => {
       if (lang === 'te') {
@@ -63,7 +61,6 @@ export const LanguageProvider = ({ children }) => {
               'google_translate_element'
             );
           } catch (err) {
-            // ignore and resolve so UI doesn't hang
             console.error('Translate element init error', err);
             resolve();
           }
@@ -79,7 +76,6 @@ export const LanguageProvider = ({ children }) => {
             }
           }, 500);
 
-          // Fallback: resolve after 10s so we don't block forever
           setTimeout(() => {
             try {
               const selectLang = document.querySelector('.goog-te-combo');
@@ -88,7 +84,6 @@ export const LanguageProvider = ({ children }) => {
                 selectLang.dispatchEvent(new Event('change'));
               }
             } catch (e) {
-              /* ignore */
             }
             resolve();
           }, 10000);
@@ -117,7 +112,6 @@ export const LanguageProvider = ({ children }) => {
   };
 
   const changeLanguage = async (newLanguage) => {
-    // Indicate we're starting a language change so UI can show loaders
     setIsChanging(true);
     setChangingTo(newLanguage);
 
@@ -132,7 +126,6 @@ export const LanguageProvider = ({ children }) => {
       }
     }
 
-    // Wait until translation initialization completes (for Telugu)
     try {
       await initializeTranslation(newLanguage);
     } catch (e) {
@@ -140,12 +133,11 @@ export const LanguageProvider = ({ children }) => {
     }
 
     setLanguage(newLanguage);
-    // Reset loading flags
     setIsChanging(false);
     setChangingTo(null);
 
     if (newLanguage === 'en') {
-      // Reloading the page ensures that the default (English) state is applied
+      // Reloading the page ensures that the default English state is applied
       window.location.reload();
     }
   };

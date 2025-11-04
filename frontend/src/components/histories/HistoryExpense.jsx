@@ -1,5 +1,3 @@
-import { formatDateTime } from '../../utils/dateTime';
-
 function HistoryExpense({ expenses, snapshotName }) {
   if (!expenses || expenses.length === 0) {
     return (
