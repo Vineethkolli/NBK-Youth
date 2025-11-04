@@ -91,7 +91,7 @@ video
         videoRef.current.onended = null;
       }
     };
-  }, [currentSlide, slides, isEditing, isEditingOrder, nextSlide]);
+  }, [currentSlide, slides, isEditing, isEditingOrder]);
 
   useEffect(() => {
     const video = videoRef.current;
