@@ -22,16 +22,19 @@ function SongItem({ song, isPlaying, onPlay, onEdit, onDelete, isEditMode }) {
       }`}
     >
       <div
-        className="font-medium truncate flex-1 flex items-center"
-        onClick={() => !isEditMode && onPlay(song)}
-      >
-        {isPlaying ? (
-          <Pause className="h-4 w-4 mr-2 text-indigo-600" />
-        ) : (
-          <Play className="h-4 w-4 mr-2" />
-        )}
-        {song.name}
-      </div>
+  className="font-medium flex-1 flex items-center min-w-0"
+  onClick={() => !isEditMode && onPlay(song)}
+>
+  <div className="shrink-0">
+    {isPlaying ? (
+      <Pause className="h-4 w-4 mr-2 text-indigo-600" />
+    ) : (
+      <Play className="h-4 w-4 mr-2" />
+    )}
+  </div>
+  <span className="truncate block min-w-0">{song.name}</span>
+</div>
+
 
       {isEditMode && (
         <div className="flex space-x-2 ml-2">

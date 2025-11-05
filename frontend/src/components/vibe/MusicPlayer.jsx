@@ -59,18 +59,18 @@ export default function MusicPlayer() {
             </button>
           </div>
 
-          <div className="flex items-center space-x-2 w-full">
-            <span className="text-xs text-gray-500 w-10">{formatTime(progress)}</span>
-            <input
-              type="range"
-              min="0"
-              max={duration}
-              value={progress}
-              onChange={e => seek(+e.target.value)}
-              className="flex-1 h-1 bg-gray-200 rounded-lg cursor-pointer accent-indigo-600"
-            />
-            <span className="text-xs text-gray-500 w-10">{formatTime(duration)}</span>
-          </div>
+          <div className="flex items-center space-x-3 w-full">
+  <span className="text-xs text-gray-500 w-8 text-right">{formatTime(progress)}</span>
+  <input
+    type="range"
+    min="0"
+    max={duration}
+    value={progress}
+    onChange={e => seek(+e.target.value)}
+    className="flex-1 h-1 bg-gray-200 rounded-lg cursor-pointer accent-indigo-600"
+  />
+  <span className="text-xs text-gray-500 w-8 text-left">{formatTime(duration)}</span>
+</div>
         </div>
 
         <button
