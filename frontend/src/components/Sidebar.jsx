@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Home, User, History, FolderOpen, UserCog, Users, Bell, ShieldCheck, Settings, IndianRupee, DollarSign,
   Trash2, CheckSquare, BarChart2, Terminal, MusicIcon, CameraIcon, TrophyIcon, X, ChevronLeft, Calculator, 
-  Layers, LayoutDashboard, FileClock, Cpu } from 'lucide-react';
+  Layers, LayoutDashboard, FileClock, Cpu, Fingerprint } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 function Sidebar({ isOpen, onNavigate }) {
@@ -24,6 +24,7 @@ function Sidebar({ isOpen, onNavigate }) {
     { to: '/notifications', icon: Bell, label: 'Notifications' },
     { to: '/settings', icon: Settings, label: 'Settings' },
     { to: '/lets-play', icon: TrophyIcon, label: 'Activities' },
+    { to: '/tech-stack', icon: Layers, label: 'Tech Stack' },
     ...((['developer', 'financier'].includes(user?.role)) ? [
       { to: '/verification', icon: CheckSquare, label: 'Verification' }
     ] : []),
@@ -39,9 +40,9 @@ function Sidebar({ isOpen, onNavigate }) {
     ...(['developer'].includes(user?.role) ? [
         { to: '/developer-options', icon: Terminal, label: 'Developer Options' },
         { to: '/activity-logs',     icon: FileClock, label: 'Activity Logs' },
+        { to: '/auth-logs',         icon: Fingerprint, label: 'Auth Logs' },
         { to: '/monitor',     icon: Cpu, label: 'Monitor' }
       ] : []),
-    { to: '/tech-stack', icon: Layers, label: 'Tech Stack' }
   ];
 
   const handleClick = () => {
@@ -61,7 +62,7 @@ function Sidebar({ isOpen, onNavigate }) {
         <nav className="flex-1 px-2 py-4 space-y-1">
           {links.map((link, index) => {
             const Icon = link.icon;
-            const isSeparator = [3, 7, 9, 13, 17].includes(index); 
+            const isSeparator = [3, 7, 9, 13, 15, 19].includes(index); 
             return (
               <div key={link.to}>
                 <Link

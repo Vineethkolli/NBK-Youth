@@ -3,61 +3,69 @@ import User from '../models/User.js';
 import OTP from '../models/OTP.js';
 import { sendOTPEmail } from '../utils/emailService.js';
 import { logActivity } from '../middleware/activityLogger.js';
+import AuthLog from '../models/AuthLog.js';
+
+// auth log
+const logAuthEvent = async (data) => {
+  try {
+    setImmediate(async () => {
+      await AuthLog.create(data);
+    });
+  } catch (error) {
+    console.error('Auth log failed:', error.message);
+  }
+};
+
 
 export const signUp = async (req, res) => {
   try {
-    const { name, email, phoneNumber, password, language } = req.body;
-    if (!name || !phoneNumber || !password) {
+    const { name, email, phoneNumber, password, language, deviceInfo } = req.body;
+
+    if (!name || !phoneNumber || !password)
       return res.status(400).json({ message: 'Required fields missing' });
-    }
-    // Check for existing user with same phone number
+
     const phoneExists = await User.findOne({ phoneNumber });
-    if (phoneExists) {
+    if (phoneExists)
       return res.status(400).json({ message: 'User already exists' });
-    }
-    // If email is provided, check if it's already in use
+
     if (email) {
       const emailExists = await User.findOne({ email });
-      if (emailExists) {
+      if (emailExists)
         return res.status(400).json({ message: 'User already exists' });
-      }
     }
+
     const user = await User.create({
       name,
       email: email || undefined,
       phoneNumber,
       password,
-      language: language || 'en'
+      language: language || 'en',
     });
 
-    await logActivity(
-      { 
-        user: { registerId: user.registerId, name: user.name }
-      },
+    // Fire both logs asynchronously
+    const safeDeviceInfo = deviceInfo || {
+      accessMode: 'website',
+      deviceType: 'unknown',
+      deviceModel: 'unknown',
+      platform: 'unknown',
+      browser: { name: 'unknown', version: 'unknown', osName: 'unknown', osVersion: 'unknown' }
+    };
+
+    setImmediate(() => {
+      logAuthEvent({
+        registerId: user.registerId,
+        name: user.name,
+        action: 'signup',
+        deviceInfo: safeDeviceInfo,
+      });
+    });
+
+    logActivity(
+      { user: { registerId: user.registerId, name: user.name } },
       'CREATE',
       'User',
       user.registerId,
-      { 
-        before: null, 
-        after: { 
-          name: user.name, 
-          email: user.email, 
-          phoneNumber: user.phoneNumber, 
-          role: user.role,
-          deviceInfo: req.body.deviceInfo || {
-            type: 'unknown',
-            deviceType: 'unknown',
-            deviceModel: 'unknown',
-            platform: 'unknown',
-            browser: {
-              name: 'unknown',
-              version: 'unknown',
-              osName: 'unknown',
-              osVersion: 'unknown'
-            }
-          }
-        } 
-      },
+      { before: null, after: { name: user.name, email: user.email, phoneNumber: user.phoneNumber } },
       `User ${user.name} signed up`
     );
 
@@ -66,6 +74,7 @@ export const signUp = async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: '365d' }
     );
+
     return res.status(201).json({
       token,
       user: {
@@ -86,56 +95,55 @@ export const signUp = async (req, res) => {
   }
 };
 
+
 export const signIn = async (req, res) => {
   try {
-    const { identifier, password, language } = req.body;
+    const { identifier, password, language, deviceInfo } = req.body;
     const user = await User.findOne({
-      $or: [
-        { email: identifier },
-        { phoneNumber: identifier }
-      ]
+      $or: [{ email: identifier }, { phoneNumber: identifier }]
     });
-    if (!user || !(await user.comparePassword(password))) {
-      return res.status(401).json({ message: 'Invalid credentials' });
-    }
 
-    await logActivity(
-      { 
-        user: { registerId: user.registerId, name: user.name }
-      },
+    if (!user || !(await user.comparePassword(password)))
+      return res.status(401).json({ message: 'Invalid credentials' });
+
+    const safeDeviceInfo = deviceInfo || {
+      accessMode: 'website',
+      deviceType: 'unknown',
+      deviceModel: 'unknown',
+      platform: 'unknown',
+      browser: { name: 'unknown', version: 'unknown', osName: 'unknown', osVersion: 'unknown' }
+    };
+
+    setImmediate(() => {
+      logAuthEvent({
+        registerId: user.registerId,
+        name: user.name,
+        action: 'signin',
+        deviceInfo: safeDeviceInfo
+      });
+    });
+
+    logActivity(
+      { user: { registerId: user.registerId, name: user.name } },
       'UPDATE',
       'User',
       user.registerId,
-      { 
-        before: null, 
-        after: {
-          deviceInfo: req.body.deviceInfo || {
-            type: 'unknown',
-            deviceType: 'unknown',
-            deviceModel: 'unknown',
-            platform: 'unknown',
-            browser: {
-              name: 'unknown',
-              version: 'unknown',
-              osName: 'unknown',
-              osVersion: 'unknown'
-            }
-          }
-        }
-      },
+      { before: null, after: { deviceInfo: safeDeviceInfo } },
       `User ${user.name} signed in`
     );
 
-    // Update language preference if provided and it differs from stored language
+    // Update language preference if changed
     if (language && language !== user.language) {
       user.language = language;
       await user.save();
     }
+
     const token = jwt.sign(
       { id: user._id, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: '365d' }
     );
+
     return res.json({
       token,
       user: {
@@ -151,9 +159,11 @@ export const signIn = async (req, res) => {
       }
     });
   } catch (error) {
+    console.error('Signin error:', error);
     return res.status(500).json({ message: 'Server error' });
   }
 };
+
 
 export const forgotPassword = async (req, res) => {
   try {
@@ -174,6 +184,7 @@ export const forgotPassword = async (req, res) => {
   }
 };
 
+
 export const verifyOtp = async (req, res) => {
   try {
     const { email, otp } = req.body;
@@ -192,6 +203,7 @@ export const verifyOtp = async (req, res) => {
     return res.status(500).json({ message: 'Server error' });
   }
 };
+
 
 export const resetPassword = async (req, res) => {
   try {

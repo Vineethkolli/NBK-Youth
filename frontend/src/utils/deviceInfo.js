@@ -8,17 +8,18 @@ export const getDeviceInfo = async () => {
       .replace(/[^\w\s\-._]/g, '')
       .slice(0, 60) || 'unknown';
 
-  // Detect PWA mode
-  let displayMode = 'website';
+  // Detect Access Mode
+  let accessMode = 'website';
   try {
     if (window.matchMedia?.('(display-mode: standalone)').matches) {
-      displayMode = 'pwa';
+      accessMode = 'pwa';
     } else if (navigator.standalone) {
-      displayMode = 'addtohomescreen';
+      accessMode = 'addtohomescreen';
     } else if (document.referrer?.includes('android-app://')) {
-      displayMode = 'twa';
+      accessMode = 'twa';
     }
   } catch {
+    accessMode = 'unknown';
   }
 
   let browserName = 'unknown';
@@ -28,39 +29,39 @@ export const getDeviceInfo = async () => {
   let deviceType = 'desktop';
   let deviceIdentifier = 'unknown';
 
-  // Prefer Client Hints
+  // Prefer Client Hints (modern browsers)
   if (navigator.userAgentData) {
-  try {
-    const uaData = navigator.userAgentData;
-    const brands = uaData.brands || uaData.uaList || [];
-    if (brands.length) {
-      const realBrand = brands.find(b => b.brand && !/^not\?a_brand$/i.test(b.brand));
-      if (realBrand) {
-        browserName = realBrand.brand;
-        browserVersion = realBrand.version || 'unknown';
+    try {
+      const uaData = navigator.userAgentData;
+      const brands = uaData.brands || uaData.uaList || [];
+      if (brands.length) {
+        const realBrand = brands.find(b => b.brand && !/^not\?a_brand$/i.test(b.brand));
+        if (realBrand) {
+          browserName = realBrand.brand;
+          browserVersion = realBrand.version || 'unknown';
+        }
       }
+
+      deviceType = uaData.mobile ? 'mobile' : 'desktop';
+
+      const high = await uaData.getHighEntropyValues?.([
+        'platform',
+        'platformVersion',
+        'model',
+        'uaFullVersion'
+      ]).catch(() => ({}));
+
+      if (high) {
+        osName = high.platform || osName;
+        osVersion = String(high.platformVersion || osVersion);
+        deviceIdentifier = sanitize(high.model);
+        browserVersion = String(high.uaFullVersion || browserVersion);
+      }
+    } catch {
     }
-
-    deviceType = uaData.mobile ? 'mobile' : 'desktop';
-
-    const high = await uaData.getHighEntropyValues?.([
-      'platform',
-      'platformVersion',
-      'model',
-      'uaFullVersion'
-    ]).catch(() => ({}));
-
-    if (high) {
-      osName = high.platform || osName;
-      osVersion = String(high.platformVersion || osVersion);
-      deviceIdentifier = sanitize(high.model);
-      browserVersion = String(high.uaFullVersion || browserVersion);
-    }
-  } catch {
   }
-}
 
-  // Browser detection
+  // Browser name fallback
   if (browserName === 'unknown') {
     const uaLower = ua.toLowerCase();
     if (/edg\//i.test(uaLower)) browserName = 'edge';
@@ -71,7 +72,7 @@ export const getDeviceInfo = async () => {
     else if (/msie|trident/i.test(uaLower)) browserName = 'ie';
   }
 
-  // Browser version
+  // Browser version fallback
   if (browserVersion === 'unknown') {
     try {
       const versionRegex =
@@ -80,11 +81,10 @@ export const getDeviceInfo = async () => {
           : new RegExp(`${browserName}[\\/ ]([\\d.]+)`, 'i');
       const v = ua.match(versionRegex);
       if (v?.[1]) browserVersion = v[1];
-    } catch {
-    }
+    } catch {}
   }
 
-  // Device type
+  // Device type detection
   if (deviceType === 'desktop') {
     const isTablet = /(tablet|ipad|playbook|silk)|(android(?!.*mobile))/i.test(ua);
     const isMobile = /mobile|iphone|ipod|blackberry|iemobile|opera mini/i.test(ua);
@@ -108,7 +108,7 @@ export const getDeviceInfo = async () => {
     }
   }
 
-  // OS version
+  // OS version detection
   if (osVersion === 'unknown') {
     const v =
       ua.match(/Windows NT ([0-9._]+)/i) ||
@@ -118,7 +118,7 @@ export const getDeviceInfo = async () => {
     if (v?.[1]) osVersion = v[1].replace(/_/g, '.');
   }
 
-  // Device model
+  // Device model detection
   if (deviceIdentifier === 'unknown') {
     const inside = ua.match(/\(([^)]+)\)/)?.[1];
     const token = inside
@@ -129,7 +129,7 @@ export const getDeviceInfo = async () => {
   }
 
   return {
-    type: displayMode,
+    accessMode,
     deviceType,
     deviceModel: deviceIdentifier,
     platform: osName.toLowerCase() || 'unknown',
