@@ -59,7 +59,7 @@ export default function MusicPlayer() {
             </button>
           </div>
 
-          <div className="flex items-center space-x-3 w-full">
+          <div className="flex items-center space-x-2 w-full">
   <span className="text-xs text-gray-500 w-8 text-right">{formatTime(progress)}</span>
   <input
     type="range"
