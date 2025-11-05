@@ -37,12 +37,12 @@ function Stats() {
     villagers: {
       paid: { cash: 0, online: 0, webApp: 0, total: 0 },
       pending: { cash: 0, online: 0, webApp: 0, total: 0 },
-      total: 0
+      total: 0, count: 0
     },
     youth: {
       paid: { cash: 0, online: 0, webApp: 0, total: 0 },
       pending: { cash: 0, online: 0, webApp: 0, total: 0 },
-      total: 0
+      total: 0, count: 0
     },
     dateWiseStats: []
   });

@@ -70,7 +70,7 @@ export const statsController = {
         cashAmount: roundNumber(offline.amount - totalExpenses.cashAmount)
       };
 
-      // Calculate villagers stats
+      // Calculate villagers, Youth stats
       const calculateGroupStats = (belongsTo) => {
         const groupIncomes = incomes.filter(income => 
           income.belongsTo.toLowerCase() === belongsTo.toLowerCase());
@@ -95,10 +95,11 @@ export const statsController = {
         };
         pending.total = roundNumber(pending.cash + pending.online + pending.webApp);
 
-        // Add overall total for the group
+        
         const total = roundNumber(paid.total + pending.total);
+        const count = groupIncomes.length;
 
-        return { paid, pending, total };
+        return { paid, pending, total, count };
       };
 
       const stats = {

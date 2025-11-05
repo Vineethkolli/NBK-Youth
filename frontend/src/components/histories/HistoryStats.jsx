@@ -148,9 +148,14 @@ function HistoryStats({ stats, snapshotName }) {
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-xl font-semibold mb-4">Villagers</h2>
           <div className="mb-4">
-            <p className="text-lg font-bold">
-              Total Amount: {formatAmount(villagers.total)}
-            </p>
+              <p className="text-lg">
+    <span className="font-bold">
+      Total Amount: {formatAmount(stats.villagers.total)}
+    </span>{" "}
+    <span className="text-gray-700 text-sm">
+      ({formatNumber(stats.villagers.count)} entries)
+    </span>
+  </p>
           </div>
           <table className="min-w-full">
             <thead>
@@ -185,9 +190,14 @@ function HistoryStats({ stats, snapshotName }) {
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-xl font-semibold mb-4">Youth</h2>
           <div className="mb-4">
-            <p className="text-lg font-bold">
-              Total Amount: {formatAmount(youth.total)}
-            </p>
+            <p className="text-lg">
+            <span className="font-bold">
+            Total Amount: {formatAmount(stats.youth.total)}
+           </span>{" "}
+           <span className="text-gray-600 text-sm">
+        ({formatNumber(stats.youth.count)} entries)
+      </span>
+          </p>
           </div>
           <table className="min-w-full">
             <thead>

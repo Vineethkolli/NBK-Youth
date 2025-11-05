@@ -264,7 +264,8 @@ const generateStats = async () => {
       pending.total = pending.cash + pending.online + pending.webApp;
 
       const total = paid.total + pending.total;
-      return { paid, pending, total };
+      const count = groupIncomes.length;
+      return { paid, pending, total, count };
     };
 
     return {
