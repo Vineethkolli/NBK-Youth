@@ -250,12 +250,37 @@ function Histories() {
             </div>
           )}
 
-          <div className="bg-white rounded-lg shadow">
-            {activeTab === 'stats' && <HistoryStats stats={getCurrentData()} snapshotName={selectedHistory.snapshotName} />}
-            {activeTab === 'income' && <HistoryIncome incomes={filteredData()} snapshotName={selectedHistory.snapshotName} showBelongsTo={showBelongsTo} />}
-            {activeTab === 'expense' && <HistoryExpense expenses={filteredData()} snapshotName={selectedHistory.snapshotName} />}
-            {activeTab === 'events' && <HistoryEvents events={getCurrentData()} snapshotName={selectedHistory.snapshotName} />}
-          </div>
+          {activeTab === 'stats' && (
+  <HistoryStats
+    stats={getCurrentData()}
+    snapshotName={selectedHistory.snapshotName}
+  />
+)}
+
+{['income', 'expense'].includes(activeTab) ? (
+  <div className="bg-white rounded-lg shadow">
+    {activeTab === 'income' && (
+      <HistoryIncome
+        incomes={filteredData()}
+        snapshotName={selectedHistory.snapshotName}
+        showBelongsTo={showBelongsTo}
+      />
+    )}
+    {activeTab === 'expense' && (
+      <HistoryExpense
+        expenses={filteredData()}
+        snapshotName={selectedHistory.snapshotName}
+      />
+    )}
+  </div>
+) : null}
+
+{activeTab === 'events' && (
+  <HistoryEvents
+    events={getCurrentData()}
+    snapshotName={selectedHistory.snapshotName}
+  />
+)}
         </div>
       )}
 

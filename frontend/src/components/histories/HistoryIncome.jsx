@@ -9,7 +9,7 @@ function HistoryIncome({ incomes, snapshotName, showBelongsTo }) {
 
   return (
     <div className="space-y-6">
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto  rounded-lg">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
