@@ -1,33 +1,33 @@
 steps:
-  # Step 1: Build Docker image
+  # Build the image
   - name: 'gcr.io/cloud-builders/docker'
     args:
       [
         'build',
         '-t',
-        'asia-south1-docker.pkg.dev/$PROJECT_ID/nbk-youth-backend/backend:$COMMIT_SHA',
+        'asia-south1-docker.pkg.dev/nbk-youth-446015/nbk-youth-backend/backend:$COMMIT_SHA',
         '.'
       ]
 
-  # Step 2: Push image to Artifact Registry
+  # Push the image to Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
     args:
       [
         'push',
-        'asia-south1-docker.pkg.dev/$PROJECT_ID/nbk-youth-backend/backend:$COMMIT_SHA'
+        'asia-south1-docker.pkg.dev/nbk-youth-446015/nbk-youth-backend/backend:$COMMIT_SHA'
       ]
 
-  # Step 3: Deploy to Cloud Run
+  # Deploy to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: gcloud
     args:
       [
-        'run', 'deploy', 'nbkyouth-backend',
-        '--image', 'asia-south1-docker.pkg.dev/$PROJECT_ID/nbk-youth-backend/backend:$COMMIT_SHA',
-        '--region', 'asia-south1',
-        '--platform', 'managed',
+        'run','deploy','nbkyouth-backend',
+        '--image','asia-south1-docker.pkg.dev/nbk-youth-446015/nbk-youth-backend/backend:$COMMIT_SHA',
+        '--region','asia-south1',
+        '--platform','managed',
         '--allow-unauthenticated'
       ]
 
 images:
-  - 'asia-south1-docker.pkg.dev/$PROJECT_ID/nbk-youth-backend/backend:$COMMIT_SHA'
+  - 'asia-south1-docker.pkg.dev/nbk-youth-446015/nbk-youth-backend/backend:$COMMIT_SHA'
