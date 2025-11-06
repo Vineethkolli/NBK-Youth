@@ -126,27 +126,29 @@ export const getAllUsers = async (req, res) => {
 
 export const updateProfile = async (req, res) => {
   try {
-    const { name, email, phoneNumber } = req.body;
+    let { name, email, phoneNumber } = req.body;
     const user = await User.findById(req.user.id);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-    
+
     const originalData = { name: user.name, email: user.email, phoneNumber: user.phoneNumber };
 
+    const normalizedEmail = email?.trim().toLowerCase();
+
     // Prevent updating default developer email
-    if (user.email === 'gangavaramnbkyouth@gmail.com' && email !== 'gangavaramnbkyouth@gmail.com') {
+    if (user.email === 'gangavaramnbkyouth@gmail.com' && normalizedEmail !== 'gangavaramnbkyouth@gmail.com') {
       return res.status(403).json({ message: 'Cannot change default developer email' });
     }
-    
+
     // Check if email is already taken by another user
-    if (email && email !== user.email) {
-      const emailExists = await User.findOne({ email });
+    if (normalizedEmail && normalizedEmail !== user.email) {
+      const emailExists = await User.findOne({ email: normalizedEmail });
       if (emailExists) {
         return res.status(400).json({ message: 'Email already in use' });
       }
     }
-    
+
     // Check if phone number is already taken by another user
     if (phoneNumber && phoneNumber !== user.phoneNumber) {
       const phoneExists = await User.findOne({ phoneNumber });
@@ -154,11 +156,11 @@ export const updateProfile = async (req, res) => {
         return res.status(400).json({ message: 'Phone number already in use' });
       }
     }
-    
+
     user.name = name || user.name;
-    user.email = email || user.email;
+    user.email = normalizedEmail || user.email;
     user.phoneNumber = phoneNumber || user.phoneNumber;
-    
+
     await user.save();
     res.json(user);
 
@@ -341,18 +343,20 @@ export const updateLanguage = async (req, res) => {
 
 export const updateUserProfile = async (req, res) => {
   try {
-    const { name, email, phoneNumber } = req.body;
+    let { name, email, phoneNumber } = req.body;
     const userToUpdate = await User.findById(req.params.userId);
     if (!userToUpdate) return res.status(404).json({ message: 'User not found' });
 
+    const normalizedEmail = email?.trim().toLowerCase();
+
     // Protect default developer account
-    if (userToUpdate.email === 'gangavaramnbkyouth@gmail.com' && email !== 'gangavaramnbkyouth@gmail.com') {
+    if (userToUpdate.email === 'gangavaramnbkyouth@gmail.com' && normalizedEmail !== 'gangavaramnbkyouth@gmail.com') {
       return res.status(403).json({ message: 'Cannot change default developer email' });
     }
 
     // Check unique email & phone
-    if (email && email !== userToUpdate.email) {
-      const exists = await User.findOne({ email });
+    if (normalizedEmail && normalizedEmail !== userToUpdate.email) {
+      const exists = await User.findOne({ email: normalizedEmail });
       if (exists) return res.status(400).json({ message: 'Email already in use' });
     }
 
@@ -364,7 +368,7 @@ export const updateUserProfile = async (req, res) => {
     const originalData = { name: userToUpdate.name, email: userToUpdate.email, phoneNumber: userToUpdate.phoneNumber };
 
     userToUpdate.name = name || userToUpdate.name;
-    userToUpdate.email = email || userToUpdate.email;
+    userToUpdate.email = normalizedEmail || userToUpdate.email;
     userToUpdate.phoneNumber = phoneNumber || userToUpdate.phoneNumber;
 
     await userToUpdate.save();
@@ -374,7 +378,7 @@ export const updateUserProfile = async (req, res) => {
       'UPDATE',
       'User',
       userToUpdate.registerId,
-      { before: originalData, after: { name, email, phoneNumber } },
+      { before: originalData, after: { name, email: normalizedEmail, phoneNumber } },
       `User ${userToUpdate.name} updated by ${req.user.name}`
     );
 

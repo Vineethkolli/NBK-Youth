@@ -19,24 +19,26 @@ const logAuthEvent = async (data) => {
 
 export const signUp = async (req, res) => {
   try {
-    const { name, email, phoneNumber, password, language, deviceInfo } = req.body;
+    let { name, email, phoneNumber, password, language, deviceInfo } = req.body;
 
     if (!name || !phoneNumber || !password)
       return res.status(400).json({ message: 'Required fields missing' });
+
+    const normalizedEmail = email?.trim().toLowerCase() || undefined;
 
     const phoneExists = await User.findOne({ phoneNumber });
     if (phoneExists)
       return res.status(400).json({ message: 'User already exists' });
 
-    if (email) {
-      const emailExists = await User.findOne({ email });
+    if (normalizedEmail) {
+      const emailExists = await User.findOne({ email: normalizedEmail });
       if (emailExists)
         return res.status(400).json({ message: 'User already exists' });
     }
 
     const user = await User.create({
       name,
-      email: email || undefined,
+      email: normalizedEmail,
       phoneNumber,
       password,
       language: language || 'en',
@@ -98,7 +100,11 @@ export const signUp = async (req, res) => {
 
 export const signIn = async (req, res) => {
   try {
-    const { identifier, password, language, deviceInfo } = req.body;
+    let { identifier, password, language, deviceInfo } = req.body;
+
+    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier);
+    if (isEmail) identifier = identifier.trim().toLowerCase();
+
     const user = await User.findOne({
       $or: [{ email: identifier }, { phoneNumber: identifier }]
     });
