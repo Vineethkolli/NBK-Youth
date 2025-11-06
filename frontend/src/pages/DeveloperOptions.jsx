@@ -7,7 +7,6 @@ import { useState } from 'react';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import { API_URL } from '../utils/config';
-import DeveloperPhoneOTPTester from '../components/developer/OTPTest';
 
 function DeveloperOptions() {
   const { user } = useAuth();
@@ -52,7 +51,6 @@ function DeveloperOptions() {
       </div>
 
       <LockManager />
-      <DeveloperPhoneOTPTester />
 
       {/* Reset Roles */}
       <div className="bg-white rounded-lg shadow p-6 flex items-center justify-between">
