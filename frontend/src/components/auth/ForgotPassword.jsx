@@ -8,19 +8,29 @@ function ForgotPassword({ onBack, onOTPSent }) {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsLoading(true);
+  e.preventDefault();
+  setIsLoading(true);
 
-    try {
-      await axios.post(`${API_URL}/api/auth/forgot-password`, { email });
-      toast.success('OTP sent to your email');
-      onOTPSent(email);
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to send OTP');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const normalizedEmail = email.trim().toLowerCase();
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  if (!emailRegex.test(normalizedEmail)) {
+    toast.error('Please enter a valid email address');
+    setIsLoading(false);
+    return;
+  }
+
+  try {
+    await axios.post(`${API_URL}/api/auth/forgot-password`, { email: normalizedEmail });
+    toast.success('OTP sent to your email');
+    onOTPSent(normalizedEmail);
+  } catch (error) {
+    toast.error(error.response?.data?.message || 'Failed to send OTP');
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   return (
     <div className="space-y-6">

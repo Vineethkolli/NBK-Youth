@@ -115,14 +115,23 @@ export const updateUserProfile = async (req, res) => {
 
     const normalizedEmail = email?.trim().toLowerCase();
 
+    // Prevent changing default developer email
     if (userToUpdate.email === 'gangavaramnbkyouth@gmail.com' && normalizedEmail !== userToUpdate.email)
       return res.status(403).json({ message: 'Cannot change default developer email' });
 
-    if (normalizedEmail && normalizedEmail !== userToUpdate.email) {
-      const exists = await User.findOne({ email: normalizedEmail });
-      if (exists) return res.status(400).json({ message: 'Email already in use' });
+    // Email validation
+    if (normalizedEmail) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(normalizedEmail))
+        return res.status(400).json({ message: 'Invalid email format' });
+
+      if (normalizedEmail !== userToUpdate.email) {
+        const exists = await User.findOne({ email: normalizedEmail });
+        if (exists) return res.status(400).json({ message: 'Email already in use' });
+      }
     }
 
+    // Phone validation and duplicate check
     if (phoneNumber && phoneNumber !== userToUpdate.phoneNumber) {
       const exists = await User.findOne({ phoneNumber });
       if (exists) return res.status(400).json({ message: 'Phone number already in use' });

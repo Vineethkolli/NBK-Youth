@@ -60,32 +60,36 @@ function Profile() {
   };
 
   const handleUpdateProfile = async (e) => {
-    e?.preventDefault?.();
+  e?.preventDefault?.();
 
-    // Email validation (if provided)
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (userData.email && !emailRegex.test(userData.email)) {
-      return toast.error('Please enter a valid email address');
-    }
+  // ✅ Email validation (if provided)
+  const normalizedEmail = userData.email.trim().toLowerCase();
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (normalizedEmail && !emailRegex.test(normalizedEmail)) {
+    return toast.error('Please enter a valid email address');
+  }
 
-    // Phone number validation
-    const phoneRegex = /^(?=(?:.*\d){8,})[+\-\d\s()]*$/;;
-    if (!phoneRegex.test(userData.phoneNumber)) {
-      return toast.error('Please enter a valid phone number');
-    }
+  // ✅ Phone number validation
+  const phoneRegex = /^(?=(?:.*\d){8,})[+\-\d\s()]*$/;
+  if (!phoneRegex.test(userData.phoneNumber)) {
+    return toast.error('Please enter a valid phone number');
+  }
 
-    try {
-      setIsUpdatingProfile(true);
-      const { data } = await axios.patch(`${API_URL}/api/profile/profile`, userData);
-      updateUserData(data);
-      toast.success('Profile updated successfully');
-      setIsEditing(false);
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to update profile');
-    } finally {
-      setIsUpdatingProfile(false);
-    }
-  };
+  try {
+    setIsUpdatingProfile(true);
+    const { data } = await axios.patch(`${API_URL}/api/profile/profile`, {
+      ...userData,
+      email: normalizedEmail, // ✅ use normalized email
+    });
+    updateUserData(data);
+    toast.success('Profile updated successfully');
+    setIsEditing(false);
+  } catch (error) {
+    toast.error(error.response?.data?.message || 'Failed to update profile');
+  } finally {
+    setIsUpdatingProfile(false);
+  }
+};
 
   const handleImageUpload = async (imageData) => {
     try {

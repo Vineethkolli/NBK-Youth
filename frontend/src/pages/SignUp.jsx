@@ -27,41 +27,41 @@ function SignUp() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    // Email validation (if provided)
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (formData.email && !emailRegex.test(formData.email)) {
-      return toast.error('Please enter a valid email address');
-    }
+  // Email validation (if provided)
+  const normalizedEmail = formData.email.trim().toLowerCase();
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (normalizedEmail && !emailRegex.test(normalizedEmail)) {
+    return toast.error('Please enter a valid email address');
+  }
 
-    // Phone number validation
-    const phoneRegex = /^(?=(?:.*\d){8,})[+\-\d\s()]*$/;
-    if (!phoneRegex.test(formData.phoneNumber)) {
-      return toast.error('Please enter a valid phone number');
-    }
+  // Phone number validation
+  const phoneRegex = /^(?=(?:.*\d){8,})[+\-\d\s()]*$/;
+  if (!phoneRegex.test(formData.phoneNumber)) {
+    return toast.error('Please enter a valid phone number');
+  }
 
-    // Password length validation
-    if (formData.password.length < 4) {
-      return toast.error('Password must be at least 4 characters long');
-    }
+  // Password length validation
+  if (formData.password.length < 4) {
+    return toast.error('Password must be at least 4 characters long');
+  }
 
-    // Password match validation
-    if (formData.password !== formData.confirmPassword) {
-      return toast.error('Passwords do not match');
-    }
+  // Password match validation
+  if (formData.password !== formData.confirmPassword) {
+    return toast.error('Passwords do not match');
+  }
 
-    setIsSubmitting(true);
-    try {
-      // Pass the current language along with form data
-      await signup({ ...formData, language });
-      toast.success('Account created successfully');
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to create account');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  setIsSubmitting(true);
+  try {
+    await signup({ ...formData, email: normalizedEmail, language });
+    toast.success('Account created successfully');
+  } catch (error) {
+    toast.error(error.response?.data?.message || 'Failed to create account');
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   const togglePasswordVisibility = () => {
     setShowPassword((prevState) => !prevState);

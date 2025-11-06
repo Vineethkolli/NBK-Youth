@@ -15,14 +15,15 @@ const incomeSchema = new mongoose.Schema({
     required: true,
     unique: true, 
   },
-  email: {
-    type: String,
-    validate: {
-      validator: (v) =>
-        !v || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v), 
-      message: 'Invalid email format',
-    },
+email: {
+  type: String,
+  trim: true,
+  lowercase: true,
+  validate: {
+    validator: (v) => !v || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v),
+    message: 'Invalid email format',
   },
+},
   phoneNumber: {
     type: String,
   },

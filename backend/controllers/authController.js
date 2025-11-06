@@ -16,19 +16,23 @@ const logAuthEvent = async (data) => {
   }
 };
 
-
 export const signUp = async (req, res) => {
   try {
     let { name, email, phoneNumber, password, language, deviceInfo } = req.body;
     if (!name || !phoneNumber || !password)
       return res.status(400).json({ message: 'Required fields missing' });
 
+    // Normalize email (trim + lowercase + optional)
     const normalizedEmail = email?.trim().toLowerCase() || undefined;
 
     const phoneExists = await User.findOne({ phoneNumber });
     if (phoneExists) return res.status(400).json({ message: 'User already exists' });
 
     if (normalizedEmail) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(normalizedEmail))
+        return res.status(400).json({ message: 'Invalid email format' });
+
       const emailExists = await User.findOne({ email: normalizedEmail });
       if (emailExists) return res.status(400).json({ message: 'User already exists' });
     }
@@ -91,10 +95,11 @@ export const signUp = async (req, res) => {
   }
 };
 
-
 export const signIn = async (req, res) => {
   try {
     let { identifier, password, language, deviceInfo } = req.body;
+
+    // Normalize identifier if it's email
     const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier);
     if (isEmail) identifier = identifier.trim().toLowerCase();
 
@@ -160,15 +165,22 @@ export const signIn = async (req, res) => {
   }
 };
 
-
 export const forgotPassword = async (req, res) => {
   try {
-    const { email } = req.body;
+    const rawEmail = req.body.email;
+    if (!rawEmail) return res.status(400).json({ message: 'Email required' });
+
+    const email = rawEmail.trim().toLowerCase();
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) return res.status(400).json({ message: 'Invalid email format' });
+
     const user = await User.findOne({ email });
     if (!user) return res.status(404).json({ message: 'User not found' });
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     await OTP.create({ email, otp });
+
     const emailSent = await sendOTPEmail(email, otp);
     if (!emailSent) return res.status(500).json({ message: 'Failed to send OTP email' });
 
@@ -178,10 +190,12 @@ export const forgotPassword = async (req, res) => {
   }
 };
 
-
 export const verifyOtp = async (req, res) => {
   try {
-    const { email, otp } = req.body;
+    const rawEmail = req.body.email;
+    const email = rawEmail.trim().toLowerCase();
+    const otp = req.body.otp;
+
     const otpRecord = await OTP.findOne({ email, otp });
     if (!otpRecord) return res.status(400).json({ message: 'Invalid OTP' });
 
@@ -194,12 +208,13 @@ export const verifyOtp = async (req, res) => {
   }
 };
 
-
 export const resetPassword = async (req, res) => {
   try {
     const { resetToken, newPassword } = req.body;
     const decoded = jwt.verify(resetToken, process.env.JWT_SECRET);
-    const user = await User.findOne({ email: decoded.email });
+
+    const email = decoded.email.trim().toLowerCase();
+    const user = await User.findOne({ email });
     if (!user) return res.status(404).json({ message: 'User not found' });
 
     user.password = newPassword;

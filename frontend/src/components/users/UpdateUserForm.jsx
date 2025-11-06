@@ -17,19 +17,33 @@ export default function UpdateUserForm({ user, onClose, onUpdated }) {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      const { data } = await axios.patch(`${API_URL}/api/users/${user._id}`, formData);
-      toast.success('User updated successfully');
-      onUpdated(data);
-      onClose();
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to update user');
-    } finally {
-      setLoading(false);
-    }
-  };
+  e.preventDefault();
+  setLoading(true);
+
+  const normalizedEmail = formData.email.trim().toLowerCase();
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  if (normalizedEmail && !emailRegex.test(normalizedEmail)) {
+    toast.error('Please enter a valid email address');
+    setLoading(false);
+    return;
+  }
+
+  try {
+    const { data } = await axios.patch(`${API_URL}/api/users/${user._id}`, {
+      ...formData,
+      email: normalizedEmail
+    });
+    toast.success('User updated successfully');
+    onUpdated(data);
+    onClose();
+  } catch (error) {
+    toast.error(error.response?.data?.message || 'Failed to update user');
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
