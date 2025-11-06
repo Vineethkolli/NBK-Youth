@@ -93,7 +93,7 @@ function SignUp() {
               type="text"
               name="name"
               required
-              placeholder="Name"
+              placeholder="Name *"
               value={formData.name}
               onChange={handleChange}
               className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500"
@@ -103,7 +103,7 @@ function SignUp() {
             <input
               type="email"
               name="email"
-              placeholder="Email (Not Mandatory but Recommended)"
+              placeholder="Email"
               value={formData.email}
               onChange={handleChange}
               className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500"
@@ -114,7 +114,7 @@ function SignUp() {
               type="tel"
               name="phoneNumber"
               required
-              placeholder="Phone Number"
+              placeholder="Phone Number *"
               value={formData.phoneNumber}
               onChange={handleChange}
               className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500"
@@ -125,7 +125,7 @@ function SignUp() {
               type={showPassword ? 'text' : 'password'}
               name="password"
               required
-              placeholder="Password"
+              placeholder="Password *"
               value={formData.password}
               onChange={handleChange}
               className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500"
@@ -143,7 +143,7 @@ function SignUp() {
               type={showConfirmPassword ? 'text' : 'password'}
               name="confirmPassword"
               required
-              placeholder="Confirm Password"
+              placeholder="Confirm Password *"
               value={formData.confirmPassword}
               onChange={handleChange}
               className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500"
