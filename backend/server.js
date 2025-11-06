@@ -9,6 +9,7 @@ import cron from 'node-cron';
 
 import authRoutes from './routes/auth.js';
 import userRoutes from './routes/users.js';
+import profileRoutes from './routes/profile.js';
 import paymentRoutes from './routes/payment.js';
 import paymentDetailsRoutes from './routes/paymentDetails.js';
 import incomeRoutes from './routes/incomes.js';
@@ -73,6 +74,7 @@ app.use('/assets', express.static(path.join(__dirname, 'public/assets')));
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/profile', profileRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/payment-details', paymentDetailsRoutes);
 app.use('/api/incomes', incomeRoutes);

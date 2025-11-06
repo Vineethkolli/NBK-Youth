@@ -23,7 +23,7 @@ export const AuthProvider = ({ children }) => {
 
   const fetchProfile = async () => {
     try {
-      const { data } = await axios.get(`${API_URL}/api/users/profile`);
+      const { data } = await axios.get(`${API_URL}/api/profile/profile`);
       setUser((prevUser) => ({
         ...prevUser,
         ...data, 

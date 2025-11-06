@@ -118,7 +118,7 @@ export const LanguageProvider = ({ children }) => {
     localStorage.setItem('preferredLanguage', newLanguage);
     if (user) {
       try {
-        await axios.patch(`${API_URL}/api/users/language`, {
+        await axios.patch(`${API_URL}/api/profile/language`, {
           language: newLanguage,
         });
       } catch (error) {

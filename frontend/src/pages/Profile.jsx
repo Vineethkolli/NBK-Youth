@@ -76,7 +76,7 @@ function Profile() {
 
     try {
       setIsUpdatingProfile(true);
-      const { data } = await axios.patch(`${API_URL}/api/users/profile`, userData);
+      const { data } = await axios.patch(`${API_URL}/api/profile/profile`, userData);
       updateUserData(data);
       toast.success('Profile updated successfully');
       setIsEditing(false);
@@ -90,14 +90,14 @@ function Profile() {
   const handleImageUpload = async (imageData) => {
     try {
       if (imageData === null) {
-        await axios.delete(`${API_URL}/api/users/profile/image`);
+        await axios.delete(`${API_URL}/api/profile/image`);
         setUserData((p) => ({ ...p, profileImage: null }));
         updateUserData({ ...user, profileImage: null });
         toast.success('Profile image deleted successfully');
       } else {
         // imageData include profileImage, profileImagePublicId
         const { data } = await axios.post(
-          `${API_URL}/api/users/profile/image`,
+          `${API_URL}/api/profile/image`,
           imageData
         );
         setUserData((p) => ({ ...p, profileImage: data.profileImage }));
@@ -122,7 +122,7 @@ function Profile() {
     }
     setIsUpdatingPassword(true);
     try {
-      await axios.post(`${API_URL}/api/auth/change-password`, {
+      await axios.post(`${API_URL}/api/profile/change-password`, {
         currentPassword: passwordData.currentPassword,
         newPassword: passwordData.newPassword
       });
