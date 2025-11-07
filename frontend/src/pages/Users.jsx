@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import { API_URL } from '../utils/config';
 import UpdateUserForm from '../components/users/UpdateUserForm';
 import DeleteUserConfirm from '../components/users/DeleteUserForm';
+import { parsePhoneNumberFromString } from 'libphonenumber-js'; // ✅ import for formatting
 
 function Users() {
   const [users, setUsers] = useState([]);
@@ -53,6 +54,16 @@ function Users() {
     }
   };
 
+  // ✅ Helper: format phone numbers (safe even for invalid ones)
+  const formatPhone = (number) => {
+    if (!number) return 'N/A';
+    try {
+      const parsed = parsePhoneNumberFromString(number);
+      return parsed && parsed.isValid() ? parsed.formatInternational() : number;
+    } catch {
+      return number;
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -107,13 +118,18 @@ function Users() {
                       </span>
                     )}
                   </td>
+
+                  {/* 📧 Email */}
                   <td className="px-4 py-3 whitespace-nowrap text-sm notranslate">
                     {user.email || 'N/A'}
                   </td>
 
+                  {/* 📞 Formatted phone number */}
                   <td className="px-4 py-3 whitespace-nowrap text-sm notranslate">
-                    {user.phoneNumber || 'N/A'}
+                    {formatPhone(user.phoneNumber)}
                   </td>
+
+                  {/* 🎭 Role */}
                   <td className="px-4 py-3 whitespace-nowrap text-sm">
                     <select
                       value={user.role}
@@ -130,6 +146,7 @@ function Users() {
                     </select>
                   </td>
 
+                  {/* 🧩 Category */}
                   <td className="px-4 py-3 whitespace-nowrap text-sm">
                     <select
                       value={user.category}
@@ -144,6 +161,7 @@ function Users() {
                     </select>
                   </td>
 
+                  {/* 🔔 Notifications */}
                   <td className="px-4 py-3 whitespace-nowrap text-center">
                     {user.notificationsEnabled ? (
                       <Bell className="h-5 w-5 text-green-600" title="Notifications Enabled" />
@@ -152,10 +170,12 @@ function Users() {
                     )}
                   </td>
 
+                  {/* 🌐 Language */}
                   <td className="px-4 py-3 whitespace-nowrap text-sm">
                     {user.language === 'te' ? 'Telugu' : user.language === 'en' ? 'English' : 'N/A'}
-                  </td>             
+                  </td>
 
+                  {/* ⚙️ Actions */}
                   {currentUser.role === 'developer' && (
                     <td className="px-4 py-3 whitespace-nowrap text-sm space-x-2">
                       <button
@@ -181,6 +201,7 @@ function Users() {
         </div>
       </div>
 
+      {/* 🧩 Modals */}
       {editingUser && (
         <UpdateUserForm
           user={editingUser}

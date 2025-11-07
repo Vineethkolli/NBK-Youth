@@ -1,4 +1,6 @@
 import { Camera } from 'lucide-react';
+import { AsYouType } from 'libphonenumber-js';
+import ProfilePhoneInput from "./PhoneInput";
 
 function ProfileDetails({
   user,
@@ -40,12 +42,18 @@ function ProfileDetails({
     );
   }
 
+  // ✅ Format phone number nicely for display mode
+  const formattedPhone = user?.phoneNumber
+    ? new AsYouType().input(user.phoneNumber)
+    : 'Not provided';
+
   return (
     <>
       <Avatar image={userData.profileImage} onClick={onImageClick} />
 
       {isEditing ? (
         <form onSubmit={handleUpdateProfile} className="space-y-4">
+          {/* 👤 Name */}
           <div>
             <label className="block text-sm font-medium text-gray-700">Name</label>
             <input
@@ -57,6 +65,7 @@ function ProfileDetails({
             />
           </div>
 
+          {/* ✉️ Email */}
           <div>
             <label className="block text-sm font-medium text-gray-700">Email</label>
             <input
@@ -68,17 +77,22 @@ function ProfileDetails({
             />
           </div>
 
+          {/* 📞 Phone Number */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">Phone Number</label>
-            <input
-              type="tel"
-              name="phoneNumber"
-              value={userData.phoneNumber}
-              onChange={handleUserDataChange}
-              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-            />
+            <label className="block text-sm font-medium text-gray-700">
+              Phone Number
+            </label>
+            <div className="mt-1">
+              <ProfilePhoneInput
+  value={userData.phoneNumber}
+  onChange={(val) =>
+    handleUserDataChange({ target: { name: "phoneNumber", value: val } })
+  }
+/>
+            </div>
           </div>
 
+          {/* 🔘 Update Button */}
           <button
             type="submit"
             disabled={isUpdatingProfile}
@@ -95,21 +109,26 @@ function ProfileDetails({
             <dt className="text-sm font-medium text-gray-500">Register ID</dt>
             <dd className="mt-1 text-sm text-gray-900 notranslate">{user.registerId}</dd>
           </div>
+
           <div className="sm:col-span-1">
             <dt className="text-sm font-medium text-gray-500">Name</dt>
             <dd className="mt-1 text-sm text-gray-900">{user.name}</dd>
           </div>
+
           <div className="sm:col-span-1">
             <dt className="text-sm font-medium text-gray-500">Role</dt>
             <dd className="mt-1 text-sm text-gray-900">{user.role}</dd>
           </div>
+
           <div className="sm:col-span-1">
             <dt className="text-sm font-medium text-gray-500">Email</dt>
             <dd className="mt-1 text-sm text-gray-900">{user.email || 'Not provided'}</dd>
           </div>
+
+          {/* 📞 Beautifully formatted phone number (view only) */}
           <div className="sm:col-span-1">
             <dt className="text-sm font-medium text-gray-500">Phone number</dt>
-            <dd className="mt-1 text-sm text-gray-900">{user.phoneNumber}</dd>
+            <dd className="mt-1 text-sm text-gray-900">{formattedPhone}</dd>
           </div>
         </dl>
       )}

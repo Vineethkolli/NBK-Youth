@@ -1,7 +1,7 @@
 import User from '../models/User.js';
 import Notification from '../models/Notification.js';
 import { logActivity } from '../middleware/activityLogger.js';
-
+import { parsePhoneNumberFromString } from 'libphonenumber-js';
 
 export const getAllUsers = async (req, res) => {
   try {
@@ -115,11 +115,15 @@ export const updateUserProfile = async (req, res) => {
 
     const normalizedEmail = email?.trim().toLowerCase();
 
-    // Prevent changing default developer email
-    if (userToUpdate.email === 'gangavaramnbkyouth@gmail.com' && normalizedEmail !== userToUpdate.email)
+    // 🚫 Prevent changing developer email
+    if (
+      userToUpdate.email === 'gangavaramnbkyouth@gmail.com' &&
+      normalizedEmail !== userToUpdate.email
+    ) {
       return res.status(403).json({ message: 'Cannot change default developer email' });
+    }
 
-    // Email validation
+    // ✅ Email validation
     if (normalizedEmail) {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(normalizedEmail))
@@ -131,10 +135,30 @@ export const updateUserProfile = async (req, res) => {
       }
     }
 
-    // Phone validation and duplicate check
-    if (phoneNumber && phoneNumber !== userToUpdate.phoneNumber) {
-      const exists = await User.findOne({ phoneNumber });
-      if (exists) return res.status(400).json({ message: 'Phone number already in use' });
+    // ✅ Phone normalization and validation (E.164)
+    if (phoneNumber && phoneNumber.trim()) {
+      let normalized = phoneNumber.trim().replace(/^00/, '+').replace(/[\s-]+/g, '');
+      let parsed;
+
+      if (normalized.startsWith('+')) {
+        parsed = parsePhoneNumberFromString(normalized);
+      } else if (/^\d{6,15}$/.test(normalized)) {
+        parsed = parsePhoneNumberFromString(`+${normalized}`);
+      }
+
+      if (!parsed || !parsed.isValid()) {
+        return res
+          .status(400)
+          .json({ message: 'Please enter a valid phone number in international format' });
+      }
+
+      phoneNumber = parsed.number; // save in +E.164 format
+
+      // Check for duplicate
+      if (phoneNumber !== userToUpdate.phoneNumber) {
+        const exists = await User.findOne({ phoneNumber });
+        if (exists) return res.status(400).json({ message: 'Phone number already in use' });
+      }
     }
 
     const original = {
@@ -158,7 +182,8 @@ export const updateUserProfile = async (req, res) => {
     );
 
     res.json(userToUpdate);
-  } catch {
+  } catch (err) {
+    console.error('updateUserProfile error:', err);
     res.status(500).json({ message: 'Server error' });
   }
 };

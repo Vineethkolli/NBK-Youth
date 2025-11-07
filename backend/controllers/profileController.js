@@ -1,7 +1,7 @@
 import User from '../models/User.js';
 import cloudinary from '../config/cloudinary.js';
 import { logActivity } from '../middleware/activityLogger.js';
-
+import { parsePhoneNumberFromString } from 'libphonenumber-js';
 
 export const getProfile = async (req, res) => {
   try {
@@ -23,11 +23,11 @@ export const updateProfile = async (req, res) => {
     const originalData = { name: user.name, email: user.email, phoneNumber: user.phoneNumber };
     const normalizedEmail = email?.trim().toLowerCase();
 
-    // Prevent changing developer account email
+    // ✅ Developer account lock
     if (user.email === 'gangavaramnbkyouth@gmail.com' && normalizedEmail !== user.email)
       return res.status(403).json({ message: 'Cannot change default developer email' });
 
-    // Validate email format if email provided
+    // ✅ Email validation
     if (normalizedEmail) {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(normalizedEmail))
@@ -39,10 +39,28 @@ export const updateProfile = async (req, res) => {
       }
     }
 
-    // Check for duplicate phone number if changed
-    if (phoneNumber && phoneNumber !== user.phoneNumber) {
-      const phoneExists = await User.findOne({ phoneNumber });
-      if (phoneExists) return res.status(400).json({ message: 'Phone number already in use' });
+    // ✅ Phone normalization and validation (E.164)
+    // Skip validation for default developer
+    if (phoneNumber && phoneNumber.trim() && user.email !== 'gangavaramnbkyouth@gmail.com') {
+      let normalized = phoneNumber.trim().replace(/^00/, '+').replace(/[\s-]+/g, '');
+      let parsed;
+
+      if (normalized.startsWith('+')) {
+        parsed = parsePhoneNumberFromString(normalized);
+      } else if (/^\d{6,15}$/.test(normalized)) {
+        parsed = parsePhoneNumberFromString(`+${normalized}`);
+      }
+
+      if (!parsed || !parsed.isValid()) {
+        return res.status(400).json({ message: 'Please enter a valid phone number in international format' });
+      }
+
+      phoneNumber = parsed.number; // ✅ Save in strict +E.164 format
+
+      if (phoneNumber !== user.phoneNumber) {
+        const phoneExists = await User.findOne({ phoneNumber });
+        if (phoneExists) return res.status(400).json({ message: 'Phone number already in use' });
+      }
     }
 
     user.name = name || user.name;
@@ -60,7 +78,8 @@ export const updateProfile = async (req, res) => {
     );
 
     res.json(user);
-  } catch {
+  } catch (err) {
+    console.error('Update profile error:', err);
     res.status(500).json({ message: 'Server error' });
   }
 };

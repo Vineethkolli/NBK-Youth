@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
@@ -7,6 +7,7 @@ import { API_URL } from '../utils/config';
 import ProfileImageDialog from '../components/profile/ProfileImageDialog';
 import ProfileDetails from '../components/profile/ProfileDetails';
 import PasswordChangeForm from '../components/profile/PasswordChangeForm';
+import { parsePhoneNumberFromString } from "libphonenumber-js";
 
 function Profile() {
   const { user, signout, updateUserData } = useAuth();
@@ -16,6 +17,7 @@ function Profile() {
   const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [showImageDialog, setShowImageDialog] = useState(false);
+  const [showSignoutConfirm, setShowSignoutConfirm] = useState(false); // 👈 new state for confirmation
 
   const [userData, setUserData] = useState({
     name: user?.name || '',
@@ -35,6 +37,8 @@ function Profile() {
     newPassword: false,
     confirmPassword: false,
   });
+
+  const passwordFormRef = useRef(null);
 
   const togglePasswordVisibility = (field) => {
     setShowPasswords((prev) => ({ ...prev, [field]: !prev[field] }));
@@ -60,36 +64,50 @@ function Profile() {
   };
 
   const handleUpdateProfile = async (e) => {
-  e?.preventDefault?.();
+    e?.preventDefault?.();
 
-  // ✅ Email validation (if provided)
-  const normalizedEmail = userData.email.trim().toLowerCase();
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (normalizedEmail && !emailRegex.test(normalizedEmail)) {
-    return toast.error('Please enter a valid email address');
-  }
+    const normalizedEmail = userData.email.trim().toLowerCase();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (normalizedEmail && !emailRegex.test(normalizedEmail)) {
+      return toast.error("Please enter a valid email address");
+    }
 
-  // ✅ Phone number validation
-  const phoneRegex = /^(?=(?:.*\d){8,})[+\-\d\s()]*$/;
-  if (!phoneRegex.test(userData.phoneNumber)) {
-    return toast.error('Please enter a valid phone number');
-  }
+    let phoneNumber = userData.phoneNumber.trim();
+    let finalPhoneNumber = phoneNumber;
 
-  try {
-    setIsUpdatingProfile(true);
-    const { data } = await axios.patch(`${API_URL}/api/profile/profile`, {
-      ...userData,
-      email: normalizedEmail, // ✅ use normalized email
-    });
-    updateUserData(data);
-    toast.success('Profile updated successfully');
-    setIsEditing(false);
-  } catch (error) {
-    toast.error(error.response?.data?.message || 'Failed to update profile');
-  } finally {
-    setIsUpdatingProfile(false);
-  }
-};
+    if (user.email !== 'gangavaramnbkyouth@gmail.com') {
+      let normalized = phoneNumber.replace(/^00/, "+").replace(/[\s-]+/g, "");
+      let parsed;
+
+      if (normalized.startsWith("+")) {
+        parsed = parsePhoneNumberFromString(normalized);
+      } else if (/^\d{6,15}$/.test(normalized)) {
+        parsed = parsePhoneNumberFromString(`+${normalized}`);
+      }
+
+      if (!parsed || !parsed.isValid()) {
+        return toast.error("Please enter a valid phone number in international format");
+      }
+
+      finalPhoneNumber = parsed.number;
+    }
+
+    try {
+      setIsUpdatingProfile(true);
+      const { data } = await axios.patch(`${API_URL}/api/profile/profile`, {
+        ...userData,
+        email: normalizedEmail,
+        phoneNumber: finalPhoneNumber,
+      });
+      updateUserData(data);
+      toast.success("Profile updated successfully");
+      setIsEditing(false);
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to update profile");
+    } finally {
+      setIsUpdatingProfile(false);
+    }
+  };
 
   const handleImageUpload = async (imageData) => {
     try {
@@ -99,11 +117,7 @@ function Profile() {
         updateUserData({ ...user, profileImage: null });
         toast.success('Profile image deleted successfully');
       } else {
-        // imageData include profileImage, profileImagePublicId
-        const { data } = await axios.post(
-          `${API_URL}/api/profile/image`,
-          imageData
-        );
+        const { data } = await axios.post(`${API_URL}/api/profile/image`, imageData);
         setUserData((p) => ({ ...p, profileImage: data.profileImage }));
         updateUserData({ ...user, profileImage: data.profileImage });
         toast.success('Profile image updated successfully');
@@ -124,6 +138,7 @@ function Profile() {
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       return toast.error('New passwords do not match');
     }
+
     setIsUpdatingPassword(true);
     try {
       await axios.post(`${API_URL}/api/profile/change-password`, {
@@ -132,11 +147,7 @@ function Profile() {
       });
       toast.success('Password updated successfully');
       setIsChangingPassword(false);
-      setPasswordData({
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: ''
-      });
+      setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to update password');
     } finally {
@@ -144,10 +155,35 @@ function Profile() {
     }
   };
 
+  const toggleChangePassword = () => {
+    setIsChangingPassword((prev) => {
+      const newState = !prev;
+      if (newState) {
+        setTimeout(() => {
+          passwordFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
+      }
+      return newState;
+    });
+  };
+
+  const confirmSignout = () => {
+    setShowSignoutConfirm(true);
+  };
+
+  const handleConfirmSignout = () => {
+    setShowSignoutConfirm(false);
+    signout();
+  };
+
+  const handleCancelSignout = () => {
+    setShowSignoutConfirm(false);
+  };
+
   if (!user) return null;
 
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="max-w-3xl mx-auto relative">
       <div className="bg-white shadow overflow-hidden rounded-lg">
         <div className="px-4 py-5 sm:px-6 flex justify-between items-center">
           <h3 className="text-2xl font-semibold">
@@ -160,7 +196,7 @@ function Profile() {
           </h3>
           <div className="space-x-2">
             <button
-              onClick={signout}
+              onClick={confirmSignout}
               className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700"
             >
               <LogOut className="mr-2 h-4 w-4" />
@@ -194,14 +230,14 @@ function Profile() {
         <div className="px-4 py-5 sm:px-6 space-x-4">
           <button
             onClick={() => setIsEditing(!isEditing)}
-            className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-gray-300  hover:bg-gray-50"
+            className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-gray-300 hover:bg-gray-50"
           >
             <Edit2 className="mr-2 h-4 w-4" />
             {isEditing ? 'Cancel' : 'Edit Profile'}
           </button>
 
           <button
-            onClick={() => setIsChangingPassword(!isChangingPassword)}
+            onClick={toggleChangePassword}
             className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
           >
             {isChangingPassword ? 'Cancel' : 'Change Password'}
@@ -209,7 +245,7 @@ function Profile() {
         </div>
 
         {isChangingPassword && (
-          <div className="px-4 py-5 sm:px-6">
+          <div ref={passwordFormRef} className="px-4 py-5 sm:px-6">
             <PasswordChangeForm
               passwordData={passwordData}
               showPasswords={showPasswords}
@@ -221,6 +257,29 @@ function Profile() {
           </div>
         )}
       </div>
+
+      {/* 🔴 Signout Confirmation Modal */}
+      {showSignoutConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-white p-6 rounded shadow-lg w-90">
+            <h2 className="text-lg font-medium mb-4">Are you sure you want to sign out?</h2>
+            <div className="flex justify-center space-x-4">
+              <button
+                onClick={handleCancelSignout}
+                className="px-4 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-100"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmSignout}
+                className="px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700"
+              >
+                Sign Out
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
