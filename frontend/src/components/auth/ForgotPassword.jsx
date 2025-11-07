@@ -35,7 +35,7 @@ function ForgotPassword({ onBack, onOTPSent }) {
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h2 className="text-2xl font-bold">Forgot Password</h2>
+        <h2 className="text-2xl font-bold text-green-600">Forgot Password</h2>
         <p className="text-sm text-gray-600 mt-1">
           Enter your email to receive a password reset OTP
         </p>

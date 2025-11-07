@@ -54,7 +54,7 @@ function OTPVerification({ email, onVerified, onBack }) {
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h2 className="text-2xl font-bold">Enter OTP</h2>
+        <h2 className="text-2xl font-bold text-green-600">Enter OTP</h2>
         <p className="text-sm text-gray-600 mt-1">
           Enter the 6-digit code sent to {email}
         </p>
