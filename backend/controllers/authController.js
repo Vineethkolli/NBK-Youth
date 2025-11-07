@@ -4,6 +4,7 @@ import OTP from '../models/OTP.js';
 import { sendOTPEmail } from '../utils/emailService.js';
 import { logActivity } from '../middleware/activityLogger.js';
 import AuthLog from '../models/AuthLog.js';
+import { parsePhoneNumberFromString } from 'libphonenumber-js';
 
 // Helper for Auth Logs
 const logAuthEvent = async (data) => {
@@ -16,25 +17,35 @@ const logAuthEvent = async (data) => {
   }
 };
 
+
 export const signUp = async (req, res) => {
   try {
     let { name, email, phoneNumber, password, language, deviceInfo } = req.body;
     if (!name || !phoneNumber || !password)
       return res.status(400).json({ message: 'Required fields missing' });
 
-    // Normalize email (trim + lowercase + optional)
-    const normalizedEmail = email?.trim().toLowerCase() || undefined;
+    // Phone NumberStrict validation
+    const parsedPhone = parsePhoneNumberFromString(phoneNumber);
+    if (!parsedPhone || !parsedPhone.isValid()) {
+      return res.status(400).json({ message: 'Please enter a valid phone number' });
+    }
+
+    // Normalize to E.164 
+    phoneNumber = parsedPhone.number;
 
     const phoneExists = await User.findOne({ phoneNumber });
-    if (phoneExists) return res.status(400).json({ message: 'User already exists' });
+    if (phoneExists)
+      return res.status(400).json({ message: 'User already exists' });
 
+    // Email normalization and validation
+    const normalizedEmail = email?.trim().toLowerCase() || undefined;
     if (normalizedEmail) {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(normalizedEmail))
         return res.status(400).json({ message: 'Invalid email format' });
-
       const emailExists = await User.findOne({ email: normalizedEmail });
-      if (emailExists) return res.status(400).json({ message: 'User already exists' });
+      if (emailExists)
+        return res.status(400).json({ message: 'User already exists' });
     }
 
     const user = await User.create({
