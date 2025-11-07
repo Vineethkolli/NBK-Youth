@@ -3,15 +3,11 @@ import {
   parsePhoneNumberFromString,
   getCountries,
   getCountryCallingCode,
-  findPhoneNumbersInText,
 } from "libphonenumber-js";
 import * as Flags from "country-flag-icons/react/3x2";
 import axios from "axios";
 import { ChevronDown } from "lucide-react";
 
-/**
- * Country data setup
- */
 const COUNTRIES = getCountries().map((iso2) => ({
   iso2,
   name: new Intl.DisplayNames(["en"], { type: "region" }).of(iso2),
@@ -32,31 +28,29 @@ export default function CustomPhoneInput({ value, onChange }) {
 
   // 🌍 Detect user country from IP
   useEffect(() => {
-  const detectCountry = async () => {
-    try {
-      const res = await axios.get("https://ipwho.is/");
-      const iso = res.data?.country_code;
-      if (iso) {
-        const found = COUNTRIES.find((c) => c.iso2 === iso);
-        if (found) setCountry(found);
-        return;
-      }
-      throw new Error("Invalid ISO from ipwho.is");
-    } catch {
+    const detectCountry = async () => {
       try {
-        const res2 = await axios.get("https://get.geojs.io/v1/ip/country.json");
-        const iso2 = res2.data?.country;
-        const found = COUNTRIES.find((c) => c.iso2 === iso2);
-        if (found) setCountry(found);
+        const res = await axios.get("https://ipwho.is/");
+        const iso = res.data?.country_code;
+        if (iso) {
+          const found = COUNTRIES.find((c) => c.iso2 === iso);
+          if (found) setCountry(found);
+          return;
+        }
+        throw new Error("Invalid ISO from ipwho.is");
       } catch {
-        console.warn("Country detection failed, defaulting to India.");
+        try {
+          const res2 = await axios.get("https://get.geojs.io/v1/ip/country.json");
+          const iso2 = res2.data?.country;
+          const found = COUNTRIES.find((c) => c.iso2 === iso2);
+          if (found) setCountry(found);
+        } catch {
+          console.warn("Country detection failed, defaulting to India.");
+        }
       }
-    }
-  };
-  detectCountry();
-}, []);
-
-
+    };
+    detectCountry();
+  }, []);
 
   // 🧹 Close dropdown on outside click
   useEffect(() => {
@@ -76,31 +70,43 @@ export default function CustomPhoneInput({ value, onChange }) {
     }
   }, [dropdownOpen]);
 
-  /**
-   * 📞 Handle all possible phone number inputs
-   * - Accepts +91, 91, or plain local numbers
-   * - Auto-detects country if + or 00 prefix used
-   * - Always outputs normalized E.164
-   */
+  // 📞 Handle all possible phone number inputs
   const handleInputChange = (e) => {
     const val = e.target.value.trim();
     setInputValue(val);
 
+    // 💡 Detect if the user is typing a country code and jump instantly
+    const matchCountryByCode = (input) => {
+      // Normalize (replace 00 with +)
+      let normalized = input.startsWith("00") ? input.replace(/^00/, "+") : input;
+      if (!normalized.startsWith("+")) return null;
+
+      for (const c of COUNTRIES) {
+        if (normalized.startsWith(c.code)) return c;
+      }
+      return null;
+    };
+
+    const codeMatch = matchCountryByCode(val);
+    if (codeMatch && codeMatch.iso2 !== country.iso2) {
+      setCountry(codeMatch);
+    }
+
     let parsed;
 
-    // 1️⃣ If user typed + or 00 → try full parsing
+    // 1️⃣ If user typed full code
     if (val.startsWith("+") || val.startsWith("00")) {
       parsed = parsePhoneNumberFromString(val.replace(/^00/, "+"));
       if (parsed && parsed.isValid()) {
         const iso = parsed.country;
         const found = COUNTRIES.find((c) => c.iso2 === iso);
         if (found) setCountry(found);
-        onChange(parsed.number); // E.164 output
+        onChange(parsed.number);
         return;
       }
     }
 
-    // 2️⃣ If user typed digits with possible country code
+    // 2️⃣ Only digits with possible code
     if (/^\d{6,15}$/.test(val)) {
       const plusPrefixed = `+${val}`;
       parsed = parsePhoneNumberFromString(plusPrefixed);
@@ -113,13 +119,13 @@ export default function CustomPhoneInput({ value, onChange }) {
       }
     }
 
-    // 3️⃣ Fallback — combine selected country code
+    // 3️⃣ Fallback — combine selected code
     const raw = `${country.code}${val.replace(/\D/g, "")}`;
     parsed = parsePhoneNumberFromString(raw);
     if (parsed && parsed.isValid()) {
       onChange(parsed.number);
     } else {
-      onChange(raw); // still send for live typing
+      onChange(raw);
     }
   };
 
@@ -159,7 +165,7 @@ export default function CustomPhoneInput({ value, onChange }) {
         />
       </div>
 
-      {/* Dropdown */}
+      {/* 🌎 Dropdown */}
       {dropdownOpen && (
         <div
           ref={dropdownRef}
