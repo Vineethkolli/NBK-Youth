@@ -7,6 +7,7 @@ import OTPVerification from '../components/auth/OTPVerification';
 import ResetPassword from '../components/auth/ResetPassword';
 import LanguageToggle from '../components/auth/LanguageToggle';
 import InstallApp from '../components/auth/InstallApp';
+import SmartAuthInput from "../components/auth/SmartAuthInput";
 
 function SignIn() {
   const [identifier, setIdentifier] = useState('');
@@ -95,14 +96,10 @@ function SignIn() {
   </h2>
   </div> 
         <div>
-          <input
-            type="text"
-            required
-            value={identifier}
-            onChange={(e) => setIdentifier(e.target.value)}
-            placeholder="Email or Phone Number"
-            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500"
-          />
+          <SmartAuthInput
+  value={identifier}
+  onChange={(val) => setIdentifier(val)}
+/>
         </div>
 
         <div className="relative">

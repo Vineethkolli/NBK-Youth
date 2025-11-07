@@ -25,13 +25,36 @@ export const signUp = async (req, res) => {
       return res.status(400).json({ message: 'Required fields missing' });
 
     // Phone NumberStrict validation
-    const parsedPhone = parsePhoneNumberFromString(phoneNumber);
-    if (!parsedPhone || !parsedPhone.isValid()) {
-      return res.status(400).json({ message: 'Please enter a valid phone number' });
-    }
+    // 📞 Strict International Phone Number Validation (E.164)
+if (typeof phoneNumber !== "string" || !phoneNumber.trim()) {
+  return res.status(400).json({ message: "Phone number required" });
+}
 
-    // Normalize to E.164 
-    phoneNumber = parsedPhone.number;
+phoneNumber = phoneNumber.trim();
+
+// Normalize: Convert `00` prefix to `+`, and strip spaces/dashes
+let normalized = phoneNumber.replace(/^00/, "+").replace(/[\s-]+/g, "");
+let parsed;
+
+// 1️⃣ Direct + prefixed number
+if (normalized.startsWith("+")) {
+  parsed = parsePhoneNumberFromString(normalized);
+}
+// 2️⃣ Raw digits (no prefix)
+else if (/^\d{6,15}$/.test(normalized)) {
+  // Assume already includes country code if >10 digits
+  parsed = parsePhoneNumberFromString(`+${normalized}`);
+}
+
+// 3️⃣ If still invalid → reject
+if (!parsed || !parsed.isValid()) {
+  return res.status(400).json({ message: "Please enter a valid phone number in international format" });
+}
+
+// ✅ Store strictly in E.164 format (+CountryCode + Number)
+phoneNumber = parsed.number;
+
+
 
     const phoneExists = await User.findOne({ phoneNumber });
     if (phoneExists)
@@ -40,7 +63,7 @@ export const signUp = async (req, res) => {
     // Email normalization and validation
     const normalizedEmail = email?.trim().toLowerCase() || undefined;
     if (normalizedEmail) {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
       if (!emailRegex.test(normalizedEmail))
         return res.status(400).json({ message: 'Invalid email format' });
       const emailExists = await User.findOne({ email: normalizedEmail });

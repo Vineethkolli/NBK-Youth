@@ -38,13 +38,16 @@ function SignUp() {
     }
 
     // Phone number validation
-    const parsedPhone = parsePhoneNumberFromString(formData.phoneNumber || '');
-if (!parsedPhone || !parsedPhone.isValid()) {
+    if (typeof formData.phoneNumber !== 'string' || !formData.phoneNumber.trim()) {
   return toast.error('Please enter a valid phone number');
 }
 
-// Normalize to E.164 format 
+const parsedPhone = parsePhoneNumberFromString(formData.phoneNumber.replace(/^00/, '+'));
+if (!parsedPhone || !parsedPhone.isValid()) {
+  return toast.error('Please enter a valid phone number');
+}
 formData.phoneNumber = parsedPhone.number;
+
 
     // Password length validation
     if (formData.password.length < 4) {

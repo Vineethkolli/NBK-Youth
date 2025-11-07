@@ -1,9 +1,17 @@
 import { useState, useEffect, useRef } from "react";
-import { AsYouType, parsePhoneNumberFromString, getCountries, getCountryCallingCode } from "libphonenumber-js";
+import {
+  parsePhoneNumberFromString,
+  getCountries,
+  getCountryCallingCode,
+  findPhoneNumbersInText,
+} from "libphonenumber-js";
 import * as Flags from "country-flag-icons/react/3x2";
 import axios from "axios";
-import { ChevronDown } from "lucide-react"; // for dropdown icon
+import { ChevronDown } from "lucide-react";
 
+/**
+ * Country data setup
+ */
 const COUNTRIES = getCountries().map((iso2) => ({
   iso2,
   name: new Intl.DisplayNames(["en"], { type: "region" }).of(iso2),
@@ -11,28 +19,46 @@ const COUNTRIES = getCountries().map((iso2) => ({
 }));
 
 export default function CustomPhoneInput({ value, onChange }) {
-  const [country, setCountry] = useState({ iso2: "IN", name: "India", code: "+91" });
-  const [phone, setPhone] = useState("");
+  const [country, setCountry] = useState({
+    iso2: "IN",
+    name: "India",
+    code: "+91",
+  });
+  const [inputValue, setInputValue] = useState(value || "");
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [search, setSearch] = useState("");
   const dropdownRef = useRef(null);
   const searchRef = useRef(null);
 
-  // Auto-detect user country from IP
+  // 🌍 Detect user country from IP
   useEffect(() => {
-    axios
-      .get("https://ipapi.co/json/")
-      .then((res) => {
-        const iso = res.data?.country_code;
-        if (iso) {
-          const found = COUNTRIES.find((c) => c.iso2 === iso);
-          if (found) setCountry(found);
-        }
-      })
-      .catch(() => {});
-  }, []);
+  const detectCountry = async () => {
+    try {
+      const res = await axios.get("https://ipwho.is/");
+      const iso = res.data?.country_code;
+      if (iso) {
+        const found = COUNTRIES.find((c) => c.iso2 === iso);
+        if (found) setCountry(found);
+        return;
+      }
+      throw new Error("Invalid ISO from ipwho.is");
+    } catch {
+      try {
+        const res2 = await axios.get("https://get.geojs.io/v1/ip/country.json");
+        const iso2 = res2.data?.country;
+        const found = COUNTRIES.find((c) => c.iso2 === iso2);
+        if (found) setCountry(found);
+      } catch {
+        console.warn("Country detection failed, defaulting to India.");
+      }
+    }
+  };
+  detectCountry();
+}, []);
 
-  // Close dropdown when clicking outside
+
+
+  // 🧹 Close dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -43,39 +69,77 @@ export default function CustomPhoneInput({ value, onChange }) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Focus search when dropdown opens
+  // 🔍 Focus search when dropdown opens
   useEffect(() => {
     if (dropdownOpen && searchRef.current) {
       setTimeout(() => searchRef.current.focus(), 50);
     }
   }, [dropdownOpen]);
 
+  /**
+   * 📞 Handle all possible phone number inputs
+   * - Accepts +91, 91, or plain local numbers
+   * - Auto-detects country if + or 00 prefix used
+   * - Always outputs normalized E.164
+   */
   const handleInputChange = (e) => {
-    const input = e.target.value;
-const formatter = new AsYouType(country.iso2);
-const formatted = formatter.input(input);
+    const val = e.target.value.trim();
+    setInputValue(val);
 
-    setPhone(formatted);
-    onChange(parsed ? parsed.number : "");
+    let parsed;
+
+    // 1️⃣ If user typed + or 00 → try full parsing
+    if (val.startsWith("+") || val.startsWith("00")) {
+      parsed = parsePhoneNumberFromString(val.replace(/^00/, "+"));
+      if (parsed && parsed.isValid()) {
+        const iso = parsed.country;
+        const found = COUNTRIES.find((c) => c.iso2 === iso);
+        if (found) setCountry(found);
+        onChange(parsed.number); // E.164 output
+        return;
+      }
+    }
+
+    // 2️⃣ If user typed digits with possible country code
+    if (/^\d{6,15}$/.test(val)) {
+      const plusPrefixed = `+${val}`;
+      parsed = parsePhoneNumberFromString(plusPrefixed);
+      if (parsed && parsed.isValid()) {
+        const iso = parsed.country;
+        const found = COUNTRIES.find((c) => c.iso2 === iso);
+        if (found) setCountry(found);
+        onChange(parsed.number);
+        return;
+      }
+    }
+
+    // 3️⃣ Fallback — combine selected country code
+    const raw = `${country.code}${val.replace(/\D/g, "")}`;
+    parsed = parsePhoneNumberFromString(raw);
+    if (parsed && parsed.isValid()) {
+      onChange(parsed.number);
+    } else {
+      onChange(raw); // still send for live typing
+    }
   };
 
   return (
     <div className="relative w-full">
-      {/* Main input box */}
-      <div className="flex items-center border border-gray-300 rounded-md shadow-sm py-2 px-3 focus-within:ring-1 focus-within:ring-green-500 bg-white gap-2">
-        {/* Flag + dropdown icon */}
+      <div className="flex items-center border border-gray-300 rounded-md shadow-sm bg-white focus-within:ring-1 focus-within:ring-green-500 overflow-hidden">
+        {/* 🌐 Flag + Code */}
         <div
-          className="flex items-center gap-1 cursor-pointer select-none"
+          className="flex items-center gap-2 px-3 py-2 bg-gray-50 cursor-pointer border-r border-gray-200 select-none"
           onClick={() => {
             setDropdownOpen(!dropdownOpen);
-            setSearch(""); // reset search each time
+            setSearch("");
           }}
         >
-          {Flags[country.iso2] ? (() => {
-            const Flag = Flags[country.iso2];
-            return <Flag className="w-6 h-4 rounded-sm object-cover" />;
-          })() : null}
-          <span className="font-medium">{country.code}</span>
+          {Flags[country.iso2] &&
+            (() => {
+              const Flag = Flags[country.iso2];
+              return <Flag className="w-6 h-4 rounded-sm" />;
+            })()}
+          <span className="font-medium text-gray-800">{country.code}</span>
           <ChevronDown
             size={16}
             className={`transition-transform duration-200 ${
@@ -84,17 +148,18 @@ const formatted = formatter.input(input);
           />
         </div>
 
-        {/* Phone number field */}
+        {/* 📞 Input */}
         <input
           type="tel"
-          className="flex-1 outline-none bg-transparent text-base"
+          className="flex-1 p-2 outline-none text-base bg-transparent"
           placeholder="Phone Number *"
-          value={phone}
+          value={inputValue}
           onChange={handleInputChange}
+          inputMode="tel"
         />
       </div>
 
-      {/* Dropdown menu */}
+      {/* Dropdown */}
       {dropdownOpen && (
         <div
           ref={dropdownRef}
