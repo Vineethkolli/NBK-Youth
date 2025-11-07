@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, Loader2 } from 'lucide-react';
+import { Search, Loader2, Clock } from 'lucide-react';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import { API_URL } from '../utils/config';
@@ -10,10 +10,11 @@ function AuthLogs() {
   const { user } = useAuth();
   const [logs, setLogs] = useState([]);
   const [search, setSearch] = useState('');
+  const [showLatest, setShowLatest] = useState(false);
   const [pagination, setPagination] = useState({
     currentPage: 1,
     totalPages: 1,
-    totalCount: 0
+    totalCount: 0,
   });
   const [loading, setLoading] = useState(false);
 
@@ -23,6 +24,7 @@ function AuthLogs() {
     try {
       setLoading(true);
       const params = new URLSearchParams({ search, page });
+      if (showLatest) params.append('latest', 'true');
       const { data } = await axios.get(`${API_URL}/api/authlogs?${params}`);
       setLogs(data.logs);
       setPagination(data.pagination);
@@ -35,20 +37,29 @@ function AuthLogs() {
 
   useEffect(() => {
     fetchLogs();
-  }, [search]);
+  }, [search, showLatest]);
 
   const handlePageChange = (newPage) => {
-    if (newPage >= 1 && newPage <= pagination.totalPages) {
-      fetchLogs(newPage);
-    }
+    if (newPage >= 1 && newPage <= pagination.totalPages) fetchLogs(newPage);
   };
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-semibold flex items-center">
-          Auth Logs
-        </h1>
+        <h1 className="text-2xl font-semibold flex items-center">Auth Logs</h1>
+
+        {/* Toggle Latest Option */}
+        <button
+          onClick={() => setShowLatest(!showLatest)}
+          className={`flex items-center px-3 py-2 rounded-lg border text-sm font-medium transition ${
+            showLatest
+              ? 'bg-blue-600 text-white border-blue-600'
+              : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'
+          }`}
+        >
+          <Clock className="w-4 h-4 mr-2" />
+          {'Latest per User'}
+        </button>
       </div>
 
       {/* Search */}

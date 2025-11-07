@@ -91,7 +91,7 @@ export default function ProfilePhoneInput({ value, onChange }) {
               const Flag = Flags[country.iso2];
               return <Flag className="w-6 h-4 rounded-sm" />;
             })()}
-          <span className="font-medium text-gray-800">{country.code}</span>
+          <span className="font-medium text-gray-800 notranslate">{country.code}</span>
           <ChevronDown
             size={16}
             className={`transition-transform duration-200 ${
@@ -149,7 +149,7 @@ export default function ProfilePhoneInput({ value, onChange }) {
                 >
                   {Flag && <Flag className="w-6 h-4 rounded-sm" />}
                   <span className="text-gray-700">{c.name}</span>
-                  <span className="ml-auto text-gray-500">{c.code}</span>
+                  <span className="ml-auto text-gray-500 notranslate">{c.code}</span>
                 </div>
               );
             })}
