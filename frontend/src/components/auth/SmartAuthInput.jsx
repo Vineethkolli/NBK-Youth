@@ -109,7 +109,8 @@ export default function SmartAuthInput({ value = "", onChange }) {
 
     // Digits only → combine with country
     if (/^\d+$/.test(clean)) {
-      const full = `${country.code}${clean}`;
+  const digits = clean.replace(/^0+/, ""); // remove leading zeros
+  const full = `${country.code}${digits}`;
       parsed = parsePhoneNumberFromString(full);
       if (parsed && parsed.isValid()) {
         onChange(parsed.number);

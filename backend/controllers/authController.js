@@ -128,55 +128,81 @@ phoneNumber = parsed.number;
     return res.status(500).json({ message: 'Server error' });
   }
 };
-
 export const signIn = async (req, res) => {
   try {
     let { identifier, password, language, deviceInfo } = req.body;
 
-    // Normalize identifier if it's email
-    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier);
-    if (isEmail) identifier = identifier.trim().toLowerCase();
+    if (!identifier || !password) {
+      return res.status(400).json({ message: 'Required fields missing' });
+    }
 
+    let isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier);
+
+    // 🔹 Normalize email if applicable
+    if (isEmail) {
+      identifier = identifier.trim().toLowerCase();
+    } else {
+      // 🔹 Normalize phone number to E.164 format (same logic as signup)
+      let phone = identifier.trim().replace(/^00/, "+").replace(/[\s-]+/g, "");
+      let parsed;
+
+      if (phone.startsWith("+")) {
+        parsed = parsePhoneNumberFromString(phone);
+      } else if (/^\d{6,15}$/.test(phone)) {
+        parsed = parsePhoneNumberFromString(`+${phone}`);
+      }
+
+      if (parsed && parsed.isValid()) {
+        identifier = parsed.number; // ✅ final normalized phone number
+      } else {
+        return res.status(400).json({ message: "Invalid phone number" });
+      }
+    }
+
+    // 🔍 Lookup by email or normalized phone
     const user = await User.findOne({
       $or: [{ email: identifier }, { phoneNumber: identifier }],
     });
 
-    if (!user || !(await user.comparePassword(password)))
-      return res.status(401).json({ message: 'Invalid credentials' });
+    if (!user || !(await user.comparePassword(password))) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
 
+    // ✅ Device logging
     const safeDeviceInfo = deviceInfo || {
-      accessMode: 'website',
-      deviceType: 'unknown',
-      deviceModel: 'unknown',
-      platform: 'unknown',
-      browser: { name: 'unknown', version: 'unknown', osName: 'unknown', osVersion: 'unknown' },
+      accessMode: "website",
+      deviceType: "unknown",
+      deviceModel: "unknown",
+      platform: "unknown",
+      browser: { name: "unknown", version: "unknown", osName: "unknown", osVersion: "unknown" },
     };
 
     setImmediate(() => {
       logAuthEvent({
         registerId: user.registerId,
         name: user.name,
-        action: 'signin',
+        action: "signin",
         deviceInfo: safeDeviceInfo,
       });
     });
 
     logActivity(
       { user: { registerId: user.registerId, name: user.name } },
-      'UPDATE',
-      'User',
+      "UPDATE",
+      "User",
       user.registerId,
       { before: null, after: { deviceInfo: safeDeviceInfo } },
       `User ${user.name} signed in`
     );
 
+    // ✅ Language update
     if (language && language !== user.language) {
       user.language = language;
       await user.save();
     }
 
     const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
-      expiresIn: '365d',
+      expiresIn: "365d",
     });
 
     return res.json({
@@ -194,10 +220,11 @@ export const signIn = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Signin error:', error);
-    return res.status(500).json({ message: 'Server error' });
+    console.error("Signin error:", error);
+    return res.status(500).json({ message: "Server error" });
   }
 };
+
 
 export const forgotPassword = async (req, res) => {
   try {
