@@ -1,9 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import {
-  parsePhoneNumberFromString,
-  getCountries,
-  getCountryCallingCode,
-} from "libphonenumber-js";
+import { parsePhoneNumberFromString, getCountries, getCountryCallingCode } from "libphonenumber-js";
 import * as Flags from "country-flag-icons/react/3x2";
 import axios from "axios";
 import { ChevronDown } from "lucide-react";
@@ -26,7 +22,7 @@ export default function CustomPhoneInput({ value, onChange }) {
   const dropdownRef = useRef(null);
   const searchRef = useRef(null);
 
-  // 🌍 Detect user country from IP
+  // Detect user country from IP
   useEffect(() => {
     const detectCountry = async () => {
       try {
@@ -52,7 +48,6 @@ export default function CustomPhoneInput({ value, onChange }) {
     detectCountry();
   }, []);
 
-  // 🧹 Close dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -63,21 +58,19 @@ export default function CustomPhoneInput({ value, onChange }) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // 🔍 Focus search when dropdown opens
   useEffect(() => {
     if (dropdownOpen && searchRef.current) {
       setTimeout(() => searchRef.current.focus(), 50);
     }
   }, [dropdownOpen]);
 
-  // 📞 Handle all possible phone number inputs
+  // Handle all possible phone number inputs
   const handleInputChange = (e) => {
     const val = e.target.value.trim();
     setInputValue(val);
 
-    // 💡 Detect if the user is typing a country code and jump instantly
+    // Detect if the user is typing a country code and jump instantly
     const matchCountryByCode = (input) => {
-      // Normalize (replace 00 with +)
       let normalized = input.startsWith("00") ? input.replace(/^00/, "+") : input;
       if (!normalized.startsWith("+")) return null;
 
@@ -94,7 +87,7 @@ export default function CustomPhoneInput({ value, onChange }) {
 
     let parsed;
 
-    // 1️⃣ If user typed full code
+    // If user typed full code
     if (val.startsWith("+") || val.startsWith("00")) {
       parsed = parsePhoneNumberFromString(val.replace(/^00/, "+"));
       if (parsed && parsed.isValid()) {
@@ -106,7 +99,7 @@ export default function CustomPhoneInput({ value, onChange }) {
       }
     }
 
-    // 2️⃣ Only digits with possible code
+    // Only digits with possible code
     if (/^\d{6,15}$/.test(val)) {
       const plusPrefixed = `+${val}`;
       parsed = parsePhoneNumberFromString(plusPrefixed);
@@ -119,7 +112,7 @@ export default function CustomPhoneInput({ value, onChange }) {
       }
     }
 
-    // 3️⃣ Fallback — combine selected code
+    // Fallback — combine selected code
     const raw = `${country.code}${val.replace(/\D/g, "")}`;
     parsed = parsePhoneNumberFromString(raw);
     if (parsed && parsed.isValid()) {
@@ -132,7 +125,7 @@ export default function CustomPhoneInput({ value, onChange }) {
   return (
     <div className="relative w-full">
       <div className="flex items-center border border-gray-300 rounded-md shadow-sm bg-white focus-within:ring-1 focus-within:ring-green-500 overflow-hidden">
-        {/* 🌐 Flag + Code */}
+ 
         <div
           className="flex items-center gap-2 px-3 py-2 bg-gray-50 cursor-pointer border-r border-gray-200 select-none"
           onClick={() => {
@@ -154,7 +147,6 @@ export default function CustomPhoneInput({ value, onChange }) {
           />
         </div>
 
-        {/* 📞 Input */}
         <input
           type="tel"
           className="flex-1 p-2 outline-none text-base bg-transparent"
@@ -165,7 +157,6 @@ export default function CustomPhoneInput({ value, onChange }) {
         />
       </div>
 
-      {/* 🌎 Dropdown */}
       {dropdownOpen && (
         <div
           ref={dropdownRef}

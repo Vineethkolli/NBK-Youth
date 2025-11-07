@@ -24,8 +24,7 @@ export const signUp = async (req, res) => {
     if (!name || !phoneNumber || !password)
       return res.status(400).json({ message: 'Required fields missing' });
 
-    // Phone NumberStrict validation
-    // 📞 Strict International Phone Number Validation (E.164)
+    // Phone Number validation with E.164 format
 if (typeof phoneNumber !== "string" || !phoneNumber.trim()) {
   return res.status(400).json({ message: "Phone number required" });
 }
@@ -36,25 +35,18 @@ phoneNumber = phoneNumber.trim();
 let normalized = phoneNumber.replace(/^00/, "+").replace(/[\s-]+/g, "");
 let parsed;
 
-// 1️⃣ Direct + prefixed number
 if (normalized.startsWith("+")) {
   parsed = parsePhoneNumberFromString(normalized);
 }
-// 2️⃣ Raw digits (no prefix)
 else if (/^\d{6,15}$/.test(normalized)) {
-  // Assume already includes country code if >10 digits
   parsed = parsePhoneNumberFromString(`+${normalized}`);
 }
 
-// 3️⃣ If still invalid → reject
 if (!parsed || !parsed.isValid()) {
   return res.status(400).json({ message: "Please enter a valid phone number in international format" });
 }
 
-// ✅ Store strictly in E.164 format (+CountryCode + Number)
 phoneNumber = parsed.number;
-
-
 
     const phoneExists = await User.findOne({ phoneNumber });
     if (phoneExists)
@@ -128,6 +120,8 @@ phoneNumber = parsed.number;
     return res.status(500).json({ message: 'Server error' });
   }
 };
+
+
 export const signIn = async (req, res) => {
   try {
     let { identifier, password, language, deviceInfo } = req.body;
@@ -138,11 +132,11 @@ export const signIn = async (req, res) => {
 
     let isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier);
 
-    // 🔹 Normalize email if applicable
+    // Normalize email
     if (isEmail) {
       identifier = identifier.trim().toLowerCase();
     } else {
-      // 🔹 Normalize phone number to E.164 format (same logic as signup)
+      // Normalize phone number to E.164 format
       let phone = identifier.trim().replace(/^00/, "+").replace(/[\s-]+/g, "");
       let parsed;
 
@@ -153,13 +147,12 @@ export const signIn = async (req, res) => {
       }
 
       if (parsed && parsed.isValid()) {
-        identifier = parsed.number; // ✅ final normalized phone number
+        identifier = parsed.number; 
       } else {
         return res.status(400).json({ message: "Invalid phone number" });
       }
     }
 
-    // 🔍 Lookup by email or normalized phone
     const user = await User.findOne({
       $or: [{ email: identifier }, { phoneNumber: identifier }],
     });
@@ -168,7 +161,6 @@ export const signIn = async (req, res) => {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    // ✅ Device logging
     const safeDeviceInfo = deviceInfo || {
       accessMode: "website",
       deviceType: "unknown",
@@ -195,7 +187,6 @@ export const signIn = async (req, res) => {
       `User ${user.name} signed in`
     );
 
-    // ✅ Language update
     if (language && language !== user.language) {
       user.language = language;
       await user.save();
@@ -251,6 +242,7 @@ export const forgotPassword = async (req, res) => {
   }
 };
 
+
 export const verifyOtp = async (req, res) => {
   try {
     const rawEmail = req.body.email;
@@ -268,6 +260,7 @@ export const verifyOtp = async (req, res) => {
     return res.status(500).json({ message: 'Server error' });
   }
 };
+
 
 export const resetPassword = async (req, res) => {
   try {

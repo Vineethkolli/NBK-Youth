@@ -80,7 +80,7 @@ function SignIn() {
 
   return (
     <>
-        {/* Hidden container for Google Translate */}
+    {/* Google Translate */}
     <div id="google_translate_element" style={{ display: 'none' }}></div>
     <div className="relative ">
       <div className="absolute top-10 right-0">

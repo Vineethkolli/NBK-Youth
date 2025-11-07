@@ -31,7 +31,7 @@ function SignUp() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Email validation (if provided)
+    // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (formData.email && !emailRegex.test(formData.email)) {
       return toast.error('Please enter a valid email address');
@@ -81,7 +81,7 @@ formData.phoneNumber = parsedPhone.number;
 
   return (
     <>
-      {/* Hidden container for Google Translate */}
+      {/* Google Translate */}
     <div id="google_translate_element" style={{ display: 'none' }}></div>
     <div className="relative ">
       <div className="absolute top-10 right-0">
@@ -182,7 +182,6 @@ formData.phoneNumber = parsedPhone.number;
         </form>
       </div>
       
-      {/* InstallApp component for app download prompt */}
       <InstallApp />
     </>
   );

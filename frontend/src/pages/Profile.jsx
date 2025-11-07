@@ -17,7 +17,7 @@ function Profile() {
   const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [showImageDialog, setShowImageDialog] = useState(false);
-  const [showSignoutConfirm, setShowSignoutConfirm] = useState(false); // 👈 new state for confirmation
+  const [showSignoutConfirm, setShowSignoutConfirm] = useState(false); 
 
   const [userData, setUserData] = useState({
     name: user?.name || '',
@@ -258,7 +258,6 @@ function Profile() {
         )}
       </div>
 
-      {/* 🔴 Signout Confirmation Modal */}
       {showSignoutConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="bg-white p-6 rounded shadow-lg w-90">

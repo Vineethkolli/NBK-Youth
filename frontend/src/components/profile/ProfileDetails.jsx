@@ -42,7 +42,7 @@ function ProfileDetails({
     );
   }
 
-  // ✅ Format phone number nicely for display mode
+  // Format phone number for display 
   const formattedPhone = user?.phoneNumber
     ? new AsYouType().input(user.phoneNumber)
     : 'Not provided';
@@ -53,7 +53,6 @@ function ProfileDetails({
 
       {isEditing ? (
         <form onSubmit={handleUpdateProfile} className="space-y-4">
-          {/* 👤 Name */}
           <div>
             <label className="block text-sm font-medium text-gray-700">Name</label>
             <input
@@ -65,7 +64,6 @@ function ProfileDetails({
             />
           </div>
 
-          {/* ✉️ Email */}
           <div>
             <label className="block text-sm font-medium text-gray-700">Email</label>
             <input
@@ -77,7 +75,6 @@ function ProfileDetails({
             />
           </div>
 
-          {/* 📞 Phone Number */}
           <div>
             <label className="block text-sm font-medium text-gray-700">
               Phone Number
@@ -92,7 +89,6 @@ function ProfileDetails({
             </div>
           </div>
 
-          {/* 🔘 Update Button */}
           <button
             type="submit"
             disabled={isUpdatingProfile}
@@ -125,7 +121,6 @@ function ProfileDetails({
             <dd className="mt-1 text-sm text-gray-900">{user.email || 'Not provided'}</dd>
           </div>
 
-          {/* 📞 Beautifully formatted phone number (view only) */}
           <div className="sm:col-span-1">
             <dt className="text-sm font-medium text-gray-500">Phone number</dt>
             <dd className="mt-1 text-sm text-gray-900">{formattedPhone}</dd>

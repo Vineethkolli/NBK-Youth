@@ -1,14 +1,9 @@
-import { useState, useEffect, useRef, useMemo } from "react";
-import {
-  parsePhoneNumberFromString,
-  getCountries,
-  getCountryCallingCode,
-} from "libphonenumber-js";
+import { useState, useEffect, useRef } from "react";
+import { parsePhoneNumberFromString, getCountries, getCountryCallingCode } from "libphonenumber-js";
 import * as Flags from "country-flag-icons/react/3x2";
 import axios from "axios";
 import { ChevronDown } from "lucide-react";
 
-// 🌍 Memoized country list for performance
 const COUNTRIES = getCountries().map((iso2) => ({
   iso2,
   name: new Intl.DisplayNames(["en"], { type: "region" }).of(iso2),
@@ -16,7 +11,7 @@ const COUNTRIES = getCountries().map((iso2) => ({
 }));
 
 export default function SmartAuthInput({ value = "", onChange }) {
-  const [mode, setMode] = useState("email"); // 'email' | 'phone'
+  const [mode, setMode] = useState("email"); 
   const [country, setCountry] = useState({ iso2: "IN", name: "India", code: "+91" });
   const [inputValue, setInputValue] = useState(value);
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -26,7 +21,7 @@ export default function SmartAuthInput({ value = "", onChange }) {
   const searchRef = useRef(null);
   const inputRef = useRef(null);
 
-  // 🌍 Detect user country (via ipwho.is with fallback)
+  // Detect user country with ip
   useEffect(() => {
     const detectCountry = async () => {
       try {
@@ -52,7 +47,6 @@ export default function SmartAuthInput({ value = "", onChange }) {
     detectCountry();
   }, []);
 
-  // 🧹 Close dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -63,14 +57,13 @@ export default function SmartAuthInput({ value = "", onChange }) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // 🔍 Auto focus search input when dropdown opens
   useEffect(() => {
     if (dropdownOpen && searchRef.current) {
       setTimeout(() => searchRef.current.focus(), 50);
     }
   }, [dropdownOpen]);
 
-  // 🧠 Detect mode (lightweight + consistent)
+  // Detect mode
   const detectMode = (val) => {
     const trimmed = val.trim();
     if (!trimmed) return "email";
@@ -79,7 +72,7 @@ export default function SmartAuthInput({ value = "", onChange }) {
     return "email";
   };
 
-  // 📞 Handle input changes
+  //  Handle input changes
   const handleInputChange = (e) => {
     const val = e.target.value;
     const newMode = detectMode(val);
@@ -109,7 +102,7 @@ export default function SmartAuthInput({ value = "", onChange }) {
 
     // Digits only → combine with country
     if (/^\d+$/.test(clean)) {
-  const digits = clean.replace(/^0+/, ""); // remove leading zeros
+  const digits = clean.replace(/^0+/, ""); 
   const full = `${country.code}${digits}`;
       parsed = parsePhoneNumberFromString(full);
       if (parsed && parsed.isValid()) {
@@ -127,13 +120,12 @@ export default function SmartAuthInput({ value = "", onChange }) {
     if (!inputValue.trim()) setMode("email");
   };
 
-  // 🧲 Keep focus when mode changes
+  // Keep focus when mode changes
   useEffect(() => {
     if (inputRef.current) inputRef.current.focus();
   }, [mode]);
 return (
   <div className="relative w-full">
-    {/* 📧 Email Mode */}
     {mode === "email" ? (
       <input
         ref={inputRef}
@@ -146,13 +138,11 @@ return (
         onBlur={handleBlur}
       />
     ) : (
-      // 📞 Phone Mode
       <div
         className={`mt-1 flex items-center w-full border border-gray-300 rounded-md shadow-sm 
                     focus-within:ring-green-500 focus-within:border-green-500 
                     bg-white overflow-hidden`}
       >
-        {/* 🌐 Flag + Code (only if not starting with '+') */}
         {!inputValue.startsWith("+") && (
           <div
             className="flex items-center gap-2 px-3 py-2 bg-gray-50 cursor-pointer border-r border-gray-200 select-none"
@@ -186,7 +176,6 @@ return (
       </div>
     )}
 
-    {/* 🌍 Dropdown */}
     {mode === "phone" && dropdownOpen && !inputValue.startsWith("+") && (
       <div
         ref={dropdownRef}

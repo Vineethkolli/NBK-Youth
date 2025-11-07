@@ -3,6 +3,7 @@ import cloudinary from '../config/cloudinary.js';
 import { logActivity } from '../middleware/activityLogger.js';
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
 
+
 export const getProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select('-password');
@@ -23,11 +24,11 @@ export const updateProfile = async (req, res) => {
     const originalData = { name: user.name, email: user.email, phoneNumber: user.phoneNumber };
     const normalizedEmail = email?.trim().toLowerCase();
 
-    // ✅ Developer account lock
+    // Developer account lock
     if (user.email === 'gangavaramnbkyouth@gmail.com' && normalizedEmail !== user.email)
       return res.status(403).json({ message: 'Cannot change default developer email' });
 
-    // ✅ Email validation
+    // Email validation
     if (normalizedEmail) {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(normalizedEmail))
@@ -39,8 +40,7 @@ export const updateProfile = async (req, res) => {
       }
     }
 
-    // ✅ Phone normalization and validation (E.164)
-    // Skip validation for default developer
+    // Phone normalization and validation (E.164)
     if (phoneNumber && phoneNumber.trim() && user.email !== 'gangavaramnbkyouth@gmail.com') {
       let normalized = phoneNumber.trim().replace(/^00/, '+').replace(/[\s-]+/g, '');
       let parsed;
@@ -55,7 +55,7 @@ export const updateProfile = async (req, res) => {
         return res.status(400).json({ message: 'Please enter a valid phone number in international format' });
       }
 
-      phoneNumber = parsed.number; // ✅ Save in strict +E.164 format
+      phoneNumber = parsed.number;
 
       if (phoneNumber !== user.phoneNumber) {
         const phoneExists = await User.findOne({ phoneNumber });

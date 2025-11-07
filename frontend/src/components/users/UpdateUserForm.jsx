@@ -3,7 +3,7 @@ import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { X } from 'lucide-react';
 import { API_URL } from '../../utils/config';
-import ProfilePhoneInput from '../profile/PhoneInput'; // ✅ same phone input component
+import ProfilePhoneInput from '../profile/PhoneInput';
 
 export default function UpdateUserForm({ user, onClose, onUpdated }) {
   const [formData, setFormData] = useState({
@@ -66,7 +66,6 @@ export default function UpdateUserForm({ user, onClose, onUpdated }) {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Name */}
           <div>
             <label className="block text-sm font-medium">Name *</label>
             <input
@@ -78,7 +77,6 @@ export default function UpdateUserForm({ user, onClose, onUpdated }) {
             />
           </div>
 
-          {/* Email */}
           <div>
             <label className="block text-sm font-medium">Email</label>
             <input
@@ -90,7 +88,6 @@ export default function UpdateUserForm({ user, onClose, onUpdated }) {
             />
           </div>
 
-          {/* 📱 Phone Number */}
           <div>
             <label className="block text-sm font-medium">Phone Number *</label>
             <div className="mt-1">
@@ -101,7 +98,6 @@ export default function UpdateUserForm({ user, onClose, onUpdated }) {
             </div>
           </div>
 
-          {/* Actions */}
           <div className="flex justify-end gap-4 mt-6">
             <button
               type="button"

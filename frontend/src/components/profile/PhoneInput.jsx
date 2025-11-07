@@ -1,9 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import {
-  parsePhoneNumberFromString,
-  getCountries,
-  getCountryCallingCode,
-} from "libphonenumber-js";
+import { parsePhoneNumberFromString, getCountries, getCountryCallingCode } from "libphonenumber-js";
 import * as Flags from "country-flag-icons/react/3x2";
 import { ChevronDown } from "lucide-react";
 
@@ -15,13 +11,13 @@ const COUNTRIES = getCountries().map((iso2) => ({
 
 export default function ProfilePhoneInput({ value, onChange }) {
   const [country, setCountry] = useState({ iso2: "IN", name: "India", code: "+91" });
-  const [nationalNumber, setNationalNumber] = useState(""); // 👈 only national number (no +91)
+  const [nationalNumber, setNationalNumber] = useState(""); 
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [search, setSearch] = useState("");
   const dropdownRef = useRef(null);
   const searchRef = useRef(null);
 
-  // 🧠 On load → detect country and extract national number
+  // On load → detect country and extract national number
   useEffect(() => {
     if (value) {
       const parsed = parsePhoneNumberFromString(value);
@@ -44,7 +40,6 @@ export default function ProfilePhoneInput({ value, onChange }) {
     }
   }, [value, country.code]);
 
-  // 🧹 Close dropdown when clicked outside
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -55,38 +50,35 @@ export default function ProfilePhoneInput({ value, onChange }) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // 🔍 Focus search when dropdown opens
   useEffect(() => {
     if (dropdownOpen && searchRef.current) {
       setTimeout(() => searchRef.current.focus(), 50);
     }
   }, [dropdownOpen]);
 
-  // 📞 Handle typing (no + code shown)
   const handleInputChange = (e) => {
-    const digits = e.target.value.replace(/\D/g, ""); // only numbers
+    const digits = e.target.value.replace(/\D/g, ""); 
     setNationalNumber(digits);
 
-    // Build the full number with country code
     const fullNumber = digits ? `${country.code}${digits}` : "";
     
     // Only validate and format if there are digits
     if (digits) {
       const parsed = parsePhoneNumberFromString(fullNumber);
       if (parsed && parsed.isValid()) {
-        onChange(parsed.number); // send E.164 like +14155552671
+        onChange(parsed.number); 
       } else {
         onChange(fullNumber);
       }
     } else {
-      onChange(""); // Clear the value when input is empty
+      onChange(""); 
     }
   };
 
   return (
     <div className="relative w-full">
       <div className="flex items-center border border-gray-300 rounded-md shadow-sm bg-white focus-within:ring-1 focus-within:ring-indigo-500 overflow-hidden">
-        {/* 🌐 Flag + Country Code (prefix only) */}
+
         <div
           className="flex items-center gap-2 px-3 py-2 bg-gray-50 cursor-pointer border-r border-gray-200 select-none"
           onClick={() => {
@@ -108,7 +100,6 @@ export default function ProfilePhoneInput({ value, onChange }) {
           />
         </div>
 
-        {/* 📞 Input field (no country code) */}
         <input
           type="tel"
           className="flex-1 p-2 outline-none text-base bg-transparent"
@@ -119,7 +110,6 @@ export default function ProfilePhoneInput({ value, onChange }) {
         />
       </div>
 
-      {/* 🌍 Country Dropdown */}
       {dropdownOpen && (
         <div
           ref={dropdownRef}
