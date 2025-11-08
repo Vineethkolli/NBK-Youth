@@ -2,14 +2,14 @@ import { useState, useRef, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { API_URL } from '../../utils/config';
-import { auth } from '../../utils/firebase';
 
-function OTPVerification({ userInfo, onVerified, onBack }) {
+function OTPVerification({ email, onVerified, onBack }) {
   const OTP_LENGTH = 6;
   const [otpValues, setOtpValues] = useState(Array(OTP_LENGTH).fill(''));
   const [isLoading, setIsLoading] = useState(false);
   const inputsRef = useRef([]);
 
+  // On mount, focus first input
   useEffect(() => {
     inputsRef.current[0]?.focus();
   }, []);
@@ -35,23 +35,15 @@ function OTPVerification({ userInfo, onVerified, onBack }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const otp = otpValues.join('');
-    if (otp.length < OTP_LENGTH) return toast.error('Enter complete OTP');
+    if (otp.length < OTP_LENGTH) {
+      toast.error('Please enter the complete OTP');
+      return;
+    }
 
     setIsLoading(true);
     try {
-      if (userInfo.method === 'email') {
-        const { data } = await axios.post(`${API_URL}/api/auth/verify-otp`, {
-          email: userInfo.value,
-          otp,
-        });
-        onVerified(data.resetToken);
-      } else {
-        const confirmationResult = window.confirmationResult;
-        await confirmationResult.confirm(otp);
-        // Firebase verified successfully
-        const resetToken = btoa(userInfo.value); // simple encoded token for consistency
-        onVerified(resetToken);
-      }
+      const { data } = await axios.post(`${API_URL}/api/auth/verify-otp`, { email, otp });
+      onVerified(data.resetToken);
     } catch (error) {
       toast.error(error.response?.data?.message || 'Invalid OTP');
     } finally {
@@ -64,7 +56,7 @@ function OTPVerification({ userInfo, onVerified, onBack }) {
       <div className="text-center">
         <h2 className="text-2xl font-bold text-green-600">Enter OTP</h2>
         <p className="text-sm text-gray-600 mt-1">
-          Enter the 6-digit code sent to {userInfo.value}
+          Enter the 6-digit code sent to {email}
         </p>
       </div>
 
@@ -74,12 +66,13 @@ function OTPVerification({ userInfo, onVerified, onBack }) {
             <input
               key={idx}
               type="text"
+              inputMode="numeric"
               maxLength={1}
               value={digit}
               onChange={(e) => handleChange(e, idx)}
               onKeyDown={(e) => handleKeyDown(e, idx)}
               ref={(el) => (inputsRef.current[idx] = el)}
-              className="w-10 h-12 text-center border rounded-md focus:ring-2 focus:ring-green-500"
+              className="w-10 h-12 text-center border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" 
             />
           ))}
         </div>
@@ -87,8 +80,8 @@ function OTPVerification({ userInfo, onVerified, onBack }) {
         <button
           type="submit"
           disabled={isLoading}
-          className={`w-full py-2 bg-green-600 text-white rounded-md ${
-            isLoading ? 'opacity-50 cursor-not-allowed' : ''
+          className={`w-full flex justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 ${
+                isLoading ? 'opacity-50 cursor-not-allowed' : ''
           }`}
         >
           {isLoading ? 'Verifying...' : 'Verify OTP'}
@@ -97,7 +90,7 @@ function OTPVerification({ userInfo, onVerified, onBack }) {
         <button
           type="button"
           onClick={onBack}
-          className="w-full py-2 text-green-600 hover:text-green-700"
+          className="w-full py-2 px-4 text-green-600 hover:text-green-700"
         >
           Back
         </button>

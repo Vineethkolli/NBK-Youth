@@ -1,35 +1,33 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-hot-toast';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react'; 
 import ForgotPassword from '../components/auth/ForgotPassword';
 import OTPVerification from '../components/auth/OTPVerification';
 import ResetPassword from '../components/auth/ResetPassword';
 import LanguageToggle from '../components/auth/LanguageToggle';
 import InstallApp from '../components/auth/InstallApp';
-import SmartAuthInput from '../components/auth/SmartAuthInput';
+import SmartAuthInput from "../components/auth/SmartAuthInput";
 
 function SignIn() {
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [resetFlow, setResetFlow] = useState({
-    step: 'signin', // possible values: signin | forgot | otp | reset
-    userInfo: null, // { method: 'email' | 'phone', value: string }
-    resetToken: '',
-    phone: '',
+    step: 'signin', 
+    email: '',
+    resetToken: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { signin } = useAuth();
 
-  // 👁 Toggle password visibility
-  const togglePasswordVisibility = () => setShowPassword((prev) => !prev);
+  const togglePasswordVisibility = () => {
+    setShowPassword((prevState) => !prevState);
+  };
 
-  // 🔑 Handle Sign In
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-
     try {
       await signin(identifier, password);
       toast.success('Signed in successfully');
@@ -40,45 +38,18 @@ function SignIn() {
     }
   };
 
-  // 📩 When OTP sent (email or phone)
-  const handleOTPSent = (userInfo) => {
-    setResetFlow({ ...resetFlow, step: 'otp', userInfo });
+  const handleOTPSent = (email) => {
+    setResetFlow({ ...resetFlow, step: 'otp', email });
   };
 
-  // ✅ When OTP verified successfully
-  const handleOTPVerified = (resetData) => {
-    if (resetData.method === 'phone') {
-      setResetFlow({
-        ...resetFlow,
-        step: 'reset',
-        phone: resetData.value,
-        resetToken: '',
-      });
-    } else {
-      setResetFlow({
-        ...resetFlow,
-        step: 'reset',
-        resetToken: resetData.token,
-        phone: '',
-      });
-    }
+  const handleOTPVerified = (resetToken) => {
+    setResetFlow({ ...resetFlow, step: 'reset', resetToken });
   };
 
-  // ✅ After password reset success
   const handlePasswordReset = () => {
-    setResetFlow({
-      step: 'signin',
-      userInfo: null,
-      resetToken: '',
-      phone: '',
-    });
+    setResetFlow({ step: 'signin', email: '', resetToken: '' });
   };
 
-  // ============================
-  // 💡 CONDITIONAL FLOWS
-  // ============================
-
-  // Forgot password flow
   if (resetFlow.step === 'forgot') {
     return (
       <ForgotPassword
@@ -88,128 +59,110 @@ function SignIn() {
     );
   }
 
-  // OTP verification step
   if (resetFlow.step === 'otp') {
     return (
       <OTPVerification
-        userInfo={resetFlow.userInfo}
+        email={resetFlow.email}
         onVerified={handleOTPVerified}
         onBack={() => setResetFlow({ ...resetFlow, step: 'forgot' })}
       />
     );
   }
 
-  // Reset password step
   if (resetFlow.step === 'reset') {
     return (
       <ResetPassword
         resetToken={resetFlow.resetToken}
-        phone={resetFlow.phone}
         onSuccess={handlePasswordReset}
       />
     );
   }
 
-  // ============================
-  // 🟢 DEFAULT SIGN-IN SCREEN
-  // ============================
-
   return (
     <>
-      {/* Google Translate */}
-      <div id="google_translate_element" style={{ display: 'none' }}></div>
-
-      <div className="relative">
-        <div className="absolute top-10 right-0">
-          <LanguageToggle />
+    {/* Google Translate */}
+    <div id="google_translate_element" style={{ display: 'none' }}></div>
+    <div className="relative ">
+      <div className="absolute top-10 right-0">
+        <LanguageToggle /> 
+      </div>
+      <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="text-center">
+  <h1 className="mt-2 text-4xl md:text-3xl font-extrabold tracking-wide text-green-600">
+    NBK YOUTH
+  </h1>
+  <h2 className="text-xl md:text-lg font-medium text-gray-600">
+    Gangavaram
+  </h2>
+  </div> 
+        <div>
+          <SmartAuthInput
+  value={identifier}
+  onChange={(val) => setIdentifier(val)}
+/>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="text-center">
-            <h1 className="mt-2 text-4xl md:text-3xl font-extrabold tracking-wide text-green-600">
-              NBK YOUTH
-            </h1>
-            <h2 className="text-xl md:text-lg font-medium text-gray-600">
-              Gangavaram
-            </h2>
-          </div>
+        <div className="relative">
+          <input
+            type={showPassword ? 'text' : 'password'} 
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Password"
+            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500"
+          />
+          <button
+            type="button"
+            onClick={togglePasswordVisibility}
+            className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700"
+          >
+            {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+          </button>
+        </div>
 
-          <div>
-            <SmartAuthInput
-              value={identifier}
-              onChange={(val) => setIdentifier(val)}
-            />
-          </div>
-
-          <div className="relative">
-            <input
-              type={showPassword ? 'text' : 'password'}
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Password"
-              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500"
-            />
-            <button
-              type="button"
-              onClick={togglePasswordVisibility}
-              className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700"
-            >
-              {showPassword ? (
-                <EyeOff className="h-5 w-5" />
-              ) : (
-                <Eye className="h-5 w-5" />
-              )}
-            </button>
-          </div>
-
-          <div>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className={`w-full flex justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 ${
+        <div>
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className={`w-full flex justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 ${
                 isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
               }`}
+          >
+            {isSubmitting ? 'Signing in...' : 'Sign in'}
+          </button>
+        </div>
+
+        <div className="text-sm text-center">
+          <p className="text-black">
+            Don&apos;t have an account?{' '}
+            <a href="/signup" className="font-medium text-green-600 hover:text-green-500">
+              Sign up
+            </a>
+          </p>
+        </div>
+        <div className="text-sm text-center">
+          <p className="text-black">
+            Forgot password?{' '}
+            <button
+              type="button"
+              onClick={() => setResetFlow({ ...resetFlow, step: 'forgot' })}
+              className="font-medium text-green-600 hover:text-green-500"
             >
-              {isSubmitting ? 'Signing in...' : 'Sign in'}
+              Reset
             </button>
-          </div>
-
-          <div className="text-sm text-center">
-            <p className="text-black">
-              Don&apos;t have an account?{' '}
-              <a
-                href="/signup"
-                className="font-medium text-green-600 hover:text-green-500"
-              >
-                Sign up
-              </a>
-            </p>
-          </div>
-
-          <div className="text-sm text-center">
-            <p className="text-black">
-              Forgot password?{' '}
-              <button
-                type="button"
-                onClick={() => setResetFlow({ ...resetFlow, step: 'forgot' })}
-                className="font-medium text-green-600 hover:text-green-500"
-              >
-                Reset
-              </button>
-            </p>
-          </div>
-        </form>
+          </p>
+        </div>
+      </form>
       </div>
+     <div className="w-full max-w-md text-center mt-10">
+  <p className="font-semibold text-gray-700 md:text-base tracking-wide">
+    Developed by{" "}
+    <span className="text-green-600 font-bold text-lg md:text-xl">
+      Kolli Vineeth
+    </span>
+  </p>
+</div>
 
-      <div className="w-full max-w-md text-center mt-10">
-        <p className="font-semibold text-gray-700 md:text-base tracking-wide">
-          Developed by{' '}
-          <span className="text-green-600 font-bold text-lg md:text-xl">
-            Kolli Vineeth
-          </span>
-        </p>
-      </div>
 
       <InstallApp />
     </>
