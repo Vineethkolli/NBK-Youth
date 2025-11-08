@@ -267,8 +267,13 @@ export const resetPassword = async (req, res) => {
     const { resetToken, newPassword } = req.body;
     const decoded = jwt.verify(resetToken, process.env.JWT_SECRET);
 
-    const email = decoded.email.trim().toLowerCase();
-    const user = await User.findOne({ email });
+    const email = decoded.email?.trim()?.toLowerCase();
+    const phone = decoded.phone?.trim();
+
+    const user = email
+      ? await User.findOne({ email })
+      : await User.findOne({ phone });
+
     if (!user) return res.status(404).json({ message: 'User not found' });
 
     user.password = newPassword;
@@ -287,6 +292,35 @@ export const resetPassword = async (req, res) => {
   } catch (error) {
     if (error.name === 'JsonWebTokenError')
       return res.status(401).json({ message: 'Invalid or expired reset token' });
+    return res.status(500).json({ message: 'Server error' });
+  }
+};
+
+
+
+export const checkPhoneExists = async (req, res) => {
+  try {
+    const { phone } = req.body;
+    if (!phone) return res.status(400).json({ message: 'Phone number required' });
+
+    const user = await User.findOne({ phone });
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    return res.json({ message: 'User found' });
+  } catch (error) {
+    return res.status(500).json({ message: 'Server error' });
+  }
+};
+// POST /api/auth/generate-reset-token-phone
+export const generateResetTokenForPhone = async (req, res) => {
+  try {
+    const { phone } = req.body;
+    const user = await User.findOne({ phone });
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    const resetToken = jwt.sign({ phone }, process.env.JWT_SECRET, { expiresIn: '10m' });
+    return res.json({ resetToken });
+  } catch {
     return res.status(500).json({ message: 'Server error' });
   }
 };
