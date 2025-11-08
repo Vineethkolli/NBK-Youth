@@ -13,11 +13,15 @@ function SignIn() {
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [resetFlow, setResetFlow] = useState({
-    step: 'signin', 
-    email: '',
-    resetToken: ''
-  });
+  const resetInitialState = {
+    step: 'signin',
+    method: 'email',
+    identifier: '',
+    resetToken: '',
+    confirmationResult: null,
+  };
+
+  const [resetFlow, setResetFlow] = useState(resetInitialState);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { signin } = useAuth();
 
@@ -38,23 +42,39 @@ function SignIn() {
     }
   };
 
-  const handleOTPSent = (email) => {
-    setResetFlow({ ...resetFlow, step: 'otp', email });
+  const handleOTPSent = ({ method, value, confirmationResult }) => {
+    setResetFlow((prev) => ({
+      ...prev,
+      step: 'otp',
+      method,
+      identifier: value,
+      confirmationResult: confirmationResult || null,
+    }));
   };
 
   const handleOTPVerified = (resetToken) => {
-    setResetFlow({ ...resetFlow, step: 'reset', resetToken });
+    setResetFlow((prev) => ({
+      ...prev,
+      step: 'reset',
+      resetToken,
+      confirmationResult: null,
+    }));
   };
 
   const handlePasswordReset = () => {
-    setResetFlow({ step: 'signin', email: '', resetToken: '' });
+    setResetFlow(resetInitialState);
   };
 
   if (resetFlow.step === 'forgot') {
     return (
       <ForgotPassword
-        onBack={() => setResetFlow({ ...resetFlow, step: 'signin' })}
+        onBack={() => setResetFlow(resetInitialState)}
         onOTPSent={handleOTPSent}
+        activeMethod={resetFlow.method}
+        onMethodChange={(method) =>
+          setResetFlow((prev) => ({ ...prev, method }))
+        }
+        initialIdentifier={resetFlow.identifier}
       />
     );
   }
@@ -62,9 +82,18 @@ function SignIn() {
   if (resetFlow.step === 'otp') {
     return (
       <OTPVerification
-        email={resetFlow.email}
+        method={resetFlow.method}
+        identifier={resetFlow.identifier}
+        confirmationResult={resetFlow.confirmationResult}
         onVerified={handleOTPVerified}
-        onBack={() => setResetFlow({ ...resetFlow, step: 'forgot' })}
+        onBack={() =>
+          setResetFlow((prev) => ({
+            ...prev,
+            step: 'forgot',
+            resetToken: '',
+            confirmationResult: null,
+          }))
+        }
       />
     );
   }
@@ -145,7 +174,12 @@ function SignIn() {
             Forgot password?{' '}
             <button
               type="button"
-              onClick={() => setResetFlow({ ...resetFlow, step: 'forgot' })}
+              onClick={() =>
+                setResetFlow((prev) => ({
+                  ...prev,
+                  step: 'forgot',
+                }))
+              }
               className="font-medium text-green-600 hover:text-green-500"
             >
               Reset

@@ -1,9 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
+import { signOut } from 'firebase/auth';
 import { API_URL } from '../../utils/config';
+import { getFirebaseAuth } from '../../utils/firebase';
 
-function OTPVerification({ email, onVerified, onBack }) {
+function OTPVerification({ method = 'email', identifier, confirmationResult, onVerified, onBack }) {
   const OTP_LENGTH = 6;
   const [otpValues, setOtpValues] = useState(Array(OTP_LENGTH).fill(''));
   const [isLoading, setIsLoading] = useState(false);
@@ -32,6 +34,10 @@ function OTPVerification({ email, onVerified, onBack }) {
     }
   };
 
+  const displayTarget = method === 'phone'
+    ? (identifier ? identifier.replace(/.(?=.{4})/g, '*') : 'your phone number')
+    : identifier || 'your email';
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const otp = otpValues.join('');
@@ -42,10 +48,40 @@ function OTPVerification({ email, onVerified, onBack }) {
 
     setIsLoading(true);
     try {
-      const { data } = await axios.post(`${API_URL}/api/auth/verify-otp`, { email, otp });
-      onVerified(data.resetToken);
+      if (method === 'phone') {
+        if (!confirmationResult) {
+          toast.error('Missing OTP session. Please request a new code.');
+          return;
+        }
+
+        await confirmationResult.confirm(otp);
+
+        try {
+          await signOut(getFirebaseAuth());
+        } catch (signOutError) {
+          console.warn('Firebase signOut failed after OTP confirmation:', signOutError);
+        }
+
+        const { data } = await axios.post(`${API_URL}/api/auth/forgot-password/phone/token`, {
+          phoneNumber: identifier,
+        });
+
+        onVerified(data.resetToken);
+      } else {
+        const { data } = await axios.post(`${API_URL}/api/auth/verify-otp`, {
+          email: identifier,
+          otp,
+        });
+        onVerified(data.resetToken);
+      }
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Invalid OTP');
+      if (error.code === 'auth/invalid-verification-code') {
+        toast.error('Invalid OTP. Please check and try again.');
+      } else if (error.code === 'auth/code-expired') {
+        toast.error('OTP expired. Please request a new code.');
+      } else {
+        toast.error(error.response?.data?.message || error.message || 'Invalid OTP');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -56,7 +92,7 @@ function OTPVerification({ email, onVerified, onBack }) {
       <div className="text-center">
         <h2 className="text-2xl font-bold text-green-600">Enter OTP</h2>
         <p className="text-sm text-gray-600 mt-1">
-          Enter the 6-digit code sent to {email}
+          Enter the 6-digit code sent to {displayTarget}
         </p>
       </div>
 

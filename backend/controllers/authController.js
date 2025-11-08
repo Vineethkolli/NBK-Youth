@@ -17,6 +17,27 @@ const logAuthEvent = async (data) => {
   }
 };
 
+const normalizePhoneNumber = (phoneNumber) => {
+  if (typeof phoneNumber !== 'string') return null;
+  const trimmed = phoneNumber.trim();
+  if (!trimmed) return null;
+
+  const normalized = trimmed.replace(/^00/, '+').replace(/[\s-]+/g, '');
+  let parsed;
+
+  if (normalized.startsWith('+')) {
+    parsed = parsePhoneNumberFromString(normalized);
+  } else if (/^\d{6,15}$/.test(normalized)) {
+    parsed = parsePhoneNumberFromString(`+${normalized}`);
+  }
+
+  if (!parsed || !parsed.isValid()) {
+    return null;
+  }
+
+  return parsed.number;
+};
+
 
 export const signUp = async (req, res) => {
   try {
@@ -243,6 +264,50 @@ export const forgotPassword = async (req, res) => {
 };
 
 
+export const initiatePhonePasswordReset = async (req, res) => {
+  try {
+    const normalizedPhone = normalizePhoneNumber(req.body.phoneNumber);
+    if (!normalizedPhone) {
+      return res.status(400).json({ message: 'Please enter a valid phone number' });
+    }
+
+    const user = await User.findOne({ phoneNumber: normalizedPhone });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    return res.json({ message: 'Phone number verified' });
+  } catch (error) {
+    console.error('Phone reset initiation error:', error);
+    return res.status(500).json({ message: 'Server error' });
+  }
+};
+
+
+export const issuePhoneResetToken = async (req, res) => {
+  try {
+    const normalizedPhone = normalizePhoneNumber(req.body.phoneNumber);
+    if (!normalizedPhone) {
+      return res.status(400).json({ message: 'Please enter a valid phone number' });
+    }
+
+    const user = await User.findOne({ phoneNumber: normalizedPhone });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const resetToken = jwt.sign({ phoneNumber: normalizedPhone }, process.env.JWT_SECRET, {
+      expiresIn: '10m',
+    });
+
+    return res.json({ resetToken });
+  } catch (error) {
+    console.error('Phone reset token error:', error);
+    return res.status(500).json({ message: 'Server error' });
+  }
+};
+
+
 export const verifyOtp = async (req, res) => {
   try {
     const rawEmail = req.body.email;
@@ -266,9 +331,21 @@ export const resetPassword = async (req, res) => {
   try {
     const { resetToken, newPassword } = req.body;
     const decoded = jwt.verify(resetToken, process.env.JWT_SECRET);
+    let user;
 
-    const email = decoded.email.trim().toLowerCase();
-    const user = await User.findOne({ email });
+    if (decoded.email) {
+      const email = decoded.email.trim().toLowerCase();
+      user = await User.findOne({ email });
+    } else if (decoded.phoneNumber) {
+      const phoneNumber = normalizePhoneNumber(decoded.phoneNumber);
+      if (!phoneNumber) {
+        return res.status(400).json({ message: 'Invalid reset token payload' });
+      }
+      user = await User.findOne({ phoneNumber });
+    } else {
+      return res.status(400).json({ message: 'Invalid reset token payload' });
+    }
+
     if (!user) return res.status(404).json({ message: 'User not found' });
 
     user.password = newPassword;
