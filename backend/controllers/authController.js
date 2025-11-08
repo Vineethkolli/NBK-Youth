@@ -262,11 +262,87 @@ export const verifyOtp = async (req, res) => {
 };
 
 
+
+// ✅ Check if phone exists before Firebase OTP
+export const checkPhoneExists = async (req, res) => {
+  try {
+    // Accept either `phone` or `phoneNumber` from client
+    let { phone, phoneNumber } = req.body;
+    let raw = phone || phoneNumber;
+    if (!raw || typeof raw !== 'string' || !raw.trim()) {
+      return res.status(400).json({ message: 'Phone number required' });
+    }
+
+    raw = raw.trim();
+
+    // Normalize: convert leading 00 to +, remove spaces/dashes
+    let normalized = raw.replace(/^00/, '+').replace(/[\s-]+/g, '');
+    let parsed;
+    if (normalized.startsWith('+')) {
+      parsed = parsePhoneNumberFromString(normalized);
+    } else if (/^\d{6,15}$/.test(normalized)) {
+      parsed = parsePhoneNumberFromString(`+${normalized}`);
+    }
+
+    if (!parsed || !parsed.isValid()) {
+      return res.status(400).json({ message: 'Invalid phone number' });
+    }
+
+    const e164 = parsed.number; // E.164 formatted number stored in DB
+
+    const user = await User.findOne({ phoneNumber: e164 });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    return res.json({ message: 'User found', exists: true });
+  } catch (err) {
+    console.error("checkPhoneExists error:", err);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+
 export const resetPassword = async (req, res) => {
   try {
     const { resetToken, newPassword } = req.body;
-    const decoded = jwt.verify(resetToken, process.env.JWT_SECRET);
+    let { phone, phoneNumber } = req.body;
 
+    // ✅ If user used phone-based reset
+    if (phone || phoneNumber) {
+      let raw = phone || phoneNumber;
+      raw = (raw || '').trim();
+      let normalized = raw.replace(/^00/, '+').replace(/[\s-]+/g, '');
+      let parsed;
+      if (normalized.startsWith('+')) {
+        parsed = parsePhoneNumberFromString(normalized);
+      } else if (/^\d{6,15}$/.test(normalized)) {
+        parsed = parsePhoneNumberFromString(`+${normalized}`);
+      }
+      if (!parsed || !parsed.isValid()) {
+        return res.status(400).json({ message: 'Invalid phone number' });
+      }
+      const e164 = parsed.number;
+      const user = await User.findOne({ phoneNumber: e164 });
+      if (!user) return res.status(404).json({ message: 'User not found' });
+
+      user.password = newPassword;
+      await user.save();
+
+      await logActivity(
+        { user: { registerId: user.registerId, name: user.name } },
+        'UPDATE',
+        'User',
+        user.registerId,
+        { before: null, after: null },
+        `User ${user.name} reset password via phone`
+      );
+
+      return res.json({ message: 'Password reset successful via phone' });
+    }
+
+    // ✅ Otherwise, use email JWT-based flow (existing)
+    const decoded = jwt.verify(resetToken, process.env.JWT_SECRET);
     const email = decoded.email.trim().toLowerCase();
     const user = await User.findOne({ email });
     if (!user) return res.status(404).json({ message: 'User not found' });
@@ -280,13 +356,14 @@ export const resetPassword = async (req, res) => {
       'User',
       user.registerId,
       { before: null, after: null },
-      `User ${user.name} reset password`
+      `User ${user.name} reset password via email`
     );
 
-    return res.json({ message: 'Password reset successful' });
+    return res.json({ message: 'Password reset successful via email' });
   } catch (error) {
     if (error.name === 'JsonWebTokenError')
       return res.status(401).json({ message: 'Invalid or expired reset token' });
+    console.error('resetPassword error:', error);
     return res.status(500).json({ message: 'Server error' });
   }
 };

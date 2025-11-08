@@ -4,10 +4,10 @@ import axios from 'axios';
 import { API_URL } from '../../utils/config';
 import { Eye, EyeOff } from 'lucide-react';
 
-function ResetPassword({ resetToken, onSuccess }) {
+function ResetPassword({ resetToken, phone, onSuccess }) {
   const [passwords, setPasswords] = useState({
     newPassword: '',
-    confirmPassword: ''
+    confirmPassword: '',
   });
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -27,10 +27,15 @@ function ResetPassword({ resetToken, onSuccess }) {
     setIsLoading(true);
 
     try {
-      await axios.post(`${API_URL}/api/auth/reset-password`, {
-        resetToken,
-        newPassword: passwords.newPassword
-      });
+      const payload = {
+        newPassword: passwords.newPassword,
+      };
+
+      // ✅ Decide whether to use phone or token
+      if (phone) payload.phone = phone;
+      else payload.resetToken = resetToken;
+
+      await axios.post(`${API_URL}/api/auth/reset-password`, payload);
 
       toast.success('Password reset successful');
       onSuccess();
@@ -41,21 +46,14 @@ function ResetPassword({ resetToken, onSuccess }) {
     }
   };
 
-  const toggleNewPasswordVisibility = () => {
-    setShowNewPassword((prev) => !prev);
-  };
-
-  const toggleConfirmPasswordVisibility = () => {
-    setShowConfirmPassword((prev) => !prev);
-  };
+  const toggleNewPasswordVisibility = () => setShowNewPassword((prev) => !prev);
+  const toggleConfirmPasswordVisibility = () => setShowConfirmPassword((prev) => !prev);
 
   return (
     <div className="space-y-6">
       <div className="text-center">
         <h2 className="text-2xl font-bold text-green-600">Reset Password</h2>
-        <p className="text-sm text-gray-600 mt-1">
-          Enter your new password
-        </p>
+        <p className="text-sm text-gray-600 mt-1">Enter your new password</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -64,7 +62,9 @@ function ResetPassword({ resetToken, onSuccess }) {
             type={showNewPassword ? 'text' : 'password'}
             required
             value={passwords.newPassword}
-            onChange={(e) => setPasswords({ ...passwords, newPassword: e.target.value })}
+            onChange={(e) =>
+              setPasswords({ ...passwords, newPassword: e.target.value })
+            }
             placeholder="New Password"
             className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
           />
@@ -82,7 +82,9 @@ function ResetPassword({ resetToken, onSuccess }) {
             type={showConfirmPassword ? 'text' : 'password'}
             required
             value={passwords.confirmPassword}
-            onChange={(e) => setPasswords({ ...passwords, confirmPassword: e.target.value })}
+            onChange={(e) =>
+              setPasswords({ ...passwords, confirmPassword: e.target.value })
+            }
             placeholder="Confirm New Password"
             className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
           />
@@ -99,7 +101,7 @@ function ResetPassword({ resetToken, onSuccess }) {
           type="submit"
           disabled={isLoading}
           className={`w-full flex justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 ${
-                isLoading ? 'opacity-50 cursor-not-allowed' : ''
+            isLoading ? 'opacity-50 cursor-not-allowed' : ''
           }`}
         >
           {isLoading ? 'Resetting...' : 'Reset Password'}
