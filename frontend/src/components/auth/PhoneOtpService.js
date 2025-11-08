@@ -43,18 +43,3 @@ export async function sendPhoneOTP(phoneNumber) {
     throw err;
   }
 }
-
-export async function verifyPhoneOTP(otp) {
-  try {
-    const confirmationResult = window.confirmationResult;
-    if (!confirmationResult) throw new Error("OTP session expired. Please resend.");
-
-    const result = await confirmationResult.confirm(otp);
-    toast.success("OTP verified successfully!");
-    return result.user;
-  } catch (err) {
-    console.error("Firebase OTP verification failed:", err);
-    toast.error("Invalid or expired OTP. Please try again.");
-    throw err;
-  }
-}
