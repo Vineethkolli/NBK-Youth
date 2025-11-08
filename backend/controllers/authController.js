@@ -220,59 +220,25 @@ export const signIn = async (req, res) => {
 export const forgotPassword = async (req, res) => {
   try {
     const rawEmail = req.body.email;
-    if (!rawEmail?.trim()) {
-      return res.status(400).json({ message: 'Email required' });
-    }
+    if (!rawEmail) return res.status(400).json({ message: 'Email required' });
 
     const email = rawEmail.trim().toLowerCase();
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
-    if (!emailRegex.test(email)) {
-      return res.status(400).json({ message: 'Invalid email format' });
-    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) return res.status(400).json({ message: 'Invalid email format' });
 
     const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
+    if (!user) return res.status(404).json({ message: 'User not found' });
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     await OTP.create({ email, otp });
 
     const emailSent = await sendOTPEmail(email, otp);
-    if (!emailSent) {
-      return res.status(500).json({ message: 'Failed to send OTP email' });
-    }
+    if (!emailSent) return res.status(500).json({ message: 'Failed to send OTP email' });
 
     return res.json({ message: 'OTP sent successfully' });
-  } catch (err) {
-    console.error('Forgot Password Error:', err);
+  } catch {
     return res.status(500).json({ message: 'Server error' });
-  }
-};
-
-
-export const checkPhone = async (req, res) => {
-  try {
-    let { phone } = req.body;
-    if (!phone?.trim()) return res.status(400).json({ message: "Phone number required" });
-
-    phone = phone.trim().replace(/^00/, "+").replace(/[\s-]+/g, "");
-    const parsed = parsePhoneNumberFromString(phone.startsWith("+") ? phone : `+${phone}`);
-
-    if (!parsed || !parsed.isValid()) {
-      return res.status(400).json({ message: "Invalid phone number" });
-    }
-
-    const user = await User.findOne({ phoneNumber: parsed.number });
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    return res.json({ exists: true });
-  } catch (err) {
-    console.error("Check phone error:", err);
-    return res.status(500).json({ message: "Server error" });
   }
 };
 
