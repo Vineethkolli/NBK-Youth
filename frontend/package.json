@@ -14,10 +14,11 @@
     "@heroicons/react": "^2.2.0",
     "axios": "^1.13.2",
     "country-flag-icons": "^1.5.21",
+    "firebase": "^12.5.0",
     "jspdf": "^3.0.2",
     "jspdf-autotable": "^5.0.2",
-    "libphonenumber-js": "^1.12.25",
-    "lucide-react": "^0.552.0",
+    "libphonenumber-js": "^1.12.26",
+    "lucide-react": "^0.553.0",
     "qrcode.react": "^4.2.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
@@ -42,6 +43,6 @@
     "globals": "^16.5.0",
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.17",
-    "vite": "^7.1.12"
+    "vite": "^7.2.2"
   }
 }
