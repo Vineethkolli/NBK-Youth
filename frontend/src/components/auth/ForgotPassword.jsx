@@ -161,7 +161,7 @@ function ForgotPassword({
       <div className="text-center">
         <h2 className="text-2xl font-bold text-green-600">Forgot Password</h2>
         <p className="text-sm text-gray-600 mt-1">
-          Enter your {isPhone ? 'phone number' : 'email'} to receive a password reset OTP
+          Enter your {isPhone ? 'phone number' : 'email'} to receive an OTP
         </p>
       </div>
 
@@ -191,14 +191,19 @@ function ForgotPassword({
           {isLoading ? 'Sending...' : 'Send OTP'}
         </button>
 
-        <button
-          type="button"
-          onClick={toggleMethod}
-          className="w-full py-2 px-4 text-green-600 hover:text-green-700"
-        >
-          {isPhone ? 'Reset using Email' : 'Reset using Phone number'}
-        </button>
-
+        
+        <div className="text-center">
+          <p className="text-black">
+            Reset using{' '}
+            <button
+              type="button"
+              onClick={toggleMethod}
+              className="font-medium text-green-600 hover:text-green-500"
+            >
+              {isPhone ? 'Email' : 'Phone number'}
+            </button>
+          </p>
+        </div>
         <button
           type="button"
           onClick={onBack}

@@ -170,7 +170,7 @@ formData.phoneNumber = parsedPhone.number;
               {isSubmitting ? 'Signing up...' : 'Sign up'}
             </button>
           </div>
-          <div className="text-sm text-center">
+          <div className=" text-center">
             <span className="text-black">Already have an account? </span>
             <a
               href="/signin"

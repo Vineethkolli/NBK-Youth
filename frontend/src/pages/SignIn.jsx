@@ -161,7 +161,7 @@ function SignIn() {
           </button>
         </div>
 
-        <div className="text-sm text-center">
+        <div className=" text-center">
           <p className="text-black">
             Don&apos;t have an account?{' '}
             <a href="/signup" className="font-medium text-green-600 hover:text-green-500">
@@ -169,7 +169,7 @@ function SignIn() {
             </a>
           </p>
         </div>
-        <div className="text-sm text-center">
+        <div className="text-center">
           <p className="text-black">
             Forgot password?{' '}
             <button
