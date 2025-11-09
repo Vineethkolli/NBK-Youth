@@ -2,9 +2,34 @@ import { precacheAndRoute } from 'workbox-precaching';
 
 precacheAndRoute(self.__WB_MANIFEST || []);
 
-// Force the new service worker to activate immediately
+// Listen for a message from the client to skip waiting
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+
+  // Handle vibe song actions (existing logic)
+  if (event.data && event.data.type === 'MEDIA_SESSION_ACTION') {
+    event.waitUntil(
+      self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+        if (clientList.length > 0) {
+          const client = clientList[0];
+          client.focus();
+          client.postMessage({
+            type: 'NAVIGATE_TO_VIBE',
+            action: event.data.action,
+          });
+        } else {
+          self.clients.openWindow('/vibe');
+        }
+      })
+    );
+  }
+});
+
+// The install event no longer calls skipWaiting() immediately
 self.addEventListener('install', () => {
-  self.skipWaiting();
+  // We'll wait for the client to tell us when to activate
 });
 
 self.addEventListener('activate', (event) => {
@@ -47,25 +72,4 @@ self.addEventListener('notificationclick', (event) => {
       }
     })
   );
-});
-
-
-// Handle vibe song actions when app is in background
-self.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'MEDIA_SESSION_ACTION') {
-    event.waitUntil(
-      self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
-        if (clientList.length > 0) {
-          const client = clientList[0];
-          client.focus();
-          client.postMessage({
-            type: 'NAVIGATE_TO_VIBE',
-            action: event.data.action,
-          });
-        } else {
-          self.clients.openWindow('/vibe');
-        }
-      })
-    );
-  }
 });

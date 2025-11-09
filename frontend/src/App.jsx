@@ -49,7 +49,7 @@ import PopupBanner from './components/adminPanel/PopupBanner';
 import FloatingMusicIcon from './components/vibe/FloatingMusicIcon';
 import OfflineIndicator from './components/common/OfflineIndicator';
 import ErrorBoundary from './components/common/ErrorBoundary';
-
+import UpdateModal from './components/common/UpdateModal';
 
 function AppContent() {
   const { user } = useAuth();
@@ -129,22 +129,54 @@ function AppContent() {
 
 // Root App Wrapper
 function App() {
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  const [waitingWorker, setWaitingWorker] = useState(null);
+
   useEffect(() => {
-  initializeAnalytics();
+    initializeAnalytics();
 
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js', { scope: '/' })
-      .catch((error) => console.error('Service Worker registration failed:', error));
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js', { scope: '/' })
+        .then((registration) => {
+          // Listen for a new service worker that is installed and waiting
+          registration.addEventListener('updatefound', () => {
+            const newWorker = registration.installing;
+            if (newWorker) {
+              newWorker.addEventListener('statechange', () => {
+                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                  // New content is available and waiting.
+                  // Show the update modal.
+                  setWaitingWorker(newWorker);
+                  setIsUpdateModalOpen(true);
+                }
+              });
+            }
+          });
+        })
+        .catch((error) => console.error('Service Worker registration failed:', error));
 
-    // Only reload if a service worker was already controlling the page
-    if (navigator.serviceWorker.controller) {
+      // This listener fires when the new service worker has taken control
       navigator.serviceWorker.addEventListener('controllerchange', () => {
-        toast.success('New version available! Refreshing...');
+        // Show toast and reload
+        toast.success('App updated! Reloading...');
         setTimeout(() => window.location.reload(), 1000);
       });
     }
-  }
-}, []);
+  }, []);
+
+  const handleReloadUpdate = () => {
+    if (waitingWorker) {
+      // Send message to SW to skip waiting
+      waitingWorker.postMessage({ type: 'SKIP_WAITING' });
+    }
+    setIsUpdateModalOpen(false);
+  };
+
+  const handleCancelUpdate = () => {
+    setIsUpdateModalOpen(false);
+    toast('Update will be applied the next time you open the app.', {
+    });
+  };
 
 
   return (
