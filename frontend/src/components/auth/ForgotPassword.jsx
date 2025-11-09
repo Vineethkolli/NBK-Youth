@@ -86,11 +86,25 @@ function ForgotPassword({
     };
   }, [resetMethod]);
 
-  const toggleMethod = () => {
-    const nextMethod = resetMethod === 'email' ? 'phone' : 'email';
-    setResetMethod(nextMethod);
-    onMethodChange(nextMethod);
-  };
+const lastEmail = useRef('');
+const lastPhone = useRef('');
+
+const toggleMethod = () => {
+  if (resetMethod === 'email') {
+    lastEmail.current = email; // remember it
+    setEmail('');
+    setPhoneNumber(lastPhone.current); // restore last phone
+    setResetMethod('phone');
+    onMethodChange('phone');
+  } else {
+    lastPhone.current = phoneNumber;
+    setPhoneNumber('');
+    setEmail(lastEmail.current);
+    setResetMethod('email');
+    onMethodChange('email');
+  }
+};
+
 
   const validateEmail = (value) => {
     const normalizedEmail = value.trim().toLowerCase();
