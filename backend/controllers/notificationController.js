@@ -4,9 +4,11 @@ import User from '../models/User.js';
 import NotificationHistory from '../models/NotificationHistory.js';
 import { logActivity } from '../middleware/activityLogger.js';
 
+
 export const getPublicKey = (req, res) => {
   res.json({ publicKey: process.env.PUBLIC_VAPID_KEY });
 };
+
 
 export const subscribe = async (req, res) => {
   const { subscription, registerId: bodyRegisterId } = req.body;
@@ -47,6 +49,7 @@ export const subscribe = async (req, res) => {
   }
 };
 
+
 export const unsubscribe = async (req, res) => {
   const { endpoint } = req.body;
   const authenticatedRegisterId = req.user?.registerId;
@@ -76,6 +79,7 @@ export const unsubscribe = async (req, res) => {
   }
 };
 
+
 export const sendNotification = async (req, res) => {
   const { title, body, link, target, registerId } = req.body;
   const senderRegisterId = req.user.registerId;
@@ -90,15 +94,25 @@ export const sendNotification = async (req, res) => {
       const allUsers = await User.find({}, 'registerId');
       eligibleRegisterIds = allUsers.map((user) => user.registerId);
       subscriptionUsers = await Subscription.find({ registerId: { $in: eligibleRegisterIds } });
+
     } else if (target === 'Admins_Financiers_Developers') {
       eligibleRegisterIds = await getRoleBasedRegisterIds(['admin', 'financier', 'developer']);
       subscriptionUsers = await Subscription.find({ registerId: { $in: eligibleRegisterIds } });
+
     } else if (target === 'Specific User' && registerId) {
+      // Check if user exists or not
+      const existingUser = await User.findOne({ registerId });
+      if (!existingUser) {
+        return res.status(404).json({ error: 'User does not exist' });
+      }
+
       eligibleRegisterIds = [registerId];
       subscriptionUsers = await Subscription.find({ registerId });
+
     } else if (target === 'Youth_Category') {
       eligibleRegisterIds = await getCategoryBasedRegisterIds('youth');
       subscriptionUsers = await Subscription.find({ registerId: { $in: eligibleRegisterIds } });
+
     } else {
       return res.status(400).json({ error: 'Invalid target selection' });
     }
@@ -108,37 +122,33 @@ export const sendNotification = async (req, res) => {
     }
 
     const notifications = subscriptionUsers.map(async (user) => {
-  let hasRemoved = false;
+      let hasRemoved = false;
 
-  // Send notifications for all subscriptions
-  await Promise.all(
-    user.subscriptions.map(async (sub) => {
-      try {
-        await webpush.sendNotification(sub, payload, { 
-          urgency: 'high', 
-          TTL: 1296000 // 15 days 
-        });
-      } catch (error) {
-        if (error.statusCode === 410 || error.statusCode === 404) {
-          // Mark subscription for removal
-          hasRemoved = true;
-          sub._remove = true; 
-        } else {
-          console.error('Error sending notification:', error);
-        }
+      await Promise.all(
+        user.subscriptions.map(async (sub) => {
+          try {
+            await webpush.sendNotification(sub, payload, { 
+              urgency: 'high', 
+              TTL: 1296000 // 15 days 
+            });
+          } catch (error) {
+            if (error.statusCode === 410 || error.statusCode === 404) {
+              hasRemoved = true;
+              sub._remove = true;
+            } else {
+              console.error('Error sending notification:', error);
+            }
+          }
+        })
+      );
+
+      if (hasRemoved) {
+        user.subscriptions = user.subscriptions.filter((s) => !s._remove);
+        await user.save(); 
       }
-    })
-  );
+    });
 
-  // Remove invalid subscriptions once
-  if (hasRemoved) {
-    user.subscriptions = user.subscriptions.filter((s) => !s._remove);
-    await user.save(); 
-  }
-});
-
-await Promise.all(notifications);
-
+    await Promise.all(notifications);
 
     await NotificationHistory.create({
       title,
@@ -164,6 +174,7 @@ await Promise.all(notifications);
   }
 };
 
+
 export const getNotificationHistory = async (req, res) => {
   try {
     const { registerId } = req.query;
@@ -177,6 +188,7 @@ export const getNotificationHistory = async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch notification history' });
   }
 };
+
 
 // Helper functions
 const getRoleBasedRegisterIds = async (roles) => {

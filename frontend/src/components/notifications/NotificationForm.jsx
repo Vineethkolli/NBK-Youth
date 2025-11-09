@@ -13,6 +13,7 @@ function NotificationForm({ onSuccess }) {
 
   const sendNotification = async (e) => {
     e.preventDefault();
+
     if (!title || !body) {
       toast.error('Please enter both title and message');
       return;
@@ -21,29 +22,39 @@ function NotificationForm({ onSuccess }) {
     setIsLoading(true);
     try {
       const requestData = { title, body, link, target };
+
       if (target === 'Specific User') {
-        if (!registerId) {
+        if (!registerId.trim()) {
           toast.error('Please enter Register ID for the specific user');
           setIsLoading(false);
           return;
         }
-        requestData.registerId = registerId;
+        requestData.registerId = registerId.trim();
       }
 
-      await axios.post(`${API_URL}/api/notifications/notify`, requestData);
+      const response = await axios.post(`${API_URL}/api/notifications/notify`, requestData);
 
-      if (onSuccess) {
-        onSuccess(requestData);
-      }
+      if (onSuccess) onSuccess(requestData);
 
+      toast.success(response.data?.message || `Notification sent successfully to ${target}`);
+
+      // Reset form
       setTitle('');
       setBody('');
-      setLink(''); 
+      setLink('');
       setRegisterId('');
-      toast.success(`Notification sent successfully to ${target}`);
     } catch (error) {
       console.error('Error sending notification:', error);
-      toast.error('Failed to send notification');
+
+      if (error.response?.status === 404 && error.response?.data?.error === 'User does not exist') {
+        toast.error('User does not exist');
+      } 
+      else if (error.response?.data?.error) {
+        toast.error(error.response.data.error);
+      } 
+      else {
+        toast.error('Failed to send notification');
+      }
     } finally {
       setIsLoading(false);
     }
