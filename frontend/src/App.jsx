@@ -1,7 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
-import { toast } from 'react-hot-toast';
 import { initializeAnalytics, trackPageView, setAnalyticsUser, clearAnalyticsUser } from './utils/analytics';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { HiddenProfileProvider } from './context/HiddenProfileContext';
@@ -49,7 +48,8 @@ import PopupBanner from './components/adminPanel/PopupBanner';
 import FloatingMusicIcon from './components/vibe/FloatingMusicIcon';
 import OfflineIndicator from './components/common/OfflineIndicator';
 import ErrorBoundary from './components/common/ErrorBoundary';
-import UpdateModal from './components/common/UpdateModal';
+import UpdatePrompt from './components/common/UpdatePrompt';
+
 
 function AppContent() {
   const { user } = useAuth();
@@ -129,53 +129,64 @@ function AppContent() {
 
 // Root App Wrapper
 function App() {
-  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
-  const [waitingWorker, setWaitingWorker] = useState(null);
+  const [updateVisible, setUpdateVisible] = useState(false);
+  const [waitingReg, setWaitingReg] = useState(null);
+  const isRefreshingRef = useRef(false);
 
   useEffect(() => {
     initializeAnalytics();
 
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js', { scope: '/' })
+      navigator.serviceWorker
+        .register('/sw.js', { scope: '/' })
         .then((registration) => {
-          // Listen for a new service worker that is installed and waiting
+          // If there's already an updated worker waiting, prompt immediately
+          if (registration.waiting) {
+            setWaitingReg(registration);
+            setUpdateVisible(true);
+          }
+
+          // Listen for new updates found
           registration.addEventListener('updatefound', () => {
             const newWorker = registration.installing;
-            if (newWorker) {
-              newWorker.addEventListener('statechange', () => {
-                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                  // New content is available and waiting.
-                  // Show the update modal.
-                  setWaitingWorker(newWorker);
-                  setIsUpdateModalOpen(true);
-                }
-              });
-            }
+            if (!newWorker) return;
+            newWorker.addEventListener('statechange', () => {
+              if (
+                newWorker.state === 'installed' &&
+                navigator.serviceWorker.controller // only prompt if already under SW control
+              ) {
+                setWaitingReg(registration);
+                setUpdateVisible(true);
+              }
+            });
           });
         })
         .catch((error) => console.error('Service Worker registration failed:', error));
 
-      // This listener fires when the new service worker has taken control
+      // Reload only when we explicitly requested a refresh
       navigator.serviceWorker.addEventListener('controllerchange', () => {
-        // Show toast and reload
-        toast.success('App updated! Reloading...');
-        setTimeout(() => window.location.reload(), 1000);
+        if (isRefreshingRef.current) {
+          window.location.reload();
+        }
       });
     }
   }, []);
 
-  const handleReloadUpdate = () => {
-    if (waitingWorker) {
-      // Send message to SW to skip waiting
-      waitingWorker.postMessage({ type: 'SKIP_WAITING' });
+  const handleRefresh = () => {
+    try {
+      if (waitingReg?.waiting) {
+        // Tell the waiting service worker to activate now
+        waitingReg.waiting.postMessage({ type: 'SKIP_WAITING' });
+        isRefreshingRef.current = true;
+      }
+    } finally {
+      setUpdateVisible(false);
     }
-    setIsUpdateModalOpen(false);
   };
 
-  const handleCancelUpdate = () => {
-    setIsUpdateModalOpen(false);
-    toast('Update will be applied the next time you open the app.', {
-    });
+  const handleCancel = () => {
+    // Do nothing: the waiting SW will activate next time the app is opened
+    setUpdateVisible(false);
   };
 
 
@@ -192,6 +203,7 @@ function App() {
                       <AppContent />
                     </ErrorBoundary>
                   </Router>
+                  <UpdatePrompt visible={!!updateVisible} onRefresh={handleRefresh} onCancel={handleCancel} />
                 </MusicProvider>
               </LockProvider>
             </EventLabelProvider>
