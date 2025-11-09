@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { toast } from 'react-hot-toast';
@@ -55,7 +55,7 @@ import UpdateNotificationDialog from './components/common/UpdateNotificationDial
 function AppContent() {
   const { user } = useAuth();
   const { isMaintenanceMode } = useMaintenanceMode();
-  const location = useLocation();
+  const location = useLocation(); 
 
   useEffect(() => {
     if (user && user.registerId) {
@@ -65,11 +65,12 @@ function AppContent() {
     }
     const path = location.pathname + location.search;
     trackPageView(path);
-  }, [user, location]);
+  }, [user, location]); 
 
   if (isMaintenanceMode && user?.role !== 'developer') {
     return <MaintenancePage />;
   }
+
 
   return (
     <>
@@ -141,51 +142,32 @@ function App() {
         .then((registration) => {
           console.log('Service Worker registered successfully');
 
-          // Check for updates periodically
-          setInterval(() => {
-            registration.update();
-          }, 60000); // Check every minute
-
-          // Handle updates
+          // Listen for updates immediately when new SW is found
           registration.addEventListener('updatefound', () => {
             const newWorker = registration.installing;
-
             newWorker.addEventListener('statechange', () => {
-              // New service worker is waiting to activate
               if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                // Check if user postponed update recently (within last 30 minutes)
-                const postponedTime = localStorage.getItem('updatePostponed');
-                const shouldShowDialog = !postponedTime || 
-                  (Date.now() - parseInt(postponedTime)) > 30 * 60 * 1000;
-
-                if (shouldShowDialog) {
-                  setWaitingWorker(newWorker);
-                  setShowUpdateDialog(true);
-                } else {
-                  // Show a subtle toast notification instead
-                  toast('Update available. Will apply on next visit.', {
-                    duration: 4000,
-                    icon: '🔔',
-                  });
-                }
+                // Show dialog immediately when update is ready
+                setWaitingWorker(newWorker);
+                setShowUpdateDialog(true);
               }
             });
           });
         })
-        .catch((error) => console.error('Service Worker registration failed:', error));
+        .catch((error) => console.error('SW registration failed:', error));
     }
   }, []);
 
-  const handleUpdateReload = () => {
+  const handleReload = () => {
     if (waitingWorker) {
       waitingWorker.postMessage({ type: 'SKIP_WAITING' });
       setShowUpdateDialog(false);
+      window.location.reload();
     }
   };
 
-  const handleUpdateCancel = () => {
+  const handleClose = () => {
     setShowUpdateDialog(false);
-    localStorage.setItem('updatePostponed', Date.now().toString());
   };
 
   return (
@@ -198,12 +180,6 @@ function App() {
                 <MusicProvider>
                   <Router>
                     <ErrorBoundary>
-                      {showUpdateDialog && (
-                        <UpdateNotificationDialog
-                          onReload={handleUpdateReload}
-                          onClose={handleUpdateCancel}
-                        />
-                      )}
                       <AppContent />
                     </ErrorBoundary>
                   </Router>

@@ -1,23 +1,18 @@
 import { precacheAndRoute } from 'workbox-precaching';
-
 precacheAndRoute(self.__WB_MANIFEST || []);
 
-// Don't force immediate activation - let the app handle it
-self.addEventListener('install', (event) => {
-  // Skip waiting only after user confirms update
-  self.skipWaiting();
+// Don't activate automatically — wait until app triggers it
+self.addEventListener('install', () => {
 });
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(self.clients.claim());
 });
 
-// Listen for messages from the app to control activation
 self.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'SKIP_WAITING') {
-    self.skipWaiting();
-  }
+  if (event.data?.type === 'SKIP_WAITING') self.skipWaiting();
 });
+
 
 // Notification logic with high priority
 self.addEventListener('push', (event) => {
