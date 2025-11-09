@@ -1,7 +1,5 @@
 import React from 'react';
 
-// Simple modal overlay for update prompt
-// Props: visible (bool), onRefresh (fn), onCancel (fn)
 export default function UpdatePrompt({ visible, onRefresh, onCancel }) {
   if (!visible) return null;
 

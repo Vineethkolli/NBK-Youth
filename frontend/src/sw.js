@@ -2,15 +2,14 @@ import { precacheAndRoute } from 'workbox-precaching';
 
 precacheAndRoute(self.__WB_MANIFEST || []);
 
-// Default: do NOT skipWaiting automatically.
-// We will prompt the user in the app and call skipWaiting only when they confirm.
+
 self.addEventListener('install', () => {
-  // Intentionally no self.skipWaiting() here to respect user choice.
 });
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(self.clients.claim());
 });
+
 
 // Notification logic with high priority
 self.addEventListener('push', (event) => {
@@ -29,6 +28,7 @@ self.addEventListener('push', (event) => {
 
   event.waitUntil(self.registration.showNotification(title, options));
 });
+
 
 // Handle notification click events
 self.addEventListener('notificationclick', (event) => {
