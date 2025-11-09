@@ -27,49 +27,64 @@ function ForgotPassword({
   useEffect(() => {
     setResetMethod(activeMethod);
     if (activeMethod === 'email') {
-      if (initialIdentifier) {
-        setEmail(initialIdentifier);
-      }
+      if (initialIdentifier) setEmail(initialIdentifier);
     } else if (activeMethod === 'phone' && initialIdentifier) {
       const parsed = parsePhoneNumberFromString(initialIdentifier);
       setPhoneNumber(parsed?.number || '');
     }
   }, [activeMethod, initialIdentifier]);
 
-  // Create the RecaptchaVerifier
+  // reCAPTCHA setup and cleanup
   useEffect(() => {
-    if (resetMethod === 'phone') {
-      if (recaptchaVerifierRef.current) {
-        return;
+    const container = document.getElementById(RECAPTCHA_CONTAINER_ID);
+
+    if (window.grecaptcha && window.grecaptcha.get) {
+      try {
+        const widgetsCount = window.grecaptcha.get().length;
+        for (let i = 0; i < widgetsCount; i++) {
+          window.grecaptcha.reset(i);
+        }
+      } catch {
       }
+    }
+    if (container) container.innerHTML = '';
 
+    if (resetMethod === 'phone') {
       const auth = getFirebaseAuth();
-      recaptchaVerifierRef.current = new RecaptchaVerifier(auth, RECAPTCHA_CONTAINER_ID, {
-        size: 'invisible',
-        callback: () => {
-        },
-        'expired-callback': () => {
-          toast.error('reCAPTCHA expired, please try again');
-          if (recaptchaVerifierRef.current) {
-            recaptchaVerifierRef.current.clear();
-            recaptchaVerifierRef.current = null;
-          }
-        },
-      });
 
-      recaptchaVerifierRef.current.render().catch((err) => {
-        toast.error('Failed to render reCAPTCHA');
-        console.error('reCAPTCHA render error:', err);
-      });
+      // Delay ensures DOM ready for rendering
+      setTimeout(() => {
+        try {
+          recaptchaVerifierRef.current = new RecaptchaVerifier(auth, RECAPTCHA_CONTAINER_ID, {
+            size: 'invisible',
+            callback: () => {},
+            'expired-callback': () => {
+              toast.error('reCAPTCHA expired, please try again');
+            },
+          });
+
+          recaptchaVerifierRef.current
+            .render()
+            .catch((err) => {
+              console.error('reCAPTCHA render error:', err);
+              toast.error('Failed to render reCAPTCHA');
+            });
+        } catch (err) {
+          console.error('Failed to initialize reCAPTCHA:', err);
+        }
+      }, 100);
     }
 
     return () => {
       if (recaptchaVerifierRef.current) {
-        recaptchaVerifierRef.current.clear();
+        try {
+          recaptchaVerifierRef.current.clear();
+        } catch {}
         recaptchaVerifierRef.current = null;
       }
+      if (container) container.innerHTML = '';
     };
-  }, [resetMethod]); 
+  }, [resetMethod]);
 
   const toggleMethod = () => {
     const nextMethod = resetMethod === 'email' ? 'phone' : 'email';
@@ -204,7 +219,6 @@ function ForgotPassword({
           {isLoading ? 'Sending...' : 'Send OTP'}
         </button>
 
-        
         <div className="text-center">
           <p className="text-black">
             Reset using{' '}
@@ -217,6 +231,7 @@ function ForgotPassword({
             </button>
           </p>
         </div>
+
         <button
           type="button"
           onClick={onBack}
@@ -226,7 +241,7 @@ function ForgotPassword({
         </button>
       </form>
 
-      <div id={RECAPTCHA_CONTAINER_ID} />
+      {isPhone && <div id={RECAPTCHA_CONTAINER_ID} />}
     </div>
   );
 }
