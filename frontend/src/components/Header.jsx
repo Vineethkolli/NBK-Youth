@@ -31,7 +31,7 @@ function Header({ toggleSidebar }) {
         </div>
 
         <div className="flex items-center space-x-2">
-          <h1 className="text-2xl font-bold text-yellow-700">NYouth</h1>
+          <h1 className="text-2xl font-bold text-yellow-700">NBK Youth</h1>
         </div>
 
          <div className="flex items-center space-x-2">
