@@ -98,7 +98,7 @@ function ResetPassword({ resetToken, onSuccess }) {
         <button
           type="submit"
           disabled={isLoading}
-          className={`w-full flex justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 ${
+          className={`w-full flex justify-center px-4 py-2 border border-transparent rounded-md shadow-sm font-medium text-white bg-green-600 hover:bg-green-700 ${
                 isLoading ? 'opacity-50 cursor-not-allowed' : ''
           }`}
         >

@@ -36,23 +36,45 @@ function ForgotPassword({
     }
   }, [activeMethod, initialIdentifier]);
 
+  // Create the RecaptchaVerifier
   useEffect(() => {
+    if (resetMethod === 'phone') {
+      if (recaptchaVerifierRef.current) {
+        return;
+      }
+
+      const auth = getFirebaseAuth();
+      recaptchaVerifierRef.current = new RecaptchaVerifier(auth, RECAPTCHA_CONTAINER_ID, {
+        size: 'invisible',
+        callback: () => {
+        },
+        'expired-callback': () => {
+          toast.error('reCAPTCHA expired, please try again');
+          if (recaptchaVerifierRef.current) {
+            recaptchaVerifierRef.current.clear();
+            recaptchaVerifierRef.current = null;
+          }
+        },
+      });
+
+      recaptchaVerifierRef.current.render().catch((err) => {
+        toast.error('Failed to render reCAPTCHA');
+        console.error('reCAPTCHA render error:', err);
+      });
+    }
+
     return () => {
       if (recaptchaVerifierRef.current) {
         recaptchaVerifierRef.current.clear();
         recaptchaVerifierRef.current = null;
       }
     };
-  }, []);
+  }, [resetMethod]); 
 
   const toggleMethod = () => {
     const nextMethod = resetMethod === 'email' ? 'phone' : 'email';
     setResetMethod(nextMethod);
     onMethodChange(nextMethod);
-    if (nextMethod === 'email' && recaptchaVerifierRef.current) {
-      recaptchaVerifierRef.current.clear();
-      recaptchaVerifierRef.current = null;
-    }
   };
 
   const validateEmail = (value) => {
@@ -74,22 +96,6 @@ function ForgotPassword({
       return null;
     }
     return parsed.number;
-  };
-
-  const prepareRecaptcha = (auth) => {
-    if (recaptchaVerifierRef.current) {
-      recaptchaVerifierRef.current.clear();
-    }
-
-    recaptchaVerifierRef.current = new RecaptchaVerifier(auth, RECAPTCHA_CONTAINER_ID, {
-      size: 'invisible',
-      callback: () => {},
-      'expired-callback': () => {
-        toast.error('reCAPTCHA expired, please try again');
-      },
-    });
-
-    return recaptchaVerifierRef.current;
   };
 
   const handleSubmit = async (e) => {
@@ -121,13 +127,19 @@ function ForgotPassword({
       return;
     }
 
+    const appVerifier = recaptchaVerifierRef.current;
+    if (!appVerifier) {
+      toast.error('reCAPTCHA not initialized. Please wait a moment and try again.');
+      setIsLoading(false);
+      return;
+    }
+
     try {
       await axios.post(`${API_URL}/api/auth/forgot-password/phone`, {
         phoneNumber: normalizedPhone,
       });
 
       const auth = getFirebaseAuth();
-      const appVerifier = prepareRecaptcha(auth);
       const confirmationResult = await signInWithPhoneNumber(auth, normalizedPhone, appVerifier);
 
       toast.success('OTP sent to your phone');
@@ -136,7 +148,6 @@ function ForgotPassword({
         value: normalizedPhone,
         confirmationResult,
       });
-      recaptchaVerifierRef.current = null;
     } catch (error) {
       if (error.code === 'auth/too-many-requests') {
         toast.error('Too many attempts. Please try again later.');
@@ -144,10 +155,6 @@ function ForgotPassword({
         toast.error('Firebase rejected the phone number format');
       } else {
         toast.error(error.response?.data?.message || error.message || 'Failed to send OTP');
-      }
-      if (recaptchaVerifierRef.current) {
-        recaptchaVerifierRef.current.clear();
-        recaptchaVerifierRef.current = null;
       }
     } finally {
       setIsLoading(false);
@@ -160,9 +167,15 @@ function ForgotPassword({
     <div className="space-y-6">
       <div className="text-center">
         <h2 className="text-2xl font-bold text-green-600">Forgot Password</h2>
-        <p className="text-sm text-gray-600 mt-1">
-          Enter your {isPhone ? 'phone number' : 'email'} to receive an OTP
-        </p>
+        {isPhone ? (
+          <p className="text-sm text-gray-600 mt-1">
+            Enter your phone number to receive an OTP
+          </p>
+        ) : (
+          <p className="text-sm text-gray-600 mt-1">
+            Enter your email to receive an OTP
+          </p>
+        )}
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -175,7 +188,7 @@ function ForgotPassword({
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your email"
+              placeholder="Enter your Email"
               className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
             />
           )}
@@ -184,7 +197,7 @@ function ForgotPassword({
         <button
           type="submit"
           disabled={isLoading}
-          className={`w-full flex justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 ${
+          className={`w-full flex justify-center px-4 py-2 border border-transparent rounded-md shadow-sm font-medium text-white bg-green-600 hover:bg-green-700 ${
             isLoading ? 'opacity-50 cursor-not-allowed' : ''
           }`}
         >
@@ -207,13 +220,13 @@ function ForgotPassword({
         <button
           type="button"
           onClick={onBack}
-          className="w-full py-2 px-4 text-green-600 hover:text-green-700"
+          className="w-full px-4 text-green-600 hover:text-green-700"
         >
           Back to Sign In
         </button>
       </form>
 
-      <div id={RECAPTCHA_CONTAINER_ID} className="hidden" aria-hidden="true" />
+      <div id={RECAPTCHA_CONTAINER_ID} />
     </div>
   );
 }

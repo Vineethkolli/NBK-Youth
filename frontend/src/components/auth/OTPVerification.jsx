@@ -11,7 +11,6 @@ function OTPVerification({ method = 'email', identifier, confirmationResult, onV
   const [isLoading, setIsLoading] = useState(false);
   const inputsRef = useRef([]);
 
-  // On mount, focus first input
   useEffect(() => {
     inputsRef.current[0]?.focus();
   }, []);
@@ -116,7 +115,7 @@ function OTPVerification({ method = 'email', identifier, confirmationResult, onV
         <button
           type="submit"
           disabled={isLoading}
-          className={`w-full flex justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 ${
+          className={`w-full flex justify-center px-4 py-2 border border-transparent rounded-md shadow-sm font-medium text-white bg-green-600 hover:bg-green-700 ${
                 isLoading ? 'opacity-50 cursor-not-allowed' : ''
           }`}
         >

@@ -17,27 +17,6 @@ const logAuthEvent = async (data) => {
   }
 };
 
-const normalizePhoneNumber = (phoneNumber) => {
-  if (typeof phoneNumber !== 'string') return null;
-  const trimmed = phoneNumber.trim();
-  if (!trimmed) return null;
-
-  const normalized = trimmed.replace(/^00/, '+').replace(/[\s-]+/g, '');
-  let parsed;
-
-  if (normalized.startsWith('+')) {
-    parsed = parsePhoneNumberFromString(normalized);
-  } else if (/^\d{6,15}$/.test(normalized)) {
-    parsed = parsePhoneNumberFromString(`+${normalized}`);
-  }
-
-  if (!parsed || !parsed.isValid()) {
-    return null;
-  }
-
-  return parsed.number;
-};
-
 
 export const signUp = async (req, res) => {
   try {
@@ -261,6 +240,28 @@ export const forgotPassword = async (req, res) => {
   } catch {
     return res.status(500).json({ message: 'Server error' });
   }
+};
+
+
+const normalizePhoneNumber = (phoneNumber) => {
+  if (typeof phoneNumber !== 'string') return null;
+  const trimmed = phoneNumber.trim();
+  if (!trimmed) return null;
+
+  const normalized = trimmed.replace(/^00/, '+').replace(/[\s-]+/g, '');
+  let parsed;
+
+  if (normalized.startsWith('+')) {
+    parsed = parsePhoneNumberFromString(normalized);
+  } else if (/^\d{6,15}$/.test(normalized)) {
+    parsed = parsePhoneNumberFromString(`+${normalized}`);
+  }
+
+  if (!parsed || !parsed.isValid()) {
+    return null;
+  }
+
+  return parsed.number;
 };
 
 
