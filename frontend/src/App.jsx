@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { toast } from 'react-hot-toast';
@@ -49,12 +49,13 @@ import PopupBanner from './components/adminPanel/PopupBanner';
 import FloatingMusicIcon from './components/vibe/FloatingMusicIcon';
 import OfflineIndicator from './components/common/OfflineIndicator';
 import ErrorBoundary from './components/common/ErrorBoundary';
-import UpdateDialog from './components/common/AppUpdate';
+import UpdateNotificationDialog from './components/common/UpdateNotificationDialog';
+
 
 function AppContent() {
   const { user } = useAuth();
   const { isMaintenanceMode } = useMaintenanceMode();
-  const location = useLocation(); 
+  const location = useLocation();
 
   useEffect(() => {
     if (user && user.registerId) {
@@ -64,12 +65,11 @@ function AppContent() {
     }
     const path = location.pathname + location.search;
     trackPageView(path);
-  }, [user, location]); 
+  }, [user, location]);
 
   if (isMaintenanceMode && user?.role !== 'developer') {
     return <MaintenancePage />;
   }
-
 
   return (
     <>
@@ -129,16 +129,64 @@ function AppContent() {
 
 // Root App Wrapper
 function App() {
+  const [showUpdateDialog, setShowUpdateDialog] = useState(false);
+  const [waitingWorker, setWaitingWorker] = useState(null);
+
   useEffect(() => {
     initializeAnalytics();
 
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js', { scope: '/' })
-        .then(() => console.log('Service Worker registered'))
-        .catch((error) => console.error('SW registration failed:', error));
+      navigator.serviceWorker
+        .register('/sw.js', { scope: '/' })
+        .then((registration) => {
+          console.log('Service Worker registered successfully');
+
+          // Check for updates periodically
+          setInterval(() => {
+            registration.update();
+          }, 60000); // Check every minute
+
+          // Handle updates
+          registration.addEventListener('updatefound', () => {
+            const newWorker = registration.installing;
+
+            newWorker.addEventListener('statechange', () => {
+              // New service worker is waiting to activate
+              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                // Check if user postponed update recently (within last 30 minutes)
+                const postponedTime = localStorage.getItem('updatePostponed');
+                const shouldShowDialog = !postponedTime || 
+                  (Date.now() - parseInt(postponedTime)) > 30 * 60 * 1000;
+
+                if (shouldShowDialog) {
+                  setWaitingWorker(newWorker);
+                  setShowUpdateDialog(true);
+                } else {
+                  // Show a subtle toast notification instead
+                  toast('Update available. Will apply on next visit.', {
+                    duration: 4000,
+                    icon: '🔔',
+                  });
+                }
+              }
+            });
+          });
+        })
+        .catch((error) => console.error('Service Worker registration failed:', error));
     }
   }, []);
 
+  const handleUpdateReload = () => {
+    if (waitingWorker) {
+      waitingWorker.postMessage({ type: 'SKIP_WAITING' });
+      setShowUpdateDialog(false);
+    }
+  };
+
+  const handleUpdateCancel = () => {
+    setShowUpdateDialog(false);
+    localStorage.setItem('updatePostponed', Date.now().toString());
+  };
 
   return (
     <AuthProvider>
@@ -150,6 +198,12 @@ function App() {
                 <MusicProvider>
                   <Router>
                     <ErrorBoundary>
+                      {showUpdateDialog && (
+                        <UpdateNotificationDialog
+                          onReload={handleUpdateReload}
+                          onClose={handleUpdateCancel}
+                        />
+                      )}
                       <AppContent />
                     </ErrorBoundary>
                   </Router>
