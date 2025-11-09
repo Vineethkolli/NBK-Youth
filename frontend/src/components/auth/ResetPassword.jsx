@@ -4,7 +4,7 @@ import axios from 'axios';
 import { API_URL } from '../../utils/config';
 import { Eye, EyeOff } from 'lucide-react';
 
-function ResetPassword({ resetToken, onSuccess }) {
+function ResetPassword({ resetToken, onSuccess, onBack }) {
   const [passwords, setPasswords] = useState({
     newPassword: '',
     confirmPassword: ''
@@ -41,14 +41,6 @@ function ResetPassword({ resetToken, onSuccess }) {
     }
   };
 
-  const toggleNewPasswordVisibility = () => {
-    setShowNewPassword((prev) => !prev);
-  };
-
-  const toggleConfirmPasswordVisibility = () => {
-    setShowConfirmPassword((prev) => !prev);
-  };
-
   return (
     <div className="space-y-6">
       <div className="text-center">
@@ -70,7 +62,7 @@ function ResetPassword({ resetToken, onSuccess }) {
           />
           <button
             type="button"
-            onClick={toggleNewPasswordVisibility}
+            onClick={() => setShowNewPassword((prev) => !prev)}
             className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700"
           >
             {showNewPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
@@ -88,7 +80,7 @@ function ResetPassword({ resetToken, onSuccess }) {
           />
           <button
             type="button"
-            onClick={toggleConfirmPasswordVisibility}
+            onClick={() => setShowConfirmPassword((prev) => !prev)}
             className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700"
           >
             {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
@@ -99,11 +91,13 @@ function ResetPassword({ resetToken, onSuccess }) {
           type="submit"
           disabled={isLoading}
           className={`w-full flex justify-center px-4 py-2 border border-transparent rounded-md shadow-sm font-medium text-white bg-green-600 hover:bg-green-700 ${
-                isLoading ? 'opacity-50 cursor-not-allowed' : ''
+            isLoading ? 'opacity-50 cursor-not-allowed' : ''
           }`}
         >
           {isLoading ? 'Resetting...' : 'Reset Password'}
         </button>
+
+        <p> </p>
       </form>
     </div>
   );
