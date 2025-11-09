@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
-import { Dialog } from "@headlessui/react";
 import { toast } from "react-hot-toast";
 
-export default function UpdateDialog() {
+export default function AppUpdate() {
   const [isOpen, setIsOpen] = useState(false);
   const [registration, setRegistration] = useState(null);
 
@@ -35,7 +34,7 @@ export default function UpdateDialog() {
     setIsOpen(false);
     toast.loading("Updating app...");
     registration?.waiting?.postMessage({ type: "SKIP_WAITING" });
-    setTimeout(() => window.location.reload());
+    setTimeout(() => window.location.reload(), 800);
   };
 
   const handleLater = () => {
@@ -43,32 +42,30 @@ export default function UpdateDialog() {
     toast("You’ll see the update next time you open the app.", { icon: "⏳" });
   };
 
-  return (
-    <Dialog
-      open={isOpen}
-      onClose={handleLater}
-      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm"
-    >
-      <Dialog.Panel className="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 text-center">
-        <Dialog.Title className="text-xl font-semibold text-gray-900">
-          New Update Available 🚀
-        </Dialog.Title>
-        <Dialog.Description className="mt-2 text-sm text-gray-600">
-          A new version of <strong>NBK YOUTH</strong> is available with the latest improvements:
-        </Dialog.Description>
+  if (!isOpen) return null;
 
-        <div className="mt-4 text-left text-sm bg-gray-50 p-3 rounded-lg border">
-          <ul className="list-disc pl-5 space-y-1 text-gray-700">
-            <li>✨ New features and performance boosts</li>
-            <li>🐞 Bug fixes and stability improvements</li>
-            <li>🔒 Security updates</li>
+  return (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fadeIn">
+      <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-sm w-full mx-4 p-6 text-center">
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+          🚀 New Update Available
+        </h2>
+        <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
+          A new version of <strong>NBK YOUTH</strong> is available with the latest improvements:
+        </p>
+
+        <div className="mt-4 text-left text-sm bg-gray-50 dark:bg-gray-800 p-3 rounded-lg border dark:border-gray-700">
+          <ul className="list-disc pl-5 space-y-1 text-gray-700 dark:text-gray-300">
+            <li>✨ New features and performance improvements</li>
+            <li>🐞 Bug fixes and stability updates</li>
+            <li>🔒 Security enhancements</li>
           </ul>
         </div>
 
         <div className="mt-6 flex justify-center gap-3">
           <button
             onClick={handleLater}
-            className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 transition"
+            className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
           >
             Cancel
           </button>
@@ -76,10 +73,10 @@ export default function UpdateDialog() {
             onClick={handleReload}
             className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition"
           >
-            Reload Now
+            Reload
           </button>
         </div>
-      </Dialog.Panel>
-    </Dialog>
+      </div>
+    </div>
   );
 }
