@@ -7,7 +7,7 @@ import { Eye, EyeOff } from 'lucide-react';
 function ResetPassword({ resetToken, onSuccess, onBack }) {
   const [passwords, setPasswords] = useState({
     newPassword: '',
-    confirmPassword: ''
+    confirmPassword: '',
   });
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -29,7 +29,7 @@ function ResetPassword({ resetToken, onSuccess, onBack }) {
     try {
       await axios.post(`${API_URL}/api/auth/reset-password`, {
         resetToken,
-        newPassword: passwords.newPassword
+        newPassword: passwords.newPassword,
       });
 
       toast.success('Password reset successful');
@@ -45,18 +45,19 @@ function ResetPassword({ resetToken, onSuccess, onBack }) {
     <div className="space-y-6">
       <div className="text-center">
         <h2 className="text-2xl font-bold text-green-600">Reset Password</h2>
-        <p className="text-sm text-gray-600 mt-1">
-          Enter your new password
-        </p>
+        <p className="text-sm text-gray-600 mt-1">Enter your new password</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
+        {/* New password */}
         <div className="relative">
           <input
             type={showNewPassword ? 'text' : 'password'}
             required
             value={passwords.newPassword}
-            onChange={(e) => setPasswords({ ...passwords, newPassword: e.target.value })}
+            onChange={(e) =>
+              setPasswords({ ...passwords, newPassword: e.target.value })
+            }
             placeholder="New Password"
             className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
           />
@@ -65,16 +66,23 @@ function ResetPassword({ resetToken, onSuccess, onBack }) {
             onClick={() => setShowNewPassword((prev) => !prev)}
             className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700"
           >
-            {showNewPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+            {showNewPassword ? (
+              <EyeOff className="h-5 w-5" />
+            ) : (
+              <Eye className="h-5 w-5" />
+            )}
           </button>
         </div>
 
+        {/* Confirm password */}
         <div className="relative">
           <input
             type={showConfirmPassword ? 'text' : 'password'}
             required
             value={passwords.confirmPassword}
-            onChange={(e) => setPasswords({ ...passwords, confirmPassword: e.target.value })}
+            onChange={(e) =>
+              setPasswords({ ...passwords, confirmPassword: e.target.value })
+            }
             placeholder="Confirm New Password"
             className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
           />
@@ -83,10 +91,15 @@ function ResetPassword({ resetToken, onSuccess, onBack }) {
             onClick={() => setShowConfirmPassword((prev) => !prev)}
             className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700"
           >
-            {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+            {showConfirmPassword ? (
+              <EyeOff className="h-5 w-5" />
+            ) : (
+              <Eye className="h-5 w-5" />
+            )}
           </button>
         </div>
 
+        {/* Reset button */}
         <button
           type="submit"
           disabled={isLoading}
@@ -97,7 +110,13 @@ function ResetPassword({ resetToken, onSuccess, onBack }) {
           {isLoading ? 'Resetting...' : 'Reset Password'}
         </button>
 
-        <p> </p>
+        {/* Cancel button */}
+        <button
+          type="button"
+          onClick={onBack}
+          className="w-full py-2 px-4 text-green-600 hover:text-green-700">
+          Cancel
+        </button>
       </form>
     </div>
   );

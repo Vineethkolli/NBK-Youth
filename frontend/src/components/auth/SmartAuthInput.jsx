@@ -72,6 +72,21 @@ export default function SmartAuthInput({ value = "", onChange }) {
     return "email";
   };
 
+  // Recompute value when country changes (for phone mode)
+useEffect(() => {
+  if (mode === "phone" && inputValue && !inputValue.startsWith("+")) {
+    const digits = inputValue.replace(/\D/g, "");
+    const full = `${country.code}${digits}`;
+    const parsed = parsePhoneNumberFromString(full);
+
+    if (parsed && parsed.isValid()) {
+      onChange(parsed.number);
+    } else {
+      onChange(full);
+    }
+  }
+}, [country]);
+
   //  Handle input changes
   const handleInputChange = (e) => {
     const val = e.target.value;

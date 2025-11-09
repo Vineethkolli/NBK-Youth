@@ -122,6 +122,21 @@ export default function CustomPhoneInput({ value, onChange }) {
     }
   };
 
+  useEffect(() => {
+  if (inputValue && !inputValue.startsWith("+") && !inputValue.startsWith("00")) {
+    const raw = `${country.code}${inputValue.replace(/\D/g, "")}`;
+    const parsed = parsePhoneNumberFromString(raw);
+
+    if (parsed && parsed.isValid()) {
+      onChange(parsed.number);
+    } else {
+      onChange(raw);
+    }
+  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [country]);
+
+
   return (
     <div className="relative w-full">
       <div className="flex items-center border border-gray-300 rounded-md shadow-sm bg-white focus-within:ring-1 focus-within:ring-green-500 overflow-hidden">
