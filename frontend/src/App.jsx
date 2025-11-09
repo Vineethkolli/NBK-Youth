@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { toast } from 'react-hot-toast';
@@ -49,7 +49,6 @@ import PopupBanner from './components/adminPanel/PopupBanner';
 import FloatingMusicIcon from './components/vibe/FloatingMusicIcon';
 import OfflineIndicator from './components/common/OfflineIndicator';
 import ErrorBoundary from './components/common/ErrorBoundary';
-import UpdateNotificationDialog from './components/common/UpdateNotificationDialog';
 
 
 function AppContent() {
@@ -130,45 +129,23 @@ function AppContent() {
 
 // Root App Wrapper
 function App() {
-  const [showUpdateDialog, setShowUpdateDialog] = useState(false);
-  const [waitingWorker, setWaitingWorker] = useState(null);
-
   useEffect(() => {
-    initializeAnalytics();
+  initializeAnalytics();
 
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker
-        .register('/sw.js', { scope: '/' })
-        .then((registration) => {
-          console.log('Service Worker registered successfully');
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js', { scope: '/' })
+      .catch((error) => console.error('Service Worker registration failed:', error));
 
-          // Listen for updates immediately when new SW is found
-          registration.addEventListener('updatefound', () => {
-            const newWorker = registration.installing;
-            newWorker.addEventListener('statechange', () => {
-              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                // Show dialog immediately when update is ready
-                setWaitingWorker(newWorker);
-                setShowUpdateDialog(true);
-              }
-            });
-          });
-        })
-        .catch((error) => console.error('SW registration failed:', error));
+    // Only reload if a service worker was already controlling the page
+    if (navigator.serviceWorker.controller) {
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        toast.success('New version available! Refreshing...');
+        setTimeout(() => window.location.reload(), 1000);
+      });
     }
-  }, []);
+  }
+}, []);
 
-  const handleReload = () => {
-    if (waitingWorker) {
-      waitingWorker.postMessage({ type: 'SKIP_WAITING' });
-      setShowUpdateDialog(false);
-      window.location.reload();
-    }
-  };
-
-  const handleClose = () => {
-    setShowUpdateDialog(false);
-  };
 
   return (
     <AuthProvider>

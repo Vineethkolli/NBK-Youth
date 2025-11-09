@@ -1,18 +1,15 @@
 import { precacheAndRoute } from 'workbox-precaching';
+
 precacheAndRoute(self.__WB_MANIFEST || []);
 
-// Don't activate automatically — wait until app triggers it
+// Force the new service worker to activate immediately
 self.addEventListener('install', () => {
+  self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(self.clients.claim());
 });
-
-self.addEventListener('message', (event) => {
-  if (event.data?.type === 'SKIP_WAITING') self.skipWaiting();
-});
-
 
 // Notification logic with high priority
 self.addEventListener('push', (event) => {
