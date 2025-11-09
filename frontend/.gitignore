@@ -13,6 +13,10 @@ dist
 dist-ssr
 *.local
 
+# Frontend build artifacts
+/frontend/dist
+/frontend/dist-ssr
+
 # Coverage reports
 coverage
 *.lcov

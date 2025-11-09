@@ -9,14 +9,23 @@ export const getPublicKey = (req, res) => {
 };
 
 export const subscribe = async (req, res) => {
-  const { registerId, subscription } = req.body;
+  const { subscription, registerId: bodyRegisterId } = req.body;
+  const authenticatedRegisterId = req.user?.registerId;
 
-  if (!registerId || !subscription) {
-    return res.status(400).json({ error: "registerId and subscription are required" });
+  if (!authenticatedRegisterId) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+
+  if (bodyRegisterId && bodyRegisterId !== authenticatedRegisterId) {
+    return res.status(403).json({ error: 'registerId does not match the authenticated user' });
+  }
+
+  if (!subscription) {
+    return res.status(400).json({ error: 'subscription is required' });
   }
 
   try {
-    const existingUser = await Subscription.findOne({ registerId });
+    const existingUser = await Subscription.findOne({ registerId: authenticatedRegisterId });
 
     if (existingUser) {
       // Avoid duplicate subscriptions
@@ -28,7 +37,7 @@ export const subscribe = async (req, res) => {
         await existingUser.save();
       }
     } else {
-      await Subscription.create({ registerId, subscriptions: [subscription] });
+      await Subscription.create({ registerId: authenticatedRegisterId, subscriptions: [subscription] });
     }
 
     res.status(201).json({ message: 'Subscription saved successfully' });
@@ -40,17 +49,26 @@ export const subscribe = async (req, res) => {
 
 export const unsubscribe = async (req, res) => {
   const { endpoint } = req.body;
+  const authenticatedRegisterId = req.user?.registerId;
+
+  if (!authenticatedRegisterId) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
 
   if (!endpoint) {
     return res.status(400).json({ error: 'Endpoint is required' });
   }
 
   try {
-    // Remove only the matching subscription from the subscriptions array
-    await Subscription.updateOne(
-      { "subscriptions.endpoint": endpoint },
+    const updateResult = await Subscription.updateOne(
+      { registerId: authenticatedRegisterId, 'subscriptions.endpoint': endpoint },
       { $pull: { subscriptions: { endpoint } } }
     );
+
+    if (updateResult.modifiedCount === 0) {
+      return res.status(404).json({ error: 'Subscription not found for this user' });
+    }
+
     res.status(200).json({ message: 'Unsubscribed successfully' });
   } catch (error) {
     console.error('Error unsubscribing:', error);
@@ -104,7 +122,7 @@ export const sendNotification = async (req, res) => {
         if (error.statusCode === 410 || error.statusCode === 404) {
           // Mark subscription for removal
           hasRemoved = true;
-          sub._remove = true; // temporary flag
+          sub._remove = true; 
         } else {
           console.error('Error sending notification:', error);
         }
@@ -115,7 +133,7 @@ export const sendNotification = async (req, res) => {
   // Remove invalid subscriptions once
   if (hasRemoved) {
     user.subscriptions = user.subscriptions.filter((s) => !s._remove);
-    await user.save(); // save only once
+    await user.save(); 
   }
 });
 

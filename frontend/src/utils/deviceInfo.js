@@ -99,6 +99,10 @@ export const getDeviceInfo = async () => {
       { name: 'iOS', regex: /iPhone|iPad|iPod/i },
       { name: 'Android', regex: /Android/i },
       { name: 'Linux', regex: /Linux/i },
+      { name: 'ChromeOS', regex: /CrOS/i },
+      { name: 'HarmonyOS', regex: /HarmonyOS/i },
+      { name: 'KaiOS', regex: /KaiOS/i },
+      { name: 'Fuchsia', regex: /Fuchsia/i },
     ];
     for (const o of patterns) {
       if (o.regex.test(ua)) {

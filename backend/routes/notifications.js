@@ -5,8 +5,8 @@ import { getPublicKey, subscribe, unsubscribe, sendNotification, getNotification
 const router = express.Router();
 
 router.get('/publicKey', getPublicKey);
-router.post('/subscribe', subscribe);
-router.post('/unsubscribe', unsubscribe);
+router.post('/subscribe', auth, subscribe);
+router.post('/unsubscribe', auth, unsubscribe);
 router.post('/notify', auth, sendNotification); 
 router.get('/history', auth, getNotificationHistory); 
 

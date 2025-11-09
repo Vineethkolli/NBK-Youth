@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 import OTP from '../models/OTP.js';
-import { sendOTPEmail } from '../utils/emailService.js';
+import { sendOTPEmail } from '../utils/emailOTPService.js';
 import { logActivity } from '../middleware/activityLogger.js';
 import AuthLog from '../models/AuthLog.js';
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
@@ -311,9 +311,25 @@ export const issuePhoneResetToken = async (req, res) => {
 
 export const verifyOtp = async (req, res) => {
   try {
-    const rawEmail = req.body.email;
+    const { email: rawEmail, otp: rawOtp } = req.body;
+
+    if (!rawEmail || typeof rawEmail !== 'string') {
+      return res.status(400).json({ message: 'Email is required' });
+    }
+
+    if (!rawOtp || typeof rawOtp !== 'string') {
+      return res.status(400).json({ message: 'OTP is required' });
+    }
+
     const email = rawEmail.trim().toLowerCase();
-    const otp = req.body.otp;
+    if (!email) {
+      return res.status(400).json({ message: 'Email is required' });
+    }
+
+    const otp = rawOtp.trim();
+    if (!otp) {
+      return res.status(400).json({ message: 'OTP is required' });
+    }
 
     const otpRecord = await OTP.findOne({ email, otp });
     if (!otpRecord) return res.status(400).json({ message: 'Invalid OTP' });

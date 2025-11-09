@@ -21,13 +21,24 @@ export const getAllUsers = async (req, res) => {
     }
 
     const users = await User.find(query).select('-password');
-    const usersWithNotifications = await Promise.all(
-      users.map(async (user) => {
-        const notificationRecord = await Notification.findOne({ registerId: user.registerId });
-        const notificationsEnabled = notificationRecord?.subscriptions?.length > 0;
-        return { ...user.toObject(), notificationsEnabled };
-      })
-    );
+    
+    // Batch fetch all notifications in a single query to avoid N+1 problem
+    const registerIds = users.map(user => user.registerId);
+    const notifications = await Notification.find({ 
+      registerId: { $in: registerIds } 
+    }).lean();
+    
+    // Create a map for O(1) lookup
+    const notificationMap = new Map();
+    notifications.forEach(notif => {
+      notificationMap.set(notif.registerId, notif.subscriptions?.length > 0);
+    });
+
+    // Merge user data with notification status
+    const usersWithNotifications = users.map(user => ({
+      ...user.toObject(),
+      notificationsEnabled: notificationMap.get(user.registerId) || false
+    }));
 
     res.json(usersWithNotifications);
   } catch {

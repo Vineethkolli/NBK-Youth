@@ -7,26 +7,35 @@ export const committeeController = {
     try {
       const committees = await Committee.find().sort('order');
 
-      // For each committee entry, re-fetch name & profileImage
-      const members = await Promise.all(
-        committees.map(async (c) => {
-          const user = await User.findOne({ registerId: c.registerId })
-          if (!user) {
-            return { ...c.toObject(), name: 'Unknown', profileImage: null };
-          }
-          return {
-            _id:          c._id,
-            registerId:   c.registerId,
-            order:        c.order,
-            addedBy:      c.addedBy,
-            createdAt:    c.createdAt,
-            updatedAt:    c.updatedAt,
-            // override with live data
-            name:         user.name,
-            profileImage: user.profileImage,
-          };
-        })
-      );
+      // Batch fetch all users in a single query to avoid N+1 problem
+      const registerIds = committees.map(c => c.registerId);
+      const users = await User.find({ 
+        registerId: { $in: registerIds } 
+      }).lean();
+      
+      // Create a map for O(1) lookup
+      const userMap = new Map();
+      users.forEach(user => {
+        userMap.set(user.registerId, user);
+      });
+
+      // Map committee data with user information
+      const members = committees.map(c => {
+        const user = userMap.get(c.registerId);
+        if (!user) {
+          return { ...c.toObject(), name: 'Unknown', profileImage: null };
+        }
+        return {
+          _id:          c._id,
+          registerId:   c.registerId,
+          order:        c.order,
+          addedBy:      c.addedBy,
+          createdAt:    c.createdAt,
+          updatedAt:    c.updatedAt,
+          name:         user.name,
+          profileImage: user.profileImage,
+        };
+      });
 
       res.json(members);
     } catch (error) {
