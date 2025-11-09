@@ -49,7 +49,7 @@ import PopupBanner from './components/adminPanel/PopupBanner';
 import FloatingMusicIcon from './components/vibe/FloatingMusicIcon';
 import OfflineIndicator from './components/common/OfflineIndicator';
 import ErrorBoundary from './components/common/ErrorBoundary';
-
+import UpdateDialog from './components/common/AppUpdate';
 
 function AppContent() {
   const { user } = useAuth();
@@ -136,13 +136,13 @@ function App() {
     navigator.serviceWorker.register('/sw.js', { scope: '/' })
       .catch((error) => console.error('Service Worker registration failed:', error));
 
-    // Only reload if a service worker was already controlling the page
-    if (navigator.serviceWorker.controller) {
-      navigator.serviceWorker.addEventListener('controllerchange', () => {
-        toast.success('New version available! Refreshing...');
-        setTimeout(() => window.location.reload(), 1000);
-      });
-    }
+  // Detect if app updated
+  if (localStorage.getItem('appJustUpdated')) {
+    setTimeout(() => {
+      toast.success('App Updated 🎉');
+      localStorage.removeItem('appJustUpdated');
+    }, 1000); 
+  }
   }
 }, []);
 
