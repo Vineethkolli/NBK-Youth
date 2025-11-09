@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 import { initializeAnalytics, trackPageView, setAnalyticsUser, clearAnalyticsUser } from './utils/analytics';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { HiddenProfileProvider } from './context/HiddenProfileContext';
@@ -48,7 +49,6 @@ import PopupBanner from './components/adminPanel/PopupBanner';
 import FloatingMusicIcon from './components/vibe/FloatingMusicIcon';
 import OfflineIndicator from './components/common/OfflineIndicator';
 import ErrorBoundary from './components/common/ErrorBoundary';
-import UpdatePrompt from './components/common/UpdatePrompt';
 
 
 function AppContent() {
@@ -129,65 +129,22 @@ function AppContent() {
 
 // Root App Wrapper
 function App() {
-  const [updateVisible, setUpdateVisible] = useState(false);
-  const [waitingReg, setWaitingReg] = useState(null);
-  const isRefreshingRef = useRef(false);
-
   useEffect(() => {
-    initializeAnalytics();
+  initializeAnalytics();
 
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker
-        .register('/sw.js', { scope: '/' })
-        .then((registration) => {
-          // If there's already an updated worker waiting, prompt immediately
-          if (registration.waiting) {
-            setWaitingReg(registration);
-            setUpdateVisible(true);
-          }
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js', { scope: '/' })
+      .catch((error) => console.error('Service Worker registration failed:', error));
 
-          // Listen for new updates found
-          registration.addEventListener('updatefound', () => {
-            const newWorker = registration.installing;
-            if (!newWorker) return;
-            newWorker.addEventListener('statechange', () => {
-              if (
-                newWorker.state === 'installed' &&
-                navigator.serviceWorker.controller // only prompt if already under SW control
-              ) {
-                setWaitingReg(registration);
-                setUpdateVisible(true);
-              }
-            });
-          });
-        })
-        .catch((error) => console.error('Service Worker registration failed:', error));
-
-      // Reload only when we explicitly requested a refresh
+    // Only reload if a service worker was already controlling the page
+    if (navigator.serviceWorker.controller) {
       navigator.serviceWorker.addEventListener('controllerchange', () => {
-        if (isRefreshingRef.current) {
-          window.location.reload();
-        }
+        toast.success('New version available! Refreshing...');
+        setTimeout(() => window.location.reload(), 1000);
       });
     }
-  }, []);
-
-  const handleRefresh = () => {
-    try {
-      if (waitingReg?.waiting) {
-        // Tell the waiting service worker to activate now
-        waitingReg.waiting.postMessage({ type: 'SKIP_WAITING' });
-        isRefreshingRef.current = true;
-      }
-    } finally {
-      setUpdateVisible(false);
-    }
-  };
-
-  const handleCancel = () => {
-    // Do nothing: the waiting SW will activate next time the app is opened
-    setUpdateVisible(false);
-  };
+  }
+}, []);
 
 
   return (
@@ -203,7 +160,6 @@ function App() {
                       <AppContent />
                     </ErrorBoundary>
                   </Router>
-                  <UpdatePrompt visible={!!updateVisible} onRefresh={handleRefresh} onCancel={handleCancel} />
                 </MusicProvider>
               </LockProvider>
             </EventLabelProvider>

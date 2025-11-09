@@ -16,67 +16,59 @@ function ForgotPassword({
   onMethodChange = () => {},
   initialIdentifier = '',
 }) {
-  const [email, setEmail] = useState('');
-  const [phoneNumber, setPhoneNumber] = useState('');
+  const [email, setEmail] = useState(activeMethod === 'email' ? initialIdentifier : '');
+  const [phoneNumber, setPhoneNumber] = useState(
+    activeMethod === 'phone' ? initialIdentifier : ''
+  );
   const [resetMethod, setResetMethod] = useState(activeMethod);
   const [isLoading, setIsLoading] = useState(false);
   const recaptchaVerifierRef = useRef(null);
 
-  // Remember last identifiers used for restoring after OTP
-  const lastEmail = useRef('');
-  const lastPhone = useRef('');
-
-  // Restore identifier only when coming back from OTP
   useEffect(() => {
     setResetMethod(activeMethod);
-
-    if (initialIdentifier) {
-      if (activeMethod === 'email') {
-        // Only restore email if it looks like one
-        if (initialIdentifier.includes('@')) {
-          setEmail(initialIdentifier);
-          setPhoneNumber('');
-        }
-      } else if (activeMethod === 'phone') {
-        // Only restore phone if it looks like a number
-        const parsed = parsePhoneNumberFromString(initialIdentifier);
-        if (parsed && parsed.isValid()) {
-          setPhoneNumber(parsed.number);
-          setEmail('');
-        }
-      }
-    } else {
-      // clean slate
-      setEmail('');
-      setPhoneNumber('');
+    if (activeMethod === 'email') {
+      if (initialIdentifier) setEmail(initialIdentifier);
+    } else if (activeMethod === 'phone' && initialIdentifier) {
+      const parsed = parsePhoneNumberFromString(initialIdentifier);
+      setPhoneNumber(parsed?.number || '');
     }
   }, [activeMethod, initialIdentifier]);
 
-  // reCAPTCHA setup & cleanup
+  // reCAPTCHA setup and cleanup
   useEffect(() => {
     const container = document.getElementById(RECAPTCHA_CONTAINER_ID);
+
     if (window.grecaptcha && window.grecaptcha.get) {
       try {
         const widgetsCount = window.grecaptcha.get().length;
-        for (let i = 0; i < widgetsCount; i++) window.grecaptcha.reset(i);
-      } catch {}
+        for (let i = 0; i < widgetsCount; i++) {
+          window.grecaptcha.reset(i);
+        }
+      } catch {
+      }
     }
     if (container) container.innerHTML = '';
 
     if (resetMethod === 'phone') {
       const auth = getFirebaseAuth();
+
+      // Delay ensures DOM ready for rendering
       setTimeout(() => {
         try {
           recaptchaVerifierRef.current = new RecaptchaVerifier(auth, RECAPTCHA_CONTAINER_ID, {
             size: 'invisible',
             callback: () => {},
-            'expired-callback': () => toast.error('reCAPTCHA expired, please try again'),
+            'expired-callback': () => {
+              toast.error('reCAPTCHA expired, please try again');
+            },
           });
 
-          recaptchaVerifierRef.current.render().catch((err) => {
-            console.error('reCAPTCHA render error:', err);
-            toast.error('Failed to render reCAPTCHA');
-          });
+          recaptchaVerifierRef.current
+            .render()
+            .catch((err) => {
+              console.error('reCAPTCHA render error:', err);
+              toast.error('Failed to render reCAPTCHA');
+            });
         } catch (err) {
           console.error('Failed to initialize reCAPTCHA:', err);
         }
@@ -94,30 +86,21 @@ function ForgotPassword({
     };
   }, [resetMethod]);
 
-  // Toggle between email and phone
   const toggleMethod = () => {
-    if (resetMethod === 'email') {
-      lastEmail.current = email;
-      setEmail('');
-      setPhoneNumber('');
-      setResetMethod('phone');
-      onMethodChange('phone');
-    } else {
-      lastPhone.current = phoneNumber;
-      setEmail('');
-      setPhoneNumber('');
-      setResetMethod('email');
-      onMethodChange('email');
-    }
+    const nextMethod = resetMethod === 'email' ? 'phone' : 'email';
+    setResetMethod(nextMethod);
+    onMethodChange(nextMethod);
   };
 
   const validateEmail = (value) => {
     const normalizedEmail = value.trim().toLowerCase();
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
     if (!emailRegex.test(normalizedEmail)) {
       toast.error('Please enter a valid email address');
       return null;
     }
+
     return normalizedEmail;
   };
 
@@ -144,7 +127,6 @@ function ForgotPassword({
       try {
         await axios.post(`${API_URL}/api/auth/forgot-password`, { email: normalizedEmail });
         toast.success('OTP sent to your email');
-        lastEmail.current = normalizedEmail;
         onOTPSent({ method: 'email', value: normalizedEmail });
       } catch (error) {
         toast.error(error.response?.data?.message || 'Failed to send OTP');
@@ -168,13 +150,14 @@ function ForgotPassword({
     }
 
     try {
-      await axios.post(`${API_URL}/api/auth/forgot-password/phone`, { phoneNumber: normalizedPhone });
+      await axios.post(`${API_URL}/api/auth/forgot-password/phone`, {
+        phoneNumber: normalizedPhone,
+      });
 
       const auth = getFirebaseAuth();
       const confirmationResult = await signInWithPhoneNumber(auth, normalizedPhone, appVerifier);
 
       toast.success('OTP sent to your phone');
-      lastPhone.current = normalizedPhone;
       onOTPSent({
         method: 'phone',
         value: normalizedPhone,
@@ -199,11 +182,15 @@ function ForgotPassword({
     <div className="space-y-6">
       <div className="text-center">
         <h2 className="text-2xl font-bold text-green-600">Forgot Password</h2>
-        <p className="text-sm text-gray-600 mt-1">
-          {isPhone
-            ? 'Enter your phone number to receive an OTP'
-            : 'Enter your email to receive an OTP'}
-        </p>
+        {isPhone ? (
+          <p className="text-sm text-gray-600 mt-1">
+            Enter your phone number to receive an OTP
+          </p>
+        ) : (
+          <p className="text-sm text-gray-600 mt-1">
+            Enter your email to receive an OTP
+          </p>
+        )}
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">

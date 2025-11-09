@@ -99,14 +99,13 @@ function SignIn() {
   }
 
   if (resetFlow.step === 'reset') {
-  return (
-    <ResetPassword
-      resetToken={resetFlow.resetToken}
-      onSuccess={handlePasswordReset}
-      onBack={() => setResetFlow(resetInitialState)}
-    />
-  );
-}
+    return (
+      <ResetPassword
+        resetToken={resetFlow.resetToken}
+        onSuccess={handlePasswordReset}
+      />
+    );
+  }
 
   return (
     <>
@@ -197,6 +196,7 @@ function SignIn() {
     </span>
   </p>
 </div>
+
 
       <InstallApp />
     </>

@@ -2,14 +2,14 @@ import { precacheAndRoute } from 'workbox-precaching';
 
 precacheAndRoute(self.__WB_MANIFEST || []);
 
-
+// Force the new service worker to activate immediately
 self.addEventListener('install', () => {
+  self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(self.clients.claim());
 });
-
 
 // Notification logic with high priority
 self.addEventListener('push', (event) => {
@@ -28,7 +28,6 @@ self.addEventListener('push', (event) => {
 
   event.waitUntil(self.registration.showNotification(title, options));
 });
-
 
 // Handle notification click events
 self.addEventListener('notificationclick', (event) => {
@@ -53,15 +52,7 @@ self.addEventListener('notificationclick', (event) => {
 
 // Handle vibe song actions when app is in background
 self.addEventListener('message', (event) => {
-  const type = event?.data?.type;
-
-  // Respect user's choice: only activate immediately when explicitly told.
-  if (type === 'SKIP_WAITING') {
-    self.skipWaiting();
-    return;
-  }
-
-  if (type === 'MEDIA_SESSION_ACTION') {
+  if (event.data && event.data.type === 'MEDIA_SESSION_ACTION') {
     event.waitUntil(
       self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
         if (clientList.length > 0) {
