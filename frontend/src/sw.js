@@ -2,16 +2,43 @@ import { precacheAndRoute } from 'workbox-precaching';
 
 precacheAndRoute(self.__WB_MANIFEST || []);
 
-// Force the new service worker to activate immediately
-self.addEventListener('install', () => {
-  self.skipWaiting();
+// ✅ Install — don’t activate immediately; let app trigger SKIP_WAITING manually
+self.addEventListener('install', (event) => {
 });
 
+// ✅ Activate — take control once activated
 self.addEventListener('activate', (event) => {
   event.waitUntil(self.clients.claim());
 });
 
-// Notification logic with high priority
+// ✅ Handle "SKIP_WAITING" message from app (manual reload flow)
+self.addEventListener('message', (event) => {
+  if (!event.data) return;
+
+  if (event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+
+  // Handle Vibe background action
+  if (event.data.type === 'MEDIA_SESSION_ACTION') {
+    event.waitUntil(
+      self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+        if (clientList.length > 0) {
+          const client = clientList[0];
+          client.focus();
+          client.postMessage({
+            type: 'NAVIGATE_TO_VIBE',
+            action: event.data.action,
+          });
+        } else {
+          self.clients.openWindow('/vibe');
+        }
+      })
+    );
+  }
+});
+
+// ✅ Handle push notifications
 self.addEventListener('push', (event) => {
   const data = event.data ? event.data.json() : {};
   const title = data.title || 'Default Title';
@@ -29,7 +56,7 @@ self.addEventListener('push', (event) => {
   event.waitUntil(self.registration.showNotification(title, options));
 });
 
-// Handle notification click events
+// ✅ Handle notification click
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
 
@@ -39,33 +66,17 @@ self.addEventListener('notificationclick', (event) => {
 
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
-      const client = clientList.find((c) => 'focus' in c) || clientList[0];
-      if (client && !isExternal) {
-        return client.focus().then(() => client.navigate(targetLink));
-      } else {
-        return self.clients.openWindow(targetLink);
+      // Focus if window already open, else open new one
+      for (const client of clientList) {
+        if ('focus' in client) {
+          if (!isExternal) {
+            client.focus();
+            client.navigate(targetLink);
+          }
+          return;
+        }
       }
+      return self.clients.openWindow(targetLink);
     })
   );
-});
-
-
-// Handle vibe song actions when app is in background
-self.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'MEDIA_SESSION_ACTION') {
-    event.waitUntil(
-      self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
-        if (clientList.length > 0) {
-          const client = clientList[0];
-          client.focus();
-          client.postMessage({
-            type: 'NAVIGATE_TO_VIBE',
-            action: event.data.action,
-          });
-        } else {
-          self.clients.openWindow('/vibe');
-        }
-      })
-    );
-  }
 });

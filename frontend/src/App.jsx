@@ -49,6 +49,7 @@ import PopupBanner from './components/adminPanel/PopupBanner';
 import FloatingMusicIcon from './components/vibe/FloatingMusicIcon';
 import OfflineIndicator from './components/common/OfflineIndicator';
 import ErrorBoundary from './components/common/ErrorBoundary';
+import UpdateDialog from "./components/common/UpdateDialog";
 
 
 function AppContent() {
@@ -129,22 +130,43 @@ function AppContent() {
 
 // Root App Wrapper
 function App() {
+  const [updateAvailable, setUpdateAvailable] = useState(false);
+  const [waitingServiceWorker, setWaitingServiceWorker] = useState(null);
+
   useEffect(() => {
-  initializeAnalytics();
+    initializeAnalytics();
 
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js', { scope: '/' })
-      .catch((error) => console.error('Service Worker registration failed:', error));
-
-    // Only reload if a service worker was already controlling the page
-    if (navigator.serviceWorker.controller) {
-      navigator.serviceWorker.addEventListener('controllerchange', () => {
-        toast.success('New version available! Refreshing...');
-        setTimeout(() => window.location.reload(), 1000);
-      });
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker
+        .register("/sw.js", { scope: "/" })
+        .then((registration) => {
+          // Listen for new updates
+          registration.addEventListener("updatefound", () => {
+            const newSW = registration.installing;
+            if (newSW) {
+              newSW.addEventListener("statechange", () => {
+                if (newSW.state === "installed" && navigator.serviceWorker.controller) {
+                  setWaitingServiceWorker(newSW);
+                  setUpdateAvailable(true);
+                }
+              });
+            }
+          });
+        })
+        .catch((error) =>
+          console.error("Service Worker registration failed:", error)
+        );
     }
-  }
-}, []);
+  }, []);
+
+  const handleUpdate = () => {
+    if (waitingServiceWorker) {
+      waitingServiceWorker.postMessage({ type: "SKIP_WAITING" });
+      setUpdateAvailable(false);
+      toast.success("Updating to the latest version...");
+      setTimeout(() => window.location.reload());
+    }
+  };
 
 
   return (
@@ -157,8 +179,9 @@ function App() {
                 <MusicProvider>
                   <Router>
                     <ErrorBoundary>
-                      <AppContent />
-                    </ErrorBoundary>
+                    <AppContent />
+                    {updateAvailable && <UpdateDialog onUpdate={handleUpdate} />}
+                  </ErrorBoundary>
                   </Router>
                 </MusicProvider>
               </LockProvider>
