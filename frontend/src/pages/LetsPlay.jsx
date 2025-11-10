@@ -276,6 +276,7 @@ function LetsPlay() {
               onStatusUpdate={handleStatusUpdate}
               onEdit={handleUpdatePlayer}
               onDelete={handlePlayerDelete}
+              isPrivilegedUser={isPrivilegedUser}
             />
           ) : (
             <div className="text-center text-gray-500 text-g">

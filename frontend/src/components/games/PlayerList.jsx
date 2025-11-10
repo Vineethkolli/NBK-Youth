@@ -9,7 +9,8 @@ function PlayerList({
   onTimeUpdate, 
   onStatusUpdate, 
   onEdit,
-  onDelete 
+  onDelete,
+  isPrivilegedUser
 }) {
   const [modalPlayerId, setModalPlayerId] = useState(null);
   const [modalInitialName, setModalInitialName] = useState('');
@@ -121,27 +122,29 @@ function PlayerList({
 
             <div className="flex items-center space-x-2">
               {timerRequired ? (
-                <button
-                  onClick={() => onTimeUpdate(player)}
-                  className="text-gray-600 hover:text-gray-800"
-                  disabled={deletingId === player._id}
-                >
-                  <Clock className="h-5 w-5" />
-                </button>
-              ) : (
-                <select
-                  value={player.status || ''}
-                  onChange={(e) => onStatusUpdate(player._id, e.target.value)}
-                  className="form-select text-sm"
-                  disabled={deletingId === player._id}
-                >
-                  <option value="">Select Status</option>
-                  <option value="eliminated">Eliminated</option>
-                  <option value="winner-1st">Winner (1st)</option>
-                  <option value="winner-2nd">Winner (2nd)</option>
-                  <option value="winner-3rd">Winner (3rd)</option>
-                </select>
-              )}
+  <button
+    onClick={() => onTimeUpdate(player)}
+    className="text-gray-600 hover:text-gray-800"
+    disabled={deletingId === player._id}
+  >
+    <Clock className="h-5 w-5" />
+  </button>
+) : (
+  isPrivilegedUser && (
+    <select
+      value={player.status || ''}
+      onChange={(e) => onStatusUpdate(player._id, e.target.value)}
+      className="form-select text-sm"
+      disabled={deletingId === player._id}
+    >
+      <option value="">Select Status</option>
+      <option value="eliminated">Eliminated</option>
+      <option value="winner-1st">Winner (1st)</option>
+      <option value="winner-2nd">Winner (2nd)</option>
+      <option value="winner-3rd">Winner (3rd)</option>
+    </select>
+  )
+)}
 
               {isEditMode && (
                 <>

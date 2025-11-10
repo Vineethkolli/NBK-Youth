@@ -115,7 +115,7 @@ function TechStack() {
         <div className="md:w-1/2 text-center mt-6 md:mt-0">
           <div className="relative inline-block">
             <img
-              src="developerImage.png"
+              src="/developerImage.png"
               alt="Developer"
               className="mx-auto rounded-full border-4 border-indigo-500 shadow-lg transform transition duration-500 hover:scale-105"
             />
