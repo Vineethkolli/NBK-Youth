@@ -1,6 +1,5 @@
 import Moment from '../models/Moment.js';
 import { logActivity } from '../middleware/activityLogger.js';
-import { invalidate } from "../middleware/cache.js";
 import { drive, extractFileIdFromUrl, extractFolderIdFromUrl, createSubfolder, getFilesFromFolder } from '../utils/driveUtils.js';
 import { google } from 'googleapis';
 
@@ -27,8 +26,6 @@ export const galleryController = {
       );
 
       const updatedMoment = await Moment.findById(momentId);
-
-      await invalidate('moments:*');
       res.json({ message: 'Gallery order updated successfully', moment: updatedMoment });
     } catch (error) {
       res.status(500).json({ message: 'Failed to update gallery order' });
@@ -89,8 +86,6 @@ export const galleryController = {
 
       await logActivity(req, 'UPDATE', 'Moment', momentId, before, `${mediaFiles.length} new gallery files added to moment "${moment.title}" by ${req.user.name}`);
       const updated = await Moment.findById(momentId);
-
-      await invalidate('moments:*');
       res.json({ message: 'Gallery upload completed', moment: updated });
     } catch (err) {
       res.status(500).json({ message: 'Failed to complete gallery upload', error: err.message });
@@ -187,7 +182,6 @@ export const galleryController = {
       );
 
       const updatedMoment = await Moment.findById(momentId);
-      await invalidate('moments:*');
       res.status(201).json(updatedMoment);
     } catch (error) {
       res.status(500).json({ message: 'Failed to copy and add Drive media to moment', error: error.message });
@@ -234,7 +228,6 @@ export const galleryController = {
       );
 
       const updatedMoment = await Moment.findById(req.params.momentId);
-      await invalidate('moments:*');
       res.json({ message: 'Gallery file deleted successfully', moment: updatedMoment });
     } catch (error) {
       res.status(500).json({ message: 'Failed to delete gallery file', error: error.message });

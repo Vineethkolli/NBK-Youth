@@ -1,6 +1,5 @@
 import Moment from '../models/Moment.js';
 import { logActivity } from '../middleware/activityLogger.js';
-import { invalidate } from "../middleware/cache.js";
 import { drive, extractFileIdFromUrl, extractFolderIdFromUrl, createSubfolder, getFilesFromFolder } from '../utils/driveUtils.js';
 import { google } from 'googleapis';
 
@@ -38,7 +37,6 @@ export const momentController = {
         `YouTube moment "${title}" added by ${req.user.name}`
       );
 
-      await invalidate('moments:*');
       res.status(201).json(moment);
     } catch (error) {
       res.status(500).json({ message: 'Failed to add YouTube moment', error: error.message });
@@ -120,7 +118,6 @@ export const momentController = {
           : `Drive file moment "${title}" added by ${req.user.name}`
       );
 
-      await invalidate('moments:*');
       res.status(201).json(moment);
     } catch (error) {
       console.error('Error adding Drive moment:', error);
@@ -171,7 +168,6 @@ export const momentController = {
         `Drive folder moment "${moment.title}" synced by ${req.user.name}`
       );
 
-      await invalidate('moments:*');
       res.json({ message: 'Drive folder synced successfully', moment });
     } catch (error) {
       console.error('Error syncing Drive moment:', error);
@@ -234,7 +230,7 @@ export const momentController = {
       }
 
       await moment.save();
-      await invalidate('moments:*');
+
       await logActivity(
         req,
         'UPDATE',
@@ -336,7 +332,6 @@ export const momentController = {
         `Drive moment "${title}" with ${filesToProcess.length} files copied and added by ${req.user.name}`
       );
 
-      await invalidate('moments:*');
       res.status(201).json(moment);
     } catch (error) {
       res.status(500).json({ message: 'Failed to copy and add drive moment', error: error.message });
@@ -364,7 +359,6 @@ export const momentController = {
         `Moment order updated by ${req.user.name}`
       );
 
-      await invalidate('moments:*');
       res.json({ message: 'Moment order updated successfully', moments: updatedMoments });
     } catch (error) {
       res.status(500).json({ message: 'Failed to update moment order' });
@@ -398,7 +392,6 @@ export const momentController = {
         `Moment title updated to "${title}" by ${req.user.name}`
       );
 
-      await invalidate('moments:*');
       res.json({ message: 'Moment title updated successfully', moment });
     } catch (error) {
       res.status(500).json({ message: 'Failed to update moment title', error: error.message });
@@ -450,7 +443,6 @@ export const momentController = {
 
       await Moment.findByIdAndDelete(req.params.id);
 
-      await invalidate('moments:*');
       res.json({ message: 'Moment deleted successfully' });
     } catch (error) {
       res.status(500).json({ message: 'Failed to delete moment', error: error.message });

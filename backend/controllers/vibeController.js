@@ -1,7 +1,6 @@
 import Collection from '../models/Vibe.js';
 import cloudinary from '../config/cloudinary.js';
 import { logActivity } from '../middleware/activityLogger.js';
-import { invalidate } from '../middleware/cache.js';
 
 const extractPublicId = (url) => {
   const parts = url.split('/');
@@ -45,7 +44,7 @@ const VibeController = {
       { before: null, after: collection.toObject() },
       `Collection "${collection.name}" created by ${req.user.name}`
     );
-    await invalidate('vibe:*');
+
     res.status(201).json(collection);
   } catch (error) {
     res.status(500).json({ message: 'Failed to create collection' });
@@ -89,7 +88,6 @@ const VibeController = {
       `Collection "${collection.name}" updated by ${req.user.name}`
     );
 
-    await invalidate('vibe:*');
     res.json(collection);
   } catch (error) {
     res.status(500).json({ message: 'Failed to update collection' });
@@ -122,7 +120,6 @@ const VibeController = {
       );
 
       await Collection.findByIdAndDelete(req.params.id);
-      await invalidate('vibe:*');
       res.json({ message: 'Collection deleted successfully' });
     } catch (error) {
       res.status(500).json({ message: 'Failed to delete collection' });
@@ -149,7 +146,6 @@ const VibeController = {
       });
 
       await collection.save();
-      await invalidate('vibe:*');
       res.status(201).json(collection);
       
       await logActivity(
@@ -160,6 +156,7 @@ const VibeController = {
         { before: null, after: { songName: req.body.name } },
         `Song "${req.body.name}" uploaded to collection "${collection.name}" by ${req.user.name}`
       );
+
     } catch (error) {
       res.status(500).json({ message: 'Failed to upload song' });
     }
@@ -197,7 +194,6 @@ uploadMultipleSongs: async (req, res) => {
     // Add all songs to collection
     collection.songs.push(...songsWithRegisterId);
     await collection.save();
-    await invalidate('vibe:*');
 
     // Log activity for bulk upload
     const songNames = songs.map(song => song.name).join(', ');
@@ -240,7 +236,6 @@ uploadMultipleSongs: async (req, res) => {
 
       song.name = req.body.name;
       await collection.save();
-      await invalidate('vibe:*');
       res.json(collection);
     } catch (error) {
       res.status(500).json({ message: 'Failed to update song' });
@@ -278,7 +273,6 @@ uploadMultipleSongs: async (req, res) => {
       // Remove from database
       collection.songs.pull(req.params.songId);
       await collection.save();
-      await invalidate('vibe:*');
       res.json({ message: 'Song deleted successfully' });
     } catch (error) {
       res.status(500).json({ message: 'Failed to delete song' });
