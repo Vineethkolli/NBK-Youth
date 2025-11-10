@@ -1,11 +1,12 @@
 import express from 'express';
 import { auth, checkRole } from '../middleware/auth.js';
+import { cache } from '../middleware/cache.js';
 import VibeController from '../controllers/vibeController.js';
 
 const router = express.Router();
 
 // collections routes
-router.get('/', VibeController.getAllCollections);
+router.get('/', cache('vibe:allCollections'), VibeController.getAllCollections);
 router.post('/', auth, checkRole(['developer', 'financier', 'admin']), VibeController.createCollection);
 router.put('/:id', auth, checkRole(['developer', 'financier', 'admin']), VibeController.updateCollection);
 router.delete('/:id', auth, checkRole(['developer', 'financier', 'admin']), VibeController.deleteCollection);

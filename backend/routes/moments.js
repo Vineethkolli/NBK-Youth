@@ -1,5 +1,6 @@
 import express from 'express';
 import { auth, checkRole } from '../middleware/auth.js';
+import { cache } from '../middleware/cache.js';
 import { momentController } from '../controllers/momentController.js';
 import { galleryController } from '../controllers/momentGalleryController.js'; 
 
@@ -7,7 +8,7 @@ const router = express.Router();
 const authRoles = ['developer', 'admin', 'financier'];
 
 // Moment Routes
-router.get('/', momentController.getAllMoments);
+router.get('/', cache('moments:allMoments'), momentController.getAllMoments);
 router.post('/youtube', auth, checkRole(authRoles), momentController.addYouTubeMoment);
 router.post('/drive', auth, checkRole(authRoles), momentController.addDriveMoment);
 

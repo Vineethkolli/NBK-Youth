@@ -40,6 +40,7 @@ import monitorRoutes from './routes/monitor.js';
 import authLogRoutes from './routes/authLog.js';
 import { processDueNotifications } from './controllers/scheduledNotificationController.js';
 import { createDefaultDeveloper } from './utils/setupDefaults.js';
+import redis from './utils/redisClient.js'; 
 
 dotenv.config({ quiet: true });
 const app = express();
@@ -119,6 +120,9 @@ mongoose.connect(process.env.MONGODB_URI)
     console.error('MongoDB connection error:', err);
     process.exit(1); 
   });
+
+// Redis Connection
+redis.on("error", (err) => console.error("Redis connection error:", err));
 
 // Notification Scheduler runs at 7:00, 7:15, 7:35, 7:55 AM IST IST every day
 cron.schedule('0,15,35,55 7 * * *', async () => {
