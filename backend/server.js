@@ -6,8 +6,6 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import webpush from 'web-push';
 import cron from 'node-cron';
-import helmet from 'helmet';
-import compression from 'compression';
 
 import authRoutes from './routes/auth.js';
 import userRoutes from './routes/users.js';
@@ -67,8 +65,6 @@ webpush.setVapidDetails( 'mailto:gangavaramnbkyouth@gmail.com',
 
 // Middleware
 app.use(cors({ origin: process.env.FRONTEND_URL, credentials: true }));
-app.use(helmet());
-app.use(compression());
 
 app.use(express.json({ limit: '10mb' }));      
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
