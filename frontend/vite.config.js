@@ -7,7 +7,6 @@ export default defineConfig({
   plugins: [
     react(),
 
-    // Compression
     viteCompression({
       algorithm: 'brotliCompress',
       ext: '.br',
@@ -15,7 +14,6 @@ export default defineConfig({
       compressionOptions: { level: 11 },
     }),
 
-    // Progressive Web App setup
     VitePWA({
       strategies: 'injectManifest',
       srcDir: 'src',
@@ -50,7 +48,6 @@ export default defineConfig({
     }),
   ],
 
-  // Build optimization
   build: {
     sourcemap: false,
     minify: 'esbuild',
