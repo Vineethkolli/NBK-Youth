@@ -5,7 +5,6 @@ import { paymentDetailsController } from '../controllers/paymentDetailsControlle
 const router = express.Router();
 
 router.get('/', paymentDetailsController.getPaymentDetails);
-
-router.put('/', auth, checkRole(['developer', 'financier', 'admin']), paymentDetailsController.updatePaymentDetails);
+router.put('/', auth, checkRole('Privileged'), paymentDetailsController.updatePaymentDetails);
 
 export default router;

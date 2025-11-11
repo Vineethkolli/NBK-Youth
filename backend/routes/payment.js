@@ -7,12 +7,12 @@ const router = express.Router();
 router.get('/', PaymentController.getAllPayments);
 router.get('/:paymentId', PaymentController.getPaymentById);
 
-router.get('/verification/data', auth, checkRole(['developer', 'financier']), PaymentController.getVerificationData);
+router.get('/verification/data', auth, checkRole('Pro'), PaymentController.getVerificationData);
 
 router.post('/', PaymentController.createPayment);
 
-router.put('/:id', auth, checkRole(['developer', 'financier']), PaymentController.updatePayment);
-router.patch('/:id/verify', auth, checkRole(['developer', 'financier']), PaymentController.updateVerificationStatus);
+router.put('/:id', auth, checkRole('Pro'), PaymentController.updatePayment);
+router.patch('/:id/verify', auth, checkRole('Pro'), PaymentController.updateVerificationStatus);
 
 router.delete('/:paymentId', PaymentController.deletePayment);
 

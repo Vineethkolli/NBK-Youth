@@ -5,7 +5,6 @@ import { lockSettingsController } from '../controllers/lockSettingsController.js
 const router = express.Router();
 
 router.get('/', lockSettingsController.getLockStatus);
-
-router.post('/toggle',  auth,  checkRole(['developer']), lockSettingsController.toggleLockStatus);
+router.post('/toggle', auth, checkRole('Developer'), lockSettingsController.toggleLockStatus);
 
 export default router;

@@ -4,6 +4,6 @@ import { developerController } from '../controllers/developerController.js';
 
 const router = express.Router();
 
-router.delete('/clear/:type',  auth, checkRole(['developer']), developerController.clearData);
+router.delete('/clear/:type', auth, checkRole('Developer'), developerController.clearData);
 
 export default router;

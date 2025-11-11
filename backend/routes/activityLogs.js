@@ -4,7 +4,7 @@ import { activityLogController } from '../controllers/activityLogController.js';
 
 const router = express.Router();
 
-router.get('/', auth, checkRole(['developer']), activityLogController.getAllLogs);
-router.get('/stats', auth, checkRole(['developer']), activityLogController.getLogStats);
+router.get('/', auth, checkRole('Developer'), activityLogController.getAllLogs);
+router.get('/stats', auth, checkRole('Developer'), activityLogController.getLogStats);
 
 export default router;

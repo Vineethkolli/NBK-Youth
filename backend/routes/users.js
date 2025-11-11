@@ -5,12 +5,11 @@ import { getAllUsers, updateUserCategory, updateUserRole, updateUserProfile,
 
 const router = express.Router();
 
+router.get('/', auth, checkRole('Privileged'), getAllUsers);
+router.patch('/:userId/category', auth, checkRole('Privileged'), updateUserCategory);
+router.patch('/:userId/role', auth, checkRole('Privileged'), updateUserRole);
 
-router.get('/', auth, checkRole(['developer', 'financier', 'admin']), getAllUsers);
-router.patch('/:userId/category', auth, checkRole(['developer', 'financier', 'admin']), updateUserCategory);
-router.patch('/:userId/role', auth, checkRole(['developer', 'financier', 'admin']), updateUserRole);
-
-router.patch('/:userId', auth, checkRole(['developer']), updateUserProfile);
-router.delete('/:userId', auth, checkRole(['developer']), deleteUser);
+router.patch('/:userId', auth, checkRole('Developer'), updateUserProfile);
+router.delete('/:userId', auth, checkRole('Developer'), deleteUser);
 
 export default router;

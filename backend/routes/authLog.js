@@ -4,6 +4,6 @@ import { authLogController } from '../controllers/authLogController.js';
 
 const router = express.Router();
 
-router.get('/', auth, checkRole(['developer']), authLogController.getAll);
+router.get('/', auth, checkRole(['Developer']), authLogController.getAll);
 
 export default router;

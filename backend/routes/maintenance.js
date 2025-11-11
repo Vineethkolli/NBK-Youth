@@ -5,6 +5,6 @@ import { maintenanceController } from '../controllers/maintenanceController.js';
 const router = express.Router();
 
 router.get('/status', maintenanceController.getStatus);
-router.post('/toggle', auth, checkRole(['developer', 'financier', 'admin']), maintenanceController.toggleMode);
+router.post('/toggle', auth, checkRole('Privileged'), maintenanceController.toggleMode);
 
 export default router;

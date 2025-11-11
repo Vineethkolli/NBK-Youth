@@ -5,8 +5,8 @@ import { committeeController } from '../controllers/committeeController.js';
 const router = express.Router();
 
 router.get('/', committeeController.getAllMembers);
-router.post('/', auth, checkRole(['developer', 'financier', 'admin']), committeeController.addMember);
-router.put('/order', auth, checkRole(['developer', 'financier', 'admin']), committeeController.updateOrder);
-router.delete('/:id', auth, checkRole(['developer', 'financier', 'admin']), committeeController.removeMember);
+router.post('/', auth, checkRole('Privileged'), committeeController.addMember);
+router.put('/order', auth, checkRole('Privileged'), committeeController.updateOrder);
+router.delete('/:id', auth, checkRole('Privileged'), committeeController.removeMember);
 
 export default router;

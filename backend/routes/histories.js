@@ -5,7 +5,7 @@ import { historyController } from '../controllers/historyController.js';
 const router = express.Router();
 
 router.get('/', historyController.getAllHistories);
-router.post('/', auth, checkRole(['developer']), historyController.createHistory);
-router.delete('/:id', auth, checkRole(['developer']), historyController.deleteHistory);
+router.post('/', auth, checkRole('Developer'), historyController.createHistory);
+router.delete('/:id', auth, checkRole('Developer'), historyController.deleteHistory);
 
 export default router;

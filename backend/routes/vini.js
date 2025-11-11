@@ -5,11 +5,11 @@ import { viniController } from '../controllers/viniController.js';
 const router = express.Router();
 
 // Processed Records routes
-router.get('/processed-records', auth, checkRole(['developer']), viniController.getAllProcessedRecords);
-router.post('/processed-records', auth, checkRole(['developer']), viniController.createProcessedRecord);
-router.post('/process-record/:id', auth, checkRole(['developer']), viniController.processRecord);
-router.post('/reprocess-record/:id', auth, checkRole(['developer']), viniController.reprocessRecord);
-router.delete('/processed-records/:id', auth, checkRole(['developer']), viniController.deleteProcessedRecord);
+router.get('/processed-records', auth, checkRole('Developer'), viniController.getAllProcessedRecords);
+router.post('/processed-records', auth, checkRole('Developer'), viniController.createProcessedRecord);
+router.post('/process-record/:id', auth, checkRole('Developer'), viniController.processRecord);
+router.post('/reprocess-record/:id', auth, checkRole('Developer'), viniController.reprocessRecord);
+router.delete('/processed-records/:id', auth, checkRole('Developer'), viniController.deleteProcessedRecord);
 
 // VINI routes
 router.post('/chat', auth, viniController.chatWithVini);

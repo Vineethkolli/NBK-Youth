@@ -5,6 +5,6 @@ import { hiddenProfileController } from '../controllers/hiddenProfileController.
 const router = express.Router();
 
 router.get('/', auth, hiddenProfileController.getHiddenProfiles);
-router.post('/toggle', auth, checkRole(['developer', 'financier', 'admin']), hiddenProfileController.toggleHiddenProfile);
+router.post('/toggle', auth, checkRole('Privileged'), hiddenProfileController.toggleHiddenProfile);
 
 export default router;
