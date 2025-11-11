@@ -20,6 +20,11 @@ export default defineConfig({
       filename: 'sw.js',
       registerType: 'autoUpdate',
 
+      includeAssets: [
+        '/logo/*.png',
+        'developerImage.png' 
+      ],
+      
       manifest: {
         name: 'NBK Youth',
         short_name: 'NBK Youth',
