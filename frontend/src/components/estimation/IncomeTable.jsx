@@ -16,6 +16,14 @@ function EstimatedIncomeTable({ incomes, visibleColumns, onEdit, onDelete }) {
     }
   };
 
+  if (incomes.length === 0) {
+    return (
+      <div>
+        <h3 className="text-gray-500 text-center py-4">No estimated incomes found</h3>
+      </div>
+    );
+  }
+
   return (
     <div className="overflow-x-auto">
       <table className="min-w-full divide-y divide-gray-200">

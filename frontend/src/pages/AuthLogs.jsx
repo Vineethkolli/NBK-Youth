@@ -54,7 +54,7 @@ function AuthLogs() {
           onClick={() => setShowLatest(!showLatest)}
           className={`flex items-center px-3 py-2 rounded-lg border text-sm font-medium transition ${
             showLatest
-              ? 'bg-blue-600 text-white border-blue-600'
+              ? 'bg-indigo-600 text-white'
               : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'
           }`}
         >
