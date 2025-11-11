@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import axios from 'axios';
 import { API_URL } from '../utils/config';
 import { getDeviceInfo } from '../utils/deviceInfo';
@@ -11,6 +11,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Load user profile if token exists
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
@@ -87,24 +88,30 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Unified role checker
-  const hasAccess = (group) => {
-    const role = user?.role;
-    if (!role) return false;
-    if (group === 'All') return true;
+  const hasAccess = useCallback(
+    (group) => {
+      const role = user?.role;
+      if (!role) return false;
+      if (group === 'All') return true;
 
-    const allowed = Access[group];
-    return Array.isArray(allowed) && allowed.includes(role);
-  };
+      const allowed = Access[group];
+      return Array.isArray(allowed) && allowed.includes(role);
+    },
+    [user?.role]
+  );
 
-  const value = {
-    user,
-    loading,
-    signin,
-    signup,
-    signout,
-    updateUserData,
-    hasAccess,
-  };
+  const value = useMemo(
+    () => ({
+      user,
+      loading,
+      signin,
+      signup,
+      signout,
+      updateUserData,
+      hasAccess,
+    }),
+    [user, loading, signin, signup, signout, updateUserData, hasAccess]
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

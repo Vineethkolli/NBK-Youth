@@ -113,7 +113,7 @@ export const sendSignupEmail = async (email, name) => {
                   <td align="center" class="footer" style="background-color:#edf2f7;padding:20px;">
                     <p style="margin:0;color:#718096;font-size:13px;line-height:1.6;">
                       © 2024 Developed by <b>Kolli Vineeth</b><br>
-                      Stay proud. Stay connected...
+                      Stay active. Stay connected...
                     </p>
                   </td>
                 </tr>
