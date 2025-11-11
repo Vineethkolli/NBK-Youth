@@ -15,7 +15,7 @@ import LockIndicator from '../components/common/LockIndicator';
 import { useLockSettings } from '../context/LockContext';
 
 function Income() {
-  const { user, hasAccess } = useAuth();
+  const { hasAccess } = useAuth();
   const { lockSettings } = useLockSettings();
   const [incomes, setIncomes] = useState([]);
   const [search, setSearch] = useState('');

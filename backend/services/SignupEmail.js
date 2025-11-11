@@ -21,11 +21,7 @@ export const sendSignupEmail = async (email, name) => {
     const subject = 'Welcome to NBK Youth 🎉';
 
     const baseUrl = process.env.FRONTEND_URL;
-<<<<<<< HEAD
     const logoUrl = `${baseUrl}/logo/192.png`;
-=======
-    const logoUrl = ``;
->>>>>>> de31f5a (Roles access erro corrected)
 
     const html = `
       <!DOCTYPE html>

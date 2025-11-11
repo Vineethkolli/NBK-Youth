@@ -15,7 +15,7 @@ import LockIndicator from '../components/common/LockIndicator';
 import { useLockSettings } from '../context/LockContext';
 
 function Expense() {
-  const { user, hasAccess } = useAuth();
+  const { hasAccess } = useAuth();
   const { lockSettings } = useLockSettings();
   const [expenses, setExpenses] = useState([]);
   const [search, setSearch] = useState('');
@@ -169,7 +169,6 @@ function Expense() {
           visibleColumns={visibleColumns}
           onEdit={handleEdit}
           onDelete={handleDelete}
-          userRole={user?.role}
           isLocked={lockSettings.isLocked}
         />
       </div>
