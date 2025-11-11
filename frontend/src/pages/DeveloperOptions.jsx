@@ -9,13 +9,11 @@ import { toast } from 'react-hot-toast';
 import { API_URL } from '../utils/config';
 
 function DeveloperOptions() {
-  const { user } = useAuth();
+  const {hasAccess} = useAuth();
   const [isResetting, setIsResetting] = useState(false);
-
-  if (user?.role !== 'developer') {
-    return (
-      <div>Access denied</div>
-    );
+  
+  if (!hasAccess('Developer')) {
+    return <div className="text-center mt-10 text-red-500 font-semibold">Access denied</div>;
   }
 
   const handleResetRoles = async () => {

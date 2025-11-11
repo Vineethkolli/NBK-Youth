@@ -3,21 +3,22 @@ import { Eye, EyeOff, Edit2, Trash2, Loader2 } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa';
 import { useHiddenProfiles } from '../../context/HiddenProfileContext';
 import { formatDateTime } from '../../utils/dateTime';
+import { useAuth } from '../../context/AuthContext';
 
 function IncomeTable({
   incomes,
   visibleColumns,
   onEdit,
   onDelete,
-  isPrivilegedUser,
   isLocked = false,
 }) {
+  const { hasAccess } = useAuth();
   const { hiddenProfiles, toggleProfileHidden } = useHiddenProfiles();
   const [deletingId, setDeletingId] = useState(null);
   const [togglingHiddenId, setTogglingHiddenId] = useState(null);
 
   const handleToggleHidden = async (incomeId) => {
-    if (!isPrivilegedUser || isLocked) return;
+    if (!hasAccess('Privileged') || isLocked) return;
     try {
       setTogglingHiddenId(incomeId);
       await toggleProfileHidden(incomeId);
@@ -63,21 +64,45 @@ function IncomeTable({
         <thead className="bg-gray-50">
           <tr>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">S.No</th>
-            {isPrivilegedUser && visibleColumns.registerId && (
+            {hasAccess('Privileged') && visibleColumns.registerId && (
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Register ID</th>
             )}
-            {visibleColumns.incomeId && <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Income ID</th>}
-            {visibleColumns.entryDate && <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Entry Date</th>}
-            {visibleColumns.paidDate && <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Paid Date</th>}
-            {visibleColumns.name && <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>}
-            {isPrivilegedUser && visibleColumns.email && <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>}
-            {isPrivilegedUser && visibleColumns.phoneNumber && <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Phone Number</th>}
-            {visibleColumns.amount && <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>}
-            {visibleColumns.status && <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>}
-            {visibleColumns.paymentMode && <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Payment Mode</th>}
-            {visibleColumns.belongsTo && <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Belongs To</th>}
-            {visibleColumns.verifyLog && <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Verify Log</th>}
-            {isPrivilegedUser && <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>}
+            {visibleColumns.incomeId && (
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Income ID</th>
+            )}
+            {visibleColumns.entryDate && (
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Entry Date</th>
+            )}
+            {visibleColumns.paidDate && (
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Paid Date</th>
+            )}
+            {visibleColumns.name && (
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
+            )}
+            {hasAccess('Privileged') && visibleColumns.email && (
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+            )}
+            {hasAccess('Privileged') && visibleColumns.phoneNumber && (
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Phone Number</th>
+            )}
+            {visibleColumns.amount && (
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
+            )}
+            {visibleColumns.status && (
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+            )}
+            {visibleColumns.paymentMode && (
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Payment Mode</th>
+            )}
+            {visibleColumns.belongsTo && (
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Belongs To</th>
+            )}
+            {visibleColumns.verifyLog && (
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Verify Log</th>
+            )}
+            {hasAccess('Privileged') && (
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+            )}
           </tr>
         </thead>
 
@@ -87,19 +112,34 @@ function IncomeTable({
             return (
               <tr key={income._id}>
                 <td className="px-6 py-4 whitespace-nowrap text-sm">{index + 1}</td>
-                {isPrivilegedUser && visibleColumns.registerId && (
+
+                {hasAccess('Privileged') && visibleColumns.registerId && (
                   <td className="px-6 py-4 whitespace-nowrap text-sm">{income.registerId}</td>
                 )}
-                {visibleColumns.incomeId && <td className="px-6 py-4 whitespace-nowrap text-sm">{income.incomeId}</td>}
-                {visibleColumns.entryDate && <td className="px-6 py-4 whitespace-nowrap text-sm">{formatDateTime(income.createdAt)}</td>}
-                {visibleColumns.paidDate && <td className="px-6 py-4 whitespace-nowrap text-sm">{income.paidDate ? formatDateTime(income.paidDate) : '-'}</td>}
-                {visibleColumns.name && <td className="px-6 py-4 whitespace-nowrap text-sm">{isHidden ? 'Donor' : income.name}</td>}
 
-                {isPrivilegedUser && visibleColumns.email && (
+                {visibleColumns.incomeId && (
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">{income.incomeId}</td>
+                )}
+
+                {visibleColumns.entryDate && (
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">{formatDateTime(income.createdAt)}</td>
+                )}
+
+                {visibleColumns.paidDate && (
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    {income.paidDate ? formatDateTime(income.paidDate) : '-'}
+                  </td>
+                )}
+
+                {visibleColumns.name && (
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">{isHidden ? 'Donor' : income.name}</td>
+                )}
+
+                {hasAccess('Privileged') && visibleColumns.email && (
                   <td className="px-6 py-4 whitespace-nowrap text-sm">{isHidden ? 'Donor' : income.email}</td>
                 )}
 
-                {isPrivilegedUser && visibleColumns.phoneNumber && (
+                {hasAccess('Privileged') && visibleColumns.phoneNumber && (
                   <td className="px-6 py-4 whitespace-nowrap text-sm flex items-center space-x-2">
                     {isHidden ? (
                       <span className="text-gray-500">Donor</span>
@@ -110,9 +150,17 @@ function IncomeTable({
                           onClick={() => income.phoneNumber && sendWhatsAppMessage(income)}
                           disabled={!income.phoneNumber || isLocked}
                           className={`${getWhatsAppIconColor(income)} ${
-                            (!income.phoneNumber || isLocked) ? 'opacity-50 cursor-not-allowed' : ''
+                            (!income.phoneNumber || isLocked)
+                              ? 'opacity-50 cursor-not-allowed'
+                              : ''
                           }`}
-                          title={income.phoneNumber ? (isLocked ? 'Locked' : 'Send WhatsApp') : 'No number'}
+                          title={
+                            income.phoneNumber
+                              ? isLocked
+                                ? 'Locked'
+                                : 'Send WhatsApp'
+                              : 'No number'
+                          }
                         >
                           <FaWhatsapp className="h-5 w-5" />
                         </button>
@@ -121,7 +169,10 @@ function IncomeTable({
                   </td>
                 )}
 
-                {visibleColumns.amount && <td className="px-6 py-4 whitespace-nowrap text-sm">{income.amount}</td>}
+                {visibleColumns.amount && (
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">{income.amount}</td>
+                )}
+
                 {visibleColumns.status && (
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span
@@ -135,8 +186,15 @@ function IncomeTable({
                     </span>
                   </td>
                 )}
-                {visibleColumns.paymentMode && <td className="px-6 py-4 whitespace-nowrap text-sm">{income.paymentMode}</td>}
-                {visibleColumns.belongsTo && <td className="px-6 py-4 whitespace-nowrap text-sm">{income.belongsTo}</td>}
+
+                {visibleColumns.paymentMode && (
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">{income.paymentMode}</td>
+                )}
+
+                {visibleColumns.belongsTo && (
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">{income.belongsTo}</td>
+                )}
+
                 {visibleColumns.verifyLog && (
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span
@@ -153,7 +211,7 @@ function IncomeTable({
                   </td>
                 )}
 
-                {isPrivilegedUser && (
+                {hasAccess('Privileged') && (
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     <div className="flex space-x-2">
                       <button
@@ -188,7 +246,9 @@ function IncomeTable({
                         onClick={() => handleDelete(income._id)}
                         disabled={isLocked || deletingId === income._id}
                         className={`text-red-600 ${
-                          isLocked ? 'opacity-50 cursor-not-allowed' : 'hover:text-red-900'
+                          isLocked || deletingId === income._id
+                            ? 'opacity-50 cursor-not-allowed'
+                            : 'hover:text-red-900'
                         }`}
                         title={isLocked ? 'Locked' : 'Delete'}
                       >

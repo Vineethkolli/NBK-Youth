@@ -11,7 +11,7 @@ import LogPrint from '../components/activityLogs/LogPrint';
 import LogStatsPrint from '../components/activityLogs/LogStatsPrint';
 
 function ActivityLogs() {
-  const { user } = useAuth();
+  const { hasAccess } = useAuth();
   const [logs, setLogs] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -22,17 +22,19 @@ function ActivityLogs() {
     entityType: '',
     registerId: '',
     startDate: '',
-    endDate: ''
+    endDate: '',
   });
   const [pagination, setPagination] = useState({
     currentPage: 1,
     totalPages: 1,
     totalCount: 0,
     hasNext: false,
-    hasPrev: false
+    hasPrev: false,
   });
 
-  if (!['developer'].includes(user?.role)) return <div>Access denied</div>;
+  if (!hasAccess('Developer')) {
+    return <div className="text-center mt-10 text-red-500 font-semibold">Access denied</div>;
+  }
 
   useEffect(() => {
     if (activeTab === 'logs') {
@@ -40,6 +42,7 @@ function ActivityLogs() {
     } else if (activeTab === 'stats') {
       fetchStats();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab, search, filters, pagination.currentPage]);
 
   const fetchLogs = async () => {
@@ -49,7 +52,7 @@ function ActivityLogs() {
         search,
         page: pagination.currentPage,
         limit: 50,
-        ...filters
+        ...filters,
       });
 
       const { data } = await axios.get(`${API_URL}/api/activity-logs?${params}`);

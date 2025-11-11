@@ -6,18 +6,17 @@ import { useAuth } from '../context/AuthContext';
 import { API_URL } from '../utils/config';
 import UpdateUserForm from '../components/users/UpdateUserForm';
 import DeleteUserConfirm from '../components/users/DeleteUserForm';
-import { parsePhoneNumberFromString } from 'libphonenumber-js'; // ✅ import for formatting
+import { parsePhoneNumberFromString } from 'libphonenumber-js'; 
 
 function Users() {
   const [users, setUsers] = useState([]);
   const [search, setSearch] = useState('');
-  const { user: currentUser } = useAuth();
+  const { hasAccess } = useAuth();
   const [editingUser, setEditingUser] = useState(null);
   const [userToDelete, setUserToDelete] = useState(null);
 
-  if (currentUser.role === 'user') {
-    return <div>Access denied</div>;
-  }
+  if (!hasAccess('Privileged')) 
+    return <div className="text-center mt-10 text-red-500 font-semibold">Access denied</div>;
 
   useEffect(() => {
     fetchUsers();
@@ -54,7 +53,6 @@ function Users() {
     }
   };
 
-  // ✅ Helper: format phone numbers (safe even for invalid ones)
   const formatPhone = (number) => {
     if (!number) return 'N/A';
     try {
@@ -91,7 +89,7 @@ function Users() {
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
                 <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Notifications</th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Language</th>
-                {currentUser.role === 'developer' && (
+                {hasAccess('Developer') && (
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                     Actions
                   </th>
@@ -119,17 +117,17 @@ function Users() {
                     )}
                   </td>
 
-                  {/* 📧 Email */}
+                  {/* Email */}
                   <td className="px-4 py-3 whitespace-nowrap text-sm notranslate">
                     {user.email || 'N/A'}
                   </td>
 
-                  {/* 📞 Formatted phone number */}
+                  {/* Formatted phone number */}
                   <td className="px-4 py-3 whitespace-nowrap text-sm notranslate">
                     {formatPhone(user.phoneNumber)}
                   </td>
 
-                  {/* 🎭 Role */}
+                  {/* Role */}
                   <td className="px-4 py-3 whitespace-nowrap text-sm">
                     <select
                       value={user.role}
@@ -146,7 +144,7 @@ function Users() {
                     </select>
                   </td>
 
-                  {/* 🧩 Category */}
+                  {/* Category */}
                   <td className="px-4 py-3 whitespace-nowrap text-sm">
                     <select
                       value={user.category}
@@ -161,7 +159,7 @@ function Users() {
                     </select>
                   </td>
 
-                  {/* 🔔 Notifications */}
+                  {/* Notifications */}
                   <td className="px-4 py-3 whitespace-nowrap text-center">
                     {user.notificationsEnabled ? (
                       <Bell className="h-5 w-5 text-green-600" title="Notifications Enabled" />
@@ -170,13 +168,13 @@ function Users() {
                     )}
                   </td>
 
-                  {/* 🌐 Language */}
+                  {/* Language */}
                   <td className="px-4 py-3 whitespace-nowrap text-sm">
                     {user.language === 'te' ? 'Telugu' : user.language === 'en' ? 'English' : 'N/A'}
                   </td>
 
-                  {/* ⚙️ Actions */}
-                  {currentUser.role === 'developer' && (
+                  {/* Actions */}
+                  {hasAccess('Developer') && (
                     <td className="px-4 py-3 whitespace-nowrap text-sm space-x-2">
                       <button
                         onClick={() => setEditingUser(user)}
@@ -201,7 +199,7 @@ function Users() {
         </div>
       </div>
 
-      {/* 🧩 Modals */}
+      {/* Modals */}
       {editingUser && (
         <UpdateUserForm
           user={editingUser}

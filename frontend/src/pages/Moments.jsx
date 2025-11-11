@@ -10,7 +10,7 @@ import MomentReorder from '../components/moments/MomentReorder';
 import WatchMore from '../components/moments/WatchMore';
 
 function Moments() {
-  const { user } = useAuth();
+  const { hasAccess } = useAuth();
   const [moments, setMoments] = useState([]);
   const [isEditMode, setIsEditMode] = useState(false);
   const [isReorderMode, setIsReorderMode] = useState(false);
@@ -213,11 +213,10 @@ if (formType === 'drive') {
     setShowForm(true);
   };
 
-  const isPrivilegedUser = ['developer', 'admin', 'financier'].includes(user?.role);
 
   return (
     <div className="max-w-7xl mx-auto sm:px-6 lg:px-0 py-0">
-      {isPrivilegedUser && (
+      {hasAccess('Privileged') && (
         <div className="flex justify-start items-center mb-6 space-x-3">
           <button onClick={() => openForm('youtube')} className="btn-primary">
             <Youtube className="h-4 w-4 mr-2" /> Add YouTube

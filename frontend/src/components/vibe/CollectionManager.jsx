@@ -7,7 +7,8 @@ import { API_URL } from '../../utils/config';
 import { useAuth } from '../../context/AuthContext';
 
 function CollectionManager({ collections, onUpdate, isEditMode, onEditModeToggle, uploadMode, onUploadModeToggle }) {
-  const { user } = useAuth();
+  const { hasAccess } = useAuth();
+
   const [showNewUpload, setShowNewUpload] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -16,8 +17,6 @@ function CollectionManager({ collections, onUpdate, isEditMode, onEditModeToggle
     songs: [], // Array of { name: '', file: null, filePreview: null }
   });
   const [fileInputKey, setFileInputKey] = useState(Date.now());
-
-  const isPrivilegedUser = ['developer', 'financier', 'admin'].includes(user?.role);
 
   const resetForm = () => {
     setFormData({
@@ -161,7 +160,7 @@ function CollectionManager({ collections, onUpdate, isEditMode, onEditModeToggle
   return (
     <div className="space-y-4">
       <div className="flex space-x-4">
-        {isPrivilegedUser && (
+        {hasAccess('Privileged') && (
           <>
             <button
               onClick={() => setShowNewUpload(true)}

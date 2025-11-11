@@ -14,7 +14,7 @@ function ExpenseSection({ refreshStats }) {
   const { language } = useLanguage();
   const PrintComponent = language === 'te' ? ExpenseTeluguPrint : ExpensePrint;
 
-  const { user } = useAuth(); 
+  const { hasAccess, user } = useAuth();
   const [expenses, setExpenses] = useState([]);
   const [search, setSearch] = useState('');
   const [expenseFilters, setExpenseFilters] = useState({
@@ -32,7 +32,7 @@ function ExpenseSection({ refreshStats }) {
   });
 
   useEffect(() => {
-    if (user?.role && ['developer', 'financier', 'admin'].includes(user.role)) {
+    if (hasAccess('Privileged')) {
       setExpenseColumns(prev => ({ ...prev, registerId: false }));
     }
   }, [user?.role]);
@@ -117,7 +117,7 @@ function ExpenseSection({ refreshStats }) {
         </div>
 
         <div className="flex items-center space-x-3">
-          {['developer', 'financier', 'admin'].includes(user?.role) && (
+          {hasAccess('Privileged') && (
             <button onClick={handleAdd} className="btn-secondary flex items-center">
               <Plus className="h-4 w-4 mr-1 inline" />
               Add
@@ -146,7 +146,7 @@ function ExpenseSection({ refreshStats }) {
           <div className="mt-2 flex flex-wrap gap-2">
             {Object.entries(expenseColumns).map(([column, isVisible]) => {
               if (column === 'sno') return null;
-              if (column === 'registerId' && !['developer', 'financier', 'admin'].includes(user?.role)) return null;
+              if (column === 'registerId' && !hasAccess('Privileged')) return null;
               return (
                 <label key={column} className="inline-flex items-center">
                   <input

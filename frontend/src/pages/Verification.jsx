@@ -10,9 +10,11 @@ import LockIndicator from '../components/common/LockIndicator';
 import { IndianRupee, DollarSign, ShieldCheck, Filter } from 'lucide-react';
 
 function Verification() {
-  const { user } = useAuth();
-  const { lockSettings } = useLockSettings();
+  const { hasAccess } = useAuth();
+  if (!hasAccess('Pro')) 
+    return <div className="text-center mt-10 text-red-500 font-semibold">Access denied</div>;
 
+  const { lockSettings } = useLockSettings();
   const [activeTab, setActiveTab] = useState('income');
   const [incomeData, setIncomeData] = useState([]);
   const [expenseData, setExpenseData] = useState([]);
@@ -20,8 +22,6 @@ function Verification() {
   const [filters, setFilters] = useState({
     verifyLog: 'not verified'
   });
-
-  if (!['developer', 'financier'].includes(user?.role)) return <div>Access denied</div>;
 
   useEffect(() => {
     fetchData();

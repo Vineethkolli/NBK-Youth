@@ -11,7 +11,7 @@ import GameCard from '../components/games/GameCard';
 import PlayerList from '../components/games/PlayerList';
 
 function LetsPlay() {
-  const { user } = useAuth();
+  const { hasAccess } = useAuth();
   const [games, setGames] = useState([]);
   const [selectedGame, setSelectedGame] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
@@ -19,8 +19,6 @@ function LetsPlay() {
   const [showPlayerForm, setShowPlayerForm] = useState(false);
   const [showTimeForm, setShowTimeForm] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState(null);
-
-  const isPrivilegedUser = ['developer', 'financier', 'admin'].includes(user?.role);
 
   useEffect(() => {
     fetchGames();
@@ -190,7 +188,7 @@ function LetsPlay() {
         <div>
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-2xl font-semibold">Activities</h1>
-            {isPrivilegedUser && (
+            {hasAccess('Privileged') && (
               <div className="space-x-2">
                 <button
                   onClick={() => setShowGameForm(true)}
@@ -244,7 +242,7 @@ function LetsPlay() {
               </button>
               <h2 className="text-2xl font-semibold">{selectedGame.name}</h2>
             </div>
-            {isPrivilegedUser && (
+            {hasAccess('Privileged') && (
               <div className="space-x-2">
                 <button
                   onClick={() => setShowPlayerForm(true)}
@@ -276,7 +274,6 @@ function LetsPlay() {
               onStatusUpdate={handleStatusUpdate}
               onEdit={handleUpdatePlayer}
               onDelete={handlePlayerDelete}
-              isPrivilegedUser={isPrivilegedUser}
             />
           ) : (
             <div className="text-center text-gray-500 text-g">

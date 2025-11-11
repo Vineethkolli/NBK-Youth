@@ -6,44 +6,44 @@ import { useAuth } from '../context/AuthContext';
 
 function Sidebar({ isOpen, onNavigate }) {
   const location = useLocation();
-  const { user } = useAuth();
+  const { hasAccess } = useAuth();
 
   const links = [
-    { to: '/', icon: Home, label: 'Home' },
-    { to: '/committee', icon: Users, label: 'Committee' },
-    { to: '/moments', icon: CameraIcon, label: 'Moments' },
-    { to: '/vibe', icon: MusicIcon, label: 'Vibe' },
-    { to: '/stats', icon: BarChart2, label: 'Stats' },
-    { to: '/income', icon: IndianRupee, label: 'Income' },
-    { to: '/expense', icon: DollarSign, label: 'Expense' },
-    { to: '/estimation', icon: Calculator, label: 'Estimation' },
-    { to: '/histories', icon: History, label: 'Histories' },
-    { to: '/records', icon: FolderOpen, label: 'Records' },
-    { to: '/profile', icon: User, label: 'Profile' },
-    { to: '/pay-online', icon: ShieldCheck, label: 'Pay Online' },
-    { to: '/notifications', icon: Bell, label: 'Notifications' },
-    { to: '/settings', icon: Settings, label: 'Settings' },
-    { to: '/lets-play', icon: TrophyIcon, label: 'Activities' },
-    { to: '/tech-stack', icon: Layers, label: 'Tech Stack' },
-    ...((['developer', 'financier'].includes(user?.role)) ? [
-      { to: '/verification', icon: CheckSquare, label: 'Verification' }
-    ] : []),
-    ...((['admin', 'developer', 'financier'].includes(user?.role)) ? [
-      { to: '/users', icon: UserCog, label: 'Users & Roles' }
-    ] : []),
-    ...((['admin', 'developer', 'financier'].includes(user?.role)) ? [
-      { to: '/admin-panel', icon: LayoutDashboard, label: 'Admin Panel' }
-    ] : []),
-    ...(([ 'developer', 'financier'].includes(user?.role)) ? [
-      { to: '/recycle-bin', icon: Trash2, label: 'Recycle Bin' }
-    ] : []),
-    ...(['developer'].includes(user?.role) ? [
-        { to: '/developer-options', icon: Terminal, label: 'Developer Options' },
-        { to: '/activity-logs',     icon: FileClock, label: 'Activity Logs' },
-        { to: '/auth-logs',         icon: Fingerprint, label: 'Auth Logs' },
-        { to: '/monitor',     icon: Cpu, label: 'Monitor' }
-      ] : []),
-  ];
+  { to: '/', icon: Home, label: 'Home' },
+  { to: '/committee', icon: Users, label: 'Committee' },
+  { to: '/moments', icon: CameraIcon, label: 'Moments' },
+  { to: '/vibe', icon: MusicIcon, label: 'Vibe' },
+  { to: '/stats', icon: BarChart2, label: 'Stats' },
+  { to: '/income', icon: IndianRupee, label: 'Income' },
+  { to: '/expense', icon: DollarSign, label: 'Expense' },
+  { to: '/estimation', icon: Calculator, label: 'Estimation' },
+  { to: '/histories', icon: History, label: 'Histories' },
+  { to: '/records', icon: FolderOpen, label: 'Records' },
+  { to: '/profile', icon: User, label: 'Profile' },
+  { to: '/pay-online', icon: ShieldCheck, label: 'Pay Online' },
+  { to: '/notifications', icon: Bell, label: 'Notifications' },
+  { to: '/settings', icon: Settings, label: 'Settings' },
+  { to: '/lets-play', icon: TrophyIcon, label: 'Activities' },
+  { to: '/tech-stack', icon: Layers, label: 'Tech Stack' },
+  
+  ...(hasAccess('Pro') ? [
+    { to: '/verification', icon: CheckSquare, label: 'Verification' },
+    { to: '/recycle-bin', icon: Trash2, label: 'Recycle Bin' },
+  ] : []),
+
+  ...(hasAccess('Privileged') ? [
+    { to: '/users', icon: UserCog, label: 'Users & Roles' },
+    { to: '/admin-panel', icon: LayoutDashboard, label: 'Admin Panel' },
+  ] : []),
+
+  ...(hasAccess('Developer') ? [
+    { to: '/developer-options', icon: Terminal, label: 'Developer Options' },
+    { to: '/activity-logs', icon: FileClock, label: 'Activity Logs' },
+    { to: '/auth-logs', icon: Fingerprint, label: 'Auth Logs' },
+    { to: '/monitor', icon: Cpu, label: 'Monitor' },
+  ] : []),
+];
+
 
   const handleClick = () => {
     if (window.innerWidth < 1024) { 

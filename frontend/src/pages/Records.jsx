@@ -10,7 +10,7 @@ import FinancialRecordForm from '../components/records/FinancialRecordForm';
 import EventRecordForm from '../components/records/EventRecordForm';
 
 function Records() {
-  const { user } = useAuth();
+  const { hasAccess } = useAuth();
   const [activeTab, setActiveTab] = useState('timeline');
   const [financialRecords, setFinancialRecords] = useState([]);
   const [eventRecords, setEventRecords] = useState([]);
@@ -22,8 +22,6 @@ function Records() {
   const [showRecordForm, setShowRecordForm] = useState(false);
   const [editingFinancialRecord, setEditingFinancialRecord] = useState(null);
   const [editingEventRecord, setEditingEventRecord] = useState(null);
-
-  const isDeveloper = user?.role === 'developer';
 
   useEffect(() => {
     fetchFinancialRecords();
@@ -218,7 +216,7 @@ function Records() {
               </div>
             </div>
 
-            {isDeveloper && (
+            {hasAccess('Developer') && (
               <div className="flex justify-end space-x-3">
                 <button
                   onClick={() => setShowFinancialForm(true)}
@@ -250,7 +248,7 @@ function Records() {
 
       {activeTab === 'records' && (
         <div className="space-y-6">
-          {isDeveloper && (
+          {hasAccess('Developer') && (
             <div className="flex justify-end space-x-3">
               <button
                 onClick={() => setShowRecordForm(true)}

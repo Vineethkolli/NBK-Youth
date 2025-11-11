@@ -7,9 +7,7 @@ import { toast } from 'react-hot-toast';
 import { API_URL } from '../utils/config';
 
 function Committee() {
-  const { user } = useAuth();
-  const isPrivilegedUser = ['developer', 'financier', 'admin'].includes(user?.role);
-
+  const { hasAccess } = useAuth();
   const [members, setMembers] = useState([]);
   const [localMembers, setLocalMembers] = useState([]);
   const [isEditMode, setIsEditMode] = useState(false);
@@ -111,7 +109,7 @@ function Committee() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-semibold">Committee</h1>
-        {isPrivilegedUser && (
+        {hasAccess('Privileged') && (
           <div className="flex items-center space-x-2">
             <button onClick={() => setShowAddDialog(true)} className="btn-primary">
               <Plus className="h-4 w-4 mr-2" /> Add

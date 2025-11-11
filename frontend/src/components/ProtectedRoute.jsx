@@ -26,7 +26,6 @@ function ProtectedRoute({ children }) {
           @keyframes spin-fast { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
         `}</style>
 
-        {/* rotating gears */}
         <div className="relative flex items-center justify-center mb-10">
           <Settings
             className="w-20 h-20 text-green-600 drop-shadow-lg"

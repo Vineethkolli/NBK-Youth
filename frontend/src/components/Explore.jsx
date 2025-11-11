@@ -6,7 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import Footer from './Footer';
 
 function Explore() {
-  const { user } = useAuth();
+  const { hasAccess } = useAuth();
 
   const groupedPages = [
     {
@@ -46,33 +46,32 @@ function Explore() {
     {
       title: 'Admin Tools',
       icon: LockKeyhole,
-      pages: [
-        ...(['admin', 'developer', 'financier'].includes(user?.role)
-          ? [
-              { to: '/users', icon: UserCog, label: 'Users & Roles' },
-              { to: '/admin-panel', icon: LayoutDashboard, label: 'Admin Panel' },
-            ]
-          : []),
-        ...(['developer', 'financier'].includes(user?.role)
-          ? [{ to: '/verification', icon: CheckSquare, label: 'Verification' }]
-          : []),
-        ...(['developer', 'financier'].includes(user?.role)
-          ? [{ to: '/recycle-bin', icon: Trash2, label: 'Recycle Bin' }]
-          : []),
+      pages: [...(hasAccess('Privileged')
+  ? [
+      { to: '/users', icon: UserCog, label: 'Users & Roles' },
+      { to: '/admin-panel', icon: LayoutDashboard, label: 'Admin Panel' },
+    ]
+  : []),
+...(hasAccess('Pro')
+  ? [
+      { to: '/verification', icon: CheckSquare, label: 'Verification' },
+      { to: '/recycle-bin', icon: Trash2, label: 'Recycle Bin' },
+    ]
+  : []),
       ],
     },
     {
       title: 'Developer Zone',
       icon: Code2,
       pages: [
-        ...(['developer'].includes(user?.role)
-          ? [
-              { to: '/developer-options', icon: Terminal, label: 'Developer Options' },
-              { to: '/activity-logs', icon: FileClock, label: 'Activity Logs' },
-              { to: '/auth-logs', icon: Fingerprint, label: 'Auth Logs' },
-              { to: '/monitor', icon: Cpu, label: 'Monitor' },
-            ]
-          : []),
+        ...(hasAccess('Developer')
+  ? [
+      { to: '/developer-options', icon: Terminal, label: 'Developer Options' },
+      { to: '/activity-logs', icon: FileClock, label: 'Activity Logs' },
+      { to: '/auth-logs', icon: Fingerprint, label: 'Auth Logs' },
+      { to: '/monitor', icon: Cpu, label: 'Monitor' },
+    ]
+  : []),
       ],
     },
   ];

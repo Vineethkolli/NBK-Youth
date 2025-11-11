@@ -14,7 +14,7 @@ import TeluguPrint from '../components/histories/HistoryTeluguPrint';
 import { useLanguage } from '../context/LanguageContext';
 
 function Histories() {
-  const { user } = useAuth();
+  const { hasAccess } = useAuth();
   const { language } = useLanguage();
   const [histories, setHistories] = useState([]);
   const [selectedHistory, setSelectedHistory] = useState(null);
@@ -27,7 +27,6 @@ function Histories() {
   const [filters, setFilters] = useState({ sort: 'desc', belongsTo: '' });
   const [deletingId, setDeletingId] = useState(null); 
 
-  const isPrivilegedUser = ['developer'].includes(user?.role);
   const PrintComponent = language === 'te' ? TeluguPrint : EnglishPrint;
 
   useEffect(() => {
@@ -140,7 +139,7 @@ function Histories() {
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-semibold">Histories</h1>
         <div className="flex items-center space-x-3">
-          {isPrivilegedUser && (
+          {hasAccess('Developer') && (
             <>
               <button onClick={() => setShowForm(true)} className="btn-primary flex items-center">
                 <Plus className="h-4 w-4 mr-1" /> Add

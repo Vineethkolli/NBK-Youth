@@ -16,7 +16,7 @@ function GalleryGrid({
   onCopyToServiceDriveGallery,
   onGalleryOrderSave,
 }) {
-  const { user } = useAuth();
+  const { hasAccess } = useAuth();
   const [isEditMode, setIsEditMode] = useState(false);
   const [isReorderMode, setIsReorderMode] = useState(false);
   const [showUploadForm, setShowUploadForm] = useState(false);
@@ -25,10 +25,9 @@ function GalleryGrid({
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [deletingFiles, setDeletingFiles] = useState({});
 
-
   const longPressTimeout = useRef(null);
-  const allowedRoles = ['admin', 'developer', 'financier'];
-  const canManageMedia = user && allowedRoles.includes(user.role);
+  
+  const canManageMedia = hasAccess('Privileged');
 
   useEffect(() => {
     if (moment && moment.mediaFiles) {

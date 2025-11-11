@@ -7,7 +7,7 @@ import { useAuth } from '../context/AuthContext';
 import { formatDateTime } from '../utils/dateTime';
 
 function AuthLogs() {
-  const { user } = useAuth();
+  const { hasAccess } = useAuth();
   const [logs, setLogs] = useState([]);
   const [search, setSearch] = useState('');
   const [showLatest, setShowLatest] = useState(false);
@@ -18,7 +18,9 @@ function AuthLogs() {
   });
   const [loading, setLoading] = useState(false);
 
-  if (!['developer'].includes(user?.role)) return <div>Access denied</div>;
+  if (!hasAccess('Developer')) {
+    return <div className="text-center mt-10 text-red-500 font-semibold">Access denied</div>;
+  }
 
   const fetchLogs = async (page = 1) => {
     try {
@@ -48,7 +50,6 @@ function AuthLogs() {
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-semibold flex items-center">Auth Logs</h1>
 
-        {/* Toggle Latest Option */}
         <button
           onClick={() => setShowLatest(!showLatest)}
           className={`flex items-center px-3 py-2 rounded-lg border text-sm font-medium transition ${
@@ -62,7 +63,6 @@ function AuthLogs() {
         </button>
       </div>
 
-      {/* Search */}
       <div className="relative mt-4">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
         <input
@@ -74,7 +74,6 @@ function AuthLogs() {
         />
       </div>
 
-      {/* Table */}
       <div className="overflow-x-auto bg-white rounded-lg shadow">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
@@ -157,7 +156,6 @@ function AuthLogs() {
         </table>
       </div>
 
-      {/* Pagination */}
       {pagination.totalPages > 1 && (
         <div className="flex justify-between items-center mt-4">
           <button

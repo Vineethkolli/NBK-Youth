@@ -9,7 +9,7 @@ import Timeline from '../components/home/Timeline';
 import Footer from '../components/Footer';
 
 function Home() {
-  const { user } = useAuth();
+  const { user, hasAccess } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [events, setEvents] = useState([]);
 
@@ -30,7 +30,7 @@ function Home() {
     <div>
 
       <div className="space-y-8">
-        {['developer', 'financier', 'admin'].includes(user?.role) && (
+        {hasAccess('Privileged') && (
           <div className="flex justify-end">
             <button
               onClick={() => setIsEditing(!isEditing)}
@@ -44,7 +44,6 @@ function Home() {
 
         <Slideshow isEditing={isEditing} />
 
-        {/* Welcome Message */}
         <div className="bg-white shadow rounded-lg p-6">
           <h1 className="text-2xl font-semibold text-gray-900">
             Hello, {user?.name}!

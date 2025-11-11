@@ -1,4 +1,5 @@
 import { IndianRupee, Users, Edit2 } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
 export default function StatsOverview({
   stats,
@@ -13,6 +14,8 @@ export default function StatsOverview({
   isAddingPreviousYear,
   handlePreviousYearUpdate
 }) {
+  const { hasAccess } = useAuth();
+  
   return (
     <>
       {/* Budget Stats */}
@@ -66,7 +69,7 @@ export default function StatsOverview({
             {/* Previous Year Amount */}
             <div>
               <p className="font-semibold">Previous Year Amount</p>
-              {(user?.role === 'developer' || user?.role === 'financier' || user?.role === 'admin') && isEditingPreviousYear ? (
+              {hasAccess('Privileged') && isEditingPreviousYear ? (
                 <div className="flex flex-col space-y-2">
                   <input
                     type="number"
@@ -100,7 +103,7 @@ export default function StatsOverview({
                   <p className="text-lg font-bold">
                     {formatAmount(stats.budgetStats.previousYearAmount.amount)}
                   </p>
-                  {(user?.role === 'developer' || user?.role === 'financier' || user?.role === 'admin') && (
+                  {hasAccess('Privileged') && (
                     <button
                       onClick={() => setIsEditingPreviousYear(true)}
                       className="text-gray-500 hover:text-gray-700"

@@ -5,11 +5,12 @@ import MongoDBMonitor from '../components/monitor/MongodbMonitor';
 import GithubActionsMonitor from '../components/monitor/GithubActionsMonitor';
 
 export default function Monitor() {
-  
-  const { user } = useAuth();
-  
-  if (!['developer'].includes(user?.role)) return <div>Access denied</div>;
-  
+  const { hasAccess } = useAuth();
+
+  if (!hasAccess('Developer')) {
+    return <div className="text-center mt-10 text-red-500 font-semibold">Access denied</div>;
+  }
+
   return (
     <div className="max-w-1xl mx-auto space-y-6">
       <div className="bg-white border border-indigo-200 rounded-xl shadow-md p-4 flex items-center justify-between">
@@ -27,13 +28,9 @@ export default function Monitor() {
       </div>
 
       <ServiceDriveMonitor />
-
       <CloudinaryMonitor />
-
       <MongoDBMonitor />
-
       <GithubActionsMonitor />
-
     </div>
   );
 }

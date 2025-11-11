@@ -10,7 +10,7 @@ import LockIndicator from '../components/common/LockIndicator';
 import { useLockSettings } from '../context/LockContext';
 
 function RecycleBin() {
-  const { user } = useAuth();
+  const { hasAccess } = useAuth();
   const { lockSettings } = useLockSettings();
   const [deletedIncomes, setDeletedIncomes] = useState([]);
   const [deletedExpenses, setDeletedExpenses] = useState([]);
@@ -20,8 +20,10 @@ function RecycleBin() {
   const [loadingDeleteExpenseId, setLoadingDeleteExpenseId] = useState(null);
 
   const [activeBin, setActiveBin] = useState('income'); 
-
-  if (!['developer', 'financier'].includes(user?.role)) return <div>Access denied</div>;
+  
+  if (!hasAccess('Pro'))  {
+    return <div className="text-center mt-10 text-red-500 font-semibold">Access denied</div>;
+  }
 
   useEffect(() => {
     fetchDeletedItems();

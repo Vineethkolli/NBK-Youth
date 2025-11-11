@@ -15,7 +15,7 @@ import LockIndicator from '../components/common/LockIndicator';
 import { useLockSettings } from '../context/LockContext';
 
 function Income() {
-  const { user } = useAuth();
+  const { user, hasAccess } = useAuth();
   const { lockSettings } = useLockSettings();
   const [incomes, setIncomes] = useState([]);
   const [search, setSearch] = useState('');
@@ -45,8 +45,6 @@ function Income() {
   const [editingIncome, setEditingIncome] = useState(null);
   const { language } = useLanguage();
   const PrintComponent = language === 'te' ? TeluguPrint : EnglishPrint;
-
-  const isPrivilegedUser = ['developer', 'financier', 'admin'].includes(user?.role);
 
   useEffect(() => {
     fetchIncomes();
@@ -99,7 +97,7 @@ function Income() {
           <h1 className="text-2xl font-semibold">Income</h1>
 
           <div className="flex items-center space-x-3">
-            {isPrivilegedUser && (
+            {hasAccess('Privileged') && (
               <button
                 onClick={() => setShowForm(!showForm)}
                 disabled={lockSettings.isLocked}
@@ -151,7 +149,7 @@ function Income() {
             {Object.entries(visibleColumns).map(([column, isVisible]) => {
               if (
                 ['registerId', 'email', 'phoneNumber'].includes(column) &&
-                !isPrivilegedUser
+                !hasAccess('Privileged')
               ) {
                 return null;
               }
@@ -175,7 +173,6 @@ function Income() {
           visibleColumns={visibleColumns}
           onEdit={handleEdit}
           onDelete={handleDelete}
-          isPrivilegedUser={isPrivilegedUser}
           isLocked={lockSettings.isLocked}
         />
       </div>

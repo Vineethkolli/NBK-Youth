@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Edit2, Trash2, Clock, Loader2 } from 'lucide-react';
 import EditNameModal from '../common/UpdateNameForm';
+import { useAuth } from '../../context/AuthContext';
 
 function PlayerList({ 
   players, 
@@ -9,9 +10,9 @@ function PlayerList({
   onTimeUpdate, 
   onStatusUpdate, 
   onEdit,
-  onDelete,
-  isPrivilegedUser
+  onDelete
 }) {
+  const { hasAccess } = useAuth();
   const [modalPlayerId, setModalPlayerId] = useState(null);
   const [modalInitialName, setModalInitialName] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -122,29 +123,29 @@ function PlayerList({
 
             <div className="flex items-center space-x-2">
               {timerRequired ? (
-  <button
-    onClick={() => onTimeUpdate(player)}
-    className="text-gray-600 hover:text-gray-800"
-    disabled={deletingId === player._id}
-  >
-    <Clock className="h-5 w-5" />
-  </button>
-) : (
-  isPrivilegedUser && (
-    <select
-      value={player.status || ''}
-      onChange={(e) => onStatusUpdate(player._id, e.target.value)}
-      className="form-select text-sm"
-      disabled={deletingId === player._id}
-    >
-      <option value="">Select Status</option>
-      <option value="eliminated">Eliminated</option>
-      <option value="winner-1st">Winner (1st)</option>
-      <option value="winner-2nd">Winner (2nd)</option>
-      <option value="winner-3rd">Winner (3rd)</option>
-    </select>
-  )
-)}
+                <button
+                  onClick={() => onTimeUpdate(player)}
+                  className="text-gray-600 hover:text-gray-800"
+                  disabled={deletingId === player._id}
+                >
+                  <Clock className="h-5 w-5" />
+                </button>
+              ) : (
+                hasAccess('Privileged') && (
+                  <select
+                    value={player.status || ''}
+                    onChange={(e) => onStatusUpdate(player._id, e.target.value)}
+                    className="form-select text-sm"
+                    disabled={deletingId === player._id}
+                  >
+                    <option value="">Select Status</option>
+                    <option value="eliminated">Eliminated</option>
+                    <option value="winner-1st">Winner (1st)</option>
+                    <option value="winner-2nd">Winner (2nd)</option>
+                    <option value="winner-3rd">Winner (3rd)</option>
+                  </select>
+                )
+              )}
 
               {isEditMode && (
                 <>
@@ -162,7 +163,11 @@ function PlayerList({
                     }`}
                     disabled={deletingId === player._id}
                   >
-                    {deletingId === player._id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                    {deletingId === player._id ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Trash2 className="h-4 w-4" />
+                    )}
                   </button>
                 </>
               )}

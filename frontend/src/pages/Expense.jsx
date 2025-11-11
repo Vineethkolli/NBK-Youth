@@ -15,7 +15,7 @@ import LockIndicator from '../components/common/LockIndicator';
 import { useLockSettings } from '../context/LockContext';
 
 function Expense() {
-  const { user } = useAuth();
+  const { user, hasAccess } = useAuth();
   const { lockSettings } = useLockSettings();
   const [expenses, setExpenses] = useState([]);
   const [search, setSearch] = useState('');
@@ -41,10 +41,7 @@ function Expense() {
   const [showForm, setShowForm] = useState(false);
   const [editingExpense, setEditingExpense] = useState(null);
   const { language } = useLanguage();
-  const PrintComponent = language === 'te' ? TeluguPrint : EnglishPrint;
-
-  const isPrivilegedUser = ['developer', 'financier'].includes(user?.role);
-  const canView = ['developer', 'financier', 'admin'].includes(user?.role);
+  const PrintComponent = language === 'te' ? TeluguPrint : EnglishPrint;    
 
   useEffect(() => {
     fetchExpenses();
@@ -83,7 +80,7 @@ function Expense() {
   };
 
   const handleDelete = async (expenseId) => {
-    if (!isPrivilegedUser) return;
+    if (!hasAccess('Pro')) return;
     if (!window.confirm('Are you sure you want to move this item to recycle bin?')) return;
     try {
       await axios.delete(`${API_URL}/api/expenses/${expenseId}`);
@@ -101,7 +98,7 @@ function Expense() {
           <h1 className="text-2xl font-semibold">Expense</h1>
 
           <div className="flex items-center space-x-3">
-            {isPrivilegedUser && (
+            {!hasAccess('Pro') && (
               <button
                 onClick={() => setShowForm(!showForm)}
                 disabled={lockSettings.isLocked}
@@ -151,7 +148,7 @@ function Expense() {
           <h2 className="font-medium">Visible Columns</h2>
           <div className="mt-2 flex flex-wrap gap-2">
             {Object.entries(visibleColumns).map(([column, isVisible]) => {
-              if (['registerId', 'phoneNumber'].includes(column) && !canView) return null;
+              if (['registerId', 'phoneNumber'].includes(column) && !hasAccess('Privileged')) return null;
               return (
                 <label key={column} className="inline-flex items-center">
                   <input
@@ -172,7 +169,6 @@ function Expense() {
           visibleColumns={visibleColumns}
           onEdit={handleEdit}
           onDelete={handleDelete}
-          isPrivilegedUser={isPrivilegedUser}
           userRole={user?.role}
           isLocked={lockSettings.isLocked}
         />

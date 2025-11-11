@@ -37,7 +37,7 @@ import snapshotRoutes from './routes/snapshots.js';
 import historiesRoutes from './routes/histories.js';
 import cloudinaryRoutes from './routes/cloudinary.js';
 import monitorRoutes from './routes/monitor.js';
-import authLogRoutes from './routes/authLog.js';
+import authLogRoutes from './routes/authLogs.js';
 import { processDueNotifications } from './controllers/scheduledNotificationController.js';
 import { createDefaultDeveloper } from './utils/setupDefaults.js';
 

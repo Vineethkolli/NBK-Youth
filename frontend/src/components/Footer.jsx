@@ -1,4 +1,3 @@
-
 function Footer() {
   return (
     <footer className="text-black py-4">

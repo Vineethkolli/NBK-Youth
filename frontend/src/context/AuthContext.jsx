@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 import { API_URL } from '../utils/config';
 import { getDeviceInfo } from '../utils/deviceInfo';
+import { Access } from '../utils/access';
 
 const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
@@ -85,6 +86,16 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+  // Unified role checker
+  const hasAccess = (group) => {
+    const role = user?.role;
+    if (!role) return false;
+    if (group === 'All') return true;
+
+    const allowed = Access[group];
+    return Array.isArray(allowed) && allowed.includes(role);
+  };
+
   const value = {
     user,
     loading,
@@ -92,6 +103,7 @@ export const AuthProvider = ({ children }) => {
     signup,
     signout,
     updateUserData,
+    hasAccess,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
