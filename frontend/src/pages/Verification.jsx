@@ -10,7 +10,7 @@ import LockIndicator from '../components/common/LockIndicator';
 import { IndianRupee, DollarSign, ShieldCheck, Filter } from 'lucide-react';
 
 function Verification() {
-  const { hasAccess } = useAuth();
+  const { hasAccess, user } = useAuth();
   if (!hasAccess('Pro')) 
     return <div className="text-center mt-10 text-red-500 font-semibold">Access denied</div>;
 

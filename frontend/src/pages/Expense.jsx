@@ -98,7 +98,7 @@ function Expense() {
           <h1 className="text-2xl font-semibold">Expense</h1>
 
           <div className="flex items-center space-x-3">
-            {!hasAccess('Pro') && (
+            {hasAccess('Pro') && (
               <button
                 onClick={() => setShowForm(!showForm)}
                 disabled={lockSettings.isLocked}
