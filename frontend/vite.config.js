@@ -22,7 +22,8 @@ export default defineConfig({
 
       includeAssets: [
         '/logo/*.png',
-        'developerImage.png' 
+        'developerImage.png',
+        'offline.html'
       ],
       
       manifest: {
@@ -51,8 +52,18 @@ export default defineConfig({
 
       workbox: {
         cleanupOutdatedCaches: true, 
-        clientsClaim: true,          
+        clientsClaim: true,   
+        navigateFallback: '/offline.html',       
         runtimeCaching: [
+          {
+            urlPattern: ({ request }) => request.destination === 'document',
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'pages-cache',
+              networkTimeoutSeconds: 5,
+              fallbackURL: '/offline.html',
+            },
+          },
           {
             urlPattern: ({ url }) => url.origin === location.origin,
             handler: 'StaleWhileRevalidate',
