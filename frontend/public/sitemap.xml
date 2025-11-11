@@ -4,12 +4,21 @@
     <loc>https://nbkyouth.vercel.app/</loc>
     <lastmod>2025-11-10</lastmod>
   </url>
-  <url>
-    <loc>https://nbkyouth.vercel.app/signin</loc>
+    <url>
+    <loc>https://nbkyouth.vercel.app/explore</loc>
     <lastmod>2025-11-10</lastmod>
   </url>
   <url>
-    <loc>https://nbkyouth.vercel.app/signup</loc>
+    <loc>https://nbkyouth.vercel.app/moments</loc>
+    <lastmod>2025-11-10</lastmod>
+  </url>
+  <url>
+    <loc>https://nbkyouth.vercel.app/stats</loc>
+    <lastmod>2025-11-10</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://nbkyouth.vercel.app/committee</loc>
     <lastmod>2025-11-10</lastmod>
   </url>
 </urlset>
