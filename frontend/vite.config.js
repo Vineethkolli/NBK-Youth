@@ -11,7 +11,7 @@ export default defineConfig({
       algorithm: 'brotliCompress',
       ext: '.br',                 
       threshold: 1024,             
-      deleteOriginFile: false,     
+      deleteOriginFile: false,
     }),
 
     VitePWA({
