@@ -12,10 +12,10 @@ export default function VersionUpdateDialog({ isOpen, onReload, onLater }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm px-4">
       <div 
         ref={dialogRef}
-        className="bg-white rounded-lg shadow-2xl p-6 max-w-md w-full mx-4 transform transition-all animate-scale-in"
+        className="bg-white rounded-lg shadow-2xl p-6 max-w-md w-full transform transition-all animate-scale-in"
         role="dialog"
         aria-modal="true"
         aria-labelledby="version-dialog-title"
@@ -53,16 +53,16 @@ export default function VersionUpdateDialog({ isOpen, onReload, onLater }) {
         </p>
 
         {/* Buttons */}
-        <div className="flex gap-3">
+        <div className="flex flex-col sm:flex-row gap-3">
           <button
             onClick={onLater}
-            className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+            className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 active:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 order-2 sm:order-1"
           >
             Later
           </button>
           <button
             onClick={onReload}
-            className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 active:bg-blue-800 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 order-1 sm:order-2"
           >
             Reload Now
           </button>
