@@ -1,7 +1,6 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
-import { toast } from 'react-hot-toast';
 import { initializeAnalytics, trackPageView, setAnalyticsUser, clearAnalyticsUser } from './utils/analytics';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { HiddenProfileProvider } from './context/HiddenProfileContext';
@@ -49,6 +48,7 @@ import PopupBanner from './components/adminPanel/PopupBanner';
 import FloatingMusicIcon from './components/vibe/FloatingMusicIcon';
 import OfflineIndicator from './components/common/OfflineIndicator';
 import ErrorBoundary from './components/common/ErrorBoundary';
+import VersionUpdateDialog from './components/common/VersionUpdateDialog';
 
 
 function AppContent() {
@@ -129,23 +129,31 @@ function AppContent() {
 
 // Root App Wrapper
 function App() {
+  const [showUpdateDialog, setShowUpdateDialog] = useState(false);
+
   useEffect(() => {
-  initializeAnalytics();
+    initializeAnalytics();
 
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js', { scope: '/' })
-      .catch((error) => console.error('Service Worker registration failed:', error));
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js', { scope: '/' })
+        .catch((error) => console.error('Service Worker registration failed:', error));
 
-    // Only reload if a service worker was already controlling the page
-    if (navigator.serviceWorker.controller) {
-      navigator.serviceWorker.addEventListener('controllerchange', () => {
-        toast.success('New version available! Refreshing...');
-        setTimeout(() => window.location.reload(), 1000);
-      });
+      // Only show dialog if a service worker was already controlling the page
+      if (navigator.serviceWorker.controller) {
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          setShowUpdateDialog(true);
+        });
+      }
     }
-  }
-}, []);
+  }, []);
 
+  const handleReload = () => {
+    window.location.reload();
+  };
+
+  const handleLater = () => {
+    setShowUpdateDialog(false);
+  };
 
   return (
     <AuthProvider>
@@ -166,6 +174,11 @@ function App() {
           </MaintenanceModeProvider>
         </HiddenProfileProvider>
       </LanguageProvider>
+      <VersionUpdateDialog 
+        isOpen={showUpdateDialog}
+        onReload={handleReload}
+        onLater={handleLater}
+      />
     </AuthProvider>
   );
 }
