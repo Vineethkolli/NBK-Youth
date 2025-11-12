@@ -79,7 +79,7 @@ export default function VersionUpdate({ isOpen, onReload, onLater }) {
           </button>
           <button
             onClick={handleReload}
-            className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 active:bg-blue-800 transition-colors flex items-center justify-center gap-2"
+            className="flex-1 px-4 py-2.5 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 active:bg-indigo-800 transition-colors flex items-center justify-center gap-2"
           >
             <RefreshCcw className="w-4 h-4" />
             Reload Now
