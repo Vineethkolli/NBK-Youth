@@ -48,7 +48,7 @@ import PopupBanner from './components/adminPanel/PopupBanner';
 import FloatingMusicIcon from './components/vibe/FloatingMusicIcon';
 import OfflineIndicator from './components/common/OfflineIndicator';
 import ErrorBoundary from './components/common/ErrorBoundary';
-import VersionUpdateDialog from './components/common/VersionUpdateDialog';
+import VersionUpdate from './components/common/VersionUpdate';
 
 
 function AppContent() {
@@ -147,13 +147,9 @@ function App() {
     }
   }, []);
 
-  const handleReload = () => {
-    window.location.reload();
-  };
+  const handleReload = () => {  window.location.reload(); };
+  const handleLater = () => { setShowUpdateDialog(false); };
 
-  const handleLater = () => {
-    setShowUpdateDialog(false);
-  };
 
   return (
     <AuthProvider>
@@ -174,11 +170,7 @@ function App() {
           </MaintenanceModeProvider>
         </HiddenProfileProvider>
       </LanguageProvider>
-      <VersionUpdateDialog 
-        isOpen={showUpdateDialog}
-        onReload={handleReload}
-        onLater={handleLater}
-      />
+      <VersionUpdate isOpen={showUpdateDialog} onReload={handleReload} onLater={handleLater} />
     </AuthProvider>
   );
 }

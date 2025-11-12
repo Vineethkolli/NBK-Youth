@@ -65,7 +65,7 @@ function Settings() {
         </div>
       </div>
 
-      <div className="text-center text-gray-500 text-sm mt-4">WEB APP Version 8.0 </div>
+      <div className="text-center text-gray-500 text-sm mt-4">WEB APP Version 3.0 </div>
       <div className="text-center text-gray-500 text-sm mt-4">
         For any queries, write an email to <a href="mailto:gangavaramnbkyouth@gmail.com" className=" hover:text-indigo-600">gangavaramnbkyouth@gmail.com</a>
       </div>
