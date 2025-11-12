@@ -104,7 +104,6 @@ function InstallApp() {
       <div
         ref={promptRef}
         className="fixed top-4 left-4 right-4 bg-green-50 bg-opacity-80 text-green-800 p-4 flex items-center justify-between shadow-lg rounded-lg z-50"
-        // Clicks inside the container don’t trigger the document listener
         onClick={(e) => e.stopPropagation()}
       >
         <div>

@@ -251,7 +251,7 @@ function ChatWidget({ isOpen, setIsOpen }) {
               Currently in development stage.
             </p>
             <p className="text-xs mt-1">
-              Ask me anything about your app data—I’m learning fast!
+              Ask me anything about app data.
             </p>
           </div>
         )}
