@@ -109,16 +109,34 @@ app.use('/api/authlogs', authLogRoutes);
 app.get('/', (req, res) => res.json({ status: 'API is running' }));
 app.get('/health', (req, res) => res.status(200).send('Ok'));
 
+
 // MongoDB Connection
-mongoose.connect(process.env.MONGODB_URI)
-  .then(() => {
+const connectWithRetry = async (retries = 4, delay = 3000) => {
+  try {
+    await mongoose.connect(process.env.MONGODB_URI, {
+      maxPoolSize: 200,
+      minPoolSize: 5,
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
+    });
+
     console.log('Connected to MongoDB');
-    createDefaultDeveloper();
-  })
-  .catch(err => {
-    console.error('MongoDB connection error:', err);
-    process.exit(1); 
-  });
+    await createDefaultDeveloper();
+  } catch (err) {
+    console.error(`MongoDB connection error: ${err.message}`);
+
+    if (retries > 0) {
+      console.log(`Retrying MongoDB connection in ${delay / 1000}s... (${retries} retries left)`);
+      setTimeout(() => connectWithRetry(retries - 1, delay), delay);
+    } else {
+      console.error('All MongoDB connection retries failed. Exiting...');
+      process.exit(1);
+    }
+  }
+};
+
+connectWithRetry();
+
 
 // Notification Scheduler runs at 7:00, 7:15, 7:35, 7:55 AM IST IST every day
 cron.schedule('0,15,35,55 7 * * *', async () => {
