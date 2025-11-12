@@ -1,4 +1,4 @@
-import { ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
+import { ExternalLink } from 'lucide-react';
 import { formatDateTime } from '../../utils/dateTime';
 
 function NotificationHistory({ history, loading }) {
@@ -30,7 +30,7 @@ function NotificationHistory({ history, loading }) {
                   aria-label={`Open link to ${notif.link}`}
                 >
                   Open
-                  <ArrowTopRightOnSquareIcon className="ml-2 h-5 w-5" />
+                  <ExternalLink className="ml-2 h-5 w-5" />
                 </button>
               )}
 
