@@ -165,7 +165,7 @@ export default function CustomPhoneInput({ value, onChange }) {
         <input
           type="tel"
           className="flex-1 p-2 outline-none text-base bg-transparent"
-          placeholder="Phone Number *"
+          placeholder="Phone Number"
           value={inputValue}
           onChange={handleInputChange}
           inputMode="tel"

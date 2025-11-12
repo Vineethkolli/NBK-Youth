@@ -216,7 +216,7 @@ function ForgotPassword({
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your Email"
+              placeholder="Email"
               className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
             />
           )}

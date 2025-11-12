@@ -101,7 +101,7 @@ formData.phoneNumber = parsedPhone.number;
               type="text"
               name="name"
               required
-              placeholder="Name *"
+              placeholder="Name"
               value={formData.name}
               onChange={handleChange}
               className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500"
@@ -128,7 +128,7 @@ formData.phoneNumber = parsedPhone.number;
               type={showPassword ? 'text' : 'password'}
               name="password"
               required
-              placeholder="Password *"
+              placeholder="Password"
               value={formData.password}
               onChange={handleChange}
               className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500"
@@ -146,7 +146,7 @@ formData.phoneNumber = parsedPhone.number;
               type={showConfirmPassword ? 'text' : 'password'}
               name="confirmPassword"
               required
-              placeholder="Confirm Password *"
+              placeholder="Confirm Password"
               value={formData.confirmPassword}
               onChange={handleChange}
               className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500"
