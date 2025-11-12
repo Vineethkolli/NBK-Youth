@@ -175,7 +175,7 @@ function DashboardLayout() {
                     onClick={() => handleNavigation('/stats')}
                     className="transform translate-y-2 -translate-x-8 pointer-events-auto"
                   >
-                    <div className={`rounded-full p-4 flex flex-col items-center justify-center w-16 h-16 shadow-lg ${isActive('/stats') ? 'bg-indigo-600 text-white' : 'bg-white text-gray-600'}`}>
+                    <div className={`rounded-full p-3 flex flex-col items-center justify-center w-16 h-16 shadow-lg ${isActive('/stats') ? 'bg-indigo-600 text-white' : 'bg-white text-gray-600'}`}>
                       <BarChart2 className="h-6 w-6" />
                       <span className="text-xs mt-1">Stats</span>
                     </div>
@@ -186,7 +186,7 @@ function DashboardLayout() {
                     onClick={() => handleNavigation('/income')}
                     className="transform -translate-y-2 pointer-events-auto"
                   >
-                    <div className={`rounded-full p-4 flex flex-col items-center justify-center w-16 h-16 shadow-lg ${isActive('/income') ? 'bg-indigo-600 text-white' : 'bg-white text-gray-600'}`}>
+                    <div className={`rounded-full p-3 flex flex-col items-center justify-center w-16 h-16 shadow-lg ${isActive('/income') ? 'bg-indigo-600 text-white' : 'bg-white text-gray-600'}`}>
                       <IndianRupee className="h-6 w-6" />
                       <span className="text-xs mt-1">Income</span>
                     </div>
@@ -197,7 +197,7 @@ function DashboardLayout() {
                     onClick={() => handleNavigation('/expense')}
                     className="transform translate-y-2 translate-x-8 pointer-events-auto"
                   >
-                    <div className={`rounded-full p-4 flex flex-col items-center justify-center w-16 h-16 shadow-lg ${isActive('/expense') ? 'bg-indigo-600 text-white' : 'bg-white text-gray-600'}`}>
+                    <div className={`rounded-full p-3 flex flex-col items-center justify-center w-16 h-16 shadow-lg ${isActive('/expense') ? 'bg-indigo-600 text-white' : 'bg-white text-gray-600'}`}>
                       <DollarSign className="h-6 w-6" />
                       <span className="text-xs mt-1">Expense</span>
                     </div>
