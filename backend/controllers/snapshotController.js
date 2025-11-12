@@ -10,7 +10,7 @@ import Event from '../models/Event.js';
 export const snapshotController = {
   getAllSnapshots: async (req, res) => {
     try {
-      const snapshots = await Snapshot.find().sort({ year: -1, eventName: 1 });
+      const snapshots = await Snapshot.find().sort({ year: -1, eventName: 1 }).lean();
       res.json(snapshots);
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch snapshots' });
@@ -201,11 +201,14 @@ const calculateDateWiseStats = async (incomes, expenses) => {
 
 const generateStats = async () => {
   try {
-    const incomes = await Income.find({ isDeleted: false });
-    const expenses = await Expense.find({ isDeleted: false });
-    const users = await User.find();
-    const successfulPayments = await Payment.find({ transactionStatus: 'successful' });
-    const previousYear = await PreviousYear.findOne() || { amount: 0 };
+    // Parallel queries + .lean()
+    const [incomes, expenses, userCount, successfulPaymentCount, previousYear] = await Promise.all([
+      Income.find({ isDeleted: false }).lean(),
+      Expense.find({ isDeleted: false }).lean(),
+      User.countDocuments(),
+      Payment.countDocuments({ transactionStatus: 'successful' }),
+      PreviousYear.findOne().lean()
+    ]);
 
     const round = num => Math.round(num);
 
@@ -274,14 +277,14 @@ const generateStats = async () => {
         amountReceived,
         amountPending,
         totalExpenses,
-        previousYearAmount: { amount: round(previousYear.amount) },
+        previousYearAmount: { amount: round(previousYear?.amount || 0) },
         amountLeft,
         online,
         offline
       },
       userStats: {
-        totalUsers: users.length,
-        successfulPayments: successfulPayments.length
+      totalUsers: userCount,
+      successfulPayments: successfulPaymentCount
       },
       villagers: groupStats('villagers'),
       youth: groupStats('youth'),

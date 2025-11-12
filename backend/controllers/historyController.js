@@ -6,8 +6,7 @@ export const historyController = {
 
   getAllHistories: async (req, res) => {
     try {
-      const histories = await History.find()
-        .sort({ createdAt: -1 });
+      const histories = await History.find().sort({ createdAt: -1 }).lean();
 
       res.json(histories);
     } catch (error) {
@@ -28,8 +27,7 @@ export const historyController = {
         });
       }
 
-      // Find the snapshot by name: snapshotName format is "<eventName> <year>". 
-      // eventName may contain spaces (e.g., "Ganesh Chaturthi 2025"), so split accordingly.
+      // Find the snapshot by name: snapshotName format is "<eventName> <year>"
       const parts = snapshotName.trim().split(' ');
       const yearStr = parts.pop();
       const eventName = parts.join(' ');

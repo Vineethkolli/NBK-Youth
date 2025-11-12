@@ -8,7 +8,7 @@ export const recordsController = {
   // Financial Timeline
   getAllFinancialRecords: async (req, res) => {
     try {
-      const records = await FinancialRecord.find().sort({ year: -1 });
+      const records = await FinancialRecord.find().sort({ year: -1 }).lean();
       res.json(records);
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch financial records' });
@@ -156,7 +156,7 @@ export const recordsController = {
   // Event Records
   getAllEventRecords: async (req, res) => {
     try {
-      const records = await EventRecord.find().sort({ createdAt: -1 });
+      const records = await EventRecord.find().sort({ createdAt: -1 }).lean();
       res.json(records);
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch event records' });

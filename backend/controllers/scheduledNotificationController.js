@@ -41,7 +41,7 @@ export const createScheduledNotification = async (req, res) => {
 // List Scheduled Notifications
 export const listScheduledNotifications = async (req, res) => {
   try {
-    const docs = await ScheduledNotification.find().sort({ scheduledAt: -1 });
+    const docs = await ScheduledNotification.find().sort({ scheduledAt: -1 }).lean();
     res.json(docs);
   } catch (err) {
     console.error(err);

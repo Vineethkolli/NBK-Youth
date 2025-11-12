@@ -7,7 +7,7 @@ export const homepageController = {
 
   getSlides: async (req, res) => {
     try {
-      const slides = await Slide.find().sort('order');
+      const slides = await Slide.find().sort('order').lean();
       res.json(slides);
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch slides' });
@@ -71,7 +71,7 @@ export const homepageController = {
       await Slide.findByIdAndDelete(req.params.id);
 
       // Reorder remaining slides
-      const remainingSlides = await Slide.find().sort('order');
+      const remainingSlides = await Slide.find().sort('order').lean();
       for (let i = 0; i < remainingSlides.length; i++) {
         remainingSlides[i].order = i;
         await remainingSlides[i].save();
@@ -113,7 +113,7 @@ export const homepageController = {
 
   getEvents: async (req, res) => {
     try {
-      const events = await Event.find().sort('-dateTime');
+      const events = await Event.find().sort('-dateTime').lean();
       res.json(events);
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch events' });

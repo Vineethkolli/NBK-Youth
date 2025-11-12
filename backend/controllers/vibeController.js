@@ -12,7 +12,7 @@ const VibeController = {
 
   getAllCollections: async (req, res) => {
     try {
-      const collections = await Collection.find().sort({ createdAt: -1 });
+      const collections = await Collection.find().sort({ createdAt: -1 }).lean();
       res.json(collections);
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch collections' });

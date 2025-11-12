@@ -5,7 +5,7 @@ export const gameController = {
 
   getAllGames: async (req, res) => {
     try {
-      const games = await Game.find().sort('-createdAt');
+      const games = await Game.find().sort('-createdAt').lean();
       res.json(games);
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch games' });

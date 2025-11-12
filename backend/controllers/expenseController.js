@@ -31,7 +31,7 @@ export const expenseController = {
         }
       }
 
-      const expenses = await Expense.find(query).sort({ createdAt: -1 });
+      const expenses = await Expense.find(query).sort({ createdAt: -1 }).lean();
       res.json(expenses);
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch expenses' });
@@ -43,7 +43,8 @@ export const expenseController = {
     try {
       const { verifyLog } = req.query;
       const expenses = await Expense.find({ verifyLog, isDeleted: false })
-        .sort({ createdAt: -1 });
+        .sort({ createdAt: -1 })
+        .lean();
       res.json(expenses);
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch verification data' });
