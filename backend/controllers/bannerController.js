@@ -5,7 +5,7 @@ import { logActivity } from '../middleware/activityLogger.js';
 export const bannerController = {
   getAllBanners: async (req, res) => {
     try {
-      const banners = await Banner.find().sort('-createdAt').lean();
+      const banners = await Banner.find().sort('-createdAt');
       res.json(banners);
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch banners' });

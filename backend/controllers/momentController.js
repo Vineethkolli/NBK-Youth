@@ -6,7 +6,7 @@ import { google } from 'googleapis';
 export const momentController = {
   getAllMoments: async (req, res) => {
     try {
-      const moments = await Moment.find().sort({ order: -1, createdAt: -1 }).lean();
+      const moments = await Moment.find().sort({ order: -1, createdAt: -1 });
       res.json(moments);
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch moments', error: error.message });
@@ -348,7 +348,7 @@ export const momentController = {
         await Moment.findByIdAndUpdate(moment._id, { order: moment.order });
       }
 
-      const updatedMoments = await Moment.find().sort({ order: -1, createdAt: -1 }).lean();
+      const updatedMoments = await Moment.find().sort({ order: -1, createdAt: -1 });
 
       await logActivity(
         req,

@@ -10,9 +10,9 @@ const PaymentController = {
       let payments;
 
       if (registerId) {
-        payments = await Payment.find({ registerId }).sort({ createdAt: -1 }).lean();
+        payments = await Payment.find({ registerId }).sort({ createdAt: -1 });
       } else {
-        payments = await Payment.find().sort({ createdAt: -1 }).lean();
+        payments = await Payment.find().sort({ createdAt: -1 });
       }
 
       return res.status(200).json(payments);
@@ -80,7 +80,7 @@ const PaymentController = {
   async getVerificationData(req, res) {
     try {
       const { verifyLog } = req.query;
-      const payments = await Payment.find({ verifyLog }).sort({ createdAt: -1 }).lean();
+      const payments = await Payment.find({ verifyLog }).sort({ createdAt: -1 });
       return res.json(payments);
     } catch (error) {
       return res.status(500).json({ message: 'Failed to fetch verification data', error: error.message });

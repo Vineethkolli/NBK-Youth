@@ -38,7 +38,7 @@ export const incomeController = {
         }
       }
 
-      const incomes = await Income.find(query).sort({ createdAt: -1 }).lean();
+      const incomes = await Income.find(query).sort({ createdAt: -1 });
       res.json(incomes);
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch incomes', error: error.message });
@@ -49,7 +49,7 @@ export const incomeController = {
   getVerificationData: async (req, res) => {
     try {
       const { verifyLog } = req.query;
-      const incomes = await Income.find({ verifyLog, isDeleted: false }).sort({ createdAt: -1 }).lean();
+      const incomes = await Income.find({ verifyLog, isDeleted: false }).sort({ createdAt: -1 });
       res.json(incomes);
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch verification data', error: error.message });

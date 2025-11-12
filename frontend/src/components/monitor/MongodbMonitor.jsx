@@ -51,7 +51,7 @@ export default function MongoDBMonitor() {
       <h2 className="text-2xl font-semibold text-gray-900 pb-3 mb-4">MongoDB Monitor</h2>
 
       {/* Storage & Databases Info */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 text-sm w-full md:w-full">
+      <div className="grid grid-cols-2 lg:grid-cols-6 gap-3 text-sm w-full md:w-full">
   <div className="p-3 bg-indigo-50 rounded-xl flex flex-col justify-center shadow-md">
     <div className="text-xs font-medium text-indigo-600 uppercase">Storage Limit</div>
     <div className="font-bold text-gray-900 text-lg">
@@ -73,24 +73,14 @@ export default function MongoDBMonitor() {
     </div>
   </div>
 
-  <div className="p-3 bg-indigo-50 rounded-xl flex flex-col justify-center shadow-md">
-    <div className="text-xs font-medium text-indigo-600 uppercase">Total Indexes</div>
-    <div className="font-bold text-gray-900 text-lg">
-      {quota ? quota.totalIndexes : '...'}
-    </div>
-  </div>
-</div>
-
-      {/* Databases Info */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 text-sm w-full md:w-full">
   {(databases && databases.length > 0
     ? databases
-    : Array.from({ length: 3 }, (_, i) => ({ name: i, collections: null, indexes: null }))
+    : Array.from({ length: 3 }, (_, i) => ({ name: i, collections: null }))
   ).map((db) => (
-    <div key={db.name} className="p-3 bg-green-50 rounded-xl flex flex-col justify-center shadow-md">
-      <div className="text-xs font-medium text-green-600 uppercase">{db.name || 'Database'}</div>
-      <div className="font-bold text-gray-900 text-base">
-        {quota ? `${db.collections} Collections / ${db.indexes} Indexes` : '...'}
+    <div key={db.name} className="p-3 bg-indigo-50 rounded-xl flex flex-col justify-center shadow-md">
+      <div className="text-xs font-medium text-indigo-600 uppercase">Collections</div>
+      <div className="font-bold text-gray-900 text-lg">
+        {quota ? db.collections : '...'}
       </div>
     </div>
   ))}

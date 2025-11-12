@@ -4,7 +4,7 @@ import { logActivity } from '../middleware/activityLogger.js';
 export const hiddenProfileController = {
   getHiddenProfiles: async (req, res) => {
     try {
-      const hiddenProfiles = await HiddenProfile.find().lean();
+      const hiddenProfiles = await HiddenProfile.find();
       res.json(hiddenProfiles.map(profile => profile.profileId));
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch hidden profiles' });

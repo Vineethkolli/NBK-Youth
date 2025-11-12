@@ -8,14 +8,12 @@ import { logActivity } from '../middleware/activityLogger.js';
 export const statsController = {
   getStats: async (req, res) => {
     try {
-      // Fetch data in parallel + .lean()
-      const [incomes, expenses, userCount, successfulPaymentCount, previousYear] = await Promise.all([
-        Income.find({ isDeleted: false }).lean(),
-        Expense.find({ isDeleted: false }).lean(),
-        User.countDocuments(),
-        Payment.countDocuments({ transactionStatus: 'successful' }),
-        PreviousYear.findOne().lean()
-      ]);
+
+      const incomes = await Income.find({ isDeleted: false });
+      const expenses = await Expense.find({ isDeleted: false });
+      const users = await User.find();
+      const successfulPayments = await Payment.find({ transactionStatus: 'successful' });
+      const previousYear = await PreviousYear.findOne() || { amount: 0 };
 
       // Calculate date-wise stats
       const dateWiseStats = await calculateDateWiseStats(incomes, expenses);
@@ -110,14 +108,14 @@ export const statsController = {
           amountReceived,
           amountPending,
           totalExpenses,
-          previousYearAmount: { amount: roundNumber(previousYear?.amount || 0) },
+          previousYearAmount: { amount: roundNumber(previousYear.amount) },
           amountLeft,
           online,
           offline
         },
         userStats: {
-          totalUsers: userCount,
-          successfulPayments: successfulPaymentCount
+          totalUsers: users.length,
+          successfulPayments: successfulPayments.length
         },
         villagers: calculateGroupStats('villagers'),
         youth: calculateGroupStats('youth'),

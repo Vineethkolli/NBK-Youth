@@ -23,28 +23,24 @@ export const mongodbStorageController = {
           const dbInstance = client.db(dbData.name);
           let collectionsCount = 0;
           let totalSize = 0;
-          let totalIndexes = 0;
           try {
             const collections = await dbInstance.listCollections().toArray();
             collectionsCount = collections.length;
             for (const coll of collections) {
               const stats = await dbInstance.command({ collStats: coll.name });
               totalSize += (stats.size || 0) + (stats.totalIndexSize || 0);
-              totalIndexes += stats.nindexes || 0;
             }
           } catch {}
           return {
             name: dbData.name,
             collections: collectionsCount,
             storage: totalSize,
-            indexes: totalIndexes,
           };
         })
       );
 
       // Total storage used - sum of user databases
       const totalStorageUsed = databasesInfo.reduce((sum, d) => sum + d.storage, 0);
-      const totalIndexesCount = databasesInfo.reduce((sum, d) => sum + d.indexes, 0);
 
       res.json({
         quota: {
@@ -54,7 +50,6 @@ export const mongodbStorageController = {
             active: connections.current,
             max: maxConnections,
           },
-          totalIndexes: totalIndexesCount,
         },
         databases: databasesInfo,
       });
