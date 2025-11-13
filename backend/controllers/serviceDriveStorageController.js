@@ -18,7 +18,7 @@ try {
   drive = google.drive({ version: 'v3' });
 }
 
-// Helper: format bytes
+// Helper format bytes
 const formatSize = (bytes) => {
   if (bytes === undefined || bytes === null || isNaN(bytes) || bytes === '0') return '-';
   const units = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
@@ -31,7 +31,7 @@ const formatSize = (bytes) => {
   return size.toFixed(2) + ' ' + units[i];
 };
 
-// Helper: calculate total size & count in a folder
+// Helper calculate total size & count in a folder
 const calculateFolderSizeAndCount = async (folderId, trashed = false) => {
   let totalSize = 0;
   let totalCount = 0;
@@ -60,7 +60,7 @@ const calculateFolderSizeAndCount = async (folderId, trashed = false) => {
   return { size: totalSize, count: totalCount };
 };
 
-// Helper: recursive delete for folder
+// Helper recursive delete for folder
 const deleteFileRecursiveIfFolder = async (fileId) => {
   const meta = await drive.files.get({ fileId, fields: 'id, mimeType' }).catch(() => null);
   if (!meta || !meta.data) return;
@@ -116,6 +116,7 @@ export const serviceDriveStorageController = {
         .json({ message: 'Failed to fetch storage quota', error: err.message });
     }
   },
+
 
   getFileList: async (req, res) => {
     const parentId = req.query.parentId || 'root';
@@ -189,6 +190,7 @@ export const serviceDriveStorageController = {
     }
   },
 
+
   getTrashList: async (req, res) => {
     try {
       let allFiles = [];
@@ -261,6 +263,7 @@ export const serviceDriveStorageController = {
     }
   },
 
+
   trashItem: async (req, res) => {
     const { fileId } = req.params;
     try {
@@ -280,6 +283,7 @@ export const serviceDriveStorageController = {
     }
   },
 
+
   deleteItemPermanent: async (req, res) => {
     const { fileId } = req.params;
     try {
@@ -298,6 +302,7 @@ export const serviceDriveStorageController = {
         .json({ message: 'Failed to delete item permanently', error: err.message });
     }
   },
+
 
   emptyTrash: async (req, res) => {
     try {
@@ -337,6 +342,7 @@ export const serviceDriveStorageController = {
     }
   },
 
+  
   downloadItem: async (req, res) => {
     const { fileId } = req.params;
     const itemName = req.query.itemName || fileId;

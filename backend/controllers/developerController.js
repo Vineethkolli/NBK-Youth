@@ -83,7 +83,7 @@ export const developerController = {
             if (toDateRaw) {
               toDateObj = new Date(toDateRaw);
               if (isNaN(toDateObj.getTime())) throw new Error('Invalid toDate');
-              // If user provided only a date (e.g. '2025-10-10'), treat toDate as end of day to be inclusive
+              // If user provided only a date, treat to Date as end of day to be inclusive
               if (/^\d{4}-\d{2}-\d{2}$/.test(String(toDateRaw))) {
                 toDateObj.setHours(23, 59, 59, 999);
               }
@@ -162,6 +162,7 @@ export const developerController = {
     }
   }
 };
+
 
 // Utility function to delete all files in a Cloudinary folder
 const deleteCloudinaryFolder = async (folder) => {

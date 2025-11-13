@@ -7,7 +7,8 @@ export const historyController = {
   getAllHistories: async (req, res) => {
     try {
       const histories = await History.find()
-        .sort({ createdAt: -1 });
+        .sort({ createdAt: -1 })
+        .lean();
 
       res.json(histories);
     } catch (error) {
@@ -20,23 +21,24 @@ export const historyController = {
     try {
       const { snapshotName, selectedCollections } = req.body;
 
-      // Check for duplicate snapshotName
-      const existingHistory = await History.findOne({ snapshotName });
+      // Check duplicate and find snapshot
+      const parts = snapshotName.trim().split(' ');
+      const yearStr = parts.pop();
+      const eventName = parts.join(' ');
+
+      const [existingHistory, snapshot] = await Promise.all([
+        History.findOne({ snapshotName }).lean(),
+        Snapshot.findOne({
+          eventName: eventName,
+          year: parseInt(yearStr)
+        }).lean()
+      ]);
+
       if (existingHistory) {
         return res.status(400).json({
           message: `History with name "${snapshotName}" already exists`
         });
       }
-
-      // Find the snapshot by name: snapshotName format is "<eventName> <year>". 
-      // eventName may contain spaces (e.g., "Ganesh Chaturthi 2025"), so split accordingly.
-      const parts = snapshotName.trim().split(' ');
-      const yearStr = parts.pop();
-      const eventName = parts.join(' ');
-      const snapshot = await Snapshot.findOne({
-        eventName: eventName,
-        year: parseInt(yearStr)
-      });
 
       if (!snapshot) {
         return res.status(404).json({ message: 'Snapshot not found' });

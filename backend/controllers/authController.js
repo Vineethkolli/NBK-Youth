@@ -49,20 +49,23 @@ if (!parsed || !parsed.isValid()) {
 
 phoneNumber = parsed.number;
 
-    const phoneExists = await User.findOne({ phoneNumber });
-    if (phoneExists)
-      return res.status(400).json({ message: 'User already exists' });
-
     // Email normalization and validation
     const normalizedEmail = email?.trim().toLowerCase() || undefined;
     if (normalizedEmail) {
       const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
       if (!emailRegex.test(normalizedEmail))
         return res.status(400).json({ message: 'Invalid email format' });
-      const emailExists = await User.findOne({ email: normalizedEmail });
-      if (emailExists)
-        return res.status(400).json({ message: 'User already exists' });
     }
+
+    const [phoneExists, emailExists] = await Promise.all([
+      User.findOne({ phoneNumber }).lean(),
+      normalizedEmail ? User.findOne({ email: normalizedEmail }).lean() : Promise.resolve(null)
+    ]);
+
+    if (phoneExists)
+      return res.status(400).json({ message: 'User already exists' });
+    if (emailExists)
+      return res.status(400).json({ message: 'User already exists' });
 
     const user = await User.create({
       name,

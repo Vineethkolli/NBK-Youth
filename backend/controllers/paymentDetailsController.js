@@ -4,7 +4,7 @@ import { logActivity } from '../middleware/activityLogger.js';
 export const paymentDetailsController = {
   getPaymentDetails: async (req, res) => {
     try {
-      let details = await PaymentDetails.findOne();
+      let details = await PaymentDetails.findOne().lean();
 
       // If no details exist, create default
       if (!details) {
@@ -14,6 +14,7 @@ export const paymentDetailsController = {
           accountHolder: 'NBK Youth',
           registerId: req.user?.registerId || 'System'
         });
+        details = details.toObject();
       }
 
       res.json(details);
@@ -21,6 +22,7 @@ export const paymentDetailsController = {
       res.status(500).json({ message: 'Failed to fetch payment details' });
     }
   },
+
 
   updatePaymentDetails: async (req, res) => {
     try {

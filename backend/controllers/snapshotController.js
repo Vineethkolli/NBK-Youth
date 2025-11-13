@@ -10,37 +10,38 @@ import Event from '../models/Event.js';
 export const snapshotController = {
   getAllSnapshots: async (req, res) => {
     try {
-      const snapshots = await Snapshot.find().sort({ year: -1, eventName: 1 });
+      const snapshots = await Snapshot.find().sort({ year: -1, eventName: 1 }).lean();
       res.json(snapshots);
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch snapshots' });
     }
   },
 
+
   createSnapshot: async (req, res) => {
     try {
       const { eventName, year, selectedCollections } = req.body;
 
-      // Prevent duplicates for same eventName + year
-      const existingSnapshot = await Snapshot.findOne({ eventName, year });
+      // Check for duplicates and fetch collections in parallel
+      const collections = {};
+      let stats = {};
+
+      const [existingSnapshot, incomeData, expenseData, eventData] = await Promise.all([
+        Snapshot.findOne({ eventName, year }).lean(),
+        selectedCollections.includes('Income') ? Income.find({ isDeleted: false }).lean() : Promise.resolve(null),
+        selectedCollections.includes('Expense') ? Expense.find({ isDeleted: false }).lean() : Promise.resolve(null),
+        selectedCollections.includes('Event') ? Event.find().lean() : Promise.resolve(null)
+      ]);
+
       if (existingSnapshot) {
         return res.status(400).json({
           message: `Snapshot for ${eventName} ${year} already exists`
         });
       }
 
-      const collections = {};
-      let stats = {};
-
-      if (selectedCollections.includes('Income')) {
-        collections.Income = await Income.find({ isDeleted: false });
-      }
-      if (selectedCollections.includes('Expense')) {
-        collections.Expense = await Expense.find({ isDeleted: false });
-      }
-      if (selectedCollections.includes('Event')) {
-        collections.Event = await Event.find();
-      }
+      if (incomeData) collections.Income = incomeData;
+      if (expenseData) collections.Expense = expenseData;
+      if (eventData) collections.Event = eventData;
 
       if (selectedCollections.includes('Stats')) {
         stats = await generateStats();
@@ -74,6 +75,7 @@ export const snapshotController = {
     }
   },
 
+
   updateSnapshot: async (req, res) => {
     try {
       const { eventName, year } = req.body;
@@ -89,7 +91,7 @@ export const snapshotController = {
           eventName,
           year,
           _id: { $ne: req.params.id }
-        });
+        }).lean();
         if (existingSnapshot) {
           return res.status(400).json({
             message: `Snapshot for ${eventName} ${year} already exists`
@@ -119,6 +121,7 @@ export const snapshotController = {
     }
   },
 
+
   deleteSnapshot: async (req, res) => {
     try {
       const snapshot = await Snapshot.findById(req.params.id);
@@ -144,6 +147,7 @@ export const snapshotController = {
     }
   }
 };
+
 
 // Helper Functions
 const calculateDateWiseStats = async (incomes, expenses) => {
@@ -198,6 +202,7 @@ const calculateDateWiseStats = async (incomes, expenses) => {
       totalExpenses: Math.round(stat.totalExpenses)
     }));
 };
+
 
 const generateStats = async () => {
   try {

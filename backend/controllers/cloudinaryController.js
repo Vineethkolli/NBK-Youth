@@ -12,7 +12,6 @@ export const cloudinaryController = {
 
       const timestamp = Math.floor(Date.now() / 1000);
 
-      // Build params that will be signed
       // Only sign parameters that will be sent to Cloudinary in the request body
       const paramsToSign = {
         timestamp,
@@ -45,4 +44,3 @@ export const cloudinaryController = {
 };
 
 export default cloudinaryController;
-

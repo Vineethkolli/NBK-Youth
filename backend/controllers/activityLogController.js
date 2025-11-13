@@ -26,7 +26,7 @@ export const activityLogController = {
         ];
       }
 
-      // Filter by action (multi-select support)
+      // Filter by action
 if (action) {
   const actionsArray = action.split(',').filter(Boolean);
   if (actionsArray.length > 0) {
@@ -58,7 +58,8 @@ if (action) {
         ActivityLog.find(query)
           .sort({ createdAt: -1 })
           .skip(skip)
-          .limit(parseInt(limit)),
+          .limit(parseInt(limit))
+          .lean(),
         ActivityLog.countDocuments(query)
       ]);
 
@@ -78,11 +79,11 @@ if (action) {
   },
 
 
-  // Get activity statistics
+// Activity statistics
 getLogStats: async (req, res) => {
   try {
     const [actionStats, entityStats, totalLogs, recentActivity, userActivityBreakdown] = await Promise.all([
-      // Get action breakdown
+      // Action breakdown
       ActivityLog.aggregate([
         {
           $group: {
@@ -93,7 +94,7 @@ getLogStats: async (req, res) => {
         { $sort: { count: -1 } } 
       ]),
 
-      // Get entity breakdown
+      // Entity breakdown
       ActivityLog.aggregate([
         {
           $group: {
@@ -104,15 +105,12 @@ getLogStats: async (req, res) => {
         { $sort: { count: -1 } } 
       ]),
 
-      // Get total logs count
       ActivityLog.countDocuments(),
 
-      // Get recent activity (last 24 hours)
       ActivityLog.find({
         createdAt: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) }
       }).countDocuments(),
 
-      // Get detailed user activity breakdown for specific entities
       ActivityLog.aggregate([
         {
           $match: {
@@ -177,10 +175,10 @@ getLogStats: async (req, res) => {
       entityBreakdown[stat._id] = stat.count;
     });
 
-    // Convert user activity breakdown to a more usable format and sort
+// Convert user activity breakdown to a more usable format and sort
 const detailedUserBreakdown = {};
 
-// First, map entity groups with total actions per entity
+// Map entity groups with total actions per entity
 const entityTotals = userActivityBreakdown.map(entityGroup => {
   const users = entityGroup.users
     .sort((a, b) => b.totalActions - a.totalActions) 

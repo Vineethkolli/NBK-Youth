@@ -2,7 +2,6 @@ import Income from '../models/Income.js';
 import { logActivity } from '../middleware/activityLogger.js';
 
 export const incomeController = {
-  // Get all incomes with filters
   getIncomes: async (req, res) => {
     try {
       const { search, status, paymentMode, belongsTo, verifyLog, startDate, endDate, dateFilter } = req.query;
@@ -38,7 +37,7 @@ export const incomeController = {
         }
       }
 
-      const incomes = await Income.find(query).sort({ createdAt: -1 });
+      const incomes = await Income.find(query).sort({ createdAt: -1 }).lean();
       res.json(incomes);
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch incomes', error: error.message });
@@ -49,12 +48,13 @@ export const incomeController = {
   getVerificationData: async (req, res) => {
     try {
       const { verifyLog } = req.query;
-      const incomes = await Income.find({ verifyLog, isDeleted: false }).sort({ createdAt: -1 });
+      const incomes = await Income.find({ verifyLog, isDeleted: false }).sort({ createdAt: -1 }).lean();
       res.json(incomes);
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch verification data', error: error.message });
     }
   },
+
 
   // Create new income (case-insensitive + whitespace-normalized name uniqueness)
   createIncome: async (req, res) => {
@@ -65,7 +65,7 @@ export const incomeController = {
 
       const existingIncome = await Income.findOne({
         name: { $regex: `^${normalizedName}$`, $options: 'i' }
-      });
+      }).lean();
       if (existingIncome) {
         return res.status(400).json({ message: 'Name already exists' });
       }
@@ -97,7 +97,7 @@ export const incomeController = {
     }
   },
 
-  // Update income (case-insensitive + whitespace-normalized name uniqueness)
+  
   updateIncome: async (req, res) => {
     try {
       let { name, status } = req.body;
@@ -113,7 +113,7 @@ export const incomeController = {
         const existingIncome = await Income.findOne({
           name: { $regex: `^${normalizedName}$`, $options: 'i' },
           _id: { $ne: req.params.id }
-        });
+        }).lean();
         if (existingIncome) {
           return res.status(400).json({ message: 'Name already exists' });
         }
@@ -190,6 +190,7 @@ export const incomeController = {
     }
   },
 
+
   // Soft delete income
   deleteIncome: async (req, res) => {
     try {
@@ -223,7 +224,7 @@ export const incomeController = {
 
   getRecycleBin: async (req, res) => {
     try {
-      const deletedIncomes = await Income.find({ isDeleted: true }).sort({ updatedAt: -1 });
+      const deletedIncomes = await Income.find({ isDeleted: true }).sort({ updatedAt: -1 }).lean();
       res.json(deletedIncomes);
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch deleted incomes', error: error.message });
@@ -257,6 +258,7 @@ export const incomeController = {
       res.status(500).json({ message: 'Failed to restore income', error: error.message });
     }
   },
+
 
   // Permanently delete from recycle bin
   permanentDeleteIncome: async (req, res) => {

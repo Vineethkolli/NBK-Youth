@@ -8,16 +8,22 @@ import { logActivity } from '../middleware/activityLogger.js';
 export const statsController = {
   getStats: async (req, res) => {
     try {
+      const [incomes, expenses, userCount, successfulPaymentCount, previousYear] = await Promise.all([
+        Income.find({ isDeleted: false })
+          .select('amount status paymentMode belongsTo createdAt')
+          .lean(),
+        Expense.find({ isDeleted: false })
+          .select('amount paymentMode createdAt')
+          .lean(),
+        User.countDocuments(),
+        Payment.countDocuments({ transactionStatus: 'successful' }),
+        PreviousYear.findOne().lean()
+      ]);
 
-      const incomes = await Income.find({ isDeleted: false });
-      const expenses = await Expense.find({ isDeleted: false });
-      const users = await User.find();
-      const successfulPayments = await Payment.find({ transactionStatus: 'successful' });
-      const previousYear = await PreviousYear.findOne() || { amount: 0 };
+      const previousYearData = previousYear || { amount: 0 };
 
       // Calculate date-wise stats
       const dateWiseStats = await calculateDateWiseStats(incomes, expenses);
-      // Round numbers and remove decimals
       const roundNumber = (num) => Math.round(num);
 
       // Calculate budget stats
@@ -108,14 +114,14 @@ export const statsController = {
           amountReceived,
           amountPending,
           totalExpenses,
-          previousYearAmount: { amount: roundNumber(previousYear.amount) },
+          previousYearAmount: { amount: roundNumber(previousYearData.amount || 0) },
           amountLeft,
           online,
           offline
         },
         userStats: {
-          totalUsers: users.length,
-          successfulPayments: successfulPayments.length
+          totalUsers: userCount,
+          successfulPayments: successfulPaymentCount
         },
         villagers: calculateGroupStats('villagers'),
         youth: calculateGroupStats('youth'),
@@ -128,10 +134,11 @@ export const statsController = {
     }
   },
 
+
   updatePreviousYear: async (req, res) => {
     try {
       const { amount } = req.body;
-      const currentData = await PreviousYear.findOne();
+      const currentData = await PreviousYear.findOne().lean();
       const originalAmount = currentData ? currentData.amount : 0;
 
       await PreviousYear.findOneAndUpdate(
@@ -156,6 +163,7 @@ export const statsController = {
     }
   }
 };
+
 
 // Helper function to calculate date-wise statistics
 const calculateDateWiseStats = async (incomes, expenses) => {

@@ -6,7 +6,7 @@ import { parsePhoneNumberFromString } from 'libphonenumber-js';
 
 export const getProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select('-password');
+    const user = await User.findById(req.user.id).select('-password').lean();
     if (!user) return res.status(404).json({ message: 'User not found' });
     res.json(user);
   } catch {
@@ -35,7 +35,7 @@ export const updateProfile = async (req, res) => {
         return res.status(400).json({ message: 'Invalid email format' });
 
       if (normalizedEmail !== user.email) {
-        const emailExists = await User.findOne({ email: normalizedEmail });
+        const emailExists = await User.findOne({ email: normalizedEmail }).lean();
         if (emailExists) return res.status(400).json({ message: 'Email already in use' });
       }
     }
@@ -58,7 +58,7 @@ export const updateProfile = async (req, res) => {
       phoneNumber = parsed.number;
 
       if (phoneNumber !== user.phoneNumber) {
-        const phoneExists = await User.findOne({ phoneNumber });
+        const phoneExists = await User.findOne({ phoneNumber }).lean();
         if (phoneExists) return res.status(400).json({ message: 'Phone number already in use' });
       }
     }

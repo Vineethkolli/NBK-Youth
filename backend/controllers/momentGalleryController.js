@@ -25,12 +25,13 @@ export const galleryController = {
         `Gallery order updated for moment "${moment.title}" by ${req.user.name}`
       );
 
-      const updatedMoment = await Moment.findById(momentId);
+      const updatedMoment = await Moment.findById(momentId).lean();
       res.json({ message: 'Gallery order updated successfully', moment: updatedMoment });
     } catch (error) {
       res.status(500).json({ message: 'Failed to update gallery order' });
     }
   },
+
 
   startuploadMediaGallery: async (req, res) => {
     try {
@@ -85,12 +86,14 @@ export const galleryController = {
       await moment.save();
 
       await logActivity(req, 'UPDATE', 'Moment', momentId, before, `${mediaFiles.length} new gallery files added to moment "${moment.title}" by ${req.user.name}`);
-      const updated = await Moment.findById(momentId);
+
+      const updated = await Moment.findById(momentId).lean();
       res.json({ message: 'Gallery upload completed', moment: updated });
     } catch (err) {
       res.status(500).json({ message: 'Failed to complete gallery upload', error: err.message });
     }
   },
+
 
   addCopyToServiceDriveGallery: async (req, res) => {
     try {
@@ -181,12 +184,13 @@ export const galleryController = {
         `${filesToProcess.length} media files copied and added from Drive to moment "${moment.title}" by ${req.user.name}`
       );
 
-      const updatedMoment = await Moment.findById(momentId);
+      const updatedMoment = await Moment.findById(momentId).lean();
       res.status(201).json(updatedMoment);
     } catch (error) {
       res.status(500).json({ message: 'Failed to copy and add Drive media to moment', error: error.message });
     }
   },
+
 
   deleteGalleryFile: async (req, res) => {
     try {
@@ -227,13 +231,14 @@ export const galleryController = {
         `Gallery file "${mediaFile.name}" deleted from moment "${moment.title}" by ${req.user.name}`
       );
 
-      const updatedMoment = await Moment.findById(req.params.momentId);
+      const updatedMoment = await Moment.findById(req.params.momentId).lean();
       res.json({ message: 'Gallery file deleted successfully', moment: updatedMoment });
     } catch (error) {
       res.status(500).json({ message: 'Failed to delete gallery file', error: error.message });
     }
   },
 
+  
   downloadMediaFile: async (req, res) => {
     try {
       const { fileId } = req.params;

@@ -7,17 +7,18 @@ export const homepageController = {
 
   getSlides: async (req, res) => {
     try {
-      const slides = await Slide.find().sort('order');
+      const slides = await Slide.find().sort('order').lean();
       res.json(slides);
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch slides' });
     }
   },
 
+
   addSlide: async (req, res) => {
     try {
       const { type, url, mediaPublicId } = req.body;
-      const maxOrder = await Slide.findOne().sort('-order');
+      const maxOrder = await Slide.findOne().sort('-order').lean();
       const order = maxOrder ? maxOrder.order + 1 : 0;
       if (!url || !mediaPublicId) {
         return res.status(400).json({ message: 'Missing slide media details' });
@@ -44,6 +45,7 @@ export const homepageController = {
       res.status(500).json({ message: 'Failed to add slide' });
     }
   },
+
 
   deleteSlide: async (req, res) => {
     try {
@@ -82,6 +84,7 @@ export const homepageController = {
       res.status(500).json({ message: 'Failed to delete slide' });
     }
   },
+
 
   updateSlideOrder: async (req, res) => {
   try {

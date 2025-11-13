@@ -6,17 +6,18 @@ import { google } from 'googleapis';
 export const momentController = {
   getAllMoments: async (req, res) => {
     try {
-      const moments = await Moment.find().sort({ order: -1, createdAt: -1 });
+      const moments = await Moment.find().sort({ order: -1, createdAt: -1 }).lean();
       res.json(moments);
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch moments', error: error.message });
     }
   },
 
+
   addYouTubeMoment: async (req, res) => {
     try {
       const { title, url } = req.body;
-      const maxOrder = await Moment.findOne().sort('-order');
+      const maxOrder = await Moment.findOne().sort('-order').lean();
       const order = maxOrder ? maxOrder.order + 1 : 0;
       const momentData = {
         title,
@@ -42,6 +43,7 @@ export const momentController = {
       res.status(500).json({ message: 'Failed to add YouTube moment', error: error.message });
     }
   },
+
 
   addDriveMoment: async (req, res) => {
     try {
@@ -92,7 +94,7 @@ export const momentController = {
         }];
       }
 
-      const maxOrder = await Moment.findOne().sort('-order');
+      const maxOrder = await Moment.findOne().sort('-order').lean();
       const order = maxOrder ? maxOrder.order + 1 : 0;
 
       const momentData = {
@@ -124,6 +126,7 @@ export const momentController = {
       res.status(500).json({ message: 'Failed to add Drive moment', error: error.message });
     }
   },
+
 
   // Sync refresh Drive Moment — only if it's folder-based
   syncDriveFolderMoment: async (req, res) => {
@@ -174,6 +177,7 @@ export const momentController = {
       res.status(500).json({ message: 'Failed to sync Drive moment', error: error.message });
     }
   },
+
 
   startuploadMediaMoment: async (req, res) => {
     try {
@@ -246,6 +250,7 @@ export const momentController = {
       res.status(500).json({ message: 'Failed to complete upload', error: err.message });
     }
   },
+
 
   addCopyToServiceDriveMoment: async (req, res) => {
     try {
@@ -338,6 +343,7 @@ export const momentController = {
     }
   },
 
+
   updateMomentOrder: async (req, res) => {
     try {
       const { moments } = req.body;
@@ -364,6 +370,7 @@ export const momentController = {
       res.status(500).json({ message: 'Failed to update moment order' });
     }
   },
+
 
   updateMomentTitle: async (req, res) => {
     try {
@@ -398,6 +405,7 @@ export const momentController = {
     }
   },
 
+  
   deleteMoment: async (req, res) => {
     try {
       const moment = await Moment.findById(req.params.id);

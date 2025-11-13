@@ -14,11 +14,11 @@ export const verificationController = {
       let data;
 
       if (type === 'income') {
-        data = await Income.find(query).sort({ createdAt: -1 });
+        data = await Income.find(query).sort({ createdAt: -1 }).lean();
       } else if (type === 'expense') {
-        data = await Expense.find(query).sort({ createdAt: -1 });
+        data = await Expense.find(query).sort({ createdAt: -1 }).lean();
       } else if (type === 'payment') { 
-        data = await Payment.find(query).sort({ createdAt: -1 });
+        data = await Payment.find(query).sort({ createdAt: -1 }).lean();
       } else {
         return res.status(400).json({ message: 'Invalid type specified' });
       }
@@ -61,7 +61,6 @@ export const verificationController = {
         item.deletedBy = registerId;
       }
 
-      // Update verification status
       item.verifyLog = verifyLog;
       await item.save();
 

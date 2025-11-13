@@ -10,13 +10,15 @@ export const viniController = {
     try {
       const records = await ProcessedRecord.find()
         .populate('snapshotId')
-        .sort({ year: -1, eventName: 1 });
+        .sort({ year: -1, eventName: 1 })
+        .lean();
 
       res.json(records);
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch processed records' });
     }
   },
+
 
   // Create processed record from snapshot
   createProcessedRecord: async (req, res) => {
@@ -25,7 +27,7 @@ export const viniController = {
       const createdBy = req.user.registerId;
 
       // Check for duplicate eventName + year
-      const existingRecord = await ProcessedRecord.findOne({ eventName, year });
+      const existingRecord = await ProcessedRecord.findOne({ eventName, year }).lean();
       if (existingRecord) {
         return res.status(400).json({
           message: `Processed record for ${eventName} ${year} already exists`
@@ -50,6 +52,7 @@ export const viniController = {
       res.status(500).json({ message: 'Failed to create processed record' });
     }
   },
+
 
   // Process record data into chunks
   processRecord: async (req, res) => {
@@ -84,6 +87,7 @@ export const viniController = {
     }
   },
 
+
   // Reprocess record data
   reprocessRecord: async (req, res) => {
     try {
@@ -103,7 +107,6 @@ export const viniController = {
       const { allText, metadata } = buildSnapshotTextFromRecord(record);
       const chunkCount = await processRecordIntoChunks(record, allText, metadata, record.createdBy);
 
-      // Update record
       record.chunksCount = chunkCount;
       record.status = 'ready';
       await record.save();
@@ -122,11 +125,8 @@ export const viniController = {
       if (!record) {
         return res.status(404).json({ message: 'Processed record not found' });
       }
-
-      // Delete associated chunks
       await ProcessedChunk.deleteMany({ eventName: record.eventName, year: record.year });
 
-      // Delete the record
       await ProcessedRecord.findByIdAndDelete(req.params.id);
 
       res.json({ message: 'Processed record deleted successfully' });

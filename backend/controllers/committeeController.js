@@ -5,7 +5,7 @@ import { logActivity } from '../middleware/activityLogger.js';
 export const committeeController = {
   getAllMembers: async (req, res) => {
     try {
-      const committees = await Committee.find().sort('order');
+      const committees = await Committee.find().sort('order').lean();
 
       // Batch fetch all users in a single query to avoid N+1 problem
       const registerIds = committees.map(c => c.registerId);
@@ -23,7 +23,7 @@ export const committeeController = {
       const members = committees.map(c => {
         const user = userMap.get(c.registerId);
         if (!user) {
-          return { ...c.toObject(), name: 'Unknown', profileImage: null };
+          return { ...c, name: 'Unknown', profileImage: null };
         }
         return {
           _id:          c._id,
@@ -48,15 +48,19 @@ export const committeeController = {
   addMember: async (req, res) => {
     try {
       const { registerId } = req.body;
-      const user = await User.findOne({ registerId });
+      
+      const [user, existingMember, last] = await Promise.all([
+        User.findOne({ registerId }).lean(),
+        Committee.findOne({ registerId }).lean(),
+        Committee.findOne().sort('-order').lean()
+      ]);
+
       if (!user) {
         return res.status(404).json({ message: 'User not found' });
       }
-      if (await Committee.findOne({ registerId })) {
+      if (existingMember) {
         return res.status(400).json({ message: 'Already in committee' });
       }
-
-      const last = await Committee.findOne().sort('-order');
       const member = await Committee.create({
         registerId,
         order:     last ? last.order + 1 : 1,
@@ -71,7 +75,6 @@ export const committeeController = {
   { before: null, after: member.toObject() },
   `Added ${user.name || 'Unknown'} (${registerId}) to committee by ${req.user.name}`
 );
-
 
       res.status(201).json({
         ...member.toObject(),

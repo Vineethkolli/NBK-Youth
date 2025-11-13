@@ -3,7 +3,6 @@ import cloudinary from '../config/cloudinary.js';
 import { logActivity } from '../middleware/activityLogger.js';
 
 export const expenseController = {
-  // Get all expenses with filters
   getExpenses: async (req, res) => {
     try {
       const { search, paymentMode, verifyLog, startDate, endDate } = req.query;
@@ -31,7 +30,7 @@ export const expenseController = {
         }
       }
 
-      const expenses = await Expense.find(query).sort({ createdAt: -1 });
+      const expenses = await Expense.find(query).sort({ createdAt: -1 }).lean();
       res.json(expenses);
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch expenses' });
@@ -43,7 +42,8 @@ export const expenseController = {
     try {
       const { verifyLog } = req.query;
       const expenses = await Expense.find({ verifyLog, isDeleted: false })
-        .sort({ createdAt: -1 });
+        .sort({ createdAt: -1 })
+        .lean();
       res.json(expenses);
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch verification data' });
@@ -162,7 +162,6 @@ export const expenseController = {
         expense.deletedBy = registerId;
       }
 
-      // Update verification status
       expense.verifyLog = verifyLog;
       await expense.save();
 
@@ -181,6 +180,7 @@ export const expenseController = {
     }
   },
 
+
   // Soft delete expense
   deleteExpense: async (req, res) => {
     try {
@@ -191,7 +191,6 @@ export const expenseController = {
 
       const originalData = expense.toObject();
 
-      // Do NOT delete bill image from Cloudinary on soft delete
       expense.isDeleted = true;
       expense.deletedAt = new Date();
       expense.deletedBy = req.user.registerId;
@@ -217,7 +216,8 @@ export const expenseController = {
   getRecycleBin: async (req, res) => {
     try {
       const deletedExpenses = await Expense.find({ isDeleted: true })
-        .sort({ deletedAt: -1 });
+        .sort({ deletedAt: -1 })
+        .lean();
       res.json(deletedExpenses);
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch deleted expenses' });

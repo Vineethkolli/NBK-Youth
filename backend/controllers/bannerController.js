@@ -5,12 +5,13 @@ import { logActivity } from '../middleware/activityLogger.js';
 export const bannerController = {
   getAllBanners: async (req, res) => {
     try {
-      const banners = await Banner.find().sort('-createdAt');
+      const banners = await Banner.find().sort('-createdAt').lean();
       res.json(banners);
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch banners' });
     }
   },
+
 
   createBanner: async (req, res) => {
     try {
@@ -25,7 +26,7 @@ export const bannerController = {
 
       // If trying to enable this banner, check if any other banner is enabled
       if (status === 'enabled') {
-        const enabledBanner = await Banner.findOne({ status: 'enabled' });
+        const enabledBanner = await Banner.findOne({ status: 'enabled' }).lean();
         if (enabledBanner) {
           return res.status(400).json({ 
             message: 'Please disable the currently enabled banner first' 
@@ -66,6 +67,7 @@ export const bannerController = {
     }
   },
 
+
   updateBanner: async (req, res) => {
     try {
       const { title, message, periodicity, duration, status, deleteImage, deleteVideo, deleteImageCloudinary, deleteVideoCloudinary, image, imagePublicId, video, videoPublicId } = req.body;
@@ -93,7 +95,7 @@ export const bannerController = {
         const enabledBanner = await Banner.findOne({ 
           status: 'enabled',
           _id: { $ne: req.params.id }
-        });
+        }).lean();
         if (enabledBanner) {
           return res.status(400).json({ 
             message: 'Please disable the currently enabled banner first' 
@@ -175,6 +177,7 @@ export const bannerController = {
     }
   },
 
+
   deleteBanner: async (req, res) => {
     try {
       const banner = await Banner.findById(req.params.id);
@@ -217,6 +220,7 @@ export const bannerController = {
       res.status(500).json({ message: 'Failed to delete banner' });
     }
   },
+
 
   getActiveBanner: async (req, res) => {
     try {

@@ -1,4 +1,3 @@
-// controllers/authLogController.js
 import AuthLog from '../models/AuthLog.js';
 
 export const authLogController = {
@@ -19,7 +18,7 @@ export const authLogController = {
 
       const skip = (page - 1) * limit;
 
-      // ✅ If latest=true, get only the latest log per user
+      // If latest=true, get only the latest log per user
       if (latest === 'true') {
         const pipeline = [
           { $match: query },
@@ -38,7 +37,7 @@ export const authLogController = {
 
         const logs = await AuthLog.aggregate(pipeline);
 
-        // For pagination, count distinct registerIds matching the query
+        // Count distinct registerIds matching the query
         const total = await AuthLog.distinct("registerId", query).then((ids) => ids.length);
 
         return res.json({
@@ -51,12 +50,12 @@ export const authLogController = {
         });
       }
 
-      // ✅ Normal mode (no latest filter)
       const [logs, total] = await Promise.all([
         AuthLog.find(query)
           .sort({ createdAt: -1 })
           .skip(skip)
-          .limit(parseInt(limit)),
+          .limit(parseInt(limit))
+          .lean(),
         AuthLog.countDocuments(query),
       ]);
 

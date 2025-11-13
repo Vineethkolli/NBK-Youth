@@ -5,7 +5,7 @@ export const lockSettingsController = {
 
   getLockStatus: async (req, res) => {
     try {
-      const lockSettings = await LockSettings.findOne();
+      const lockSettings = await LockSettings.findOne().lean();
       res.json(lockSettings || { isLocked: false });
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch lock status' });

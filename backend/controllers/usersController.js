@@ -20,24 +20,26 @@ export const getAllUsers = async (req, res) => {
       };
     }
 
-    const users = await User.find(query).select('-password');
-    
+    const users = await User.find(query).select('-password').lean();
+
     // Batch fetch all notifications in a single query to avoid N+1 problem
-    const registerIds = users.map(user => user.registerId);
-    const notifications = await Notification.find({ 
-      registerId: { $in: registerIds } 
+    const registerIds = users.map(u => u.registerId);
+    const notifications = await Notification.find({
+      registerId: { $in: registerIds }
     }).lean();
-    
-    // Create a map for O(1) lookup
+
     const notificationMap = new Map();
     notifications.forEach(notif => {
-      notificationMap.set(notif.registerId, notif.subscriptions?.length > 0);
-    });
+      const existing = notificationMap.get(notif.registerId) || false;
+      const hasSubscription = notif.subscriptions?.length > 0;
 
+      notificationMap.set(notif.registerId, existing || hasSubscription);
+    });
+   
     // Merge user data with notification status
     const usersWithNotifications = users.map(user => ({
-      ...user.toObject(),
-      notificationsEnabled: notificationMap.get(user.registerId) || false
+      ...user,
+      notificationsEnabled: notificationMap.get(user.registerId) === true
     }));
 
     res.json(usersWithNotifications);
@@ -141,7 +143,7 @@ export const updateUserProfile = async (req, res) => {
         return res.status(400).json({ message: 'Invalid email format' });
 
       if (normalizedEmail !== userToUpdate.email) {
-        const exists = await User.findOne({ email: normalizedEmail });
+        const exists = await User.findOne({ email: normalizedEmail }).lean();
         if (exists) return res.status(400).json({ message: 'Email already in use' });
       }
     }
@@ -166,7 +168,7 @@ export const updateUserProfile = async (req, res) => {
       phoneNumber = parsed.number; 
 
       if (phoneNumber !== userToUpdate.phoneNumber) {
-        const exists = await User.findOne({ phoneNumber });
+        const exists = await User.findOne({ phoneNumber }).lean();
         if (exists) return res.status(400).json({ message: 'Phone number already in use' });
       }
     }

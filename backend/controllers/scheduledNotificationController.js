@@ -5,7 +5,6 @@ import NotificationHistory from '../models/NotificationHistory.js';
 import webpush from 'web-push';
 import { logActivity } from '../middleware/activityLogger.js';
 
-// Create Scheduled Notification
 export const createScheduledNotification = async (req, res) => {
   try {
     const { title, message, link, scheduledAt } = req.body;
@@ -38,10 +37,10 @@ export const createScheduledNotification = async (req, res) => {
   }
 };
 
-// List Scheduled Notifications
+
 export const listScheduledNotifications = async (req, res) => {
   try {
-    const docs = await ScheduledNotification.find().sort({ scheduledAt: -1 });
+    const docs = await ScheduledNotification.find().sort({ scheduledAt: -1 }).lean();
     res.json(docs);
   } catch (err) {
     console.error(err);
@@ -49,7 +48,7 @@ export const listScheduledNotifications = async (req, res) => {
   }
 };
 
-// Update Scheduled Notification
+
 export const updateScheduledNotification = async (req, res) => {
   try {
     const { id } = req.params;
@@ -58,7 +57,7 @@ export const updateScheduledNotification = async (req, res) => {
     const oldDoc = await ScheduledNotification.findById(id);
     if (!oldDoc) return res.status(404).json({ error: 'Not found' });
 
-    // Reset status to PENDING if scheduled date changed
+    // Reset status to Pending if scheduled date changed
     if (updates.scheduledAt && new Date(updates.scheduledAt).getTime() !== oldDoc.scheduledAt.getTime()) {
       updates.status = 'PENDING';
     }
@@ -83,7 +82,7 @@ export const updateScheduledNotification = async (req, res) => {
   }
 };
 
-// Delete Scheduled Notification
+
 export const deleteScheduledNotification = async (req, res) => {
   try {
     const { id } = req.params;
@@ -104,6 +103,7 @@ export const deleteScheduledNotification = async (req, res) => {
     res.status(500).json({ error: 'Failed to delete scheduled notification' });
   }
 };
+
 
 // Send Manually
 export const sendScheduledNow = async (req, res) => {
@@ -163,6 +163,7 @@ export const sendScheduledNow = async (req, res) => {
     res.status(500).json({ error: 'Failed to send scheduled notification' });
   }
 };
+
 
 // Scheduled Notifications Processor
 export const processDueNotifications = async () => {

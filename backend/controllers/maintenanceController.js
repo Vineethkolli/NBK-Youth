@@ -4,13 +4,14 @@ import { logActivity } from '../middleware/activityLogger.js';
 export const maintenanceController = {
   getStatus: async (req, res) => {
     try {
-      const status = await MaintenanceMode.findOne();
+      const status = await MaintenanceMode.findOne().lean();
       res.json(status || { isEnabled: false });
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch maintenance status' });
     }
   },
 
+  
   toggleMode: async (req, res) => {
     try {
       const { isEnabled, expectedBackAt } = req.body;

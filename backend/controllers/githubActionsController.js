@@ -164,6 +164,7 @@ export const githubActionsController = {
     }
   },
 
+
   getMetricsOnly: async (req, res) => {
   try {
     const workflowFilter = req.query.workflow || 'all';
@@ -239,6 +240,7 @@ export const githubActionsController = {
     return res.status(500).json({ error: 'Failed to fetch metrics' });
   }
 },
+
 
   getWorkflowsOnly: async (req, res) => {
     try {

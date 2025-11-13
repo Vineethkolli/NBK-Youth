@@ -8,11 +8,11 @@ const extractPublicId = (url) => {
   return `Vibe/${filename.split('.')[0]}`;
 };
 
-const VibeController = {
 
+const VibeController = {
   getAllCollections: async (req, res) => {
     try {
-      const collections = await Collection.find().sort({ createdAt: -1 });
+      const collections = await Collection.find().sort({ createdAt: -1 }).lean();
       res.json(collections);
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch collections' });
@@ -25,7 +25,7 @@ const VibeController = {
     const name = req.body.name.trim();
     const existing = await Collection.findOne({
       name: { $regex: `^${name}$`, $options: 'i' } // case-insensitive match
-    });
+    }).lean();
 
     if (existing) {
       return res.status(400).json({ message: 'Collection name already exists' });
@@ -60,7 +60,7 @@ const VibeController = {
     const existing = await Collection.findOne({
       _id: { $ne: req.params.id }, 
       name: { $regex: `^${name}$`, $options: 'i' }
-    });
+    }).lean();
 
     if (existing) {
       return res.status(400).json({ message: 'Collection name already exists' });
@@ -161,6 +161,7 @@ const VibeController = {
       res.status(500).json({ message: 'Failed to upload song' });
     }
   },
+
 
 uploadMultipleSongs: async (req, res) => {
   try {
@@ -270,7 +271,6 @@ uploadMultipleSongs: async (req, res) => {
         `Song "${song.name}" deleted from collection "${collection.name}" by ${req.user.name}`
       );
 
-      // Remove from database
       collection.songs.pull(req.params.songId);
       await collection.save();
       res.json({ message: 'Song deleted successfully' });

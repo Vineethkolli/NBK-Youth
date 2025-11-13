@@ -5,12 +5,13 @@ export const gameController = {
 
   getAllGames: async (req, res) => {
     try {
-      const games = await Game.find().sort('-createdAt');
+      const games = await Game.find().sort('-createdAt').lean();
       res.json(games);
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch games' });
     }
   },
+
 
   createGame: async (req, res) => {
     try {
@@ -22,7 +23,7 @@ export const gameController = {
 
       const existingGame = await Game.findOne({
         name: { $regex: `^${normalizedName}$`, $options: 'i' }
-      });
+      }).lean();
 
       if (existingGame) {
         return res.status(400).json({ message: 'Game name already exists. Please choose a different name.' });
@@ -53,6 +54,7 @@ export const gameController = {
     }
   },
 
+
   updateGame: async (req, res) => {
     try {
       const originalGame = await Game.findById(req.params.id);
@@ -63,7 +65,7 @@ export const gameController = {
       const existingGame = await Game.findOne({
         name: { $regex: `^${normalizedName}$`, $options: 'i' },
         _id: { $ne: req.params.id }
-      });
+      }).lean();
 
       if (existingGame) {
         return res.status(400).json({ message: 'Game name already exists. Please choose a different name.' });
@@ -90,6 +92,7 @@ export const gameController = {
     }
   },
 
+
   deleteGame: async (req, res) => {
     try {
       const game = await Game.findById(req.params.id);
@@ -112,6 +115,7 @@ export const gameController = {
       res.status(500).json({ message: 'Failed to delete game' });
     }
   },
+
 
   addPlayer: async (req, res) => {
     try {
@@ -149,6 +153,7 @@ export const gameController = {
       res.status(500).json({ message: 'Failed to add player' });
     }
   },
+
 
   updatePlayer: async (req, res) => {
     try {
@@ -189,6 +194,7 @@ export const gameController = {
     }
   },
 
+
   deletePlayer: async (req, res) => {
     try {
       const game = await Game.findById(req.params.gameId);
@@ -216,5 +222,4 @@ export const gameController = {
       res.status(500).json({ message: 'Failed to delete player' });
     }
   }
-
 };

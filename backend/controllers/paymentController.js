@@ -10,9 +10,9 @@ const PaymentController = {
       let payments;
 
       if (registerId) {
-        payments = await Payment.find({ registerId }).sort({ createdAt: -1 });
+        payments = await Payment.find({ registerId }).sort({ createdAt: -1 }).lean();
       } else {
-        payments = await Payment.find().sort({ createdAt: -1 });
+        payments = await Payment.find().sort({ createdAt: -1 }).lean();
       }
 
       return res.status(200).json(payments);
@@ -21,11 +21,11 @@ const PaymentController = {
     }
   },
 
-  // Fetch a single payment by paymentId
+  
   async getPaymentById(req, res) {
     try {
       const { paymentId } = req.params;
-      const payment = await Payment.findOne({ paymentId });
+      const payment = await Payment.findOne({ paymentId }).lean();
 
       if (!payment) {
         return res.status(404).json({ message: 'Payment not found' });
@@ -80,7 +80,7 @@ const PaymentController = {
   async getVerificationData(req, res) {
     try {
       const { verifyLog } = req.query;
-      const payments = await Payment.find({ verifyLog }).sort({ createdAt: -1 });
+      const payments = await Payment.find({ verifyLog }).sort({ createdAt: -1 }).lean();
       return res.json(payments);
     } catch (error) {
       return res.status(500).json({ message: 'Failed to fetch verification data', error: error.message });
@@ -98,8 +98,8 @@ const PaymentController = {
         return res.status(404).json({ message: 'Payment not found' });
       }
 
-      // Check if name exists in Income collection
-      const existingIncome = await Income.findOne({ name });
+      // Check if name exists in income collection
+      const existingIncome = await Income.findOne({ name }).lean();
       if (existingIncome) {
         return res.status(400).json({ 
           message: 'Name already exists in income records',
@@ -141,9 +141,9 @@ const PaymentController = {
 
       const originalData = payment.toObject();
 
-      // If verifying payment, check for existing name in Income
+      // If verifying payment, check for existing name in income
       if (verifyLog === 'verified') {
-        const existingIncome = await Income.findOne({ name: payment.name });
+        const existingIncome = await Income.findOne({ name: payment.name }).lean();
         if (existingIncome) {
           return res.status(400).json({ 
             message: 'Name already exists in income records',

@@ -5,7 +5,7 @@ export const eventLabelController = {
   
   getEventLabel: async (req, res) => {
     try {
-      const eventLabel = await EventLabel.findOne().sort({ createdAt: -1 });
+      const eventLabel = await EventLabel.findOne().sort({ createdAt: -1 }).lean();
       res.json(eventLabel);
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch event label' });
@@ -17,7 +17,7 @@ export const eventLabelController = {
     try {
       const { label } = req.body;
 
-      // Delete any existing event label (only one at a time)
+      // Delete any existing event label (only allowed one)
       await EventLabel.deleteMany({});
 
       const eventLabel = await EventLabel.create({

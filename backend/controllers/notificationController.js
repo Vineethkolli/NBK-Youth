@@ -4,7 +4,6 @@ import User from '../models/User.js';
 import NotificationHistory from '../models/NotificationHistory.js';
 import { logActivity } from '../middleware/activityLogger.js';
 
-
 export const getPublicKey = (req, res) => {
   res.json({ publicKey: process.env.PUBLIC_VAPID_KEY });
 };
@@ -91,13 +90,13 @@ export const sendNotification = async (req, res) => {
     let subscriptionUsers = [];
 
     if (target === 'All') {
-      const allUsers = await User.find({}, 'registerId');
+      const allUsers = await User.find({}, 'registerId').lean();
       eligibleRegisterIds = allUsers.map((user) => user.registerId);
-      subscriptionUsers = await Subscription.find({ registerId: { $in: eligibleRegisterIds } });
+      subscriptionUsers = await Subscription.find({ registerId: { $in: eligibleRegisterIds } }).lean();
 
     } else if (target === 'Admins_Financiers_Developers') {
       eligibleRegisterIds = await getRoleBasedRegisterIds(['admin', 'financier', 'developer']);
-      subscriptionUsers = await Subscription.find({ registerId: { $in: eligibleRegisterIds } });
+      subscriptionUsers = await Subscription.find({ registerId: { $in: eligibleRegisterIds } }).lean();
 
     } else if (target === 'Specific User' && registerId) {
       // Check if user exists or not

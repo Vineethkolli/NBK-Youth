@@ -3,18 +3,15 @@ import EstimatedExpense from '../models/EstimatedExpense.js';
 import { logActivity } from '../middleware/activityLogger.js';
 
 export const estimationController = {
-  
-// Income
+
 getAllEstimatedIncomes: async (req, res) => {
   try {
     const { sortOrder, sortField, belongsTo, status, search } = req.query;
     let query = EstimatedIncome.find();
 
-    // Filters
     if (belongsTo) query = query.where('belongsTo', belongsTo);
     if (status) query = query.where('status', status);
 
-    // Search
     if (search) {
       const searchRegex = new RegExp(search.trim(), 'i'); 
       const searchNumber = Number(search);
@@ -38,7 +35,6 @@ getAllEstimatedIncomes: async (req, res) => {
       }
     }
 
-    // Sorting
     if (sortOrder && sortField) {
       const sortObj = {};
       sortObj[sortField] = sortOrder === 'desc' ? -1 : 1;
@@ -47,13 +43,14 @@ getAllEstimatedIncomes: async (req, res) => {
       query = query.sort({ createdAt: -1 });
     }
 
-    const incomes = await query.exec();
+    const incomes = await query.lean().exec();
     res.json(incomes);
   } catch (error) {
     console.error('Error fetching estimated incomes:', error);
     res.status(500).json({ message: 'Failed to fetch estimated incomes' });
   }
 },
+
 
   createEstimatedIncome: async (req, res) => {
     try {
@@ -62,7 +59,7 @@ getAllEstimatedIncomes: async (req, res) => {
       const normalizedName = name.trim().replace(/\s+/g, ' ');
       const existingIncome = await EstimatedIncome.findOne({
         name: { $regex: `^${normalizedName}$`, $options: 'i' }
-      });
+      }).lean();
       if (existingIncome) {
         return res.status(400).json({ message: 'Name already exists' });
       }
@@ -89,6 +86,7 @@ getAllEstimatedIncomes: async (req, res) => {
     }
   },
 
+
   updateEstimatedIncome: async (req, res) => {
     try {
       const { name } = req.body;
@@ -103,7 +101,7 @@ getAllEstimatedIncomes: async (req, res) => {
         const existingIncome = await EstimatedIncome.findOne({
           name: { $regex: `^${normalizedName}$`, $options: 'i' },
           _id: { $ne: req.params.id }
-        });
+        }).lean();
         if (existingIncome) {
           return res.status(400).json({ message: 'Name already exists' });
         }
@@ -131,6 +129,7 @@ getAllEstimatedIncomes: async (req, res) => {
     }
   },
 
+
   deleteEstimatedIncome: async (req, res) => {
     try {
       const income = await EstimatedIncome.findById(req.params.id);
@@ -153,7 +152,6 @@ getAllEstimatedIncomes: async (req, res) => {
   },
 
   
-  // Expense
   getAllEstimatedExpenses: async (req, res) => {
   try {
     const { sortOrder, sortField, search } = req.query;
@@ -182,7 +180,6 @@ getAllEstimatedIncomes: async (req, res) => {
       }
     }
 
-    // Sorting
     if (sortOrder && sortField) {
       const sortObj = {};
       sortObj[sortField] = sortOrder === 'desc' ? -1 : 1;
@@ -223,6 +220,7 @@ getAllEstimatedIncomes: async (req, res) => {
     }
   },
 
+
   updateEstimatedExpense: async (req, res) => {
     try {
       const originalExpense = await EstimatedExpense.findById(req.params.id);
@@ -250,6 +248,7 @@ getAllEstimatedIncomes: async (req, res) => {
     }
   },
 
+
   deleteEstimatedExpense: async (req, res) => {
     try {
       const expense = await EstimatedExpense.findById(req.params.id);
@@ -272,11 +271,12 @@ getAllEstimatedIncomes: async (req, res) => {
   },
 
 
-  // Stats
   getEstimationStats: async (req, res) => {
     try {
-      const incomes = await EstimatedIncome.find();
-      const expenses = await EstimatedExpense.find();
+      const [incomes, expenses] = await Promise.all([
+        EstimatedIncome.find().lean(),
+        EstimatedExpense.find().lean()
+      ]);
 
       const totalEstimatedIncome = incomes.reduce((sum, i) => sum + i.presentAmount, 0);
       const totalEstimatedPaidIncome = incomes
