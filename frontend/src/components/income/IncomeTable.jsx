@@ -119,14 +119,14 @@ function IncomeTable({
             const isHidden = hiddenProfiles.has(income._id);
             return (
               <tr key={income._id}>
-                <td className="px-6 py-4 whitespace-nowrap text-sm">{index + 1}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{index + 1}</td>
 
                 {hasAccess('Privileged') && visibleColumns.registerId && (
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">{income.registerId}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{income.registerId}</td>
                 )}
 
                 {visibleColumns.incomeId && (
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">{income.incomeId}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{income.incomeId}</td>
                 )}
 
                 {visibleColumns.entryDate && (
@@ -178,7 +178,7 @@ function IncomeTable({
                 )}
 
                 {visibleColumns.amount && (
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">{income.amount}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{income.amount}</td>
                 )}
 
                 {visibleColumns.status && (
