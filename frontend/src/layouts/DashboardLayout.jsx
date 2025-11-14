@@ -172,23 +172,23 @@ function DashboardLayout() {
                   
                   {/* Stats Button */}
                   <button
-                    onClick={() => handleNavigation('/income')}
+                    onClick={() => handleNavigation('/stats')}
                     className="transform translate-y-2 -translate-x-8 pointer-events-auto"
                   >
-                    <div className={`rounded-full p-3.5 flex flex-col items-center justify-center w-16 h-16 shadow-lg ${isActive('/income') ? 'bg-indigo-600 text-white' : 'bg-white text-gray-600'}`}>
-                      <IndianRupee className="h-6 w-6" />
-                      <span className="text-xs mt-1">Income</span>
+                    <div className={`rounded-full p-3.5 flex flex-col items-center justify-center w-16 h-16 shadow-lg ${isActive('/stats') ? 'bg-indigo-600 text-white' : 'bg-white text-gray-600'}`}>
+                      <BarChart2 className="h-6 w-6" />
+                      <span className="text-xs mt-1">Stats</span>
                     </div>
                   </button>
 
                   {/* Income Button */}
                   <button
-                    onClick={() => handleNavigation('/stats')}
+                    onClick={() => handleNavigation('/income')}
                     className="transform -translate-y-2 pointer-events-auto"
                   >
-                    <div className={`rounded-full p-3.5 flex flex-col items-center justify-center w-16 h-16 shadow-lg ${isActive('/stats') ? 'bg-indigo-600 text-white' : 'bg-white text-gray-600'}`}>
-                      <BarChart2 className="h-6 w-6" />
-                      <span className="text-xs mt-1">Stats</span>
+                    <div className={`rounded-full p-3.5 flex flex-col items-center justify-center w-16 h-16 shadow-lg ${isActive('/income') ? 'bg-indigo-600 text-white' : 'bg-white text-gray-600'}`}>
+                      <IndianRupee className="h-6 w-6" />
+                      <span className="text-xs mt-1">Income</span>
                     </div>
                   </button>
 
