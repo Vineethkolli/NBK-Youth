@@ -111,8 +111,8 @@ app.get('/health', (req, res) => res.status(200).send('Ok'));
 
 // MongoDB Connection with Pooling
 const mongooseOptions = {
-  maxPoolSize: 200,
-  minPoolSize: 2,
+  maxPoolSize: 400,
+  minPoolSize: 10,
   maxIdleTimeMS: 60000,
   family: 4,
 };
