@@ -141,7 +141,7 @@ function Income() {
 <div className="flex items-center gap-4">
   <button
     onClick={() => setOpenPanel(openPanel === "filters" ? null : "filters")}
-    className="flex items-center justify-between px-3 py-1 bg-white rounded-md shadow border w-40"
+    className="flex items-center gap-3 px-3 py-1 bg-white rounded-md shadow border"
   >
     <span className="font-medium flex items-center gap-2">
       <Filter className="h-4 w-4 text-gray-600" />
@@ -156,7 +156,7 @@ function Income() {
 
   <button
     onClick={() => setOpenPanel(openPanel === "columns" ? null : "columns")}
-    className="flex items-center justify-between px-3 py-1 bg-white rounded-md shadow border w-40"
+    className="flex items-center gap-3 px-3 py-1 bg-white rounded-md shadow border"
   >
     <span className="font-medium flex items-center gap-2">
       <Columns className="h-4 w-4 text-gray-600" />
