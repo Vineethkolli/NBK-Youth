@@ -155,21 +155,22 @@ function GalleryGrid({
   };
 
   const isAllSelected = localMediaFiles.length > 0 && selectedFiles.length === localMediaFiles.length;
-  const selectionModeActive = selectedFiles.length > 0;
+  const selectionModeActive = selectedFiles.length > 0; // NEW: whether to show circles for all files
 
   return (
-    <div className="fixed inset-0 bg-black/90 flex flex-col z-50">
-      <div className="bg-white p-4 flex items-center justify-between gap-2">
-        <div className="flex items-center space-x-2 sm:space-x-4 min-w-0 flex-1">
-          <button onClick={onClose} className="text-gray-600 hover:text-gray-800 flex-shrink-0">
+    <div className="fixed inset-0 bg-black/90 flex flex-col z-50 transform translate-z-0">
+      {/* Header */}
+      <div className="bg-white p-4 flex items-center justify-between">
+        <div className="flex items-center space-x-4">
+          <button onClick={onClose} className="text-gray-600 hover:text-gray-800">
             <ArrowLeft className="h-6 w-6" />
           </button>
 
           {selectedFiles.length > 0 ? (
-            <div className="flex items-center space-x-2 sm:space-x-4 min-w-0">
+            <div className="flex items-center space-x-4">
               <button
                 onClick={toggleSelectAll}
-                className="flex flex-col items-center justify-center w-10 flex-shrink-0"
+                className="flex flex-col items-center justify-center w-10"
                 title={isAllSelected ? 'Deselect all' : 'Select all'}
               >
                 <div
@@ -181,16 +182,16 @@ function GalleryGrid({
                 </div>
                 <span className="text-xs mt-1">All</span>
               </button>
-              <div className="text-lg sm:text-xl font-medium truncate">{selectedFiles.length} selected</div>
+              <div className="text-xl font-medium">{selectedFiles.length} selected</div>
             </div>
           ) : (
-            <h2 className="text-lg sm:text-xl font-semibold truncate min-w-0">{moment.title}</h2>
+            <h2 className="text-xl font-semibold">{moment.title}</h2>
           )}
         </div>
 
-        <div className="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
+        <div className="flex items-center space-x-4">
           {selectedFiles.length > 0 ? (
-            <div className="flex items-center space-x-2 sm:space-x-3">
+            <div className="flex items-center space-x-3">
               <button
                 onClick={() => downloadFiles(selectedFiles)}
                 className="p-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 flex items-center"
@@ -209,7 +210,7 @@ function GalleryGrid({
 )}
               <button
                 onClick={() => setSelectedFiles([])}
-                className="text-red-600 hover:text-red-700 font-semibold text-sm sm:text-base"
+                className="text-red-600 hover:text-red-700 font-semibold"
                 title="Cancel selection"
               >
                 Cancel
@@ -221,31 +222,31 @@ function GalleryGrid({
                 <>
                   {moment.type !== 'drive' && (
                     <>
-                      <button onClick={() => setShowUploadForm(true)} className="btn-primary p-2">
-                        <Upload className="h-4 w-4" />
+                      <button onClick={() => setShowUploadForm(true)} className="btn-primary">
+                        <Upload className="h-4 w-4 mr-2" />
                       </button>
-                      <button onClick={() => setShowDriveForm(true)} className="btn-primary p-2">
-                        <Copy className="h-4 w-4" />
+                      <button onClick={() => setShowDriveForm(true)} className="btn-primary">
+                        <Copy className="h-4 w-4 mr-2" />
                       </button>
                     </>
                   )}
                   <button
                     onClick={() => setIsReorderMode(true)}
                     disabled={isReorderMode}
-                    className={`btn-secondary p-2 ${isReorderMode ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    className={`btn-secondary ${isReorderMode ? 'opacity-50 cursor-not-allowed' : ''}`}
                     title={isReorderMode ? 'Reorder is active' : 'Enter reorder mode'}
                   >
-                    <GripHorizontal className="h-4 w-4" />
+                    <GripHorizontal className="h-4 w-4 mr-2" />
                   </button>
                   <button
                     onClick={() => {
                       setIsEditMode(!isEditMode);
                       setIsReorderMode(false);
                     }}
-                    className={`btn-secondary flex items-center ${isEditMode ? 'bg-red-100' : ''}`}
+                    className={`btn-secondary ${isEditMode ? 'bg-red-100' : ''}`}
                   >
-                    <Edit2 className="h-4 w-4 sm:mr-2" />
-                    <span className="hidden sm:inline">{isEditMode ? 'Done' : ''}</span>
+                    <Edit2 className="h-4 w-4 mr-2" />
+                    {isEditMode ? 'Done' : ''}
                   </button>
                 </>
               )}
@@ -257,6 +258,7 @@ function GalleryGrid({
         </div>
       </div>
 
+      {/* Gallery grid / reorder */}
       {isReorderMode ? (
         <GalleryReorder
           mediaFiles={localMediaFiles}
@@ -299,7 +301,7 @@ function GalleryGrid({
                     {/* Selection Circle */}
                     <div
                       className={`absolute top-2 left-2 w-6 h-6 rounded-full border-2 border-white flex items-center justify-center transition-opacity ${
-                        // show circle always when selection mode is active OR on hover
+                        // show circle always when selection mode is active OR on hover; selected gets indigo bg
                         isSelected
                           ? 'opacity-100 bg-indigo-600 border-indigo-500 text-white'
                           : selectionModeActive
