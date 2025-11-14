@@ -52,9 +52,6 @@ const userSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-userSchema.index({ role: 1, category: 1 });
-userSchema.index({ createdAt: -1 });
-
 // Generate registerId
 userSchema.pre('save', async function (next) {
   if (!this.registerId) {

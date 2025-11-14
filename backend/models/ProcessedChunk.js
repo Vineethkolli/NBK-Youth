@@ -32,17 +32,6 @@ const processedChunkSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-processedChunkSchema.index(
-  { embedding: 'vectorSearch' },
-  {
-    name: 'embedding_vector_index',
-    vector: {
-      dimension: 1536,
-      metric: 'cosine'
-    }
-  }
-);
-
 processedChunkSchema.index({ eventName: 1, year: 1 });
 
 export default mongoose.model('ProcessedChunk', processedChunkSchema);
