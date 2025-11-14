@@ -32,8 +32,17 @@ const processedChunkSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-// Index for vector similarity search
-processedChunkSchema.index({ embedding: 1 });
+processedChunkSchema.index(
+  { embedding: 'vectorSearch' },
+  {
+    name: 'embedding_vector_index',
+    vector: {
+      dimension: 1536,
+      metric: 'cosine'
+    }
+  }
+);
+
 processedChunkSchema.index({ eventName: 1, year: 1 });
 
 export default mongoose.model('ProcessedChunk', processedChunkSchema);

@@ -1,12 +1,6 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
-
-const counterSchema = new mongoose.Schema({
-  _id: { type: String, required: true },
-  seq: { type: Number, default: 0 }
-});
-
-const Counter = mongoose.model('Counter', counterSchema);
+import Counter from './Counter.js';
 
 const userSchema = new mongoose.Schema({
   registerId: {
@@ -19,10 +13,10 @@ const userSchema = new mongoose.Schema({
   },
   email: {
     type: String,
-    trim: true,           
-    lowercase: true,     
-    unique: true,         
-    sparse: true         
+    trim: true,
+    lowercase: true,
+    unique: true,
+    sparse: true
   },
   phoneNumber: {
     type: String,
@@ -48,7 +42,7 @@ const userSchema = new mongoose.Schema({
     default: null
   },
   profileImagePublicId: {
-    type: String, 
+    type: String,
     default: null
   },
   language: {
@@ -57,6 +51,9 @@ const userSchema = new mongoose.Schema({
     default: 'en'
   }
 }, { timestamps: true });
+
+userSchema.index({ role: 1, category: 1 });
+userSchema.index({ createdAt: -1 });
 
 // Generate registerId
 userSchema.pre('save', async function (next) {
@@ -72,14 +69,13 @@ userSchema.pre('save', async function (next) {
 });
 
 // Hash password before saving
-userSchema.pre('save', async function(next) {
+userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
   this.password = await bcrypt.hash(this.password, 12);
   next();
 });
 
-// Compare password method
-userSchema.methods.comparePassword = async function(candidatePassword) {
+userSchema.methods.comparePassword = async function (candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };
 

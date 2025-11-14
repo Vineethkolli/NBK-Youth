@@ -1,39 +1,16 @@
 import User from '../models/User.js';
-import Notification from '../models/Notification.js';
 import { logActivity } from '../middleware/activityLogger.js';
-import { parsePhoneNumberFromString } from 'libphonenumber-js';
-
-// Helper to normalize phone number to E.164 format
-const normalizePhoneNumber = (phoneNumber) => {
-  if (!phoneNumber || typeof phoneNumber !== 'string' || !phoneNumber.trim()) {
-    return null;
-  }
-
-  const normalized = phoneNumber.trim().replace(/^00/, '+').replace(/[\s-]+/g, '');
-  let parsed;
-
-  if (normalized.startsWith('+')) {
-    parsed = parsePhoneNumberFromString(normalized);
-  } else if (/^\d{6,15}$/.test(normalized)) {
-    parsed = parsePhoneNumberFromString(`+${normalized}`);
-  }
-
-  if (!parsed || !parsed.isValid()) {
-    return null;
-  }
-
-  return parsed.number;
-};
+import { normalizePhoneNumber } from '../utils/phoneValidation.js';
 
 
 export const getAllUsers = async (req, res) => {
   try {
     const { search } = req.query;
-    const query = {};
+    const matchStage = {};
 
     if (search) {
       const searchRegex = { $regex: search, $options: 'i' };
-      query.$or = [
+      matchStage.$or = [
         { registerId: searchRegex },
         { name: searchRegex },
         { email: searchRegex },
@@ -43,40 +20,74 @@ export const getAllUsers = async (req, res) => {
       ];
     }
 
-    const users = await User.find(query)
-      .select('registerId name email phoneNumber role category profileImage language createdAt')
-      .lean();
-
-    users.sort((a, b) => {
-      const numA = parseInt(a.registerId.replace(/\D/g, '')) || 0;
-      const numB = parseInt(b.registerId.replace(/\D/g, '')) || 0;
-      return numA - numB;
-    });
-
-    const registerIds = users.map((u) => u.registerId);
-
-    const notificationStatuses = await Notification.aggregate([
-      { $match: { registerId: { $in: registerIds } } },
+    const pipeline = [
+      Object.keys(matchStage).length ? { $match: matchStage } : null,
       {
-        $project: {
-          registerId: 1,
-          hasSubscriptions: {
-            $gt: [{ $size: { $ifNull: ['$subscriptions', []] } }, 0],
+        $addFields: {
+          registerNumeric: {
+            $let: {
+              vars: {
+                digits: {
+                  $regexFind: { input: '$registerId', regex: /\d+/ },
+                },
+              },
+              in: {
+                $toInt: {
+                  $ifNull: ['$$digits.match', 0],
+                },
+              },
+            },
           },
         },
       },
-    ]);
+      { $sort: { registerNumeric: 1, registerId: 1 } },
+      {
+        $lookup: {
+          from: 'notifications',
+          let: { regId: '$registerId' },
+          pipeline: [
+            { $match: { $expr: { $eq: ['$registerId', '$$regId'] } } },
+            {
+              $project: {
+                _id: 0,
+                hasSubscriptions: {
+                  $gt: [{ $size: { $ifNull: ['$subscriptions', []] } }, 0],
+                },
+              },
+            },
+            { $limit: 1 },
+          ],
+          as: 'notificationMeta',
+        },
+      },
+      {
+        $addFields: {
+          notificationsEnabled: {
+            $ifNull: [{ $arrayElemAt: ['$notificationMeta.hasSubscriptions', 0] }, false],
+          },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          registerId: 1,
+          name: 1,
+          email: 1,
+          phoneNumber: 1,
+          role: 1,
+          category: 1,
+          profileImage: 1,
+          language: 1,
+          createdAt: 1,
+          notificationsEnabled: 1,
+        },
+      },
+    ].filter(Boolean);
 
-    const notificationMap = new Map();
-    notificationStatuses.forEach((n) => notificationMap.set(n.registerId, n.hasSubscriptions));
-
-    const usersWithNotifications = users.map((user) => ({
-      ...user,
-      notificationsEnabled: notificationMap.get(user.registerId) === true,
-    }));
-
-    res.json(usersWithNotifications);
-  } catch {
+    const users = await User.aggregate(pipeline).exec();
+    res.json(users);
+  } catch (error) {
+    console.error('getAllUsers error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };

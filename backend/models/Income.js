@@ -68,6 +68,9 @@ email: {
   },
 }, { timestamps: true });
 
+incomeSchema.index({ belongsTo: 1, verifyLog: 1, createdAt: -1 });
+incomeSchema.index({ status: 1, paymentMode: 1, createdAt: -1 });
+
 incomeSchema.pre('save', async function (next) {
   if (!this.incomeId) {
     const counter = await Counter.findByIdAndUpdate(

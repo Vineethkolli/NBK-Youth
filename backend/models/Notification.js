@@ -4,7 +4,7 @@ const notificationSchema = new mongoose.Schema({
   registerId: {
     type: String,
     required: true,
-    unique: false, // Multiple devices for the same user
+    unique: false,
   },
   subscriptions: [
     {

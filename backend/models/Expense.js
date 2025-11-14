@@ -54,6 +54,8 @@ const expenseSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
+expenseSchema.index({ verifyLog: 1, paymentMode: 1, createdAt: -1 });
+
 // Auto-generate expenseId as E1, E2, ...
 expenseSchema.pre('save', async function (next) {
   if (!this.expenseId) {

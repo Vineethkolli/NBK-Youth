@@ -15,4 +15,6 @@ const scheduledNotificationSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
+scheduledNotificationSchema.index({ status: 1, scheduledAt: 1 });
+
 export default mongoose.model('ScheduledNotification', scheduledNotificationSchema);
