@@ -95,7 +95,10 @@ export const getAllUsers = async (req, res) => {
 
 export const updateUserCategory = async (req, res) => {
   try {
-    const userToUpdate = await User.findById(req.params.userId).select('email category registerId');
+    const userId = req.query.userId;
+    if (!userId) return res.status(400).json({ message: 'userId is required' });
+
+    const userToUpdate = await User.findById(userId).select('email category registerId');
     if (!userToUpdate) return res.status(404).json({ message: 'User not found' });
 
     if (userToUpdate.email === 'gangavaramnbkyouth@gmail.com') {
@@ -124,7 +127,10 @@ export const updateUserCategory = async (req, res) => {
 
 export const updateUserRole = async (req, res) => {
   try {
-    const userToUpdate = await User.findById(req.params.userId).select('email role registerId');
+    const userId = req.query.userId;
+    if (!userId) return res.status(400).json({ message: 'userId is required' });
+
+    const userToUpdate = await User.findById(userId).select('email role registerId');
     if (!userToUpdate) return res.status(404).json({ message: 'User not found' });
 
     const requester = req.user;
@@ -174,9 +180,10 @@ export const updateUserProfile = async (req, res) => {
   try {
     let { name, email, phoneNumber } = req.body;
 
-    const userToUpdate = await User.findById(req.params.userId).select(
-      'name email phoneNumber registerId',
-    );
+    const userId = req.query.userId;
+    if (!userId) return res.status(400).json({ message: 'userId is required' });
+
+    const userToUpdate = await User.findById(userId).select('name email phoneNumber registerId');
     if (!userToUpdate) return res.status(404).json({ message: 'User not found' });
 
     const normalizedEmail = email?.trim().toLowerCase();
@@ -188,12 +195,10 @@ export const updateUserProfile = async (req, res) => {
       return res.status(403).json({ message: 'Cannot change default developer email' });
     }
 
-    // Email validation
     if (normalizedEmail) {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(normalizedEmail)) {
+      if (!emailRegex.test(normalizedEmail))
         return res.status(400).json({ message: 'Invalid email format' });
-      }
 
       if (normalizedEmail !== userToUpdate.email) {
         const exists = await User.findOne({ email: normalizedEmail }).select('_id').lean();
@@ -201,14 +206,10 @@ export const updateUserProfile = async (req, res) => {
       }
     }
 
-    // Phone normalization and validation (E.164)
     if (phoneNumber && phoneNumber.trim()) {
       phoneNumber = normalizePhoneNumber(phoneNumber);
-
       if (!phoneNumber) {
-        return res
-          .status(400)
-          .json({ message: 'Please enter a valid phone number in international format' });
+        return res.status(400).json({ message: 'Please enter a valid phone number in international format' });
       }
 
       if (phoneNumber !== userToUpdate.phoneNumber) {
@@ -248,7 +249,10 @@ export const updateUserProfile = async (req, res) => {
 
 export const deleteUser = async (req, res) => {
   try {
-    const userToDelete = await User.findById(req.params.userId).select(
+    const userId = req.query.userId;
+    if (!userId) return res.status(400).json({ message: 'userId is required' });
+
+    const userToDelete = await User.findById(userId).select(
       'email registerId name phoneNumber role category profileImage',
     );
     if (!userToDelete) return res.status(404).json({ message: 'User not found' });
@@ -259,7 +263,7 @@ export const deleteUser = async (req, res) => {
 
     const original = userToDelete.toObject();
 
-    await User.findByIdAndDelete(req.params.userId);
+    await User.findByIdAndDelete(userId);
 
     await logActivity(
       req,

@@ -33,7 +33,6 @@ const processedRecordSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-// Compound unique index for eventName + year
 processedRecordSchema.index({ eventName: 1, year: 1 }, { unique: true });
 
 export default mongoose.model('ProcessedRecord', processedRecordSchema);

@@ -12,6 +12,5 @@ const notificationHistorySchema = new mongoose.Schema(
 );
 
 notificationHistorySchema.index({ recipients: 1, createdAt: -1 });
-notificationHistorySchema.index({ sentBy: 1, createdAt: -1 });
 
 export default mongoose.model('NotificationHistory', notificationHistorySchema);
