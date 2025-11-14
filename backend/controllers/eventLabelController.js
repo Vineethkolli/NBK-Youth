@@ -2,7 +2,6 @@ import EventLabel from '../models/EventLabel.js';
 import { logActivity } from '../middleware/activityLogger.js';
 
 export const eventLabelController = {
-  
   getEventLabel: async (req, res) => {
     try {
       const eventLabel = await EventLabel.findOne().sort({ createdAt: -1 }).lean();
@@ -17,7 +16,7 @@ export const eventLabelController = {
     try {
       const { label } = req.body;
 
-      // Delete any existing event label (only allowed one)
+      // Delete any existing event labels to maintain a single label
       await EventLabel.deleteMany({});
 
       const eventLabel = await EventLabel.create({

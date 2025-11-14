@@ -6,15 +6,20 @@ export const expenseController = {
   getExpenses: async (req, res) => {
     try {
       const { search, paymentMode, verifyLog, startDate, endDate } = req.query;
-      let query = { isDeleted: false };
+      const query = { isDeleted: false };
 
       if (search) {
-        query.$or = [
+        const searchConditions = [
           { expenseId: { $regex: search, $options: 'i' } },
           { name: { $regex: search, $options: 'i' } },
-          { amount: !isNaN(search) ? Number(search) : undefined },
           { purpose: { $regex: search, $options: 'i' } }
-        ].filter(Boolean);
+        ];
+
+        if (!isNaN(Number(search))) {
+          searchConditions.push({ amount: Number(search) });
+        }
+
+        query.$or = searchConditions;
       }
 
       if (paymentMode) query.paymentMode = paymentMode;
@@ -22,15 +27,15 @@ export const expenseController = {
 
       if (startDate || endDate) {
         query.createdAt = {};
-        if (startDate) {
-          query.createdAt.$gte = new Date(startDate);
-        }
-        if (endDate) {
-          query.createdAt.$lte = new Date(endDate);
-        }
+        if (startDate) query.createdAt.$gte = new Date(startDate);
+        if (endDate) query.createdAt.$lte = new Date(endDate);
       }
 
-      const expenses = await Expense.find(query).sort({ createdAt: -1 }).lean();
+      const expenses = await Expense.find(query)
+        .select('expenseId name amount purpose paymentMode verifyLog billImage billImagePublicId createdAt registerId')
+        .sort({ createdAt: -1 })
+        .lean();
+
       res.json(expenses);
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch expenses' });
@@ -41,16 +46,18 @@ export const expenseController = {
   getVerificationData: async (req, res) => {
     try {
       const { verifyLog } = req.query;
+
       const expenses = await Expense.find({ verifyLog, isDeleted: false })
         .sort({ createdAt: -1 })
         .lean();
+
       res.json(expenses);
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch verification data' });
     }
   },
 
- 
+
   createExpense: async (req, res) => {
     try {
       const { billImage, billImagePublicId } = req.body;
@@ -87,12 +94,11 @@ export const expenseController = {
       }
 
       const originalData = expense.toObject();
-      let billImageUrl = expense.billImage;
 
-      // Handle bill image update via direct-upload metadata
+      let billImageUrl = expense.billImage;
       let billImagePublicId = expense.billImagePublicId;
+
       if (req.body.billImage && req.body.billImagePublicId) {
-        // If new image provided, delete old and set new
         if (expense.billImagePublicId) {
           try {
             await cloudinary.uploader.destroy(expense.billImagePublicId, { resource_type: 'image' });
@@ -100,11 +106,11 @@ export const expenseController = {
             console.warn('Failed to delete old bill image from Cloudinary:', err);
           }
         }
+
         billImageUrl = req.body.billImage;
         billImagePublicId = req.body.billImagePublicId;
       }
 
-      // If user requested bill image deletion (no new file, just delete)
       if (req.body.deleteBillImage === 'true' && expense.billImagePublicId) {
         try {
           await cloudinary.uploader.destroy(expense.billImagePublicId, { resource_type: 'image' });
@@ -115,7 +121,6 @@ export const expenseController = {
         }
       }
 
-     
       const updatedExpense = await Expense.findByIdAndUpdate(
         req.params.id,
         {
@@ -155,7 +160,6 @@ export const expenseController = {
 
       const originalData = expense.toObject();
 
-      // If status is changing to rejected, move to recycle bin
       if (verifyLog === 'rejected') {
         expense.isDeleted = true;
         expense.deletedAt = new Date();
@@ -181,7 +185,6 @@ export const expenseController = {
   },
 
 
-  // Soft delete expense
   deleteExpense: async (req, res) => {
     try {
       const expense = await Expense.findById(req.params.id);
@@ -194,6 +197,7 @@ export const expenseController = {
       expense.isDeleted = true;
       expense.deletedAt = new Date();
       expense.deletedBy = req.user.registerId;
+
       await expense.save({ validateBeforeSave: false });
 
       await logActivity(
@@ -218,6 +222,7 @@ export const expenseController = {
       const deletedExpenses = await Expense.find({ isDeleted: true })
         .sort({ deletedAt: -1 })
         .lean();
+
       res.json(deletedExpenses);
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch deleted expenses' });
@@ -251,7 +256,7 @@ export const expenseController = {
       res.status(500).json({ message: 'Failed to restore expense' });
     }
   },
-
+  
 
   permanentDeleteExpense: async (req, res) => {
     try {
@@ -262,7 +267,6 @@ export const expenseController = {
 
       const originalData = expense.toObject();
 
-      // Delete bill image from Cloudinary (permanent delete)
       if (expense.billImage && expense.billImage.includes('cloudinary.com')) {
         try {
           const publicId = expense.billImage.split('/').pop().split('.')[0];
@@ -282,6 +286,7 @@ export const expenseController = {
       );
 
       await Expense.findByIdAndDelete(req.params.id);
+
       res.json({ message: 'Expense permanently deleted' });
     } catch (error) {
       res.status(500).json({ message: 'Failed to delete expense permanently' });

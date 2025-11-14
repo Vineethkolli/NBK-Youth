@@ -48,7 +48,7 @@ async function fetchWorkflowYAML(wf) {
 }
 
 function getScheduleStrings(schedules) {
-  // convert schedule entries to human-readable strings (cron string or JSON fallback)
+  // convert schedule entries to human-readable strings
   const out = [];
   for (const s of schedules || []) {
     if (!s && s !== 0) continue;

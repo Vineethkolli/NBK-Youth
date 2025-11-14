@@ -24,7 +24,7 @@ const VibeController = {
   try {
     const name = req.body.name.trim();
     const existing = await Collection.findOne({
-      name: { $regex: `^${name}$`, $options: 'i' } // case-insensitive match
+      name: { $regex: `^${name}$`, $options: 'i' }
     }).lean();
 
     if (existing) {
@@ -56,7 +56,7 @@ const VibeController = {
   try {
     const name = req.body.name.trim();
 
-    // Check if another collection already has this name (case-insensitive)
+    // Check if another collection already has this name
     const existing = await Collection.findOne({
       _id: { $ne: req.params.id }, 
       name: { $regex: `^${name}$`, $options: 'i' }
@@ -186,7 +186,6 @@ uploadMultipleSongs: async (req, res) => {
       }
     }
 
-    // Add registerId to each song
     const songsWithRegisterId = songs.map(song => ({
       ...song,
       registerId: req.user.registerId
@@ -196,7 +195,6 @@ uploadMultipleSongs: async (req, res) => {
     collection.songs.push(...songsWithRegisterId);
     await collection.save();
 
-    // Log activity for bulk upload
     const songNames = songs.map(song => song.name).join(', ');
     await logActivity(
       req,
@@ -226,9 +224,8 @@ uploadMultipleSongs: async (req, res) => {
         return res.status(404).json({ message: 'Song not found' });
       }
 
-      // If a new url is provided, delete the old one and set new
+      // If a new url is provided, delete the old one from cloudinary and set new
       if (req.body.url && req.body.mediaPublicId) {
-        // Delete old file from Cloudinary
         const oldPublicId = extractPublicId(song.url);
         await cloudinary.uploader.destroy(oldPublicId, { resource_type: 'video' });
         song.url = req.body.url;
@@ -258,7 +255,6 @@ uploadMultipleSongs: async (req, res) => {
 
       const originalSongData = { ...song.toObject() };
 
-      // Delete from Cloudinary
       const publicId = extractPublicId(song.url);
       await cloudinary.uploader.destroy(publicId, { resource_type: 'video' });
 

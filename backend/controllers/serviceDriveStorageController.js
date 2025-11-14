@@ -18,7 +18,7 @@ try {
   drive = google.drive({ version: 'v3' });
 }
 
-// Helper format bytes
+// Helper functions
 const formatSize = (bytes) => {
   if (bytes === undefined || bytes === null || isNaN(bytes) || bytes === '0') return '-';
   const units = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
@@ -31,7 +31,6 @@ const formatSize = (bytes) => {
   return size.toFixed(2) + ' ' + units[i];
 };
 
-// Helper calculate total size & count in a folder
 const calculateFolderSizeAndCount = async (folderId, trashed = false) => {
   let totalSize = 0;
   let totalCount = 0;
@@ -60,7 +59,6 @@ const calculateFolderSizeAndCount = async (folderId, trashed = false) => {
   return { size: totalSize, count: totalCount };
 };
 
-// Helper recursive delete for folder
 const deleteFileRecursiveIfFolder = async (fileId) => {
   const meta = await drive.files.get({ fileId, fields: 'id, mimeType' }).catch(() => null);
   if (!meta || !meta.data) return;

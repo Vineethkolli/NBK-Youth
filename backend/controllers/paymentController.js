@@ -3,29 +3,37 @@ import Income from '../models/Income.js';
 import { logActivity } from '../middleware/activityLogger.js';
 
 const PaymentController = {
-
   async getAllPayments(req, res) {
     try {
       const { registerId } = req.query;
-      let payments;
+      const query = registerId ? { registerId } : {};
 
-      if (registerId) {
-        payments = await Payment.find({ registerId }).sort({ createdAt: -1 }).lean();
-      } else {
-        payments = await Payment.find().sort({ createdAt: -1 }).lean();
-      }
+      const payments = await Payment.find(query)
+        .select(
+          'paymentId registerId name email phoneNumber amount belongsTo screenshot screenshotPublicId transactionStatus verifyLog createdAt'
+        )
+        .sort({ createdAt: -1 })
+        .lean();
 
       return res.status(200).json(payments);
     } catch (err) {
-      return res.status(500).json({ message: 'Error fetching payments', error: err.message });
+      return res.status(500).json({
+        message: 'Error fetching payments',
+        error: err.message
+      });
     }
   },
 
-  
+
   async getPaymentById(req, res) {
     try {
       const { paymentId } = req.params;
-      const payment = await Payment.findOne({ paymentId }).lean();
+
+      const payment = await Payment.findOne({ paymentId })
+        .select(
+          'paymentId registerId name email phoneNumber amount belongsTo screenshot screenshotPublicId transactionStatus verifyLog verifiedBy verifiedAt createdAt'
+        )
+        .lean();
 
       if (!payment) {
         return res.status(404).json({ message: 'Payment not found' });
@@ -33,16 +41,32 @@ const PaymentController = {
 
       return res.status(200).json(payment);
     } catch (err) {
-      return res.status(500).json({ message: 'Error fetching payment', error: err.message });
+      return res.status(500).json({
+        message: 'Error fetching payment',
+        error: err.message
+      });
     }
   },
 
 
   async createPayment(req, res) {
     try {
-      const { paymentId, registerId, name, email, phoneNumber, amount, belongsTo, screenshot, screenshotPublicId } = req.body;
+      const {
+        paymentId,
+        registerId,
+        name,
+        email,
+        phoneNumber,
+        amount,
+        belongsTo,
+        screenshot,
+        screenshotPublicId
+      } = req.body;
+
       if (!screenshot || !screenshotPublicId) {
-        return res.status(400).json({ message: 'Missing uploaded screenshot details' });
+        return res
+          .status(400)
+          .json({ message: 'Missing uploaded screenshot details' });
       }
 
       const newPayment = new Payment({
@@ -72,7 +96,10 @@ const PaymentController = {
 
       return res.status(201).json(newPayment);
     } catch (err) {
-      return res.status(500).json({ message: 'Error creating payment', error: err.message });
+      return res.status(500).json({
+        message: 'Error creating payment',
+        error: err.message
+      });
     }
   },
 
@@ -80,10 +107,17 @@ const PaymentController = {
   async getVerificationData(req, res) {
     try {
       const { verifyLog } = req.query;
-      const payments = await Payment.find({ verifyLog }).sort({ createdAt: -1 }).lean();
+
+      const payments = await Payment.find({ verifyLog })
+        .sort({ createdAt: -1 })
+        .lean();
+
       return res.json(payments);
     } catch (error) {
-      return res.status(500).json({ message: 'Failed to fetch verification data', error: error.message });
+      return res.status(500).json({
+        message: 'Failed to fetch verification data',
+        error: error.message
+      });
     }
   },
 
@@ -101,9 +135,9 @@ const PaymentController = {
       // Check if name exists in income collection
       const existingIncome = await Income.findOne({ name }).lean();
       if (existingIncome) {
-        return res.status(400).json({ 
+        return res.status(400).json({
           message: 'Name already exists in income records',
-          existingName: existingIncome.name 
+          existingName: existingIncome.name
         });
       }
 
@@ -111,6 +145,7 @@ const PaymentController = {
 
       payment.name = name;
       payment.belongsTo = belongsTo;
+
       await payment.save();
 
       await logActivity(
@@ -122,9 +157,15 @@ const PaymentController = {
         `Payment ${payment.paymentId} details updated - Name: ${name}, Belongs to: ${belongsTo}`
       );
 
-      return res.json({ message: 'Payment updated successfully', payment });
+      return res.json({
+        message: 'Payment updated successfully',
+        payment
+      });
     } catch (error) {
-      return res.status(500).json({ message: 'Failed to update payment', error: error.message });
+      return res.status(500).json({
+        message: 'Failed to update payment',
+        error: error.message
+      });
     }
   },
 
@@ -143,11 +184,14 @@ const PaymentController = {
 
       // If verifying payment, check for existing name in income
       if (verifyLog === 'verified') {
-        const existingIncome = await Income.findOne({ name: payment.name }).lean();
+        const existingIncome = await Income.findOne({
+          name: payment.name
+        }).lean();
+
         if (existingIncome) {
-          return res.status(400).json({ 
+          return res.status(400).json({
             message: 'Name already exists in income records',
-            existingName: existingIncome.name 
+            existingName: existingIncome.name
           });
         }
 
@@ -171,13 +215,12 @@ const PaymentController = {
         payment.transactionStatus = 'failed';
       }
 
-      // Update verification status
       payment.verifyLog = verifyLog;
       payment.verifiedBy = registerId;
       payment.verifiedAt = new Date();
 
       await payment.save();
-      
+
       await logActivity(
         req,
         'VERIFY',
@@ -187,26 +230,37 @@ const PaymentController = {
         `Payment ${payment.paymentId} verification status changed to ${verifyLog} by ${registerId}`
       );
 
-      return res.json({ message: 'Verification status updated successfully' });
+      return res.json({
+        message: 'Verification status updated successfully'
+      });
     } catch (error) {
-      return res.status(500).json({ message: 'Failed to update verification status', error: error.message });
+      return res.status(500).json({
+        message: 'Failed to update verification status',
+        error: error.message
+      });
     }
   },
-  
 
+  
   async deletePayment(req, res) {
     try {
       const { paymentId } = req.params;
-      const payment = await Payment.findOne({ paymentId });
 
+      const payment = await Payment.findOne({ paymentId });
       if (!payment) {
         return res.status(404).json({ message: 'Payment not found' });
       }
 
       await payment.remove();
-      return res.status(200).json({ message: 'Payment deleted successfully' });
+
+      return res.status(200).json({
+        message: 'Payment deleted successfully'
+      });
     } catch (err) {
-      return res.status(500).json({ message: 'Error deleting payment', error: err.message });
+      return res.status(500).json({
+        message: 'Error deleting payment',
+        error: err.message
+      });
     }
   }
 };

@@ -34,7 +34,7 @@ export const developerController = {
           await Counter.findByIdAndDelete('expenseId');
           description = 'Cleared all expense records';
 
-          // Delete all Cloudinary files in 'ExpenseBills' folder
+          // Delete all Cloudinary files in that folder
           await deleteCloudinaryFolder('ExpenseBills');
           break;
 
@@ -61,7 +61,7 @@ export const developerController = {
           break;
 
         case 'activityLog': {
-          // Support selective deletion for activity logs.
+          // Selective deletion for activity logs
           const payload = (req.body && Object.keys(req.body).length) ? req.body : (req.query || {});
           const entityFilter = payload.entity || 'All';
           const fromDateRaw = payload.fromDate;
@@ -164,7 +164,7 @@ export const developerController = {
 };
 
 
-// Utility function to delete all files in a Cloudinary folder
+// Helper to delete all files in a Cloudinary folder
 const deleteCloudinaryFolder = async (folder) => {
   try {
     const { resources } = await cloudinary.api.resources({

@@ -3,7 +3,6 @@ import Snapshot from '../models/Snapshot.js';
 import { logActivity } from '../middleware/activityLogger.js';
 
 export const historyController = {
-
   getAllHistories: async (req, res) => {
     try {
       const histories = await History.find()

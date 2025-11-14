@@ -2,10 +2,13 @@ import Game from '../models/Game.js';
 import { logActivity } from '../middleware/activityLogger.js';
 
 export const gameController = {
-
   getAllGames: async (req, res) => {
     try {
-      const games = await Game.find().sort('-createdAt').lean();
+      const games = await Game.find()
+        .select('name players registerId createdAt')
+        .sort('-createdAt')
+        .lean();
+
       res.json(games);
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch games' });
@@ -72,6 +75,7 @@ export const gameController = {
       }
 
       const originalData = originalGame.toObject();
+
       originalGame.name = normalizedName;
       Object.assign(originalGame, req.body);
 
@@ -110,6 +114,7 @@ export const gameController = {
       );
 
       await Game.findByIdAndDelete(req.params.id);
+
       res.json({ message: 'Game deleted successfully' });
     } catch (error) {
       res.status(500).json({ message: 'Failed to delete game' });
@@ -125,7 +130,9 @@ export const gameController = {
       const normalizedPlayerName = req.body.name.trim().replace(/\s+/g, ' ');
 
       const isDuplicateName = game.players.some(
-        player => player.name.trim().replace(/\s+/g, ' ').toLowerCase() === normalizedPlayerName.toLowerCase()
+        player =>
+          player.name.trim().replace(/\s+/g, ' ').toLowerCase() ===
+          normalizedPlayerName.toLowerCase()
       );
 
       if (isDuplicateName) {
@@ -137,6 +144,7 @@ export const gameController = {
         name: normalizedPlayerName,
         registerId: req.user.registerId
       });
+
       await game.save();
 
       await logActivity(
@@ -164,17 +172,23 @@ export const gameController = {
       if (!player) return res.status(404).json({ message: 'Player not found' });
 
       const originalPlayerData = { ...player.toObject() };
+
       if (req.body.name !== undefined) {
         const normalizedPlayerName = req.body.name.trim().replace(/\s+/g, ' ');
+
         const isDuplicateName = game.players.some(
-          p => p.name.trim().replace(/\s+/g, ' ').toLowerCase() === normalizedPlayerName.toLowerCase()
-             && p._id.toString() !== req.params.playerId
+          p =>
+            p.name.trim().replace(/\s+/g, ' ').toLowerCase() === normalizedPlayerName.toLowerCase() &&
+            p._id.toString() !== req.params.playerId
         );
+
         if (isDuplicateName) {
           return res.status(400).json({ message: 'Player name already exists. Please choose a different name.' });
         }
+
         player.name = normalizedPlayerName;
       }
+
       Object.assign(player, req.body);
 
       await game.save();
@@ -194,7 +208,7 @@ export const gameController = {
     }
   },
 
-
+  
   deletePlayer: async (req, res) => {
     try {
       const game = await Game.findById(req.params.gameId);

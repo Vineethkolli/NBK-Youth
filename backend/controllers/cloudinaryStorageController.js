@@ -7,7 +7,6 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// Helper: format bytes
 const formatSize = (bytes) => {
   if (!bytes || isNaN(bytes) || bytes === '0') return '-';
   const units = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
@@ -20,11 +19,10 @@ const formatSize = (bytes) => {
   return size.toFixed(2) + ' ' + units[i];
 };
 
-// Fixed free-tier limit
 const FREE_TIER_LIMIT_BYTES = 25 * 1024 * 1024 * 1024; 
 
+
 export const cloudinaryStorageController = {
-    
   getStorageQuota: async (req, res) => {
   try {
     let nextCursor = null;
@@ -54,6 +52,7 @@ export const cloudinaryStorageController = {
     res.status(500).json({ message: 'Failed to fetch Cloudinary quota', error: err.message });
   }
 },
+
 
   listCloudinaryFolders: async (req, res) => {
   try {

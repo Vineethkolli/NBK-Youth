@@ -25,28 +25,27 @@ export const authLogController = {
           { $sort: { registerId: 1, createdAt: -1 } },
           {
             $group: {
-              _id: "$registerId",
-              latestLog: { $first: "$$ROOT" },
-            },
+              _id: '$registerId',
+              latestLog: { $first: '$$ROOT' }
+            }
           },
-          { $replaceRoot: { newRoot: "$latestLog" } },
+          { $replaceRoot: { newRoot: '$latestLog' } },
           { $sort: { createdAt: -1 } },
           { $skip: skip },
-          { $limit: parseInt(limit) },
+          { $limit: parseInt(limit) }
         ];
 
         const logs = await AuthLog.aggregate(pipeline);
 
-        // Count distinct registerIds matching the query
-        const total = await AuthLog.distinct("registerId", query).then((ids) => ids.length);
+        const total = await AuthLog.distinct('registerId', query).then(ids => ids.length);
 
         return res.json({
           logs,
           pagination: {
             currentPage: parseInt(page),
             totalPages: Math.ceil(total / parseInt(limit)),
-            totalCount: total,
-          },
+            totalCount: total
+          }
         });
       }
 
@@ -56,7 +55,7 @@ export const authLogController = {
           .skip(skip)
           .limit(parseInt(limit))
           .lean(),
-        AuthLog.countDocuments(query),
+        AuthLog.countDocuments(query)
       ]);
 
       res.json({
@@ -64,12 +63,12 @@ export const authLogController = {
         pagination: {
           currentPage: parseInt(page),
           totalPages: Math.ceil(total / parseInt(limit)),
-          totalCount: total,
-        },
+          totalCount: total
+        }
       });
     } catch (error) {
       console.error(error);
-      res.status(500).json({ message: "Failed to fetch auth logs" });
+      res.status(500).json({ message: 'Failed to fetch auth logs' });
     }
-  },
+  }
 };

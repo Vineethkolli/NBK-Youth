@@ -4,7 +4,6 @@ import cloudinary from '../config/cloudinary.js';
 import { logActivity } from '../middleware/activityLogger.js';
 
 export const homepageController = {
-
   getSlides: async (req, res) => {
     try {
       const slides = await Slide.find().sort('order').lean();
@@ -18,11 +17,14 @@ export const homepageController = {
   addSlide: async (req, res) => {
     try {
       const { type, url, mediaPublicId } = req.body;
+
       const maxOrder = await Slide.findOne().sort('-order').lean();
       const order = maxOrder ? maxOrder.order + 1 : 0;
+
       if (!url || !mediaPublicId) {
         return res.status(400).json({ message: 'Missing slide media details' });
       }
+
       const slide = await Slide.create({
         url,
         mediaPublicId,
@@ -56,10 +58,12 @@ export const homepageController = {
 
       const originalData = slide.toObject();
 
-      // Delete from Cloudinary
       const publicId = slide.url.split('/').pop().split('.')[0];
       const resourceType = slide.type === 'video' ? 'video' : 'image';
-      await cloudinary.uploader.destroy(`HomepageSlides/${publicId}`, { resource_type: resourceType });
+
+      await cloudinary.uploader.destroy(`HomepageSlides/${publicId}`, {
+        resource_type: resourceType
+      });
 
       await logActivity(
         req,
@@ -72,11 +76,15 @@ export const homepageController = {
 
       await Slide.findByIdAndDelete(req.params.id);
 
-      // Reorder remaining slides
-      const remainingSlides = await Slide.find().sort('order');
-      for (let i = 0; i < remainingSlides.length; i++) {
-        remainingSlides[i].order = i;
-        await remainingSlides[i].save();
+      const remainingSlides = await Slide.find().sort('order').lean();
+      if (remainingSlides.length > 0) {
+        const bulkOps = remainingSlides.map((s, index) => ({
+          updateOne: {
+            filter: { _id: s._id },
+            update: { $set: { order: index } }
+          }
+        }));
+        await Slide.bulkWrite(bulkOps);
       }
 
       res.json({ message: 'Slide deleted successfully' });
@@ -87,36 +95,39 @@ export const homepageController = {
 
 
   updateSlideOrder: async (req, res) => {
-  try {
-    const { slides } = req.body;
+    try {
+      const { slides } = req.body;
 
-    const originalSlides = await Slide.find();
-    const originalData = originalSlides.map(s => s.toObject());
+      const originalSlides = await Slide.find().lean();
 
-    // Update order for each slide
-    for (const slide of slides) {
-      await Slide.findByIdAndUpdate(slide._id, { order: slide.order });
+      const bulkOps = slides.map(slide => ({
+        updateOne: {
+          filter: { _id: slide._id },
+          update: { $set: { order: slide.order } }
+        }
+      }));
+
+      await Slide.bulkWrite(bulkOps);
+
+      await logActivity(
+        req,
+        'UPDATE',
+        'Slide',
+        'slide-order',
+        { before: originalSlides, after: slides },
+        `Slide order updated by ${req.user.name}`
+      );
+
+      res.json({ message: 'Slide order updated successfully' });
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to update slide order' });
     }
-
-    await logActivity(
-      req,
-      'UPDATE',
-      'Slide',
-      'slide-order',
-      { before: originalData, after: slides },
-      `Slide order updated by ${req.user.name}`
-    );
-
-    res.json({ message: 'Slide order updated successfully' });
-  } catch (error) {
-    res.status(500).json({ message: 'Failed to update slide order' });
-  }
-},
+  },
 
 
   getEvents: async (req, res) => {
     try {
-      const events = await Event.find().sort('-dateTime');
+      const events = await Event.find().sort('-dateTime').lean();
       res.json(events);
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch events' });
@@ -146,7 +157,7 @@ export const homepageController = {
     }
   },
 
-
+  
   deleteEvent: async (req, res) => {
     try {
       const event = await Event.findById(req.params.id);
@@ -166,6 +177,7 @@ export const homepageController = {
       );
 
       await Event.findByIdAndDelete(req.params.id);
+
       res.json({ message: 'Event deleted successfully' });
     } catch (error) {
       res.status(500).json({ message: 'Failed to delete event' });

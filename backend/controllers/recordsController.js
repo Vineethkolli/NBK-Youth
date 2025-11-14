@@ -173,7 +173,7 @@ export const recordsController = {
       const fileUrlTelugu = req.body.fileUrlTelugu || null;
       const filePublicIdTelugu = req.body.filePublicIdTelugu || null;
 
-      // Require at least one language file metadata (english or telugu)
+      // Require at least one language file english or telugu
       const hasEnglish = fileUrlEnglish && filePublicIdEnglish;
       const hasTelugu = fileUrlTelugu && filePublicIdTelugu;
       if (!hasEnglish && !hasTelugu) {
@@ -225,7 +225,7 @@ export const recordsController = {
 
       const originalData = originalRecord.toObject();
 
-      // If english file is being replaced, delete old english file from cloudinary
+      // If file is being replaced, delete old file from cloudinary
       if ((req.body.fileUrlEnglish || req.body.fileUrl) && (req.body.filePublicIdEnglish || req.body.filePublicId)) {
         const existingEnglishPublicId = originalRecord.filePublicIdEnglish || originalRecord.filePublicId;
         if (existingEnglishPublicId) {
@@ -237,7 +237,6 @@ export const recordsController = {
         }
       }
 
-      // If telugu file is being replaced, delete old telugu file
       if (req.body.filePublicIdTelugu || req.body.fileUrlTelugu) {
         if (originalRecord.filePublicIdTelugu) {
           try {
@@ -248,7 +247,6 @@ export const recordsController = {
         }
       }
 
-      // Normalize legacy keys to new keys for update
       const updatePayload = { ...req.body };
       if (req.body.fileUrl && !req.body.fileUrlEnglish) updatePayload.fileUrlEnglish = req.body.fileUrl;
       if (req.body.filePublicId && !req.body.filePublicIdEnglish) updatePayload.filePublicIdEnglish = req.body.filePublicId;
@@ -294,7 +292,6 @@ export const recordsController = {
 
       const originalData = record.toObject();
 
-      // delete both english and telugu files if present
       const englishPublicId = record.filePublicIdEnglish || record.filePublicId;
       if (englishPublicId) {
         try {

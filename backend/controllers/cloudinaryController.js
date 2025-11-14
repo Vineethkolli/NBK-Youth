@@ -12,11 +12,7 @@ export const cloudinaryController = {
 
       const timestamp = Math.floor(Date.now() / 1000);
 
-      // Only sign parameters that will be sent to Cloudinary in the request body
-      const paramsToSign = {
-        timestamp,
-        folder,
-      };
+      const paramsToSign = { timestamp, folder };
 
       if (public_id) paramsToSign.public_id = public_id;
       if (typeof overwrite !== 'undefined') paramsToSign.overwrite = overwrite;

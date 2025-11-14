@@ -18,38 +18,35 @@ const logAuthEvent = async (data) => {
   }
 };
 
+// Helper to normalize phone number to E.164 format
+const normalizePhoneNumber = (phoneNumber) => {
+  if (typeof phoneNumber !== 'string' || !phoneNumber.trim()) return null;
+
+  const normalized = phoneNumber.trim().replace(/^00/, '+').replace(/[\s-]+/g, '');
+  let parsed;
+
+  if (normalized.startsWith('+')) {
+    parsed = parsePhoneNumberFromString(normalized);
+  } else if (/^\d{6,15}$/.test(normalized)) {
+    parsed = parsePhoneNumberFromString(`+${normalized}`);
+  }
+
+  if (!parsed || !parsed.isValid()) return null;
+  return parsed.number;
+};
+
 
 export const signUp = async (req, res) => {
   try {
     let { name, email, phoneNumber, password, language, deviceInfo } = req.body;
+
     if (!name || !phoneNumber || !password)
       return res.status(400).json({ message: 'Required fields missing' });
 
-    // Phone Number validation with E.164 format
-if (typeof phoneNumber !== "string" || !phoneNumber.trim()) {
-  return res.status(400).json({ message: "Phone number required" });
-}
+    phoneNumber = normalizePhoneNumber(phoneNumber);
+    if (!phoneNumber)
+      return res.status(400).json({ message: 'Please enter a valid phone number in international format' });
 
-phoneNumber = phoneNumber.trim();
-
-// Normalize: Convert `00` prefix to `+`, and strip spaces/dashes
-let normalized = phoneNumber.replace(/^00/, "+").replace(/[\s-]+/g, "");
-let parsed;
-
-if (normalized.startsWith("+")) {
-  parsed = parsePhoneNumberFromString(normalized);
-}
-else if (/^\d{6,15}$/.test(normalized)) {
-  parsed = parsePhoneNumberFromString(`+${normalized}`);
-}
-
-if (!parsed || !parsed.isValid()) {
-  return res.status(400).json({ message: "Please enter a valid phone number in international format" });
-}
-
-phoneNumber = parsed.number;
-
-    // Email normalization and validation
     const normalizedEmail = email?.trim().toLowerCase() || undefined;
     if (normalizedEmail) {
       const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -58,14 +55,12 @@ phoneNumber = parsed.number;
     }
 
     const [phoneExists, emailExists] = await Promise.all([
-      User.findOne({ phoneNumber }).lean(),
-      normalizedEmail ? User.findOne({ email: normalizedEmail }).lean() : Promise.resolve(null)
+      User.findOne({ phoneNumber }).select('_id').lean(),
+      normalizedEmail ? User.findOne({ email: normalizedEmail }).select('_id').lean() : Promise.resolve(null)
     ]);
 
-    if (phoneExists)
-      return res.status(400).json({ message: 'User already exists' });
-    if (emailExists)
-      return res.status(400).json({ message: 'User already exists' });
+    if (phoneExists) return res.status(400).json({ message: 'User already exists' });
+    if (emailExists) return res.status(400).json({ message: 'User already exists' });
 
     const user = await User.create({
       name,
@@ -97,15 +92,19 @@ phoneNumber = parsed.number;
       'CREATE',
       'User',
       user.registerId,
-      { before: null, after: { name: user.name, email: user.email, phoneNumber: user.phoneNumber } },
+      {
+        before: null,
+        after: { name: user.name, email: user.email, phoneNumber: user.phoneNumber }
+      },
       `User ${user.name} signed up`
     );
 
-    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
-      expiresIn: '365d',
-    });
+    const token = jwt.sign(
+      { id: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: '365d' }
+    );
 
-    // Send signup email asynchronously if email exists
     if (user.email) {
       setImmediate(() => {
         sendSignupEmail(user.email, user.name);
@@ -137,62 +136,47 @@ export const signIn = async (req, res) => {
   try {
     let { identifier, password, language, deviceInfo } = req.body;
 
-    if (!identifier || !password) {
+    if (!identifier || !password)
       return res.status(400).json({ message: 'Required fields missing' });
-    }
 
-    let isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier);
+    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier);
 
-    // Normalize email
     if (isEmail) {
       identifier = identifier.trim().toLowerCase();
     } else {
-      // Normalize phone number to E.164 format
-      let phone = identifier.trim().replace(/^00/, "+").replace(/[\s-]+/g, "");
-      let parsed;
-
-      if (phone.startsWith("+")) {
-        parsed = parsePhoneNumberFromString(phone);
-      } else if (/^\d{6,15}$/.test(phone)) {
-        parsed = parsePhoneNumberFromString(`+${phone}`);
-      }
-
-      if (parsed && parsed.isValid()) {
-        identifier = parsed.number; 
-      } else {
-        return res.status(400).json({ message: "Invalid phone number" });
-      }
+      identifier = normalizePhoneNumber(identifier);
+      if (!identifier)
+        return res.status(400).json({ message: 'Invalid phone number' });
     }
 
     const user = await User.findOne({
       $or: [{ email: identifier }, { phoneNumber: identifier }],
     });
 
-    if (!user || !(await user.comparePassword(password))) {
-      return res.status(401).json({ message: "Invalid credentials" });
-    }
+    if (!user || !(await user.comparePassword(password)))
+      return res.status(401).json({ message: 'Invalid credentials' });
 
     const safeDeviceInfo = deviceInfo || {
-      accessMode: "website",
-      deviceType: "unknown",
-      deviceModel: "unknown",
-      platform: "unknown",
-      browser: { name: "unknown", version: "unknown", osName: "unknown", osVersion: "unknown" },
+      accessMode: 'website',
+      deviceType: 'unknown',
+      deviceModel: 'unknown',
+      platform: 'unknown',
+      browser: { name: 'unknown', version: 'unknown', osName: 'unknown', osVersion: 'unknown' },
     };
 
     setImmediate(() => {
       logAuthEvent({
         registerId: user.registerId,
         name: user.name,
-        action: "signin",
+        action: 'signin',
         deviceInfo: safeDeviceInfo,
       });
     });
 
     logActivity(
       { user: { registerId: user.registerId, name: user.name } },
-      "UPDATE",
-      "User",
+      'UPDATE',
+      'User',
       user.registerId,
       { before: null, after: { deviceInfo: safeDeviceInfo } },
       `User ${user.name} signed in`
@@ -203,9 +187,11 @@ export const signIn = async (req, res) => {
       await user.save();
     }
 
-    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
-      expiresIn: "365d",
-    });
+    const token = jwt.sign(
+      { id: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: '365d' }
+    );
 
     return res.json({
       token,
@@ -222,8 +208,8 @@ export const signIn = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Signin error:", error);
-    return res.status(500).json({ message: "Server error" });
+    console.error('Signin error:', error);
+    return res.status(500).json({ message: 'Server error' });
   }
 };
 
@@ -234,11 +220,12 @@ export const forgotPassword = async (req, res) => {
     if (!rawEmail) return res.status(400).json({ message: 'Email required' });
 
     const email = rawEmail.trim().toLowerCase();
-
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) return res.status(400).json({ message: 'Invalid email format' });
 
-    const user = await User.findOne({ email });
+    if (!emailRegex.test(email))
+      return res.status(400).json({ message: 'Invalid email format' });
+
+    const user = await User.findOne({ email }).select('_id email').lean();
     if (!user) return res.status(404).json({ message: 'User not found' });
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -254,39 +241,15 @@ export const forgotPassword = async (req, res) => {
 };
 
 
-const normalizePhoneNumber = (phoneNumber) => {
-  if (typeof phoneNumber !== 'string') return null;
-  const trimmed = phoneNumber.trim();
-  if (!trimmed) return null;
-
-  const normalized = trimmed.replace(/^00/, '+').replace(/[\s-]+/g, '');
-  let parsed;
-
-  if (normalized.startsWith('+')) {
-    parsed = parsePhoneNumberFromString(normalized);
-  } else if (/^\d{6,15}$/.test(normalized)) {
-    parsed = parsePhoneNumberFromString(`+${normalized}`);
-  }
-
-  if (!parsed || !parsed.isValid()) {
-    return null;
-  }
-
-  return parsed.number;
-};
-
-
 export const initiatePhonePasswordReset = async (req, res) => {
   try {
     const normalizedPhone = normalizePhoneNumber(req.body.phoneNumber);
-    if (!normalizedPhone) {
+    if (!normalizedPhone)
       return res.status(400).json({ message: 'Please enter a valid phone number' });
-    }
 
-    const user = await User.findOne({ phoneNumber: normalizedPhone });
-    if (!user) {
+    const user = await User.findOne({ phoneNumber: normalizedPhone }).select('_id').lean();
+    if (!user)
       return res.status(404).json({ message: 'User not found' });
-    }
 
     return res.json({ message: 'Phone number verified' });
   } catch (error) {
@@ -299,18 +262,18 @@ export const initiatePhonePasswordReset = async (req, res) => {
 export const issuePhoneResetToken = async (req, res) => {
   try {
     const normalizedPhone = normalizePhoneNumber(req.body.phoneNumber);
-    if (!normalizedPhone) {
+    if (!normalizedPhone)
       return res.status(400).json({ message: 'Please enter a valid phone number' });
-    }
 
-    const user = await User.findOne({ phoneNumber: normalizedPhone });
-    if (!user) {
+    const user = await User.findOne({ phoneNumber: normalizedPhone }).select('_id').lean();
+    if (!user)
       return res.status(404).json({ message: 'User not found' });
-    }
 
-    const resetToken = jwt.sign({ phoneNumber: normalizedPhone }, process.env.JWT_SECRET, {
-      expiresIn: '10m',
-    });
+    const resetToken = jwt.sign(
+      { phoneNumber: normalizedPhone },
+      process.env.JWT_SECRET,
+      { expiresIn: '10m' }
+    );
 
     return res.json({ resetToken });
   } catch (error) {
@@ -324,30 +287,30 @@ export const verifyOtp = async (req, res) => {
   try {
     const { email: rawEmail, otp: rawOtp } = req.body;
 
-    if (!rawEmail || typeof rawEmail !== 'string') {
+    if (!rawEmail || typeof rawEmail !== 'string')
       return res.status(400).json({ message: 'Email is required' });
-    }
 
-    if (!rawOtp || typeof rawOtp !== 'string') {
+    if (!rawOtp || typeof rawOtp !== 'string')
       return res.status(400).json({ message: 'OTP is required' });
-    }
 
     const email = rawEmail.trim().toLowerCase();
-    if (!email) {
-      return res.status(400).json({ message: 'Email is required' });
-    }
+    if (!email) return res.status(400).json({ message: 'Email is required' });
 
     const otp = rawOtp.trim();
-    if (!otp) {
-      return res.status(400).json({ message: 'OTP is required' });
-    }
+    if (!otp) return res.status(400).json({ message: 'OTP is required' });
 
-    const otpRecord = await OTP.findOne({ email, otp });
-    if (!otpRecord) return res.status(400).json({ message: 'Invalid OTP' });
+    const otpRecord = await OTP.findOne({ email, otp }).lean();
+    if (!otpRecord)
+      return res.status(400).json({ message: 'Invalid OTP' });
 
     await OTP.deleteOne({ _id: otpRecord._id });
 
-    const resetToken = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: '10m' });
+    const resetToken = jwt.sign(
+      { email },
+      process.env.JWT_SECRET,
+      { expiresIn: '10m' }
+    );
+
     return res.json({ resetToken });
   } catch {
     return res.status(500).json({ message: 'Server error' });
@@ -359,6 +322,7 @@ export const resetPassword = async (req, res) => {
   try {
     const { resetToken, newPassword } = req.body;
     const decoded = jwt.verify(resetToken, process.env.JWT_SECRET);
+
     let user;
 
     if (decoded.email) {
@@ -366,9 +330,9 @@ export const resetPassword = async (req, res) => {
       user = await User.findOne({ email });
     } else if (decoded.phoneNumber) {
       const phoneNumber = normalizePhoneNumber(decoded.phoneNumber);
-      if (!phoneNumber) {
+      if (!phoneNumber)
         return res.status(400).json({ message: 'Invalid reset token payload' });
-      }
+
       user = await User.findOne({ phoneNumber });
     } else {
       return res.status(400).json({ message: 'Invalid reset token payload' });
@@ -392,6 +356,7 @@ export const resetPassword = async (req, res) => {
   } catch (error) {
     if (error.name === 'JsonWebTokenError')
       return res.status(401).json({ message: 'Invalid or expired reset token' });
+
     return res.status(500).json({ message: 'Server error' });
   }
 };

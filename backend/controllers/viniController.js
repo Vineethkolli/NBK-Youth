@@ -20,13 +20,11 @@ export const viniController = {
   },
 
 
-  // Create processed record from snapshot
   createProcessedRecord: async (req, res) => {
     try {
       const { snapshotId, eventName, year, selectedCollections } = req.body;
       const createdBy = req.user.registerId;
 
-      // Check for duplicate eventName + year
       const existingRecord = await ProcessedRecord.findOne({ eventName, year }).lean();
       if (existingRecord) {
         return res.status(400).json({
@@ -69,7 +67,6 @@ export const viniController = {
       const { allText, metadata } = buildSnapshotTextFromRecord(record);
       const chunkCount = await processRecordIntoChunks(record, allText, metadata, record.createdBy);
 
-      // Update record with chunk count and status
       record.chunksCount = chunkCount;
       record.status = 'ready';
       await record.save();
@@ -88,7 +85,6 @@ export const viniController = {
   },
 
 
-  // Reprocess record data
   reprocessRecord: async (req, res) => {
     try {
       const record = await ProcessedRecord.findById(req.params.id).populate('snapshotId');

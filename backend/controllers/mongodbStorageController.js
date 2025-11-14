@@ -17,7 +17,6 @@ export const mongodbStorageController = {
         (d) => !['admin', 'local'].includes(d.name)
       );
 
-      // Prepare databases info with storage
       const databasesInfo = await Promise.all(
         userDatabases.map(async (dbData) => {
           const dbInstance = client.db(dbData.name);
@@ -39,7 +38,6 @@ export const mongodbStorageController = {
         })
       );
 
-      // Total storage used - sum of user databases
       const totalStorageUsed = databasesInfo.reduce((sum, d) => sum + d.storage, 0);
 
       res.json({
@@ -60,7 +58,6 @@ export const mongodbStorageController = {
   },
 
 
-  // Collections info for a specific database
   getCollectionsInfo: async (req, res) => {
     try {
       const dbName = req.query.dbName || mongoose.connection.db.databaseName;

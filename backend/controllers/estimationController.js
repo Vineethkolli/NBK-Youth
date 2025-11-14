@@ -3,54 +3,45 @@ import EstimatedExpense from '../models/EstimatedExpense.js';
 import { logActivity } from '../middleware/activityLogger.js';
 
 export const estimationController = {
+  getAllEstimatedIncomes: async (req, res) => {
+    try {
+      const { sortOrder, sortField, belongsTo, status, search } = req.query;
+      const query = {};
 
-getAllEstimatedIncomes: async (req, res) => {
-  try {
-    const { sortOrder, sortField, belongsTo, status, search } = req.query;
-    let query = EstimatedIncome.find();
+      if (belongsTo) query.belongsTo = belongsTo;
+      if (status) query.status = status;
 
-    if (belongsTo) query = query.where('belongsTo', belongsTo);
-    if (status) query = query.where('status', status);
+      if (search) {
+        const searchRegex = new RegExp(search.trim(), 'i');
+        const searchConditions = [{ name: searchRegex }];
 
-    if (search) {
-      const searchRegex = new RegExp(search.trim(), 'i'); 
-      const searchNumber = Number(search);
-      let numberCondition = {};
-
-      if (!isNaN(searchNumber)) {
-        numberCondition = {
-          $expr: {
-            $regexMatch: { input: { $toString: "$presentAmount" }, regex: searchNumber.toString() }
-          }
-        };
+        if (!isNaN(Number(search))) {
+          searchConditions.push({
+            $expr: {
+              $regexMatch: { input: { $toString: "$presentAmount" }, regex: search }
+            }
+          });
+        }
+        query.$or = searchConditions;
       }
 
-      if (!isNaN(searchNumber)) {
-        query = query.or([
-          { name: { $regex: searchRegex } },
-          numberCondition
-        ]);
-      } else {
-        query = query.or([{ name: { $regex: searchRegex } }]);
-      }
+      const sortOptions =
+        sortOrder && sortField
+          ? { [sortField]: sortOrder === 'desc' ? -1 : 1 }
+          : { createdAt: -1 };
+
+      const incomes = await EstimatedIncome.find(query)
+        .select('estimatedIncomeId name presentAmount belongsTo status createdAt registerId')
+        .sort(sortOptions)
+        .lean();
+
+      res.json(incomes);
+    } catch (error) {
+      console.error('Error fetching estimated incomes:', error);
+      res.status(500).json({ message: 'Failed to fetch estimated incomes' });
     }
-
-    if (sortOrder && sortField) {
-      const sortObj = {};
-      sortObj[sortField] = sortOrder === 'desc' ? -1 : 1;
-      query = query.sort(sortObj);
-    } else {
-      query = query.sort({ createdAt: -1 });
-    }
-
-    const incomes = await query.lean().exec();
-    res.json(incomes);
-  } catch (error) {
-    console.error('Error fetching estimated incomes:', error);
-    res.status(500).json({ message: 'Failed to fetch estimated incomes' });
-  }
-},
-
+  },
+  
 
   createEstimatedIncome: async (req, res) => {
     try {
@@ -60,6 +51,7 @@ getAllEstimatedIncomes: async (req, res) => {
       const existingIncome = await EstimatedIncome.findOne({
         name: { $regex: `^${normalizedName}$`, $options: 'i' }
       }).lean();
+
       if (existingIncome) {
         return res.status(400).json({ message: 'Name already exists' });
       }
@@ -90,6 +82,7 @@ getAllEstimatedIncomes: async (req, res) => {
   updateEstimatedIncome: async (req, res) => {
     try {
       const { name } = req.body;
+
       const originalIncome = await EstimatedIncome.findById(req.params.id);
       if (!originalIncome) {
         return res.status(404).json({ message: 'Estimated income not found' });
@@ -102,12 +95,14 @@ getAllEstimatedIncomes: async (req, res) => {
           name: { $regex: `^${normalizedName}$`, $options: 'i' },
           _id: { $ne: req.params.id }
         }).lean();
+
         if (existingIncome) {
           return res.status(400).json({ message: 'Name already exists' });
         }
       }
 
       const originalData = originalIncome.toObject();
+
       const income = await EstimatedIncome.findByIdAndUpdate(
         req.params.id,
         req.body,
@@ -133,9 +128,12 @@ getAllEstimatedIncomes: async (req, res) => {
   deleteEstimatedIncome: async (req, res) => {
     try {
       const income = await EstimatedIncome.findById(req.params.id);
-      if (!income) return res.status(404).json({ message: 'Estimated income not found' });
+      if (!income) {
+        return res.status(404).json({ message: 'Estimated income not found' });
+      }
 
       const originalData = income.toObject();
+
       await logActivity(
         req,
         'DELETE',
@@ -144,57 +142,52 @@ getAllEstimatedIncomes: async (req, res) => {
         { before: originalData, after: null },
         `Estimated Income ${income.estimatedIncomeId} deleted by ${req.user.name}`
       );
+
       await EstimatedIncome.findByIdAndDelete(req.params.id);
+
       res.json({ message: 'Estimated income deleted successfully' });
     } catch (error) {
       res.status(500).json({ message: 'Failed to delete estimated income' });
     }
   },
 
-  
+
   getAllEstimatedExpenses: async (req, res) => {
-  try {
-    const { sortOrder, sortField, search } = req.query;
+    try {
+      const { sortOrder, sortField, search } = req.query;
+      const query = {};
 
-    let query = EstimatedExpense.find();
+      if (search) {
+        const searchRegex = new RegExp(search.trim(), 'i');
+        const searchConditions = [{ purpose: searchRegex }];
 
-    if (search) {
-      const searchRegex = new RegExp(search.trim(), 'i'); 
+        if (!isNaN(Number(search))) {
+          searchConditions.push({
+            $expr: {
+              $regexMatch: { input: { $toString: "$presentAmount" }, regex: search }
+            }
+          });
+        }
 
-      const searchNumber = Number(search);
-      let numberCondition = {};
-
-      if (!isNaN(searchNumber)) {
-        numberCondition = { 
-          $expr: { $regexMatch: { input: { $toString: "$presentAmount" }, regex: searchNumber.toString() } }
-        };
+        query.$or = searchConditions;
       }
 
-      if (!isNaN(searchNumber)) {
-        query = query.or([
-          { purpose: { $regex: searchRegex } },
-          numberCondition
-        ]);
-      } else {
-        query = query.or([{ purpose: { $regex: searchRegex } }]);
-      }
-    }
+      const sortOptions =
+        sortOrder && sortField
+          ? { [sortField]: sortOrder === 'desc' ? -1 : 1 }
+          : { createdAt: -1 };
 
-    if (sortOrder && sortField) {
-      const sortObj = {};
-      sortObj[sortField] = sortOrder === 'desc' ? -1 : 1;
-      query = query.sort(sortObj);
-    } else {
-      query = query.sort({ createdAt: -1 });
-    }
+      const expenses = await EstimatedExpense.find(query)
+        .select('estimatedExpenseId purpose presentAmount createdAt registerId')
+        .sort(sortOptions)
+        .lean();
 
-    const expenses = await query.exec();
-    res.json(expenses);
-  } catch (error) {
-    console.error('Error fetching estimated expenses:', error);
-    res.status(500).json({ message: 'Failed to fetch estimated expenses' });
-  }
-},
+      res.json(expenses);
+    } catch (error) {
+      console.error('Error fetching estimated expenses:', error);
+      res.status(500).json({ message: 'Failed to fetch estimated expenses' });
+    }
+  },
 
 
   createEstimatedExpense: async (req, res) => {
@@ -224,9 +217,12 @@ getAllEstimatedIncomes: async (req, res) => {
   updateEstimatedExpense: async (req, res) => {
     try {
       const originalExpense = await EstimatedExpense.findById(req.params.id);
-      if (!originalExpense) return res.status(404).json({ message: 'Estimated expense not found' });
+      if (!originalExpense) {
+        return res.status(404).json({ message: 'Estimated expense not found' });
+      }
 
       const originalData = originalExpense.toObject();
+
       const expense = await EstimatedExpense.findByIdAndUpdate(
         req.params.id,
         req.body,
@@ -252,9 +248,12 @@ getAllEstimatedIncomes: async (req, res) => {
   deleteEstimatedExpense: async (req, res) => {
     try {
       const expense = await EstimatedExpense.findById(req.params.id);
-      if (!expense) return res.status(404).json({ message: 'Estimated expense not found' });
+      if (!expense) {
+        return res.status(404).json({ message: 'Estimated expense not found' });
+      }
 
       const originalData = expense.toObject();
+
       await logActivity(
         req,
         'DELETE',
@@ -263,7 +262,9 @@ getAllEstimatedIncomes: async (req, res) => {
         { before: originalData, after: null },
         `Estimated Expense ${expense.estimatedExpenseId} deleted by ${req.user.name}`
       );
+
       await EstimatedExpense.findByIdAndDelete(req.params.id);
+
       res.json({ message: 'Estimated expense deleted successfully' });
     } catch (error) {
       res.status(500).json({ message: 'Failed to delete estimated expense' });
@@ -282,25 +283,27 @@ getAllEstimatedIncomes: async (req, res) => {
       const totalEstimatedPaidIncome = incomes
         .filter(i => i.status === 'paid')
         .reduce((sum, i) => sum + i.presentAmount, 0);
+
       const totalEstimatedNotPaidIncome = totalEstimatedIncome - totalEstimatedPaidIncome;
       const totalEstimatedExpense = expenses.reduce((sum, e) => sum + e.presentAmount, 0);
       const balance = totalEstimatedIncome - totalEstimatedExpense;
 
       const incomeCount = incomes.length;
       const expenseCount = expenses.length;
+
       const overallPaidCount = incomes.filter(i => i.status === 'paid').length;
       const overallNotPaidCount = incomes.filter(i => i.status !== 'paid').length;
 
       const youthIncomes = incomes.filter(i => i.belongsTo === 'youth');
-      const youthPaid = youthIncomes.filter(i => i.status === 'paid').reduce((sum, i) => sum + i.presentAmount, 0);
-      const youthNotPaid = youthIncomes.filter(i => i.status !== 'paid').reduce((sum, i) => sum + i.presentAmount, 0);
+      const youthPaid = youthIncomes.filter(i => i.status === 'paid').reduce((a, b) => a + b.presentAmount, 0);
+      const youthNotPaid = youthIncomes.filter(i => i.status !== 'paid').reduce((a, b) => a + b.presentAmount, 0);
       const youthCount = youthIncomes.length;
       const youthPaidCount = youthIncomes.filter(i => i.status === 'paid').length;
       const youthNotPaidCount = youthIncomes.filter(i => i.status !== 'paid').length;
 
       const villagersIncomes = incomes.filter(i => i.belongsTo === 'villagers');
-      const villagersPaid = villagersIncomes.filter(i => i.status === 'paid').reduce((sum, i) => sum + i.presentAmount, 0);
-      const villagersNotPaid = villagersIncomes.filter(i => i.status !== 'paid').reduce((sum, i) => sum + i.presentAmount, 0);
+      const villagersPaid = villagersIncomes.filter(i => i.status === 'paid').reduce((a, b) => a + b.presentAmount, 0);
+      const villagersNotPaid = villagersIncomes.filter(i => i.status !== 'paid').reduce((a, b) => a + b.presentAmount, 0);
       const villagersCount = villagersIncomes.length;
       const villagersPaidCount = villagersIncomes.filter(i => i.status === 'paid').length;
       const villagersNotPaidCount = villagersIncomes.filter(i => i.status !== 'paid').length;

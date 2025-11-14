@@ -4,7 +4,6 @@ import Payment from '../models/Payment.js';
 import { logActivity } from '../middleware/activityLogger.js';
 
 export const verificationController = {
-
   getVerificationData: async (req, res) => {
     try {
       const { type } = req.params;
@@ -64,7 +63,6 @@ export const verificationController = {
       item.verifyLog = verifyLog;
       await item.save();
 
-      // Log verification status change
       const entityId = type === 'income' ? item.incomeId : 
                       type === 'expense' ? item.expenseId : 
                       item.paymentId;
