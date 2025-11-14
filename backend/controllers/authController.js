@@ -5,7 +5,7 @@ import { sendOTPEmail } from '../services/emailOTPService.js';
 import { logActivity } from '../middleware/activityLogger.js';
 import AuthLog from '../models/AuthLog.js';
 import { sendSignupEmail } from '../services/SignupEmail.js';
-import { normalizePhoneNumber } from '../utils/phone.js';
+import { normalizePhoneNumber } from '../utils/phoneValidation.js';
 
 // Helper for Auth Logs
 const logAuthEvent = async (data) => {

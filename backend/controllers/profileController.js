@@ -1,7 +1,7 @@
 import User from '../models/User.js';
 import cloudinary from '../config/cloudinary.js';
 import { logActivity } from '../middleware/activityLogger.js';
-import { normalizePhoneNumber } from '../utils/phone.js';
+import { normalizePhoneNumber } from '../utils/phoneValidation.js';
 
 export const getProfile = async (req, res) => {
   try {
