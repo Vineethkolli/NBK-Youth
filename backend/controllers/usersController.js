@@ -1,16 +1,16 @@
 import User from '../models/User.js';
+import Notification from '../models/Notification.js';
 import { logActivity } from '../middleware/activityLogger.js';
 import { normalizePhoneNumber } from '../utils/phoneValidation.js';
-
 
 export const getAllUsers = async (req, res) => {
   try {
     const { search } = req.query;
-    const matchStage = {};
+    const query = {};
 
     if (search) {
       const searchRegex = { $regex: search, $options: 'i' };
-      matchStage.$or = [
+      query.$or = [
         { registerId: searchRegex },
         { name: searchRegex },
         { email: searchRegex },
@@ -20,74 +20,40 @@ export const getAllUsers = async (req, res) => {
       ];
     }
 
-    const pipeline = [
-      Object.keys(matchStage).length ? { $match: matchStage } : null,
-      {
-        $addFields: {
-          registerNumeric: {
-            $let: {
-              vars: {
-                digits: {
-                  $regexFind: { input: '$registerId', regex: /\d+/ },
-                },
-              },
-              in: {
-                $toInt: {
-                  $ifNull: ['$$digits.match', 0],
-                },
-              },
-            },
-          },
-        },
-      },
-      { $sort: { registerNumeric: 1, registerId: 1 } },
-      {
-        $lookup: {
-          from: 'notifications',
-          let: { regId: '$registerId' },
-          pipeline: [
-            { $match: { $expr: { $eq: ['$registerId', '$$regId'] } } },
-            {
-              $project: {
-                _id: 0,
-                hasSubscriptions: {
-                  $gt: [{ $size: { $ifNull: ['$subscriptions', []] } }, 0],
-                },
-              },
-            },
-            { $limit: 1 },
-          ],
-          as: 'notificationMeta',
-        },
-      },
-      {
-        $addFields: {
-          notificationsEnabled: {
-            $ifNull: [{ $arrayElemAt: ['$notificationMeta.hasSubscriptions', 0] }, false],
-          },
-        },
-      },
+    const users = await User.find(query)
+      .select('registerId name email phoneNumber role category profileImage language createdAt')
+      .lean();
+
+    users.sort((a, b) => {
+      const numA = parseInt(a.registerId.replace(/\D/g, '')) || 0;
+      const numB = parseInt(b.registerId.replace(/\D/g, '')) || 0;
+      return numA - numB;
+    });
+
+    const registerIds = users.map((u) => u.registerId);
+
+    const notificationStatuses = await Notification.aggregate([
+      { $match: { registerId: { $in: registerIds } } },
       {
         $project: {
-          _id: 0,
           registerId: 1,
-          name: 1,
-          email: 1,
-          phoneNumber: 1,
-          role: 1,
-          category: 1,
-          profileImage: 1,
-          language: 1,
-          createdAt: 1,
-          notificationsEnabled: 1,
+          hasSubscriptions: {
+            $gt: [{ $size: { $ifNull: ['$subscriptions', []] } }, 0],
+          },
         },
       },
-    ].filter(Boolean);
+    ]);
 
-    const users = await User.aggregate(pipeline).exec();
-    res.json(users);
-  } catch (error) {
-    console.error('getAllUsers error:', error);
+    const notificationMap = new Map();
+    notificationStatuses.forEach((n) => notificationMap.set(n.registerId, n.hasSubscriptions));
+
+    const usersWithNotifications = users.map((user) => ({
+      ...user,
+      notificationsEnabled: notificationMap.get(user.registerId) === true,
+    }));
+
+    res.json(usersWithNotifications);
+  } catch {
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -95,10 +61,7 @@ export const getAllUsers = async (req, res) => {
 
 export const updateUserCategory = async (req, res) => {
   try {
-    const userId = req.query.userId;
-    if (!userId) return res.status(400).json({ message: 'userId is required' });
-
-    const userToUpdate = await User.findById(userId).select('email category registerId');
+    const userToUpdate = await User.findById(req.params.userId).select('email category registerId');
     if (!userToUpdate) return res.status(404).json({ message: 'User not found' });
 
     if (userToUpdate.email === 'gangavaramnbkyouth@gmail.com') {
@@ -127,10 +90,7 @@ export const updateUserCategory = async (req, res) => {
 
 export const updateUserRole = async (req, res) => {
   try {
-    const userId = req.query.userId;
-    if (!userId) return res.status(400).json({ message: 'userId is required' });
-
-    const userToUpdate = await User.findById(userId).select('email role registerId');
+    const userToUpdate = await User.findById(req.params.userId).select('email role registerId');
     if (!userToUpdate) return res.status(404).json({ message: 'User not found' });
 
     const requester = req.user;
@@ -180,10 +140,9 @@ export const updateUserProfile = async (req, res) => {
   try {
     let { name, email, phoneNumber } = req.body;
 
-    const userId = req.query.userId;
-    if (!userId) return res.status(400).json({ message: 'userId is required' });
-
-    const userToUpdate = await User.findById(userId).select('name email phoneNumber registerId');
+    const userToUpdate = await User.findById(req.params.userId).select(
+      'name email phoneNumber registerId',
+    );
     if (!userToUpdate) return res.status(404).json({ message: 'User not found' });
 
     const normalizedEmail = email?.trim().toLowerCase();
@@ -195,10 +154,12 @@ export const updateUserProfile = async (req, res) => {
       return res.status(403).json({ message: 'Cannot change default developer email' });
     }
 
+    // Email validation
     if (normalizedEmail) {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(normalizedEmail))
+      if (!emailRegex.test(normalizedEmail)) {
         return res.status(400).json({ message: 'Invalid email format' });
+      }
 
       if (normalizedEmail !== userToUpdate.email) {
         const exists = await User.findOne({ email: normalizedEmail }).select('_id').lean();
@@ -206,10 +167,14 @@ export const updateUserProfile = async (req, res) => {
       }
     }
 
+    // Phone normalization and validation (E.164)
     if (phoneNumber && phoneNumber.trim()) {
       phoneNumber = normalizePhoneNumber(phoneNumber);
+
       if (!phoneNumber) {
-        return res.status(400).json({ message: 'Please enter a valid phone number in international format' });
+        return res
+          .status(400)
+          .json({ message: 'Please enter a valid phone number in international format' });
       }
 
       if (phoneNumber !== userToUpdate.phoneNumber) {
@@ -249,10 +214,7 @@ export const updateUserProfile = async (req, res) => {
 
 export const deleteUser = async (req, res) => {
   try {
-    const userId = req.query.userId;
-    if (!userId) return res.status(400).json({ message: 'userId is required' });
-
-    const userToDelete = await User.findById(userId).select(
+    const userToDelete = await User.findById(req.params.userId).select(
       'email registerId name phoneNumber role category profileImage',
     );
     if (!userToDelete) return res.status(404).json({ message: 'User not found' });
@@ -263,7 +225,7 @@ export const deleteUser = async (req, res) => {
 
     const original = userToDelete.toObject();
 
-    await User.findByIdAndDelete(userId);
+    await User.findByIdAndDelete(req.params.userId);
 
     await logActivity(
       req,

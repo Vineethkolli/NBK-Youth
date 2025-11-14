@@ -5,7 +5,7 @@ export const normalizePhoneNumber = (phoneNumber) => {
     return null;
   }
 
-  const normalized = phoneNumber.trim().replace(/^00/, '+').replace(/\s+/g, '').replace(/-/g, '');
+  const normalized = phoneNumber.trim().replace(/^00/, '+').replace(/[()\s-]+/g, '');
   let parsed;
 
   if (normalized.startsWith('+')) {
