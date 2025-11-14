@@ -24,7 +24,6 @@ const snapshotSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-// Compound unique index for eventName + year
 snapshotSchema.index({ eventName: 1, year: 1 }, { unique: true });
 
 export default mongoose.model('Snapshot', snapshotSchema);

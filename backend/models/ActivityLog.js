@@ -39,10 +39,7 @@ const activityLogSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-// Index for better query performance
-activityLogSchema.index({ createdAt: -1 });
 activityLogSchema.index({ registerId: 1 });
-activityLogSchema.index({ entityType: 1 });
-activityLogSchema.index({ action: 1 });
+activityLogSchema.index({ action: 1, entityType: 1, createdAt: -1 });
 
 export default mongoose.model('ActivityLog', activityLogSchema);

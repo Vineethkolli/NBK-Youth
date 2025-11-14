@@ -4,10 +4,9 @@ const authLogSchema = new mongoose.Schema({
   registerId: { type: String, required: true },
   name: { type: String, required: true },
   action: { type: String, enum: ['signin', 'signup'], required: true },
+
   deviceInfo: {
-    accessMode: {
-      type: String,
-    },
+    accessMode: String,
     deviceType: String,
     deviceModel: String,
     platform: String,
@@ -17,8 +16,11 @@ const authLogSchema = new mongoose.Schema({
       osName: String,
       osVersion: String
     }
-  },
-  createdAt: { type: Date, default: Date.now }
-});
+  }
+}, { timestamps: true });
+
+authLogSchema.index({ registerId: 1, createdAt: -1 });
+authLogSchema.index({ createdAt: -1 });
+authLogSchema.index({ action: 1, createdAt: -1 });
 
 export default mongoose.model('AuthLog', authLogSchema);
