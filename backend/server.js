@@ -109,10 +109,17 @@ app.use('/api/authlogs', authLogRoutes);
 app.get('/', (req, res) => res.json({ status: 'API is running' }));
 app.get('/health', (req, res) => res.status(200).send('Ok'));
 
-// MongoDB Connection
-mongoose.connect(process.env.MONGODB_URI)
+// MongoDB Connection with Pooling
+const mongooseOptions = {
+  maxPoolSize: 200,
+  minPoolSize: 2,
+  maxIdleTimeMS: 60000,
+  family: 4,
+};
+
+mongoose.connect(process.env.MONGODB_URI, mongooseOptions)
   .then(() => {
-    console.log('Connected to MongoDB');
+    console.log('Connected to MongoDB with optimized pooling');
     createDefaultDeveloper();
   })
   .catch(err => {

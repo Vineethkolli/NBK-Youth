@@ -6,7 +6,6 @@ import { logActivity } from '../middleware/activityLogger.js';
 import AuthLog from '../models/AuthLog.js';
 import { sendSignupEmail } from '../services/SignupEmail.js';
 import { normalizePhoneNumber } from '../utils/phoneValidation.js';
-import bcrypt from 'bcryptjs';
 
 // Helper for Auth Logs
 const logAuthEvent = async (data) => {
@@ -139,14 +138,6 @@ export const signIn = async (req, res) => {
 
     if (!user || !(await user.comparePassword(password)))
       return res.status(401).json({ message: 'Invalid credentials' });
-
-    // --------------------------------------
-    // AUTO-REHASH TO SALT 10 IF OLD SALT!=10
-    const currentRounds = parseInt(user.password.split("$")[2], 10);
-    if (currentRounds !== 10) {
-      user.password = await bcrypt.hash(password, 10);
-      await user.save(); }
-    // --------------------------------------
 
     const safeDeviceInfo = deviceInfo || {
       accessMode: 'website',
