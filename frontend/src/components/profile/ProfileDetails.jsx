@@ -118,12 +118,13 @@ function ProfileDetails({
 
           <div className="sm:col-span-1">
             <dt className="text-sm font-medium text-gray-500">Email</dt>
-            <dd className="mt-1 text-sm text-gray-900">{user.email || 'Not provided'}</dd>
+            <dd className={`mt-1 text-sm text-gray-900 ${ user.email ? 'notranslate' : '' }`} >
+              {user.email || 'Not provided'}</dd>
           </div>
 
           <div className="sm:col-span-1">
             <dt className="text-sm font-medium text-gray-500">Phone number</dt>
-            <dd className="mt-1 text-sm text-gray-900">{formattedPhone}</dd>
+            <dd className="mt-1 text-sm text-gray-900 notranslate">{formattedPhone}</dd>
           </div>
         </dl>
       )}

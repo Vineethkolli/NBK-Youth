@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
-import { Trash2, Bell, BellOff, Edit2 } from 'lucide-react';
+import { Trash2, Bell, BellOff, Edit2, Search } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { API_URL } from '../utils/config';
 import UpdateUserForm from '../components/users/UpdateUserForm';
@@ -67,13 +67,16 @@ function Users() {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-semibold">Users & Roles</h1>
-        <input
-          type="text"
-          placeholder="Search users..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-        />
+        <div className="relative">
+  <Search className="h-5 w-5 absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400" />
+  <input
+    type="text"
+    placeholder="Search users..."
+    value={search}
+    onChange={(e) => setSearch(e.target.value)}
+    className="pl-10 pr-4 py-1 w-full border rounded-lg"
+  />
+</div>
       </div>
 
       <div className="bg-white shadow overflow-hidden sm:rounded-lg">
@@ -117,17 +120,14 @@ function Users() {
                     )}
                   </td>
 
-                  {/* Email */}
                   <td className="px-4 py-3 whitespace-nowrap text-sm notranslate">
                     {user.email || 'N/A'}
                   </td>
 
-                  {/* Formatted phone number */}
                   <td className="px-4 py-3 whitespace-nowrap text-sm notranslate">
                     {formatPhone(user.phoneNumber)}
                   </td>
 
-                  {/* Role */}
                   <td className="px-4 py-3 whitespace-nowrap text-sm">
                     <select
                       value={user.role}
@@ -144,7 +144,6 @@ function Users() {
                     </select>
                   </td>
 
-                  {/* Category */}
                   <td className="px-4 py-3 whitespace-nowrap text-sm">
                     <select
                       value={user.category}
@@ -159,7 +158,6 @@ function Users() {
                     </select>
                   </td>
 
-                  {/* Notifications */}
                   <td className="px-4 py-3 whitespace-nowrap text-center">
                     {user.notificationsEnabled ? (
                       <Bell className="h-5 w-5 text-green-600" title="Notifications Enabled" />
@@ -168,12 +166,10 @@ function Users() {
                     )}
                   </td>
 
-                  {/* Language */}
                   <td className="px-4 py-3 whitespace-nowrap text-sm">
                     {user.language === 'te' ? 'Telugu' : user.language === 'en' ? 'English' : 'N/A'}
                   </td>
 
-                  {/* Actions */}
                   {hasAccess('Developer') && (
                     <td className="px-4 py-3 whitespace-nowrap text-sm space-x-2">
                       <button
@@ -199,7 +195,6 @@ function Users() {
         </div>
       </div>
 
-      {/* Modals */}
       {editingUser && (
         <UpdateUserForm
           user={editingUser}

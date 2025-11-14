@@ -1,4 +1,4 @@
-import { Filter, Calendar, X } from 'lucide-react';
+import { Calendar, X } from 'lucide-react';
 import { useRef } from 'react';
 import { formatDateTime } from '../../utils/dateTime';
 
@@ -29,12 +29,7 @@ function IncomeFilters({ filters, onChange }) {
 
   return (
     <div className="space-y-3">
-      <div className="flex flex-wrap items-center gap-2 sm:gap-4">
-        <div className="flex items-center">
-          <Filter className="h-5 w-5 text-gray-400 mr-2" />
-          <span className="text-sm font-medium">Filters:</span>
-        </div>
-
+      <div className="flex flex-wrap items-center gap-3 sm:gap-4">
         <select
           value={filters.status}
           onChange={(e) => handleChange('status', e.target.value)}
@@ -61,8 +56,8 @@ function IncomeFilters({ filters, onChange }) {
           className="form-select"
         >
           <option value="">Sort</option>
-          <option value="desc">Descending</option>
-          <option value="asc">Ascending</option>
+          <option value="desc">High → Low</option>
+          <option value="asc">Low → High</option>
         </select>
 
         <select
@@ -100,7 +95,6 @@ function IncomeFilters({ filters, onChange }) {
       {/* Date Range Filters */}
       <div className="flex flex-wrap items-center gap-2 sm:gap-4">
         
-        {/* Start Date Picker */}
         <div className="flex items-center">
           <div
             className="flex items-center cursor-pointer"
@@ -131,7 +125,6 @@ function IncomeFilters({ filters, onChange }) {
           )}
         </div>
 
-        {/* End Date Picker */}
         <div className="flex items-center">
           <div
             className="flex items-center cursor-pointer"

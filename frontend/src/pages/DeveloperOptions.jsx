@@ -55,7 +55,7 @@ function DeveloperOptions() {
         <div>
           <h2 className="text-xl font-semibold">Reset Roles</h2>
           <p className="text-sm text-gray-500">
-            This will set every user except developers back to the <code>user</code> role.
+            This will set every user except developers back to the user role.
           </p>
         </div>
         <button

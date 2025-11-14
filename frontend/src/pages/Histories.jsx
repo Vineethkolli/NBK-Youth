@@ -127,13 +127,12 @@ function Histories() {
           return filters.sort === 'desc' ? bAmount - aAmount : aAmount - bAmount;
         });
       }
-
       return filtered;
     }
-
     return data;
   };
 
+  
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -209,13 +208,13 @@ function Histories() {
           {(activeTab === 'income' || activeTab === 'expense') && (
             <div className="space-y-3">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <Search className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                 <input
                   type="text"
                   placeholder={`Search ${activeTab}...`}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 pr-4 py-2 w-full border rounded-lg"
+                  className="pl-10 pr-4 py-1 w-full border rounded-lg"
                 />
               </div>
 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Plus, Search } from 'lucide-react';
+import { Plus, Search, ChevronRight, ChevronDown, Filter, Columns } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import IncomeTable from '../components/income/IncomeTable';
@@ -19,6 +19,8 @@ function Income() {
   const { lockSettings } = useLockSettings();
   const [incomes, setIncomes] = useState([]);
   const [search, setSearch] = useState('');
+  const [openPanel, setOpenPanel] = useState(null);
+
   const [filters, setFilters] = useState({
     status: '',
     paymentMode: '',
@@ -29,6 +31,7 @@ function Income() {
     endDate: '',
     dateFilter: 'entryDate',
   });
+
   const [visibleColumns, setVisibleColumns] = useState({
     incomeId: false,
     registerId: false,
@@ -41,6 +44,7 @@ function Income() {
     belongsTo: false,
     verifyLog: false,
   });
+
   const [showForm, setShowForm] = useState(false);
   const [editingIncome, setEditingIncome] = useState(null);
   const { language } = useLanguage();
@@ -90,6 +94,7 @@ function Income() {
     }
   };
 
+
   return (
     <div className="space-y-6">
       <div className="space-y-2">
@@ -110,6 +115,7 @@ function Income() {
                 Add
               </button>
             )}
+
             <PrintComponent incomes={incomes} visibleColumns={visibleColumns} />
           </div>
         </div>
@@ -120,54 +126,88 @@ function Income() {
         </div>
       </div>
 
-      {/* Search & Filters */}
       <div className="space-y-3">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+          <Search className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
           <input
             type="text"
             placeholder="Search by ID, name, amount..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-10 pr-4 py-2 w-full border rounded-lg"
+            className="pl-10 pr-4 py-1 w-full border rounded-lg"
           />
         </div>
 
-        <IncomeFilters
-          filters={filters}
-          visibleColumns={visibleColumns}
-          onChange={handleFilterChange}
-          onColumnToggle={handleColumnToggle}
-        />
+<div className="flex items-center gap-4">
+  <button
+    onClick={() => setOpenPanel(openPanel === "filters" ? null : "filters")}
+    className="flex items-center justify-between px-3 py-1 bg-white rounded-md shadow border w-40"
+  >
+    <span className="font-medium flex items-center gap-2">
+      <Filter className="h-4 w-4 text-gray-600" />
+      Filters
+    </span>
+    {openPanel === "filters" ? (
+      <ChevronDown className="h-4 w-4" />
+    ) : (
+      <ChevronRight className="h-4 w-4" />
+    )}
+  </button>
+
+  <button
+    onClick={() => setOpenPanel(openPanel === "columns" ? null : "columns")}
+    className="flex items-center justify-between px-3 py-1 bg-white rounded-md shadow border w-40"
+  >
+    <span className="font-medium flex items-center gap-2">
+      <Columns className="h-4 w-4 text-gray-600" />
+      Columns
+    </span>
+    {openPanel === "columns" ? (
+      <ChevronDown className="h-4 w-4" />
+    ) : (
+      <ChevronRight className="h-4 w-4" />
+    )}
+  </button>
+</div>
+
+        {openPanel === "filters" && (
+          <div className="bg-white rounded-lg shadow p-2 border animate-fadeIn">
+            <IncomeFilters
+              filters={filters}
+              visibleColumns={visibleColumns}
+              onChange={handleFilterChange}
+              onColumnToggle={handleColumnToggle}
+            />
+          </div>
+        )}
+
+        {openPanel === "columns" && (
+          <div className="bg-white rounded-lg shadow p-2 border animate-fadeIn">
+            <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
+              {Object.entries(visibleColumns).map(([column, isVisible]) => {
+                if (
+                  ['registerId', 'email', 'phoneNumber'].includes(column) &&
+                  !hasAccess('Privileged')
+                ) return null;
+
+                return (
+                  <label key={column} className="inline-flex items-center text-sm">
+                    <input
+                      type="checkbox"
+                      checked={isVisible}
+                      onChange={() => handleColumnToggle(column)}
+                      className="form-checkbox"
+                    />
+                    <span className="ml-2 capitalize">{column}</span>
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Visible Columns */}
       <div className="bg-white rounded-lg shadow">
-        <div className="p-4 border-b">
-          <h2 className="font-medium">Visible Columns</h2>
-          <div className="mt-2 flex flex-wrap gap-2">
-            {Object.entries(visibleColumns).map(([column, isVisible]) => {
-              if (
-                ['registerId', 'email', 'phoneNumber'].includes(column) &&
-                !hasAccess('Privileged')
-              ) {
-                return null;
-              }
-              return (
-                <label key={column} className="inline-flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={isVisible}
-                    onChange={() => handleColumnToggle(column)}
-                    className="form-checkbox"
-                  />
-                  <span className="ml-2 text-sm">{column}</span>
-                </label>
-              );
-            })}
-          </div>
-        </div>
-
         <IncomeTable
           incomes={incomes}
           visibleColumns={visibleColumns}

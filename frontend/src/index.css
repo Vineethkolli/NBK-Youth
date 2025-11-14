@@ -1,5 +1,6 @@
 @import "tailwindcss";
 
+
 /*Hide Google Translator*/
 .skiptranslate {
   display: none !important;

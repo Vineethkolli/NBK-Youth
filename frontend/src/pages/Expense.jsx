@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Plus, Search } from 'lucide-react';
+import { Plus, Search, ChevronRight, ChevronDown, Filter, Columns  } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import ExpenseTable from '../components/expense/ExpenseTable';
@@ -19,6 +19,8 @@ function Expense() {
   const { lockSettings } = useLockSettings();
   const [expenses, setExpenses] = useState([]);
   const [search, setSearch] = useState('');
+  const [openPanel, setOpenPanel] = useState(null); 
+
   const [filters, setFilters] = useState({
     paymentMode: '',
     verifyLog: '',
@@ -26,6 +28,7 @@ function Expense() {
     startDate: '',
     endDate: ''
   });
+
   const [visibleColumns, setVisibleColumns] = useState({
     expenseId: false,
     registerId: false,
@@ -41,7 +44,7 @@ function Expense() {
   const [showForm, setShowForm] = useState(false);
   const [editingExpense, setEditingExpense] = useState(null);
   const { language } = useLanguage();
-  const PrintComponent = language === 'te' ? TeluguPrint : EnglishPrint;    
+  const PrintComponent = language === 'te' ? TeluguPrint : EnglishPrint;
 
   useEffect(() => {
     fetchExpenses();
@@ -49,18 +52,16 @@ function Expense() {
 
   const fetchExpenses = async () => {
     try {
-      const params = new URLSearchParams({
-        search,
-        ...filters
-      });
+      const params = new URLSearchParams({ search, ...filters });
       const { data } = await axios.get(`${API_URL}/api/expenses?${params}`);
 
       if (filters.sort) {
-        data.sort((a, b) => (filters.sort === 'desc' ? b.amount - a.amount : a.amount - b.amount));
+        data.sort((a, b) =>
+          filters.sort === 'desc' ? b.amount - a.amount : a.amount - b.amount
+        );
       }
-
       setExpenses(data);
-    } catch (error) {
+    } catch {
       toast.error('Failed to fetch expenses');
     }
   };
@@ -68,10 +69,7 @@ function Expense() {
   const handleFilterChange = (newFilters) => setFilters(newFilters);
 
   const handleColumnToggle = (column) => {
-    setVisibleColumns((prev) => ({
-      ...prev,
-      [column]: !prev[column]
-    }));
+    setVisibleColumns((prev) => ({ ...prev, [column]: !prev[column] }));
   };
 
   const handleEdit = (expense) => {
@@ -82,14 +80,16 @@ function Expense() {
   const handleDelete = async (expenseId) => {
     if (!hasAccess('Pro')) return;
     if (!window.confirm('Are you sure you want to move this item to recycle bin?')) return;
+
     try {
       await axios.delete(`${API_URL}/api/expenses/${expenseId}`);
       toast.success('Expense moved to recycle bin');
       fetchExpenses();
-    } catch (error) {
+    } catch {
       toast.error('Failed to delete expense');
     }
   };
+
 
   return (
     <div className="space-y-6">
@@ -121,49 +121,88 @@ function Expense() {
         </div>
       </div>
 
-      {/* Search and Filters */}
       <div className="space-y-3">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+          <Search className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
           <input
             type="text"
             placeholder="Search by ID, name, amount, purpose..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-10 pr-4 py-2 w-full border rounded-lg"
+            className="pl-10 pr-4 py-1 w-full border rounded-lg"
           />
         </div>
 
-        <ExpenseFilters
-          filters={filters}
-          visibleColumns={visibleColumns}
-          onChange={handleFilterChange}
-          onColumnToggle={handleColumnToggle}
-        />
+<div className="flex items-center gap-4">
+  <button
+    onClick={() => setOpenPanel(openPanel === "filters" ? null : "filters")}
+    className="flex items-center justify-between px-3 py-1 bg-white rounded-md shadow border w-40"
+  >
+    <span className="font-medium flex items-center gap-2">
+      <Filter className="h-4 w-4 text-gray-600" />
+      Filters
+    </span>
+    {openPanel === "filters" ? (
+      <ChevronDown className="h-4 w-4" />
+    ) : (
+      <ChevronRight className="h-4 w-4" />
+    )}
+  </button>
+
+  <button
+    onClick={() => setOpenPanel(openPanel === "columns" ? null : "columns")}
+    className="flex items-center justify-between px-3 py-1 bg-white rounded-md shadow border w-40"
+  >
+    <span className="font-medium flex items-center gap-2">
+      <Columns className="h-4 w-4 text-gray-600" />
+      Columns
+    </span>
+    {openPanel === "columns" ? (
+      <ChevronDown className="h-4 w-4" />
+    ) : (
+      <ChevronRight className="h-4 w-4" />
+    )}
+  </button>
+</div>
+
+        {openPanel === "filters" && (
+          <div className="bg-white rounded-lg shadow p-2 border animate-fadeIn">
+            <ExpenseFilters
+              filters={filters}
+              visibleColumns={visibleColumns}
+              onChange={handleFilterChange}
+              onColumnToggle={handleColumnToggle}
+            />
+          </div>
+        )}
+
+        {openPanel === "columns" && (
+          <div className="bg-white rounded-lg shadow p-2 border animate-fadeIn">
+            <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
+              {Object.entries(visibleColumns).map(([column, isVisible]) => {
+                if (
+                  ['registerId', 'phoneNumber'].includes(column) &&
+                  !hasAccess('Privileged')
+                ) return null;
+
+                return (
+                  <label key={column} className="inline-flex items-center text-sm">
+                    <input
+                      type="checkbox"
+                      checked={isVisible}
+                      onChange={() => handleColumnToggle(column)}
+                      className="form-checkbox"
+                    />
+                    <span className="ml-2 capitalize">{column}</span>
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Visible Columns */}
       <div className="bg-white rounded-lg shadow">
-        <div className="p-4 border-b">
-          <h2 className="font-medium">Visible Columns</h2>
-          <div className="mt-2 flex flex-wrap gap-2">
-            {Object.entries(visibleColumns).map(([column, isVisible]) => {
-              if (['registerId', 'phoneNumber'].includes(column) && !hasAccess('Privileged')) return null;
-              return (
-                <label key={column} className="inline-flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={isVisible}
-                    onChange={() => handleColumnToggle(column)}
-                    className="form-checkbox"
-                  />
-                  <span className="ml-2 text-sm">{column}</span>
-                </label>
-              );
-            })}
-          </div>
-        </div>
-
         <ExpenseTable
           expenses={expenses}
           visibleColumns={visibleColumns}

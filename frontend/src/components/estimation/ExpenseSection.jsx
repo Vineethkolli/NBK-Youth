@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Filter, Plus, Search } from 'lucide-react';
+import { Plus, Search, ChevronRight, ChevronDown, Filter, Columns } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { API_URL } from '../../utils/config';
@@ -17,14 +17,16 @@ function ExpenseSection({ refreshStats }) {
   const { hasAccess, user } = useAuth();
   const [expenses, setExpenses] = useState([]);
   const [search, setSearch] = useState('');
+  const [openPanel, setOpenPanel] = useState(null);
+
   const [expenseFilters, setExpenseFilters] = useState({
     sortField: 'presentAmount',
-    sortOrder: ''
+    sortOrder: '',
   });
 
   const [expenseColumns, setExpenseColumns] = useState({
     sno: true,
-    registerId: false, 
+    registerId: false,
     purpose: true,
     previousAmount: false,
     presentAmount: true,
@@ -38,7 +40,7 @@ function ExpenseSection({ refreshStats }) {
   }, [user?.role]);
 
   const [showForm, setShowForm] = useState(false);
-  const [formMode, setFormMode] = useState('add'); 
+  const [formMode, setFormMode] = useState('add');
   const [currentRecord, setCurrentRecord] = useState(null);
 
   useEffect(() => {
@@ -50,13 +52,14 @@ function ExpenseSection({ refreshStats }) {
       const params = { ...expenseFilters, search };
       const { data } = await axios.get(`${API_URL}/api/estimation/expense`, { params });
 
+      // Sorting logic for present/previous amount
       let sortedData = data;
       if (expenseFilters.sortOrder) {
         const { sortField, sortOrder } = expenseFilters;
         sortedData = [...data].sort((a, b) => {
-          const aValue = Number(a[sortField]) || 0;
-          const bValue = Number(b[sortField]) || 0;
-          return sortOrder === 'asc' ? aValue - bValue : bValue - aValue;
+          const aVal = Number(a[sortField]) || 0;
+          const bVal = Number(b[sortField]) || 0;
+          return sortOrder === 'asc' ? aVal - bVal : bVal - aVal;
         });
       }
 
@@ -68,48 +71,52 @@ function ExpenseSection({ refreshStats }) {
 
   const handleExpenseDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this expense?")) return;
+
     try {
       await axios.delete(`${API_URL}/api/estimation/expense/${id}`);
-      setExpenses(expenses.filter(expense => expense._id !== id));
+      setExpenses(expenses.filter(exp => exp._id !== id));
       toast.success('Expense deleted successfully');
       if (refreshStats) refreshStats();
-    } catch (error) {
-      toast.error('Failed to delete expense');
+    } catch {
+      toast.error("Failed to delete expense");
     }
   };
 
-  const handleAdd = () => { setFormMode('add'); setCurrentRecord(null); setShowForm(true); };
-  const handleEdit = (record) => { setFormMode('edit'); setCurrentRecord(record); setShowForm(true); };
+  const handleAdd = () => { setFormMode("add"); setCurrentRecord(null); setShowForm(true); };
+  const handleEdit = (record) => { setFormMode("edit"); setCurrentRecord(record); setShowForm(true); };
 
   const handleFormSubmit = async (formData) => {
     try {
       const payload = { ...formData, registerId: user.registerId };
       let data;
-      if (formMode === 'add') {
+
+      if (formMode === "add") {
         ({ data } = await axios.post(`${API_URL}/api/estimation/expense`, payload));
         setExpenses([data, ...expenses]);
-        toast.success('Expense added successfully');
-      } else if (formMode === 'edit') {
+        toast.success("Expense added successfully");
+      } else {
         ({ data } = await axios.put(`${API_URL}/api/estimation/expense/${currentRecord._id}`, payload));
-        setExpenses(expenses.map(e => e._id === currentRecord._id ? data : e));
-        toast.success('Expense updated successfully');
+        setExpenses(expenses.map(e => (e._id === currentRecord._id ? data : e)));
+        toast.success("Expense updated successfully");
       }
+
       setShowForm(false);
       fetchExpenses();
       if (refreshStats) refreshStats();
-    } catch (error) {
-      toast.error('Failed to submit form');
+    } catch {
+      toast.error("Failed to submit form");
     }
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
+
       <div className="flex justify-between items-center">
         <div className="flex-1 relative max-w-xs">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+          <Search className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
           <input
             type="text"
-            placeholder="Search by purpose, present amount..."
+            placeholder="Search by purpose, amount..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-10 pr-4 py-1 w-full border rounded-lg"
@@ -117,9 +124,9 @@ function ExpenseSection({ refreshStats }) {
         </div>
 
         <div className="flex items-center space-x-3">
-          {hasAccess('Privileged') && (
+          {hasAccess("Privileged") && (
             <button onClick={handleAdd} className="btn-secondary flex items-center">
-              <Plus className="h-4 w-4 mr-1 inline" />
+              <Plus className="h-4 w-4 mr-1" />
               Add
             </button>
           )}
@@ -127,41 +134,79 @@ function ExpenseSection({ refreshStats }) {
         </div>
       </div>
 
-      <div className="flex items-center space-x-4">
-        <Filter className="h-5 w-5 text-gray-400" />
-        <select
-          value={expenseFilters.sortOrder}
-          onChange={(e) => setExpenseFilters({ ...expenseFilters, sortOrder: e.target.value })}
-          className="form-select"
+      <div className="flex items-center gap-4">
+        <button
+          onClick={() => setOpenPanel(openPanel === "filters" ? null : "filters")}
+          className="flex items-center justify-between px-3 py-1 bg-white rounded-md shadow border w-40"
         >
-          <option value="">Sort</option>
-          <option value="desc">Descending</option>
-          <option value="asc">Ascending</option>
-        </select>
+          <span className="font-medium flex items-center gap-2">
+            <Filter className="h-4 w-4 text-gray-600" />
+            Filters
+          </span>
+          {openPanel === "filters" ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+        </button>
+
+        <button
+          onClick={() => setOpenPanel(openPanel === "columns" ? null : "columns")}
+          className="flex items-center justify-between px-3 py-1 bg-white rounded-md shadow border w-40"
+        >
+          <span className="font-medium flex items-center gap-2">
+            <Columns className="h-4 w-4 text-gray-600" />
+            Columns
+          </span>
+          {openPanel === "columns" ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+        </button>
+
       </div>
 
-      <div className="bg-white rounded-lg shadow">
-        <div className="p-4 border-b">
-          <h2 className="font-medium">Visible Columns</h2>
-          <div className="mt-2 flex flex-wrap gap-2">
+      {openPanel === "filters" && (
+        <div className="bg-white rounded-lg shadow p-2 border animate-fadeIn">
+          <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+
+            <select
+              value={expenseFilters.sortOrder}
+              onChange={(e) =>
+                setExpenseFilters({ ...expenseFilters, sortOrder: e.target.value })
+              }
+              className="form-select"
+            >
+              <option value="">Sort</option>
+              <option value="desc">High → Low</option>
+              <option value="asc">Low → High</option>
+            </select>
+
+          </div>
+        </div>
+      )}
+
+      {openPanel === "columns" && (
+        <div className="bg-white rounded-lg shadow p-2 border animate-fadeIn">
+          <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
+
             {Object.entries(expenseColumns).map(([column, isVisible]) => {
-              if (column === 'sno') return null;
-              if (column === 'registerId' && !hasAccess('Privileged')) return null;
+              if (column === "sno") return null;
+              if (column === "registerId" && !hasAccess("Privileged")) return null;
+
               return (
-                <label key={column} className="inline-flex items-center">
+                <label key={column} className="inline-flex items-center text-sm">
                   <input
                     type="checkbox"
                     checked={isVisible}
-                    onChange={() => setExpenseColumns({ ...expenseColumns, [column]: !isVisible })}
+                    onChange={() =>
+                      setExpenseColumns({ ...expenseColumns, [column]: !isVisible })
+                    }
                     className="form-checkbox"
                   />
-                  <span className="ml-2 text-sm">{column}</span>
+                  <span className="ml-2 capitalize">{column}</span>
                 </label>
               );
             })}
+
           </div>
         </div>
+      )}
 
+      <div className="bg-white rounded-lg shadow">
         <EstimatedExpenseTable
           expenses={expenses}
           visibleColumns={expenseColumns}
