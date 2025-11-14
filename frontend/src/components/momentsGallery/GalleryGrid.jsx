@@ -158,9 +158,9 @@ function GalleryGrid({
   const selectionModeActive = selectedFiles.length > 0; // NEW: whether to show circles for all files
 
   return (
-    <div className="fixed inset-0 bg-black/90 flex flex-col z-50 transform translate-z-0">
+    <div className="fixed top-0 left-0 right-0 h-screen bg-black/90 flex flex-col z-50">
       {/* Header */}
-      <div className="bg-white p-4 flex items-center justify-between">
+      <div className="bg-white p-4 pt-safe flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <button onClick={onClose} className="text-gray-600 hover:text-gray-800">
             <ArrowLeft className="h-6 w-6" />
