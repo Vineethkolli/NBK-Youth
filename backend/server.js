@@ -119,7 +119,7 @@ const mongooseOptions = {
 
 mongoose.connect(process.env.MONGODB_URI, mongooseOptions)
   .then(() => {
-    console.log('Connected to MongoDB with optimized pooling');
+    console.log('Connected to MongoDB');
     createDefaultDeveloper();
   })
   .catch(err => {
@@ -127,8 +127,8 @@ mongoose.connect(process.env.MONGODB_URI, mongooseOptions)
     process.exit(1); 
   });
 
-// Notification Scheduler runs at 7:00, 7:15, 7:35, 7:55 AM IST IST every day
-cron.schedule('0,15,35,55 7 * * *', async () => {
+// Notification Scheduler runs at 7:00, 7:10, 7:25 AM IST every day
+cron.schedule('0,10,25 7 * * *', async () => {
   try {
     console.log('Running scheduled notifications');
     await processDueNotifications();
