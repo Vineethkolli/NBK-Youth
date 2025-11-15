@@ -2,11 +2,20 @@ import Slide from '../models/Slide.js';
 import Event from '../models/Event.js';
 import cloudinary from '../config/cloudinary.js';
 import { logActivity } from '../middleware/activityLogger.js';
+import { redis } from '../utils/redis.js';
 
 export const homepageController = {
   getSlides: async (req, res) => {
     try {
+      const cached = await redis.get('home:slides');
+      if (cached) {
+        return res.json(JSON.parse(cached));
+      }
+
       const slides = await Slide.find().sort('order').lean();
+
+      redis.set('home:slides', JSON.stringify(slides));
+
       res.json(slides);
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch slides' });
@@ -42,6 +51,7 @@ export const homepageController = {
         `${type} slide added to homepage by ${req.user.name}`
       );
 
+      redis.del('home:slides');
       res.status(201).json(slide);
     } catch (error) {
       res.status(500).json({ message: 'Failed to add slide' });
@@ -87,6 +97,7 @@ export const homepageController = {
         await Slide.bulkWrite(bulkOps);
       }
 
+      redis.del('home:slides');
       res.json({ message: 'Slide deleted successfully' });
     } catch (error) {
       res.status(500).json({ message: 'Failed to delete slide' });
@@ -118,6 +129,7 @@ export const homepageController = {
         `Slide order updated by ${req.user.name}`
       );
 
+      redis.del('home:slides');
       res.json({ message: 'Slide order updated successfully' });
     } catch (error) {
       res.status(500).json({ message: 'Failed to update slide order' });
@@ -127,7 +139,15 @@ export const homepageController = {
 
   getEvents: async (req, res) => {
     try {
+      const cached = await redis.get('home:events');
+      if (cached) {
+        return res.json(JSON.parse(cached));
+      }
+
       const events = await Event.find().sort('-dateTime').lean();
+
+      redis.set('home:events', JSON.stringify(events));
+
       res.json(events);
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch events' });
@@ -151,13 +171,14 @@ export const homepageController = {
         `Event "${event.name}" added by ${req.user.name} for ${new Date(event.dateTime).toLocaleString()}`
       );
 
+      redis.del('home:events');
       res.status(201).json(event);
     } catch (error) {
       res.status(500).json({ message: 'Failed to add event' });
     }
   },
 
-  
+
   deleteEvent: async (req, res) => {
     try {
       const event = await Event.findById(req.params.id);
@@ -178,6 +199,7 @@ export const homepageController = {
 
       await Event.findByIdAndDelete(req.params.id);
 
+      redis.del('home:events');
       res.json({ message: 'Event deleted successfully' });
     } catch (error) {
       res.status(500).json({ message: 'Failed to delete event' });

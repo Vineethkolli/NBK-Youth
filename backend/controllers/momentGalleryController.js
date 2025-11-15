@@ -2,6 +2,7 @@ import Moment from '../models/Moment.js';
 import { logActivity } from '../middleware/activityLogger.js';
 import { drive, extractFileIdFromUrl, extractFolderIdFromUrl, createSubfolder, getFilesFromFolder } from '../utils/driveUtils.js';
 import { google } from 'googleapis';
+import { redis } from '../utils/redis.js';
 
 export const galleryController = {
   updateGalleryOrder: async (req, res) => {
@@ -24,6 +25,9 @@ export const galleryController = {
         { before: originalData, after: moment.toObject() },
         `Gallery order updated for moment "${moment.title}" by ${req.user.name}`
       );
+
+      redis.del('moments:all');
+      redis.del(`moments:gallery:${momentId}`);
 
       const updatedMoment = await Moment.findById(momentId).lean();
       res.json({ message: 'Gallery order updated successfully', moment: updatedMoment });
@@ -62,6 +66,7 @@ export const galleryController = {
     }
   },
 
+
   completeuploadMediaGallery: async (req, res) => {
     try {
       const { momentId } = req.params;
@@ -86,6 +91,9 @@ export const galleryController = {
       await moment.save();
 
       await logActivity(req, 'UPDATE', 'Moment', momentId, before, `${mediaFiles.length} new gallery files added to moment "${moment.title}" by ${req.user.name}`);
+
+      redis.del('moments:all');
+      redis.del(`moments:gallery:${momentId}`);
 
       const updated = await Moment.findById(momentId).lean();
       res.json({ message: 'Gallery upload completed', moment: updated });
@@ -184,6 +192,9 @@ export const galleryController = {
         `${filesToProcess.length} media files copied and added from Drive to moment "${moment.title}" by ${req.user.name}`
       );
 
+      redis.del('moments:all');
+      redis.del(`moments:gallery:${momentId}`);
+
       const updatedMoment = await Moment.findById(momentId).lean();
       res.status(201).json(updatedMoment);
     } catch (error) {
@@ -231,6 +242,9 @@ export const galleryController = {
         `Gallery file "${mediaFile.name}" deleted from moment "${moment.title}" by ${req.user.name}`
       );
 
+      redis.del('moments:all');
+      redis.del(`moments:gallery:${momentId}`);
+
       const updatedMoment = await Moment.findById(req.params.momentId).lean();
       res.json({ message: 'Gallery file deleted successfully', moment: updatedMoment });
     } catch (error) {
@@ -238,7 +252,7 @@ export const galleryController = {
     }
   },
 
-  
+
   downloadMediaFile: async (req, res) => {
     try {
       const { fileId } = req.params;

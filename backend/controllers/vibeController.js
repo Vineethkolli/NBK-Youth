@@ -1,6 +1,7 @@
 import Collection from '../models/Vibe.js';
 import cloudinary from '../config/cloudinary.js';
 import { logActivity } from '../middleware/activityLogger.js';
+import { redis } from '../utils/redis.js';
 
 const extractPublicId = (url) => {
   const parts = url.split('/');
@@ -12,7 +13,15 @@ const extractPublicId = (url) => {
 const VibeController = {
   getAllCollections: async (req, res) => {
     try {
+      const cached = await redis.get('vibe:collections');
+      if (cached) {
+        return res.json(JSON.parse(cached));
+      }
+
       const collections = await Collection.find().sort({ createdAt: -1 }).lean();
+
+      redis.set('vibe:collections', JSON.stringify(collections));
+
       res.json(collections);
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch collections' });
@@ -21,78 +30,79 @@ const VibeController = {
 
 
   createCollection: async (req, res) => {
-  try {
-    const name = req.body.name.trim();
-    const existing = await Collection.findOne({
-      name: { $regex: `^${name}$`, $options: 'i' }
-    }).lean();
+    try {
+      const name = req.body.name.trim();
+      const existing = await Collection.findOne({
+        name: { $regex: `^${name}$`, $options: 'i' }
+      }).lean();
 
-    if (existing) {
-      return res.status(400).json({ message: 'Collection name already exists' });
+      if (existing) {
+        return res.status(400).json({ message: 'Collection name already exists' });
+      }
+
+      const collection = await Collection.create({
+        name,
+        registerId: req.user.registerId 
+      });
+
+      await logActivity(
+        req,
+        'CREATE',
+        'Vibe',
+        collection._id.toString(),
+        { before: null, after: collection.toObject() },
+        `Collection "${collection.name}" created by ${req.user.name}`
+      );
+
+      redis.del('vibe:collections');
+      res.status(201).json(collection);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to create collection' });
     }
-
-    const collection = await Collection.create({
-      name,
-      registerId: req.user.registerId 
-    });
-
-    await logActivity(
-      req,
-      'CREATE',
-      'Vibe',
-      collection._id.toString(),
-      { before: null, after: collection.toObject() },
-      `Collection "${collection.name}" created by ${req.user.name}`
-    );
-
-    res.status(201).json(collection);
-  } catch (error) {
-    res.status(500).json({ message: 'Failed to create collection' });
-  }
-},
+  },
 
 
   updateCollection: async (req, res) => {
-  try {
-    const name = req.body.name.trim();
+    try {
+      const name = req.body.name.trim();
 
-    // Check if another collection already has this name
-    const existing = await Collection.findOne({
-      _id: { $ne: req.params.id }, 
-      name: { $regex: `^${name}$`, $options: 'i' }
-    }).lean();
+      const existing = await Collection.findOne({
+        _id: { $ne: req.params.id }, 
+        name: { $regex: `^${name}$`, $options: 'i' }
+      }).lean();
 
-    if (existing) {
-      return res.status(400).json({ message: 'Collection name already exists' });
+      if (existing) {
+        return res.status(400).json({ message: 'Collection name already exists' });
+      }
+
+      const originalCollection = await Collection.findById(req.params.id);
+      if (!originalCollection) {
+        return res.status(404).json({ message: 'Collection not found' });
+      }
+
+      const originalData = originalCollection.toObject();
+
+      const collection = await Collection.findByIdAndUpdate(
+        req.params.id,
+        { name },
+        { new: true }
+      );
+
+      await logActivity(
+        req,
+        'UPDATE',
+        'Vibe',
+        collection._id.toString(),
+        { before: originalData, after: collection.toObject() },
+        `Collection "${collection.name}" updated by ${req.user.name}`
+      );
+
+      redis.del('vibe:collections');
+      res.json(collection);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to update collection' });
     }
-
-    const originalCollection = await Collection.findById(req.params.id);
-    if (!originalCollection) {
-      return res.status(404).json({ message: 'Collection not found' });
-    }
-
-    const originalData = originalCollection.toObject();
-
-    const collection = await Collection.findByIdAndUpdate(
-      req.params.id,
-      { name },
-      { new: true }
-    );
-
-    await logActivity(
-      req,
-      'UPDATE',
-      'Vibe',
-      collection._id.toString(),
-      { before: originalData, after: collection.toObject() },
-      `Collection "${collection.name}" updated by ${req.user.name}`
-    );
-
-    res.json(collection);
-  } catch (error) {
-    res.status(500).json({ message: 'Failed to update collection' });
-  }
-},
+  },
 
 
   deleteCollection: async (req, res) => {
@@ -120,6 +130,8 @@ const VibeController = {
       );
 
       await Collection.findByIdAndDelete(req.params.id);
+
+      redis.del('vibe:collections');
       res.json({ message: 'Collection deleted successfully' });
     } catch (error) {
       res.status(500).json({ message: 'Failed to delete collection' });
@@ -147,7 +159,7 @@ const VibeController = {
 
       await collection.save();
       res.status(201).json(collection);
-      
+
       await logActivity(
         req,
         'CREATE',
@@ -157,59 +169,59 @@ const VibeController = {
         `Song "${req.body.name}" uploaded to collection "${collection.name}" by ${req.user.name}`
       );
 
+      redis.del('vibe:collections');
     } catch (error) {
       res.status(500).json({ message: 'Failed to upload song' });
     }
   },
 
 
-uploadMultipleSongs: async (req, res) => {
-  try {
-    const collection = await Collection.findById(req.params.collectionId);
-    if (!collection) {
-      return res.status(404).json({ message: 'Collection not found' });
-    }
-
-    const { songs } = req.body;
-    if (!songs || !Array.isArray(songs) || songs.length === 0) {
-      return res.status(400).json({ message: 'Songs array is required and must not be empty' });
-    }
-
-    if (songs.length > 10) {
-      return res.status(400).json({ message: 'Maximum 10 songs can be uploaded at once' });
-    }
-
-    // Validate each song
-    for (const song of songs) {
-      if (!song.name || !song.url || !song.mediaPublicId) {
-        return res.status(400).json({ message: 'Each song must have name, url, and mediaPublicId' });
+  uploadMultipleSongs: async (req, res) => {
+    try {
+      const collection = await Collection.findById(req.params.collectionId);
+      if (!collection) {
+        return res.status(404).json({ message: 'Collection not found' });
       }
+
+      const { songs } = req.body;
+      if (!songs || !Array.isArray(songs) || songs.length === 0) {
+        return res.status(400).json({ message: 'Songs array is required and must not be empty' });
+      }
+
+      if (songs.length > 10) {
+        return res.status(400).json({ message: 'Maximum 10 songs can be uploaded at once' });
+      }
+
+      for (const song of songs) {
+        if (!song.name || !song.url || !song.mediaPublicId) {
+          return res.status(400).json({ message: 'Each song must have name, url, and mediaPublicId' });
+        }
+      }
+
+      const songsWithRegisterId = songs.map(song => ({
+        ...song,
+        registerId: req.user.registerId
+      }));
+
+      collection.songs.push(...songsWithRegisterId);
+      await collection.save();
+
+      const songNames = songs.map(song => song.name).join(', ');
+      await logActivity(
+        req,
+        'CREATE',
+        'Vibe',
+        collection._id.toString(),
+        { before: null, after: { songCount: songs.length, songNames } },
+        `${songs.length} songs uploaded to collection "${collection.name}" by ${req.user.name}: ${songNames}`
+      );
+
+      redis.del('vibe:collections');
+      res.status(201).json(collection);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to upload songs' });
     }
-
-    const songsWithRegisterId = songs.map(song => ({
-      ...song,
-      registerId: req.user.registerId
-    }));
-
-    // Add all songs to collection
-    collection.songs.push(...songsWithRegisterId);
-    await collection.save();
-
-    const songNames = songs.map(song => song.name).join(', ');
-    await logActivity(
-      req,
-      'CREATE',
-      'Vibe',
-      collection._id.toString(),
-      { before: null, after: { songCount: songs.length, songNames } },
-      `${songs.length} songs uploaded to collection "${collection.name}" by ${req.user.name}: ${songNames}`
-    );
-
-    res.status(201).json(collection);
-  } catch (error) {
-    res.status(500).json({ message: 'Failed to upload songs' });
-  }
-},
+  },
 
 
   updateSong: async (req, res) => {
@@ -235,6 +247,8 @@ uploadMultipleSongs: async (req, res) => {
       song.name = req.body.name;
       await collection.save();
       res.json(collection);
+
+      redis.del('vibe:collections');
     } catch (error) {
       res.status(500).json({ message: 'Failed to update song' });
     }
@@ -270,6 +284,8 @@ uploadMultipleSongs: async (req, res) => {
       collection.songs.pull(req.params.songId);
       await collection.save();
       res.json({ message: 'Song deleted successfully' });
+
+      redis.del('vibe:collections');
     } catch (error) {
       res.status(500).json({ message: 'Failed to delete song' });
     }

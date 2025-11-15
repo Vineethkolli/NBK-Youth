@@ -1,10 +1,16 @@
 import Committee from '../models/Committee.js';
 import User from '../models/User.js';
 import { logActivity } from '../middleware/activityLogger.js';
+import { redis } from '../utils/redis.js';
 
 export const committeeController = {
   getAllMembers: async (req, res) => {
     try {
+      const cached = await redis.get('committee:members');
+      if (cached) {
+        return res.json(JSON.parse(cached));
+      }
+
       const members = await Committee.aggregate([
         { $sort: { order: 1 } },
         {
@@ -35,6 +41,7 @@ export const committeeController = {
         }
       ]);
 
+      redis.set('committee:members', JSON.stringify(members));
       res.json(members);
     } catch (error) {
       console.error(error);
@@ -76,6 +83,7 @@ export const committeeController = {
         `Added ${user.name || 'Unknown'} (${registerId}) to committee by ${req.user.name}`
       );
 
+      redis.del('committee:members');
       res.status(201).json({
         ...member.toObject(),
         name: user.name,
@@ -112,13 +120,14 @@ export const committeeController = {
         `Committee member order updated by ${req.user.name}`
       );
 
+      redis.del('committee:members');
       res.json({ message: 'Order updated successfully' });
     } catch (error) {
       res.status(500).json({ message: 'Failed to update order' });
     }
   },
 
-  
+
   removeMember: async (req, res) => {
     try {
       const member = await Committee.findById(req.params.id);
@@ -152,6 +161,7 @@ export const committeeController = {
         await Committee.bulkWrite(bulkOps);
       }
 
+      redis.del('committee:members');
       res.json({ message: 'Committee member removed successfully' });
     } catch (error) {
       res.status(500).json({ message: 'Failed to remove committee member' });

@@ -2,11 +2,19 @@ import Moment from '../models/Moment.js';
 import { logActivity } from '../middleware/activityLogger.js';
 import { drive, extractFileIdFromUrl, extractFolderIdFromUrl, createSubfolder, getFilesFromFolder } from '../utils/driveUtils.js';
 import { google } from 'googleapis';
+import { redis } from '../utils/redis.js';
 
 export const momentController = {
   getAllMoments: async (req, res) => {
     try {
+      const cached = await redis.get("moments:all");
+      if (cached) {
+        return res.json(JSON.parse(cached));
+      }
+
       const moments = await Moment.find().sort({ order: -1, createdAt: -1 }).lean();
+
+      redis.set("moments:all", JSON.stringify(moments));
       res.json(moments);
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch moments', error: error.message });
@@ -38,6 +46,7 @@ export const momentController = {
         `YouTube moment "${title}" added by ${req.user.name}`
       );
 
+      redis.del("moments:all");
       res.status(201).json(moment);
     } catch (error) {
       res.status(500).json({ message: 'Failed to add YouTube moment', error: error.message });
@@ -120,6 +129,7 @@ export const momentController = {
           : `Drive file moment "${title}" added by ${req.user.name}`
       );
 
+      redis.del("moments:all");
       res.status(201).json(moment);
     } catch (error) {
       console.error('Error adding Drive moment:', error);
@@ -171,6 +181,7 @@ export const momentController = {
         `Drive folder moment "${moment.title}" synced by ${req.user.name}`
       );
 
+      redis.del("moments:all");
       res.json({ message: 'Drive folder synced successfully', moment });
     } catch (error) {
       console.error('Error syncing Drive moment:', error);
@@ -205,11 +216,13 @@ export const momentController = {
       });
       const token = await jwt.authorize();
 
+      redis.del("moments:all");
       res.json({ momentId: moment._id, subfolderId, accessToken: token.access_token });
     } catch (err) {
       res.status(500).json({ message: 'Failed to start upload', error: err.message });
     }
   },
+
 
   completeuploadMediaMoment: async (req, res) => {
     try {
@@ -244,6 +257,7 @@ export const momentController = {
         `${mediaFiles.length} media files added to "${moment.title}" by ${req.user.name}`
       );
 
+      redis.del("moments:all");
       const updated = await Moment.findById(momentId);
       res.json({ message: 'Upload completed', moment: updated });
     } catch (err) {
@@ -337,6 +351,7 @@ export const momentController = {
         `Drive moment "${title}" with ${filesToProcess.length} files copied and added by ${req.user.name}`
       );
 
+      redis.del("moments:all");
       res.status(201).json(moment);
     } catch (error) {
       res.status(500).json({ message: 'Failed to copy and add drive moment', error: error.message });
@@ -365,6 +380,7 @@ export const momentController = {
         `Moment order updated by ${req.user.name}`
       );
 
+      redis.del("moments:all");
       res.json({ message: 'Moment order updated successfully', moments: updatedMoments });
     } catch (error) {
       res.status(500).json({ message: 'Failed to update moment order' });
@@ -399,13 +415,14 @@ export const momentController = {
         `Moment title updated to "${title}" by ${req.user.name}`
       );
 
+      redis.del("moments:all");
       res.json({ message: 'Moment title updated successfully', moment });
     } catch (error) {
       res.status(500).json({ message: 'Failed to update moment title', error: error.message });
     }
   },
 
-  
+
   deleteMoment: async (req, res) => {
     try {
       const moment = await Moment.findById(req.params.id);
@@ -451,6 +468,7 @@ export const momentController = {
 
       await Moment.findByIdAndDelete(req.params.id);
 
+      redis.del("moments:all");
       res.json({ message: 'Moment deleted successfully' });
     } catch (error) {
       res.status(500).json({ message: 'Failed to delete moment', error: error.message });

@@ -206,6 +206,12 @@ function ForgotPassword({
         </p>
       </div>
 
+      {isPhone && (
+        <div className="bg-yellow-100 border border-yellow-300 text-yellow-800 p-3 rounded-md text-sm rounded-md">
+          If your account is linked with an <b>email</b>, please use the email reset option for faster otp and recovery.
+        </div>
+      )}
+
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           {isPhone ? (

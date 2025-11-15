@@ -1,13 +1,21 @@
 import History from '../models/History.js';
 import Snapshot from '../models/Snapshot.js';
 import { logActivity } from '../middleware/activityLogger.js';
+import { redis } from '../utils/redis.js';
 
 export const historyController = {
   getAllHistories: async (req, res) => {
     try {
+      const cached = await redis.get('history:all');
+      if (cached) {
+        return res.json(JSON.parse(cached));
+      }
+
       const histories = await History.find()
         .sort({ createdAt: -1 })
         .lean();
+
+      redis.set('history:all', JSON.stringify(histories));
 
       res.json(histories);
     } catch (error) {
@@ -19,7 +27,7 @@ export const historyController = {
   createHistory: async (req, res) => {
     try {
       const { snapshotName, selectedCollections } = req.body;
-
+      
       // Check duplicate and find snapshot
       const parts = snapshotName.trim().split(' ');
       const yearStr = parts.pop();
@@ -42,7 +50,7 @@ export const historyController = {
       if (!snapshot) {
         return res.status(404).json({ message: 'Snapshot not found' });
       }
-
+      
       // Extract only the selected collections from snapshot
       const filteredSnapshotData = {
         collections: {},
@@ -73,6 +81,7 @@ export const historyController = {
         `History "${snapshotName}" created by ${req.user.name}`
       );
 
+      redis.del('history:all');
       res.status(201).json(history);
     } catch (error) {
       if (error.code === 11000) {
@@ -98,12 +107,14 @@ export const historyController = {
         req,
         'DELETE',
         'History',
-         history._id,
+        history._id,
         { before: originalData, after: null },
         `History "${history.snapshotName}" deleted by ${req.user.name}`
       );
 
       await History.findByIdAndDelete(req.params.id);
+
+      redis.del('history:all');
       res.json({ message: 'History deleted successfully' });
     } catch (error) {
       res.status(500).json({ message: 'Failed to delete history' });
