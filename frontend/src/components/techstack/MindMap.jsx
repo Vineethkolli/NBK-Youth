@@ -28,7 +28,6 @@ const MindMap = () => {
         <line x1="50%" y1="240" x2="65%" y2="300" stroke="black" strokeWidth="2" />
       </svg>
 
-      {/* Roles Section */}
       <div className="absolute top-4 left-1/2 transform -translate-x-1/2">
         <div className="p-3 rounded shadow-lg bg-gray-300 text-black font-bold">
           Roles
@@ -47,7 +46,6 @@ const MindMap = () => {
         </div>
       </div>
 
-      {/* Category Section */}
       <div className="absolute left-1/2 transform -translate-x-1/2" style={{ top: "210px" }}>
         <div className="p-3 rounded shadow-lg bg-gray-300 text-black font-bold">
           Category

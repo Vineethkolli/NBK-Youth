@@ -1,61 +1,62 @@
 
 import { SiVercel, SiRender, SiMongodb, SiGmail, SiCloudinary, SiGoogledrive, SiReact, SiTailwindcss, SiVite, 
-  SiNodedotjs, SiExpress, SiGoogleanalytics, SiPostman, SiGit, SiGithub, SiGoogletranslate, SiGoogle, SiOpenai, 
-  SiYoutube, SiGithubcopilot, SiHuggingface, SiGooglecloud } from "react-icons/si";
+  SiNodedotjs, SiExpress, SiGoogleanalytics, SiPostman, SiGit, SiGithub, SiGoogletranslate, SiGooglechrome, SiOpenai, 
+  SiYoutube, SiGithubcopilot, SiHuggingface, SiGooglecloud, SiRedis, SiFirebase } from "react-icons/si";
 import { FaCode, FaWhatsapp, FaRobot, FaClock } from "react-icons/fa";
 import Footer from "../Footer";
 
 const infrastructure = [
   {
-    category: "Frontend Hosting",
     name: "Vercel",
     icon: <SiVercel className="h-12 w-12 text-black-600" />,
-    description: "Frontend deployment and hosting platform",
+    description: "Frontend deployment and Hosting",
   },
   {
-    category: "Backend Hosting",
     name: "Render",
     icon: <SiRender className="h-12 w-12 text-black-600" />,
     description: "Backend server deployment",
   },
   {
-    category: "Database",
     name: "MongoDB",
     icon: <SiMongodb className="h-12 w-12 text-green-600" />,
-    description: "NoSQL database for data storage",
+    description: "Database for data storage",
   },
   {
-    category: "Email Service",
-    name: "Gmail API",
-    icon: <SiGmail className="h-12 w-12 text-red-600" />,
-    description: "OTP delivery and notifications",
-  },
-  {
-    category: "Media Storage",
     name: "Cloudinary",
     icon: <SiCloudinary className="h-12 w-12 text-blue-600" />,
-    description: "Cloud storage for images, videos, audios and files",
+    description: "Global CDN for media assets",
   },
   {
-    category: "Photos & Images",
     name: "Google Drive",
     icon: <SiGoogledrive className="h-12 w-12 text-green-500" />,
-    description: "Cloud storage for images and videos",
+    description: "Cloud storage for media",
   },
   {
-    category: "Cloud Platform",
-    name: "Google Cloud Console",
+    name: "Redis",
+    icon: <SiRedis className="h-12 w-12 text-red-600" />,
+    description: "Memory cache for faster API responses",
+  },
+  {
+  name: "Firebase & Gmail API",
+  icon: (
+    <div className="flex space-x-2">
+      <SiFirebase className="h-10 w-10 text-yellow-500" />
+      <SiGmail className="h-10 w-10 text-red-600" />
+    </div>
+  ),
+  description: "Delivers OTPs via SMS and Email",
+  },
+  {
+    name: "Google Cloud",
     icon: <SiGooglecloud className="h-12 w-12 text-blue-600" />,
-    description: "Service Account for Drive storage and OAuth Credentials for sending OTPs",
+    description: "Service Account for Drive storage and OAuth credentials for sending OTPs",
   },
   {
-    category: "Automation / CI",
     name: "GitHub Actions",
     icon: <SiGithub className="h-12 w-12 text-gray-800" />,
     description: "Keeps server running, with automated MongoDB backups stored as artifacts",
   },
 ];
-
 
 const frontendTech = [
   { name: "React", icon: <SiReact className="h-8 w-8 mr-2 text-blue-500" /> },
@@ -100,7 +101,7 @@ const techCategories = [
 ];
 
 const sources = [
-  { name: "Google", icon: <SiGoogle className="h-8 w-8 mr-2 text-blue-500" /> },
+  { name: "Browser", icon: <SiGooglechrome className="h-8 w-8 mr-2 text-blue-500" /> },
   { name: "YouTube", icon: <SiYoutube className="h-8 w-8 mr-2 text-red-500" /> },
   { name: "ChatGPT", icon: <SiOpenai className="h-8 w-8 mr-2 text-green-500" /> },
   { name: "GitHub", icon: <SiGithub className="h-8 w-8 mr-2 text-gray-800" /> },
@@ -111,7 +112,7 @@ const sources = [
 function TechStackDetails() {
   return (
     <div>
-      {/* Platforms Section */}
+
       <section className="mb-16">
         <h2 className="text-2xl font-semibold text-gray-900 mb-8">Platforms</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -128,7 +129,6 @@ function TechStackDetails() {
         </div>
       </section>
 
-      {/* Technologies Section */}
       <section className="mb-16">
         <h2 className="text-2xl font-semibold text-gray-900 mb-8">Technologies</h2>
         <div className="space-y-12">
@@ -151,7 +151,6 @@ function TechStackDetails() {
         </div>
       </section>
 
-      {/* References Section */}
       <section className="mt-16">
         <h2 className="text-2xl font-semibold text-gray-900 mb-8">References</h2>
         <ul className="flex flex-wrap gap-4">

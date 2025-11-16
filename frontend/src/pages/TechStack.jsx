@@ -36,7 +36,6 @@ function TechStack() {
     },
   ];
 
-  // Share function
   const handleShare = (url) => {
     if (navigator.share) {
       navigator
@@ -56,7 +55,7 @@ function TechStack() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row items-center justify-between mb-16">
-        {/* Social Media Section */}
+    
         <div className="mb-4">
           <span className="block font-semibold text-gray-500">Follow us</span>
           <div className="flex items-center space-x-4 mt-2">
@@ -85,7 +84,6 @@ function TechStack() {
           </div>
         </div>
 
-        {/* Website Links Section */}
         <div className="space-y-4">
           {websites.map((site) => (
             <div
@@ -111,7 +109,6 @@ function TechStack() {
           ))}
         </div>
 
-        {/* Developer Section */}
         <div className="md:w-1/2 text-center mt-6 md:mt-0">
           <div className="relative inline-block">
             <img
@@ -127,7 +124,6 @@ function TechStack() {
         </div>
       </div>
 
-      {/* Principles Section */}
       <section className="mb-16">
         <h2 className="text-2xl font-semibold text-gray-900 mb-8">
           Principles
