@@ -13,14 +13,14 @@ const extractPublicId = (url) => {
 const VibeController = {
   getAllCollections: async (req, res) => {
     try {
-      const cached = await redis.get('vibe:collections');
+      const cached = await redis.get('vibe');
       if (cached) {
         return res.json(JSON.parse(cached));
       }
 
       const collections = await Collection.find().sort({ createdAt: -1 }).lean();
 
-      redis.set('vibe:collections', JSON.stringify(collections));
+      redis.set('vibe', JSON.stringify(collections));
 
       res.json(collections);
     } catch (error) {
@@ -54,7 +54,7 @@ const VibeController = {
         `Collection "${collection.name}" created by ${req.user.name}`
       );
 
-      redis.del('vibe:collections');
+      redis.del('vibe');
       res.status(201).json(collection);
     } catch (error) {
       res.status(500).json({ message: 'Failed to create collection' });
@@ -97,7 +97,7 @@ const VibeController = {
         `Collection "${collection.name}" updated by ${req.user.name}`
       );
 
-      redis.del('vibe:collections');
+      redis.del('vibe');
       res.json(collection);
     } catch (error) {
       res.status(500).json({ message: 'Failed to update collection' });
@@ -131,7 +131,7 @@ const VibeController = {
 
       await Collection.findByIdAndDelete(req.params.id);
 
-      redis.del('vibe:collections');
+      redis.del('vibe');
       res.json({ message: 'Collection deleted successfully' });
     } catch (error) {
       res.status(500).json({ message: 'Failed to delete collection' });
@@ -169,7 +169,7 @@ const VibeController = {
         `Song "${req.body.name}" uploaded to collection "${collection.name}" by ${req.user.name}`
       );
 
-      redis.del('vibe:collections');
+      redis.del('vibe');
     } catch (error) {
       res.status(500).json({ message: 'Failed to upload song' });
     }
@@ -216,7 +216,7 @@ const VibeController = {
         `${songs.length} songs uploaded to collection "${collection.name}" by ${req.user.name}: ${songNames}`
       );
 
-      redis.del('vibe:collections');
+      redis.del('vibe');
       res.status(201).json(collection);
     } catch (error) {
       res.status(500).json({ message: 'Failed to upload songs' });
@@ -248,7 +248,7 @@ const VibeController = {
       await collection.save();
       res.json(collection);
 
-      redis.del('vibe:collections');
+      redis.del('vibe');
     } catch (error) {
       res.status(500).json({ message: 'Failed to update song' });
     }
@@ -285,7 +285,7 @@ const VibeController = {
       await collection.save();
       res.json({ message: 'Song deleted successfully' });
 
-      redis.del('vibe:collections');
+      redis.del('vibe');
     } catch (error) {
       res.status(500).json({ message: 'Failed to delete song' });
     }

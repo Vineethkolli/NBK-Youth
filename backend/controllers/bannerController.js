@@ -1,6 +1,7 @@
 import Banner from '../models/Banner.js';
 import cloudinary from '../config/cloudinary.js';
 import { logActivity } from '../middleware/activityLogger.js';
+import { redis } from '../utils/redis.js';
 
 export const bannerController = {
   getAllBanners: async (req, res) => {
@@ -64,6 +65,7 @@ export const bannerController = {
         `Banner "${title || 'Untitled'}" created by ${req.user.name}`
       );
 
+      await redis.del("banner:active");
       res.status(201).json(banner);
     } catch (error) {
       res.status(500).json({ message: error.message });
@@ -183,6 +185,7 @@ export const bannerController = {
         `Banner "${title || originalBanner.title || 'Untitled'}" updated by ${req.user.name}`
       );
 
+      await redis.del("banner:active");
       res.json(banner);
     } catch (error) {
       res.status(500).json({ message: error.message });
@@ -227,6 +230,7 @@ export const bannerController = {
 
       await Banner.findByIdAndDelete(req.params.id);
 
+      await redis.del("banner:active");
       res.json({ message: 'Banner deleted successfully' });
     } catch (error) {
       res.status(500).json({ message: 'Failed to delete banner' });
@@ -236,9 +240,19 @@ export const bannerController = {
 
   getActiveBanner: async (req, res) => {
     try {
+      const cacheKey = 'banner:active';
+      
+      const cached = await redis.get(cacheKey);
+      if (cached) {
+        return res.json(JSON.parse(cached));
+      }
+      
       const banner = await Banner.findOne({ status: 'enabled' })
         .select('title message image imagePublicId video videoPublicId periodicity duration status')
         .lean();
+
+      await redis.set(cacheKey, JSON.stringify(banner));
+
       res.json(banner);
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch active banner' });

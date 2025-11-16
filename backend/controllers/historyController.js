@@ -6,7 +6,7 @@ import { redis } from '../utils/redis.js';
 export const historyController = {
   getAllHistories: async (req, res) => {
     try {
-      const cached = await redis.get('history:all');
+      const cached = await redis.get('history');
       if (cached) {
         return res.json(JSON.parse(cached));
       }
@@ -15,7 +15,7 @@ export const historyController = {
         .sort({ createdAt: -1 })
         .lean();
 
-      redis.set('history:all', JSON.stringify(histories));
+      redis.set('history', JSON.stringify(histories));
 
       res.json(histories);
     } catch (error) {
@@ -81,7 +81,7 @@ export const historyController = {
         `History "${snapshotName}" created by ${req.user.name}`
       );
 
-      redis.del('history:all');
+      redis.del('history');
       res.status(201).json(history);
     } catch (error) {
       if (error.code === 11000) {
@@ -114,7 +114,7 @@ export const historyController = {
 
       await History.findByIdAndDelete(req.params.id);
 
-      redis.del('history:all');
+      redis.del('history');
       res.json({ message: 'History deleted successfully' });
     } catch (error) {
       res.status(500).json({ message: 'Failed to delete history' });

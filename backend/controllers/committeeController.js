@@ -6,7 +6,7 @@ import { redis } from '../utils/redis.js';
 export const committeeController = {
   getAllMembers: async (req, res) => {
     try {
-      const cached = await redis.get('committee:members');
+      const cached = await redis.get('committee');
       if (cached) {
         return res.json(JSON.parse(cached));
       }
@@ -41,7 +41,7 @@ export const committeeController = {
         }
       ]);
 
-      redis.set('committee:members', JSON.stringify(members));
+      redis.set('committee', JSON.stringify(members));
       res.json(members);
     } catch (error) {
       console.error(error);
@@ -83,7 +83,7 @@ export const committeeController = {
         `Added ${user.name || 'Unknown'} (${registerId}) to committee by ${req.user.name}`
       );
 
-      redis.del('committee:members');
+      redis.del('committee');
       res.status(201).json({
         ...member.toObject(),
         name: user.name,
@@ -120,7 +120,7 @@ export const committeeController = {
         `Committee member order updated by ${req.user.name}`
       );
 
-      redis.del('committee:members');
+      redis.del('committee');
       res.json({ message: 'Order updated successfully' });
     } catch (error) {
       res.status(500).json({ message: 'Failed to update order' });
@@ -161,7 +161,7 @@ export const committeeController = {
         await Committee.bulkWrite(bulkOps);
       }
 
-      redis.del('committee:members');
+      redis.del('committee');
       res.json({ message: 'Committee member removed successfully' });
     } catch (error) {
       res.status(500).json({ message: 'Failed to remove committee member' });

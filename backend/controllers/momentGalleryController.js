@@ -26,9 +26,7 @@ export const galleryController = {
         `Gallery order updated for moment "${moment.title}" by ${req.user.name}`
       );
 
-      redis.del('moments:all');
-      redis.del(`moments:gallery:${momentId}`);
-
+      redis.del('moments');
       const updatedMoment = await Moment.findById(momentId).lean();
       res.json({ message: 'Gallery order updated successfully', moment: updatedMoment });
     } catch (error) {
@@ -92,9 +90,7 @@ export const galleryController = {
 
       await logActivity(req, 'UPDATE', 'Moment', momentId, before, `${mediaFiles.length} new gallery files added to moment "${moment.title}" by ${req.user.name}`);
 
-      redis.del('moments:all');
-      redis.del(`moments:gallery:${momentId}`);
-
+      redis.del('moments');
       const updated = await Moment.findById(momentId).lean();
       res.json({ message: 'Gallery upload completed', moment: updated });
     } catch (err) {
@@ -192,9 +188,7 @@ export const galleryController = {
         `${filesToProcess.length} media files copied and added from Drive to moment "${moment.title}" by ${req.user.name}`
       );
 
-      redis.del('moments:all');
-      redis.del(`moments:gallery:${momentId}`);
-
+      redis.del('moments');
       const updatedMoment = await Moment.findById(momentId).lean();
       res.status(201).json(updatedMoment);
     } catch (error) {
@@ -242,9 +236,7 @@ export const galleryController = {
         `Gallery file "${mediaFile.name}" deleted from moment "${moment.title}" by ${req.user.name}`
       );
 
-      redis.del('moments:all');
-      redis.del(`moments:gallery:${momentId}`);
-
+      redis.del('moments');
       const updatedMoment = await Moment.findById(req.params.momentId).lean();
       res.json({ message: 'Gallery file deleted successfully', moment: updatedMoment });
     } catch (error) {
