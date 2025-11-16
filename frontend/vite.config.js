@@ -51,14 +51,19 @@ export default defineConfig({
 
       workbox: {
         cleanupOutdatedCaches: true, 
-        clientsClaim: true,          
+        clientsClaim: true,
         runtimeCaching: [
           {
-            urlPattern: ({ url }) => url.origin === location.origin,
-            handler: 'StaleWhileRevalidate',
-            options: { cacheName: 'assets-cache' }
-          }
-        ]
+            urlPattern: ({ request }) =>
+              request.destination === 'script' ||
+              request.destination === 'style' ||
+              request.destination === 'image' ||
+              request.destination === 'font',
+              
+              handler: 'StaleWhileRevalidate',
+              options: { cacheName: 'assets-cache' }
+            }
+          ]
       }
     })
   ],

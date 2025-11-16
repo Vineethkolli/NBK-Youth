@@ -2,7 +2,7 @@ import Redis from "ioredis";
 
 let redis = null;
 
-// Create a safe dummy redis object to avoid crashes
+// Safe dummy redis object to avoid crashes
 const dummyRedis = {
   get: async () => null,
   set: async () => {},
