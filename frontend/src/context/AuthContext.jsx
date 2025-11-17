@@ -36,6 +36,10 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+    const updateUserData = (newData) => {
+    setUser((prev) => ({ ...(prev || {}), ...newData }));
+  };
+
   const setTokenAndUser = (token, userObj) => {
     localStorage.setItem("token", token);
     axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
@@ -111,6 +115,7 @@ export const AuthProvider = ({ children }) => {
       signout,
       googleAuth,
       hasAccess,
+      updateUserData,
     }),
     [user, loading]
   );
