@@ -49,5 +49,11 @@ export default function GoogleAuthButton({ onNewUser }) {
     document.body.appendChild(script);
   }, []);
 
-  return <div id="google-signin-button"></div>;
+  return (
+  <div
+    id="google-signin-button"
+    className="w-full"      
+    style={{ minWidth: "100%" }} 
+  />
+ );
 }
