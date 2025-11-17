@@ -1,11 +1,13 @@
 import express from 'express';
-import { signUp, signIn, forgotPassword, verifyOtp, resetPassword, initiatePhonePasswordReset,
-	issuePhoneResetToken } from '../controllers/authController.js';
+import { signUp, signIn, forgotPassword, verifyOtp, resetPassword, initiatePhonePasswordReset, issuePhoneResetToken,
+  googleAuth } from '../controllers/authController.js';
 
 const router = express.Router();
 
 router.post('/signup', signUp);
 router.post('/signin', signIn);
+router.post('/google-auth', googleAuth);
+
 router.post('/forgot-password', forgotPassword);
 router.post('/forgot-password/phone', initiatePhonePasswordReset);
 router.post('/forgot-password/phone/token', issuePhoneResetToken);

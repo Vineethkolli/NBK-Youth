@@ -1,22 +1,37 @@
-import jwt from 'jsonwebtoken';
-import User from '../models/User.js';
-import OTP from '../models/OTP.js';
-import { sendOTPEmail } from '../services/emailOTPService.js';
-import { logActivity } from '../middleware/activityLogger.js';
-import AuthLog from '../models/AuthLog.js';
-import { sendSignupEmail } from '../services/SignupEmail.js';
-import { normalizePhoneNumber } from '../utils/phoneValidation.js';
+import jwt from "jsonwebtoken";
+import { OAuth2Client } from "google-auth-library";
+import User from "../models/User.js";
+import OTP from "../models/OTP.js";
+import { sendOTPEmail } from "../services/emailOTPService.js";
+import { logActivity } from "../middleware/activityLogger.js";
+import AuthLog from "../models/AuthLog.js";
+import { sendSignupEmail } from "../services/SignupEmail.js";
+import { normalizePhoneNumber } from "../utils/phoneValidation.js";
 
-// Helper for Auth Logs
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
 const logAuthEvent = async (data) => {
   try {
     setImmediate(async () => {
       await AuthLog.create(data);
     });
   } catch (error) {
-    console.error('Auth log failed:', error.message);
+    console.error("Auth log failed:", error.message);
   }
 };
+
+// User Response Formatter
+const createAuthResponse = (user) => ({
+  id: user._id,
+  registerId: user.registerId,
+  name: user.name,
+  email: user.email,
+  phoneNumber: user.phoneNumber,
+  role: user.role,
+  category: user.category,
+  language: user.language,
+  profileImage: user.profileImage,
+});
 
 
 export const signUp = async (req, res) => {
@@ -24,60 +39,60 @@ export const signUp = async (req, res) => {
     let { name, email, phoneNumber, password, language, deviceInfo } = req.body;
 
     if (!name || !phoneNumber || !password)
-      return res.status(400).json({ message: 'Required fields missing' });
+      return res.status(400).json({ message: "Required fields missing" });
 
     phoneNumber = normalizePhoneNumber(phoneNumber);
     if (!phoneNumber)
-      return res.status(400).json({ message: 'Please enter a valid phone number in international format' });
+      return res
+        .status(400)
+        .json({ message: "Please enter a valid phone number" });
 
     const normalizedEmail = email?.trim().toLowerCase() || undefined;
     if (normalizedEmail) {
-      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(normalizedEmail))
-        return res.status(400).json({ message: 'Invalid email format' });
+        return res.status(400).json({ message: "Invalid email format" });
     }
 
     const [phoneExists, emailExists] = await Promise.all([
-      User.findOne({ phoneNumber }).select('_id').lean(),
-      normalizedEmail ? User.findOne({ email: normalizedEmail }).select('_id').lean() : Promise.resolve(null)
+      User.findOne({ phoneNumber }).select("_id").lean(),
+      normalizedEmail
+        ? User.findOne({ email: normalizedEmail }).select("_id").lean()
+        : null,
     ]);
 
-    if (phoneExists) return res.status(400).json({ message: 'User already exists' });
-    if (emailExists) return res.status(400).json({ message: 'User already exists' });
+    if (phoneExists)
+      return res.status(400).json({ message: "Phone number already registered" });
+    if (emailExists)
+      return res.status(400).json({ message: "Email already registered" });
 
     const user = await User.create({
       name,
       email: normalizedEmail,
       phoneNumber,
       password,
-      language: language || 'en',
+      language: language || "en",
     });
 
-    const safeDeviceInfo = deviceInfo || {
-      accessMode: 'website',
-      deviceType: 'unknown',
-      deviceModel: 'unknown',
-      platform: 'unknown',
-      browser: { name: 'unknown', version: 'unknown', osName: 'unknown', osVersion: 'unknown' },
-    };
-
-    setImmediate(() => {
-      logAuthEvent({
-        registerId: user.registerId,
-        name: user.name,
-        action: 'signup',
-        deviceInfo: safeDeviceInfo,
-      });
+    logAuthEvent({
+      registerId: user.registerId,
+      name: user.name,
+      action: "signup",
+      deviceInfo,
     });
 
     logActivity(
       { user: { registerId: user.registerId, name: user.name } },
-      'CREATE',
-      'User',
+      "CREATE",
+      "User",
       user.registerId,
       {
         before: null,
-        after: { name: user.name, email: user.email, phoneNumber: user.phoneNumber }
+        after: {
+          name: user.name,
+          email: user.email,
+          phoneNumber: user.phoneNumber,
+        },
       },
       `User ${user.name} signed up`
     );
@@ -85,32 +100,18 @@ export const signUp = async (req, res) => {
     const token = jwt.sign(
       { id: user._id, role: user.role },
       process.env.JWT_SECRET,
-      { expiresIn: '365d' }
+      { expiresIn: "365d" }
     );
 
-    if (user.email) {
-      setImmediate(() => {
-        sendSignupEmail(user.email, user.name);
-      });
-    }
+    if (user.email) sendSignupEmail(user.email, user.name);
 
-    return res.status(201).json({
+    res.status(201).json({
       token,
-      user: {
-        id: user._id,
-        registerId: user.registerId,
-        name: user.name,
-        email: user.email,
-        phoneNumber: user.phoneNumber,
-        role: user.role,
-        category: user.category,
-        language: user.language,
-        profileImage: user.profileImage,
-      },
+      user: createAuthResponse(user),
     });
   } catch (error) {
-    console.error('Signup error:', error);
-    return res.status(500).json({ message: 'Server error' });
+    console.error("Signup error:", error);
+    return res.status(500).json({ message: "Server error" });
   }
 };
 
@@ -120,48 +121,46 @@ export const signIn = async (req, res) => {
     let { identifier, password, language, deviceInfo } = req.body;
 
     if (!identifier || !password)
-      return res.status(400).json({ message: 'Required fields missing' });
+      return res.status(400).json({ message: "Required fields missing" });
 
+    let query = {};
     const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier);
 
     if (isEmail) {
-      identifier = identifier.trim().toLowerCase();
+      query.email = identifier.trim().toLowerCase();
     } else {
-      identifier = normalizePhoneNumber(identifier);
-      if (!identifier)
-        return res.status(400).json({ message: 'Invalid phone number' });
+      const phone = normalizePhoneNumber(identifier);
+      if (!phone)
+        return res.status(400).json({ message: "Invalid phone number" });
+      query.phoneNumber = phone;
     }
 
-    const user = await User.findOne({
-      $or: [{ email: identifier }, { phoneNumber: identifier }],
-    });
+    const user = await User.findOne(query);
+    if (!user)
+      return res.status(401).json({ message: "Invalid credentials" });
 
-    if (!user || !(await user.comparePassword(password)))
-      return res.status(401).json({ message: 'Invalid credentials' });
+    if (!user.password)
+      return res
+        .status(400)
+        .json({ message: "This account uses Google Sign-In" });
 
-    const safeDeviceInfo = deviceInfo || {
-      accessMode: 'website',
-      deviceType: 'unknown',
-      deviceModel: 'unknown',
-      platform: 'unknown',
-      browser: { name: 'unknown', version: 'unknown', osName: 'unknown', osVersion: 'unknown' },
-    };
+    const valid = await user.comparePassword(password);
+    if (!valid)
+      return res.status(401).json({ message: "Invalid credentials" });
 
-    setImmediate(() => {
-      logAuthEvent({
-        registerId: user.registerId,
-        name: user.name,
-        action: 'signin',
-        deviceInfo: safeDeviceInfo,
-      });
+    logAuthEvent({
+      registerId: user.registerId,
+      name: user.name,
+      action: "signin",
+      deviceInfo,
     });
 
     logActivity(
       { user: { registerId: user.registerId, name: user.name } },
-      'UPDATE',
-      'User',
+      "UPDATE",
+      "User",
       user.registerId,
-      { before: null, after: { deviceInfo: safeDeviceInfo } },
+      { before: null, after: { deviceInfo } },
       `User ${user.name} signed in`
     );
 
@@ -173,28 +172,137 @@ export const signIn = async (req, res) => {
     const token = jwt.sign(
       { id: user._id, role: user.role },
       process.env.JWT_SECRET,
-      { expiresIn: '365d' }
+      { expiresIn: "365d" }
     );
 
-    return res.json({
+    res.json({
       token,
-      user: {
-        id: user._id,
-        registerId: user.registerId,
-        name: user.name,
-        email: user.email,
-        phoneNumber: user.phoneNumber,
-        role: user.role,
-        category: user.category,
-        language: user.language,
-        profileImage: user.profileImage,
-      },
+      user: createAuthResponse(user),
     });
   } catch (error) {
-    console.error('Signin error:', error);
-    return res.status(500).json({ message: 'Server error' });
+    console.error("Signin error:", error);
+    return res.status(500).json({ message: "Server error" });
   }
 };
+
+
+export const googleAuth = async (req, res) => {
+  const { credential, phoneNumber, language, deviceInfo } = req.body;
+
+  if (!credential)
+    return res.status(400).json({ message: "Google credential required" });
+
+  try {
+    // Validate Google ID token
+    const ticket = await client.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+    if (!payload || !payload.email || !payload.sub)
+      return res.status(401).json({ message: "Invalid Google token" });
+
+    const { name, email, sub: googleId, picture } = payload;
+    const normalizedEmail = email.trim().toLowerCase();
+
+    // Existing User ⇒ Login
+    let user = await User.findOne({ email: normalizedEmail });
+
+    if (user) {
+      if (!user.googleId) {
+        user.googleId = googleId;
+        await user.save();
+      }
+
+      logAuthEvent({
+        registerId: user.registerId,
+        name: user.name,
+        action: "signin-google",
+        deviceInfo,
+      });
+
+      const token = jwt.sign(
+        { id: user._id, role: user.role },
+        process.env.JWT_SECRET,
+        { expiresIn: "365d" }
+      );
+
+      return res.json({
+        status: "success",
+        token,
+        user: createAuthResponse(user),
+      });
+    }
+
+    // New Google User ⇒ Signup + Phone
+    if (!phoneNumber)
+      return res
+        .status(400)
+        .json({ message: "Phone number required for new Google users" });
+
+    const normalizedPhone = normalizePhoneNumber(phoneNumber);
+    if (!normalizedPhone)
+      return res.status(400).json({ message: "Invalid phone number" });
+
+    const phoneExists = await User.findOne({ phoneNumber: normalizedPhone });
+    if (phoneExists)
+      return res
+        .status(400)
+        .json({ message: "Phone number already registered" });
+
+    user = await User.create({
+      name,
+      email: normalizedEmail,
+      googleId,
+      phoneNumber: normalizedPhone,
+      password: null,
+      profileImage: picture || null,
+      language: language || "en",
+      role: "user",
+      category: "general",
+    });
+
+    logAuthEvent({
+      registerId: user.registerId,
+      name: user.name,
+      action: "signup-google",
+      deviceInfo,
+    });
+
+    logActivity(
+      { user: { registerId: user.registerId, name: user.name } },
+      "CREATE",
+      "User",
+      user.registerId,
+      {
+        before: null,
+        after: {
+          name: user.name,
+          email: user.email,
+          phoneNumber: user.phoneNumber,
+        },
+      },
+      `User ${user.name} signed up via Google`
+    );
+
+    const token = jwt.sign(
+      { id: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "365d" }
+    );
+
+    res.status(201).json({
+      status: "success",
+      token,
+      user: createAuthResponse(user),
+    });
+  } catch (error) {
+    console.error("Google signup error:", error);
+    return res.status(500).json({ message: "Google authentication failed" });
+  }
+};
+
 
 
 export const forgotPassword = async (req, res) => {

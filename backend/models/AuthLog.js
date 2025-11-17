@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 const authLogSchema = new mongoose.Schema({
   registerId: { type: String, required: true },
   name: { type: String, required: true },
-  action: { type: String, enum: ['signin', 'signup'], required: true },
+  action: { type: String, enum: ['signin', 'signup', 'signup-google','signin-google'], required: true },
 
   deviceInfo: {
     accessMode: String,
