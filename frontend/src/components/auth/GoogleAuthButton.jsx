@@ -41,7 +41,6 @@ export default function GoogleAuthButton({ onNewUser }) {
           theme: "outline",
           size: "large",
           text: "continue_with",
-          width: "100%"
         }
       );
     };
@@ -49,11 +48,9 @@ export default function GoogleAuthButton({ onNewUser }) {
     document.body.appendChild(script);
   }, []);
 
-  return (
-  <div
-    id="google-signin-button"
-    className="w-full"      
-    style={{ minWidth: "100%" }} 
-  />
- );
+   return (
+    <div className="flex justify-center w-full">
+      <div id="google-signin-button"></div>
+    </div>
+  );
 }
