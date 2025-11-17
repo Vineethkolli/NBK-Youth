@@ -6,3 +6,7 @@ if (!backendUrl) {
 }
 
 export const API_URL = backendUrl.trim().replace(/\/+$/, '');
+
+
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+export { GOOGLE_CLIENT_ID };

@@ -126,6 +126,13 @@ function ProfileDetails({
             <dt className="text-sm font-medium text-gray-500">Phone number</dt>
             <dd className="mt-1 text-sm text-gray-900 notranslate">{formattedPhone}</dd>
           </div>
+
+          <div className="sm:col-span-1">
+            <dt className="text-sm font-medium text-gray-500">Google Account</dt>
+            <dd className="mt-1 text-sm text-gray-900">
+              {user.googleId ? "Connected" : "Not Connected"}
+            </dd>
+          </div>
         </dl>
       )}
     </>

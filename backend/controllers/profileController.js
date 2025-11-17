@@ -2,20 +2,31 @@ import User from '../models/User.js';
 import cloudinary from '../config/cloudinary.js';
 import { logActivity } from '../middleware/activityLogger.js';
 import { normalizePhoneNumber } from '../utils/phoneValidation.js';
+import { OAuth2Client } from 'google-auth-library';
 
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+// ✅ FIXED getProfile — Detect password from real DB value, not req.user
 export const getProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id)
-      .select('-password')
-      .lean();
+    const user = await User.findById(req.user.id).lean();
 
     if (!user) return res.status(404).json({ message: 'User not found' });
 
-    res.json(user);
-  } catch {
+    // Extract and remove password
+    const { password, ...publicUser } = user;
+
+    // REAL & CORRECT password existence check
+    publicUser.hasPassword = Boolean(password);
+
+    res.json(publicUser);
+
+  } catch (error) {
+    console.error("Profile fetch error:", error);
     res.status(500).json({ message: 'Server error' });
   }
 };
+
 
 
 export const updateProfile = async (req, res) => {
@@ -42,7 +53,6 @@ export const updateProfile = async (req, res) => {
         .json({ message: 'Cannot change default developer email' });
     }
 
-    // Email validation
     if (normalizedEmail) {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -58,7 +68,6 @@ export const updateProfile = async (req, res) => {
       }
     }
 
-    // Phone normalization and validation (E.164)
     if (
       phoneNumber &&
       phoneNumber.trim() &&
@@ -84,6 +93,20 @@ export const updateProfile = async (req, res) => {
     user.email = normalizedEmail || user.email;
     user.phoneNumber = phoneNumber || user.phoneNumber;
 
+    if (normalizedEmail && normalizedEmail !== originalData.email) {
+      if (user.googleId) {
+        user.googleId = null;
+        await logActivity(
+          req,
+          'UPDATE',
+          'User',
+          user.registerId,
+          { before: { googleId: 'connected' }, after: { googleId: null } },
+          `Google account auto-removed due to email change by ${user.name}`
+        );
+      }
+    }
+
     await user.save();
 
     await logActivity(
@@ -95,7 +118,12 @@ export const updateProfile = async (req, res) => {
       `User ${user.name} updated profile`
     );
 
-    res.json(user);
+    res.json({
+      ...user.toObject(),
+      password: undefined,
+      hasPassword: Boolean(user.password)
+    });
+
   } catch (err) {
     console.error('Update profile error:', err);
     res.status(500).json({ message: 'Server error' });
@@ -129,6 +157,7 @@ export const updateLanguage = async (req, res) => {
       .json({ message: 'Failed to update language preference' });
   }
 };
+
 
 
 export const updateProfileImage = async (req, res) => {
@@ -180,6 +209,7 @@ export const updateProfileImage = async (req, res) => {
 };
 
 
+
 export const deleteProfileImage = async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
@@ -217,16 +247,28 @@ export const deleteProfileImage = async (req, res) => {
 };
 
 
+
 export const changePassword = async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
 
     const user = await User.findById(req.user.id);
 
-    if (!(await user.comparePassword(currentPassword))) {
-      return res
-        .status(401)
-        .json({ message: 'Current password is incorrect' });
+    // Change password flow
+    if (user.password) {
+      if (!currentPassword) {
+        return res.status(400).json({ message: 'Current password is required' });
+      }
+
+      if (!(await user.comparePassword(currentPassword))) {
+        return res
+          .status(401)
+          .json({ message: 'Current password is incorrect' });
+      }
+    }
+
+    if (!newPassword) {
+      return res.status(400).json({ message: 'New password is required' });
     }
 
     user.password = newPassword;
@@ -239,11 +281,111 @@ export const changePassword = async (req, res) => {
       'User',
       req.user.registerId,
       { before: null, after: null },
-      `User ${req.user.name} changed password`
+      `User ${req.user.name} ${user.password ? 'changed' : 'set'} password`
     );
 
-    res.json({ message: 'Password updated successfully' });
+    res.json({
+      message: 'Password updated successfully',
+      hasPassword: true
+    });
+
   } catch {
     res.status(500).json({ message: 'Server error' });
+  }
+};
+
+
+
+export const linkGoogleAccount = async (req, res) => {
+  try {
+    const { credential } = req.body;
+
+    if (!credential) {
+      return res.status(400).json({ message: 'Google credential required' });
+    }
+
+    const ticket = await client.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+    if (!payload || !payload.email || !payload.sub) {
+      return res.status(401).json({ message: 'Invalid Google token' });
+    }
+
+    const { email: googleEmail, sub: googleId } = payload;
+    const normalizedGoogleEmail = googleEmail.trim().toLowerCase();
+
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    if (normalizedGoogleEmail !== user.email) {
+      return res.status(400).json({
+        message: 'Cannot connect Google: Email mismatch. Change your email in profile to connect this Google account'
+      });
+    }
+
+    const existingGoogleUser = await User.findOne({ googleId });
+    if (existingGoogleUser && existingGoogleUser._id.toString() !== user._id.toString()) {
+      return res.status(400).json({
+        message: 'This Google account is already linked to another user'
+      });
+    }
+
+    user.googleId = googleId;
+    await user.save();
+
+    await logActivity(
+      req,
+      'UPDATE',
+      'User',
+      user.registerId,
+      { before: { googleId: null }, after: { googleId } },
+      `User ${user.name} linked Google account`
+    );
+
+    res.json({ 
+      message: 'Google account linked successfully', 
+      googleId: user.googleId 
+    });
+
+  } catch (error) {
+    console.error('Link Google account error:', error);
+    res.status(500).json({ message: 'Failed to link Google account' });
+  }
+};
+
+
+
+export const unlinkGoogleAccount = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    if (!user.googleId) {
+      return res.status(400).json({ message: 'No Google account linked' });
+    }
+
+    user.googleId = null;
+    await user.save();
+
+    await logActivity(
+      req,
+      'UPDATE',
+      'User',
+      user.registerId,
+      { before: { googleId: 'connected' }, after: { googleId: null } },
+      `User ${user.name} removed Google account connection`
+    );
+
+    res.json({ message: 'Google account unlinked successfully' });
+  } catch (error) {
+    console.error('Unlink Google account error:', error);
+    res.status(500).json({ message: 'Failed to unlink Google account' });
   }
 };

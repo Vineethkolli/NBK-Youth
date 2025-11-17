@@ -1,7 +1,7 @@
 import express from 'express';
 import { auth } from '../middleware/auth.js';
 import { getProfile, updateProfile, updateLanguage, updateProfileImage, deleteProfileImage, 
-    changePassword } from '../controllers/profileController.js';
+    changePassword, linkGoogleAccount, unlinkGoogleAccount } from '../controllers/profileController.js';
 
 const router = express.Router();
 
@@ -12,5 +12,7 @@ router.post('/image', auth, updateProfileImage);
 router.delete('/image', auth, deleteProfileImage);
 
 router.post('/change-password', auth, changePassword);
+router.post('/link-google', auth, linkGoogleAccount);
+router.post('/unlink-google', auth, unlinkGoogleAccount);
 
 export default router;

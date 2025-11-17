@@ -31,6 +31,8 @@ const createAuthResponse = (user) => ({
   category: user.category,
   language: user.language,
   profileImage: user.profileImage,
+  hasPassword: !!user.password,
+  googleId: user.googleId || null,
 });
 
 
