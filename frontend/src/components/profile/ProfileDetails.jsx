@@ -73,6 +73,11 @@ function ProfileDetails({
               onChange={handleUserDataChange}
               className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
             />
+            {user.googleId && (
+  <p className="text-xs text-red-600 mt-1">
+    Changing your email will disconnect your Google account. So reconnect it.
+  </p>
+)}
           </div>
 
           <div>
