@@ -31,7 +31,13 @@ export default function GoogleAuthButton({ onNewUser }) {
       window.google?.accounts.id.initialize({
         client_id: GOOGLE_CLIENT_ID,
         callback: handleGoogleCallback,
+        // Prevent automatic selection/personalized "Continue as <name>" button
+        auto_select: false,
+        ux_mode: "popup",
       });
+
+      // Explicitly disable any remembered auto-selection state
+      window.google?.accounts.id.disableAutoSelect?.();
 
       window.google?.accounts.id.renderButton(
         document.getElementById("google-signin-button"),
@@ -48,14 +54,8 @@ export default function GoogleAuthButton({ onNewUser }) {
   }, []);
 
    return (
-  <div className="flex justify-center w-full">
-    {/* Add min-height so the page doesn't jump vertically.
-      Add min-width so the centering doesn't jump horizontally.
-    */}
-    <div 
-      id="google-signin-button" 
-      style={{ minHeight: '40px', minWidth: '20px' }} // Adjust width to match your button size
-    ></div>
-  </div>
-);
+    <div className="flex justify-center w-full">
+      <div id="google-signin-button"></div>
+    </div>
+  );
 }
