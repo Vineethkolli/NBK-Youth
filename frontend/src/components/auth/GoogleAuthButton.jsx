@@ -31,13 +31,7 @@ export default function GoogleAuthButton({ onNewUser }) {
       window.google?.accounts.id.initialize({
         client_id: GOOGLE_CLIENT_ID,
         callback: handleGoogleCallback,
-        // Prevent automatic selection/personalized "Continue as <name>" button
-        auto_select: false,
-        ux_mode: "popup",
       });
-
-      // Explicitly disable any remembered auto-selection state
-      window.google?.accounts.id.disableAutoSelect?.();
 
       window.google?.accounts.id.renderButton(
         document.getElementById("google-signin-button"),
@@ -46,6 +40,7 @@ export default function GoogleAuthButton({ onNewUser }) {
           theme: "outline",
           size: "large",
           text: "continue_with",
+          personalization: "disabled",
         }
       );
     };
