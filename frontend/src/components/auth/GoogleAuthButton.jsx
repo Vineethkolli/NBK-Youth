@@ -31,10 +31,14 @@ export default function GoogleAuthButton({ onNewUser }) {
       window.google?.accounts.id.initialize({
         client_id: GOOGLE_CLIENT_ID,
         callback: handleGoogleCallback,
+
+        // 🔥 FIX mobile auto prompt glitch
         auto_select: false,
-        cancel_on_tap_outside: true,
+        use_fedcm_for_prompt: false,
+        prompt_parent_id: "google-signin-button",
       });
 
+      // Render clean custom button
       window.google?.accounts.id.renderButton(
         document.getElementById("google-signin-button"),
         {
@@ -49,7 +53,7 @@ export default function GoogleAuthButton({ onNewUser }) {
     document.body.appendChild(script);
   }, []);
 
-   return (
+  return (
     <div className="flex justify-center w-full">
       <div id="google-signin-button"></div>
     </div>
