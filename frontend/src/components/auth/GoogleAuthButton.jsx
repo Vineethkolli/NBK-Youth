@@ -31,6 +31,8 @@ export default function GoogleAuthButton({ onNewUser }) {
       window.google?.accounts.id.initialize({
         client_id: GOOGLE_CLIENT_ID,
         callback: handleGoogleCallback,
+        auto_select: false,
+        cancel_on_tap_outside: true,
       });
 
       window.google?.accounts.id.renderButton(
