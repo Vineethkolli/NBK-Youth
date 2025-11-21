@@ -11,14 +11,16 @@ export default function GooglePhoneStep({ credential, onCancel }) {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (credential) {
+    if (credential?.googleUser) {
+      setName(credential.googleUser.name);
+    } else if (typeof credential === "string") {
       try {
-        const payload = JSON.parse(atob(credential.split('.')[1]));
+        const payload = JSON.parse(atob(credential.split(".")[1]));
         if (payload.name) {
           setName(payload.name);
         }
       } catch (error) {
-        console.error('Failed to decode credential:', error);
+        console.error("Failed to decode credential:", error);
       }
     }
   }, [credential]);

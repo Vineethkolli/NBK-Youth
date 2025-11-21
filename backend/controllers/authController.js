@@ -1,3 +1,4 @@
+import axios from "axios";
 import jwt from "jsonwebtoken";
 import { OAuth2Client } from "google-auth-library";
 import User from "../models/User.js";
@@ -189,23 +190,43 @@ export const signIn = async (req, res) => {
 
 
 export const googleAuth = async (req, res) => {
-  const { credential, phoneNumber, name: customName, language, deviceInfo } = req.body;
+  const { credential, accessToken, phoneNumber, name: customName, language, deviceInfo } = req.body;
 
-  if (!credential)
-    return res.status(400).json({ message: "Google credential required" });
+  if (!credential && !accessToken)
+    return res.status(400).json({ message: "Google credential or access token required" });
 
   try {
-    // Validate Google ID token
-    const ticket = await client.verifyIdToken({
-      idToken: credential,
-      audience: process.env.GOOGLE_CLIENT_ID,
-    });
+    let name, email, googleId, picture;
 
-    const payload = ticket.getPayload();
-    if (!payload || !payload.email || !payload.sub)
-      return res.status(401).json({ message: "Invalid Google token" });
+    if (credential) {
+      // Validate Google ID token
+      const ticket = await client.verifyIdToken({
+        idToken: credential,
+        audience: process.env.GOOGLE_CLIENT_ID,
+      });
 
-    const { name, email, sub: googleId, picture } = payload;
+      const payload = ticket.getPayload();
+      if (!payload || !payload.email || !payload.sub)
+        return res.status(401).json({ message: "Invalid Google token" });
+
+      name = payload.name;
+      email = payload.email;
+      googleId = payload.sub;
+      picture = payload.picture;
+    } else if (accessToken) {
+      const { data } = await axios.get("https://www.googleapis.com/oauth2/v3/userinfo", {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+
+      if (!data || !data.email || !data.sub)
+        return res.status(401).json({ message: "Invalid Google access token" });
+
+      name = data.name;
+      email = data.email;
+      googleId = data.sub;
+      picture = data.picture;
+    }
+
     const normalizedEmail = email.trim().toLowerCase();
 
     let user = await User.findOne({ email: normalizedEmail });
@@ -237,9 +258,10 @@ export const googleAuth = async (req, res) => {
     }
 
     if (!phoneNumber)
-      return res
-        .status(400)
-        .json({ message: "Phone number required for new Google users" });
+      return res.status(400).json({
+        message: "Phone number required for new Google users",
+        googleUser: { name, email, picture },
+      });
 
     const normalizedPhone = normalizePhoneNumber(phoneNumber);
     if (!normalizedPhone)
@@ -308,7 +330,6 @@ export const googleAuth = async (req, res) => {
     return res.status(500).json({ message: "Google authentication failed" });
   }
 };
-
 
 
 export const forgotPassword = async (req, res) => {
