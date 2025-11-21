@@ -31,21 +31,23 @@ export default function GoogleAuthButton({ onNewUser }) {
       window.google?.accounts.id.initialize({
         client_id: GOOGLE_CLIENT_ID,
         callback: handleGoogleCallback,
-
-        // 🔥 FIX mobile auto prompt glitch
-        auto_select: false,
-        use_fedcm_for_prompt: false,
-        prompt_parent_id: "google-signin-button",
+        // *** ADD THESE TWO PROPERTIES ***
+        // 1. Ensures ITP (Intelligent Tracking Prevention) support, 
+        //    often preventing unexpected behavior.
+        itp_support: true,
+        // 2. The most direct way to suppress the automatic One Tap prompt
+        //    which shows the user's account in production.
+        prompt_parent_id: "google-signin-button", 
       });
 
-      // Render clean custom button
       window.google?.accounts.id.renderButton(
         document.getElementById("google-signin-button"),
         {
           type: "standard",
           theme: "outline",
           size: "large",
-          text: "continue_with",
+          // This ensures the button text is "Continue with Google"
+          text: "continue_with", 
         }
       );
     };
