@@ -31,13 +31,6 @@ export default function GoogleAuthButton({ onNewUser }) {
       window.google?.accounts.id.initialize({
         client_id: GOOGLE_CLIENT_ID,
         callback: handleGoogleCallback,
-        // *** ADD THESE TWO PROPERTIES ***
-        // 1. Ensures ITP (Intelligent Tracking Prevention) support, 
-        //    often preventing unexpected behavior.
-        itp_support: true,
-        // 2. The most direct way to suppress the automatic One Tap prompt
-        //    which shows the user's account in production.
-        prompt_parent_id: "google-signin-button", 
       });
 
       window.google?.accounts.id.renderButton(
@@ -46,8 +39,7 @@ export default function GoogleAuthButton({ onNewUser }) {
           type: "standard",
           theme: "outline",
           size: "large",
-          // This ensures the button text is "Continue with Google"
-          text: "continue_with", 
+          text: "continue_with",
         }
       );
     };
@@ -55,7 +47,7 @@ export default function GoogleAuthButton({ onNewUser }) {
     document.body.appendChild(script);
   }, []);
 
-  return (
+   return (
     <div className="flex justify-center w-full">
       <div id="google-signin-button"></div>
     </div>

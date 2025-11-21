@@ -77,13 +77,14 @@ export const AuthProvider = ({ children }) => {
     setTokenAndUser(data.token, data.user);
   };
 
-  const googleAuth = async (credential, phoneNumber = null) => {
+  const googleAuth = async (credential, phoneNumber = null, name = null) => {
     const language = localStorage.getItem("preferredLanguage") || "en";
     const deviceInfo = await getDeviceInfo();
 
     const { data } = await axios.post(`${API_URL}/api/auth/google-auth`, {
       credential,
       phoneNumber,
+      name,
       language,
       deviceInfo,
     });

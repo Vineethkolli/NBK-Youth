@@ -189,7 +189,7 @@ export const signIn = async (req, res) => {
 
 
 export const googleAuth = async (req, res) => {
-  const { credential, phoneNumber, language, deviceInfo } = req.body;
+  const { credential, phoneNumber, name: customName, language, deviceInfo } = req.body;
 
   if (!credential)
     return res.status(400).json({ message: "Google credential required" });
@@ -208,7 +208,6 @@ export const googleAuth = async (req, res) => {
     const { name, email, sub: googleId, picture } = payload;
     const normalizedEmail = email.trim().toLowerCase();
 
-    // Existing User ⇒ Login
     let user = await User.findOne({ email: normalizedEmail });
 
     if (user) {
@@ -237,7 +236,6 @@ export const googleAuth = async (req, res) => {
       });
     }
 
-    // New Google User ⇒ Signup + Phone
     if (!phoneNumber)
       return res
         .status(400)
@@ -253,8 +251,12 @@ export const googleAuth = async (req, res) => {
         .status(400)
         .json({ message: "Phone number already registered" });
 
+    const finalName = customName || name;
+    if (!finalName)
+      return res.status(400).json({ message: "Name is required" });
+
     user = await User.create({
-      name,
+      name: finalName,
       email: normalizedEmail,
       googleId,
       phoneNumber: normalizedPhone,
@@ -293,6 +295,8 @@ export const googleAuth = async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: "365d" }
     );
+
+    if (user.email) sendSignupEmail(user.email, user.name);
 
     res.status(201).json({
       status: "success",

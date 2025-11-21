@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
 import CustomPhoneInput from "./PhoneInput";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
@@ -7,9 +7,27 @@ import { toast } from "react-hot-toast";
 export default function GooglePhoneStep({ credential, onCancel }) {
   const { googleAuth } = useAuth();
   const [phone, setPhone] = useState("");
+  const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    if (credential) {
+      try {
+        const payload = JSON.parse(atob(credential.split('.')[1]));
+        if (payload.name) {
+          setName(payload.name);
+        }
+      } catch (error) {
+        console.error('Failed to decode credential:', error);
+      }
+    }
+  }, [credential]);
+
   const submitPhone = async () => {
+    if (!name.trim()) {
+      return toast.error("Please enter your name");
+    }
+
     const parsed = parsePhoneNumberFromString(phone.replace(/^00/, "+"));
     if (!parsed?.isValid()) {
       return toast.error("Please enter a valid phone number");
@@ -18,7 +36,7 @@ export default function GooglePhoneStep({ credential, onCancel }) {
     setLoading(true);
 
     try {
-      await googleAuth(credential, parsed.number);
+      await googleAuth(credential, parsed.number, name.trim());
       toast.success("Account created successfully");
     } catch (err) {
       toast.error(err.response?.data?.message || "Signup failed");
@@ -32,9 +50,16 @@ export default function GooglePhoneStep({ credential, onCancel }) {
 
       <div className="text-center">
         <h2 className="text-2xl font-bold text-green-600">Complete Signup</h2>
-        <p className="text-sm text-gray-600 mt-1">
-          Enter your Phone Number
-        </p>
+      </div>
+
+      <div>
+        <input
+          type="text"
+          placeholder="Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500"
+        />
       </div>
 
       <div>
