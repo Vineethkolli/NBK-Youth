@@ -31,8 +31,6 @@ export default function GoogleAuthButton({ onNewUser }) {
       window.google?.accounts.id.initialize({
         client_id: GOOGLE_CLIENT_ID,
         callback: handleGoogleCallback,
-        // Explicitly disable auto_select to prevent automatic sign-in behaviors
-        auto_select: false,
       });
 
       window.google?.accounts.id.renderButton(
@@ -41,21 +39,12 @@ export default function GoogleAuthButton({ onNewUser }) {
           type: "standard",
           theme: "outline",
           size: "large",
-          // Changed from 'continue_with' to 'signin_with' 
-          // This prevents "Continue as [Name]" and strictly shows "Sign in with Google"
-          text: "continue_with", 
-          logo_alignment: "left"
+          text: "continue_with",
         }
       );
     };
 
     document.body.appendChild(script);
-    
-    return () => {
-      if(document.body.contains(script)) {
-        document.body.removeChild(script);
-      }
-    }
   }, []);
 
    return (
