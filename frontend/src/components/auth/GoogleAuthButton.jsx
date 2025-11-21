@@ -48,8 +48,14 @@ export default function GoogleAuthButton({ onNewUser }) {
   }, []);
 
    return (
-    <div className="flex justify-center w-full">
-      <div id="google-signin-button"></div>
-    </div>
-  );
+  <div className="flex justify-center w-full">
+    {/* Add min-height so the page doesn't jump vertically.
+      Add min-width so the centering doesn't jump horizontally.
+    */}
+    <div 
+      id="google-signin-button" 
+      style={{ minHeight: '40px', minWidth: '20px' }} // Adjust width to match your button size
+    ></div>
+  </div>
+);
 }
