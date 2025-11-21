@@ -31,6 +31,8 @@ export default function GoogleAuthButton({ onNewUser }) {
       window.google?.accounts.id.initialize({
         client_id: GOOGLE_CLIENT_ID,
         callback: handleGoogleCallback,
+        auto_select: false,
+        itp_support: false,
       });
 
       window.google?.accounts.id.renderButton(
@@ -43,12 +45,15 @@ export default function GoogleAuthButton({ onNewUser }) {
           personalization: "disabled",
         }
       );
+
+      // MUST BE HERE (after render and after initialize)
+      window.google?.accounts.id.prompt(() => {});
     };
 
     document.body.appendChild(script);
   }, []);
 
-   return (
+  return (
     <div className="flex justify-center w-full">
       <div id="google-signin-button"></div>
     </div>
