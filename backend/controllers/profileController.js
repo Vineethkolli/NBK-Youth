@@ -370,7 +370,7 @@ export const unlinkGoogleAccount = async (req, res) => {
       return res.status(400).json({ message: 'No Google account linked' });
     }
 
-    user.googleId = null;
+    delete user.googleId;
     await user.save();
 
     await logActivity(
