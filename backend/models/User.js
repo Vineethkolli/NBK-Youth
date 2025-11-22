@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import Counter from './Counter.js';
 
 const userSchema = new mongoose.Schema({
