@@ -90,7 +90,7 @@ export const updateProfile = async (req, res) => {
 
     if (normalizedEmail && normalizedEmail !== originalData.email) {
       if (user.googleId) {
-        user.googleId = null;
+        delete user.googleId;
         await logActivity(
           req,
           'UPDATE',
