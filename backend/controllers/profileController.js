@@ -91,6 +91,7 @@ export const updateProfile = async (req, res) => {
     if (normalizedEmail && normalizedEmail !== originalData.email) {
       if (user.googleId) {
         delete user.googleId;
+        user.markModified('googleId');
         await logActivity(
           req,
           'UPDATE',
@@ -371,6 +372,7 @@ export const unlinkGoogleAccount = async (req, res) => {
     }
 
     delete user.googleId;
+    user.markModified('googleId');
     await user.save();
 
     await logActivity(
