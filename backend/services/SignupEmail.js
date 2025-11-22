@@ -94,7 +94,7 @@ export const sendSignupEmail = async (email, name) => {
                          class="btn"
                          style="background-color:#d4a017;color:#fff;padding:14px 32px;border-radius:8px;
                          font-weight:bold;font-size:16px;display:inline-block;text-decoration:none;">
-                        🚀 Visit NBK Youth
+                        🚀  Visit NBK Youth
                       </a>
                     </div>
 
