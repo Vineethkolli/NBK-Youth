@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import bcrypt from 'bcryptjs';
+import bcrypt from 'bcrypt';
 import Counter from './Counter.js';
 
 const userSchema = new mongoose.Schema({
@@ -71,7 +71,7 @@ userSchema.pre('save', async function () {
 // Hash password before saving
 userSchema.pre('save', async function () {
   if (this.isModified('password') && this.password) {
-    this.password = await bcrypt.hash(this.password, 12);
+    this.password = await bcrypt.hash(this.password, 8);
   }
 });
 
@@ -80,6 +80,12 @@ userSchema.methods.comparePassword = async function (candidatePassword) {
     return false;
   }
   return await bcrypt.compare(candidatePassword, this.password);
+};
+
+// Extract current hash rounds (to change from 12 to 8)
+userSchema.methods.getHashRounds = function () {
+  const parts = this.password.split("$");
+  return parts.length > 2 ? parseInt(parts[2], 10) : null;
 };
 
 export default mongoose.model('User', userSchema);
