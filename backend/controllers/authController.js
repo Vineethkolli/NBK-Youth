@@ -199,7 +199,6 @@ export const googleAuth = async (req, res) => {
     let name, email, googleId, picture;
 
     if (credential) {
-      // Validate Google ID token
       const ticket = await client.verifyIdToken({
         idToken: credential,
         audience: process.env.GOOGLE_CLIENT_ID,

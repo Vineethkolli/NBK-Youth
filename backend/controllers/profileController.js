@@ -6,17 +6,13 @@ import { OAuth2Client } from 'google-auth-library';
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-// ✅ FIXED getProfile — Detect password from real DB value, not req.user
 export const getProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).lean();
 
     if (!user) return res.status(404).json({ message: 'User not found' });
 
-    // Extract and remove password
     const { password, ...publicUser } = user;
-
-    // REAL & CORRECT password existence check
     publicUser.hasPassword = Boolean(password);
 
     res.json(publicUser);
@@ -26,7 +22,6 @@ export const getProfile = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
-
 
 
 export const updateProfile = async (req, res) => {
@@ -254,7 +249,6 @@ export const changePassword = async (req, res) => {
 
     const user = await User.findById(req.user.id);
 
-    // Change password flow
     if (user.password) {
       if (!currentPassword) {
         return res.status(400).json({ message: 'Current password is required' });
@@ -293,7 +287,6 @@ export const changePassword = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
-
 
 
 export const linkGoogleAccount = async (req, res) => {
@@ -357,7 +350,6 @@ export const linkGoogleAccount = async (req, res) => {
     res.status(500).json({ message: 'Failed to link Google account' });
   }
 };
-
 
 
 export const unlinkGoogleAccount = async (req, res) => {
