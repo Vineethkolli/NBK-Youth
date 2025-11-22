@@ -33,9 +33,7 @@ function OTPVerification({ method = 'email', identifier, confirmationResult, onV
     }
   };
 
-  const displayTarget = method === 'phone'
-    ? (identifier ? identifier.replace(/.(?=.{4})/g, '*') : 'your phone number')
-    : identifier || 'your email';
+  const displayTarget = identifier || (method === 'phone' ? 'your phone number' : 'your email');
 
   const handleSubmit = async (e) => {
     e.preventDefault();

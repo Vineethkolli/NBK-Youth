@@ -12,11 +12,11 @@
   "dependencies": {
     "@hello-pangea/dnd": "^18.0.1",
     "axios": "^1.13.2",
-    "country-flag-icons": "^1.6.3",
+    "country-flag-icons": "^1.6.4",
     "firebase": "^12.6.0",
     "jspdf": "^3.0.4",
     "jspdf-autotable": "^5.0.2",
-    "libphonenumber-js": "^1.12.28",
+    "libphonenumber-js": "^1.12.29",
     "lucide-react": "^0.554.0",
     "qrcode.react": "^4.2.0",
     "react": "^19.1.1",
