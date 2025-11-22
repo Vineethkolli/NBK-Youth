@@ -21,7 +21,7 @@ export const getAllUsers = async (req, res) => {
     }
 
     const users = await User.find(query)
-      .select('registerId name email phoneNumber role category profileImage language createdAt')
+      .select('registerId name email phoneNumber role category profileImage language googleId createdAt')
       .lean();
 
     users.sort((a, b) => {

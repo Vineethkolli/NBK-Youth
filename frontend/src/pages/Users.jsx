@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
-import { Trash2, Bell, BellOff, Edit2, Search } from 'lucide-react';
+import { Trash2, Bell, BellOff, Edit2, Search, CheckCircle, XCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { API_URL } from '../utils/config';
 import UpdateUserForm from '../components/users/UpdateUserForm';
@@ -90,6 +90,7 @@ function Users() {
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Phone</th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
+                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Google</th>
                 <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Notifications</th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Language</th>
                 {hasAccess('Developer') && (
@@ -157,6 +158,14 @@ function Users() {
                       <option value="general">General</option>
                     </select>
                   </td>
+
+<td className="px-4 py-3 text-center">
+  {user.googleId ? (
+    <CheckCircle className="h-5 w-5 text-green-600" title="Google Linked" />
+  ) : (
+    <XCircle className="h-5 w-5 text-gray-400" title="Not Linked" />
+  )}
+</td>
 
                   <td className="px-4 py-3 whitespace-nowrap text-center">
                     {user.notificationsEnabled ? (
