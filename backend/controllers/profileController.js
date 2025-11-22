@@ -278,9 +278,16 @@ export const changePassword = async (req, res) => {
       `User ${req.user.name} ${user.password ? 'changed' : 'set'} password`
     );
 
+    const userResponse = {
+      ...user.toObject(),
+      password: undefined,
+      hasPassword: true
+    };
+
     res.json({
       message: 'Password updated successfully',
-      hasPassword: true
+      hasPassword: true,
+      user: userResponse
     });
 
   } catch {

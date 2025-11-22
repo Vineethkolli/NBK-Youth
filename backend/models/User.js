@@ -29,7 +29,7 @@ const userSchema = new mongoose.Schema({
   googleId: {
     type: String,
     unique: true,
-    sparse: undefined,
+    sparse: true,
   },
   role: {
     type: String,
@@ -57,7 +57,7 @@ const userSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // Generate registerId
-userSchema.pre('save', async function (next) {
+userSchema.pre('save', async function () {
   if (!this.registerId) {
     const counter = await Counter.findByIdAndUpdate(
       'registerId',
@@ -66,15 +66,13 @@ userSchema.pre('save', async function (next) {
     );
     this.registerId = `R${counter.seq}`;
   }
-  next();
 });
 
 // Hash password before saving
-userSchema.pre('save', async function (next) {
+userSchema.pre('save', async function () {
   if (this.isModified('password') && this.password) {
     this.password = await bcrypt.hash(this.password, 12);
   }
-  next();
 });
 
 userSchema.methods.comparePassword = async function (candidatePassword) {
