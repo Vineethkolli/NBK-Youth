@@ -1,7 +1,6 @@
 import { useAuth } from '../context/AuthContext';
 import PaymentDetails from '../components/adminPanel/PaymentDetails';
 import MaintenanceMode from '../components/adminPanel/MaintenanceMode';
-import RoleStatistics from '../components/adminPanel/Stats';
 import BannerManager from '../components/adminPanel/BannerManager';
 import EventLabelManager from '../components/adminPanel/EventLabelManager';
 import ScheduledNotifications from '../components/adminPanel/ScheduledNotifications';
@@ -20,7 +19,6 @@ function AdminPanel() {
       <EventLabelManager />
       <PaymentDetails />
       <ScheduledNotifications />
-      <RoleStatistics />
     </div>
   );
 }
