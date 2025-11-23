@@ -352,6 +352,8 @@ export const forgotPassword = async (req, res) => {
     const user = await User.findOne({ email }).select('_id email').lean();
     if (!user) return res.status(404).json({ message: 'User not found' });
 
+    await OTP.deleteMany({ email });
+
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     await OTP.create({ email, otp });
 
@@ -423,11 +425,15 @@ export const verifyOtp = async (req, res) => {
     const otp = rawOtp.trim();
     if (!otp) return res.status(400).json({ message: 'OTP is required' });
 
-    const otpRecord = await OTP.findOne({ email, otp }).lean();
+    const otpRecord = await OTP.findOneAndDelete({ email, otp });
     if (!otpRecord)
-      return res.status(400).json({ message: 'Invalid OTP' });
+      return res.status(400).json({ message: 'Invalid or expired OTP' });
 
-    await OTP.deleteOne({ _id: otpRecord._id });
+    const otpAge = Date.now() - otpRecord.createdAt.getTime();
+    const TEN_MINUTES = 10 * 60 * 1000;
+    if (otpAge > TEN_MINUTES) {
+      return res.status(400).json({ message: 'OTP has expired' });
+    }
 
     const resetToken = jwt.sign(
       { email },

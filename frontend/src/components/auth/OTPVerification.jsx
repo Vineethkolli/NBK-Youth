@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
-import { signOut } from 'firebase/auth';
+import { signOut, RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth';
 import { API_URL } from '../../utils/config';
 import { getFirebaseAuth } from '../../utils/firebase';
 
@@ -9,6 +9,7 @@ function OTPVerification({ method = 'email', identifier, confirmationResult, onV
   const OTP_LENGTH = 6;
   const [otpValues, setOtpValues] = useState(Array(OTP_LENGTH).fill(''));
   const [isLoading, setIsLoading] = useState(false);
+  const [isResending, setIsResending] = useState(false);
   const inputsRef = useRef([]);
 
   useEffect(() => {
@@ -35,9 +36,46 @@ function OTPVerification({ method = 'email', identifier, confirmationResult, onV
 
   const displayTarget = identifier || (method === 'phone' ? 'your phone number' : 'your email');
 
+  const handleResendOTP = async () => {
+    if (isResending) return;
+    setIsResending(true);
+
+    try {
+      if (method === 'phone') {
+        const auth = getFirebaseAuth();
+
+        const appVerifier = new RecaptchaVerifier(auth, 'resend-recaptcha', {
+          size: 'invisible',
+        });
+
+        await axios.post(`${API_URL}/api/auth/forgot-password/phone`, {
+          phoneNumber: identifier,
+        });
+
+        const newResult = await signInWithPhoneNumber(auth, identifier, appVerifier);
+
+        toast.success('OTP resent to phone');
+        confirmationResult = newResult;
+      } else {
+        await axios.post(`${API_URL}/api/auth/forgot-password`, {
+          email: identifier,
+        });
+        toast.success('OTP resent to email');
+      }
+
+      setOtpValues(Array(OTP_LENGTH).fill(''));
+      inputsRef.current[0]?.focus();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to resend OTP');
+    } finally {
+      setIsResending(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const otp = otpValues.join('');
+
     if (otp.length < OTP_LENGTH) {
       toast.error('Please enter the complete OTP');
       return;
@@ -55,9 +93,7 @@ function OTPVerification({ method = 'email', identifier, confirmationResult, onV
 
         try {
           await signOut(getFirebaseAuth());
-        } catch (signOutError) {
-          console.warn('Firebase signOut failed after OTP confirmation:', signOutError);
-        }
+        } catch {}
 
         const { data } = await axios.post(`${API_URL}/api/auth/forgot-password/phone/token`, {
           phoneNumber: identifier,
@@ -105,7 +141,7 @@ function OTPVerification({ method = 'email', identifier, confirmationResult, onV
               onChange={(e) => handleChange(e, idx)}
               onKeyDown={(e) => handleKeyDown(e, idx)}
               ref={(el) => (inputsRef.current[idx] = el)}
-              className="w-10 h-12 text-center border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" 
+              className="w-10 h-12 text-center border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
             />
           ))}
         </div>
@@ -114,11 +150,25 @@ function OTPVerification({ method = 'email', identifier, confirmationResult, onV
           type="submit"
           disabled={isLoading}
           className={`w-full flex justify-center px-4 py-2 border border-transparent rounded-md shadow-sm font-medium text-white bg-green-600 hover:bg-green-700 ${
-                isLoading ? 'opacity-50 cursor-not-allowed' : ''
+            isLoading ? 'opacity-50 cursor-not-allowed' : ''
           }`}
         >
           {isLoading ? 'Verifying...' : 'Verify OTP'}
         </button>
+
+        <div className="text-center text-sm mt-2">
+          Didn't receive yet?{' '}
+          <button
+            type="button"
+            onClick={handleResendOTP}
+            disabled={isResending}
+            className={`text-green-600 font-medium ${
+              isResending ? 'opacity-50 cursor-not-allowed' : 'hover:text-green-700'
+            }`}
+          >
+            {isResending ? 'Resending...' : 'Resend OTP'}
+          </button>
+        </div>
 
         <button
           type="button"
@@ -128,6 +178,8 @@ function OTPVerification({ method = 'email', identifier, confirmationResult, onV
           Back
         </button>
       </form>
+      
+      <div id="resend-recaptcha"></div>
     </div>
   );
 }
