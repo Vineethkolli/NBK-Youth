@@ -4,9 +4,9 @@ import { logActivity } from '../middleware/activityLogger.js';
 import { redis } from '../utils/redis.js';
 
 const extractPublicId = (url) => {
-  const parts = url.split('/');
-  const filename = parts[parts.length - 1];
-  return `Vibe/${filename.split('.')[0]}`;
+  const regex = /\/v\d+\/(.+?)\./;
+  const match = url.match(regex);
+  return match ? `Vibe/${match[1]}` : null;
 };
 
 
@@ -226,33 +226,45 @@ const VibeController = {
 
   updateSong: async (req, res) => {
     try {
-      const collection = await Collection.findById(req.params.collectionId);
-      if (!collection) {
-        return res.status(404).json({ message: 'Collection not found' });
-      }
-
-      const song = collection.songs.id(req.params.songId);
-      if (!song) {
-        return res.status(404).json({ message: 'Song not found' });
-      }
-
-      // If a new url is provided, delete the old one from cloudinary and set new
-      if (req.body.url && req.body.mediaPublicId) {
-        const oldPublicId = extractPublicId(song.url);
-        await cloudinary.uploader.destroy(oldPublicId, { resource_type: 'video' });
-        song.url = req.body.url;
-        song.mediaPublicId = req.body.mediaPublicId;
-      }
-
-      song.name = req.body.name;
-      await collection.save();
-      res.json(collection);
-
-      redis.del('vibe');
-    } catch (error) {
-      res.status(500).json({ message: 'Failed to update song' });
+    const collection = await Collection.findById(req.params.collectionId);
+    if (!collection) {
+      return res.status(404).json({ message: 'Collection not found' });
     }
-  },
+
+    const song = collection.songs.id(req.params.songId);
+    if (!song) {
+      return res.status(404).json({ message: 'Song not found' });
+    }
+
+    const originalSongData = song.toObject();
+
+    // If a new url is provided, delete the old one from cloudinary and set new
+    if (req.body.url && req.body.mediaPublicId) {
+      const oldPublicId = extractPublicId(song.url);
+      await cloudinary.uploader.destroy(oldPublicId, { resource_type: 'video' });
+      song.url = req.body.url;
+      song.mediaPublicId = req.body.mediaPublicId;
+    }
+
+    song.name = req.body.name;
+    await collection.save();
+
+    res.json(collection);
+
+    await logActivity(
+      req,
+      'UPDATE',
+      'Vibe',
+      collection._id.toString(),
+      { before: originalSongData, after: song.toObject() },
+      `Song "${song.name}" updated in collection "${collection.name}" by ${req.user.name}`
+    );
+
+    redis.del('vibe');
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to update song' });
+  }
+},
 
 
   deleteSong: async (req, res) => {
