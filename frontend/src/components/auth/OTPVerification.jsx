@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
-import { signOut, RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth';
+import { signOut } from 'firebase/auth';
 import { API_URL } from '../../utils/config';
 import { getFirebaseAuth } from '../../utils/firebase';
 
@@ -41,28 +41,11 @@ function OTPVerification({ method = 'email', identifier, confirmationResult, onV
     setIsResending(true);
 
     try {
-      if (method === 'phone') {
-        const auth = getFirebaseAuth();
+      await axios.post(`${API_URL}/api/auth/forgot-password`, {
+        email: identifier,
+      });
 
-        const appVerifier = new RecaptchaVerifier(auth, 'resend-recaptcha', {
-          size: 'invisible',
-        });
-
-        await axios.post(`${API_URL}/api/auth/forgot-password/phone`, {
-          phoneNumber: identifier,
-        });
-
-        const newResult = await signInWithPhoneNumber(auth, identifier, appVerifier);
-
-        toast.success('OTP resent to phone');
-        confirmationResult = newResult;
-      } else {
-        await axios.post(`${API_URL}/api/auth/forgot-password`, {
-          email: identifier,
-        });
-        toast.success('OTP resent to email');
-      }
-
+      toast.success('OTP resent to email');
       setOtpValues(Array(OTP_LENGTH).fill(''));
       inputsRef.current[0]?.focus();
     } catch (error) {
@@ -156,19 +139,22 @@ function OTPVerification({ method = 'email', identifier, confirmationResult, onV
           {isLoading ? 'Verifying...' : 'Verify OTP'}
         </button>
 
-        <div className="text-center text-sm mt-2">
-          Didn't receive yet?{' '}
-          <button
-            type="button"
-            onClick={handleResendOTP}
-            disabled={isResending}
-            className={`text-green-600 font-medium ${
-              isResending ? 'opacity-50 cursor-not-allowed' : 'hover:text-green-700'
-            }`}
-          >
-            {isResending ? 'Resending...' : 'Resend OTP'}
-          </button>
-        </div>
+        {/* ONLY show resend if using email */}
+        {method === 'email' && (
+          <div className="text-center text-sm mt-2">
+            Didn't receive yet?{' '}
+            <button
+              type="button"
+              onClick={handleResendOTP}
+              disabled={isResending}
+              className={`text-green-600 font-medium ${
+                isResending ? 'opacity-50 cursor-not-allowed' : 'hover:text-green-700'
+              }`}
+            >
+              {isResending ? 'Resending...' : 'Resend OTP'}
+            </button>
+          </div>
+        )}
 
         <button
           type="button"
@@ -178,8 +164,6 @@ function OTPVerification({ method = 'email', identifier, confirmationResult, onV
           Back
         </button>
       </form>
-      
-      <div id="resend-recaptcha"></div>
     </div>
   );
 }
