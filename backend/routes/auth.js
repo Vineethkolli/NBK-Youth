@@ -1,6 +1,6 @@
 import express from 'express';
-import { checkSignupInfo, signUp, signIn, forgotPassword, verifyOtp, resetPassword, initiatePhonePasswordReset, issuePhoneResetToken,
-  googleAuth } from '../controllers/authController.js';
+import { checkSignupInfo, signUp, signIn, forgotPassword, verifyOtp, resetPassword, initiatePhonePasswordReset, 
+  issuePhoneResetToken, googleAuth } from '../controllers/authController.js';
 
 const router = express.Router();
 
