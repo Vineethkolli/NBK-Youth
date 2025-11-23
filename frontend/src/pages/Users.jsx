@@ -73,10 +73,10 @@ function Users() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between flex-wrap gap-4">
+      <div className="flex items-center justify-between flex-wrap gap-2">
   <h1 className="text-2xl font-semibold">Users & Roles</h1>
 
-  <div className="flex items-center gap-3">
+  <div className="flex items-center gap-2">
     <button
       onClick={() => setActiveTab('users')}
       className={`px-3 py-2 rounded-md font-semibold flex items-center ${
@@ -85,7 +85,7 @@ function Users() {
           : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
       }`}
     >
-      <UsersIcon className="h-4 w-4 mr-2" />
+      <UsersIcon className="h-4 w-4 mr-1" />
       Users
     </button>
 
@@ -97,7 +97,7 @@ function Users() {
           : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
       }`}
     >
-      <BarChart3 className="h-4 w-4 mr-2" />
+      <BarChart3 className="h-4 w-4 mr-1" />
       Stats
     </button>
   </div>
