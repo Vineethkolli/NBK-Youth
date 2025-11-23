@@ -147,7 +147,7 @@ export const sendSignupEmail = async (email, name) => {
       requestBody: { raw: encodedMessage },
     });
 
-    console.log(`Signup email sent successfully`);
+    console.log(`Signup Email sent`);
     return true;
   } catch (error) {
     console.error('Signup email sending failed:', error.message);

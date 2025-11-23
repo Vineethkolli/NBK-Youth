@@ -49,7 +49,6 @@ function ResetPassword({ resetToken, onSuccess, onBack }) {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* New password */}
         <div className="relative">
           <input
             type={showNewPassword ? 'text' : 'password'}
@@ -74,7 +73,6 @@ function ResetPassword({ resetToken, onSuccess, onBack }) {
           </button>
         </div>
 
-        {/* Confirm password */}
         <div className="relative">
           <input
             type={showConfirmPassword ? 'text' : 'password'}
@@ -99,7 +97,6 @@ function ResetPassword({ resetToken, onSuccess, onBack }) {
           </button>
         </div>
 
-        {/* Reset button */}
         <button
           type="submit"
           disabled={isLoading}
@@ -110,7 +107,6 @@ function ResetPassword({ resetToken, onSuccess, onBack }) {
           {isLoading ? 'Resetting...' : 'Reset Password'}
         </button>
 
-        {/* Cancel button */}
         <button
           type="button"
           onClick={onBack}

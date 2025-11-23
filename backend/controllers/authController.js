@@ -37,6 +37,62 @@ const createAuthResponse = (user) => ({
 });
 
 
+export const checkSignupInfo = async (req, res) => {
+  try {
+    let { name, email, phoneNumber } = req.body;
+
+    if (!name || !phoneNumber)
+      return res.status(400).json({ message: "Name & phone number are required" });
+
+    phoneNumber = normalizePhoneNumber(phoneNumber);
+    if (!phoneNumber)
+      return res.status(400).json({ message: "Please enter a valid phone number" });
+
+    const normalizedEmail = email?.trim().toLowerCase() || undefined;
+    if (normalizedEmail) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(normalizedEmail))
+        return res.status(400).json({ message: "Invalid email format" });
+    }
+
+    const [phoneExists, emailExists] = await Promise.all([
+      User.findOne({ phoneNumber }).select("_id").lean(),
+      normalizedEmail ? User.findOne({ email: normalizedEmail }).select("_id").lean() : null,
+    ]);
+
+    if (phoneExists)
+      return res.status(400).json({ message: "Phone number already registered" });
+
+    if (emailExists)
+      return res.status(400).json({ message: "Email already registered" });
+
+    if (!normalizedEmail) {
+      return res.json({
+        sendOtp: false
+      });
+    }
+
+    await OTP.deleteMany({ email: normalizedEmail });
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    await OTP.create({ email: normalizedEmail, otp });
+
+    const emailSent = await sendOTPEmail(normalizedEmail, otp, "verify_email");
+
+    if (!emailSent)
+      return res.status(500).json({ message: "Failed to send verification OTP" });
+
+    res.json({
+      message: "OTP sent to email",
+      sendOtp: true
+    });
+  } catch (error) {
+    console.error("Check signup error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+
 export const signUp = async (req, res) => {
   try {
     let { name, email, phoneNumber, password, language, deviceInfo } = req.body;

@@ -1,9 +1,10 @@
 import express from 'express';
-import { signUp, signIn, forgotPassword, verifyOtp, resetPassword, initiatePhonePasswordReset, issuePhoneResetToken,
+import { checkSignupInfo, signUp, signIn, forgotPassword, verifyOtp, resetPassword, initiatePhonePasswordReset, issuePhoneResetToken,
   googleAuth } from '../controllers/authController.js';
 
 const router = express.Router();
 
+router.post('/signup/check', checkSignupInfo);
 router.post('/signup', signUp);
 router.post('/signin', signIn);
 router.post('/google-auth', googleAuth);
