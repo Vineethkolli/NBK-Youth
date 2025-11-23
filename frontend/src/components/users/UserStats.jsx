@@ -101,10 +101,10 @@ const UserStats = () => {
         <Table
           headers={['Role', 'Count', 'Register IDs']}
           rows={Object.entries(stats.roleStats).map(([role, obj]) => [
-            role,
-            obj.count,
-            role === 'user' ? '' : obj.registerIds.join(', ')
-          ])}
+  role.charAt(0).toUpperCase() + role.slice(1),
+  obj.count,
+  role === 'user' ? '' : obj.registerIds.join(', ')
+])}
         />
       </Section>
 
@@ -112,9 +112,9 @@ const UserStats = () => {
         <Table
           headers={['Category', 'Count']}
           rows={Object.entries(stats.categoryStats).map(([category, count]) => [
-            category,
-            count
-          ])}
+  category.charAt(0).toUpperCase() + category.slice(1),
+  count
+])}
         />
       </Section>
 
