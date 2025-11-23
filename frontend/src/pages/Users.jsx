@@ -73,13 +73,13 @@ function Users() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between flex-wrap gap-2">
+      <div className="flex items-center justify-between flex-wrap gap-3">
   <h1 className="text-2xl font-semibold">Users & Roles</h1>
 
   <div className="flex items-center gap-2">
     <button
       onClick={() => setActiveTab('users')}
-      className={`px-3 py-2 rounded-md font-semibold flex items-center ${
+      className={`px-2 py-2 rounded-md font-semibold flex items-center ${
         activeTab === 'users'
           ? 'bg-indigo-600 text-white'
           : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
@@ -91,7 +91,7 @@ function Users() {
 
     <button
       onClick={() => setActiveTab('stats')}
-      className={`px-3 py-2 rounded-md font-semibold flex items-center ${
+      className={`px-2 py-2 rounded-md font-semibold flex items-center ${
         activeTab === 'stats'
           ? 'bg-indigo-600 text-white'
           : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
