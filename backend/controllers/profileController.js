@@ -242,7 +242,6 @@ export const deleteProfileImage = async (req, res) => {
 };
 
 
-
 export const changePassword = async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
@@ -322,16 +321,37 @@ export const linkGoogleAccount = async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    if (normalizedGoogleEmail !== user.email) {
-      return res.status(400).json({
-        message: 'Cannot connect Google: Email mismatch. Change your email in profile to connect this Google account'
-      });
-    }
-
     const existingGoogleUser = await User.findOne({ googleId });
     if (existingGoogleUser && existingGoogleUser._id.toString() !== user._id.toString()) {
       return res.status(400).json({
-        message: 'This Google account is already linked to another user'
+        message: 'This Google account is already linked to another user account'
+      });
+    }
+
+    if (!user.email) {
+      user.email = normalizedGoogleEmail;
+      user.googleId = googleId;
+      await user.save();
+
+      await logActivity(
+        req,
+        'UPDATE',
+        'User',
+        user.registerId,
+        { after: { email: normalizedGoogleEmail, googleId } },
+        `User ${user.name} linked Google account, email auto-filled`
+      );
+
+      return res.json({
+        message: 'Google account linked successfully, email updated',
+        googleId: user.googleId,
+        email: user.email
+      });
+    }
+
+    if (normalizedGoogleEmail !== user.email) {
+      return res.status(400).json({
+        message: 'Email mismatch. Update your email in profile to link this Google account.'
       });
     }
 
@@ -343,7 +363,7 @@ export const linkGoogleAccount = async (req, res) => {
       'UPDATE',
       'User',
       user.registerId,
-      { before: { googleId: null }, after: { googleId } },
+      { after: { googleId } },
       `User ${user.name} linked Google account`
     );
 
