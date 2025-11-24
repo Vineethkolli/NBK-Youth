@@ -207,9 +207,9 @@ export const signIn = async (req, res) => {
     if (!valid)
       return res.status(401).json({ message: "Invalid credentials" });
 
-    // Password has from 12 to 8 rounds
+    // Password has from 12 to 10 rounds
     const currentRounds = user.getHashRounds();
-    if (currentRounds !== 8) {
+    if (currentRounds !== 10) {
       user.password = password;
       await user.save();
     }

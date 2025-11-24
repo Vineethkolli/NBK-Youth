@@ -71,7 +71,7 @@ userSchema.pre('save', async function () {
 // Hash password before saving
 userSchema.pre('save', async function () {
   if (this.isModified('password') && this.password) {
-    this.password = await bcrypt.hash(this.password, 8);
+    this.password = await bcrypt.hash(this.password, 10);
   }
 });
 
@@ -82,7 +82,7 @@ userSchema.methods.comparePassword = async function (candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };
 
-// Extract current hash rounds (to change from 12 to 8)
+// Extract current hash rounds (to change from 12 to 10)
 userSchema.methods.getHashRounds = function () {
   const parts = this.password.split("$");
   return parts.length > 2 ? parseInt(parts[2], 10) : null;
