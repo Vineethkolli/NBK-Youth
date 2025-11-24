@@ -8,6 +8,7 @@ import { logActivity } from "../middleware/activityLogger.js";
 import AuthLog from "../models/AuthLog.js";
 import { sendSignupEmail } from "../services/SignupEmail.js";
 import { normalizePhoneNumber } from "../utils/phoneValidation.js";
+import admin from "../utils/firebaseAdmin.js";
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -443,9 +444,20 @@ export const initiatePhonePasswordReset = async (req, res) => {
 
 export const issuePhoneResetToken = async (req, res) => {
   try {
-    const normalizedPhone = normalizePhoneNumber(req.body.phoneNumber);
+    const { phoneNumber, firebaseToken } = req.body;
+
+    const normalizedPhone = normalizePhoneNumber(phoneNumber);
     if (!normalizedPhone)
       return res.status(400).json({ message: 'Please enter a valid phone number' });
+
+    if (!firebaseToken)
+      return res.status(401).json({ message: 'OTP verification required' });
+
+    const decoded = await admin.auth().verifyIdToken(firebaseToken);
+
+    if (!decoded.phone_number || normalizePhoneNumber(decoded.phone_number) !== normalizedPhone) {
+      return res.status(401).json({ message: 'OTP verification mismatch' });
+    }
 
     const user = await User.findOne({ phoneNumber: normalizedPhone }).select('_id').lean();
     if (!user)
@@ -460,7 +472,7 @@ export const issuePhoneResetToken = async (req, res) => {
     return res.json({ resetToken });
   } catch (error) {
     console.error('Phone reset token error:', error);
-    return res.status(500).json({ message: 'Server error' });
+    return res.status(401).json({ message: 'Invalid Firebase token' });
   }
 };
 

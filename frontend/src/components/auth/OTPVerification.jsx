@@ -72,17 +72,24 @@ function OTPVerification({ method = 'email', identifier, confirmationResult, onV
           return;
         }
 
-        await confirmationResult.confirm(otp);
+const result = await confirmationResult.confirm(otp);
 
-        try {
-          await signOut(getFirebaseAuth());
-        } catch {}
+const firebaseToken = await result.user.getIdToken();
 
-        const { data } = await axios.post(`${API_URL}/api/auth/forgot-password/phone/token`, {
-          phoneNumber: identifier,
-        });
+try {
+  await signOut(getFirebaseAuth());
+} catch {}
 
-        onVerified(data.resetToken);
+const { data } = await axios.post(
+  `${API_URL}/api/auth/forgot-password/phone/token`,
+  {
+    phoneNumber: identifier,
+    firebaseToken,
+  }
+);
+
+onVerified(data.resetToken);
+
       } else {
         const { data } = await axios.post(`${API_URL}/api/auth/verify-otp`, {
           email: identifier,
