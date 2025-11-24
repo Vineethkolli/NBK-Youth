@@ -1,8 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import api from '../../utils/api';
 import { RefreshCcw, FileText } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { API_URL } from '../../utils/config';
 
 export default function MongoDBMonitor() {
   const [quota, setQuota] = useState(null);
@@ -13,13 +12,13 @@ export default function MongoDBMonitor() {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const resCluster = await axios.get(`${API_URL}/api/monitor/mongodb/cluster`);
+      const resCluster = await api.get(`/api/monitor/mongodb/cluster`);
       setQuota(resCluster.data.quota);
       setDatabases(resCluster.data.databases || []);
 
       const defaultDb = resCluster.data.databases?.[0]?.name;
       if (defaultDb) {
-        const resColl = await axios.get(`${API_URL}/api/monitor/mongodb/collections?dbName=${defaultDb}`);
+        const resColl = await api.get(`/api/monitor/mongodb/collections?dbName=${defaultDb}`);
         setCollections(resColl.data.collections || []);
       }
     } catch (err) {

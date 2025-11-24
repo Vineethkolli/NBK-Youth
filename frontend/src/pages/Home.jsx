@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Edit2 } from 'lucide-react';
-import axios from 'axios';
+import api from '../utils/api';
 import { toast } from 'react-hot-toast';
-import { API_URL } from '../utils/config';
 import Slideshow from '../components/home/Slideshow';
 import Timeline from '../components/home/Timeline';
 import Footer from '../components/Footer';
@@ -19,7 +18,7 @@ function Home() {
 
   const fetchEvents = async () => {
     try {
-      const { data } = await axios.get(`${API_URL}/api/homepage/events`);
+      const { data } = await api.get(`/api/homepage/events`);
       setEvents(data);
     } catch (error) {
       toast.error('Failed to fetch events');

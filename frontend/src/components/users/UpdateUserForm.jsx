@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { toast } from 'react-hot-toast';
-import axios from 'axios';
+import api from '../../utils/api';
 import { X } from 'lucide-react';
-import { API_URL } from '../../utils/config';
 import ProfilePhoneInput from '../profile/PhoneInput';
 
 export default function UpdateUserForm({ user, onClose, onUpdated }) {
@@ -41,7 +40,7 @@ export default function UpdateUserForm({ user, onClose, onUpdated }) {
     }
 
     try {
-      const { data } = await axios.patch(`${API_URL}/api/users/${user._id}`, {
+      const { data } = await api.patch(`/api/users/${user._id}`, {
         ...formData,
         email: normalizedEmail,
       });

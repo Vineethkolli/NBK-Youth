@@ -8,8 +8,7 @@ import CustomPhoneInput from '../components/auth/PhoneInput';
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
 import GoogleAuthButton from '../components/auth/GoogleAuthButton';
 import GooglePhoneStep from '../components/auth/GooglePhoneStep';
-import axios from 'axios';
-import { API_URL } from '../utils/config';
+import api from '../utils/api';
 import OTPVerification from '../components/auth/OTPVerification';
 import SetPassword from '../components/auth/SetPassword';
 
@@ -50,7 +49,7 @@ function SignUp() {
 
   setIsSubmitting(true);
   try {
-    const { data } = await axios.post(`${API_URL}/api/auth/signup/check`, {
+    const { data } = await api.post(`/api/auth/signup/check`, {
       name: formData.name,
       email: formData.email?.trim() || undefined,
       phoneNumber: parsed.number,

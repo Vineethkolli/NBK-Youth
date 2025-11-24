@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import axios from 'axios';
+import api from '../../utils/api';
 import { RefreshCcw, Trash2, Folder, File, Download, Home } from 'lucide-react';
-import { API_URL } from '../../utils/config';
 import { toast } from 'react-hot-toast';
 
 // Confirmation Modal component
@@ -56,7 +55,7 @@ export default function ServiceDriveMonitor() {
 
   const fetchStorageQuota = useCallback(async () => {
     try {
-      const res = await axios.get(`${API_URL}/api/monitor/drive/quota`);
+      const res = await api.get(`/api/monitor/drive/quota`);
       setQuotaData(res.data);
     } catch (err) {
       console.error('Failed to fetch quota:', err);
@@ -67,7 +66,7 @@ export default function ServiceDriveMonitor() {
   const fetchCurrentItems = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`${API_URL}/api/monitor/drive/files?parentId=${currentFolderId}`);
+      const res = await api.get(`/api/monitor/drive/files?parentId=${currentFolderId}`);
       setItems(res.data.items);
     } catch (err) {
       console.error('Failed to fetch items:', err);
@@ -81,7 +80,7 @@ export default function ServiceDriveMonitor() {
   const fetchTrashItems = useCallback(async (parentId = 'root') => {
     setLoading(true);
     try {
-      const res = await axios.get(`${API_URL}/api/monitor/drive/trash?parentId=${parentId}`);
+      const res = await api.get(`/api/monitor/drive/trash?parentId=${parentId}`);
       setItems(res.data.items);
       setCurrentFolderId(res.data.parentId || parentId);
     } catch (err) {
@@ -150,18 +149,18 @@ export default function ServiceDriveMonitor() {
      if (item.isFolder) {
   // Fetch files in the folder
   const endpoint = showTrash
-    ? `${API_URL}/api/monitor/drive/trash?parentId=${item.id}`
-    : `${API_URL}/api/monitor/drive/files?parentId=${item.id}`;
+    ? `/api/monitor/drive/trash?parentId=${item.id}`
+    : `/api/monitor/drive/files?parentId=${item.id}`;
 
-  const res = await axios.get(endpoint);
+  const res = await api.get(endpoint);
   const files = res.data.items.filter(f => !f.isFolder);
 
   if (files.length === 0) {
     toast('No files to download in this folder');
   } else {
     for (const file of files) {
-      const response = await axios.get(
-        `${API_URL}/api/monitor/item/download/${file.id}?itemName=${encodeURIComponent(file.name)}`,
+      const response = await api.get(
+        `/api/monitor/item/download/${file.id}?itemName=${encodeURIComponent(file.name)}`,
         { responseType: 'blob' }
       );
       const blob = new Blob([response.data]);
@@ -177,10 +176,10 @@ export default function ServiceDriveMonitor() {
 }
 else {
         // For folders, download children files
-        const res = await axios.get(`${API_URL}/api/monitor/drive/files?parentId=${item.id}`);
+        const res = await api.get(`/api/monitor/drive/files?parentId=${item.id}`);
         const files = res.data.items.filter(f => !f.isFolder);
         for (const file of files) {
-          const response = await axios.get(`${API_URL}/api/monitor/item/download/${file.id}?itemName=${encodeURIComponent(file.name)}`, { responseType: 'blob' });
+          const response = await api.get(`/api/monitor/item/download/${file.id}?itemName=${encodeURIComponent(file.name)}`, { responseType: 'blob' });
           const blob = new Blob([response.data]);
           const link = document.createElement('a');
           link.href = window.URL.createObjectURL(blob);
@@ -228,12 +227,12 @@ else {
 
     try {
       let url = '', method = '', data = {};
-      if (action === 'trash') { url = `${API_URL}/api/monitor/item/trash/${itemId}`; method = 'PUT'; data = { confirm: true }; }
-      else if (action === 'delete') { url = `${API_URL}/api/monitor/item/delete/${itemId}`; method = 'DELETE'; data = { confirm: true }; }
+      if (action === 'trash') { url = `/api/monitor/item/trash/${itemId}`; method = 'PUT'; data = { confirm: true }; }
+      else if (action === 'delete') { url = `/api/monitor/item/delete/${itemId}`; method = 'DELETE'; data = { confirm: true }; }
       else return;
 
       const toastId = toast.loading(`${action === 'delete' ? 'Deleting' : 'Trashing'} "${itemName}"...`);
-      await axios({ url, method, data });
+      await api({ url, method, data });
       toast.dismiss(toastId);
       toast.success(`Item "${itemName}" successfully ${action === 'delete' ? 'deleted permanently' : 'moved to trash'}!`);
       // Refresh appropriate view
@@ -258,7 +257,7 @@ else {
         setModal({ ...modal, isOpen: false });
         const toastId = toast.loading('Emptying trash...');
         try {
-          await axios.delete(`${API_URL}/api/monitor/item/trash/empty`, { data: { confirm: true } });
+          await api.delete(`/api/monitor/item/trash/empty`, { data: { confirm: true } });
           toast.dismiss(toastId);
           toast.success('Trash emptied');
           fetchTrashItems('root');

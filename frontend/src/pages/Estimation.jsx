@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 import { toast } from 'react-hot-toast';
-import { API_URL } from '../utils/config';
 import EstimationStats from '../components/estimation/Stats';
 import IncomeSection from '../components/estimation/IncomeSection';
 import ExpenseSection from '../components/estimation/ExpenseSection';
@@ -34,7 +33,7 @@ function Estimation() {
 
   const fetchStats = async () => {
     try {
-      const statsResponse = await axios.get(`${API_URL}/api/estimation/stats`);
+      const statsResponse = await api.get(`/api/estimation/stats`);
       setStats(statsResponse.data);
     } catch (error) {
       toast.error('Failed to fetch stats');
@@ -43,7 +42,7 @@ function Estimation() {
 
   const fetchBudgetStats = async () => {
     try {
-      const budgetResponse = await axios.get(`${API_URL}/api/stats`);
+      const budgetResponse = await api.get(`/api/stats`);
       setBudgetStats(budgetResponse.data.budgetStats);
     } catch (error) {
       console.error('Failed to fetch budget stats');

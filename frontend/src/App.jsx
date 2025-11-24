@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { initializeAnalytics, trackPageView, setAnalyticsUser, clearAnalyticsUser } from './utils/analytics';
+import { runAuthMigration } from './utils/authMigration';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { HiddenProfileProvider } from './context/HiddenProfileContext';
 import { LanguageProvider } from './context/LanguageContext';
@@ -55,6 +56,11 @@ function AppContent() {
   const { user } = useAuth();
   const { isMaintenanceMode } = useMaintenanceMode();
   const location = useLocation(); 
+
+  // Run auth migration on first load
+  useEffect(() => {
+    runAuthMigration();
+  }, []);
 
   useEffect(() => {
     if (user && user.registerId) {

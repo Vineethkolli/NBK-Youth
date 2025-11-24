@@ -2,8 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Plus, Edit2, Trash2, Loader2, Search, Filter, BarChart2, IndianRupee, DollarSign, CalendarDays } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import axios from 'axios';
-import { API_URL } from '../utils/config';
+import api from '../utils/api';
 import HistoryForm from '../components/histories/HistoryForm';
 import HistoryStats from '../components/histories/HistoryStats';
 import HistoryIncome from '../components/histories/HistoryIncome';
@@ -36,7 +35,7 @@ function Histories() {
 
   const fetchHistories = async () => {
     try {
-      const { data } = await axios.get(`${API_URL}/api/histories`);
+      const { data } = await api.get(`/api/histories`);
       setHistories(data);
       if (data.length > 0 && !selectedHistory) {
         setSelectedHistory(data[0]);
@@ -48,7 +47,7 @@ function Histories() {
 
   const fetchSnapshots = async () => {
     try {
-      const { data } = await axios.get(`${API_URL}/api/snapshots`);
+      const { data } = await api.get(`/api/snapshots`);
       setSnapshots(data);
     } catch (error) {
       console.error('Failed to fetch snapshots');
@@ -57,7 +56,7 @@ function Histories() {
 
   const handleFormSubmit = async (formData) => {
     try {
-      await axios.post(`${API_URL}/api/histories`, formData);
+      await api.post(`/api/histories`, formData);
       toast.success('History created successfully');
       setShowForm(false);
       fetchHistories();
@@ -72,7 +71,7 @@ function Histories() {
 
     try {
       setDeletingId(historyId);
-      await axios.delete(`${API_URL}/api/histories/${historyId}`);
+      await api.delete(`/api/histories/${historyId}`);
       toast.success('History deleted successfully');
       fetchHistories();
       if (selectedHistory?._id === historyId) {

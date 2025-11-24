@@ -2,8 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Plus, Edit2, FileText, TrendingUp } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import axios from 'axios';
-import { API_URL } from '../utils/config';
+import api from '../utils/api';
 import FinancialTimeline from '../components/records/FinancialTimeline';
 import EventRecordsGrid from '../components/records/EventRecordsGrid';
 import FinancialRecordForm from '../components/records/FinancialRecordForm';
@@ -38,7 +37,7 @@ function Records() {
 
   const fetchFinancialRecords = async () => {
     try {
-      const { data } = await axios.get(`${API_URL}/api/records/financial`);
+      const { data } = await api.get(`/api/records/financial`);
       setFinancialRecords(data);
     } catch (error) {
       toast.error('Failed to fetch financial records');
@@ -47,7 +46,7 @@ function Records() {
 
   const fetchEventRecords = async () => {
     try {
-      const { data } = await axios.get(`${API_URL}/api/records/event-records`);
+      const { data } = await api.get(`/api/records/event-records`);
       setEventRecords(data);
     } catch (error) {
       toast.error('Failed to fetch event records');
@@ -56,7 +55,7 @@ function Records() {
 
   const fetchEventNames = async () => {
     try {
-      const { data } = await axios.get(`${API_URL}/api/records/financial/event-names`);
+      const { data } = await api.get(`/api/records/financial/event-names`);
       setEventNames(data);
     } catch (error) {
       console.error('Failed to fetch event names');
@@ -65,7 +64,7 @@ function Records() {
 
   const fetchRecordEventNames = async () => {
     try {
-      const { data } = await axios.get(`${API_URL}/api/records/event-records/event-names`);
+      const { data } = await api.get(`/api/records/event-records/event-names`);
       setRecordEventNames(data);
     } catch (error) {
       console.error('Failed to fetch record event names');
@@ -75,10 +74,10 @@ function Records() {
   const handleFinancialRecordSubmit = async (formData) => {
     try {
       if (editingFinancialRecord) {
-        await axios.put(`${API_URL}/api/records/financial/${editingFinancialRecord._id}`, formData);
+        await api.put(`/api/records/financial/${editingFinancialRecord._id}`, formData);
         toast.success('Financial record updated successfully');
       } else {
-        await axios.post(`${API_URL}/api/records/financial`, formData);
+        await api.post(`/api/records/financial`, formData);
         toast.success('Financial record created successfully');
       }
       fetchFinancialRecords();
@@ -100,10 +99,10 @@ function Records() {
   const handleEventRecordSubmit = async (formData) => {
     try {
       if (editingEventRecord) {
-        await axios.put(`${API_URL}/api/records/event-records/${editingEventRecord._id}`, formData);
+        await api.put(`/api/records/event-records/${editingEventRecord._id}`, formData);
         toast.success('Event record updated successfully');
       } else {
-        await axios.post(`${API_URL}/api/records/event-records`, formData);
+        await api.post(`/api/records/event-records`, formData);
         toast.success('Event record uploaded successfully');
       }
       fetchEventRecords();
@@ -130,7 +129,7 @@ function Records() {
     if (!window.confirm('Are you sure you want to delete this financial record?')) return;
     
     try {
-      await axios.delete(`${API_URL}/api/records/financial/${id}`);
+      await api.delete(`/api/records/financial/${id}`);
       toast.success('Financial record deleted successfully');
       fetchFinancialRecords();
       fetchEventNames();
@@ -148,7 +147,7 @@ function Records() {
     if (!window.confirm('Are you sure you want to delete this event record?')) return;
     
     try {
-      await axios.delete(`${API_URL}/api/records/event-records/${id}`);
+      await api.delete(`/api/records/event-records/${id}`);
       toast.success('Event record deleted successfully');
       fetchEventRecords();
       fetchRecordEventNames();

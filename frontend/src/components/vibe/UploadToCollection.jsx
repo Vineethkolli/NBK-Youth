@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { X, Music, Upload } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import axios from 'axios';
+import api from '../../utils/api';
 import { uploadDirectToCloudinary } from '../../utils/cloudinaryUpload';
-import { API_URL } from '../../utils/config';
 
 function UploadToCollectionForm({ collection, onClose, onSuccess }) {
   const [formData, setFormData] = useState({
@@ -93,7 +92,7 @@ function UploadToCollectionForm({ collection, onClose, onSuccess }) {
       }
   
       // Upload all songs to the collection
-      await axios.post(`${API_URL}/api/collections/${collection._id}/songs/bulk`, {
+      await api.post(`/api/collections/${collection._id}/songs/bulk`, {
         songs: uploadedSongs,
       });
   

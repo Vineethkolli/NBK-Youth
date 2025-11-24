@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 import { toast } from 'react-hot-toast';
 import PaymentForm from '../components/payment/PaymentForm';
 import PaymentHistory from '../components/payment/PaymentHistory';
-import { API_URL } from '../utils/config';
 import EventLabelDisplay from '../components/common/EventLabelDisplay';
 
 function PayOnline() {
@@ -12,7 +11,7 @@ function PayOnline() {
   const fetchPayments = async () => {
     try {
       const token = localStorage.getItem('token');
-      const { data } = await axios.get(`${API_URL}/api/payments`, {
+      const { data } = await api.get(`/api/payments`, {
         headers: {
           Authorization: `Bearer ${token}`,
         }
@@ -30,7 +29,7 @@ function PayOnline() {
   const handlePaymentSubmit = async (paymentData) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.post(`${API_URL}/api/payments`, paymentData, {
+      const response = await api.post(`/api/payments`, paymentData, {
         headers: {
           'Authorization': `Bearer ${token}`
           // Do NOT set Content-Type here; let axios set it for FormData

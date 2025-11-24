@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { parsePhoneNumberFromString, getCountries, getCountryCallingCode } from "libphonenumber-js";
 import * as Flags from "country-flag-icons/react/3x2";
-import axios from "axios";
+import api from '../../utils/api';
 import { ChevronDown } from "lucide-react";
 
 const COUNTRIES = getCountries().map((iso2) => ({

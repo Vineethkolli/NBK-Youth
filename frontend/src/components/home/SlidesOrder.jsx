@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { ArrowUp, ArrowDown, GripHorizontal } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
-import axios from 'axios';
+import api from '../../utils/api';
 import { toast } from 'react-hot-toast';
 import { API_URL } from '../../utils/config';
 
@@ -43,7 +43,7 @@ function SlidesOrder({
     }));
 
     try {
-      await axios.put(`${API_URL}/api/homepage/slides/order`, {
+      await api.put(`/api/homepage/slides/order`, {
         slides: updatedSlides,
       });
       setSlides(updatedSlides);

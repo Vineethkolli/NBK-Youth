@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { Upload, X, Plus, Edit2, Music } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import axios from 'axios';
+import api from '../../utils/api';
 import { uploadDirectToCloudinary } from '../../utils/cloudinaryUpload';
-import { API_URL } from '../../utils/config';
 import { useAuth } from '../../context/AuthContext';
 
 function CollectionManager({ collections, onUpdate, isEditMode, onEditModeToggle, uploadMode, onUploadModeToggle }) {
@@ -55,7 +54,7 @@ function CollectionManager({ collections, onUpdate, isEditMode, onEditModeToggle
   
     try {
       // Create collection first
-      const collectionResponse = await axios.post(`${API_URL}/api/collections`, {
+      const collectionResponse = await api.post(`/api/collections`, {
         name: formData.collectionName,
       });
   
@@ -82,8 +81,7 @@ function CollectionManager({ collections, onUpdate, isEditMode, onEditModeToggle
       }
   
       // Bulk upload songs to collection
-      await axios.post(
-        `${API_URL}/api/collections/${collectionResponse.data._id}/songs/bulk`,
+      await api.post(`/api/collections/${collectionResponse.data._id}/songs/bulk`,
         { songs: uploadedSongs }
       );
   

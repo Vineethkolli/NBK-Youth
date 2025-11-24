@@ -2,9 +2,8 @@ import { useEffect, useState } from 'react';
 import NotificationSettings from '../components/settings/NotificationSettings';
 import NotificationForm from '../components/notifications/NotificationForm';
 import NotificationHistory from '../components/notifications/NotificationHistory';
-import { API_URL } from '../utils/config';
 import { useAuth } from '../context/AuthContext';
-import axios from 'axios';
+import api from '../utils/api';
 
 function Notifications() {
   const { user } = useAuth();
@@ -14,7 +13,7 @@ function Notifications() {
   const fetchHistory = async () => {
     if (!user?.registerId) return;
     try {
-      const response = await axios.get(`${API_URL}/api/notifications/history`, {
+      const response = await api.get(`/api/notifications/history`, {
         params: { registerId: user.registerId },
       });
       setHistory(response.data);

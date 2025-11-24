@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'react-hot-toast';
-import axios from 'axios';
+import api from '../../utils/api';
 import { API_URL } from '../../utils/config';
 
 function IncomeForm({ income, onClose, onSuccess }) {
@@ -38,7 +38,7 @@ function IncomeForm({ income, onClose, onSuccess }) {
     setFormData({ ...formData, name: value });
     if (!income || income.name !== value) {
       try {
-        await axios.post(`${API_URL}/api/incomes/check-name`, { name: value });
+        await api.post(`/api/incomes/check-name`, { name: value });
         setNameError('');
       } catch (error) {
         if (error.response?.status === 400) {
@@ -61,14 +61,14 @@ function IncomeForm({ income, onClose, onSuccess }) {
     setIsSubmitting(true);
     try {
       if (income) {
-        await axios.put(`${API_URL}/api/incomes/${income._id}`, {
+        await api.put(`/api/incomes/${income._id}`, {
           ...formData,
           registerId: user.registerId,
         });
         toast.success('Income updated successfully');
       } else {
         // For new income, if status is paid, backend will automatically set paidDate
-        await axios.post(`${API_URL}/api/incomes`, {
+        await api.post(`/api/incomes`, {
           ...formData,
           registerId: user.registerId,
         });

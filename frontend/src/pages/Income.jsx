@@ -2,13 +2,12 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Plus, Search, ChevronRight, ChevronDown, Filter, Columns } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import axios from 'axios';
+import api from '../utils/api';
 import IncomeTable from '../components/income/IncomeTable';
 import IncomeFilters from '../components/income/IncomeFilters';
 import IncomeForm from '../components/income/IncomeForm';
 import EnglishPrint from '../components/income/IncomeEnglishPrint';
 import TeluguPrint from '../components/income/IncomeTeluguPrint';
-import { API_URL } from '../utils/config';
 import { useLanguage } from '../context/LanguageContext';
 import EventLabelDisplay from '../components/common/EventLabelDisplay';
 import LockIndicator from '../components/common/LockIndicator';
@@ -57,7 +56,7 @@ function Income() {
   const fetchIncomes = async () => {
     try {
       const params = new URLSearchParams({ search, ...filters });
-      const { data } = await axios.get(`${API_URL}/api/incomes?${params}`);
+      const { data } = await api.get(`/api/incomes?${params}`);
 
       if (filters.sort) {
         data.sort((a, b) =>
@@ -86,7 +85,7 @@ function Income() {
     if (!window.confirm('Are you sure you want to move this item to recycle bin?')) return;
 
     try {
-      await axios.delete(`${API_URL}/api/incomes/${incomeId}`);
+      await api.delete(`/api/incomes/${incomeId}`);
       toast.success('Income moved to recycle bin');
       fetchIncomes();
     } catch {

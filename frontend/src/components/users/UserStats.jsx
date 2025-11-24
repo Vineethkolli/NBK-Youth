@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../../utils/api';
 import { toast } from 'react-hot-toast';
-import { API_URL } from '../../utils/config';
-import { Users, Mail, Globe, Bell } from 'lucide-react';
+import { Users } from 'lucide-react';
 
 const UserStats = () => {
   const [loading, setLoading] = useState(true);
@@ -14,7 +13,7 @@ const UserStats = () => {
 
   const fetchStats = async () => {
     try {
-      const { data } = await axios.get(`${API_URL}/api/users`);
+      const { data } = await api.get(`/api/users`);
 
       const newStats = {
         totalUsers: data.length,

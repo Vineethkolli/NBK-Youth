@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import axios from 'axios';
+import api from '../utils/api';
 import { toast } from 'react-hot-toast';
-import { API_URL } from '../utils/config';
 import Footer from '../components/Footer';
 import TeluguPrint from '../components/stats/StatsTeluguPrint';
 import EnglishPrint from '../components/stats/StatsEnglishPrint';
@@ -10,7 +9,6 @@ import { useLanguage } from '../context/LanguageContext';
 import EventLabelDisplay from '../components/common/EventLabelDisplay';
 import LockIndicator from '../components/common/LockIndicator';
 import { useLockSettings } from '../context/LockContext';
-
 import StatsOverview from '../components/stats/Overview';
 
 function Stats() {
@@ -57,7 +55,7 @@ function Stats() {
 
   const fetchStats = async () => {
     try {
-      const { data } = await axios.get(`${API_URL}/api/stats`);
+      const { data } = await api.get(`/api/stats`);
       setStats(data);
       setPreviousYearAmount(data.budgetStats.previousYearAmount.amount);
     } catch (error) {
@@ -68,7 +66,7 @@ function Stats() {
   const handlePreviousYearUpdate = async () => {
     try {
       setIsAddingPreviousYear(true);
-      await axios.patch(`${API_URL}/api/stats/previous-year`, {
+      await api.patch(`/api/stats/previous-year`, {
         amount: previousYearAmount
       });
       toast.success('Previous year amount updated');

@@ -2,8 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Search, Clock, BarChart3 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import axios from 'axios';
-import { API_URL } from '../utils/config';
+import api from '../utils/api';
 import LogTable from '../components/activityLogs/LogTable';
 import LogFilters from '../components/activityLogs/LogFilters';
 import LogStats from '../components/activityLogs/LogStats';
@@ -55,7 +54,7 @@ function ActivityLogs() {
         ...filters,
       });
 
-      const { data } = await axios.get(`${API_URL}/api/activity-logs?${params}`);
+      const { data } = await api.get(`/api/activity-logs?${params}`);
       setLogs(data.logs);
       setPagination(data.pagination);
     } catch (error) {
@@ -68,7 +67,7 @@ function ActivityLogs() {
   const fetchStats = async () => {
     setLoading(true);
     try {
-      const { data } = await axios.get(`${API_URL}/api/activity-logs/stats`);
+      const { data } = await api.get(`/api/activity-logs/stats`);
       setStats(data);
     } catch (error) {
       toast.error('Failed to fetch log statistics');

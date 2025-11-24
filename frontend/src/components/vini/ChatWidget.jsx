@@ -1,8 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import {  Cpu, X, Send, Trash2, Loader2, Pause } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import axios from 'axios';
-import { API_URL } from '../../utils/config';
+import api from '../../utils/api';
 import { useAuth } from '../../context/AuthContext';
 
 function ChatWidget({ isOpen, setIsOpen }) {
@@ -42,7 +41,7 @@ function ChatWidget({ isOpen, setIsOpen }) {
 
   const fetchChatHistory = async () => {
     try {
-      const { data } = await axios.get(`${API_URL}/api/vini/chat-history/${user.registerId}`);
+      const { data } = await api.get(`/api/vini/chat-history/${user.registerId}`);
       setChatHistory(data);
     } catch (error) {
       console.error('Failed to fetch chat history:', error);
@@ -73,8 +72,8 @@ function ChatWidget({ isOpen, setIsOpen }) {
     abortControllerRef.current = controller;
 
     try {
-      const { data } = await axios.post(
-        `${API_URL}/api/vini/chat`,
+      const { data } = await api.post(
+        `/api/vini/chat`,
         {
           message: userMessage,
           registerId: user.registerId
@@ -118,7 +117,7 @@ function ChatWidget({ isOpen, setIsOpen }) {
     if (!window.confirm('Are you sure you want to clear chat history?')) return;
 
     try {
-      await axios.delete(`${API_URL}/api/vini/chat-history/${user.registerId}`);
+      await api.delete(`/api/vini/chat-history/${user.registerId}`);
       setChatHistory([]);
       toast.success('Chat history cleared');
     } catch (error) {

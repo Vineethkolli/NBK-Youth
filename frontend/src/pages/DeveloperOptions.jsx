@@ -4,9 +4,8 @@ import ProcessedDataManager from '../components/developer/ProcessedDataManager';
 import SnapshotManager from '../components/developer/SnapshotManager';
 import LockManager from '../components/developer/LockManager';
 import { useState } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 import { toast } from 'react-hot-toast';
-import { API_URL } from '../utils/config';
 
 function DeveloperOptions() {
   const {hasAccess} = useAuth();
@@ -22,7 +21,7 @@ function DeveloperOptions() {
     }
     setIsResetting(true);
     try {
-      await axios.delete(`${API_URL}/api/developer/clear/resetRoles`);
+      await api.delete(`/api/developer/clear/resetRoles`);
       toast.success('All non-developer users have been reset to "user"');
     } catch (error) {
       console.error(error);

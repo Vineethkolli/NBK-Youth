@@ -1,6 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import axios from 'axios';
-import { API_URL } from '../utils/config';
+import api from '../utils/api';
 
 const EventLabelContext = createContext();
 
@@ -15,7 +14,7 @@ export const EventLabelProvider = ({ children }) => {
 
   const fetchEventLabel = async () => {
     try {
-      const { data } = await axios.get(`${API_URL}/api/event-label`);
+      const { data } = await api.get(`/api/event-label`);
       setEventLabel(data);
     } catch (error) {
       console.error('Failed to fetch event label:', error);

@@ -2,8 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Trash2, RefreshCw,  IndianRupee, DollarSign, Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import axios from 'axios';
-import { API_URL } from '../utils/config';
+import api from '../utils/api';
 import { formatDateTime } from '../utils/dateTime';
 import EventLabelDisplay from '../components/common/EventLabelDisplay';
 import LockIndicator from '../components/common/LockIndicator';
@@ -32,8 +31,8 @@ function RecycleBin() {
   const fetchDeletedItems = async () => {
     try {
       const [incomesResponse, expensesResponse] = await Promise.all([
-        axios.get(`${API_URL}/api/incomes/recycle-bin`),
-        axios.get(`${API_URL}/api/expenses/recycle-bin`),
+        api.get(`/api/incomes/recycle-bin`),
+        api.get(`/api/expenses/recycle-bin`),
       ]);
       setDeletedIncomes(incomesResponse.data);
       setDeletedExpenses(expensesResponse.data);
@@ -46,7 +45,7 @@ function RecycleBin() {
   if (!window.confirm('Are you sure you want to restore this income?')) return;
   setLoadingRestoreIncomeId(id);
   try {
-    await axios.post(`${API_URL}/api/incomes/restore/${id}`);
+    await api.post(`/api/incomes/restore/${id}`);
     toast.success('Income restored successfully');
     fetchDeletedItems();
   } catch {
@@ -60,7 +59,7 @@ const handlePermanentDeleteIncome = async (id) => {
   if (!window.confirm('Are you sure you want to permanently delete this income?')) return;
   setLoadingDeleteIncomeId(id);
   try {
-    await axios.delete(`${API_URL}/api/incomes/permanent/${id}`);
+    await api.delete(`/api/incomes/permanent/${id}`);
     toast.success('Income permanently deleted');
     fetchDeletedItems();
   } catch {
@@ -74,7 +73,7 @@ const handlePermanentDeleteIncome = async (id) => {
   if (!window.confirm('Are you sure you want to restore this expense?')) return;
   setLoadingRestoreExpenseId(id);
   try {
-    await axios.post(`${API_URL}/api/expenses/restore/${id}`);
+    await api.post(`/api/expenses/restore/${id}`);
     toast.success('Expense restored successfully');
     fetchDeletedItems();
   } catch {
@@ -88,7 +87,7 @@ const handlePermanentDeleteExpense = async (id) => {
   if (!window.confirm('Are you sure you want to permanently delete this expense?')) return;
   setLoadingDeleteExpenseId(id);
   try {
-    await axios.delete(`${API_URL}/api/expenses/permanent/${id}`);
+    await api.delete(`/api/expenses/permanent/${id}`);
     toast.success('Expense permanently deleted');
     fetchDeletedItems();
   } catch {
