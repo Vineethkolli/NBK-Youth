@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import api from '../../utils/api';
+import axios from 'axios';
 import { RefreshCcw, Clock, GitBranch, Info } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { API_URL } from '../../utils/config';
 
 export default function GithubActionsMonitor() {
   const [metrics, setMetrics] = useState(null);
@@ -12,7 +13,7 @@ export default function GithubActionsMonitor() {
   // Fetch workflows
   const fetchWorkflows = useCallback(async () => {
     try {
-      const res = await api.get(`/api/monitor/github/actions/workflows`);
+      const res = await axios.get(`${API_URL}/api/monitor/github/actions/workflows`);
       setWorkflows(res.data.workflows || []);
     } catch (err) {
       console.error(err);
@@ -24,8 +25,8 @@ export default function GithubActionsMonitor() {
   const fetchMetrics = useCallback(async (workflow = workflowFilter) => {
     try {
       setLoading(true);
-      const res = await api.get(
-        `/api/monitor/github/actions/metrics?workflow=${encodeURIComponent(workflow)}`
+      const res = await axios.get(
+        `${API_URL}/api/monitor/github/actions/metrics?workflow=${encodeURIComponent(workflow)}`
       );
       setMetrics(res.data.metrics || null);
     } catch (err) {

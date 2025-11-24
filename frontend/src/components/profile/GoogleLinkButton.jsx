@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { GOOGLE_CLIENT_ID } from "../../utils/config";
-import api from '../../utils/api';
+import axios from "axios";
+import { API_URL } from "../../utils/config";
 import { toast } from "react-hot-toast";
 import { useAuth } from "../../context/AuthContext";
 
@@ -32,7 +33,7 @@ export default function GoogleLinkButton({ onLinked }) {
 
   const handleCallback = async (response) => {
     try {
-      const { data } = await api.post(`/api/profile/link-google`, {
+      const { data } = await axios.post(`${API_URL}/api/profile/link-google`, {
         credential: response.credential,
       });
 

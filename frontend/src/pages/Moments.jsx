@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Edit2, Youtube, Upload, FolderOpen, Copy, GripHorizontal } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import api from '../utils/api';
+import axios from 'axios';
+import { API_URL } from '../utils/config';
 import MomentForm from '../components/moments/MomentForm';
 import MomentGrid from '../components/moments/MomentGrid';
 import MomentReorder from '../components/moments/MomentReorder';
@@ -22,7 +23,7 @@ function Moments() {
 
   const fetchMoments = async () => {
     try {
-      const { data } = await api.get(`/api/moments`);
+      const { data } = await axios.get(`${API_URL}/api/moments`);
       setMoments(data);
     } catch {
       toast.error('Failed to fetch moments');
@@ -33,20 +34,20 @@ function Moments() {
   const handleMomentFormSubmit = async (formDataOrObj) => {
     try {
       if (formType === 'youtube') {
-        const endpoint = `/api/moments/youtube`;
-        await api.post(endpoint, formDataOrObj);
+        const endpoint = `${API_URL}/api/moments/youtube`;
+        await axios.post(endpoint, formDataOrObj);
         toast.success('YouTube video added successfully');
         fetchMoments();
         return;
       }
 
 if (formType === 'drive') {
-  const endpoint = `/api/moments/drive`;
+  const endpoint = `${API_URL}/api/moments/drive`;
   
   // Detect folder URL
   const isFolder = formDataOrObj.url.includes('drive.google.com/drive/folders/');
   
-  await api.post(endpoint, formDataOrObj);
+  await axios.post(endpoint, formDataOrObj);
   
   toast.success(
     isFolder 
@@ -59,8 +60,8 @@ if (formType === 'drive') {
 }
 
       if (formType === 'copy-service-drive') {
-        const endpoint = `/api/moments/copy-to-service-drive`;
-        await api.post(endpoint, formDataOrObj);
+        const endpoint = `${API_URL}/api/moments/copy-to-service-drive`;
+        await axios.post(endpoint, formDataOrObj);
         toast.success('Drive media copied and added successfully');
         fetchMoments();
         return;
@@ -86,7 +87,7 @@ if (formType === 'drive') {
 
   const handleSyncDriveFolder = async (momentId) => {
   try {
-    const promise = api.post(`/api/moments/${momentId}/sync`);
+    const promise = axios.post(`${API_URL}/api/moments/${momentId}/sync`);
     await toast.promise(promise, {
       loading: 'Syncing folder...',
       success: 'Drive folder synced successfully!',
@@ -104,7 +105,7 @@ if (formType === 'drive') {
   const handleDeleteMoment = async (momentId) => {
     if (!window.confirm('Are you sure you want to delete this moment?')) return;
 
-    const promise = api.delete(`/api/moments/${momentId}`);
+    const promise = axios.delete(`${API_URL}/api/moments/${momentId}`);
     await toast.promise(promise, {
       loading: 'Deleting...',
       success: () => {
@@ -116,7 +117,7 @@ if (formType === 'drive') {
   };
 
   const handleDeleteGalleryFile = async (momentId, mediaId) => {
-    const promise = api.delete(`/api/moments/${momentId}/gallery/${mediaId}`);
+    const promise = axios.delete(`${API_URL}/api/moments/${momentId}/gallery/${mediaId}`);
     await toast.promise(promise, {
       loading: 'Deleting...',
       success: () => {
@@ -135,7 +136,7 @@ if (formType === 'drive') {
 
   const handleUpdateMomentTitle = async (id, newTitle) => {
     try {
-      await api.patch(`/api/moments/${id}/title`, { title: newTitle });
+      await axios.patch(`${API_URL}/api/moments/${id}/title`, { title: newTitle });
       setMoments((prev) =>
         prev.map((moment) => (moment._id === id ? { ...moment, title: newTitle } : moment))
       );
@@ -147,7 +148,7 @@ if (formType === 'drive') {
 
   const handleMomentOrderSave = async (reorderedMoments) => {
     try {
-      await api.put(`/api/moments/order`, { moments: reorderedMoments });
+      await axios.put(`${API_URL}/api/moments/order`, { moments: reorderedMoments });
       setMoments(reorderedMoments);
       setIsReorderMode(false);
       toast.success('Moment order updated successfully');
@@ -158,7 +159,7 @@ if (formType === 'drive') {
 
   const handleGalleryOrderSave = async (momentId, reorderedMediaFiles) => {
     try {
-      await api.put(`/api/moments/${momentId}/gallery/order`, {
+      await axios.put(`${API_URL}/api/moments/${momentId}/gallery/order`, {
         mediaFiles: reorderedMediaFiles,
       });
       setMoments((prev) =>
@@ -190,7 +191,8 @@ if (formType === 'drive') {
 
   const handleCopyToServiceDriveGallery = async (momentId, driveUrl) => {
     try {
-      const { data: updatedMoment } = await api.post(`/api/moments/${momentId}/gallery/copy-to-service-drive`,
+      const { data: updatedMoment } = await axios.post(
+        `${API_URL}/api/moments/${momentId}/gallery/copy-to-service-drive`,
         { url: driveUrl }
       );
 

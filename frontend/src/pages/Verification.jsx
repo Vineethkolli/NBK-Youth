@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useLockSettings } from '../context/LockContext';
 import { toast } from 'react-hot-toast';
-import api from '../utils/api';
+import axios from 'axios';
+import { API_URL } from '../utils/config';
 import VerificationTable from '../components/verification/VerificationTable';
 import EventLabelDisplay from '../components/common/EventLabelDisplay';
 import LockIndicator from '../components/common/LockIndicator';
@@ -33,7 +34,7 @@ function Verification() {
       else if (activeTab === 'expense') endpoint = 'expenses/verification';
       else endpoint = 'payments/verification/data';
 
-      const { data } = await api.get(`/api/${endpoint}`, { params: filters });
+      const { data } = await axios.get(`${API_URL}/api/${endpoint}`, { params: filters });
 
       if (activeTab === 'income') setIncomeData(data);
       else if (activeTab === 'expense') setExpenseData(data);
@@ -50,7 +51,7 @@ function Verification() {
       else if (activeTab === 'expense') endpoint = 'expenses';
       else endpoint = 'payments';
 
-      await api.patch(`/api/${endpoint}/${id}/verify`, {
+      await axios.patch(`${API_URL}/api/${endpoint}/${id}/verify`, {
         verifyLog,
         registerId: user.registerId
       });
@@ -65,7 +66,7 @@ function Verification() {
 
   const handleUpdatePayment = async (id, updateData) => {
     try {
-      await api.put(`/api/payments/${id}`, {
+      await axios.put(`${API_URL}/api/payments/${id}`, {
         ...updateData,
         registerId: user.registerId
       });

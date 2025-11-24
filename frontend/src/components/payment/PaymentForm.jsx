@@ -3,8 +3,9 @@ import { useAuth } from '../../context/AuthContext';
 import { toast } from 'react-hot-toast';
 import { Copy, QrCode, X } from 'lucide-react';
 import { QRCodeCanvas } from "qrcode.react";
-import api from '../../utils/api';
+import axios from 'axios';
 import { uploadDirectToCloudinary } from '../../utils/cloudinaryUpload';
+import { API_URL } from '../../utils/config';
 
 function PaymentForm({ onSubmit }) {
   const { user } = useAuth();
@@ -33,7 +34,7 @@ function PaymentForm({ onSubmit }) {
 
   const fetchPaymentDetails = async () => {
     try {
-      const { data } = await api.get(`/api/payment-details`);
+      const { data } = await axios.get(`${API_URL}/api/payment-details`);
       setPaymentDetails(data);
     } catch (error) {
       console.error('Failed to fetch payment details:', error);

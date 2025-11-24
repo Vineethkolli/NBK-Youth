@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import api from '../utils/api';
+import axios from 'axios';
+import { API_URL } from '../utils/config';
 import { useAuth } from './AuthContext';
 
 const HiddenProfileContext = createContext();
@@ -21,7 +22,7 @@ export const HiddenProfileProvider = ({ children }) => {
       const token = localStorage.getItem('token');
       if (!token) return;
 
-      const { data } = await api.get(`/api/hidden-profiles`, {
+      const { data } = await axios.get(`${API_URL}/api/hidden-profiles`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -41,7 +42,8 @@ export const HiddenProfileProvider = ({ children }) => {
       const token = localStorage.getItem('token');
       if (!token) return null;
 
-      const { data } = await api.post(`/api/hidden-profiles/toggle`,
+      const { data } = await axios.post(
+        `${API_URL}/api/hidden-profiles/toggle`,
         { profileId },
         {
           headers: {

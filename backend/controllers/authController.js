@@ -1,9 +1,7 @@
 import axios from "axios";
 import jwt from "jsonwebtoken";
-import crypto from "crypto";
 import { OAuth2Client } from "google-auth-library";
 import User from "../models/User.js";
-import Session from "../models/Session.js";
 import OTP from "../models/OTP.js";
 import { sendOTPEmail } from "../services/emailOTPService.js";
 import { logActivity } from "../middleware/activityLogger.js";
@@ -13,29 +11,6 @@ import { normalizePhoneNumber } from "../utils/phoneValidation.js";
 import admin from "../utils/firebaseAdmin.js";
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
-
-// Token generation utilities
-const generateAccessToken = (userId, role) => {
-  return jwt.sign(
-    { id: userId, role },
-    process.env.JWT_SECRET,
-    { expiresIn: "1d" } // 1 day
-  );
-};
-
-const generateRefreshToken = () => {
-  return crypto.randomBytes(64).toString('hex');
-};
-
-const setRefreshTokenCookie = (res, refreshToken) => {
-  res.cookie('refreshToken', refreshToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production', // HTTPS only in production
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-    maxAge: 365 * 24 * 60 * 60 * 1000, // 12 months
-    path: '/'
-  });
-};
 
 const logAuthEvent = async (data) => {
   try {
@@ -182,20 +157,16 @@ export const signUp = async (req, res) => {
       `User ${user.name} signed up`
     );
 
-    // Generate tokens
-    const accessToken = generateAccessToken(user._id, user.role);
-    const refreshToken = generateRefreshToken();
-
-    // Create session
-    await Session.createSession(user._id, refreshToken, deviceInfo);
-
-    // Set refresh token cookie
-    setRefreshTokenCookie(res, refreshToken);
+    const token = jwt.sign(
+      { id: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "365d" }
+    );
 
     if (user.email) sendSignupEmail(user.email, user.name);
 
     res.status(201).json({
-      accessToken,
+      token,
       user: createAuthResponse(user),
     });
   } catch (error) {
@@ -265,18 +236,14 @@ export const signIn = async (req, res) => {
       await user.save();
     }
 
-    // Generate tokens
-    const accessToken = generateAccessToken(user._id, user.role);
-    const refreshToken = generateRefreshToken();
-
-    // Create session
-    await Session.createSession(user._id, refreshToken, deviceInfo);
-
-    // Set refresh token cookie
-    setRefreshTokenCookie(res, refreshToken);
+    const token = jwt.sign(
+      { id: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "365d" }
+    );
 
     res.json({
-      accessToken,
+      token,
       user: createAuthResponse(user),
     });
   } catch (error) {
@@ -340,19 +307,15 @@ export const googleAuth = async (req, res) => {
         deviceInfo,
       });
 
-      // Generate tokens
-      const accessToken = generateAccessToken(user._id, user.role);
-      const refreshToken = generateRefreshToken();
-
-      // Create session
-      await Session.createSession(user._id, refreshToken, deviceInfo);
-
-      // Set refresh token cookie
-      setRefreshTokenCookie(res, refreshToken);
+      const token = jwt.sign(
+        { id: user._id, role: user.role },
+        process.env.JWT_SECRET,
+        { expiresIn: "365d" }
+      );
 
       return res.json({
         status: "success",
-        accessToken,
+        token,
         user: createAuthResponse(user),
       });
     }
@@ -412,21 +375,17 @@ export const googleAuth = async (req, res) => {
       `User ${user.name} signed up via Google`
     );
 
-    // Generate tokens
-    const accessToken = generateAccessToken(user._id, user.role);
-    const refreshToken = generateRefreshToken();
-
-    // Create session
-    await Session.createSession(user._id, refreshToken, deviceInfo);
-
-    // Set refresh token cookie
-    setRefreshTokenCookie(res, refreshToken);
+    const token = jwt.sign(
+      { id: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "365d" }
+    );
 
     if (user.email) sendSignupEmail(user.email, user.name);
 
     res.status(201).json({
       status: "success",
-      accessToken,
+      token,
       user: createAuthResponse(user),
     });
   } catch (error) {
@@ -596,143 +555,6 @@ export const resetPassword = async (req, res) => {
     if (error.name === 'JsonWebTokenError')
       return res.status(401).json({ message: 'Invalid or expired reset token' });
 
-    return res.status(500).json({ message: 'Server error' });
-  }
-};
-
-// Refresh access token
-export const refreshAccessToken = async (req, res) => {
-  try {
-    const { refreshToken } = req.cookies;
-
-    if (!refreshToken) {
-      return res.status(401).json({ message: 'Refresh token required' });
-    }
-
-    // Find session by refresh token
-    const session = await Session.findByToken(refreshToken);
-
-    if (!session) {
-      return res.status(401).json({ message: 'Invalid refresh token' });
-    }
-
-    // Check if session is expired
-    if (new Date() > session.expiresAt) {
-      await session.deleteOne();
-      return res.status(401).json({ message: 'Session expired' });
-    }
-
-    // Get user
-    const user = await User.findById(session.userId).select('-password');
-    if (!user) {
-      await session.deleteOne();
-      return res.status(404).json({ message: 'User not found' });
-    }
-
-    // Update session last used time and extend expiry (sliding window)
-    await session.updateLastUsed();
-
-    // Generate new access token
-    const accessToken = generateAccessToken(user._id, user.role);
-
-    res.json({
-      accessToken,
-      user: createAuthResponse(user),
-    });
-  } catch (error) {
-    console.error('Refresh token error:', error);
-    return res.status(500).json({ message: 'Server error' });
-  }
-};
-
-// Logout from current device
-export const logout = async (req, res) => {
-  try {
-    const { refreshToken } = req.cookies;
-
-    if (refreshToken) {
-      // Delete the session for this device
-      await Session.deleteOne({ refreshTokenHash: Session.hashToken(refreshToken) });
-    }
-
-    // Clear the refresh token cookie
-    res.clearCookie('refreshToken', {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-      path: '/'
-    });
-
-    res.json({ message: 'Logged out successfully' });
-  } catch (error) {
-    console.error('Logout error:', error);
-    return res.status(500).json({ message: 'Server error' });
-  }
-};
-
-// Get all active sessions for the logged-in user
-export const getSessions = async (req, res) => {
-  try {
-    const userId = req.user._id;
-
-    const sessions = await Session.find({ userId })
-      .sort({ lastUsedAt: -1 })
-      .select('deviceInfo createdAt lastUsedAt expiresAt refreshTokenHash')
-      .lean();
-
-    // Add current session indicator
-    const { refreshToken } = req.cookies;
-    let currentSessionHash = null;
-    if (refreshToken) {
-      currentSessionHash = Session.hashToken(refreshToken);
-    }
-
-    const sessionsWithCurrent = sessions.map(session => ({
-      id: session._id,
-      deviceInfo: session.deviceInfo,
-      createdAt: session.createdAt,
-      lastUsedAt: session.lastUsedAt,
-      expiresAt: session.expiresAt,
-      isCurrent: currentSessionHash === session.refreshTokenHash
-    }));
-
-    res.json({ sessions: sessionsWithCurrent });
-  } catch (error) {
-    console.error('Get sessions error:', error);
-    return res.status(500).json({ message: 'Server error' });
-  }
-};
-
-// Delete a specific session (logout from a device)
-export const deleteSession = async (req, res) => {
-  try {
-    const { sessionId } = req.params;
-    const userId = req.user._id;
-
-    // Find and delete session, ensuring it belongs to the user
-    const session = await Session.findOneAndDelete({
-      _id: sessionId,
-      userId
-    });
-
-    if (!session) {
-      return res.status(404).json({ message: 'Session not found' });
-    }
-
-    // If deleting current session, clear cookie
-    const { refreshToken } = req.cookies;
-    if (refreshToken && Session.hashToken(refreshToken) === session.refreshTokenHash) {
-      res.clearCookie('refreshToken', {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-        path: '/'
-      });
-    }
-
-    res.json({ message: 'Session deleted successfully' });
-  } catch (error) {
-    console.error('Delete session error:', error);
     return res.status(500).json({ message: 'Server error' });
   }
 };

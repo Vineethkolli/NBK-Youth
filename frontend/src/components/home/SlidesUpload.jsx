@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Upload, X, Image } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import api from '../../utils/api';
+import axios from 'axios';
 import { uploadDirectToCloudinary } from '../../utils/cloudinaryUpload';
 import { API_URL } from '../../utils/config';
 
@@ -83,7 +83,7 @@ export default function SlidesUpload({ open, onClose, onUploaded }) {
 
         uploadedSize += file.file.size;
 
-        await api.post(`/api/homepage/slides`, {
+        await axios.post(`${API_URL}/api/homepage/slides`, {
           type: file.type,
           url: uploaded.url,
           mediaPublicId: uploaded.publicId,

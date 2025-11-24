@@ -1,13 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
-import api from '../utils/api';
+import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import { LogOut, Edit2 } from 'lucide-react';
+import { API_URL } from '../utils/config';  
 import ProfileImageDialog from '../components/profile/ProfileImageDialog';
 import ProfileDetails from '../components/profile/ProfileDetails';
 import PasswordChangeForm from '../components/profile/PasswordChangeForm';
 import GoogleLinkButton from '../components/profile/GoogleLinkButton';
-import SessionsManager from '../components/profile/SessionsManager';
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 
 function Profile() {
@@ -99,7 +99,7 @@ function Profile() {
 
     try {
       setIsUpdatingProfile(true);
-      const { data } = await api.patch(`/api/profile/profile`, {
+      const { data } = await axios.patch(`${API_URL}/api/profile/profile`, {
         ...userData,
         email: normalizedEmail,
         phoneNumber: finalPhoneNumber,
@@ -117,12 +117,12 @@ function Profile() {
   const handleImageUpload = async (imageData) => {
     try {
       if (imageData === null) {
-        await api.delete(`/api/profile/image`);
+        await axios.delete(`${API_URL}/api/profile/image`);
         setUserData((p) => ({ ...p, profileImage: null }));
         updateUserData({ ...user, profileImage: null });
         toast.success('Profile image deleted successfully');
       } else {
-        const { data } = await api.post(`/api/profile/image`, imageData);
+        const { data } = await axios.post(`${API_URL}/api/profile/image`, imageData);
         setUserData((p) => ({ ...p, profileImage: data.profileImage }));
         updateUserData({ ...user, profileImage: data.profileImage });
         toast.success('Profile image updated successfully');
@@ -154,7 +154,7 @@ const handleSubmit = async (e) => {
       payload.currentPassword = passwordData.currentPassword;
     }
 
-    const { data } = await api.post(`/api/profile/change-password`, payload);
+    const { data } = await axios.post(`${API_URL}/api/profile/change-password`, payload);
 
     toast.success(data.message || 'Password updated successfully');
     setIsChangingPassword(false);
@@ -166,7 +166,7 @@ const handleSubmit = async (e) => {
     } else {
       // Fallback: fetch profile if backend didn't return user
       try {
-        const profileRes = await api.get(`/api/profile/profile`);
+        const profileRes = await axios.get(`${API_URL}/api/profile/profile`);
         updateUserData(profileRes.data);
       } catch (fetchErr) {
         // ignore - user still updated password server-side
@@ -203,7 +203,7 @@ const handleSubmit = async (e) => {
 
   const handleUnlinkGoogle = async () => {
     try {
-      await api.post(`/api/profile/unlink-google`);
+      await axios.post(`${API_URL}/api/profile/unlink-google`);
       toast.success('Google account removed successfully');
       updateUserData({ ...user, googleId: null });
       setShowGoogleUnlinkConfirm(false);
@@ -313,11 +313,6 @@ const handleSubmit = async (e) => {
             />
           </div>
         )}
-      </div>
-
-      {/* Sessions Manager */}
-      <div className="mt-6">
-        <SessionsManager />
       </div>
 
       {showSignoutConfirm && (

@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { X, Upload } from 'lucide-react';
 import { uploadDirectToCloudinary } from '../../utils/cloudinaryUpload';
-import api from '../../utils/api';
+import axios from 'axios';
 import { toast } from 'react-hot-toast';
+import { API_URL } from '../../utils/config';
 
 const EVENT_OPTIONS = ['Sankranti', 'Ganesh Chaturthi'];
 
@@ -84,7 +85,7 @@ function EventRecordForm({ record, onClose, onSubmit }) {
 
       // Check uniqueness before uploading to Cloudinary 
 try {
-  await api.post(`/api/records/event-records/check`, {
+  await axios.post(`${API_URL}/api/records/event-records/check`, {
     eventName: finalEventName,
     recordYear: formData.recordYear,
     recordId: record?._id || null, 

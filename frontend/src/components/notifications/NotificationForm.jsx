@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import api from '../../utils/api';
+import axios from 'axios';
 import { toast } from 'react-hot-toast';
+import { API_URL } from '../../utils/config';
 
 function NotificationForm({ onSuccess }) {
   const [title, setTitle] = useState('');
@@ -31,7 +32,7 @@ function NotificationForm({ onSuccess }) {
         requestData.registerId = registerId.trim();
       }
 
-      const response = await api.post(`/api/notifications/notify`, requestData);
+      const response = await axios.post(`${API_URL}/api/notifications/notify`, requestData);
 
       if (onSuccess) onSuccess(requestData);
 

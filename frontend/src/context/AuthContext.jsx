@@ -1,8 +1,8 @@
 import { createContext, useContext, useState, useEffect, useMemo } from "react";
-import api from "../utils/api";
+import axios from "axios";
+import { API_URL } from "../utils/config";
 import { getDeviceInfo } from "../utils/deviceInfo";
 import { Access } from "../utils/access";
-import { setAccessToken, clearAccessToken, initializeAuth, logoutUser } from "../utils/auth";
 
 const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
@@ -12,35 +12,27 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Initialize authentication on app load
-    const init = async () => {
-      try {
-        const userData = await initializeAuth();
-        if (userData) {
-          setUser(userData);
-          if (userData.language) {
-            localStorage.setItem("preferredLanguage", userData.language);
-          }
-        }
-      } catch (error) {
-        console.error("Auth initialization error:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    init();
+    const token = localStorage.getItem("token");
+    if (token) {
+      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+      fetchProfile();
+    } else {
+      setLoading(false);
+    }
   }, []);
 
   const fetchProfile = async () => {
     try {
-      const { data } = await api.get(`/api/profile/profile`);
+      const { data } = await axios.get(`${API_URL}/api/profile/profile`);
       setUser(data);
 
       if (data.language)
         localStorage.setItem("preferredLanguage", data.language);
-    } catch (error) {
-      console.error("Profile fetch error:", error);
+    } catch {
+      localStorage.removeItem("token");
+      delete axios.defaults.headers.common["Authorization"];
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -48,8 +40,9 @@ export const AuthProvider = ({ children }) => {
     setUser((prev) => ({ ...(prev || {}), ...newData }));
   };
 
-  const setTokenAndUser = (accessToken, userObj) => {
-    setAccessToken(accessToken);
+  const setTokenAndUser = (token, userObj) => {
+    localStorage.setItem("token", token);
+    axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
     setUser(userObj);
 
     if (userObj.language) {
@@ -61,27 +54,27 @@ export const AuthProvider = ({ children }) => {
     const language = localStorage.getItem("preferredLanguage") || "en";
     const deviceInfo = await getDeviceInfo();
 
-    const { data } = await api.post(`/api/auth/signin`, {
+    const { data } = await axios.post(`${API_URL}/api/auth/signin`, {
       identifier,
       password,
       language,
       deviceInfo,
     });
 
-    setTokenAndUser(data.accessToken, data.user);
+    setTokenAndUser(data.token, data.user);
   };
 
   const signup = async (userData) => {
     const language = localStorage.getItem("preferredLanguage") || "en";
     const deviceInfo = await getDeviceInfo();
 
-    const { data } = await api.post(`/api/auth/signup`, {
+    const { data } = await axios.post(`${API_URL}/api/auth/signup`, {
       ...userData,
       language,
       deviceInfo,
     });
 
-    setTokenAndUser(data.accessToken, data.user);
+    setTokenAndUser(data.token, data.user);
   };
 
   const googleAuth = async (credentialOrPayload, phoneNumber = null, name = null) => {
@@ -95,7 +88,7 @@ export const AuthProvider = ({ children }) => {
       payload = credentialOrPayload;
     }
 
-    const { data } = await api.post(`/api/auth/google-auth`, {
+    const { data } = await axios.post(`${API_URL}/api/auth/google-auth`, {
       ...payload,
       phoneNumber,
       name,
@@ -103,11 +96,12 @@ export const AuthProvider = ({ children }) => {
       deviceInfo,
     });
 
-    setTokenAndUser(data.accessToken, data.user);
+    setTokenAndUser(data.token, data.user);
   };
 
-  const signout = async () => {
-    await logoutUser();
+  const signout = () => {
+    localStorage.removeItem("token");
+    delete axios.defaults.headers.common["Authorization"];
     setUser(null);
   };
 
@@ -130,7 +124,6 @@ export const AuthProvider = ({ children }) => {
       googleAuth,
       hasAccess,
       updateUserData,
-      fetchProfile,
     }),
     [user, loading]
   );

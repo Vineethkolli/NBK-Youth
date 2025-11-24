@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import api from '../utils/api';
+import axios from 'axios';
 import { AlertTriangle, Wrench, Settings } from 'lucide-react';
+import { API_URL } from '../utils/config';
 import { formatDateTime } from '../utils/dateTime';
 
 function MaintenancePage() {
@@ -9,7 +10,7 @@ function MaintenancePage() {
   useEffect(() => {
     const fetchStatus = async () => {
       try {
-        const { data } = await api.get(`/api/maintenance/status`);
+        const { data } = await axios.get(`${API_URL}/api/maintenance/status`);
         setMaintenanceData(data);
       } catch (error) {
         console.error('Failed to fetch maintenance status:', error);

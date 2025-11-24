@@ -1,4 +1,5 @@
-import api from '../utils/api';
+import axios from 'axios';
+import { API_URL } from './config';
 import { urlBase64ToUint8Array } from './vapidKeys';
 
 // Get the service worker registration
@@ -19,7 +20,7 @@ export const getSubscription = async () => {
 export const subscribeToPush = async (registerId) => {
   const registration = await navigator.serviceWorker.ready;
 
-  const response = await api.get(`/api/notifications/publicKey`);
+  const response = await axios.get(`${API_URL}/api/notifications/publicKey`);
   const publicVapidKey = response.data.publicKey;
   const converted = urlBase64ToUint8Array(publicVapidKey);
 
@@ -28,7 +29,7 @@ export const subscribeToPush = async (registerId) => {
     applicationServerKey: converted,
   });
 
-  await api.post(`/api/notifications/subscribe`, {
+  await axios.post(`${API_URL}/api/notifications/subscribe`, {
     registerId,
     subscription,
   });

@@ -2,12 +2,13 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Plus, Search, ChevronRight, ChevronDown, Filter, Columns  } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import api from '../utils/api';
+import axios from 'axios';
 import ExpenseTable from '../components/expense/ExpenseTable';
 import ExpenseFilters from '../components/expense/ExpenseFilters';
 import ExpenseForm from '../components/expense/ExpenseForm';
 import EnglishPrint from '../components/expense/ExpenseEnglishPrint';
 import TeluguPrint from '../components/expense/ExpenseTeluguPrint';
+import { API_URL } from '../utils/config';
 import { useLanguage } from '../context/LanguageContext';
 import EventLabelDisplay from '../components/common/EventLabelDisplay';
 import LockIndicator from '../components/common/LockIndicator';
@@ -52,7 +53,7 @@ function Expense() {
   const fetchExpenses = async () => {
     try {
       const params = new URLSearchParams({ search, ...filters });
-      const { data } = await api.get(`/api/expenses?${params}`);
+      const { data } = await axios.get(`${API_URL}/api/expenses?${params}`);
 
       if (filters.sort) {
         data.sort((a, b) =>
@@ -81,7 +82,7 @@ function Expense() {
     if (!window.confirm('Are you sure you want to move this item to recycle bin?')) return;
 
     try {
-      await api.delete(`/api/expenses/${expenseId}`);
+      await axios.delete(`${API_URL}/api/expenses/${expenseId}`);
       toast.success('Expense moved to recycle bin');
       fetchExpenses();
     } catch {

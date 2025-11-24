@@ -1,6 +1,5 @@
 import express from 'express';
 import cors from 'cors';
-import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import path from 'path';
@@ -75,7 +74,6 @@ webpush.setVapidDetails( 'mailto:gangavaramnbkyouth@gmail.com',
 
 // Middleware
 app.use(cors({ origin: process.env.FRONTEND_URL, credentials: true }));
-app.use(cookieParser());
 
 app.use(express.json({ limit: '10mb' }));      
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));

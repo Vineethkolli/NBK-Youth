@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Search, Loader2, Clock } from 'lucide-react';
-import api from '../utils/api';
+import axios from 'axios';
 import { toast } from 'react-hot-toast';
+import { API_URL } from '../utils/config';
 import { useAuth } from '../context/AuthContext';
 import { formatDateTime } from '../utils/dateTime';
 
@@ -26,7 +27,7 @@ function AuthLogs() {
       setLoading(true);
       const params = new URLSearchParams({ search, page });
       if (showLatest) params.append('latest', 'true');
-      const { data } = await api.get(`/api/authlogs?${params}`);
+      const { data } = await axios.get(`${API_URL}/api/authlogs?${params}`);
       setLogs(data.logs);
       setPagination(data.pagination);
     } catch (error) {

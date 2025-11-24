@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Plus, Trash2, X, Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import api from '../../utils/api';
+import axios from 'axios';
 import { API_URL } from '../../utils/config';
 import { formatDateTime } from '../../utils/dateTime';
 
@@ -17,7 +17,7 @@ function Timeline({ events, isEditing, onUpdate }) {
 
     try {
       const dateTime = new Date(formData.dateTime).toISOString();
-      await api.post(`/api/homepage/events`, { ...formData, dateTime });
+      await axios.post(`${API_URL}/api/homepage/events`, { ...formData, dateTime });
       toast.success('Event added successfully');
       setShowForm(false);
       setFormData({ name: '', dateTime: '' });
@@ -34,7 +34,7 @@ function Timeline({ events, isEditing, onUpdate }) {
 
     try {
       setDeletingId(id);
-      await api.delete(`/api/homepage/events/${id}`);
+      await axios.delete(`${API_URL}/api/homepage/events/${id}`);
       toast.success('Event deleted successfully');
       onUpdate();
     } catch (error) {

@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
-import api from '../../utils/api';
+import axios from 'axios';
 import { RefreshCcw, Folder } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { API_URL } from '../../utils/config';
 
 export default function CloudinaryMonitor() {
   const [quota, setQuota] = useState(null);
@@ -10,7 +11,7 @@ export default function CloudinaryMonitor() {
 
   const fetchQuota = useCallback(async () => {
     try {
-      const res = await api.get(`/api/monitor/cloudinary/quota`);
+      const res = await axios.get(`${API_URL}/api/monitor/cloudinary/quota`);
       setQuota(res.data);
     } catch (err) {
       console.error(err);
@@ -21,7 +22,7 @@ export default function CloudinaryMonitor() {
   const fetchFolders = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await api.get(`/api/monitor/cloudinary/folders`);
+      const res = await axios.get(`${API_URL}/api/monitor/cloudinary/folders`);
       setFolders(res.data.folders || []);
     } catch (err) {
       console.error(err);

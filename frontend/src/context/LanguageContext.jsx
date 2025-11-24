@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import api from '../utils/api';
+import axios from 'axios';
+import { API_URL } from '../utils/config';
 import { useAuth } from './AuthContext';
 
 const LanguageContext = createContext();
@@ -117,7 +118,7 @@ export const LanguageProvider = ({ children }) => {
     localStorage.setItem('preferredLanguage', newLanguage);
     if (user) {
       try {
-        await api.patch(`/api/profile/language`, {
+        await axios.patch(`${API_URL}/api/profile/language`, {
           language: newLanguage,
         });
       } catch (error) {

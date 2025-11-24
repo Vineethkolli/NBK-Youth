@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Plus, Trash2, ArrowLeft, ArrowRight, Loader2, GripHorizontal, VolumeX, Volume2, Pause, Play } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import api from '../../utils/api';
+import axios from 'axios';
 import { API_URL } from '../../utils/config';
 import SlidesOrder from './SlidesOrder';
 import SlidesUpload from './SlidesUpload';
@@ -103,7 +103,7 @@ video
 
   async function fetchSlides() {
     try {
-      const { data } = await api.get(`/api/homepage/slides`);
+      const { data } = await axios.get(`${API_URL}/api/homepage/slides`);
       setSlides(data);
     } catch {
       toast.error('Failed to fetch slides');
@@ -115,7 +115,7 @@ video
     if (!confirmDelete) return;
     setIsDeleting(currentSlide);
     try {
-      await api.delete(`/api/homepage/slides/${id}`);
+      await axios.delete(`${API_URL}/api/homepage/slides/${id}`);
       toast.success('Slide deleted successfully');
       await fetchSlides();
     } catch {

@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import api from '../utils/api';
+import axios from 'axios';
+import { API_URL } from '../utils/config';
 
 const LockContext = createContext();
 
@@ -14,7 +15,7 @@ export const LockProvider = ({ children }) => {
 
   const fetchLockSettings = async () => {
     try {
-      const { data } = await api.get(`/api/lock-settings`);
+      const { data } = await axios.get(`${API_URL}/api/lock-settings`);
       setLockSettings(data);
     } catch (error) {
       console.error('Failed to fetch lock settings:', error);

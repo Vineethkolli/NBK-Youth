@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import api from '../utils/api';
+import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import { Trash2, Bell, BellOff, Edit2, Search, CheckCircle, XCircle, UsersIcon, BarChart3 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { API_URL } from '../utils/config';
 import UpdateUserForm from '../components/users/UpdateUserForm';
 import DeleteUserConfirm from '../components/users/DeleteUserForm';
 import UserStats from '../components/users/UserStats';
@@ -29,8 +30,8 @@ function Users() {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const { data } = await api.get(
-        `/api/users${search ? `?search=${search}` : ''}`
+      const { data } = await axios.get(
+        `${API_URL}/api/users${search ? `?search=${search}` : ''}`
       );
       setUsers(data);
     } catch {
@@ -42,7 +43,7 @@ function Users() {
 
   const handleRoleChange = async (userId, newRole) => {
     try {
-      await api.patch(`/api/users/${userId}/role`, { role: newRole });
+      await axios.patch(`${API_URL}/api/users/${userId}/role`, { role: newRole });
       toast.success('Role updated successfully');
       fetchUsers();
     } catch (error) {
@@ -52,7 +53,7 @@ function Users() {
 
   const handleCategoryChange = async (userId, newCategory) => {
     try {
-      await api.patch(`/api/users/${userId}/category`, { category: newCategory });
+      await axios.patch(`${API_URL}/api/users/${userId}/category`, { category: newCategory });
       toast.success('Category updated successfully');
       fetchUsers();
     } catch (error) {
@@ -256,7 +257,7 @@ function Users() {
               onClose={() => setUserToDelete(null)}
               onConfirm={async (user) => {
                 try {
-                  await api.delete(`/api/users/${user._id}`);
+                  await axios.delete(`${API_URL}/api/users/${user._id}`);
                   toast.success(`User "${user.name}" deleted successfully`);
                   fetchUsers();
                 } catch (error) {

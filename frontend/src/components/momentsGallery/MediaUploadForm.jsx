@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { X, Upload } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import api from '../../utils/api';
+import axios from 'axios';
 import { API_URL } from '../../utils/config';
 
 function MediaUploadForm({ momentId, momentTitle, onClose, onSubmit }) {
@@ -131,12 +131,13 @@ function MediaUploadForm({ momentId, momentTitle, onClose, onSubmit }) {
     setUploadPercent(0);
 
     try {
-      const startRes = await api.post(`/api/moments/${momentId}/gallery/upload/start`);
+      const startRes = await axios.post(`${API_URL}/api/moments/${momentId}/gallery/upload/start`);
       const { subfolderId, accessToken } = startRes.data;
 
       const uploadedFiles = await uploadFilesSequentially(files, accessToken, subfolderId, setUploadPercent);
 
-      const { data: updatedMoment } = await api.post(`/api/moments/${momentId}/gallery/upload/complete`,
+      const { data: updatedMoment } = await axios.post(
+        `${API_URL}/api/moments/${momentId}/gallery/upload/complete`,
         {
           mediaFiles: uploadedFiles.map((f) => ({
             name: f.name,

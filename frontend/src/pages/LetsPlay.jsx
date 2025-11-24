@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Plus, Edit2, ArrowLeft } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import api from '../utils/api';
+import axios from 'axios';
+import { API_URL } from '../utils/config';
 import GameForm from '../components/games/GameForm';
 import PlayerForm from '../components/games/PlayerForm';
 import TimeForm from '../components/games/TimeForm';
@@ -38,7 +39,7 @@ function LetsPlay() {
 
   const fetchGames = async () => {
     try {
-      const { data } = await api.get(`/api/games`);
+      const { data } = await axios.get(`${API_URL}/api/games`);
       setGames(data.sort((a, b) => a.name.localeCompare(b.name)));
     } catch (error) {
       toast.error('Failed to fetch games');
@@ -59,7 +60,7 @@ function LetsPlay() {
   // Game management
   const handleCreateGame = async (formData) => {
     try {
-      const { data } = await api.post(`/api/games`, formData);
+      const { data } = await axios.post(`${API_URL}/api/games`, formData);
       setGames((prevGames) => [...prevGames, data].sort((a, b) => a.name.localeCompare(b.name)));
       setShowGameForm(false);
       toast.success('Game created successfully');
@@ -70,7 +71,7 @@ function LetsPlay() {
 
   const handleGameEdit = async (gameId, newName) => {
     try {
-      const { data } = await api.put(`/api/games/${gameId}`, { name: newName });
+      const { data } = await axios.put(`${API_URL}/api/games/${gameId}`, { name: newName });
       setGames((prevGames) =>
         prevGames.map((g) => (g._id === gameId ? data : g)).sort((a, b) => a.name.localeCompare(b.name))
       );
@@ -86,7 +87,7 @@ function LetsPlay() {
   const handleGameDelete = async (game) => {
     if (!window.confirm('Are you sure you want to delete this game?')) return;
     try {
-      await api.delete(`/api/games/${game._id}`);
+      await axios.delete(`${API_URL}/api/games/${game._id}`);
       setGames((prevGames) => prevGames.filter((g) => g._id !== game._id));
       if (selectedGame?._id === game._id) {
         setSelectedGame(null);
@@ -100,7 +101,7 @@ function LetsPlay() {
   // Player management
   const handleAddPlayer = async (playerName) => {
     try {
-      const { data } = await api.post(`/api/games/${selectedGame._id}/players`, {
+      const { data } = await axios.post(`${API_URL}/api/games/${selectedGame._id}/players`, {
         name: playerName,
       });
       setGames((prevGames) =>
@@ -116,7 +117,8 @@ function LetsPlay() {
 
   const handleUpdatePlayer = async (playerId, newName) => {
     try {
-      const { data } = await api.put(`/api/games/${selectedGame._id}/players/${playerId}`,
+      const { data } = await axios.put(
+        `${API_URL}/api/games/${selectedGame._id}/players/${playerId}`,
         { name: newName }
       );
       setGames((prevGames) =>
@@ -132,8 +134,8 @@ function LetsPlay() {
   const handlePlayerDelete = async (playerId) => {
     if (!window.confirm('Are you sure you want to delete this player?')) return;
     try {
-      const { data } = await api.delete(
-        `/api/games/${selectedGame._id}/players/${playerId}`
+      const { data } = await axios.delete(
+        `${API_URL}/api/games/${selectedGame._id}/players/${playerId}`
       );
       setGames((prevGames) =>
         prevGames.map((g) => (g._id === selectedGame._id ? data : g))
@@ -147,7 +149,8 @@ function LetsPlay() {
 
   const handleTimeUpdate = async (milliseconds) => {
     try {
-      const { data } = await api.put(`/api/games/${selectedGame._id}/players/${selectedPlayer._id}`,
+      const { data } = await axios.put(
+        `${API_URL}/api/games/${selectedGame._id}/players/${selectedPlayer._id}`,
         { timeCompleted: milliseconds }
       );
       setGames((prevGames) =>
@@ -164,7 +167,8 @@ function LetsPlay() {
 
   const handleStatusUpdate = async (playerId, status) => {
     try {
-      const { data } = await api.put(`/api/games/${selectedGame._id}/players/${playerId}`,
+      const { data } = await axios.put(
+        `${API_URL}/api/games/${selectedGame._id}/players/${playerId}`,
         { status }
       );
       setGames((prevGames) =>

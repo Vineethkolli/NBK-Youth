@@ -1,13 +1,14 @@
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
-import api from '../../utils/api';
+import axios from 'axios';
+import { API_URL } from '../../utils/config';
 
 export const generatePaymentReceipt = async (payment) => {
   const doc = new jsPDF();
 
   let eventLabel = null;
   try {
-    const { data } = await api.get(`/api/event-label`);
+    const { data } = await axios.get(`${API_URL}/api/event-label`);
     eventLabel = data;
   } catch (error) {
     console.error('Failed to fetch event label:', error);

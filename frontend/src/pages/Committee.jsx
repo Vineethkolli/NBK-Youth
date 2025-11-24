@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Plus, Edit2, Trash2, X, GripHorizontal, ArrowUp, ArrowDown, Loader2 } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
-import api from '../utils/api';
+import axios from 'axios';
 import { toast } from 'react-hot-toast';
+import { API_URL } from '../utils/config';
 
 function Committee() {
   const { hasAccess } = useAuth();
@@ -22,7 +23,7 @@ function Committee() {
 
   const fetchMembers = async () => {
     try {
-      const { data } = await api.get(`/api/committee`);
+      const { data } = await axios.get(`${API_URL}/api/committee`);
       setMembers(data);
     } catch {
       toast.error('Failed to fetch committee members');
@@ -51,7 +52,7 @@ function Committee() {
   const saveOrder = async () => {
     const ordered = localMembers.map((m, i) => ({ ...m, order: i + 1 }));
     try {
-      await api.put(`/api/committee/order`, {
+      await axios.put(`${API_URL}/api/committee/order`, {
         members: ordered.map(m => ({ _id: m._id, order: m.order })),
       });
       setMembers(ordered);
@@ -77,7 +78,7 @@ function Committee() {
 
   try {
     setIsAdding(true);
-    await api.post(`/api/committee`, { registerId });
+    await axios.post(`${API_URL}/api/committee`, { registerId });
     toast.success('Member added');
     setShowAddDialog(false);
     setRegisterId('');
@@ -94,7 +95,7 @@ function Committee() {
 
   try {
     setDeletingId(id);
-    await api.delete(`/api/committee/${id}`);
+    await axios.delete(`${API_URL}/api/committee/${id}`);
     toast.success('Member removed');
     fetchMembers();
   } catch {

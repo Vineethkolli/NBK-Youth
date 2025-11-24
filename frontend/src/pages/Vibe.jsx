@@ -5,7 +5,8 @@ import MusicPlayer from '../components/vibe/MusicPlayer';
 import UploadToCollectionForm from '../components/vibe/UploadToCollection';
 import EditNameModal from '../components/common/UpdateNameForm';
 import { toast } from 'react-hot-toast';
-import api from '../utils/api';
+import axios from 'axios';
+import { API_URL } from '../utils/config';
 import { createSongQueue, filterCollections } from '../utils/songQueue';
 import { Search } from 'lucide-react';
 import { useMusicPlayer } from '../context/MusicContext';
@@ -45,7 +46,7 @@ function Vibe() {
 
   const fetchCollections = async () => {
     try {
-      const { data } = await api.get(`/api/collections`);
+      const { data } = await axios.get(`${API_URL}/api/collections`);
       data.sort((a, b) => a.name.localeCompare(b.name));
       setCollections(data);
     } catch (error) {
@@ -87,7 +88,7 @@ function Vibe() {
 
     setEditModalState(prev => ({ ...prev, isUpdating: true }));
     try {
-      await api.put(`/api/collections/${collection._id}`, {
+      await axios.put(`${API_URL}/api/collections/${collection._id}`, {
         name: newName.trim()
       });
       toast.success('Collection updated successfully');
@@ -102,7 +103,7 @@ function Vibe() {
   const handleCollectionDelete = async (collection) => {
     if (!window.confirm('Are you sure you want to delete this collection?')) return;
     try {
-      await api.delete(`/api/collections/${collection._id}`);
+      await axios.delete(`${API_URL}/api/collections/${collection._id}`);
       toast.success('Collection deleted successfully');
       fetchCollections();
     } catch (error) {
@@ -142,7 +143,8 @@ function Vibe() {
 
     setEditModalState(prev => ({ ...prev, isUpdating: true }));
     try {
-      await api.put(`/api/collections/${collection._id}/songs/${song._id}`,
+      await axios.put(
+        `${API_URL}/api/collections/${collection._id}/songs/${song._id}`,
         { name: newName.trim() }
       );
       toast.success('Song updated successfully');
@@ -163,8 +165,8 @@ function Vibe() {
 
       if (!collection) throw new Error('Song not found');
 
-      await api.delete(
-        `/api/collections/${collection._id}/songs/${song._id}`
+      await axios.delete(
+        `${API_URL}/api/collections/${collection._id}/songs/${song._id}`
       );
       toast.success('Song deleted successfully');
       fetchCollections();

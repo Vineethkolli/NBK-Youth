@@ -1,5 +1,6 @@
 import { createContext, useState, useContext, useEffect } from 'react';
-import api from '../utils/api';
+import axios from 'axios';
+import { API_URL } from '../utils/config';
 
 const MaintenanceModeContext = createContext();
 
@@ -10,7 +11,7 @@ export const MaintenanceModeProvider = ({ children }) => {
   useEffect(() => {
     const fetchMaintenanceStatus = async () => {
       try {
-        const { data } = await api.get(`/api/maintenance/status`);
+        const { data } = await axios.get(`${API_URL}/api/maintenance/status`);
         setIsMaintenanceMode(data.isEnabled);
         if (data.expectedBackAt) {
           setExpectedBackAt(new Date(data.expectedBackAt).toISOString().slice(0, 16));
@@ -25,7 +26,7 @@ export const MaintenanceModeProvider = ({ children }) => {
 
   const toggleMaintenanceMode = async (isEnabled, expectedBackAt = null) => {
     try {
-      await api.post(`/api/maintenance/toggle`, {
+      await axios.post(`${API_URL}/api/maintenance/toggle`, {
         isEnabled,
         expectedBackAt,
       });
