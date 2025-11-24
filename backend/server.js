@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url';
 import webpush from 'web-push';
 import cron from 'node-cron';
 import helmet from "helmet";
+import cookieParser from 'cookie-parser';
 
 import authRoutes from './routes/auth.js';
 import userRoutes from './routes/users.js';
@@ -46,6 +47,7 @@ dotenv.config({ quiet: true });
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+app.set('trust proxy', 1);
 
 // Security Headers Middleware
 app.use(
@@ -74,6 +76,7 @@ webpush.setVapidDetails( 'mailto:gangavaramnbkyouth@gmail.com',
 
 // Middleware
 app.use(cors({ origin: process.env.FRONTEND_URL, credentials: true }));
+app.use(cookieParser());
 
 app.use(express.json({ limit: '10mb' }));      
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));

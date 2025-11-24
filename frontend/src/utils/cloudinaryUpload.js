@@ -2,7 +2,7 @@ import axios from 'axios';
 import { API_URL } from './config';
 
 // Get Cloudinary signature
-export async function getCloudinarySignature(token, { folder, publicId, eager, overwrite }) {
+export async function getCloudinarySignature({ folder, publicId, eager, overwrite, resourceType }) {
   const res = await axios.post(
     `${API_URL}/api/uploads/sign`,
     {
@@ -10,17 +10,15 @@ export async function getCloudinarySignature(token, { folder, publicId, eager, o
       public_id: publicId,
       eager,
       overwrite,
+      resourceType,
     },
-    {
-      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-    }
   );
   return res.data;
 }
 
 // Direct upload using XHR for real-time progress
-export async function uploadDirectToCloudinary({ file, folder, resourceType = 'auto', token, onProgress }) {
-  const { cloudName, apiKey, signature, timestamp } = await getCloudinarySignature(token, { folder, resourceType });
+export async function uploadDirectToCloudinary({ file, folder, resourceType = 'auto', onProgress }) {
+  const { cloudName, apiKey, signature, timestamp } = await getCloudinarySignature({ folder, resourceType });
 
   const formData = new FormData();
   formData.append('file', file);

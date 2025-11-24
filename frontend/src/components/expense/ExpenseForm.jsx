@@ -86,7 +86,6 @@ function ExpenseForm({ expense, onClose, onSuccess }) {
           file: formData.billImage,
           folder: 'ExpenseBills',
           resourceType: 'image',
-          token: user?.token,
           onProgress: (p) => setUploadProgress(p),
         });
       }

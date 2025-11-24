@@ -1,10 +1,8 @@
 import { useState } from 'react';
 import { X, Upload, Camera, Trash2, Loader2 } from 'lucide-react';
 import { uploadDirectToCloudinary } from '../../utils/cloudinaryUpload';
-import { useAuth } from '../../context/AuthContext';
 
 function ProfileImageDialog({ image, onClose, onUpload }) {
-  const { user } = useAuth();
   const [isUploading, setIsUploading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
@@ -39,7 +37,6 @@ function ProfileImageDialog({ image, onClose, onUpload }) {
         file: selectedImage,
         folder: 'ProfileImages',
         resourceType: 'image',
-        token: user?.token,
         onProgress: (p) => setUploadProgress(p),
       });
 

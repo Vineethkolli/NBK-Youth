@@ -95,7 +95,6 @@ function PaymentForm({ onSubmit }) {
         file: screenshot,
         folder: 'PaymentScreenshots',
         resourceType: 'image',
-        token: user?.token,
         onProgress: (p) => setUploadProgress(p),
       });
   

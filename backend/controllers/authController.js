@@ -1,5 +1,6 @@
 import axios from "axios";
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
 import { OAuth2Client } from "google-auth-library";
 import User from "../models/User.js";
 import OTP from "../models/OTP.js";
@@ -9,6 +10,7 @@ import AuthLog from "../models/AuthLog.js";
 import { sendSignupEmail } from "../services/SignupEmail.js";
 import { normalizePhoneNumber } from "../utils/phoneValidation.js";
 import admin from "../utils/firebaseAdmin.js";
+import Session from "../models/Session.js";
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -36,6 +38,164 @@ const createAuthResponse = (user) => ({
   hasPassword: !!user.password,
   googleId: user.googleId || null,
 });
+
+const REFRESH_COOKIE_NAME = "nbk_refresh";
+const REFRESH_TOKEN_TTL_MS = 1000 * 60 * 60 * 24 * 365; // 1 year rolling expiry
+const ACCESS_TOKEN_TTL = "48h";
+
+const cookieOptions = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+  maxAge: REFRESH_TOKEN_TTL_MS,
+  path: "/",
+};
+
+const hashToken = (token) =>
+  crypto.createHash("sha256").update(token).digest("hex");
+
+const generateAccessToken = (userId, role, sessionId) =>
+  jwt.sign({ id: userId, role, sid: sessionId }, process.env.JWT_SECRET, {
+    expiresIn: ACCESS_TOKEN_TTL,
+  });
+
+const generateRefreshToken = () => crypto.randomBytes(64).toString("hex");
+
+const setRefreshCookie = (res, token) => {
+  res.cookie(REFRESH_COOKIE_NAME, token, cookieOptions);
+};
+
+const clearRefreshCookie = (res) => {
+  res.clearCookie(REFRESH_COOKIE_NAME, { ...cookieOptions, maxAge: 0 });
+};
+
+const getRefreshTokenFromRequest = (req) => req.cookies?.[REFRESH_COOKIE_NAME];
+
+const sanitizeSnippet = (value) =>
+  typeof value === "string"
+    ? value.trim().replace(/\s+/g, " ").slice(0, 80)
+    : undefined;
+
+const buildDeviceSnapshot = (details = {}) => {
+  if (!details || typeof details !== "object") {
+    return {
+      device: "unknown",
+      os: "unknown",
+      browser: "unknown",
+      accessMode: "unknown",
+    };
+  }
+
+  const deviceParts = [details.deviceType, details.deviceModel]
+    .map(sanitizeSnippet)
+    .filter(Boolean);
+  const osParts = [
+    details.browser?.osName || details.platform,
+    details.browser?.osVersion,
+  ]
+    .map(sanitizeSnippet)
+    .filter(Boolean);
+  const browserParts = [details.browser?.name, details.browser?.version]
+    .map(sanitizeSnippet)
+    .filter(Boolean);
+
+  return {
+    device: deviceParts.join(" ") || "unknown",
+    os: osParts.join(" ") || "unknown",
+    browser: browserParts.join(" ") || "unknown",
+    accessMode: sanitizeSnippet(details.accessMode) || "unknown",
+  };
+};
+
+const getClientIp = (req) => {
+  const forwarded = req.headers["x-forwarded-for"];
+  if (forwarded) return forwarded.split(",")[0].trim();
+  if (req.ip) return req.ip.replace("::ffff:", "");
+  return (
+    req.connection?.remoteAddress ||
+    req.socket?.remoteAddress ||
+    req.headers["x-real-ip"] ||
+    ""
+  );
+};
+
+const isPublicIp = (ip = "") => {
+  if (!ip) return false;
+  const normalized = ip.replace("::ffff:", "");
+  if (normalized === "127.0.0.1" || normalized === "::1") return false;
+  if (normalized.startsWith("10.")) return false;
+  if (normalized.startsWith("192.168.")) return false;
+  if (/^172\.(1[6-9]|2\d|3[0-1])\./.test(normalized)) return false;
+  return true;
+};
+
+const fetchIpLocation = async (ip) => {
+  if (!isPublicIp(ip)) return { state: "unknown", country: "unknown" };
+  try {
+    const { data } = await axios.get(`https://ipwhois.io/json/${ip}`, {
+      timeout: 3000,
+    });
+    return {
+      state: data.region || data.state || "unknown",
+      country: data.country || data.country_code || "unknown",
+    };
+  } catch (error) {
+    console.warn("IP lookup failed", error.message);
+    return { state: "unknown", country: "unknown" };
+  }
+};
+
+const createSession = async (user, req) => {
+  const now = new Date();
+  const refreshToken = generateRefreshToken();
+  const tokenHash = hashToken(refreshToken);
+  const deviceInfo = buildDeviceSnapshot(req.body?.deviceInfo || {});
+  const ipAddress = getClientIp(req);
+  const location = await fetchIpLocation(ipAddress);
+
+  const session = await Session.create({
+    userId: user._id,
+    tokenHash,
+    lastActive: now,
+    expiresAt: new Date(now.getTime() + REFRESH_TOKEN_TTL_MS),
+    deviceInfo,
+    location,
+    ipAddress: ipAddress || null,
+    isValid: true,
+  });
+
+  return { session, refreshToken };
+};
+
+const touchSession = (session) => {
+  const now = new Date();
+  session.lastActive = now;
+  session.expiresAt = new Date(now.getTime() + REFRESH_TOKEN_TTL_MS);
+};
+
+const invalidateSession = async (session) => {
+  if (!session) return;
+  session.isValid = false;
+  session.tokenHash = hashToken(generateRefreshToken());
+  session.expiresAt = new Date();
+  session.lastActive = new Date();
+  await session.save().catch(() => {});
+};
+
+const sendAuthSuccess = async ({ user, req, res, statusCode = 200, extra = {} }) => {
+  const { session, refreshToken } = await createSession(user, req);
+  const accessToken = generateAccessToken(user._id, user.role, session._id);
+  setRefreshCookie(res, refreshToken);
+
+  return res.status(statusCode).json({
+    ...extra,
+    accessToken,
+    token: accessToken,
+    sessionId: session._id,
+    sessionExpiresAt: session.expiresAt,
+    user: createAuthResponse(user),
+  });
+};
 
 
 export const checkSignupInfo = async (req, res) => {
@@ -157,18 +317,9 @@ export const signUp = async (req, res) => {
       `User ${user.name} signed up`
     );
 
-    const token = jwt.sign(
-      { id: user._id, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: "365d" }
-    );
-
     if (user.email) sendSignupEmail(user.email, user.name);
 
-    res.status(201).json({
-      token,
-      user: createAuthResponse(user),
-    });
+    return sendAuthSuccess({ user, req, res, statusCode: 201 });
   } catch (error) {
     console.error("Signup error:", error);
     return res.status(500).json({ message: "Server error" });
@@ -236,16 +387,7 @@ export const signIn = async (req, res) => {
       await user.save();
     }
 
-    const token = jwt.sign(
-      { id: user._id, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: "365d" }
-    );
-
-    res.json({
-      token,
-      user: createAuthResponse(user),
-    });
+    return sendAuthSuccess({ user, req, res });
   } catch (error) {
     console.error("Signin error:", error);
     return res.status(500).json({ message: "Server error" });
@@ -307,16 +449,11 @@ export const googleAuth = async (req, res) => {
         deviceInfo,
       });
 
-      const token = jwt.sign(
-        { id: user._id, role: user.role },
-        process.env.JWT_SECRET,
-        { expiresIn: "365d" }
-      );
-
-      return res.json({
-        status: "success",
-        token,
-        user: createAuthResponse(user),
+      return sendAuthSuccess({
+        user,
+        req,
+        res,
+        extra: { status: "success" },
       });
     }
 
@@ -375,22 +512,112 @@ export const googleAuth = async (req, res) => {
       `User ${user.name} signed up via Google`
     );
 
-    const token = jwt.sign(
-      { id: user._id, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: "365d" }
-    );
-
     if (user.email) sendSignupEmail(user.email, user.name);
 
-    res.status(201).json({
-      status: "success",
-      token,
-      user: createAuthResponse(user),
+    return sendAuthSuccess({
+      user,
+      req,
+      res,
+      statusCode: 201,
+      extra: { status: "success" },
     });
   } catch (error) {
     console.error("Google signup error:", error);
     return res.status(500).json({ message: "Google authentication failed" });
+  }
+};
+
+export const refreshSession = async (req, res) => {
+  try {
+    const refreshToken = getRefreshTokenFromRequest(req);
+    if (!refreshToken) {
+      return res.status(401).json({ message: "Missing refresh token" });
+    }
+
+    const session = await Session.findOne({
+      tokenHash: hashToken(refreshToken),
+      isValid: true,
+    });
+
+    if (!session || session.expiresAt < new Date()) {
+      await invalidateSession(session);
+      clearRefreshCookie(res);
+      return res.status(401).json({ message: "Session expired" });
+    }
+
+    const user = await User.findById(session.userId);
+    if (!user) {
+      await invalidateSession(session);
+      clearRefreshCookie(res);
+      return res.status(401).json({ message: "Session expired" });
+    }
+
+    const newRefreshToken = generateRefreshToken();
+    session.tokenHash = hashToken(newRefreshToken);
+    touchSession(session);
+    await session.save();
+
+    const accessToken = generateAccessToken(user._id, user.role, session._id);
+    setRefreshCookie(res, newRefreshToken);
+
+    return res.json({ accessToken, token: accessToken, sessionId: session._id });
+  } catch (error) {
+    console.error("Refresh error:", error);
+    return res.status(500).json({ message: "Failed to refresh session" });
+  }
+};
+
+export const pingSession = async (req, res) => {
+  try {
+    const refreshToken = getRefreshTokenFromRequest(req);
+    if (!refreshToken) {
+      return res.status(401).json({ ok: false });
+    }
+
+    const session = await Session.findOne({
+      tokenHash: hashToken(refreshToken),
+      isValid: true,
+    });
+
+    if (!session || session.expiresAt < new Date()) {
+      await invalidateSession(session);
+      clearRefreshCookie(res);
+      return res.status(401).json({ ok: false });
+    }
+
+    touchSession(session);
+    await session.save();
+
+    return res.json({ ok: true });
+  } catch (error) {
+    console.error("Ping error:", error);
+    return res.status(500).json({ message: "Failed to update last active" });
+  }
+};
+
+export const logout = async (req, res) => {
+  try {
+    let session = req.authSession;
+
+    if (!session) {
+      const refreshToken = getRefreshTokenFromRequest(req);
+      if (refreshToken) {
+        session = await Session.findOne({
+          tokenHash: hashToken(refreshToken),
+          userId: req.user?._id,
+        });
+      }
+    }
+
+    if (session) {
+      await invalidateSession(session);
+    }
+
+    clearRefreshCookie(res);
+    return res.json({ message: "Signed out successfully" });
+  } catch (error) {
+    console.error("Logout error:", error);
+    return res.status(500).json({ message: "Failed to sign out" });
   }
 };
 
