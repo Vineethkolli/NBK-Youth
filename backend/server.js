@@ -6,6 +6,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import webpush from 'web-push';
 import cron from 'node-cron';
+import helmet from "helmet";
 
 import authRoutes from './routes/auth.js';
 import userRoutes from './routes/users.js';
@@ -45,6 +46,14 @@ dotenv.config({ quiet: true });
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Security Headers Middleware
+app.use(
+  helmet({
+    contentSecurityPolicy: false,
+    crossOriginEmbedderPolicy: false
+  })
+);
 
 // Environment variables validation
 const requiredVars = [ 'FRONTEND_URL', 'MONGODB_URI', 'JWT_SECRET', 'PUBLIC_VAPID_KEY', 'PRIVATE_VAPID_KEY',
