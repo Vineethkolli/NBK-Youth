@@ -40,7 +40,6 @@ import Records from './pages/Records';
 import Histories from './pages/Histories';
 import Monitor from './pages/Monitor';
 import ViniPage from './pages/vini';
-import AuthLogs from './pages/AuthLogs';
 import Explore from './components/Explore';
 
 import ProtectedRoute from './components/ProtectedRoute';
@@ -114,7 +113,6 @@ function AppContent() {
           <Route path="/records" element={<Records />} />
           <Route path="/histories" element={<Histories />} />
           <Route path="/monitor" element={<Monitor />} />
-          <Route path="/auth-logs" element={<AuthLogs />} />
           <Route path="/explore" element={<Explore />} />
         </Route>
       </Routes>

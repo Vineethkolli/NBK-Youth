@@ -136,12 +136,11 @@ export const getDeviceInfo = async () => {
     accessMode,
     deviceType,
     deviceModel: deviceIdentifier,
-    platform: osName.toLowerCase() || 'unknown',
-    browser: {
-      name: browserName.toLowerCase(),
-      version: browserVersion,
-      osName,
-      osVersion
-    }
+    os: (osName || 'unknown').toLowerCase(),
+    osName,
+    osVersion,
+    browserName,
+    browserVersion,
+    userAgent: sanitize(ua).slice(0, 120)
   };
 };

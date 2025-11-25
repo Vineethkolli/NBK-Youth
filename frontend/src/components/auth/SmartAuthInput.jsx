@@ -24,8 +24,9 @@ export default function SmartAuthInput({ value = "", onChange }) {
   // Detect user country with ip
   useEffect(() => {
     const detectCountry = async () => {
+      const publicRequestConfig = { withCredentials: false };
       try {
-        const res = await axios.get("https://ipwho.is/");
+        const res = await axios.get("https://ipwho.is/", publicRequestConfig);
         const iso = res.data?.country_code;
         if (iso) {
           const found = COUNTRIES.find((c) => c.iso2 === iso);
@@ -35,7 +36,10 @@ export default function SmartAuthInput({ value = "", onChange }) {
         throw new Error("Invalid ISO");
       } catch {
         try {
-          const res2 = await axios.get("https://get.geojs.io/v1/ip/country.json");
+          const res2 = await axios.get(
+            "https://get.geojs.io/v1/ip/country.json",
+            publicRequestConfig
+          );
           const iso2 = res2.data?.country;
           const found = COUNTRIES.find((c) => c.iso2 === iso2);
           if (found) setCountry(found);

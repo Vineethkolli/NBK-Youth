@@ -3,24 +3,93 @@ import jwt from "jsonwebtoken";
 import { OAuth2Client } from "google-auth-library";
 import User from "../models/User.js";
 import OTP from "../models/OTP.js";
+import Session from "../models/Session.js";
 import { sendOTPEmail } from "../services/emailOTPService.js";
 import { logActivity } from "../middleware/activityLogger.js";
-import AuthLog from "../models/AuthLog.js";
 import { sendSignupEmail } from "../services/SignupEmail.js";
 import { normalizePhoneNumber } from "../utils/phoneValidation.js";
 import admin from "../utils/firebaseAdmin.js";
+import { createSession, extendSessionExpiry } from "../services/sessionService.js";
+import {
+  clearRefreshCookie,
+  generateAccessToken,
+  generateRefreshToken,
+  hashToken,
+  setRefreshCookie,
+} from "../utils/tokenUtils.js";
+import { getClientIp, lookupLocation } from "../utils/ipUtils.js";
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-const logAuthEvent = async (data) => {
+const buildSessionContext = async (req) => {
+  const ipAddress = getClientIp(req);
+  let location = { city: "unknown", state: "unknown", country: "unknown" };
+
   try {
-    setImmediate(async () => {
-      await AuthLog.create(data);
-    });
+    location = await lookupLocation(ipAddress);
   } catch (error) {
-    console.error("Auth log failed:", error.message);
+    console.error("Location lookup failed", error.message);
   }
+
+  return { ipAddress, location };
 };
+
+const issueAuthTokens = async ({ user, action, req, res, deviceInfo }) => {
+  const safeDeviceInfo = deviceInfo || {};
+  const { ipAddress, location } = await buildSessionContext(req);
+
+  const refreshToken = generateRefreshToken();
+  const session = await createSession({
+    userId: user._id,
+    tokenHash: hashToken(refreshToken),
+    deviceInfo: safeDeviceInfo,
+    location,
+    ipAddress,
+    action,
+  });
+
+  const accessToken = generateAccessToken(user._id, user.role, session._id.toString());
+  setRefreshCookie(res, refreshToken);
+
+  return { accessToken, sessionId: session._id };
+};
+
+const getSessionFromRefreshCookie = async (req) => {
+  const refreshToken = req.cookies?.refreshToken;
+  if (!refreshToken || typeof refreshToken !== "string") return null;
+
+  const tokenHashValue = hashToken(refreshToken);
+  const session = await Session.findOne({ tokenHash: tokenHashValue, isValid: true });
+  if (!session) return null;
+
+  if (session.expiresAt && session.expiresAt.getTime() < Date.now()) {
+    session.isValid = false;
+    await session.save();
+    return null;
+  }
+
+  const user = await User.findById(session.userId);
+  if (!user) {
+    session.isValid = false;
+    await session.save();
+    return null;
+  }
+
+  return { refreshToken, session, user };
+};
+
+const sanitizeSession = (session, currentSessionId) => ({
+  id: session._id,
+  action: session.action,
+  deviceInfo: session.deviceInfo,
+  location: session.location,
+  ipAddress: session.ipAddress,
+  lastActive: session.lastActive,
+  createdAt: session.createdAt,
+  expiresAt: session.expiresAt,
+  isValid: session.isValid,
+  isCurrent: session._id.toString() === currentSessionId,
+});
 
 // User Response Formatter
 const createAuthResponse = (user) => ({
@@ -134,13 +203,6 @@ export const signUp = async (req, res) => {
       language: language || "en",
     });
 
-    logAuthEvent({
-      registerId: user.registerId,
-      name: user.name,
-      action: "signup",
-      deviceInfo,
-    });
-
     logActivity(
       { user: { registerId: user.registerId, name: user.name } },
       "CREATE",
@@ -157,16 +219,20 @@ export const signUp = async (req, res) => {
       `User ${user.name} signed up`
     );
 
-    const token = jwt.sign(
-      { id: user._id, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: "365d" }
-    );
-
     if (user.email) sendSignupEmail(user.email, user.name);
 
+    const { accessToken, sessionId } = await issueAuthTokens({
+      user,
+      action: "signup",
+      req,
+      res,
+      deviceInfo,
+    });
+
     res.status(201).json({
-      token,
+      token: accessToken,
+      accessToken,
+      sessionId,
       user: createAuthResponse(user),
     });
   } catch (error) {
@@ -215,13 +281,6 @@ export const signIn = async (req, res) => {
       await user.save();
     }
 
-    logAuthEvent({
-      registerId: user.registerId,
-      name: user.name,
-      action: "signin",
-      deviceInfo,
-    });
-
     logActivity(
       { user: { registerId: user.registerId, name: user.name } },
       "UPDATE",
@@ -236,14 +295,18 @@ export const signIn = async (req, res) => {
       await user.save();
     }
 
-    const token = jwt.sign(
-      { id: user._id, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: "365d" }
-    );
+    const { accessToken, sessionId } = await issueAuthTokens({
+      user,
+      action: "signin",
+      req,
+      res,
+      deviceInfo,
+    });
 
     res.json({
-      token,
+      token: accessToken,
+      accessToken,
+      sessionId,
       user: createAuthResponse(user),
     });
   } catch (error) {
@@ -254,9 +317,16 @@ export const signIn = async (req, res) => {
 
 
 export const googleAuth = async (req, res) => {
-  const { credential, accessToken, phoneNumber, name: customName, language, deviceInfo } = req.body;
+  const {
+    credential,
+    accessToken: googleAccessToken,
+    phoneNumber,
+    name: customName,
+    language,
+    deviceInfo,
+  } = req.body;
 
-  if (!credential && !accessToken)
+  if (!credential && !googleAccessToken)
     return res.status(400).json({ message: "Google credential or access token required" });
 
   try {
@@ -276,9 +346,9 @@ export const googleAuth = async (req, res) => {
       email = payload.email;
       googleId = payload.sub;
       picture = payload.picture;
-    } else if (accessToken) {
+    } else if (googleAccessToken) {
       const { data } = await axios.get("https://www.googleapis.com/oauth2/v3/userinfo", {
-        headers: { Authorization: `Bearer ${accessToken}` },
+        headers: { Authorization: `Bearer ${googleAccessToken}` },
       });
 
       if (!data || !data.email || !data.sub)
@@ -300,22 +370,19 @@ export const googleAuth = async (req, res) => {
         await user.save();
       }
 
-      logAuthEvent({
-        registerId: user.registerId,
-        name: user.name,
-        action: "signin-google",
+      const { accessToken, sessionId } = await issueAuthTokens({
+        user,
+        action: "google-signin",
+        req,
+        res,
         deviceInfo,
       });
 
-      const token = jwt.sign(
-        { id: user._id, role: user.role },
-        process.env.JWT_SECRET,
-        { expiresIn: "365d" }
-      );
-
       return res.json({
         status: "success",
-        token,
+        token: accessToken,
+        accessToken,
+        sessionId,
         user: createAuthResponse(user),
       });
     }
@@ -352,13 +419,6 @@ export const googleAuth = async (req, res) => {
       category: "general",
     });
 
-    logAuthEvent({
-      registerId: user.registerId,
-      name: user.name,
-      action: "signup-google",
-      deviceInfo,
-    });
-
     logActivity(
       { user: { registerId: user.registerId, name: user.name } },
       "CREATE",
@@ -375,22 +435,132 @@ export const googleAuth = async (req, res) => {
       `User ${user.name} signed up via Google`
     );
 
-    const token = jwt.sign(
-      { id: user._id, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: "365d" }
-    );
-
     if (user.email) sendSignupEmail(user.email, user.name);
+
+    const { accessToken, sessionId } = await issueAuthTokens({
+      user,
+      action: "google-signup",
+      req,
+      res,
+      deviceInfo,
+    });
 
     res.status(201).json({
       status: "success",
-      token,
+      token: accessToken,
+      accessToken,
+      sessionId,
       user: createAuthResponse(user),
     });
   } catch (error) {
     console.error("Google signup error:", error);
     return res.status(500).json({ message: "Google authentication failed" });
+  }
+};
+
+export const refreshSession = async (req, res) => {
+  try {
+    const sessionData = await getSessionFromRefreshCookie(req);
+    if (!sessionData) {
+      clearRefreshCookie(res);
+      return res.status(401).json({ message: "Refresh token invalid" });
+    }
+
+    const { session, user } = sessionData;
+    const newRefreshToken = generateRefreshToken();
+
+    session.tokenHash = hashToken(newRefreshToken);
+    session.lastActive = new Date();
+    await extendSessionExpiry(session);
+
+    setRefreshCookie(res, newRefreshToken);
+
+    const accessToken = generateAccessToken(user._id, user.role, session._id.toString());
+    return res.json({
+      token: accessToken,
+      accessToken,
+      sessionId: session._id,
+      user: createAuthResponse(user),
+    });
+  } catch (error) {
+    console.error("Refresh session error:", error);
+    clearRefreshCookie(res);
+    return res.status(401).json({ message: "Unable to refresh session" });
+  }
+};
+
+export const updateLastActive = async (req, res) => {
+  try {
+    const sessionData = await getSessionFromRefreshCookie(req);
+    if (!sessionData) {
+      clearRefreshCookie(res);
+      return res.status(401).json({ message: "Session not found" });
+    }
+
+    sessionData.session.lastActive = new Date();
+    await sessionData.session.save();
+
+    return res.json({ ok: true });
+  } catch (error) {
+    console.error("Last active update error:", error);
+    clearRefreshCookie(res);
+    return res.status(500).json({ message: "Unable to update last active" });
+  }
+};
+
+export const signOut = async (req, res) => {
+  try {
+    if (req.session) {
+      req.session.isValid = false;
+      await req.session.save();
+    }
+
+    clearRefreshCookie(res);
+    return res.json({ message: "Signed out" });
+  } catch (error) {
+    console.error("Signout error:", error);
+    return res.status(500).json({ message: "Unable to sign out" });
+  }
+};
+
+export const listSessions = async (req, res) => {
+  try {
+    const sessions = await Session.find({ userId: req.user._id })
+      .sort({ lastActive: -1, createdAt: -1 })
+      .lean();
+
+    const currentSessionId = req.session?._id?.toString();
+    const payload = sessions.map((session) => sanitizeSession(session, currentSessionId));
+
+    return res.json({ sessions: payload });
+  } catch (error) {
+    console.error("List sessions error:", error);
+    return res.status(500).json({ message: "Unable to fetch sessions" });
+  }
+};
+
+export const revokeSession = async (req, res) => {
+  try {
+    const { sessionId } = req.params;
+    if (!sessionId)
+      return res.status(400).json({ message: "Session id required" });
+
+    const session = await Session.findOne({ _id: sessionId, userId: req.user._id });
+    if (!session)
+      return res.status(404).json({ message: "Session not found" });
+
+    session.isValid = false;
+    session.tokenHash = hashToken(generateRefreshToken()); // invalidate existing hash
+    await session.save();
+
+    if (req.session && req.session._id.toString() === sessionId) {
+      clearRefreshCookie(res);
+    }
+
+    return res.json({ message: "Session revoked" });
+  } catch (error) {
+    console.error("Revoke session error:", error);
+    return res.status(500).json({ message: "Unable to revoke session" });
   }
 };
 
