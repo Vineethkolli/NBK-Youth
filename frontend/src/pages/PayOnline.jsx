@@ -11,7 +11,12 @@ function PayOnline() {
 
   const fetchPayments = async () => {
     try {
-      const { data } = await axios.get(`${API_URL}/api/payments`);
+      const token = localStorage.getItem('token');
+      const { data } = await axios.get(`${API_URL}/api/payments`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        }
+      });
       setPayments(data);
     } catch (error) {
       toast.error('Failed to fetch payment history');
@@ -24,7 +29,13 @@ function PayOnline() {
 
   const handlePaymentSubmit = async (paymentData) => {
     try {
-      const response = await axios.post(`${API_URL}/api/payments`, paymentData);
+      const token = localStorage.getItem('token');
+      const response = await axios.post(`${API_URL}/api/payments`, paymentData, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+          // Do NOT set Content-Type here; let axios set it for FormData
+        }
+      });
 
       // Add new payment to top of the list
       setPayments((prev) => [response.data, ...prev]);

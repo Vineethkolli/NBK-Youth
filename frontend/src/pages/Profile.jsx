@@ -8,7 +8,6 @@ import ProfileImageDialog from '../components/profile/ProfileImageDialog';
 import ProfileDetails from '../components/profile/ProfileDetails';
 import PasswordChangeForm from '../components/profile/PasswordChangeForm';
 import GoogleLinkButton from '../components/profile/GoogleLinkButton';
-import SessionList from '../components/profile/SessionList';
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 
 function Profile() {
@@ -21,9 +20,6 @@ function Profile() {
   const [showImageDialog, setShowImageDialog] = useState(false);
   const [showSignoutConfirm, setShowSignoutConfirm] = useState(false);
   const [showGoogleUnlinkConfirm, setShowGoogleUnlinkConfirm] = useState(false);
-  const [showSessions, setShowSessions] = useState(false);
-  const [sessionsLoading, setSessionsLoading] = useState(false);
-  const [sessions, setSessions] = useState([]);
 
   const [userData, setUserData] = useState({
     name: user?.name || '',
@@ -197,9 +193,9 @@ const handleSubmit = async (e) => {
   };
 
   const confirmSignout = () => setShowSignoutConfirm(true);
-  const handleConfirmSignout = async () => {
+  const handleConfirmSignout = () => {
     setShowSignoutConfirm(false);
-    await signout();
+    signout();
   };
   const handleCancelSignout = () => setShowSignoutConfirm(false);
 
@@ -218,40 +214,6 @@ const handleSubmit = async (e) => {
   };
 
   const handleCancelUnlinkGoogle = () => setShowGoogleUnlinkConfirm(false);
-
-  const fetchSessions = async () => {
-    setSessionsLoading(true);
-    try {
-      const { data } = await axios.get(`${API_URL}/api/auth/sessions`);
-      setSessions(data.sessions || []);
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to load sessions');
-    } finally {
-      setSessionsLoading(false);
-    }
-  };
-
-  const toggleSessions = () => {
-    setShowSessions((prev) => {
-      const next = !prev;
-      if (next && sessions.length === 0) {
-        fetchSessions();
-      }
-      return next;
-    });
-  };
-
-  const handleSessionRefresh = () => fetchSessions();
-
-  const handleSessionSignout = async (sessionId) => {
-    try {
-      await axios.delete(`${API_URL}/api/auth/sessions/${sessionId}`);
-      setSessions((prev) => prev.filter((session) => session.id !== sessionId));
-      toast.success('Session signed out');
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to sign out session');
-    }
-  };
 
   if (!user) return null;
 
@@ -334,27 +296,8 @@ const handleSubmit = async (e) => {
     ) : (
       <GoogleLinkButton onLinked={() => {}} />
     )}
-
-    <button
-      onClick={toggleSessions}
-      className="inline-flex items-center px-3 py-2 border border-indigo-200 text-sm font-medium rounded-md shadow-sm text-indigo-700 bg-white hover:bg-indigo-50"
-    >
-      {showSessions ? 'Hide Sessions' : 'My Sessions'}
-    </button>
   </div>
 </div>
-
-
-        {showSessions && (
-          <div className="px-4 py-5 sm:px-6 border-t border-gray-200">
-            <SessionList
-              sessions={sessions}
-              loading={sessionsLoading}
-              onRefresh={handleSessionRefresh}
-              onSignout={handleSessionSignout}
-            />
-          </div>
-        )}
 
 
         {isChangingPassword && (
