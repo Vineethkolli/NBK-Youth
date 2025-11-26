@@ -8,6 +8,7 @@ import ProfileImageDialog from '../components/profile/ProfileImageDialog';
 import ProfileDetails from '../components/profile/ProfileDetails';
 import PasswordChangeForm from '../components/profile/PasswordChangeForm';
 import GoogleLinkButton from '../components/profile/GoogleLinkButton';
+import SessionsManager from '../components/profile/SessionsManager';
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 
 function Profile() {
@@ -313,6 +314,8 @@ const handleSubmit = async (e) => {
             />
           </div>
         )}
+
+        <SessionsManager />
       </div>
 
       {showSignoutConfirm && (

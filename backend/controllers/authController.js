@@ -5,22 +5,12 @@ import User from "../models/User.js";
 import OTP from "../models/OTP.js";
 import { sendOTPEmail } from "../services/emailOTPService.js";
 import { logActivity } from "../middleware/activityLogger.js";
-import AuthLog from "../models/AuthLog.js";
 import { sendSignupEmail } from "../services/SignupEmail.js";
 import { normalizePhoneNumber } from "../utils/phoneValidation.js";
 import admin from "../utils/firebaseAdmin.js";
+import { createSessionAndTokens } from "./sessionController.js";
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
-
-const logAuthEvent = async (data) => {
-  try {
-    setImmediate(async () => {
-      await AuthLog.create(data);
-    });
-  } catch (error) {
-    console.error("Auth log failed:", error.message);
-  }
-};
 
 // User Response Formatter
 const createAuthResponse = (user) => ({
@@ -134,13 +124,6 @@ export const signUp = async (req, res) => {
       language: language || "en",
     });
 
-    logAuthEvent({
-      registerId: user.registerId,
-      name: user.name,
-      action: "signup",
-      deviceInfo,
-    });
-
     logActivity(
       { user: { registerId: user.registerId, name: user.name } },
       "CREATE",
@@ -157,16 +140,24 @@ export const signUp = async (req, res) => {
       `User ${user.name} signed up`
     );
 
-    const token = jwt.sign(
-      { id: user._id, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: "365d" }
+    const { accessToken, refreshToken } = await createSessionAndTokens(
+      user,
+      deviceInfo,
+      'signup',
+      req
     );
+
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      maxAge: 365 * 24 * 60 * 60 * 1000
+    });
 
     if (user.email) sendSignupEmail(user.email, user.name);
 
     res.status(201).json({
-      token,
+      token: accessToken,
       user: createAuthResponse(user),
     });
   } catch (error) {
@@ -215,13 +206,6 @@ export const signIn = async (req, res) => {
       await user.save();
     }
 
-    logAuthEvent({
-      registerId: user.registerId,
-      name: user.name,
-      action: "signin",
-      deviceInfo,
-    });
-
     logActivity(
       { user: { registerId: user.registerId, name: user.name } },
       "UPDATE",
@@ -236,14 +220,22 @@ export const signIn = async (req, res) => {
       await user.save();
     }
 
-    const token = jwt.sign(
-      { id: user._id, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: "365d" }
+    const { accessToken, refreshToken } = await createSessionAndTokens(
+      user,
+      deviceInfo,
+      'signin',
+      req
     );
 
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      maxAge: 365 * 24 * 60 * 60 * 1000
+    });
+
     res.json({
-      token,
+      token: accessToken,
       user: createAuthResponse(user),
     });
   } catch (error) {
@@ -300,22 +292,23 @@ export const googleAuth = async (req, res) => {
         await user.save();
       }
 
-      logAuthEvent({
-        registerId: user.registerId,
-        name: user.name,
-        action: "signin-google",
+      const { accessToken: newAccessToken, refreshToken } = await createSessionAndTokens(
+        user,
         deviceInfo,
-      });
-
-      const token = jwt.sign(
-        { id: user._id, role: user.role },
-        process.env.JWT_SECRET,
-        { expiresIn: "365d" }
+        'google-signin',
+        req
       );
+
+      res.cookie('refreshToken', refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+        maxAge: 365 * 24 * 60 * 60 * 1000
+      });
 
       return res.json({
         status: "success",
-        token,
+        token: newAccessToken,
         user: createAuthResponse(user),
       });
     }
@@ -352,13 +345,6 @@ export const googleAuth = async (req, res) => {
       category: "general",
     });
 
-    logAuthEvent({
-      registerId: user.registerId,
-      name: user.name,
-      action: "signup-google",
-      deviceInfo,
-    });
-
     logActivity(
       { user: { registerId: user.registerId, name: user.name } },
       "CREATE",
@@ -375,17 +361,25 @@ export const googleAuth = async (req, res) => {
       `User ${user.name} signed up via Google`
     );
 
-    const token = jwt.sign(
-      { id: user._id, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: "365d" }
+    const { accessToken: newAccessToken, refreshToken } = await createSessionAndTokens(
+      user,
+      deviceInfo,
+      'google-signup',
+      req
     );
+
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      maxAge: 365 * 24 * 60 * 60 * 1000
+    });
 
     if (user.email) sendSignupEmail(user.email, user.name);
 
     res.status(201).json({
       status: "success",
-      token,
+      token: newAccessToken,
       user: createAuthResponse(user),
     });
   } catch (error) {

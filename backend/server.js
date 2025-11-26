@@ -7,8 +7,10 @@ import { fileURLToPath } from 'url';
 import webpush from 'web-push';
 import cron from 'node-cron';
 import helmet from "helmet";
+import cookieParser from 'cookie-parser';
 
 import authRoutes from './routes/auth.js';
+import sessionRoutes from './routes/sessions.js';
 import userRoutes from './routes/users.js';
 import profileRoutes from './routes/profile.js';
 import paymentRoutes from './routes/payment.js';
@@ -38,7 +40,6 @@ import snapshotRoutes from './routes/snapshots.js';
 import historiesRoutes from './routes/histories.js';
 import cloudinaryRoutes from './routes/cloudinary.js';
 import monitorRoutes from './routes/monitor.js';
-import authLogRoutes from './routes/authLogs.js';
 import { processDueNotifications } from './controllers/scheduledNotificationController.js';
 import { createDefaultDeveloper } from './utils/setupDefaults.js';
 
@@ -56,7 +57,7 @@ app.use(
 );
 
 // Environment variables validation
-const requiredVars = [ 'FRONTEND_URL', 'MONGODB_URI', 'JWT_SECRET', 'PUBLIC_VAPID_KEY', 'PRIVATE_VAPID_KEY',
+const requiredVars = [ 'FRONTEND_URL', 'MONGODB_URI', 'JWT_SECRET', 'REFRESH_TOKEN_SECRET', 'PUBLIC_VAPID_KEY', 'PRIVATE_VAPID_KEY',
   'CLOUDINARY_CLOUD_NAME', 'CLOUDINARY_API_KEY', 'CLOUDINARY_API_SECRET', 'GOOGLE_DRIVE_CREDENTIALS', 'GOOGLE_DRIVE_FOLDER_ID',
    'DEFAULT_DEVELOPER_PASSWORD' ];
 requiredVars.forEach(v => {
@@ -73,8 +74,12 @@ webpush.setVapidDetails( 'mailto:gangavaramnbkyouth@gmail.com',
 );
 
 // Middleware
-app.use(cors({ origin: process.env.FRONTEND_URL, credentials: true }));
+app.use(cors({ 
+  origin: process.env.FRONTEND_URL, 
+  credentials: true 
+}));
 
+app.use(cookieParser());
 app.use(express.json({ limit: '10mb' }));      
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
@@ -83,6 +88,7 @@ app.use('/assets', express.static(path.join(__dirname, 'public/assets')));
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/sessions', sessionRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/payments', paymentRoutes);
@@ -112,7 +118,6 @@ app.use('/api/snapshots', snapshotRoutes);
 app.use('/api/histories', historiesRoutes);
 app.use('/api/uploads', cloudinaryRoutes);
 app.use('/api/monitor', monitorRoutes);
-app.use('/api/authlogs', authLogRoutes);
 
 // Health Check
 app.get('/', (req, res) => res.json({ status: 'API is running' }));

@@ -39,7 +39,7 @@ function Sidebar({ isOpen, onNavigate }) {
   ...(hasAccess('Developer') ? [
     { to: '/developer-options', icon: Terminal, label: 'Developer Options' },
     { to: '/activity-logs', icon: FileClock, label: 'Activity Logs' },
-    { to: '/auth-logs', icon: Fingerprint, label: 'Auth Logs' },
+    { to: '/auth-sessions', icon: Fingerprint, label: 'Auth Sessions' },
     { to: '/monitor', icon: Cpu, label: 'Monitor' },
   ] : []),
 ];
