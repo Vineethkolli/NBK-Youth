@@ -30,7 +30,7 @@ function AuthSessions() {
     deviceInfo: false,
     location: false,
     expiresAt: false,
-    isValid: false,
+    isValid: true,
   });
 
   useEffect(() => {

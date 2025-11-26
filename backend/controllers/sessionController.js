@@ -1,6 +1,5 @@
 import Session from "../models/Session.js";
 import { generateAccessToken, generateRefreshToken, hashToken } from "../utils/tokenUtils.js";
-import User from "../models/User.js";
 import { getLocationFromIP } from "../utils/ipLocation.js";
 
 export const createSessionAndTokens = async (user, deviceInfo, action, req) => {
@@ -24,13 +23,12 @@ export const createSessionAndTokens = async (user, deviceInfo, action, req) => {
     accessMode: deviceInfo?.accessMode || "website"
   });
 
-  const accessToken = generateAccessToken({ id: user._id, role: user.role });
   const refreshToken = generateRefreshToken();
   const tokenHash = hashToken(refreshToken);
 
   const fifteenMonths = 365 * 24 * 60 * 60 * 1000;
 
-  // Create session immediately (non-blocking placeholders for device info, location)
+  // Create session first so we can bind access tokens to sessionId
   const session = await Session.create({
     userId: user._id,
     tokenHash,
@@ -50,6 +48,9 @@ export const createSessionAndTokens = async (user, deviceInfo, action, req) => {
       console.error("Failed to update session background:", err);
     }
   });
+
+  // Access token binds to sessionId for immediate revocation on signout
+  const accessToken = generateAccessToken({ id: user._id, role: user.role, sessionId: session._id });
 
   return { accessToken, refreshToken };
 };
@@ -80,7 +81,7 @@ export const refreshAccessToken = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    const newAccessToken = generateAccessToken({ id: user._id, role: user.role });
+    const newAccessToken = generateAccessToken({ id: user._id, role: user.role, sessionId: session._id });
     const newRefreshToken = generateRefreshToken();
     const newTokenHash = hashToken(newRefreshToken);
 
