@@ -34,7 +34,7 @@ export const createSessionAndTokens = async (user, deviceInfo, action, req) => {
   const session = await Session.create({
     userId: user._id,
     tokenHash,
-    deviceInfo: { deviceType: "loading", deviceModel: "loading", os: "loading", browserName: "loading" },
+    deviceInfo: { deviceType: "unknown", deviceModel: "unknown", os: "unknown", browserName: "unknown" },
     location: { city: null, state: null, country: null },
     action,
     expiresAt: new Date(Date.now() + fifteenMonths)
