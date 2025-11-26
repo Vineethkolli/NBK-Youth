@@ -46,6 +46,5 @@ app.get('/oauth2callback', async (req, res) => {
   }
 });
 
-// Start server
 const PORT = 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
