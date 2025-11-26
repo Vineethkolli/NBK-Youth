@@ -25,9 +25,8 @@ export default function CustomPhoneInput({ value, onChange }) {
   // Detect user country from IP
   useEffect(() => {
     const detectCountry = async () => {
-      const publicRequestConfig = { withCredentials: false };
       try {
-        const res = await axios.get("https://ipwho.is/", publicRequestConfig);
+        const res = await axios.get("https://ipwho.is/");
         const iso = res.data?.country_code;
         if (iso) {
           const found = COUNTRIES.find((c) => c.iso2 === iso);
@@ -37,10 +36,7 @@ export default function CustomPhoneInput({ value, onChange }) {
         throw new Error("Invalid ISO from ipwho.is");
       } catch {
         try {
-          const res2 = await axios.get(
-            "https://get.geojs.io/v1/ip/country.json",
-            publicRequestConfig
-          );
+          const res2 = await axios.get("https://get.geojs.io/v1/ip/country.json");
           const iso2 = res2.data?.country;
           const found = COUNTRIES.find((c) => c.iso2 === iso2);
           if (found) setCountry(found);

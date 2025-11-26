@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
-import { LogOut, Edit2, Smartphone, RefreshCcw, MapPin, Clock, Loader2 } from 'lucide-react';
+import { LogOut, Edit2 } from 'lucide-react';
 import { API_URL } from '../utils/config';  
 import ProfileImageDialog from '../components/profile/ProfileImageDialog';
 import ProfileDetails from '../components/profile/ProfileDetails';
@@ -20,9 +20,6 @@ function Profile() {
   const [showImageDialog, setShowImageDialog] = useState(false);
   const [showSignoutConfirm, setShowSignoutConfirm] = useState(false);
   const [showGoogleUnlinkConfirm, setShowGoogleUnlinkConfirm] = useState(false);
-  const [showSessions, setShowSessions] = useState(false);
-  const [sessionsLoading, setSessionsLoading] = useState(false);
-  const [sessions, setSessions] = useState([]);
 
   const [userData, setUserData] = useState({
     name: user?.name || '',
@@ -50,46 +47,6 @@ function Profile() {
     [field]: !prev[field],
   }));
 };
-
-  const formatDateTime = (value) => {
-    if (!value) return 'Unknown';
-    return new Date(value).toLocaleString();
-  };
-
-  const loadSessions = useCallback(async (showToast = false) => {
-    try {
-      setSessionsLoading(true);
-      const { data } = await axios.get(`${API_URL}/api/auth/sessions`);
-      setSessions(data.sessions || []);
-      if (showToast) {
-        toast.success('Sessions refreshed');
-      }
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to load sessions');
-    } finally {
-      setSessionsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (showSessions) {
-      loadSessions();
-    }
-  }, [showSessions, loadSessions]);
-
-  const handleRevokeSession = async (sessionId) => {
-    try {
-      await axios.post(`${API_URL}/api/auth/sessions/${sessionId}/revoke`);
-      setSessions((prev) =>
-        prev.map((session) =>
-          session.id === sessionId ? { ...session, isValid: false } : session
-        )
-      );
-      toast.success('Session signed out');
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to sign out session');
-    }
-  };
 
 
   useEffect(() => {
@@ -329,14 +286,6 @@ const handleSubmit = async (e) => {
       {isChangingPassword ? 'Cancel' : (user.hasPassword ? 'Change Password' : 'Set Password')}
     </button>
 
-    <button
-      onClick={() => setShowSessions((prev) => !prev)}
-      className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-emerald-600 hover:bg-emerald-700"
-    >
-      <Smartphone className="mr-2 h-4 w-4" />
-      {showSessions ? 'Hide Sessions' : 'My Sessions'}
-    </button>
-
     {user.googleId ? (
       <button
         onClick={confirmUnlinkGoogle}
@@ -350,108 +299,6 @@ const handleSubmit = async (e) => {
   </div>
 </div>
 
-
-      {showSessions && (
-        <div className="px-4 py-5 sm:px-6">
-          <div className="flex justify-between items-center mb-4">
-            <div className="flex items-center space-x-2">
-              <Smartphone className="h-5 w-5 text-emerald-600" />
-              <h4 className="text-lg font-semibold">Active Sessions</h4>
-            </div>
-            <button
-              onClick={() => loadSessions(true)}
-              className="inline-flex items-center px-3 py-1.5 text-sm rounded-md border border-gray-300 hover:bg-gray-50"
-              disabled={sessionsLoading}
-            >
-              {sessionsLoading ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Loading
-                </>
-              ) : (
-                <>
-                  <RefreshCcw className="h-4 w-4 mr-2" />
-                  Refresh
-                </>
-              )}
-            </button>
-          </div>
-
-          {sessionsLoading && sessions.length === 0 ? (
-            <div className="flex items-center space-x-2 text-gray-500">
-              <Loader2 className="h-4 w-4 animate-spin" />
-              <p>Fetching your sessions…</p>
-            </div>
-          ) : sessions.length === 0 ? (
-            <p className="text-gray-600">No active sessions found.</p>
-          ) : (
-            <div className="space-y-4">
-              {sessions.map((session) => {
-                const device = session.deviceInfo || {};
-                const location = session.location || {};
-                const locationLabel = [location.city, location.state, location.country]
-                  .filter(Boolean)
-                  .join(', ') || 'Unknown location';
-
-                return (
-                  <div key={session.id} className="border rounded-lg p-4 bg-gray-50">
-                    <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
-                      <div>
-                        <div className="flex items-center space-x-2">
-                          <Smartphone className="h-4 w-4 text-gray-500" />
-                          <p className="font-semibold">
-                            {device.deviceModel || 'Unknown device'}
-                          </p>
-                          {session.isCurrent && (
-                            <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-emerald-100 text-emerald-700">
-                              Current
-                            </span>
-                          )}
-                          {!session.isValid && (
-                            <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-gray-200 text-gray-600">
-                              Signed out
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-sm text-gray-600 mt-1">
-                          {(device.deviceType || 'device').toUpperCase()} • {device.osName || device.os || 'OS unknown'}
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          Browser: {device.browserName || 'Unknown'} {device.browserVersion || ''}
-                        </p>
-                        <p className="text-xs text-gray-500 mt-1">Action: {session.action || 'unknown'}</p>
-                      </div>
-
-                      <div className="text-sm text-gray-600 space-y-1">
-                        <div className="flex items-center space-x-2">
-                          <Clock className="h-4 w-4" />
-                          <span>Last active: {formatDateTime(session.lastActive)}</span>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <MapPin className="h-4 w-4" />
-                          <span>{locationLabel}</span>
-                        </div>
-                        <p className="text-xs text-gray-500">IP: {session.ipAddress || 'Unknown'}</p>
-                      </div>
-                    </div>
-
-                    {!session.isCurrent && session.isValid && (
-                      <div className="mt-4 flex justify-end">
-                        <button
-                          onClick={() => handleRevokeSession(session.id)}
-                          className="inline-flex items-center px-3 py-1.5 text-sm rounded-md bg-red-100 text-red-700 hover:bg-red-200"
-                        >
-                          Sign out
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      )}
 
         {isChangingPassword && (
           <div ref={passwordFormRef} className="px-4 py-5 sm:px-6">

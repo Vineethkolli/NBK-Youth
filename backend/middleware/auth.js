@@ -1,8 +1,6 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
-import Session from '../models/Session.js';
 import { Access } from '../config/access.js';
-import { clearRefreshCookie } from '../utils/tokenUtils.js';
 
 // Authenticate the user using JWT
 export const auth = async (req, res, next) => {
@@ -14,29 +12,9 @@ export const auth = async (req, res, next) => {
     const user = await User.findById(decoded.id).select('-password');
     if (!user) return res.status(404).json({ message: 'User not found' });
 
-    if (!decoded.sid) {
-      clearRefreshCookie(res);
-      return res.status(401).json({ message: 'Session invalid' });
-    }
-
-    const session = await Session.findById(decoded.sid);
-    if (!session || !session.isValid || session.userId.toString() !== user._id.toString()) {
-      clearRefreshCookie(res);
-      return res.status(401).json({ message: 'Session expired' });
-    }
-
-    if (session.expiresAt && session.expiresAt.getTime() < Date.now()) {
-      session.isValid = false;
-      await session.save();
-      clearRefreshCookie(res);
-      return res.status(401).json({ message: 'Session expired' });
-    }
-
     req.user = user;
-    req.session = session;
     next();
   } catch (error) {
-    clearRefreshCookie(res);
     res.status(401).json({ message: 'Invalid token' });
   }
 };

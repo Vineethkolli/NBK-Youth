@@ -19,7 +19,14 @@ export const HiddenProfileProvider = ({ children }) => {
 
   const fetchHiddenProfiles = async () => {
     try {
-      const { data } = await axios.get(`${API_URL}/api/hidden-profiles`);
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const { data } = await axios.get(`${API_URL}/api/hidden-profiles`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       setHiddenProfiles(new Set(data));
     } catch (error) {
       console.error('Failed to fetch hidden profiles:', error);
@@ -32,9 +39,17 @@ export const HiddenProfileProvider = ({ children }) => {
 
   const toggleProfileHidden = async (profileId) => {
     try {
+      const token = localStorage.getItem('token');
+      if (!token) return null;
+
       const { data } = await axios.post(
         `${API_URL}/api/hidden-profiles/toggle`,
-        { profileId }
+        { profileId },
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        }
       );
       
       setHiddenProfiles(prev => {
