@@ -107,8 +107,9 @@ function IncomeSection({ refreshStats }) {
       fetchIncomes();
       if (refreshStats) refreshStats();
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to submit form');
-    }
+  toast.error(error.response?.data?.message || 'Failed to submit form');
+  throw error;
+}
   };
 
   const handleColumnToggle = (col) => {

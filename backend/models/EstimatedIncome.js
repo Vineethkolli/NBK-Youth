@@ -39,7 +39,7 @@ const estimatedIncomeSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-estimatedIncomeSchema.pre('save', async function (next) {
+estimatedIncomeSchema.pre('save', async function () {
   if (!this.estimatedIncomeId) {
     const counter = await Counter.findByIdAndUpdate(
       'estimatedIncomeId',
@@ -48,7 +48,6 @@ estimatedIncomeSchema.pre('save', async function (next) {
     );
     this.estimatedIncomeId = `EI${counter.seq}`;
   }
-  next();
 });
 
 export default mongoose.model('EstimatedIncome', estimatedIncomeSchema);

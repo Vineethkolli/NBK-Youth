@@ -71,7 +71,7 @@ email: {
 incomeSchema.index({ belongsTo: 1, verifyLog: 1, createdAt: -1 });
 incomeSchema.index({ status: 1, paymentMode: 1, createdAt: -1 });
 
-incomeSchema.pre('save', async function (next) {
+incomeSchema.pre('save', async function () {
   if (!this.incomeId) {
     const counter = await Counter.findByIdAndUpdate(
       'incomeId',
@@ -80,7 +80,6 @@ incomeSchema.pre('save', async function (next) {
     );
     this.incomeId = `I${counter.seq}`;
   }
-  next();
 });
 
 export default mongoose.model('Income', incomeSchema);

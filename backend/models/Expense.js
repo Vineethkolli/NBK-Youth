@@ -57,7 +57,7 @@ const expenseSchema = new mongoose.Schema({
 expenseSchema.index({ verifyLog: 1, paymentMode: 1, createdAt: -1 });
 
 // Auto-generate expenseId as E1, E2, ...
-expenseSchema.pre('save', async function (next) {
+expenseSchema.pre('save', async function () {
   if (!this.expenseId) {
     const counter = await Counter.findByIdAndUpdate(
       'expenseId',
@@ -66,7 +66,6 @@ expenseSchema.pre('save', async function (next) {
     );
     this.expenseId = `E${counter.seq}`;
   }
-  next();
 });
 
 export default mongoose.model('Expense', expenseSchema);

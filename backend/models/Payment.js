@@ -54,7 +54,7 @@ const paymentSchema = new mongoose.Schema(
 );
 
 // Generate paymentId as P0, P1, P2, ...
-paymentSchema.pre('save', async function (next) {
+paymentSchema.pre('save', async function () {
   if (!this.paymentId) {
     const counter = await Counter.findByIdAndUpdate(
       'paymentId',
@@ -63,7 +63,6 @@ paymentSchema.pre('save', async function (next) {
     );
     this.paymentId = `P${counter.seq}`;
   }
-  next();
 });
 
 

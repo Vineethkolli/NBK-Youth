@@ -28,7 +28,7 @@ const estimatedExpenseSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-estimatedExpenseSchema.pre('save', async function (next) {
+estimatedExpenseSchema.pre('save', async function () {
   if (!this.estimatedExpenseId) {
     const counter = await Counter.findByIdAndUpdate(
       'estimatedExpenseId',
@@ -37,7 +37,6 @@ estimatedExpenseSchema.pre('save', async function (next) {
     );
     this.estimatedExpenseId = `EE${counter.seq}`;
   }
-  next();
 });
 
 export default mongoose.model('EstimatedExpense', estimatedExpenseSchema);

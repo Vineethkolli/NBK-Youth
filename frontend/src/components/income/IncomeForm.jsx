@@ -34,29 +34,15 @@ function IncomeForm({ income, onClose, onSuccess }) {
     }
   }, [income]);
 
-  const handleNameChange = async (value) => {
-    setFormData({ ...formData, name: value });
-    if (!income || income.name !== value) {
-      try {
-        await axios.post(`${API_URL}/api/incomes/check-name`, { name: value });
-        setNameError('');
-      } catch (error) {
-        if (error.response?.status === 400) {
-          setNameError('Name already exists');
-        }
-      }
-    }
-  };
+  const handleNameChange = (value) => {
+  setFormData({ ...formData, name: value });
+};
 
   const handleStatusChange = (newStatus) => {
     setFormData({ ...formData, status: newStatus });
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (nameError) {
-      toast.error('Please resolve errors before submitting the form');
-      return;
-    }
 
     setIsSubmitting(true);
     try {
@@ -105,15 +91,12 @@ function IncomeForm({ income, onClose, onSuccess }) {
           <div>
             <label className="block text-sm font-medium text-gray-700">Name *</label>
             <input
-              type="text"
-              required
-              value={formData.name}
-              onChange={(e) => handleNameChange(e.target.value)}
-              className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 ${
-                nameError ? 'border-red-500' : ''
-              }`}
-            />
-            {nameError && <p className="text-red-500 text-sm mt-1">{nameError}</p>}
+  type="text"
+  required
+  value={formData.name}
+  onChange={(e) => handleNameChange(e.target.value)}
+  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+/>
           </div>
 {/*
           <div>
