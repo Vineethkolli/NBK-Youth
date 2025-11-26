@@ -14,12 +14,22 @@ function PopupBanner() {
     fetchActiveBanner();
   }, []);
 
+  const cleanupOldBannerKeys = (activeBannerId) => {
+    Object.keys(localStorage)
+      .filter((key) => key.startsWith('banner_') && !key.includes(activeBannerId))
+      .forEach((oldKey) => localStorage.removeItem(oldKey));
+  };
+
   const fetchActiveBanner = async () => {
     try {
       const { data } = await axios.get(`${API_URL}/api/banners/active`);
+
       if (data) {
+        cleanupOldBannerKeys(data._id);
+
         setBanner(data);
         setShowBanner(true);
+
         setShowCount(
           parseInt(localStorage.getItem(`banner_${data._id}_count`) || '0')
         );
@@ -55,11 +65,10 @@ function PopupBanner() {
       video.playsInline = true;
       video.autoplay = true;
       video.loop = true;
-      video.muted = false; // try with sound
+      video.muted = false;
       setIsMuted(false);
 
       video.play().catch(() => {
-        // If blocked, fallback to muted autoplay
         video.muted = true;
         setIsMuted(true);
         video.play().catch(() => {});
@@ -69,9 +78,9 @@ function PopupBanner() {
 
   const toggleMute = () => {
     if (videoRef.current) {
-      const newMutedState = !isMuted;
-      setIsMuted(newMutedState);
-      videoRef.current.muted = newMutedState;
+      const newMuted = !isMuted;
+      setIsMuted(newMuted);
+      videoRef.current.muted = newMuted;
     }
   };
 
@@ -133,7 +142,6 @@ function PopupBanner() {
                 controls={false}
               />
 
-              {/* Mute/Unmute Button */}
               <button
                 onClick={(e) => {
                   e.stopPropagation();
