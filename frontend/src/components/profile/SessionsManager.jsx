@@ -67,15 +67,10 @@ function SessionsManager() {
   };
 
   const getAccessModeLabel = (mode) => {
-    const labels = {
-      pwa: 'PWA',
-      standalone: 'Standalone',
-      twa: 'TWA',
-      addtohomescreen: 'Home Screen',
-      website: 'Browser',
-    };
-    return labels[mode] || mode;
-  };
+  const appModes = ['pwa', 'twa', 'standalone', 'addtohomescreen'];
+  if (appModes.includes(mode)) return 'App';
+  return 'Browser';
+};
 
   const formatFullDateTime = (dateString) => {
     const date = new Date(dateString);
