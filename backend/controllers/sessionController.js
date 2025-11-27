@@ -28,7 +28,6 @@ export const createSessionAndTokens = async (user, deviceInfo, action, req) => {
 
   const fifteenMonths = 365 * 24 * 60 * 60 * 1000;
 
-  // Create session first so we can bind access tokens to sessionId
   const session = await Session.create({
     userId: user._id,
     tokenHash,
@@ -49,7 +48,6 @@ export const createSessionAndTokens = async (user, deviceInfo, action, req) => {
     }
   });
 
-  // Access token binds to sessionId for immediate revocation on signout
   const accessToken = generateAccessToken({ id: user._id, role: user.role, sessionId: session._id });
 
   return { accessToken, refreshToken };
@@ -73,10 +71,8 @@ export const refreshAccessToken = async (req, res) => {
     if (!session)
       return res.status(401).json({ message: "Invalid or expired session" });
 
-    // Verify user still exists (handles user deletion)
     const user = session.userId;
     if (!user) {
-      // User was deleted - invalidate session immediately
       await Session.findByIdAndUpdate(session._id, { isValid: false });
       return res.status(404).json({ message: "User not found" });
     }
@@ -222,26 +218,21 @@ export const getAllSessions = async (req, res) => {
   try {
     const { search, isValid, action, sortOrder } = req.query;
 
-    // Build query
     let query = {};
 
-    // Filter by validity
     if (isValid !== undefined && isValid !== '') {
       query.isValid = isValid === 'true';
     }
 
-    // Filter by action
     if (action && action !== '') {
       query.action = action;
     }
 
-    // Get sessions with user data populated
     let sessions = await Session.find(query)
       .populate('userId', 'registerId name')
       .sort({ createdAt: -1 })
       .lean();
 
-    // Search functionality
     if (search && search.trim() !== '') {
       const searchLower = search.toLowerCase();
       sessions = sessions.filter(session => {
@@ -257,7 +248,6 @@ export const getAllSessions = async (req, res) => {
       });
     }
 
-    // Sort by registerId
     if (sortOrder === 'asc' || sortOrder === 'desc') {
       sessions.sort((a, b) => {
         const regIdA = a.userId?.registerId || '';

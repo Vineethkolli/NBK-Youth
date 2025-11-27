@@ -11,7 +11,7 @@ export const generateAccessToken = (payload) => {
       type: "access",
     },
     process.env.JWT_SECRET,
-    { expiresIn: "7d" }
+    { expiresIn: "15d" }
   );
 };
 

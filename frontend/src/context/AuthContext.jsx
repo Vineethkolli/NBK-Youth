@@ -7,7 +7,6 @@ import { Access } from "../utils/access";
 const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 
-// Decode JWT
 const decodeToken = (token) => {
   try {
     const base64Url = token.split('.')[1];
@@ -30,7 +29,6 @@ const getTokenAgeDays = (issuedAt) => {
   return ageSeconds / (60 * 60 * 24);
 };
 
-// Last active update checker
 const wasLastActiveUpdatedToday = () => {
   const lastUpdate = localStorage.getItem("lastActiveUpdate");
   if (!lastUpdate) return false;
@@ -116,8 +114,8 @@ export const AuthProvider = ({ children }) => {
 
       const tokenAge = getTokenAgeDays(decoded.iat);
 
-      // proactive refresh when token is ≥ 6 days old
-      if (tokenAge >= 6) {
+      // proactive refresh when token is ≥ 14 days old
+      if (tokenAge >= 14) {
         try {
           if (!refreshPromiseRef.current) {
             refreshPromiseRef.current = axios.post(
