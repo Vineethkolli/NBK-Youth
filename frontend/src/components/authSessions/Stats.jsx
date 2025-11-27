@@ -1,5 +1,4 @@
-import React from "react";
-import { Activity, CheckCircle, XCircle, Clock, Smartphone, Monitor } from "lucide-react";
+import { Activity, CheckCircle, Monitor, Users, Laptop } from "lucide-react";
 
 function SectionCard({ title, icon: Icon, children }) {
   return (
@@ -30,40 +29,35 @@ export default function AuthSessionStats({ stats }) {
 
   return (
     <div className="space-y-6">
-
-      <h2 className="text-xl font-semibold text-gray-800">Session Statistics</h2>
-
-      {/* GRID */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-        {/* Activity */}
         <SectionCard title="Activity" icon={Activity}>
-          <StatRow label="Signins" value={stats.actionCounts.signin} />
-          <StatRow label="Signups" value={stats.actionCounts.signup} />
-          <StatRow label="Google Signins" value={stats.actionCounts["google-signin"]} />
-          <StatRow label="Google Signups" value={stats.actionCounts["google-signup"]} />
+          <StatRow label="Signins" value={stats.actionCounts?.signin ?? 0} />
+          <StatRow label="Signups" value={stats.actionCounts?.signup ?? 0} />
+          <StatRow label="Google Signins" value={stats.actionCounts?.["google-signin"] ?? 0} />
+          <StatRow label="Google Signups" value={stats.actionCounts?.["google-signup"] ?? 0} />
         </SectionCard>
 
-        {/* Validity */}
-        <SectionCard title="Validity" icon={CheckCircle}>
-          <StatRow label="Valid" value={stats.validCounts.validTrue} />
-          <StatRow label="Invalid" value={stats.validCounts.validFalse} />
+        <SectionCard title="Sessions" icon={CheckCircle}>
+          <StatRow label="Valid" value={stats.validCounts?.validTrue ?? 0} />
+          <StatRow label="Invalid" value={stats.validCounts?.validFalse ?? 0} />
         </SectionCard>
 
-        {/* Active */}
-        <SectionCard title="Active Users" icon={Clock}>
-          <StatRow label="Active Today" value={stats.active.today} />
-          <StatRow label="Active This Month" value={stats.active.month} />
+        <SectionCard title="Active Users" icon={Users}>
+          <StatRow label="Today" value={stats.activeUsers?.today ?? 0} />
+          <StatRow label="This Month" value={stats.activeUsers?.month ?? 0} />
+          <StatRow label="Overall" value={stats.activeUsers?.overall ?? 0} />
         </SectionCard>
 
-        {/* Access Modes */}
+        <SectionCard title="Active Sessions" icon={Laptop}>
+          <StatRow label="Today" value={stats.activeSessions?.today ?? 0} />
+          <StatRow label="This Month" value={stats.activeSessions?.month ?? 0} />
+          <StatRow label="Overall" value={stats.activeSessions?.overall ?? 0} />
+        </SectionCard>
+
         <SectionCard title="Access Modes" icon={Monitor}>
-          {Object.entries(stats.accessModeCounts).map(([mode, count]) => (
-            <StatRow
-              key={mode}
-              label={mode}
-              value={count}
-            />
+          {Object.entries(stats.accessModeCounts || {}).map(([mode, count]) => (
+            <StatRow key={mode} label={mode} value={count} />
           ))}
         </SectionCard>
 

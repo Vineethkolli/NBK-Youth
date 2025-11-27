@@ -272,20 +272,46 @@ export const getAllSessions = async (req, res) => {
 export const getSessionsStats = async (req, res) => {
   try {
     const startOfToday = new Date();
-    startOfToday.setHours(0,0,0,0);
+    startOfToday.setHours(0, 0, 0, 0);
+
     const startOfMonth = new Date(startOfToday.getFullYear(), startOfToday.getMonth(), 1);
 
-    const [actionAgg, accessModeAgg, validTrue, validFalse, activeToday, activeMonth] = await Promise.all([
-      Session.aggregate([
-        { $group: { _id: '$action', count: { $sum: 1 } } }
-      ]),
-      Session.aggregate([
-        { $group: { _id: '$deviceInfo.accessMode', count: { $sum: 1 } } }
-      ]),
-      Session.countDocuments({ isValid: true }),
-      Session.countDocuments({ isValid: false }),
-      Session.countDocuments({ lastActive: { $gte: startOfToday } }),
-      Session.countDocuments({ lastActive: { $gte: startOfMonth } })
+    const activeSessionToday = Session.countDocuments({ lastActive: { $gte: startOfToday } });
+    const activeSessionMonth = Session.countDocuments({ lastActive: { $gte: startOfMonth } });
+    const activeSessionOverall = Session.countDocuments({});
+
+    const activeUserToday = Session.distinct("userId", { lastActive: { $gte: startOfToday } });
+    const activeUserMonth = Session.distinct("userId", { lastActive: { $gte: startOfMonth } });
+    const activeUserOverall = Session.distinct("userId", {});
+
+    const actionAgg = Session.aggregate([{ $group: { _id: '$action', count: { $sum: 1 } } }]);
+    const accessModeAgg = Session.aggregate([{ $group: { _id: '$deviceInfo.accessMode', count: { $sum: 1 } } }]);
+
+    const validTrue = Session.countDocuments({ isValid: true });
+    const validFalse = Session.countDocuments({ isValid: false });
+
+    const [
+      _activeSessionToday,
+      _activeSessionMonth,
+      _activeSessionOverall,
+      _activeUserToday,
+      _activeUserMonth,
+      _activeUserOverall,
+      _actionAgg,
+      _accessModeAgg,
+      _validTrue,
+      _validFalse
+    ] = await Promise.all([
+      activeSessionToday,
+      activeSessionMonth,
+      activeSessionOverall,
+      activeUserToday,
+      activeUserMonth,
+      activeUserOverall,
+      actionAgg,
+      accessModeAgg,
+      validTrue,
+      validFalse
     ]);
 
     const actionCounts = {
@@ -294,17 +320,28 @@ export const getSessionsStats = async (req, res) => {
       'google-signin': 0,
       'google-signup': 0
     };
-    actionAgg.forEach(a => { actionCounts[a._id] = a.count; });
+    _actionAgg.forEach(a => { actionCounts[a._id] = a.count; });
 
     const accessModes = ['website','pwa','standalone','twa','addtohomescreen','unknown'];
     const accessModeCounts = accessModes.reduce((acc, m) => { acc[m] = 0; return acc; }, {});
-    accessModeAgg.forEach(m => { accessModeCounts[m._id || 'unknown'] = m.count; });
+    _accessModeAgg.forEach(m => { accessModeCounts[m._id || 'unknown'] = m.count; });
 
     res.json({
       actionCounts,
-      validCounts: { validTrue, validFalse },
+      validCounts: { validTrue: _validTrue, validFalse: _validFalse },
       accessModeCounts,
-      active: { today: activeToday, month: activeMonth }
+
+      activeSessions: {
+        today: _activeSessionToday,
+        month: _activeSessionMonth,
+        overall: _activeSessionOverall
+      },
+
+      activeUsers: {
+        today: _activeUserToday.length,
+        month: _activeUserMonth.length,
+        overall: _activeUserOverall.length
+      }
     });
   } catch (error) {
     console.error('Get sessions stats error:', error);
