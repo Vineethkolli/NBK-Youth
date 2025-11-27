@@ -1,6 +1,6 @@
 import express from 'express';
 import { refreshAccessToken, updateLastActive, getUserSessions, signOutSession, 
-  signOutCurrent, getAllSessions } from '../controllers/sessionController.js';
+  signOutCurrent, getAllSessions, getSessionsStats } from '../controllers/sessionController.js';
 import { auth, checkRole } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -13,5 +13,6 @@ router.post('/signout', signOutCurrent);
 router.delete('/:sessionId', auth, signOutSession);
 
 router.get('/auth-sessions', auth, checkRole('Developer'), getAllSessions);
+router.get('/stats', auth, checkRole('Developer'), getSessionsStats);
 
 export default router;

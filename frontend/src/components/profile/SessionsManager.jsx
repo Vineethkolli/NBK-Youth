@@ -1,17 +1,8 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
-import {
-  ChevronDown,
-  ChevronUp,
-  Monitor,
-  Smartphone,
-  Tablet,
-  LogOut,
-  MapPin,
-  Calendar,
-  Clock
-} from 'lucide-react';
+import { ChevronDown, ChevronUp, Monitor, Smartphone, Tablet, LogOut, MapPin, Calendar, Clock, 
+  LayoutGrid} from 'lucide-react';
 import { API_URL } from '../../utils/config';
 
 function SessionsManager() {
@@ -193,7 +184,7 @@ function SessionsManager() {
 
                       <div className="mt-1 space-y-1 text-xs text-gray-600">
                         <div className="flex items-center">
-                          <Monitor className="h-3 w-3 mr-1" />
+                          <LayoutGrid className="h-3 w-3 mr-1" />
                           {session.deviceInfo?.browserName} • {session.deviceInfo?.os} •{' '}
                           {getAccessModeLabel(session.deviceInfo?.accessMode)}
                         </div>

@@ -25,6 +25,7 @@ const accessControl = {
     'TechStack': { full: [], view: ['User','Admin', 'Financier'] },
     'DeveloperOptions': { full: [], view: [] },
     'ActivityLogs': { full: [], view: [] },
+    'AuthSessions': { full: [], view: [] },
     'Monitor': { full: [], view: [] },
   },
 };

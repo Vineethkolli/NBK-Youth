@@ -267,3 +267,47 @@ export const getAllSessions = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+
+export const getSessionsStats = async (req, res) => {
+  try {
+    const startOfToday = new Date();
+    startOfToday.setHours(0,0,0,0);
+    const startOfMonth = new Date(startOfToday.getFullYear(), startOfToday.getMonth(), 1);
+
+    const [actionAgg, accessModeAgg, validTrue, validFalse, activeToday, activeMonth] = await Promise.all([
+      Session.aggregate([
+        { $group: { _id: '$action', count: { $sum: 1 } } }
+      ]),
+      Session.aggregate([
+        { $group: { _id: '$deviceInfo.accessMode', count: { $sum: 1 } } }
+      ]),
+      Session.countDocuments({ isValid: true }),
+      Session.countDocuments({ isValid: false }),
+      Session.countDocuments({ lastActive: { $gte: startOfToday } }),
+      Session.countDocuments({ lastActive: { $gte: startOfMonth } })
+    ]);
+
+    const actionCounts = {
+      signin: 0,
+      signup: 0,
+      'google-signin': 0,
+      'google-signup': 0
+    };
+    actionAgg.forEach(a => { actionCounts[a._id] = a.count; });
+
+    const accessModes = ['website','pwa','standalone','twa','addtohomescreen','unknown'];
+    const accessModeCounts = accessModes.reduce((acc, m) => { acc[m] = 0; return acc; }, {});
+    accessModeAgg.forEach(m => { accessModeCounts[m._id || 'unknown'] = m.count; });
+
+    res.json({
+      actionCounts,
+      validCounts: { validTrue, validFalse },
+      accessModeCounts,
+      active: { today: activeToday, month: activeMonth }
+    });
+  } catch (error) {
+    console.error('Get sessions stats error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
