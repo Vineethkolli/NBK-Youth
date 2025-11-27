@@ -117,14 +117,14 @@ function SessionsManager() {
   };
 
   return (
-    <div className="border-t border-gray-200 mt-6">
+    <div className="border-t border-gray-200 mt-3">
       <button
         onClick={() => setExpanded(!expanded)}
         className="w-full px-4 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
       >
         <div className="flex items-center space-x-2">
-          <Monitor className="h-5 w-5 text-gray-600" />
-          <span className="text-sm font-medium text-gray-700">My Sessions</span>
+          <Monitor className="h-5 w-5" />
+          <span className="text-l font-semibold">My Sessions</span>
           <span className="text-xs text-gray-500">({sessions.length})</span>
         </div>
         {expanded ? (
