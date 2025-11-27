@@ -1,6 +1,8 @@
 import User from '../models/User.js';
+import Session from '../models/Session.js';
 import cloudinary from '../config/cloudinary.js';
 import { logActivity } from '../middleware/activityLogger.js';
+import { hashToken } from '../utils/tokenUtils.js';
 import { normalizePhoneNumber } from '../utils/phoneValidation.js';
 import { OAuth2Client } from 'google-auth-library';
 
@@ -267,6 +269,19 @@ export const changePassword = async (req, res) => {
     user.password = newPassword;
 
     await user.save();
+
+    // Invalidate all other sessions
+    const refreshToken = req.cookies.refreshToken;
+    const currentTokenHash = refreshToken ? hashToken(refreshToken) : null;
+
+    if (currentTokenHash) {
+      await Session.updateMany(
+        { userId: user._id, tokenHash: { $ne: currentTokenHash } },
+        { isValid: false }
+      );
+    } else {
+      await Session.updateMany({ userId: user._id }, { isValid: false });
+    }
 
     await logActivity(
       req,

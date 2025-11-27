@@ -2,6 +2,7 @@ import axios from "axios";
 import jwt from "jsonwebtoken";
 import { OAuth2Client } from "google-auth-library";
 import User from "../models/User.js";
+import Session from "../models/Session.js";
 import OTP from "../models/OTP.js";
 import { sendOTPEmail } from "../services/emailOTPService.js";
 import { logActivity } from "../middleware/activityLogger.js";
@@ -534,6 +535,9 @@ export const resetPassword = async (req, res) => {
 
     user.password = newPassword;
     await user.save();
+    
+    // Invalidate ALL sessions on password reset
+    await Session.updateMany({ userId: user._id }, { isValid: false });
 
     await logActivity(
       { user: { registerId: user.registerId, name: user.name } },
