@@ -7,7 +7,6 @@ import { API_URL } from '../../utils/config';
 function LockManager() {
   const [lockSettings, setLockSettings] = useState(null);
   const [isToggling, setIsToggling] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     fetchLockSettings();
@@ -19,8 +18,6 @@ function LockManager() {
       setLockSettings(data);
     } catch (error) {
       console.error('Failed to fetch lock settings:', error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -40,17 +37,12 @@ function LockManager() {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="bg-white rounded-lg shadow p-4">
-        <p className="text-gray-500">Loading lock settings...</p>
-      </div>
-    );
-  }
+  const isLocked = lockSettings?.isLocked;
 
   return (
     <div className="bg-white rounded-lg shadow p-4 sm:p-6">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+
         <div className="flex items-start sm:items-center">
           <Shield className="h-6 w-6 mr-2 text-gray-600 flex-shrink-0" />
           <div>
@@ -64,12 +56,16 @@ function LockManager() {
         <div className="flex items-center justify-center flex-wrap gap-3 space-x-6">
           <div
             className={`flex items-center px-3 py-2 rounded-full text-sm font-medium ${
-              lockSettings?.isLocked
+              isLocked === null
+                ? 'bg-gray-100 text-gray-700'
+                : isLocked
                 ? 'bg-red-100 text-red-800'
                 : 'bg-green-100 text-green-800'
             }`}
           >
-            {lockSettings?.isLocked ? (
+            {isLocked === null ? (
+              'Loading...'
+            ) : isLocked ? (
               <>
                 <Lock className="h-4 w-4 mr-2" />
                 Locked
@@ -84,16 +80,18 @@ function LockManager() {
 
           <button
             onClick={handleToggle}
-            disabled={isToggling}
+            disabled={isToggling || isLocked === null}
             className={`flex items-center justify-center px-3 py-2 rounded-md text-white font-medium shadow-sm ${
-              lockSettings?.isLocked
+              isLocked
                 ? 'bg-green-600 hover:bg-green-700'
                 : 'bg-red-600 hover:bg-red-700'
-            } ${isToggling ? 'opacity-50 cursor-not-allowed' : ''}`}
+            } ${isToggling || isLocked === null ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
-            {isToggling ? (
+            {isLocked === null ? (
+              'Loading...'
+            ) : isToggling ? (
               'Toggling...'
-            ) : lockSettings?.isLocked ? (
+            ) : isLocked ? (
               <>
                 <Unlock className="h-4 w-4 mr-2" />
                 Unlock
@@ -105,6 +103,7 @@ function LockManager() {
               </>
             )}
           </button>
+
         </div>
       </div>
     </div>
