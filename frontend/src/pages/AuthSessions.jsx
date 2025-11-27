@@ -86,25 +86,25 @@ function AuthSessions() {
   <div className="flex items-center space-x-3">
     <button
       onClick={() => setActiveTab("sessions")}
-      className={`px-2 py-1.5 rounded-md font-semibold flex items-center ${
+      className={`px-2 py-2 rounded-md font-semibold flex items-center ${
         activeTab === "sessions"
           ? "bg-indigo-600 text-white"
           : "bg-gray-200 text-gray-700 hover:bg-gray-300"
       }`}
     >
-      <List className="h-4 w-4 mr-2" />
+      <List className="h-4 w-4 mr-1" />
       Sessions
     </button>
 
     <button
       onClick={() => setActiveTab("stats")}
-      className={`px-2 py-1.5 rounded-md font-semibold flex items-center ${
+      className={`px-2 py-2 rounded-md font-semibold flex items-center ${
         activeTab === "stats"
           ? "bg-indigo-600 text-white"
           : "bg-gray-200 text-gray-700 hover:bg-gray-300"
       }`}
     >
-      <BarChart3 className="h-4 w-4 mr-2" />
+      <BarChart3 className="h-4 w-4 mr-1" />
       Stats
     </button>
   </div>
