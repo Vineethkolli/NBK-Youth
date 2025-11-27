@@ -9,17 +9,19 @@ function Lightbox({ mediaFiles, currentIndex, momentTitle, onClose }) {
   const [touchEnd, setTouchEnd] = useState(null);
 
   useEffect(() => {
+    // Disable body scroll on iOS
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, []);
+
+  useEffect(() => {
     const handleKeyDown = (e) => {
       switch (e.key) {
-        case 'ArrowLeft':
-          if (activeIndex > 0) handlePrevious();
-          break;
-        case 'ArrowRight':
-          if (activeIndex < mediaFiles.length - 1) handleNext();
-          break;
-        case 'Escape':
-          onClose();
-          break;
+        case 'ArrowLeft': if (activeIndex > 0) handlePrevious(); break;
+        case 'ArrowRight': if (activeIndex < mediaFiles.length - 1) handleNext(); break;
+        case 'Escape': onClose(); break;
       }
     };
 
@@ -41,20 +43,17 @@ function Lightbox({ mediaFiles, currentIndex, momentTitle, onClose }) {
 
   const getImageUrl = (url) => {
     const fileId = extractFileId(url);
-    if (!fileId) return url;
-    return `https://drive.google.com/thumbnail?id=${fileId}&sz=w2048`;
+    return fileId ? `https://drive.google.com/thumbnail?id=${fileId}&sz=w2048` : url;
   };
 
   const getVideoPlayerUrl = (url) => {
     const fileId = extractFileId(url);
-    if (!fileId) return url;
-    return `https://drive.google.com/file/d/${fileId}/preview`;
+    return fileId ? `https://drive.google.com/file/d/${fileId}/preview` : url;
   };
 
   const getBackendDownloadUrl = (url) => {
     const fileId = extractFileId(url);
-    if (!fileId) return url;
-    return `${API_URL}/api/moments/download/${fileId}`;
+    return fileId ? `${API_URL}/api/moments/download/${fileId}` : url;
   };
 
   const handleDownload = async (url, filename) => {
@@ -75,13 +74,12 @@ function Lightbox({ mediaFiles, currentIndex, momentTitle, onClose }) {
       link.click();
       document.body.removeChild(link);
 
-      // Revoke blob URL after short delay
       setTimeout(() => window.URL.revokeObjectURL(downloadUrl), 1000);
 
       toast.success('File downloaded successfully', { id: toastId });
     } catch (error) {
-      console.error('Download error:', error);
-      toast.error('Download failed. Please try again.', { id: toastId });
+      console.error(error);
+      toast.error('Download failed', { id: toastId });
     }
   };
 
@@ -101,13 +99,20 @@ function Lightbox({ mediaFiles, currentIndex, momentTitle, onClose }) {
 
   return (
     <div
-      className="fixed inset-0 bg-black z-50 flex flex-col"
+      className="absolute left-0 top-0 w-screen h-screen bg-black z-50 flex flex-col overflow-hidden"
+      style={{
+        paddingTop: "env(safe-area-inset-top)",
+        paddingBottom: "env(safe-area-inset-bottom)"
+      }}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
+
       {/* Header */}
-      <div className="bg-black/75 text-white p-4 flex items-center justify-between">
+      <div
+        className="absolute top-0 left-0 w-full bg-black/75 text-white p-4 flex items-center justify-between z-20"
+      >
         <div className="flex items-center space-x-4">
           <button onClick={onClose} className="text-white hover:text-gray-300">
             <ArrowLeft className="h-6 w-6" />
@@ -127,16 +132,13 @@ function Lightbox({ mediaFiles, currentIndex, momentTitle, onClose }) {
       {/* Media Display */}
       <div className="flex-1 flex items-center justify-center relative overflow-hidden">
         {currentMedia.type === 'image' ? (
-          <img
-            src={getImageUrl(currentMedia.url)}
-            alt={currentMedia.name}
-            className="max-w-[95%] max-h-[95%] object-contain"
-            onError={(e) => {
-              e.target.onerror = null;
-              e.target.src =
-                'https://placehold.co/800x600/000000/ffffff?text=Image+Not+Found';
-            }}
-          />
+          <div className="w-full h-full flex items-center justify-center overflow-hidden">
+            <img
+              src={getImageUrl(currentMedia.url)}
+              alt={currentMedia.name}
+              className="max-w-full max-h-full object-contain"
+            />
+          </div>
         ) : (
           <div className="relative w-full h-full max-w-4xl p-2 aspect-video">
             <iframe
@@ -154,21 +156,18 @@ function Lightbox({ mediaFiles, currentIndex, momentTitle, onClose }) {
             <button
               onClick={handlePrevious}
               disabled={activeIndex === 0}
-              className={`absolute left-4 top-1/2 transform -translate-y-1/2 p-3 bg-black/50 text-white rounded-full transition-opacity ${
-                activeIndex === 0
-                  ? 'opacity-30 cursor-not-allowed'
-                  : 'hover:bg-opacity-75'
+              className={`absolute left-4 top-1/2 -translate-y-1/2 p-3 bg-black/50 text-white rounded-full z-20 ${
+                activeIndex === 0 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-opacity-75'
               }`}
             >
               <ChevronLeft className="h-6 w-6" />
             </button>
+
             <button
               onClick={handleNext}
               disabled={activeIndex === mediaFiles.length - 1}
-              className={`absolute right-4 top-1/2 transform -translate-y-1/2 p-3 bg-black/50 text-white rounded-full transition-opacity ${
-                activeIndex === mediaFiles.length - 1
-                  ? 'opacity-30 cursor-not-allowed'
-                  : 'hover:bg-opacity-75'
+              className={`absolute right-4 top-1/2 -translate-y-1/2 p-3 bg-black/50 text-white rounded-full z-20 ${
+                activeIndex === mediaFiles.length - 1 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-opacity-75'
               }`}
             >
               <ChevronRight className="h-6 w-6" />
@@ -179,7 +178,7 @@ function Lightbox({ mediaFiles, currentIndex, momentTitle, onClose }) {
         {/* Download Button */}
         <button
           onClick={() => handleDownload(currentMedia.url, currentMedia.name)}
-          className="fixed bottom-4 right-5 p-3 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 shadow-lg z-10"
+          className="absolute bottom-4 right-5 p-3 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 shadow-lg z-30"
           title="Download"
         >
           <Download className="h-5 w-5" />
@@ -187,10 +186,10 @@ function Lightbox({ mediaFiles, currentIndex, momentTitle, onClose }) {
       </div>
 
       {/* Footer */}
-      <div className="bg-black/75 text-white p-4 flex items-center justify-between">
-        <div>
-          <p className="font-medium notranslate">{currentMedia.name}</p>
-        </div>
+      <div
+        className="absolute bottom-0 left-0 w-full bg-black/75 text-white p-4 z-20"
+      >
+        <p className="font-medium notranslate">{currentMedia.name}</p>
       </div>
     </div>
   );
