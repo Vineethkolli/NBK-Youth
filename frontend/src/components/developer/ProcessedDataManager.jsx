@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, Database, Calendar, X, Play, RotateCcw } from 'lucide-react';
+import { Plus, Edit2, Trash2, Database, X, Play, RotateCcw } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { API_URL } from '../../utils/config';
@@ -224,7 +224,6 @@ function ProcessedDataManager() {
             <div key={record._id} className="border rounded-lg p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
-                  <Calendar className="h-5 w-5 text-gray-500" />
                   <div>
                     <h3 className="font-medium">{record.eventName} {record.year}</h3>
                     <p className="text-sm text-gray-500">
