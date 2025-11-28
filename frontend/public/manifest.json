@@ -33,13 +33,6 @@
       "description": "View moments",
       "url": "/moments",
       "icons": [{ "src": "/logo/192.png", "sizes": "192x192" }]
-    },
-    {
-      "name": "Vibe",
-      "short_name": "Vibe",
-      "description": "Listen to music",
-      "url": "/vibe",
-      "icons": [{ "src": "/logo/192.png", "sizes": "192x192" }]
     }
   ]
 }
