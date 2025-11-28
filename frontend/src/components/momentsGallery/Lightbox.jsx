@@ -114,95 +114,101 @@ function Lightbox({ mediaFiles, currentIndex, momentTitle, momentId }) {
     if (distance < -50 && activeIndex > 0) handlePrevious();
   };
 
-  return (
-    <div
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
-    >
-      <div className="mb-4 flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          <button
-            onClick={() => navigate(`/moments/${momentId}`)}
-            className="flex items-center text-gray-700 hover:text-black"
-          >
-            <ArrowLeft className="h-6 w-6" />
-          </button>
+return (
+  <div
+    className="fixed inset-0 bg-black z-[9999] flex flex-col"
+    style={{
+      paddingTop: "env(safe-area-inset-top)",
+      paddingBottom: "env(safe-area-inset-bottom)",
+    }}
+    onTouchStart={handleTouchStart}
+    onTouchMove={handleTouchMove}
+    onTouchEnd={handleTouchEnd}
+  >
+    {/* HEADER */}
+    <div className="bg-black/80 text-white px-4 py-3 flex items-center justify-between backdrop-blur-md">
+      <div className="flex items-center space-x-3">
+        <button
+          onClick={() => navigate(`/moments/${momentId}`)}
+          className="text-white hover:text-gray-300"
+        >
+          <ArrowLeft className="h-6 w-6" />
+        </button>
 
-          <div>
-            <h3 className="font-medium text-lg">{momentTitle}</h3>
-            <p className="text-sm text-gray-600">
-              {activeIndex + 1} of {mediaFiles.length}
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center space-x-3">
-          <button
-            onClick={() => handleDownload(currentMedia.url, currentMedia.name)}
-            className="p-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg"
-            title="Download"
-          >
-            <Download className="h-5 w-5" />
-          </button>
-
-          <button
-            onClick={() => navigate(`/moments/${momentId}`)}
-            className="p-2 hover:bg-gray-200 rounded-full text-gray-700"
-            title="Close"
-          >
-            <X className="h-5 w-5" />
-          </button>
+        <div>
+          <h3 className="font-medium text-base">{momentTitle}</h3>
+          <p className="text-xs text-gray-300">
+            {activeIndex + 1} of {mediaFiles.length}
+          </p>
         </div>
       </div>
 
-      <div
-        className="flex items-center justify-center relative bg-black rounded-lg overflow-hidden"
-        style={{ minHeight: '60vh' }}
-      >
-        {currentMedia.type === 'image' ? (
-          <img
-            src={getImageUrl(currentMedia.url)}
-            alt=""
-            className="max-w-full max-h-[70vh] object-contain"
-          />
-        ) : (
-          <div className="relative w-full aspect-video">
-            <iframe
-              src={getVideoPlayerUrl(currentMedia.url)}
-              className="w-full h-full border-0"
-              allow="autoplay; fullscreen"
-              title="video"
-            />
-          </div>
-        )}
+      <div className="flex items-center space-x-3">
+        <button
+          onClick={() => handleDownload(currentMedia.url, currentMedia.name)}
+          className="p-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg"
+          title="Download"
+        >
+          <Download className="h-5 w-5" />
+        </button>
 
-        {mediaFiles.length > 1 && (
-          <>
-            <button
-              onClick={handlePrevious}
-              disabled={activeIndex === 0}
-              className={`absolute left-4 top-1/2 -translate-y-1/2 p-3 bg-black/50 text-white rounded-full ${
-                activeIndex === 0 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-black/70'
-              }`}
-            >
-              <ChevronLeft className="h-6 w-6" />
-            </button>
-
-            <button
-              onClick={handleNext}
-              disabled={activeIndex === mediaFiles.length - 1}
-              className={`absolute right-4 top-1/2 -translate-y-1/2 p-3 bg-black/50 text-white rounded-full ${
-                activeIndex === mediaFiles.length - 1 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-black/70'
-              }`}
-            >
-              <ChevronRight className="h-6 w-6" />
-            </button>
-          </>
-        )}
+        <button
+          onClick={() => navigate(`/moments/${momentId}`)}
+          className="p-2 hover:bg-gray-200 rounded-full text-white hover:text-gray-300"
+          title="Close"
+        >
+          <X className="h-6 w-6" />
+        </button>
       </div>
     </div>
-  );
+
+    {/* FULLSCREEN MEDIA */}
+    <div className="flex-1 relative flex items-center justify-center overflow-hidden touch-none">
+      {currentMedia.type === "image" ? (
+        <img
+          src={getImageUrl(currentMedia.url)}
+          className="w-full h-full object-contain"
+          alt=""
+        />
+      ) : (
+        <iframe
+          src={getVideoPlayerUrl(currentMedia.url)}
+          className="w-full h-full object-contain border-0"
+          allow="autoplay; fullscreen"
+          title="video"
+        />
+      )}
+
+      {/* ARROWS */}
+      {mediaFiles.length > 1 && (
+        <>
+          <button
+            onClick={handlePrevious}
+            disabled={activeIndex === 0}
+            className={`absolute left-4 top-1/2 -translate-y-1/2 p-3 bg-black/50 text-white rounded-full ${
+              activeIndex === 0 ? "opacity-30" : "hover:bg-black/70"
+            }`}
+          >
+            <ChevronLeft className="h-6 w-6" />
+          </button>
+
+          <button
+            onClick={handleNext}
+            disabled={activeIndex === mediaFiles.length - 1}
+            className={`absolute right-4 top-1/2 -translate-y-1/2 p-3 bg-black/50 text-white rounded-full ${
+              activeIndex === mediaFiles.length - 1
+                ? "opacity-30"
+                : "hover:bg-black/70"
+            }`}
+          >
+            <ChevronRight className="h-6 w-6" />
+          </button>
+        </>
+      )}
+    </div>
+  </div>
+);
+
 }
 
 export default Lightbox;
