@@ -44,6 +44,7 @@ function Notifications() {
 
   return (
     <div className="max-w-1xl mx-auto space-y-6">
+      <h2 className="text-2xl font-semibold">Notifications</h2>
       <NotificationSettings />
       <NotificationForm onSuccess={handleNewNotification} />
       <NotificationHistory history={history} loading={loading} />

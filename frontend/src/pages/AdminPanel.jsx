@@ -14,6 +14,7 @@ function AdminPanel() {
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
+      <h2 className="text-2xl font-semibold">Admin Panel</h2>
       <BannerManager />
       <MaintenanceMode />
       <EventLabelManager />

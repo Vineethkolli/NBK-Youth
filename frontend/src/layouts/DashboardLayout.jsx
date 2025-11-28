@@ -17,7 +17,7 @@ function DashboardLayout() {
   const mainRef = useRef(null);
 
   const toggleSidebar = () => {
-    const isLargeScreen = window.innerWidth >= 1280; // xl breakpoint
+    const isLargeScreen = window.innerWidth >= 1280;
     if (isLargeScreen) {
       setSidebarCollapsed((prev) => !prev);
     } else {

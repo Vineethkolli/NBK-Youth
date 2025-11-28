@@ -13,6 +13,7 @@ export default function Monitor() {
 
   return (
     <div className="max-w-1xl mx-auto space-y-6">
+      <h2 className="text-2xl font-semibold">Monitor</h2>
       <div className="bg-white border border-indigo-200 rounded-xl shadow-md p-4 flex items-center justify-between">
         <div>
           <h2 className="text-xl font-semibold mb-1">Backend Health Monitor</h2>
