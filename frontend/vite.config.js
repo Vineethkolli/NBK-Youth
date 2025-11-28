@@ -9,8 +9,8 @@ export default defineConfig({
 
     viteCompression({
       algorithm: 'brotliCompress',
-      ext: '.br',                 
-      threshold: 1024,             
+      ext: '.br',
+      threshold: 1024,
       deleteOriginFile: false,
     }),
 
@@ -50,7 +50,7 @@ export default defineConfig({
       },
 
       workbox: {
-        cleanupOutdatedCaches: true, 
+        cleanupOutdatedCaches: true,
         clientsClaim: true,
         runtimeCaching: [
           {
@@ -59,11 +59,12 @@ export default defineConfig({
               request.destination === 'style' ||
               request.destination === 'image' ||
               request.destination === 'font',
-              
-              handler: 'StaleWhileRevalidate',
-              options: { cacheName: 'assets-cache' }
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'assets-cache',
             }
-          ]
+          }
+        ]
       }
     })
   ],

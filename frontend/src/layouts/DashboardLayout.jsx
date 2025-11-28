@@ -81,7 +81,7 @@ function DashboardLayout() {
       {sidebarOpen && (
         <div
           onClick={closeSidebar}
-          className="fixed inset-0 z-5 bg-transparent"
+          className="fixed inset-0 z-5 bg-black/20 xl:hidden"
         />
       )}
 

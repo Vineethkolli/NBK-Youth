@@ -55,7 +55,7 @@ function Sidebar({ isOpen, isCollapsed = false, onNavigate }) {
     <div
       className={`fixed top-14 left-0 h-[calc(100vh-3rem)] bg-white shadow-lg transition-transform duration-300 ease-in-out transform ${
         isOpen ? 'translate-x-0' : '-translate-x-full'
-      } xl:translate-x-0 z-10 overflow-y-scroll`}
+      } xl:translate-x-0 z-10 overflow-y-auto overscroll-contain`}
       style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}
     >
       <div className={`${isCollapsed ? 'w-20' : 'w-60'} h-full flex flex-col`}>

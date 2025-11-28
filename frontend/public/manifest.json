@@ -8,6 +8,7 @@
   "display": "standalone",
   "start_url": "/?homescreen=1",
   "scope": "/",
+  "categories": ["community", "events", "entertainment", "lifestyle", "social", "finance"],
   
   "icons": [
     { "src": "/logo/96.png",   "sizes": "96x96",   "type": "image/png", "purpose": "any maskable" },
@@ -16,5 +17,29 @@
     { "src": "/logo/152.png", "sizes": "152x152", "type": "image/png", "purpose": "any maskable" },
     { "src": "/logo/192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
     { "src": "/logo/512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ],
+
+  "shortcuts": [
+    {
+      "name": "Explore",
+      "short_name": "Explore",
+      "description": "Explore app features",
+      "url": "/explore",
+      "icons": [{ "src": "/logo/192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Moments",
+      "short_name": "Moments",
+      "description": "View moments",
+      "url": "/moments",
+      "icons": [{ "src": "/logo/192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Vibe",
+      "short_name": "Vibe",
+      "description": "Listen to music",
+      "url": "/vibe",
+      "icons": [{ "src": "/logo/192.png", "sizes": "192x192" }]
+    }
   ]
 }
