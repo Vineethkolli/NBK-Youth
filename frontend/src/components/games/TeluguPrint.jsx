@@ -3,32 +3,36 @@ import { Printer } from 'lucide-react';
 
 function ActivitiesTeluguPrint({ games }) {
   const printRef = useRef();
+const handlePrint = () => {
+  const content = printRef.current.innerHTML;
+  const printWindow = window.open('height=700,width=1000');
 
-  const handlePrint = () => {
-    const content = printRef.current.innerHTML;
-    const printWindow = window.open('height=700,width=1000');
+  printWindow.document.write(`
+    <html>
+    <head>
+      <style>
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; table-layout: fixed; }
+        th, td { border: 1px solid #ccc; padding: 8px; font-size: 12px; }
 
-    printWindow.document.write(`
-      <html>
-      <head>
-        <style>
-          table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-          th, td { border: 1px solid #ccc; padding: 8px; text-align: left; font-size: 12px; }
-          th { background: #f4f4f4; }
-          .game-title { font-size: 14px; font-weight: bold; margin-top: 15px; margin-bottom: 5px; }
-        </style>
-      </head>
-      <body>
-        <div style="text-align:center;">
-          <h2>కార్యకలాపాలు</h2>
-        </div>
-    `);
+        th:nth-child(1), td:nth-child(1) { width: 40px; text-align: center; }
+        th:nth-child(2), td:nth-child(2) { width: 45px; text-align: center; }
+        th:nth-child(3), td:nth-child(3) { width: 95px; text-align: center; }
 
-    printWindow.document.write(content);
-    printWindow.document.write(`</body></html>`);
-    printWindow.document.close();
-    printWindow.print();
-  };
+        th { background: #f4f4f4; }
+        .game-title { font-size: 14px; font-weight: bold; margin-top: 15px; margin-bottom: 5px; }
+      </style>
+    </head>
+    <body>
+      <div style="text-align:center;">
+        <h2>కార్యకలాపాలు</h2>
+      </div>
+  `);
+
+  printWindow.document.write(content);
+  printWindow.document.write(`</body></html>`);
+  printWindow.document.close();
+  printWindow.print();
+};
 
   return (
     <>

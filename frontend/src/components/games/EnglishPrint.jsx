@@ -54,6 +54,7 @@ const ActivitiesEnglishPrint = ({ games }) => {
         theme: "grid",
         headStyles: { fillColor: [33,115,175], textColor: [255,255,255], fontSize: 10 },
         styles: { fontSize: 10, cellPadding: 2, rowHeight: 7, halign: "center" },
+        columnStyles: { 0: { cellWidth: 40 }, 1: { cellWidth: 45 }, 2: { cellWidth: 95 } }
       });
 
       startY = doc.lastAutoTable.finalY + 10;
