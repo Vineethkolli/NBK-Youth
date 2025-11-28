@@ -12,6 +12,7 @@ import WatchMore from '../components/moments/WatchMore';
 function Moments() {
   const { hasAccess } = useAuth();
   const [moments, setMoments] = useState([]);
+  const [momentsLoaded, setMomentsLoaded] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [isReorderMode, setIsReorderMode] = useState(false);
   const [showForm, setShowForm] = useState(false);
@@ -27,6 +28,8 @@ function Moments() {
       setMoments(data);
     } catch {
       toast.error('Failed to fetch moments');
+    } finally {
+      setMomentsLoaded(true);
     }
   };
 
@@ -261,6 +264,7 @@ if (formType === 'drive') {
       ) : (
         <MomentGrid
           moments={moments}
+          momentsLoaded={momentsLoaded}
           isEditMode={isEditMode}
           onDeleteMoment={handleDeleteMoment}
           onDeleteGalleryFile={handleDeleteGalleryFile}

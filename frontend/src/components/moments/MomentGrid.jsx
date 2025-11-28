@@ -1,11 +1,21 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Trash2, Loader2, FolderOpen, RefreshCcw, Edit2, Check, ChevronRight } from 'lucide-react';
 import DriveMediaPreview from './DriveMediaPreview.jsx';
 import GalleryGrid from '../momentsGallery/GalleryGrid.jsx';
 import Lightbox from '../momentsGallery/Lightbox.jsx';
 
+const sortMediaFiles = (mediaFiles = []) =>
+  [...mediaFiles].sort((a, b) => {
+    if (a.order !== undefined && b.order !== undefined) {
+      return b.order - a.order;
+    }
+    return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+  });
+
 function MomentGrid({
   moments,
+  momentsLoaded,
   isEditMode,
   onDeleteMoment,
   onDeleteGalleryFile,
@@ -18,41 +28,51 @@ function MomentGrid({
   const [editingTitleId, setEditingTitleId] = useState(null);
   const [tempTitle, setTempTitle] = useState('');
   const [deletingId, setDeletingId] = useState(null);
-  const [expandedMoment, setExpandedMoment] = useState(null);
-  const [lightboxData, setLightboxData] = useState(null);
+  const navigate = useNavigate();
+  const { momentId, mediaIndex } = useParams();
+
+  const expandedMoment = useMemo(() => {
+    if (!momentId) return null;
+    return moments.find((moment) => moment._id === momentId) || null;
+  }, [momentId, moments]);
+
+  const sortedMediaFiles = useMemo(() => {
+    if (!expandedMoment?.mediaFiles) return [];
+    return sortMediaFiles(expandedMoment.mediaFiles);
+  }, [expandedMoment]);
+
+  const parsedMediaIndex = mediaIndex !== undefined ? parseInt(mediaIndex, 10) : null;
+  const hasLightboxRoute =
+    expandedMoment && parsedMediaIndex !== null && !Number.isNaN(parsedMediaIndex) && sortedMediaFiles.length > 0;
+  const normalizedMediaIndex = hasLightboxRoute
+    ? Math.min(Math.max(parsedMediaIndex, 0), sortedMediaFiles.length - 1)
+    : null;
 
   useEffect(() => {
-    const handlePopState = () => {
-      const hash = window.location.hash;
-      if (hash !== '#lightbox' && lightboxData) setLightboxData(null);
-      if (hash !== '#gallery' && hash !== '#lightbox' && expandedMoment) setExpandedMoment(null);
-    };
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, [expandedMoment, lightboxData]);
-  
-  useEffect(() => {
-    if (expandedMoment) {
-      const updatedMoment = moments.find(m => m._id === expandedMoment._id);
-      if (updatedMoment) {
-        setExpandedMoment(updatedMoment);
-      }
+    if (momentId && momentsLoaded && !expandedMoment) {
+      navigate('/moments', { replace: true });
     }
-  }, [moments, expandedMoment]);
+  }, [momentId, momentsLoaded, expandedMoment, navigate]);
 
   const openGallery = (moment) => {
-    setExpandedMoment(moment);
-    window.history.pushState({ view: 'gallery' }, '', '#gallery');
+    navigate(`/moments/${moment._id}`);
   };
 
-  const openLightbox = (mediaFiles, currentIndex, momentTitle) => {
-    setLightboxData({
-      mediaFiles,
-      currentIndex,
-      momentTitle,
-      onClose: () => window.history.back(),
-    });
-    window.history.pushState({ view: 'lightbox' }, '', '#lightbox');
+  const openLightbox = (_mediaFiles, currentIndex) => {
+    if (!expandedMoment) return;
+    navigate(`/moments/${expandedMoment._id}/lightbox/${currentIndex}`);
+  };
+
+  const handleCloseGallery = () => {
+    navigate('/moments', { replace: true });
+  };
+
+  const handleCloseLightbox = () => {
+    if (expandedMoment) {
+      navigate(`/moments/${expandedMoment._id}`, { replace: true });
+    } else {
+      navigate('/moments', { replace: true });
+    }
   };
 
   const getEmbedUrl = (url) => {
@@ -235,8 +255,8 @@ useEffect(() => {
       {expandedMoment && (
         <GalleryGrid
           moment={expandedMoment}
-          onClose={() => window.history.back()}
-          onMediaClick={(mediaFiles, index) => openLightbox(mediaFiles, index, expandedMoment.title)}
+          onClose={handleCloseGallery}
+          onMediaClick={(mediaFiles, index) => openLightbox(mediaFiles, index)}
           onDeleteGalleryFile={onDeleteGalleryFile}
           onUploadMediaInGallery={onUploadMediaInGallery}
           onCopyToServiceDriveGallery={onCopyToServiceDriveGallery}
@@ -244,7 +264,14 @@ useEffect(() => {
         />
       )}
 
-      {lightboxData && <Lightbox {...lightboxData} />}
+      {expandedMoment && normalizedMediaIndex !== null && (
+        <Lightbox
+          mediaFiles={sortedMediaFiles}
+          currentIndex={normalizedMediaIndex}
+          momentTitle={expandedMoment.title}
+          onClose={handleCloseLightbox}
+        />
+      )}
     </>
   );
 }
