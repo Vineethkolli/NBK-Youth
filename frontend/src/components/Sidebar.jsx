@@ -58,7 +58,7 @@ function Sidebar({ isOpen, onNavigate }) {
       } xl:translate-x-0 z-10 overflow-y-scroll`}
       style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}
     >
-      <div className="w-50 h-full flex flex-col">
+      <div className="w-60 h-full flex flex-col">
         <nav className="flex-1 px-2 py-4 space-y-1">
           {links.map((link, index) => {
             const Icon = link.icon;
