@@ -190,10 +190,10 @@ function Histories() {
         <div className="space-y-4">
           <div className="flex space-x-4">
             {[
-              { key: 'stats', label: 'Stats', icon: <BarChart2 className="h-4 w-4 mr-2" /> },
-              { key: 'income', label: 'Income', icon: <IndianRupee className="h-4 w-4 mr-2" /> },
-              { key: 'expense', label: 'Expense', icon: <DollarSign className="h-4 w-4 mr-2" /> },
-              { key: 'events', label: '', icon: <CalendarDays className="h-4 w-4 mr-0" /> },
+              { key: 'stats', label: 'Stats', icon: <BarChart2 className="h-4 w-4 mr-1" /> },
+              { key: 'income', label: 'Income', icon: <IndianRupee className="h-4 w-4 mr-1" /> },
+              { key: 'expense', label: 'Expense', icon: <DollarSign className="h-4 w-4 mr-1" /> },
+              { key: 'events', label: '', icon: <CalendarDays className="h-4 w-4" /> },
             ].map(tab => (
               <button
                 key={tab.key}

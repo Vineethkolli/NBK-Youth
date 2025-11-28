@@ -98,7 +98,7 @@ function Verification() {
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`px-3 py-2 rounded-md font-semibold flex items-center space-x-2 ${
+                className={`px-2 py-2 rounded-md font-semibold flex items-center space-x-2 ${
                   activeTab === tab
                     ? 'bg-indigo-600 text-white'
                     : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
