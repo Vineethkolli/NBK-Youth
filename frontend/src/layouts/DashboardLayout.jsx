@@ -79,7 +79,7 @@ function DashboardLayout() {
 
       <main
         ref={mainRef}
-        className={`flex-1 overflow-auto p-4 mt-12 xl:ml-64 pb-20 min-h-[calc(100vh-3rem)] ${sidebarOpen ? 'pointer-events-none' : ''}`}
+        className={`flex-1 overflow-auto p-4 mt-12 xl:ml-54 pb-20 min-h-[calc(100vh-3rem)] ${sidebarOpen ? 'pointer-events-none' : ''}`}
         style={{ WebkitOverflowScrolling: 'touch' }}
       >
         <Outlet />
