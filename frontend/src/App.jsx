@@ -106,8 +106,6 @@ function AppContent() {
           <Route path="/developer-options" element={<DeveloperOptions />} />
           <Route path="/vibe" element={<Vibe />} />
           <Route path="/moments" element={<Moments />} />
-          <Route path="/moments/:momentId" element={<Moments />} />
-          <Route path="/moments/:momentId/:mediaIndex" element={<Moments />} />
           <Route path="/lets-play" element={<LetsPlay />} />
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/tech-stack" element={<TechStack />} />

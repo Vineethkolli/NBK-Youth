@@ -1,16 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Edit2, Youtube, Upload, FolderOpen, Copy, GripHorizontal, ArrowLeft } from 'lucide-react';
+import { Edit2, Youtube, Upload, FolderOpen, Copy, GripHorizontal } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { API_URL } from '../utils/config';
-import { useParams, useNavigate } from 'react-router-dom';
 import MomentForm from '../components/moments/MomentForm';
 import MomentGrid from '../components/moments/MomentGrid';
 import MomentReorder from '../components/moments/MomentReorder';
 import WatchMore from '../components/moments/WatchMore';
-import GalleryGrid from '../components/momentsGallery/GalleryGrid';
-import Lightbox from '../components/momentsGallery/Lightbox';
 
 function Moments() {
   const { hasAccess } = useAuth();
@@ -19,8 +16,6 @@ function Moments() {
   const [isReorderMode, setIsReorderMode] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [formType, setFormType] = useState(null);
-  const { momentId, mediaIndex } = useParams();
-  const navigate = useNavigate();
 
   useEffect(() => {
     fetchMoments();
@@ -218,46 +213,7 @@ if (formType === 'drive') {
     setShowForm(true);
   };
 
-  // Determine which view to render based on URL params
-  const selectedMoment = momentId ? moments.find(m => m._id === momentId) : null;
 
-  // Lightbox view: /moments/:momentId/:mediaIndex
-  if (momentId && mediaIndex !== undefined) {
-    if (!selectedMoment) return <div>Loading...</div>;
-    const mediaFiles = selectedMoment.mediaFiles || [];
-    const index = parseInt(mediaIndex, 10);
-    
-    return (
-      <div className="max-w-7xl mx-auto sm:px-6 lg:px-0 py-0">
-       
-        <Lightbox
-          mediaFiles={mediaFiles}
-          currentIndex={index}
-          momentTitle={selectedMoment.title}
-          momentId={momentId}
-        />
-      </div>
-    );
-  }
-
-  // Gallery view: /moments/:momentId
-  if (momentId) {
-    if (!selectedMoment) return <div>Loading...</div>;
-    
-    return (
-      <div className="max-w-7xl mx-auto sm:px-6 lg:px-0 py-0">
-        <GalleryGrid
-          moment={selectedMoment}
-          onDeleteGalleryFile={handleDeleteGalleryFile}
-          onUploadMediaInGallery={handleUploadMediaInGallery}
-          onCopyToServiceDriveGallery={handleCopyToServiceDriveGallery}
-          onGalleryOrderSave={handleGalleryOrderSave}
-        />
-      </div>
-    );
-  }
-
-  // Default moments list view: /moments
   return (
     <div className="max-w-7xl mx-auto sm:px-6 lg:px-0 py-0">
       {hasAccess('Privileged') && (
