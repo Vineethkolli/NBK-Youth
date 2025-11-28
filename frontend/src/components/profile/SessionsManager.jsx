@@ -111,7 +111,9 @@ function SessionsManager() {
         <div className="flex items-center space-x-2">
           <Monitor className="h-5 w-5" />
           <span className="text-l font-semibold">My Sessions</span>
-          <span className="text-xs text-gray-500">({sessions.length})</span>
+          {expanded && (
+  <span className="text-xs text-gray-500">({sessions.length})</span>
+)}
         </div>
         {expanded ? (
           <ChevronUp className="h-5 w-5 text-gray-400" />
@@ -137,7 +139,6 @@ function SessionsManager() {
                     session.isCurrent ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200'
                   }`}
                 >
-                  {/* TOP-RIGHT SIGN OUT BUTTON */}
                   {!session.isCurrent && (
                     <button
                       onClick={() => handleSignOut(session._id)}
