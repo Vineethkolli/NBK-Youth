@@ -202,6 +202,10 @@ Visit: [http://localhost:5173](http://localhost:5173)
 
 ---
 
+## ⚖️ License
+Licensed under the Apache License 2.0.
+
+
 ## 🙋‍♂️ Credits / Contact
 
 This project was developed by **Kolli Vineeth**  
