@@ -9,9 +9,13 @@ import PlayerForm from '../components/games/PlayerForm';
 import TimeForm from '../components/games/TimeForm';
 import GameCard from '../components/games/GameCard';
 import PlayerList from '../components/games/PlayerList';
+import ActivitiesEnglishPrint from '../components/games/EnglishPrint';
+import ActivitiesTeluguPrint from '../components/games/TeluguPrint';
+import { useLanguage } from '../context/LanguageContext';
 
 function LetsPlay() {
   const { hasAccess } = useAuth();
+  const { language } = useLanguage();
   const [games, setGames] = useState([]);
   const [selectedGame, setSelectedGame] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
@@ -19,6 +23,8 @@ function LetsPlay() {
   const [showPlayerForm, setShowPlayerForm] = useState(false);
   const [showTimeForm, setShowTimeForm] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState(null);
+
+  const PrintComponent = language === 'te' ? ActivitiesTeluguPrint : ActivitiesEnglishPrint;
 
   useEffect(() => {
     fetchGames();
@@ -49,7 +55,6 @@ function LetsPlay() {
   // Navigation Handlers
   const handleSelectGame = (game) => {
     setSelectedGame(game);
-    // Push a new state into the browser history to represent the player view
     window.history.pushState({ view: 'players' }, '');
   };
 
@@ -79,7 +84,6 @@ function LetsPlay() {
         setSelectedGame(data);
       }
     } catch (error) {
-      // Let the caller (modal) handle showing the error and keep the form open
       throw error;
     }
   };
@@ -187,7 +191,9 @@ function LetsPlay() {
       {!selectedGame && (
         <div>
           <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-semibold">Activities</h1>
+            <div className="space-y-2">
+              <h1 className="text-2xl font-semibold">Activities</h1>
+            </div>
             {hasAccess('Privileged') && (
               <div className="space-x-2">
                 <button
@@ -204,6 +210,7 @@ function LetsPlay() {
                   <Edit2 className="h-4 w-4 mr-2" />
                   {isEditMode ? 'Done' : 'Edit'}
                 </button>
+                <PrintComponent games={games} />
               </div>
             )}
           </div>
@@ -283,7 +290,6 @@ function LetsPlay() {
         </div>
       )}
 
-      {/* Modals */}
       {showGameForm && (
         <GameForm
           onSubmit={handleCreateGame}
