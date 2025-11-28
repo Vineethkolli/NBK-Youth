@@ -251,14 +251,12 @@ if (formType === 'drive') {
     }
   }
 
-  // If we have an ID but can't find the moment yet, show loading or the grid
   if (id && !selectedMoment && moments.length > 0) {
     // Moment not found, redirect to moments list
     navigate('/moments', { replace: true });
     return null;
   }
 
-  // Render Lightbox view
   if (selectedMoment && mediaId && currentMedia) {
     return (
       <div className="max-w-7xl mx-auto">
@@ -273,7 +271,6 @@ if (formType === 'drive') {
     );
   }
 
-  // Render Gallery view
   if (selectedMoment) {
     return (
       <div className="max-w-7xl mx-auto">
