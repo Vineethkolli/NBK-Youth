@@ -147,14 +147,14 @@ function Lightbox({ mediaFiles, currentIndex, momentTitle, momentId, onClose }) 
             className="text-white hover:text-gray-300"
             title="Share"
           >
-            <Share2 className="h-6 w-6" />
+            <Share2 className="h-5 w-5" />
           </button>
           <button
             onClick={() => handleDownload(currentMedia.url, currentMedia.name)}
             className="text-white hover:text-gray-300"
             title="Download"
           >
-            <Download className="h-6 w-6" />
+            <Download className="h-5 w-5" />
           </button>
           <button onClick={onClose} className="text-white hover:text-gray-300">
             <X className="h-6 w-6" />

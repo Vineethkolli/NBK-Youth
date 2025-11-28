@@ -270,7 +270,7 @@ function GalleryGrid({
               className="text-gray-800 hover:text-gray-900"
               title="Share"
             >
-              <Share2 className="h-6 w-6" />
+              <Share2 className="h-5 w-5" />
             </button>
               <button onClick={onClose} className="text-gray-800 hover:text-gray-900">
                 <X className="h-6 w-6" />
