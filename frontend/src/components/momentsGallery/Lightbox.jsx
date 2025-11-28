@@ -1,12 +1,19 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, X, ChevronLeft, ChevronRight, Download } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { API_URL } from '../../utils/config';
 
-function Lightbox({ mediaFiles, currentIndex, momentTitle, onClose }) {
+function Lightbox({ mediaFiles, currentIndex, momentTitle, momentId, onClose }) {
+  const navigate = useNavigate();
   const [activeIndex, setActiveIndex] = useState(currentIndex);
   const [touchStart, setTouchStart] = useState(null);
   const [touchEnd, setTouchEnd] = useState(null);
+
+  // Update activeIndex when URL parameter changes
+  useEffect(() => {
+    setActiveIndex(currentIndex);
+  }, [currentIndex]);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -25,10 +32,21 @@ function Lightbox({ mediaFiles, currentIndex, momentTitle, onClose }) {
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [activeIndex]);
+  }, [activeIndex, mediaFiles.length, onClose]);
 
-  const handlePrevious = () => setActiveIndex((prev) => Math.max(prev - 1, 0));
-  const handleNext = () => setActiveIndex((prev) => Math.min(prev + 1, mediaFiles.length - 1));
+  const handlePrevious = () => {
+    const newIndex = Math.max(activeIndex - 1, 0);
+    const newMediaId = mediaFiles[newIndex]._id;
+    setActiveIndex(newIndex);
+    navigate(`/moments/${momentId}/media/${newMediaId}`, { replace: true });
+  };
+
+  const handleNext = () => {
+    const newIndex = Math.min(activeIndex + 1, mediaFiles.length - 1);
+    const newMediaId = mediaFiles[newIndex]._id;
+    setActiveIndex(newIndex);
+    navigate(`/moments/${momentId}/media/${newMediaId}`, { replace: true });
+  };
 
   const extractFileId = (url) => {
     return (

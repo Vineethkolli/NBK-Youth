@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Edit2, Youtube, Upload, FolderOpen, Copy, GripHorizontal } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
@@ -8,9 +9,13 @@ import MomentForm from '../components/moments/MomentForm';
 import MomentGrid from '../components/moments/MomentGrid';
 import MomentReorder from '../components/moments/MomentReorder';
 import WatchMore from '../components/moments/WatchMore';
+import GalleryGrid from '../components/momentsGallery/GalleryGrid';
+import Lightbox from '../components/momentsGallery/Lightbox';
 
 function Moments() {
   const { hasAccess } = useAuth();
+  const { id, mediaId } = useParams();
+  const navigate = useNavigate();
   const [moments, setMoments] = useState([]);
   const [isEditMode, setIsEditMode] = useState(false);
   const [isReorderMode, setIsReorderMode] = useState(false);
@@ -213,7 +218,59 @@ if (formType === 'drive') {
     setShowForm(true);
   };
 
+  // Determine which view to render based on URL params
+  const selectedMoment = id ? moments.find(m => m._id === id) : null;
+  
+  // Find the media file and its index if mediaId is provided
+  let currentMediaIndex = null;
+  let currentMedia = null;
+  if (selectedMoment && mediaId) {
+    currentMediaIndex = selectedMoment.mediaFiles?.findIndex(mf => mf._id === mediaId);
+    if (currentMediaIndex !== -1 && currentMediaIndex !== undefined) {
+      currentMedia = selectedMoment.mediaFiles[currentMediaIndex];
+    }
+  }
 
+  // If we have an ID but can't find the moment yet, show loading or the grid
+  if (id && !selectedMoment && moments.length > 0) {
+    // Moment not found, redirect to moments list
+    navigate('/moments', { replace: true });
+    return null;
+  }
+
+  // Render Lightbox view
+  if (selectedMoment && mediaId && currentMedia) {
+    return (
+      <div className="max-w-7xl mx-auto">
+        <Lightbox
+          mediaFiles={selectedMoment.mediaFiles}
+          currentIndex={currentMediaIndex}
+          momentTitle={selectedMoment.title}
+          momentId={id}
+          onClose={() => navigate(`/moments/${id}`)}
+        />
+      </div>
+    );
+  }
+
+  // Render Gallery view
+  if (selectedMoment) {
+    return (
+      <div className="max-w-7xl mx-auto">
+        <GalleryGrid
+          moment={selectedMoment}
+          onClose={() => navigate('/moments')}
+          onMediaClick={(clickedMediaId) => navigate(`/moments/${id}/media/${clickedMediaId}`)}
+          onDeleteGalleryFile={handleDeleteGalleryFile}
+          onUploadMediaInGallery={handleUploadMediaInGallery}
+          onCopyToServiceDriveGallery={handleCopyToServiceDriveGallery}
+          onGalleryOrderSave={handleGalleryOrderSave}
+        />
+      </div>
+    );
+  }
+
+  // Render Moments List view (default)
   return (
     <div className="max-w-7xl mx-auto sm:px-6 lg:px-0 py-0">
       {hasAccess('Privileged') && (

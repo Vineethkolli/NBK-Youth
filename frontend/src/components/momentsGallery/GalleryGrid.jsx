@@ -277,7 +277,7 @@ function GalleryGrid({
                       if (selectionModeActive) {
                         toggleFileSelect(file);
                       } else {
-                        onMediaClick(localMediaFiles, index); // only open lightbox if no selection
+                        onMediaClick(file._id); // pass mediaId to open lightbox
                       }
                     }}
                     onTouchStart={() => handleLongPressStart(file)}

@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Trash2, Loader2, FolderOpen, RefreshCcw, Edit2, Check, ChevronRight } from 'lucide-react';
 import DriveMediaPreview from './DriveMediaPreview.jsx';
-import GalleryGrid from '../momentsGallery/GalleryGrid.jsx';
-import Lightbox from '../momentsGallery/Lightbox.jsx';
 
 function MomentGrid({
   moments,
@@ -15,44 +14,13 @@ function MomentGrid({
   onGalleryOrderSave,
   onSyncDriveFolder,
 }) {
+  const navigate = useNavigate();
   const [editingTitleId, setEditingTitleId] = useState(null);
   const [tempTitle, setTempTitle] = useState('');
   const [deletingId, setDeletingId] = useState(null);
-  const [expandedMoment, setExpandedMoment] = useState(null);
-  const [lightboxData, setLightboxData] = useState(null);
-
-  useEffect(() => {
-    const handlePopState = () => {
-      const hash = window.location.hash;
-      if (hash !== '#lightbox' && lightboxData) setLightboxData(null);
-      if (hash !== '#gallery' && hash !== '#lightbox' && expandedMoment) setExpandedMoment(null);
-    };
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, [expandedMoment, lightboxData]);
-  
-  useEffect(() => {
-    if (expandedMoment) {
-      const updatedMoment = moments.find(m => m._id === expandedMoment._id);
-      if (updatedMoment) {
-        setExpandedMoment(updatedMoment);
-      }
-    }
-  }, [moments, expandedMoment]);
 
   const openGallery = (moment) => {
-    setExpandedMoment(moment);
-    window.history.pushState({ view: 'gallery' }, '', '#gallery');
-  };
-
-  const openLightbox = (mediaFiles, currentIndex, momentTitle) => {
-    setLightboxData({
-      mediaFiles,
-      currentIndex,
-      momentTitle,
-      onClose: () => window.history.back(),
-    });
-    window.history.pushState({ view: 'lightbox' }, '', '#lightbox');
+    navigate(`/moments/${moment._id}`);
   };
 
   const getEmbedUrl = (url) => {
@@ -231,20 +199,6 @@ useEffect(() => {
           </div>
         ))}
       </div>
-
-      {expandedMoment && (
-        <GalleryGrid
-          moment={expandedMoment}
-          onClose={() => window.history.back()}
-          onMediaClick={(mediaFiles, index) => openLightbox(mediaFiles, index, expandedMoment.title)}
-          onDeleteGalleryFile={onDeleteGalleryFile}
-          onUploadMediaInGallery={onUploadMediaInGallery}
-          onCopyToServiceDriveGallery={onCopyToServiceDriveGallery}
-          onGalleryOrderSave={onGalleryOrderSave}
-        />
-      )}
-
-      {lightboxData && <Lightbox {...lightboxData} />}
     </>
   );
 }
