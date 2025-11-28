@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🌟 **NBK-YOUT]H**  
+# 🌟 **NBK-YOUTH**  
 ### *Empowering Youth, Celebrating Unity and Joy*
 
 **NBK YOUTH WEB APP** — *Started on OCT 2024*
