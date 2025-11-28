@@ -91,7 +91,7 @@ function Committee() {
 };
 
   const handleRemove = async id => {
-  if (!window.confirm('Remove this member?')) return;
+  if (!window.confirm('Are you sure you want to remove this member?')) return;
 
   try {
     setDeletingId(id);
