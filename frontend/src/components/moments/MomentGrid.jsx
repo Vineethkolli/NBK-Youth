@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Trash2, Loader2, FolderOpen, RefreshCcw, Edit2, Check, ChevronRight } from 'lucide-react';
+import { Trash2, Loader2, FolderOpen, RefreshCcw, Edit2, Check, ChevronRight, Share2 } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 import DriveMediaPreview from './DriveMediaPreview.jsx';
 
 function MomentGrid({
@@ -9,6 +10,7 @@ function MomentGrid({
   onDeleteMoment,
   onUpdateMomentTitle,
   onSyncDriveFolder,
+  youtubeRefs,
 }) {
   const navigate = useNavigate();
   const [editingTitleId, setEditingTitleId] = useState(null);
@@ -55,6 +57,30 @@ useEffect(() => {
     setTimeout(() => setDeletingId(null), 600);
   };
 
+  const handleShare = async (moment) => {
+    const baseUrl = window.location.origin;
+    const shareUrl = moment.type === 'youtube' 
+      ? `${baseUrl}/moments?playYoutube=${moment._id}`
+      : `${baseUrl}/moments/${moment._id}`;
+    
+    const text = `Watch ${moment.title} moments in NBK Youth APP`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ 
+          title: moment.title, 
+          text, 
+          url: shareUrl 
+        });
+      } catch (e) {
+        console.log("Share cancelled or failed");
+      }
+    } else {
+      await navigator.clipboard.writeText(shareUrl);
+      toast.success('Link copied to clipboard');
+    }
+  };
+
   const renderPreviewThumbnails = (moment) => {
     if ((moment.type === 'upload' || moment.type === 'drive') && moment.mediaFiles?.length > 0) {
       const firstFile = [...moment.mediaFiles].sort((a, b) => b.order - a.order)[0];
@@ -95,7 +121,15 @@ useEffect(() => {
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {moments.map((moment) => (
-          <div key={moment._id} className="bg-white rounded-lg shadow-md overflow-hidden flex flex-col">
+          <div 
+            key={moment._id} 
+            className="bg-white rounded-lg shadow-md overflow-hidden flex flex-col"
+            ref={(el) => {
+              if (moment.type === 'youtube' && youtubeRefs) {
+                youtubeRefs.current[moment._id] = el;
+              }
+            }}
+          >
             <div className="relative w-full h-48">
               {moment.type === 'youtube' ? (
                 <iframe
@@ -122,7 +156,6 @@ useEffect(() => {
 
               {isEditMode && (
   <div className="absolute top-2 right-2 flex items-center space-x-2">
-    {/* Drive Indicator*/}
     {moment.type === 'drive' && (
       <div className="flex items-center bg-indigo-600 text-white text-xs font-medium px-2 py-1 rounded-full mr-2 shadow-sm">
         <FolderOpen className="h-4 w-4 mr-1"/>
@@ -181,14 +214,23 @@ useEffect(() => {
               ) : (
                 <div className="flex items-start justify-between">
                   <h3 className="font-semibold text-lg mr-2">{moment.title}</h3>
-                  {isEditMode && (
+                  <div className="flex items-center space-x-1 flex-shrink-0">
                     <button
-                      onClick={() => handleEditTitle(moment._id, moment.title)}
-                      className="text-gray-500 hover:text-gray-700 p-1 hover:bg-gray-100 rounded-full flex-shrink-0"
+                      onClick={() => handleShare(moment)}
+                      className="text-blue-600 hover:text-blue-700 p-1 hover:bg-blue-50 rounded-full transition-colors"
+                      title="Share"
                     >
-                      <Edit2 className="h-4 w-4" />
+                      <Share2 className="h-4 w-4" />
                     </button>
-                  )}
+                    {isEditMode && (
+                      <button
+                        onClick={() => handleEditTitle(moment._id, moment.title)}
+                        className="text-gray-500 hover:text-gray-700 p-1 hover:bg-gray-100 rounded-full"
+                      >
+                        <Edit2 className="h-4 w-4" />
+                      </button>
+                    )}
+                  </div>
                 </div>
               )}
             </div>

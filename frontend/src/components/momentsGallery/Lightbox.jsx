@@ -95,7 +95,7 @@ function Lightbox({ mediaFiles, currentIndex, momentTitle, momentId, onClose }) 
 
   const handleShare = async () => {
     const url = window.location.href;
-    const text = `Watch this ${momentTitle} Moment in NBK Youth APP`;
+    const text = `Watch ${momentTitle} moment in NBK Youth APP`;
 
     if (navigator.share) {
       try {
@@ -105,7 +105,7 @@ function Lightbox({ mediaFiles, currentIndex, momentTitle, momentId, onClose }) 
       }
     } else {
       navigator.clipboard.writeText(url);
-      toast.success("Link copied to clipboard!");
+      toast.success("Link copied to clipboard");
     }
   };
 

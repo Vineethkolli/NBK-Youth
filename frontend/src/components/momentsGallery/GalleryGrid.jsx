@@ -81,7 +81,7 @@ function GalleryGrid({
 
     const handleShare = async () => { 
     const url = window.location.href;
-    const text = `Watch ${moment.title} Moments in NBK Youth APP`;
+    const text = `Watch ${moment.title} moments in NBK Youth APP`;
 
     if (navigator.share) {
       try {
@@ -91,7 +91,7 @@ function GalleryGrid({
       }
     } else {
       navigator.clipboard.writeText(url);
-      toast.success("Link copied to clipboard!");
+      toast.success("Link copied to clipboard");
     }
   };
 

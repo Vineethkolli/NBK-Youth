@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { Edit2, Youtube, Upload, FolderOpen, Copy, GripHorizontal } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
@@ -16,15 +16,35 @@ function Moments() {
   const { hasAccess } = useAuth();
   const { id, mediaId } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [moments, setMoments] = useState([]);
   const [isEditMode, setIsEditMode] = useState(false);
   const [isReorderMode, setIsReorderMode] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [formType, setFormType] = useState(null);
+  const youtubeRefs = useRef({});
 
   useEffect(() => {
     fetchMoments();
   }, []);
+
+  // Handle YouTube scroll when shared link is opened
+  useEffect(() => {
+    const playYoutubeId = searchParams.get('playYoutube');
+    if (playYoutubeId && moments.length > 0) {
+      const targetMoment = moments.find(m => m._id === playYoutubeId && m.type === 'youtube');
+      if (targetMoment && youtubeRefs.current[playYoutubeId]) {
+        setTimeout(() => {
+          youtubeRefs.current[playYoutubeId]?.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center' 
+          });
+        }, 100);
+        
+        navigate('/moments', { replace: true });
+      }
+    }
+  }, [moments, searchParams, navigate]);
 
   const fetchMoments = async () => {
     try {
@@ -270,7 +290,6 @@ if (formType === 'drive') {
     );
   }
 
-  // Render Moments List view (default)
   return (
     <div className="max-w-7xl mx-auto sm:px-6 lg:px-0 py-0">
       {hasAccess('Privileged') && (
@@ -326,6 +345,7 @@ if (formType === 'drive') {
           onCopyToServiceDriveGallery={handleCopyToServiceDriveGallery}
           onGalleryOrderSave={handleGalleryOrderSave}
           onSyncDriveFolder={handleSyncDriveFolder}
+          youtubeRefs={youtubeRefs}
         />
       )}
 
