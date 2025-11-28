@@ -1,12 +1,18 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, X, ChevronLeft, ChevronRight, Download } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Download, ArrowLeft, X } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { API_URL } from '../../utils/config';
+import { useNavigate } from 'react-router-dom';
 
-function Lightbox({ mediaFiles, currentIndex, momentTitle, onClose }) {
+function Lightbox({ mediaFiles, currentIndex, momentTitle, momentId }) {
   const [activeIndex, setActiveIndex] = useState(currentIndex);
   const [touchStart, setTouchStart] = useState(null);
   const [touchEnd, setTouchEnd] = useState(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    setActiveIndex(currentIndex);
+  }, [currentIndex]);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -14,21 +20,32 @@ function Lightbox({ mediaFiles, currentIndex, momentTitle, onClose }) {
         case 'ArrowLeft':
           if (activeIndex > 0) handlePrevious();
           break;
+
         case 'ArrowRight':
           if (activeIndex < mediaFiles.length - 1) handleNext();
           break;
+
         case 'Escape':
-          onClose();
+          navigate(`/moments/${momentId}`);
           break;
       }
     };
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [activeIndex]);
+  }, [activeIndex, mediaFiles.length, navigate, momentId]);
 
-  const handlePrevious = () => setActiveIndex((prev) => Math.max(prev - 1, 0));
-  const handleNext = () => setActiveIndex((prev) => Math.min(prev + 1, mediaFiles.length - 1));
+  const handlePrevious = () => {
+    const newIndex = Math.max(activeIndex - 1, 0);
+    setActiveIndex(newIndex);
+    navigate(`/moments/${momentId}/${newIndex}`, { replace: true });
+  };
+
+  const handleNext = () => {
+    const newIndex = Math.min(activeIndex + 1, mediaFiles.length - 1);
+    setActiveIndex(newIndex);
+    navigate(`/moments/${momentId}/${newIndex}`, { replace: true });
+  };
 
   const extractFileId = (url) => {
     return (
@@ -75,13 +92,10 @@ function Lightbox({ mediaFiles, currentIndex, momentTitle, onClose }) {
       link.click();
       document.body.removeChild(link);
 
-      // Revoke blob URL after short delay
       setTimeout(() => window.URL.revokeObjectURL(downloadUrl), 1000);
-
       toast.success('File downloaded successfully', { id: toastId });
     } catch (error) {
-      console.error('Download error:', error);
-      toast.error('Download failed. Please try again.', { id: toastId });
+      toast.error('Download failed', { id: toastId });
     }
   };
 
@@ -95,102 +109,97 @@ function Lightbox({ mediaFiles, currentIndex, momentTitle, onClose }) {
   const handleTouchEnd = () => {
     if (touchStart === null || touchEnd === null) return;
     const distance = touchStart - touchEnd;
+
     if (distance > 50 && activeIndex < mediaFiles.length - 1) handleNext();
     if (distance < -50 && activeIndex > 0) handlePrevious();
   };
 
   return (
     <div
-      className="fixed inset-0 bg-black z-50 flex flex-col"
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
-      {/* Header */}
-      <div className="bg-black/75 text-white p-4 flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <button onClick={onClose} className="text-white hover:text-gray-300">
+      <div className="mb-4 flex items-center justify-between">
+        <div className="flex items-center space-x-3">
+          <button
+            onClick={() => navigate(`/moments/${momentId}`)}
+            className="flex items-center text-gray-700 hover:text-black"
+          >
             <ArrowLeft className="h-6 w-6" />
           </button>
+
           <div>
-            <h3 className="font-medium">{momentTitle}</h3>
-            <p className="text-sm text-gray-300">
+            <h3 className="font-medium text-lg">{momentTitle}</h3>
+            <p className="text-sm text-gray-600">
               {activeIndex + 1} of {mediaFiles.length}
             </p>
           </div>
         </div>
-        <button onClick={onClose} className="text-white hover:text-gray-300">
-          <X className="h-6 w-6" />
-        </button>
+
+        <div className="flex items-center space-x-3">
+          <button
+            onClick={() => handleDownload(currentMedia.url, currentMedia.name)}
+            className="p-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg"
+            title="Download"
+          >
+            <Download className="h-5 w-5" />
+          </button>
+
+          <button
+            onClick={() => navigate(`/moments/${momentId}`)}
+            className="p-2 hover:bg-gray-200 rounded-full text-gray-700"
+            title="Close"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
       </div>
 
-      {/* Media Display */}
-      <div className="flex-1 flex items-center justify-center relative overflow-hidden">
+      <div
+        className="flex items-center justify-center relative bg-black rounded-lg overflow-hidden"
+        style={{ minHeight: '60vh' }}
+      >
         {currentMedia.type === 'image' ? (
           <img
             src={getImageUrl(currentMedia.url)}
-            alt={currentMedia.name}
-            className="max-w-[95%] max-h-[95%] object-contain"
-            onError={(e) => {
-              e.target.onerror = null;
-              e.target.src =
-                'https://placehold.co/800x600/000000/ffffff?text=Image+Not+Found';
-            }}
+            alt=""
+            className="max-w-full max-h-[70vh] object-contain"
           />
         ) : (
-          <div className="relative w-full h-full max-w-4xl p-2 aspect-video">
+          <div className="relative w-full aspect-video">
             <iframe
               src={getVideoPlayerUrl(currentMedia.url)}
               className="w-full h-full border-0"
               allow="autoplay; fullscreen"
-              title={currentMedia.name}
+              title="video"
             />
           </div>
         )}
 
-        {/* Navigation Arrows */}
         {mediaFiles.length > 1 && (
           <>
             <button
               onClick={handlePrevious}
               disabled={activeIndex === 0}
-              className={`absolute left-4 top-1/2 transform -translate-y-1/2 p-3 bg-black/50 text-white rounded-full transition-opacity ${
-                activeIndex === 0
-                  ? 'opacity-30 cursor-not-allowed'
-                  : 'hover:bg-opacity-75'
+              className={`absolute left-4 top-1/2 -translate-y-1/2 p-3 bg-black/50 text-white rounded-full ${
+                activeIndex === 0 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-black/70'
               }`}
             >
               <ChevronLeft className="h-6 w-6" />
             </button>
+
             <button
               onClick={handleNext}
               disabled={activeIndex === mediaFiles.length - 1}
-              className={`absolute right-4 top-1/2 transform -translate-y-1/2 p-3 bg-black/50 text-white rounded-full transition-opacity ${
-                activeIndex === mediaFiles.length - 1
-                  ? 'opacity-30 cursor-not-allowed'
-                  : 'hover:bg-opacity-75'
+              className={`absolute right-4 top-1/2 -translate-y-1/2 p-3 bg-black/50 text-white rounded-full ${
+                activeIndex === mediaFiles.length - 1 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-black/70'
               }`}
             >
               <ChevronRight className="h-6 w-6" />
             </button>
           </>
         )}
-
-        {/* Download Button */}
-        <button
-          onClick={() => handleDownload(currentMedia.url, currentMedia.name)}
-          className="fixed bottom-4 right-5 p-3 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 shadow-lg z-10"
-          title="Download"
-        >
-          <Download className="h-5 w-5" />
-        </button>
-      </div>
-
-      {/* Footer */}
-      <div className="bg-black/75 text-white p-4 flex items-center justify-between">
-        <div>
-          <p className="font-medium notranslate">{currentMedia.name}</p>
-        </div>
       </div>
     </div>
   );
