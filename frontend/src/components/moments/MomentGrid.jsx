@@ -7,11 +7,7 @@ function MomentGrid({
   moments,
   isEditMode,
   onDeleteMoment,
-  onDeleteGalleryFile,
   onUpdateMomentTitle,
-  onUploadMediaInGallery,
-  onCopyToServiceDriveGallery,
-  onGalleryOrderSave,
   onSyncDriveFolder,
 }) {
   const navigate = useNavigate();

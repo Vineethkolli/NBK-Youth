@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, X, Download, Trash2, Loader2, Upload, Copy, Edit2, GripHorizontal, CheckCircle } from 'lucide-react';
+import { ArrowLeft, X, Download, Trash2, Loader2, Upload, Copy, Edit2, GripHorizontal, CheckCircle, Share2 } from 'lucide-react';
 import GalleryReorder from './GalleryReorder';
 import MediaUploadForm from './MediaUploadForm';
 import CopyToServiceDriveForm from './CopyToServiceDriveForm';
@@ -76,6 +76,22 @@ function GalleryGrid({
     } catch (error) {
       console.error('Download error:', error);
       toast.error('Download failed. Please try again.', { id: toastId });
+    }
+  };
+
+    const handleShare = async () => { 
+    const url = window.location.href;
+    const text = `Watch ${moment.title} Moments in NBK Youth APP`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: moment.title, text, url });
+      } catch (e) {
+        console.log("Share cancelled or failed");
+      }
+    } else {
+      navigator.clipboard.writeText(url);
+      toast.success("Link copied to clipboard!");
     }
   };
 
@@ -161,7 +177,7 @@ function GalleryGrid({
     <div className="fixed inset-0 bg-black/90 flex flex-col z-50">
       <div className="bg-white p-4 flex items-center justify-between">
         <div className="flex items-center space-x-4">
-          <button onClick={onClose} className="text-gray-600 hover:text-gray-800">
+          <button onClick={onClose} className="text-gray-800 hover:text-gray-900">
             <ArrowLeft className="h-6 w-6" />
           </button>
 
@@ -249,7 +265,14 @@ function GalleryGrid({
                   </button>
                 </>
               )}
-              <button onClick={onClose} className="text-gray-600 hover:text-gray-800">
+              <button
+              onClick={handleShare}
+              className="text-gray-800 hover:text-gray-900"
+              title="Share"
+            >
+              <Share2 className="h-6 w-6" />
+            </button>
+              <button onClick={onClose} className="text-gray-800 hover:text-gray-900">
                 <X className="h-6 w-6" />
               </button>
             </>

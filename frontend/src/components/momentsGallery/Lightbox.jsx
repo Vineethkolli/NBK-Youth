@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, X, ChevronLeft, ChevronRight, Download } from 'lucide-react';
+import { ArrowLeft, X, ChevronLeft, ChevronRight, Download, Share2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { API_URL } from '../../utils/config';
 
@@ -10,24 +10,15 @@ function Lightbox({ mediaFiles, currentIndex, momentTitle, momentId, onClose }) 
   const [touchStart, setTouchStart] = useState(null);
   const [touchEnd, setTouchEnd] = useState(null);
 
-  // Update activeIndex when URL parameter changes
   useEffect(() => {
     setActiveIndex(currentIndex);
   }, [currentIndex]);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
-      switch (e.key) {
-        case 'ArrowLeft':
-          if (activeIndex > 0) handlePrevious();
-          break;
-        case 'ArrowRight':
-          if (activeIndex < mediaFiles.length - 1) handleNext();
-          break;
-        case 'Escape':
-          onClose();
-          break;
-      }
+      if (e.key === 'ArrowLeft' && activeIndex > 0) handlePrevious();
+      if (e.key === 'ArrowRight' && activeIndex < mediaFiles.length - 1) handleNext();
+      if (e.key === 'Escape') onClose();
     };
 
     document.addEventListener('keydown', handleKeyDown);
@@ -93,17 +84,30 @@ function Lightbox({ mediaFiles, currentIndex, momentTitle, momentId, onClose }) 
       link.click();
       document.body.removeChild(link);
 
-      // Revoke blob URL after short delay
       setTimeout(() => window.URL.revokeObjectURL(downloadUrl), 1000);
-
       toast.success('File downloaded successfully', { id: toastId });
     } catch (error) {
-      console.error('Download error:', error);
-      toast.error('Download failed. Please try again.', { id: toastId });
+      toast.error('Download failed', { id: toastId });
     }
   };
 
   const currentMedia = mediaFiles[activeIndex];
+
+  const handleShare = async () => {
+    const url = window.location.href;
+    const text = `Watch this ${momentTitle} Moment in NBK Youth APP`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: momentTitle, text, url });
+      } catch (e) {
+        console.log("Share cancelled or failed");
+      }
+    } else {
+      navigator.clipboard.writeText(url);
+      toast.success("Link copied to clipboard!");
+    }
+  };
 
   const handleTouchStart = (e) => {
     setTouchEnd(null);
@@ -124,7 +128,6 @@ function Lightbox({ mediaFiles, currentIndex, momentTitle, momentId, onClose }) 
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
-      {/* Header */}
       <div className="bg-black/75 text-white p-4 flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <button onClick={onClose} className="text-white hover:text-gray-300">
@@ -137,23 +140,34 @@ function Lightbox({ mediaFiles, currentIndex, momentTitle, momentId, onClose }) 
             </p>
           </div>
         </div>
-        <button onClick={onClose} className="text-white hover:text-gray-300">
-          <X className="h-6 w-6" />
-        </button>
+        
+        <div className="flex items-center space-x-4">
+          <button
+            onClick={handleShare}
+            className="text-white hover:text-gray-300"
+            title="Share"
+          >
+            <Share2 className="h-6 w-6" />
+          </button>
+          <button
+            onClick={() => handleDownload(currentMedia.url, currentMedia.name)}
+            className="text-white hover:text-gray-300"
+            title="Download"
+          >
+            <Download className="h-6 w-6" />
+          </button>
+          <button onClick={onClose} className="text-white hover:text-gray-300">
+            <X className="h-6 w-6" />
+          </button>
+        </div>
       </div>
 
-      {/* Media Display */}
       <div className="flex-1 flex items-center justify-center relative overflow-hidden">
         {currentMedia.type === 'image' ? (
           <img
             src={getImageUrl(currentMedia.url)}
             alt={currentMedia.name}
             className="max-w-[95%] max-h-[95%] object-contain"
-            onError={(e) => {
-              e.target.onerror = null;
-              e.target.src =
-                'https://placehold.co/800x600/000000/ffffff?text=Image+Not+Found';
-            }}
           />
         ) : (
           <div className="relative w-full h-full max-w-4xl p-2 aspect-video">
@@ -161,32 +175,28 @@ function Lightbox({ mediaFiles, currentIndex, momentTitle, momentId, onClose }) 
               src={getVideoPlayerUrl(currentMedia.url)}
               className="w-full h-full border-0"
               allow="autoplay; fullscreen"
-              title={currentMedia.name}
+              title="video"
             />
           </div>
         )}
 
-        {/* Navigation Arrows */}
         {mediaFiles.length > 1 && (
           <>
             <button
               onClick={handlePrevious}
               disabled={activeIndex === 0}
-              className={`absolute left-4 top-1/2 transform -translate-y-1/2 p-3 bg-black/50 text-white rounded-full transition-opacity ${
-                activeIndex === 0
-                  ? 'opacity-30 cursor-not-allowed'
-                  : 'hover:bg-opacity-75'
+              className={`absolute left-4 top-1/2 transform -translate-y-1/2 p-3 bg-black/50 text-white rounded-full ${
+                activeIndex === 0 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-opacity-75'
               }`}
             >
               <ChevronLeft className="h-6 w-6" />
             </button>
+
             <button
               onClick={handleNext}
               disabled={activeIndex === mediaFiles.length - 1}
-              className={`absolute right-4 top-1/2 transform -translate-y-1/2 p-3 bg-black/50 text-white rounded-full transition-opacity ${
-                activeIndex === mediaFiles.length - 1
-                  ? 'opacity-30 cursor-not-allowed'
-                  : 'hover:bg-opacity-75'
+              className={`absolute right-4 top-1/2 transform -translate-y-1/2 p-3 bg-black/50 text-white rounded-full ${
+                activeIndex === mediaFiles.length - 1 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-opacity-75'
               }`}
             >
               <ChevronRight className="h-6 w-6" />
@@ -194,7 +204,6 @@ function Lightbox({ mediaFiles, currentIndex, momentTitle, momentId, onClose }) 
           </>
         )}
 
-        {/* Download Button */}
         <button
           onClick={() => handleDownload(currentMedia.url, currentMedia.name)}
           className="fixed bottom-4 right-5 p-3 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 shadow-lg z-10"
@@ -204,7 +213,6 @@ function Lightbox({ mediaFiles, currentIndex, momentTitle, momentId, onClose }) 
         </button>
       </div>
 
-      {/* Footer */}
       <div className="bg-black/75 text-white p-4 flex items-center justify-between">
         <div>
           <p className="font-medium notranslate">{currentMedia.name}</p>
