@@ -9,13 +9,21 @@ import NotificationAutoRegister from '../components/notifications/NotificationAu
 
 function DashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [budgetOpen, setBudgetOpen] = useState(false);
   const [isMobileDevice, setIsMobileDevice] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const mainRef = useRef(null);
 
-  const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
+  const toggleSidebar = () => {
+    const isLargeScreen = window.innerWidth >= 1280; // xl breakpoint
+    if (isLargeScreen) {
+      setSidebarCollapsed((prev) => !prev);
+    } else {
+      setSidebarOpen((prev) => !prev);
+    }
+  };
   const closeSidebar = () => setSidebarOpen(false);
 
   const isActive = (path) => location.pathname === path;
@@ -69,7 +77,7 @@ function DashboardLayout() {
       <NotificationAutoRegister />
 
       <Header toggleSidebar={toggleSidebar} />
-      <Sidebar isOpen={sidebarOpen} onNavigate={closeSidebar} />
+      <Sidebar isOpen={sidebarOpen} isCollapsed={sidebarCollapsed} onNavigate={closeSidebar} />
       {sidebarOpen && (
         <div
           onClick={closeSidebar}
@@ -79,7 +87,9 @@ function DashboardLayout() {
 
       <main
         ref={mainRef}
-        className={`flex-1 overflow-auto p-4 mt-12 xl:ml-64 pb-20 min-h-[calc(100vh-3rem)] ${sidebarOpen ? 'pointer-events-none' : ''}`}
+        className={`flex-1 overflow-auto p-4 mt-12 pb-20 min-h-[calc(100vh-3rem)] ${sidebarOpen ? 'pointer-events-none' : ''} ${
+          sidebarCollapsed ? 'xl:ml-24' : 'xl:ml-64'
+        }`}
         style={{ WebkitOverflowScrolling: 'touch' }}
       >
         <Outlet />

@@ -4,7 +4,7 @@ import { Home, User, History, FolderOpen, UserCog, Users, Bell, ShieldCheck, Set
   Layers, LayoutDashboard, FileClock, Cpu, Fingerprint } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
-function Sidebar({ isOpen, onNavigate }) {
+function Sidebar({ isOpen, isCollapsed = false, onNavigate }) {
   const location = useLocation();
   const { hasAccess } = useAuth();
 
@@ -58,8 +58,8 @@ function Sidebar({ isOpen, onNavigate }) {
       } xl:translate-x-0 z-10 overflow-y-scroll`}
       style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}
     >
-      <div className="w-60 h-full flex flex-col">
-        <nav className="flex-1 px-2 py-4 space-y-1">
+      <div className={`${isCollapsed ? 'w-20' : 'w-60'} h-full flex flex-col`}>
+        <nav className={`flex-1 ${isCollapsed ? 'px-2' : 'px-2'} py-4 space-y-1`}>
           {links.map((link, index) => {
             const Icon = link.icon;
             const isSeparator = [3, 7, 9, 13, 15, 19].includes(index); 
@@ -72,10 +72,10 @@ function Sidebar({ isOpen, onNavigate }) {
                     location.pathname === link.to
                       ? 'bg-gray-200 text-gray-900'
                       : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                  } group flex items-center px-2 py-2 text-sm font-medium rounded-md`}
+                  } group flex items-center ${isCollapsed ? 'justify-center' : ''} px-2 py-2 text-sm font-medium rounded-md`}
                 >
-                  <Icon className="mr-3 h-6 w-6" />
-                  {link.label}
+                  <Icon className={`${isCollapsed ? '' : 'mr-3'} h-6 w-6`} />
+                  {!isCollapsed && link.label}
                 </Link>
                 {isSeparator && <hr className="my-1 border-t border-gray-300" />}
               </div>
