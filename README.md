@@ -116,8 +116,8 @@ NBK-Youth is designed to streamline content, finance, and user management in a u
 - **Gemini API, Hugging Face APIs**
 
 ### Hosting:
-- **Frontend:** [Vercel](https://vercel.com/)
-- **Backend:** [Render](https://render.com/)
+- **Frontend - Vercel**
+- **Backend - Render**
 
 ---
 
