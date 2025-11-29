@@ -137,38 +137,7 @@ cd ../backend
 npm install
 ```
 
-Create `.env` file:
-
-```
-FRONTEND_URL=http://localhost:5173
-MONGODB_URI=
-JWT_SECRET=
-
-# VAPID Keys for Web Push Notifications
-PUBLIC_VAPID_KEY=
-PRIVATE_VAPID_KEY=
-
-# Cloudinary Configuration
-CLOUDINARY_CLOUD_NAME=
-CLOUDINARY_API_KEY=
-CLOUDINARY_API_SECRET=
-
-# Gmail Configuration
-GMAIL_USER=
-GMAIL_CLIENT_ID=
-GMAIL_CLIENT_SECRET=
-GMAIL_REFRESH_TOKEN=
-
-DEFAULT_DEVELOPER_PASSWORD=
-
-# Google Drive API Credentials
-GOOGLE_DRIVE_CREDENTIALS=
-GOOGLE_DRIVE_FOLDER_ID=
-
-# AI Services
-HUGGINGFACE_API_KEY=
-GEMINI_API_KEY=
-```
+Create a `.env` file and add the required environment variables used for configuration.
 
 Run backend:
 
@@ -185,12 +154,8 @@ cd ../frontend
 npm install
 ```
 
-Create `.env` file:
+Create a `.env` file and add the required environment variables used for configuration.
 
-```
-VITE_BACKEND_URL=http://localhost:5000
-VITE_GA_MEASUREMENT_ID=
-```
 
 Run frontend:
 
