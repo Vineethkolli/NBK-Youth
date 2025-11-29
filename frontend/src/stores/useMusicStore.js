@@ -144,6 +144,7 @@ const useMusicStore = create((set, get) => ({
 
   closeMusicPlayer: () => {
     audio.pause();
+    try { audio.src = ""; } catch {}
     set({
       currentSong: null,
       isPlaying: false,
