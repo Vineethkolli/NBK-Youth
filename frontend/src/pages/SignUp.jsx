@@ -160,11 +160,10 @@ function SignUp() {
 
     <p className="text-[11px] text-gray-500 text-center leading-snug">
   By signing up, you agree to our{" "}
-  <a href="/privacy_policy.html" className="text-green-600">Privacy Policy</a>
+  <a href="/terms_of_service.html" className="text-green-600">Terms</a>
   {" "}and{" "}
-  <a href="/terms_of_service.html" className="text-green-600">Terms</a>.
+  <a href="/privacy_policy.html" className="text-green-600">Privacy Policy</a>.
 </p>
-
           </form>
         )}
 

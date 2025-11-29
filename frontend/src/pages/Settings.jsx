@@ -12,7 +12,6 @@ function Settings() {
       <div className="space-y-8">
         <h2 className="text-2xl font-semibold">Settings</h2>
 
-        {/* Language Section */}
         <div className="space-y-4">
         <h3 className="text-lg font-medium flex items-center">
   <Languages className="mr-2" />
@@ -48,7 +47,6 @@ function Settings() {
           <div id="google_translate_element" className={language === 'te' ? '' : 'hidden'}></div>
         </div>
 
-        {/* Notifications Section */}
         <div className="space-y-4">
           <h3 className="text-lg font-medium flex items-center">
             <Bell className="mr-2" /> Notifications
@@ -56,7 +54,6 @@ function Settings() {
           <Notifications />
         </div>
 
-        {/* Install App Section */}
         <div className="space-y-4">
           <h3 className="text-lg font-medium flex items-center">
             <Download className="mr-2" /> Download App
@@ -66,6 +63,11 @@ function Settings() {
       </div>
 
       <div className="text-center text-gray-500 text-sm mt-4">WEB APP Version 3.0 </div>
+      <div className="text-center text-gray-500 text-sm mt-4">
+  <a href="/privacy_policy.html" className="text-indigo-700">Privacy Policy</a>
+  {" "}and{" "}
+  <a href="/terms_of_service.html" className="text-indigo-700">Terms of Service</a>
+</div>
       <div className="text-center text-gray-500 text-sm mt-4">
         For any queries, write an email to <a href="mailto:gangavaramnbkyouth@gmail.com" className=" hover:text-indigo-600">gangavaramnbkyouth@gmail.com</a>
       </div>
