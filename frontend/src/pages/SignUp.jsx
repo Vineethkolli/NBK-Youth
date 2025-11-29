@@ -157,6 +157,14 @@ function SignUp() {
               <span>Already have an account? </span>
               <a href="/signin" className="text-green-600 font-medium">Sign in</a>
             </div>
+
+    <p className="text-[11px] text-gray-500 text-center leading-snug">
+  By signing up, you agree to our{" "}
+  <a href="/privacy_policy.html" className="text-green-600">Privacy Policy</a>
+  {" "}and{" "}
+  <a href="/terms_of_service.html" className="text-green-600">Terms</a>.
+</p>
+
           </form>
         )}
 
