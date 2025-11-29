@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useMusicPlayer } from '../../context/MusicContext';
+import useMusicStore from '../../stores/useMusicStore';
 
 function FloatingMusicIcon() {
-  const { currentSong, isPlaying } = useMusicPlayer();
+  const { currentSong, isPlaying } = useMusicStore();
   const navigate = useNavigate();
 
   const [position, setPosition] = useState({ x: 20, y: 100 });

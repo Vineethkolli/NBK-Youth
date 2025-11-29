@@ -9,10 +9,10 @@ import axios from 'axios';
 import { API_URL } from '../utils/config';
 import { createSongQueue, filterCollections } from '../utils/songQueue';
 import { Search } from 'lucide-react';
-import { useMusicPlayer } from '../context/MusicContext';
+import useMusicStore from '../stores/useMusicStore';
 
 function Vibe() {
-  const { currentSong, handleSongSelect } = useMusicPlayer();
+  const { currentSong, handleSongSelect } = useMusicStore();
   const [collections, setCollections] = useState([]);
   const [isEditMode, setIsEditMode] = useState(false);
   const [uploadMode, setUploadMode] = useState(false);

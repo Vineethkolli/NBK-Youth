@@ -6,7 +6,6 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { HiddenProfileProvider } from './context/HiddenProfileContext';
 import { LanguageProvider } from './context/LanguageContext';
 import { MaintenanceModeProvider, useMaintenanceMode } from './context/MaintenanceModeContext';
-import { MusicProvider } from './context/MusicContext';
 import { EventLabelProvider } from './context/EventLabelContext';
 import { LockProvider } from './context/LockContext';
 
@@ -160,13 +159,11 @@ function App() {
           <MaintenanceModeProvider>
             <EventLabelProvider>
               <LockProvider>
-                <MusicProvider>
-                  <Router>
-                    <ErrorBoundary>
-                      <AppContent />
-                    </ErrorBoundary>
-                  </Router>
-                </MusicProvider>
+                <Router>
+                  <ErrorBoundary>
+                    <AppContent />
+                  </ErrorBoundary>
+                </Router>
               </LockProvider>
             </EventLabelProvider>
           </MaintenanceModeProvider>

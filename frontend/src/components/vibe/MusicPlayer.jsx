@@ -1,5 +1,5 @@
 import { Play, Pause, SkipBack, SkipForward, X } from 'lucide-react';
-import { useMusicPlayer } from '../../context/MusicContext';
+import useMusicStore from '../../stores/useMusicStore';
 
 export default function MusicPlayer() {
   const {
@@ -13,7 +13,7 @@ export default function MusicPlayer() {
     togglePlay,
     seek,
     closeMusicPlayer
-  } = useMusicPlayer();
+  } = useMusicStore();
 
   if (!currentSong) return null;
 
