@@ -59,10 +59,10 @@ const ActivitiesEnglishPrint = ({ games }) => {
 
       startY = doc.lastAutoTable.finalY + 10;
 
-      if (startY > doc.internal.pageSize.height - 30) {
-        doc.addPage();
-        startY = 20;
-      }
+if (startY > doc.internal.pageSize.height - 30 && game !== games[games.length - 1]) {
+    doc.addPage();
+    startY = 20;
+}
     });
 
     const pageCount = doc.getNumberOfPages();
