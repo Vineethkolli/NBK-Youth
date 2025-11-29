@@ -267,17 +267,17 @@ export default function Weather() {
 
                 <div className="flex flex-col gap-1 text-xs sm:text-base">
 
-                  <div className="flex items-center gap-1 sm:gap-2 text-slate-700 notranslate">
+                  <div className="flex items-center gap-1 sm:gap-2 text-slate-700">
                     <Thermometer className="w-4 h-4 sm:w-5 sm:h-5" />
                     <span>Feels like: <b>{feelsLike != null ? Math.round(feelsLike) + "°C" : "—"}</b></span>
                   </div>
 
-                  <div className="flex items-center gap-1 sm:gap-2 text-slate-700 notranslate">
+                  <div className="flex items-center gap-1 sm:gap-2 text-slate-700">
                     <Droplets className="w-4 h-4 sm:w-5 sm:h-5" />
                     <span>Humidity: <b>{currHumidity ?? "—"}%</b></span>
                   </div>
 
-                  <div className="flex items-center gap-1 sm:gap-2 text-slate-700 notranslate">
+                  <div className="flex items-center gap-1 sm:gap-2 text-slate-700">
                     <Wind className="w-4 h-4 sm:w-5 sm:h-5" />
                     <span>Wind: <b>{windKmH ?? "—"} km/h {windDir}</b></span>
                   </div>
