@@ -18,6 +18,7 @@ function Explore() {
         { to: "/moments", icon: CameraIcon, label: "Moments" },
         { to: "/vibe", icon: MusicIcon, label: "Vibe" },
         { to: "/lets-play", icon: TrophyIcon, label: "Activities" },
+        { to: "/weather", icon: CloudSun, label: "Weather" },
       ],
     },
     {
@@ -41,7 +42,6 @@ function Explore() {
         { to: "/settings", icon: Settings, label: "Settings" },
         { to: "/pay-online", icon: ShieldCheck, label: "Pay Online" },
         { to: "/tech-stack", icon: Layers, label: "Tech Stack" },
-        { to: "/weather", icon: CloudSun, label: "Weather" },
       ],
     },
     {
