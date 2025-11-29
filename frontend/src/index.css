@@ -5,48 +5,8 @@
 .skiptranslate {
   display: none !important;
 }
+
 body {
     top: 0px !important; 
     position: static !important;
-}
-
-
-/* Hide the container by moving it off-screen */
-#google_translate_element {
-  position: absolute !important;
-  width: 1px !important;
-  height: 1px !important;
-  overflow: hidden !important;
-  clip: rect(1px, 1px, 1px, 1px) !important;
-  
-  top: -9999px !important;
-  left: -9999px !important;
-  
-  opacity: 0 !important;
-  pointer-events: none !important;
-  visibility: hidden !important;
-}
-
-/* Hide the top banner frame injected by Google */
-.goog-te-banner-frame.skiptranslate {
-    display: none !important;
-}
-
-/* Hide the "Original Text" tooltip that appears on hover */
-#goog-gt-tt, .goog-te-balloon-frame {
-    display: none !important;
-}
-
-/* Hide the specific Google icon inside the widget */
-.goog-te-gadget-icon {
-    display: none !important;
-    background: none !important;
-}
-
-/* Clean up any remaining text */
-.goog-te-gadget-simple, 
-.goog-te-gadget {
-    font-size: 0 !important;
-    line-height: 0 !important;
-    color: transparent !important;
 }
