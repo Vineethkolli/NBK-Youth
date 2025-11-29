@@ -2,78 +2,90 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
     <title>Privacy Policy | NBK Youth</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+
     <style>
         body {
             font-family: 'Inter', sans-serif;
         }
         .policy-content h2 {
-            font-size: 1.5rem;
-            margin-top: 1.5rem;
-            margin-bottom: 0.75rem;
+            font-size: clamp(1.3rem, 2vw, 1.7rem);
+            margin-top: 1.8rem;
+            margin-bottom: 0.8rem;
             font-weight: 700;
             color: #1f2937;
         }
-        .policy-content h3 {
-            font-size: 1.25rem;
-            margin-top: 1rem;
+        .policy-content h3, .policy-content h4 {
+            font-size: clamp(1.1rem, 1.7vw, 1.4rem);
+            margin-top: 1.3rem;
             margin-bottom: 0.5rem;
             font-weight: 600;
             color: #374151;
         }
-        .policy-content p {
+        .policy-content p, .policy-content ul {
+            line-height: 1.65;
             margin-bottom: 1rem;
-            line-height: 1.625;
             color: #4b5563;
+            overflow-wrap: break-word;
+            word-break: break-word;
         }
         .policy-content ul {
             list-style-type: disc;
-            margin-left: 1.5rem;
-            margin-bottom: 1rem;
-            color: #4b5563;
+            margin-left: 1.2rem;
         }
     </style>
 </head>
-<body class="bg-gray-50 min-h-screen p-4 sm:p-8">
 
-    <div class="max-w-4xl mx-auto bg-white shadow-xl rounded-2xl p-6 md:p-10 lg:p-12 border border-gray-100">
+<body class="bg-gray-50">
 
-        <!-- Header -->
-        <header class="mb-8 border-b pb-4">
-            <h1 class="text-3xl sm:text-4xl font-extrabold text-blue-800 tracking-tight">
-                Privacy Policy
-            </h1>
-            <p class="text-gray-500 mt-2 text-sm md:text-base">
-                Last updated: <span class="font-semibold text-gray-700">November 28, 2025</span>
+    <div class="max-w-4xl mx-auto bg-white shadow-xl rounded-2xl 
+        p-4 sm:p-6 md:p-8 border border-gray-100 mt-5 mb-10 overflow-hidden">
+
+        <div class="flex justify-center mb-6">
+            <img src="logo/512.png"
+                 alt="NBK Youth Logo"
+                 class="w-16 h-16 sm:w-20 sm:h-20 rounded-full shadow-md object-cover">
+        </div>
+
+        <header class="mb-8 border-b pb-5 text-center">
+            <div class="flex flex-col items-center gap-2">
+                <h1 class="text-2xl sm:text-4xl font-extrabold text-blue-800 tracking-tight">
+                    Privacy Policy
+                </h1>
+            </div>
+
+            <p class="text-gray-500 mt-2 text-xs sm:text-base">
+                Last updated: <span class="font-semibold text-gray-700">November 14, 2025</span>
             </p>
         </header>
 
-        <!-- Policy Content -->
         <div class="policy-content">
 
             <p>
-                This Privacy Policy describes Our policies and procedures on the collection, use, and disclosure of Your information when You use the Service and tells You about Your privacy rights and how the law protects You.
+                This Privacy Policy describes Our policies and procedures on the collection, use,
+                and disclosure of Your information when You use the Service.
             </p>
 
             <h2>1. Interpretation and Definitions</h2>
 
             <h3>Interpretation</h3>
             <p>
-                The words of which the initial letter is capitalized have meanings defined under the following conditions. The following definitions shall have the same meaning regardless of whether they appear in singular or in plural.
+                Words with their first letter capitalized have meanings defined under the following
+                conditions. These definitions apply whether the terms appear in singular or plural.
             </p>
 
             <h3>Definitions</h3>
-            <p>For the purposes of this Privacy Policy:</p>
             <ul>
-                <li><strong>Account</strong> means a unique account created for You to access our Service or parts of our Service.</li>
-                <li><strong>Application</strong> means the software program provided by the <strong>NBK Youth</strong>.</li>
-                <li><strong>Personal Data</strong> is any information that relates to an identified or identifiable individual.</li>
+                <li><strong>Account</strong> means a unique account used to access our Service.</li>
+                <li><strong>Application</strong> means the NBK Youth app.</li>
+                <li><strong>Personal Data</strong> means any information related to an identifiable person.</li>
                 <li><strong>Service</strong> refers to the Application.</li>
-                <li><strong>Usage Data</strong> refers to data collected automatically, either generated by the use of the Service or from the Service infrastructure itself (for example, the duration of a page visit).</li>
-                <li><strong>You</strong> means the individual accessing or using the Service, or other legal entity on behalf of which such individual is accessing or using the Service, as applicable.</li>
+                <li><strong>Usage Data</strong> is collected automatically during Service use.</li>
+                <li><strong>You</strong> refers to the user of the Service.</li>
             </ul>
 
             <h2>2. Collecting and Using Your Personal Data</h2>
@@ -82,122 +94,93 @@
 
             <h4>Personal Data Collected via Authentication</h4>
 
-<p>
-    When You create an account or sign in to the Service using a third-party provider such as Google Sign-In,
-    We collect the following information from Google:
-</p>
-<ul>
-    <li>Your Email address</li>
-    <li>Your display name</li>
-    <li>Your profile picture URL (if provided by Google)</li>
-</ul>
-
-<p>
-    In both Google Sign-In and Manual Sign-In, the Application will also ask You to provide additional 
-    information directly, including:
-</p>
-<ul>
-    <li>Your Phone number (manually entered)</li>
-</ul>
-
-<p>
-    This information is required to verify Your identity, maintain Your account, and provide access to
-    the core features of the Service.
-</p>
-
-            <h4>Data You Create and Store (User Content)</h4>
-            <p>
-                The Service is designed to allow You to create and manage specific types of content, which is stored in our database and linked to Your Account. This includes:
-            </p>
+            <p>When signing in using Google, Manually We collect:</p>
             <ul>
-                <li>Any text, input, or content generated by You within the Application.</li>
-                <li>Data stored and managed via the application's core functionality.</li>
+                <li>Your email address</li>
+                <li>Your display name</li>
+                <li>Your profile picture URL</li>
             </ul>
-            <p>
-                This data is considered part of Your Personal Data and is stored only for the purpose of providing the core functionality of the Application.
-            </p>
+
+            <p>In both Google & Manual sign-in, You also provide:</p>
+            <ul>
+                <li>Your phone number (entered manually)</li>
+            </ul>
+
+            <h4>Data You Create and Store</h4>
+            <ul>
+                <li>Any text or input generated by You within the app</li>
+                <li>Data managed or stored through the app’s features</li>
+            </ul>
 
             <h4>Usage Data</h4>
             <p>
-                Usage Data is collected automatically when using the Service.
-            </p>
-            <p>
-                Usage Data may include information such as Your Device's Internet Protocol address (e.g., IP address), browser type, browser version, the pages of our Service that You visit, the time and date of Your visit, the time spent on those pages, unique device identifiers, and other diagnostic data.
+                Usage Data may include IP address, browser type, pages visited, time spent,
+                unique device identifiers, and diagnostic data.
             </p>
 
             <h3>Use of Your Personal Data</h3>
-            <p>The NBK Youth may use Personal Data for the following purposes:</p>
             <ul>
-                <li><strong>To provide and maintain our Service</strong>, including monitoring the usage of our Service.</li>
-                <li><strong>To manage Your Account:</strong> to manage Your registration as a user of the Service. The Personal Data You provide can give You access to different functionalities of the Service that are available to You as a registered user.</li>
-                <li><strong>To contact You:</strong> To contact You by email or other equivalent forms of electronic communication, regarding updates or informative communications related to the functionalities, products, or contracted services, including the security updates, when necessary or reasonable for their implementation.</li>
-                <li><strong>To manage Your requests:</strong> To attend and manage Your requests to Us.</li>
+                <li>To provide and maintain the Service</li>
+                <li>To manage Your account, requests</li>
+                <li>To contact You for updates, announcements or alerts</li>
             </ul>
 
             <h3>Disclosure of Your Personal Data</h3>
 
             <h4>With Service Providers</h4>
-            <p>
-                We rely on third-party service providers to facilitate our Service, which may have access to Your Personal Data:
-            </p>
             <ul>
-                <li><strong>Google Authentication:</strong> Used for user authentication (sign-in) and managing Your user ID and email.</li>
-                <li><strong>Mongodb:</strong> Used for persistent storage of all application data (Your User Content).</li>
-                <li><strong>Hosting/Deployment Provider (e.g., Vercel, Render):</strong> May collect standard server logs, including IP addresses, for security and diagnostics.</li>
+                <li>Google Authentication – for login security</li>
+                <li>MongoDB – for data storage</li>
+                <li>Hosting Providers – may collect logs for diagnostics</li>
             </ul>
 
             <h2>3. Security of Your Personal Data</h2>
+
             <p>
-                The security of Your Personal Data is important to Us, but remember that no method of transmission over the Internet, or method of electronic storage is 100% secure. While We strive to use commercially acceptable means (like Google security and modern encryption standards) to protect Your Personal Data, We cannot guarantee its absolute security.
+                We use modern encryption and Google security, but no method of internet transmission is
+                100% secure.
             </p>
+
             <p>
-   <p>
-    For authentication, the Service may use Google Sign-In or standard password login. 
-    When using Google Sign-In, we do not store or have access to Your actual password at any time. 
-    When using password-based login, Your password is never stored in plain text. It is protected 
-    using strong, industry-standard hashing and encryption methods. This ensures that even if the 
-    database were accessed, the original password cannot be viewed or recovered. 
-    Therefore, neither the developer nor any administrators of NBK Youth can view, retrieve, or 
-    decode Your password under any circumstances.
-</p>
+                • Google Login: We never store or access your password.<br>
+                • Manual Login: Passwords are hashed using industry-standard encryption and cannot be
+                viewed or retrieved.
+            </p>
 
-</p>
-
+            <p>No developer or admin can see your password.</p>
 
             <h2>4. Your Privacy Rights</h2>
-            <p>
-                Depending on Your location, You may have the right to request access to the Personal Data We hold about You, to correct inaccurate information, to request the deletion of Your Personal Data, or to object to its processing. You can typically exercise control over Your data by:
-            </p>
+
             <ul>
-                <li><strong>Deleting Your Content:</strong> Within the application's interface.</li>
-                <li><strong>Contacting Us:</strong> If You wish to request the deletion of Your entire Account and all associated data, please contact Us at the email address below.</li>
+                <li>Delete Your content inside the app</li>
+                <li>Request full account deletion via contact</li>
             </ul>
 
             <h2>5. Links to Other Websites</h2>
+
             <p>
-                Our Service may contain links to other websites that are not operated by Us. If You click on a third-party link, You will be directed to that third party's site. We strongly advise You to review the Privacy Policy of every site You visit.
+                Third-party links may appear. We recommend reading their privacy policies.
             </p>
 
-            <h2>6. Changes to this Privacy Policy</h2>
+            <h2>6. Changes to This Privacy Policy</h2>
+
             <p>
-                We may update Our Privacy Policy from time to time. We will notify You of any changes by posting the new Privacy Policy on this page. You are advised to review this Privacy Policy periodically for any changes. Changes to this Privacy Policy are effective when they are posted on this page.
+                Updates to our policies will be posted on this page. Review periodically.
             </p>
 
             <h2>7. Contact Us</h2>
-            <p>
-                If you have any questions about this Privacy Policy, You can contact us:
-            </p>
+
+            <p>You can contact us for any privacy queries:</p>
+
             <ul>
                 <li>Developer: <strong>Kolli Vineeth</strong></li>
                 <li>Email: <strong>gangavaramnbkyouth@gmail.com</strong></li>
             </ul>
 
         </div>
-        <!-- End Policy Content -->
-        
-        <!-- Footer Branding -->
-        <footer class="mt-8 pt-4 border-t text-center text-gray-400 text-xs">
-            <p>This policy is provided by Kolli Vineeth for the application NBK Youth.</p>
+
+        <footer class="mt-10 pt-5 border-t text-center text-gray-400 text-xs">
+            <p>©2024 NBK Youth — Privacy Policy</p>
         </footer>
 
     </div>
