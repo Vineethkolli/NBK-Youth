@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Home, User, History, FolderOpen, UserCog, Users, Bell, ShieldCheck, Settings, IndianRupee, DollarSign,
   Trash2, CheckSquare, BarChart2, Terminal, MusicIcon, CameraIcon, TrophyIcon, Calculator, Layers, LayoutDashboard,
-  FileClock, Cpu, Globe2, CreditCard, LockKeyhole, Code2, Fingerprint } from "lucide-react";
+  FileClock, Cpu, Globe2, CreditCard, LockKeyhole, Code2, Fingerprint, CloudSun } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import Footer from "./Footer";
 
@@ -41,6 +41,7 @@ function Explore() {
         { to: "/settings", icon: Settings, label: "Settings" },
         { to: "/pay-online", icon: ShieldCheck, label: "Pay Online" },
         { to: "/tech-stack", icon: Layers, label: "Tech Stack" },
+        { to: "/weather", icon: CloudSun, label: "Weather" },
       ],
     },
     {
