@@ -74,7 +74,6 @@ export const checkSignupInfo = async (req, res) => {
     if (!emailSent)
       return res.status(500).json({ message: "Failed to send verification OTP" });
 
-    // Log email verification OTP sent activity
     await logActivity(
       { user: { registerId: 'SYSTEM', name: 'System' } },
       'CREATE',
@@ -167,7 +166,7 @@ export const signUp = async (req, res) => {
 
     if (user.email) {
       sendSignupEmail(user.email, user.name);
-      // Log welcome email activity
+
       await logActivity(
         { user: { registerId: user.registerId, name: user.name } },
         'CREATE',
@@ -399,7 +398,6 @@ export const googleAuth = async (req, res) => {
 
     if (user.email) {
       sendSignupEmail(user.email, user.name);
-      // Log welcome email activity for Google signup
       await logActivity(
         { user: { registerId: user.registerId, name: user.name } },
         'CREATE',
@@ -444,7 +442,6 @@ export const forgotPassword = async (req, res) => {
     const emailSent = await sendOTPEmail(email, otp);
     if (!emailSent) return res.status(500).json({ message: 'Failed to send OTP email' });
 
-    // Log password reset email OTP sent activity
     await logActivity(
       { user: { registerId: user.registerId, name: user.name } },
       'CREATE',
@@ -471,7 +468,6 @@ export const initiatePhonePasswordReset = async (req, res) => {
     if (!user)
       return res.status(404).json({ message: 'User not found' });
 
-    // Log mobile password reset initiation
     await logActivity(
       { user: { registerId: user.registerId, name: user.name } },
       'CREATE',
@@ -516,7 +512,6 @@ export const issuePhoneResetToken = async (req, res) => {
       { expiresIn: '10m' }
     );
 
-    // Log mobile password reset OTP verified and token issued
     await logActivity(
       { user: { registerId: user.registerId, name: user.name } },
       'CREATE',
