@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Cloud } from "lucide-react";
-import LocationControls from "../components/weather/LocationControls";
-import WeatherDisplay from "../components/weather/WeatherDisplay";
+import LocationControls from "./LocationControls";
+import WeatherDisplay from "./WeatherDisplay";
 
 // Default location - Gangavaram
 const DEFAULT_LOCATION = {
@@ -22,7 +22,7 @@ export default function Weather() {
   useEffect(() => {
     setLoading(true);
     setError(null);
-    
+
     const url = `https://api.open-meteo.com/v1/forecast?latitude=${location.lat}&longitude=${location.lon}&current_weather=true&hourly=weathercode,temperature_2m,precipitation_probability,relative_humidity_2m,windspeed_10m,cloudcover,visibility,pressure_msl,dewpoint_2m,uv_index,apparent_temperature&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,sunrise,sunset,uv_index_max&timezone=auto`;
 
     fetch(url)
@@ -43,15 +43,17 @@ export default function Weather() {
     const now = new Date();
     now.setMinutes(0, 0, 0);
     const nowMs = now.getTime();
+
     const exact = times.indexOf(nowMs);
     if (exact !== -1) return exact;
+
     const future = times.findIndex((t) => t > nowMs);
     return future !== -1 ? future : times.length - 1;
   };
 
   const currentIndex = findClosestHourIndex(weather?.hourly);
 
-  // Next 24 Hours
+  // Next 24 hours
   const hourlyWindow = useMemo(() => {
     if (!weather?.hourly) return [];
     const h = weather.hourly;
@@ -66,10 +68,11 @@ export default function Weather() {
     }));
   }, [weather, currentIndex]);
 
-  // Daily
+  // Daily data
   const dailyList = useMemo(() => {
     if (!weather?.daily) return [];
     const d = weather.daily;
+
     return d.time.map((t, i) => ({
       time: t,
       code: d.weathercode[i],
@@ -98,7 +101,7 @@ export default function Weather() {
 
   if (error)
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-400 to-red-600 text-white">
+      <div className="min-h-screen flex items-center justify-center bg-red-500 text-white">
         <div className="text-center">
           <Cloud className="w-16 h-16 mx-auto mb-4 opacity-50" />
           <p className="text-xl">{error}</p>
@@ -109,11 +112,11 @@ export default function Weather() {
   return (
     <div className="min-h-screen text-slate-900 p-2 sm:p-4 pb-10">
       <div className="max-w-6xl mx-auto">
-        <LocationControls 
+        <LocationControls
           onLocationChange={handleLocationChange}
           currentLocation={location}
         />
-        
+
         {weather && (
           <WeatherDisplay
             weather={weather}

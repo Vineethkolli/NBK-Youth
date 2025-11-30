@@ -40,7 +40,7 @@ import Histories from './pages/Histories';
 import Monitor from './pages/Monitor';
 import ViniPage from './pages/vini';
 import AuthSessions from './pages/AuthSessions';
-import Weather from './pages/Weather';
+import Tools from './pages/Tools';
 import Explore from './components/Explore';
 
 import ProtectedRoute from './components/ProtectedRoute';
@@ -118,7 +118,7 @@ function AppContent() {
           <Route path="/monitor" element={<Monitor />} />
           <Route path="/auth-sessions" element={<AuthSessions />} />
           <Route path="/explore" element={<Explore />} />
-          <Route path="/weather" element={<Weather />} />
+          <Route path="/tools" element={<Tools />} />
         </Route>
       </Routes>
 
