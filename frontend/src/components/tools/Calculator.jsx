@@ -7,7 +7,7 @@ export default function Calculator() {
   const [showHistory, setShowHistory] = useState(false);
   const [cursorVisible, setCursorVisible] = useState(true);
 
-  // Blink the green cursor
+  // Blink cursor
   useEffect(() => {
     const interval = setInterval(() => {
       setCursorVisible((v) => !v);
@@ -42,15 +42,74 @@ export default function Calculator() {
     else setInput("-" + input);
   };
 
+  // -----------------------------
+  // SAFE MATH PARSER (No eval)
+  // -----------------------------
+  function safeEval(expr) {
+    // Basic safety — allow only math chars
+    if (!/^[0-9+\-*/().\s]*$/.test(expr)) {
+      throw new Error("Invalid expression");
+    }
+
+    const tokens = expr.match(/[()+\-*/]|\d*\.?\d+/g);
+    if (!tokens) throw new Error("Invalid expression");
+
+    // Convert to RPN (Reverse Polish Notation)
+    const toRPN = (tokens) => {
+      const out = [];
+      const stack = [];
+      const prec = { "+": 1, "-": 1, "*": 2, "/": 2 };
+
+      for (let t of tokens) {
+        if (!isNaN(t)) out.push(t);
+        else if ("+-*/".includes(t)) {
+          while (
+            stack.length &&
+            "+-*/".includes(stack.at(-1)) &&
+            prec[stack.at(-1)] >= prec[t]
+          ) {
+            out.push(stack.pop());
+          }
+          stack.push(t);
+        } else if (t === "(") stack.push(t);
+        else if (t === ")") {
+          while (stack.length && stack.at(-1) !== "(") out.push(stack.pop());
+          stack.pop();
+        }
+      }
+
+      while (stack.length) out.push(stack.pop());
+      return out;
+    };
+
+    // Evaluate RPN
+    const evalRPN = (rpn) => {
+      const stack = [];
+      for (let t of rpn) {
+        if (!isNaN(t)) stack.push(parseFloat(t));
+        else {
+          const b = stack.pop();
+          const a = stack.pop();
+          if (t === "+") stack.push(a + b);
+          else if (t === "-") stack.push(a - b);
+          else if (t === "*") stack.push(a * b);
+          else if (t === "/") stack.push(a / b);
+        }
+      }
+      return stack[0];
+    };
+
+    return evalRPN(toRPN(tokens));
+  }
+
   const calculate = () => {
     try {
       const expr = input
         .replace(/×/g, "*")
         .replace(/÷/g, "/")
-        .replace(/(\d+)%/g, "($1*0.01)");
+        .replace(/(\d+)%/g, "($1 * 0.01)");
 
-      // eslint-disable-next-line no-eval
-      const res = eval(expr).toString();
+      const res = safeEval(expr).toString();
       saveHistory(input, res);
       setInput(res);
     } catch {
@@ -123,9 +182,8 @@ export default function Calculator() {
       <div className="h-30 flex items-end justify-end text-[54px] font-light text-gray-700 pr-2">
         <span className="flex items-end gap-1">
           {input}
-          {/* Blinking cursor */}
           <span
-            className={`w-0.5 h-18 bg-green-500 ${
+            className={`w-[3px] h-[48px] bg-green-500 rounded-sm ${
               cursorVisible ? "opacity-100" : "opacity-0"
             }`}
           />
@@ -133,9 +191,7 @@ export default function Calculator() {
       </div>
 
       {/* Icons Row */}
-      <div className="flex justify-between items-center mt-2 px-2">
-
-        {/* History Button */}
+      <div className="flex justify-between items-center mt-3 px-2">
         <button
           onClick={() => setShowHistory(!showHistory)}
           className="w-10 h-10 flex justify-center items-center rounded-full bg-gray-200 text-gray-600"
@@ -143,12 +199,11 @@ export default function Calculator() {
           <Clock size={22} strokeWidth={1.5} />
         </button>
 
-        {/* Backspace Button */}
         <button
           onClick={deleteLast}
           className="w-10 h-10 flex justify-center items-center rounded-full border-2 border-green-500 text-green-600"
         >
-          <X size={22} strokeWidth={2.5} />
+          <X size={24} strokeWidth={2.5} />
         </button>
       </div>
 
@@ -158,7 +213,6 @@ export default function Calculator() {
           <div className="flex justify-between items-center mb-2">
             <div className="text-sm font-medium">History</div>
 
-            {/* Delete All */}
             <button
               onClick={() => {
                 setHistory([]);
