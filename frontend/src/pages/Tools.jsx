@@ -11,7 +11,7 @@ export default function Tools() {
   const tabs = [
     { id: "weather", label: "Weather", icon: CloudSun },
     { id: "calculator", label: "Calculator", icon: CalculatorIcon },
-    { id: "stopwatch", label: "Stopwatch", icon: Timer },
+    { id: "stopwatch", label: "Timer", icon: Timer },
     { id: "toss", label: "Toss", icon: Coins },
   ];
 

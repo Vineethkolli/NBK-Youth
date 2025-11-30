@@ -39,22 +39,32 @@ export default function ClockTools() {
    SAMSUNG STYLE STOPWATCH
 ----------------------------------------------------------- */
 function Stopwatch() {
-  const [time, setTime] = useState(0); // ms
+  const [time, setTime] = useState(0);
   const [running, setRunning] = useState(false);
+  const [paused, setPaused] = useState(false);
   const [laps, setLaps] = useState([]);
   const intervalRef = useRef(null);
 
-  // Start / pause stopwatch
-  const toggle = () => {
-    if (running) {
-      clearInterval(intervalRef.current);
-      setRunning(false);
-    } else {
-      setRunning(true);
-      intervalRef.current = setInterval(() => {
-        setTime((t) => t + 10);
-      }, 10);
-    }
+  const start = () => {
+    setRunning(true);
+    setPaused(false);
+    intervalRef.current = setInterval(() => {
+      setTime((t) => t + 10);
+    }, 10);
+  };
+
+  const pause = () => {
+    clearInterval(intervalRef.current);
+    setPaused(true);
+    setRunning(false);
+  };
+
+  const resume = () => {
+    setRunning(true);
+    setPaused(false);
+    intervalRef.current = setInterval(() => {
+      setTime((t) => t + 10);
+    }, 10);
   };
 
   const reset = () => {
@@ -62,6 +72,7 @@ function Stopwatch() {
     setTime(0);
     setLaps([]);
     setRunning(false);
+    setPaused(false);
   };
 
   const addLap = () => {
@@ -81,40 +92,44 @@ function Stopwatch() {
 
   return (
     <div>
-      {/* Circular Dial */}
-      <div className="w-64 h-64 mx-auto rounded-full border-8 border-gray-200 flex items-center justify-center relative">
-        
-
+      <div className="w-64 h-64 mx-auto rounded-full border-8 border-gray-200 flex items-center justify-center">
         <div className="text-4xl font-mono">{format(time)}</div>
       </div>
 
       {/* Buttons */}
       <div className="flex justify-center gap-4 mt-6">
-        <button
-          onClick={toggle}
-          className={`px-5 py-2 rounded-full text-white text-lg shadow-md ${
-            running ? "bg-red-500" : "bg-green-600"
-          }`}
-        >
-          {running ? "Pause" : "Start"}
-        </button>
 
-        <button
+<button
           onClick={running ? addLap : reset}
-          className="px-5 py-2 rounded-full bg-gray-300 text-gray-700 text-lg shadow"
+          className="px-6 py-2 rounded-full bg-gray-300 text-gray-700 text-lg shadow"
         >
           {running ? "Lap" : "Reset"}
         </button>
+        {!running && !paused && (
+          <button onClick={start} className="px-6 py-2 rounded-full bg-green-600 text-white text-lg shadow">
+            Start
+          </button>
+        )}
+
+        {running && (
+          <button onClick={pause} className="px-6 py-2 rounded-full bg-red-500 text-white text-lg shadow">
+            Pause
+          </button>
+        )}
+
+        {paused && (
+          <button onClick={resume} className="px-6 py-2 rounded-full bg-blue-600 text-white text-lg shadow">
+            Resume
+          </button>
+        )}
+
       </div>
 
       {/* Laps */}
       {laps.length > 0 && (
         <div className="mt-6 bg-gray-100 rounded-xl p-4 max-h-64 overflow-y-auto">
           {laps.map((lap) => (
-            <div
-              key={lap.id}
-              className="flex justify-between border-b py-2 text-lg font-mono"
-            >
+            <div key={lap.id} className="flex justify-between border-b py-2 text-lg font-mono">
               <span>Lap {lap.id}</span>
               <span>{format(lap.t)}</span>
             </div>
@@ -125,26 +140,42 @@ function Stopwatch() {
   );
 }
 
+
 /* ----------------------------------------------------------
    SAMSUNG STYLE TIMER
+----------------------------------------------------------- *//* ----------------------------------------------------------
+   SAMSUNG STYLE TIMER (MATCH STOPWATCH SIZE)
 ----------------------------------------------------------- */
 function Timer() {
   const [input, setInput] = useState({ h: 0, m: 0, s: 0 });
   const [left, setLeft] = useState(0);
   const [running, setRunning] = useState(false);
+  const [paused, setPaused] = useState(false);
   const ref = useRef(null);
 
   const totalMs = input.h * 3600000 + input.m * 60000 + input.s * 1000;
 
+  const radius = 110;
+  const circumference = 2 * Math.PI * radius;
+  const progress = totalMs > 0 ? left / totalMs : 0;
+
+  /* -------------------------
+      START (fresh or resume)
+  ------------------------- */
   const start = () => {
-    if (totalMs <= 0) return;
-    setLeft(totalMs);
+    const startValue = left > 0 ? left : totalMs;
+    if (startValue <= 0) return;
+
+    setLeft(startValue);
     setRunning(true);
+    setPaused(false);
+
     ref.current = setInterval(() => {
       setLeft((v) => {
         if (v <= 100) {
           clearInterval(ref.current);
           setRunning(false);
+          setPaused(false);
           return 0;
         }
         return v - 100;
@@ -152,14 +183,18 @@ function Timer() {
     }, 100);
   };
 
-  const stop = () => {
-    setRunning(false);
+  const pause = () => {
     clearInterval(ref.current);
+    setRunning(false);
+    setPaused(true);
   };
 
   const reset = () => {
-    stop();
+    clearInterval(ref.current);
+    setRunning(false);
+    setPaused(false);
     setLeft(0);
+    setInput({ h: 0, m: 0, s: 0 });
   };
 
   const format = (ms) => {
@@ -175,58 +210,96 @@ function Timer() {
   return (
     <div className="flex flex-col items-center">
 
-      {/* Circular Timer UI */}
-      <div className="w-64 h-64 rounded-full border-8 border-gray-200 flex items-center justify-center relative">
+      {/* Circle */}
+      <div className="relative w-72 h-72 flex items-center justify-center">
+        <svg width="260" height="260">
+          <circle
+            cx="130"
+            cy="130"
+            r={radius}
+            stroke="#e5e7eb"
+            strokeWidth="10"
+            fill="none"
+          />
 
-        <div className="text-3xl font-mono">
+          <circle
+            cx="130"
+            cy="130"
+            r={radius}
+            stroke="#4f46e5"
+            strokeWidth="10"
+            fill="none"
+            strokeDasharray={circumference}
+            strokeDashoffset={circumference - circumference * progress}
+            strokeLinecap="round"
+            className="transition-all duration-100"
+          />
+        </svg>
+
+        <div className="absolute text-4xl font-mono">
           {left > 0 ? format(left) : format(totalMs)}
         </div>
       </div>
 
-      {/* Input Controls */}
-      {!running && (
-        <div className="mt-5 flex gap-3">
-          {["h", "m", "s"].map((k) => (
-            <div key={k} className="flex flex-col items-center">
-              <input
-                type="number"
-                className="w-16 text-center p-2 rounded bg-gray-100 text-xl"
-                min="0"
-                value={input[k]}
-                onChange={(e) =>
-                  setInput({ ...input, [k]: Number(e.target.value) })
-                }
-              />
-              <span className="text-sm mt-1 uppercase">{k}</span>
-            </div>
-          ))}
-        </div>
-      )}
+      {/* Inputs only when not running AND not paused */}
+      {!running && !paused && (
+  <div className="mt-5 flex gap-3">
+    {["h", "m", "s"].map((k) => (
+      <div key={k} className="flex flex-col items-center">
+        <input
+          type="number"
+          min="0"
+          className="w-16 text-center p-2 rounded border border-gray-300 bg-white text-xl 
+                     focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          value={input[k]}
+          onChange={(e) =>
+            setInput({ ...input, [k]: Number(e.target.value) })
+          }
+        />
+        <span className="text-sm mt-1 uppercase">{k}</span>
+      </div>
+    ))}
+  </div>
+)}
 
       {/* Buttons */}
       <div className="flex gap-4 mt-6">
-        {!running ? (
+        <button
+          className="px-6 py-2 rounded-full bg-gray-300 text-gray-700 text-lg shadow"
+          onClick={reset}
+        >
+          Reset
+        </button>
+
+        {/* Start when not running & not paused */}
+        {!running && !paused && (
           <button
+            className="px-6 py-2 rounded-full bg-green-600 text-white text-lg shadow"
             onClick={start}
-            className="px-5 py-2 rounded-full bg-green-600 text-white text-lg shadow"
           >
             Start
           </button>
-        ) : (
+        )}
+
+        {/* Pause button */}
+        {running && (
           <button
-            onClick={stop}
-            className="px-5 py-2 rounded-full bg-red-500 text-white text-lg shadow"
+            className="px-6 py-2 rounded-full bg-red-500 text-white text-lg shadow"
+            onClick={pause}
           >
             Pause
           </button>
         )}
 
-        <button
-          onClick={reset}
-          className="px-5 py-2 rounded-full bg-gray-300 text-gray-700 text-lg shadow"
-        >
-          Reset
-        </button>
+        {/* Resume button */}
+        {paused && !running && (
+          <button
+            className="px-6 py-2 rounded-full bg-blue-600 text-white text-lg shadow"
+            onClick={start}
+          >
+            Resume
+          </button>
+        )}
       </div>
     </div>
   );
