@@ -18,6 +18,8 @@
     "jspdf-autotable": "^5.0.2",
     "libphonenumber-js": "^1.12.29",
     "lucide-react": "^0.555.0",
+    "pdf-lib": "^1.17.1",
+    "pdfjs-dist": "^5.4.449",
     "qrcode.react": "^4.2.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
