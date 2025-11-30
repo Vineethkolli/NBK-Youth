@@ -3,38 +3,29 @@ import { Clock, X, Trash2 } from "lucide-react";
 
 export default function Calculator() {
   const [input, setInput] = useState("0");
-  // logical cursor position: 0..input.length (position between characters)
   const [cursorPos, setCursorPos] = useState(0);
   const [history, setHistory] = useState([]);
   const [showHistory, setShowHistory] = useState(false);
 
-  // refs
-  const exprRef = useRef(null); // expression area (lines 1 & 2)
-  const displayRef = useRef(null); // whole display wrapper
-  const charRefs = useRef([]); // array of span nodes for each char
+  const exprRef = useRef(null);
+  const displayRef = useRef(null);
+  const charRefs = useRef([]);
 
-  // cursor overlay state
   const [cursorVisible, setCursorVisible] = useState(true);
   const [cursorCoords, setCursorCoords] = useState({ left: 0, top: 0, height: 36 });
 
-  // -------------------- lifecycle --------------------
   useEffect(() => {
-    // load history
     const saved = localStorage.getItem("calc-history");
     if (saved) setHistory(JSON.parse(saved));
 
-    // start blink
     const id = setInterval(() => setCursorVisible((s) => !s), 600);
     return () => clearInterval(id);
   }, []);
 
-  // ensure cursor starts at end on mount / when input resets initially
   useEffect(() => {
     setCursorPos(() => Math.max(0, input.length));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // run once
+  }, []);
 
-  // whenever input or cursor changes, update overlay coords and keep cursor visible by scrolling
   useLayoutEffect(() => {
   requestAnimationFrame(() => {
     updateCursorOverlay();
@@ -43,15 +34,13 @@ export default function Calculator() {
 }, [input, cursorPos]);
 
 
-  // -------------------- helpers --------------------
   const saveHistory = (exp, res) => {
     const item = { exp, res, time: new Date().toLocaleString() };
-    const newHistory = [item, ...history].slice(0, 100);
+    const newHistory = [item, ...history].slice(0, 50);
     setHistory(newHistory);
     localStorage.setItem("calc-history", JSON.stringify(newHistory));
   };
 
-  // Insert at logical cursor
   const insertAtCursor = (text) => {
     const isNumberOrDot = /^[0-9.]$/.test(text);
     if (input === "0" && isNumberOrDot) {
@@ -80,7 +69,6 @@ export default function Calculator() {
     setCursorPos(Math.max(0, cursorPos - 1));
   };
 
-  // -------------------- safe evaluator (RPN) --------------------
   function safeEval(expr) {
     if (!/^[0-9+\-*/().\s]*$/.test(expr)) throw new Error();
 
@@ -130,7 +118,6 @@ export default function Calculator() {
     return evalRPN(toRPN(tokens));
   }
 
-  // live result
   let liveResult = "";
   const isExpressionComplete = () => {
     if (input.trim() === "") return false;
@@ -142,7 +129,6 @@ export default function Calculator() {
     if (isExpressionComplete()) {
       const expr = input.replace(/×/g, "*").replace(/÷/g, "/").replace(/(\d+)%/g, "($1 * 0.01)");
       const v = safeEval(expr);
-      // show as empty if NaN/undefined
       if (typeof v !== "undefined" && !Number.isNaN(v)) liveResult = v.toString();
     }
   } catch {
@@ -162,7 +148,6 @@ export default function Calculator() {
     }
   };
 
-  // -------------------- keyboard --------------------
   useEffect(() => {
     const handleKey = (e) => {
       const key = e.key;
@@ -195,28 +180,24 @@ export default function Calculator() {
 
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
-  }, [input]); // depends on input only
+  }, [input]);
 
-  // -------------------- cursor overlay math & scrolling --------------------
   const updateCursorOverlay = () => {
     const exprEl = exprRef.current;
     if (!exprEl) return;
 
     const len = input.length;
-    let left = 6; // fallback padding
+    let left = 6;
     let height = 36;
-    // if cursor is at 0 (before first char)
     if (cursorPos === 0) {
-      // leave left at small padding (offset 6)
       left = 6;
       height = getLineHeight(exprEl) || 36;
     } else {
       const el = charRefs.current[cursorPos - 1];
       if (el && typeof el.offsetLeft === "number") {
-        left = el.offsetLeft + el.offsetWidth; // position after that char
+        left = el.offsetLeft + el.offsetWidth;
         height = el.offsetHeight || getLineHeight(exprEl) || 36;
       } else {
-        // fallback to end of container
         left = exprEl.scrollWidth;
         height = getLineHeight(exprEl) || 36;
       }
@@ -225,7 +206,6 @@ export default function Calculator() {
     setCursorCoords({ left, top: 4, height });
   };
 
-  // compute line height
   const getLineHeight = (el) => {
     const cs = window.getComputedStyle(el);
     const lh = parseFloat(cs.lineHeight);
@@ -233,40 +213,34 @@ export default function Calculator() {
     return parseFloat(cs.fontSize) * 1.1;
   };
 
-  // ensure cursor visible by adjusting scrollLeft of expr container
   const ensureCursorVisible = () => {
   const expr = exprRef.current;
   if (!expr) return;
 
-  const cursorX = cursorCoords.left;  // cursor visual x relative to content
+  const cursorX = cursorCoords.left;
   const viewLeft = expr.scrollLeft;
   const viewRight = expr.scrollLeft + expr.clientWidth;
   const margin = 30;
 
-  // If cursor goes left off-screen
   if (cursorX < viewLeft + margin) {
     expr.scrollLeft = Math.max(0, cursorX - margin);
   }
 
-  // If cursor goes right off-screen
   else if (cursorX > viewRight - margin) {
     expr.scrollLeft = cursorX - expr.clientWidth + margin;
   }
 };
 
-
-  // pointer/drag support to place cursor
   const draggingRef = useRef(false);
 
   const computePosFromPointer = (clientX) => {
     const exprEl = exprRef.current;
     if (!exprEl) return 0;
     const rect = exprEl.getBoundingClientRect();
-    const relativeX = clientX - rect.left + exprEl.scrollLeft; // position in content coords
+    const relativeX = clientX - rect.left + exprEl.scrollLeft;
 
-    // find first char center greater than relativeX -> position is that index
     const len = input.length;
-    let pos = len; // default after last
+    let pos = len;
     for (let i = 0; i < len; i++) {
       const el = charRefs.current[i];
       if (!el) continue;
@@ -280,7 +254,6 @@ export default function Calculator() {
   };
 
   const onPointerDown = (e) => {
-    // only left button or touch/pointer
     if (e.pointerType && e.button !== 0 && e.pointerType === "mouse") return;
     draggingRef.current = true;
     e.currentTarget.setPointerCapture(e.pointerId);
@@ -299,7 +272,6 @@ export default function Calculator() {
     } catch {}
   };
 
-  // -------------------- UI event handlers --------------------
   const handlePress = (lbl) => {
     if (lbl === "C") {
       setInput("0");
@@ -317,7 +289,6 @@ export default function Calculator() {
       return;
     }
     if (lbl === "+/-") {
-      // toggle sign for last number (simple)
       let i = cursorPos;
       while (i > 0 && /[0-9.]/.test(input[i - 1])) i--;
       if (i === 0) {
@@ -336,19 +307,15 @@ export default function Calculator() {
       }
       return;
     }
-    // default: insert
     insertAtCursor(lbl);
   };
 
-  // -------------------- rendering --------------------
-  // prepare char refs array length
   charRefs.current = Array.from({ length: input.length }).map(
     (v, i) => charRefs.current[i] || null
   );
 
   return (
     <div className="px-4 pb-10 select-none max-w-md mx-auto">
-      {/* DISPLAY */}
       <div
         ref={displayRef}
         className="w-full bg-white rounded-xl mt-3 relative overflow-hidden"
@@ -359,7 +326,6 @@ export default function Calculator() {
           flexDirection: "column",
         }}
       >
-        {/* SCROLLABLE EXPRESSION AREA (2 lines) */}
         <div
           ref={exprRef}
           className="flex-1 overflow-y-auto"
@@ -372,7 +338,7 @@ export default function Calculator() {
             fontWeight: 300,
             lineHeight: "1.05",
             paddingRight: 6,
-            position: "relative", // cursor overlay is positioned inside this
+            position: "relative",
             cursor: "text",
             userSelect: "none",
           }}
@@ -380,7 +346,6 @@ export default function Calculator() {
           onPointerMove={onPointerMove}
           onPointerUp={onPointerUp}
         >
-          {/* character spans (no cursor injected inside them) */}
           <div style={{ display: "inline-block" }}>
             {input.split("").map((ch, i) => (
               <span
@@ -395,7 +360,6 @@ export default function Calculator() {
             ))}
           </div>
 
-          {/* cursor overlay (absolute inside exprRef) */}
           <div
             aria-hidden
             style={{
@@ -406,12 +370,11 @@ export default function Calculator() {
               width: 2,
               background: cursorVisible ? "#10B981" : "transparent",
               transition: "left 0.03s linear",
-              pointerEvents: "none", // doesn't block pointer events to characters
+              pointerEvents: "none",
             }}
           />
         </div>
 
-        {/* FIXED RESULT LINE (3rd line) */}
         <div
           style={{
             fontSize: 24,
@@ -426,7 +389,6 @@ export default function Calculator() {
         </div>
       </div>
 
-      {/* Icons Row */}
       <div className="flex justify-between items-center mt-3 px-2">
         <button
           onClick={() => setShowHistory(!showHistory)}
@@ -443,7 +405,6 @@ export default function Calculator() {
         </button>
       </div>
 
-      {/* History Drawer */}
       {showHistory && (
         <div className="bg-white rounded-lg shadow p-3 mt-3 max-h-48 overflow-y-auto border">
           <div className="flex justify-between items-center mb-2">
@@ -480,7 +441,6 @@ export default function Calculator() {
         </div>
       )}
 
-      {/* Keypad */}
       <div className="grid grid-cols-4 gap-3 mt-6">
         {[
           "C",
