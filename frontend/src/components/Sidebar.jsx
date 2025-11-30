@@ -1,7 +1,8 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Home, User, History, FolderOpen, UserCog, Users, Bell, ShieldCheck, Settings, IndianRupee, DollarSign,
   Trash2, CheckSquare, BarChart2, Terminal, MusicIcon, CameraIcon, TrophyIcon, X, ChevronLeft, Calculator, 
-  Layers, LayoutDashboard, FileClock, Cpu, Fingerprint } from 'lucide-react';
+  Layers, LayoutDashboard, FileClock, Cpu, Fingerprint, 
+  ToolCase} from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 function Sidebar({ isOpen, isCollapsed = false, onNavigate }) {
@@ -24,6 +25,7 @@ function Sidebar({ isOpen, isCollapsed = false, onNavigate }) {
   { to: '/notifications', icon: Bell, label: 'Notifications' },
   { to: '/settings', icon: Settings, label: 'Settings' },
   { to: '/lets-play', icon: TrophyIcon, label: 'Activities' },
+  { to: '/tools', icon: ToolCase, label: 'Tools' },
   { to: '/tech-stack', icon: Layers, label: 'Tech Stack' },
   
   ...(hasAccess('Pro') ? [
@@ -62,7 +64,7 @@ function Sidebar({ isOpen, isCollapsed = false, onNavigate }) {
         <nav className={`flex-1 ${isCollapsed ? 'px-2' : 'px-2'} py-4 space-y-1`}>
           {links.map((link, index) => {
             const Icon = link.icon;
-            const isSeparator = [3, 7, 9, 13, 15, 19].includes(index); 
+            const isSeparator = [3, 7, 9, 13, 16, 20].includes(index); 
             return (
               <div key={link.to}>
                 <Link
