@@ -74,6 +74,16 @@ export const checkSignupInfo = async (req, res) => {
     if (!emailSent)
       return res.status(500).json({ message: "Failed to send verification OTP" });
 
+    // Log email verification OTP sent activity
+    await logActivity(
+      { user: { registerId: 'SYSTEM', name: 'System' } },
+      'CREATE',
+      'Email',
+      'OTP',
+      { before: null, after: { type: 'signup_email_verify', email: normalizedEmail } },
+      `Email verification OTP sent to ${normalizedEmail} for signup`
+    );
+
     res.json({
       message: "OTP sent to email",
       sendOtp: true
@@ -155,7 +165,18 @@ export const signUp = async (req, res) => {
       maxAge: 365 * 24 * 60 * 60 * 1000
     });
 
-    if (user.email) sendSignupEmail(user.email, user.name);
+    if (user.email) {
+      sendSignupEmail(user.email, user.name);
+      // Log welcome email activity
+      await logActivity(
+        { user: { registerId: user.registerId, name: user.name } },
+        'CREATE',
+        'Email',
+        'Welcome',
+        { before: null, after: { type: 'signup_welcome', email: user.email, userName: user.name } },
+        `Welcome email sent to ${user.name} on signup`
+      );
+    }
 
     res.status(201).json({
       token: accessToken,
@@ -376,7 +397,18 @@ export const googleAuth = async (req, res) => {
       maxAge: 365 * 24 * 60 * 60 * 1000
     });
 
-    if (user.email) sendSignupEmail(user.email, user.name);
+    if (user.email) {
+      sendSignupEmail(user.email, user.name);
+      // Log welcome email activity for Google signup
+      await logActivity(
+        { user: { registerId: user.registerId, name: user.name } },
+        'CREATE',
+        'Email',
+        'Welcome',
+        { before: null, after: { type: 'signup_welcome', email: user.email, userName: user.name, method: 'google' } },
+        `Welcome email sent to ${user.name} on Google signup`
+      );
+    }
 
     res.status(201).json({
       status: "success",
@@ -401,7 +433,7 @@ export const forgotPassword = async (req, res) => {
     if (!emailRegex.test(email))
       return res.status(400).json({ message: 'Invalid email format' });
 
-    const user = await User.findOne({ email }).select('_id email').lean();
+    const user = await User.findOne({ email }).select('_id email registerId name').lean();
     if (!user) return res.status(404).json({ message: 'User not found' });
 
     await OTP.deleteMany({ email });
@@ -411,6 +443,16 @@ export const forgotPassword = async (req, res) => {
 
     const emailSent = await sendOTPEmail(email, otp);
     if (!emailSent) return res.status(500).json({ message: 'Failed to send OTP email' });
+
+    // Log password reset email OTP sent activity
+    await logActivity(
+      { user: { registerId: user.registerId, name: user.name } },
+      'CREATE',
+      'Email',
+      user.registerId || 'null',
+      { before: null, after: { type: 'password_reset_email', email } },
+      `Password reset OTP sent to email for ${user.name}`
+    );
 
     return res.json({ message: 'OTP sent successfully' });
   } catch {
@@ -425,9 +467,19 @@ export const initiatePhonePasswordReset = async (req, res) => {
     if (!normalizedPhone)
       return res.status(400).json({ message: 'Please enter a valid phone number' });
 
-    const user = await User.findOne({ phoneNumber: normalizedPhone }).select('_id').lean();
+    const user = await User.findOne({ phoneNumber: normalizedPhone }).select('_id registerId name').lean();
     if (!user)
       return res.status(404).json({ message: 'User not found' });
+
+    // Log mobile password reset initiation
+    await logActivity(
+      { user: { registerId: user.registerId, name: user.name } },
+      'CREATE',
+      'Mobile',
+      user.registerId || 'null',
+      { before: null, after: { type: 'password_reset_mobile_initiated', phoneNumber: normalizedPhone } },
+      `Password reset initiated via phone number for ${user.name}`
+    );
 
     return res.json({ message: 'Phone number verified' });
   } catch (error) {
@@ -454,7 +506,7 @@ export const issuePhoneResetToken = async (req, res) => {
       return res.status(401).json({ message: 'OTP verification mismatch' });
     }
 
-    const user = await User.findOne({ phoneNumber: normalizedPhone }).select('_id').lean();
+    const user = await User.findOne({ phoneNumber: normalizedPhone }).select('_id registerId name').lean();
     if (!user)
       return res.status(404).json({ message: 'User not found' });
 
@@ -462,6 +514,16 @@ export const issuePhoneResetToken = async (req, res) => {
       { phoneNumber: normalizedPhone },
       process.env.JWT_SECRET,
       { expiresIn: '10m' }
+    );
+
+    // Log mobile password reset OTP verified and token issued
+    await logActivity(
+      { user: { registerId: user.registerId, name: user.name } },
+      'CREATE',
+      'Mobile',
+      user.registerId,
+      { before: null, after: { type: 'password_reset_mobile_verified', phoneNumber: normalizedPhone } },
+      `Password reset OTP verified via phone number for ${user.name}`
     );
 
     return res.json({ resetToken });
