@@ -1,216 +1,156 @@
 import { useState } from "react";
-import { PDFDocument } from "pdf-lib";
 import { ArrowUp, ArrowDown, Trash2, FolderIcon } from "lucide-react";
-import * as pdfjsLib from "pdfjs-dist/build/pdf";import { GlobalWorkerOptions } from "pdfjs-dist/build/pdf";
-GlobalWorkerOptions.workerSrc = new URL(
-  "pdfjs-dist/build/pdf.worker.mjs",
-  import.meta.url
-).toString();
-
 
 export default function PdfMergerTool() {
   const [files, setFiles] = useState([]);
-  const [previews, setPreviews] = useState([]);
 
-  const renderThumbnail = async (file) => {
-    const arrayBuffer = await file.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-    const page = await pdf.getPage(1);
-
-    const viewport = page.getViewport({ scale: 0.3 });
-
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
-
-    canvas.width = viewport.width;
-    canvas.height = viewport.height;
-
-    await page.render({ canvasContext: ctx, viewport }).promise;
-
-    return canvas.toDataURL(); // returns preview URL
-  };
-
+  // Handle selection
   const handleFileSelect = async (e) => {
     const selected = Array.from(e.target.files);
-    const updatedFiles = [...files, ...selected];
-    setFiles(updatedFiles);
-
-    for (const file of selected) {
-      const thumbnail = await renderThumbnail(file);
-      setPreviews((prev) => [...prev, thumbnail]);
-    }
+    setFiles((prev) => [...prev, ...selected]);
   };
 
+  // Move up
   const moveUp = (index) => {
     if (index === 0) return;
 
-    const updatedFiles = [...files];
-    const updatedPreviews = [...previews];
-
-    [updatedFiles[index - 1], updatedFiles[index]] = [
-      updatedFiles[index],
-      updatedFiles[index - 1],
-    ];
-
-    [updatedPreviews[index - 1], updatedPreviews[index]] = [
-      updatedPreviews[index],
-      updatedPreviews[index - 1],
-    ];
-
-    setFiles(updatedFiles);
-    setPreviews(updatedPreviews);
+    const updated = [...files];
+    [updated[index - 1], updated[index]] = [updated[index], updated[index - 1]];
+    setFiles(updated);
   };
 
+  // Move down
   const moveDown = (index) => {
     if (index === files.length - 1) return;
 
-    const updatedFiles = [...files];
-    const updatedPreviews = [...previews];
-
-    [updatedFiles[index + 1], updatedFiles[index]] = [
-      updatedFiles[index],
-      updatedFiles[index + 1],
-    ];
-
-    [updatedPreviews[index + 1], updatedPreviews[index]] = [
-      updatedPreviews[index],
-      updatedPreviews[index + 1],
-    ];
-
-    setFiles(updatedFiles);
-    setPreviews(updatedPreviews);
+    const updated = [...files];
+    [updated[index + 1], updated[index]] = [updated[index], updated[index + 1]];
+    setFiles(updated);
   };
 
+  // Remove
   const removeFile = (index) => {
     setFiles(files.filter((_, i) => i !== index));
-    setPreviews(previews.filter((_, i) => i !== index));
   };
-const mergePDFs = async () => {
-  if (files.length < 2) {
-    alert("Select at least 2 PDF files!");
-    return;
-  }
 
-  // Ask user for a filename
-  let name = prompt("Enter a name for the merged PDF:", "merged");
+  // MERGE PDFS (Lazy import pdf-lib)
+  const mergePDFs = async () => {
+    if (files.length < 2) {
+      alert("Select at least 2 PDF files!");
+      return;
+    }
 
-  // If user cancels or enters empty text → use default
-  if (!name || name.trim() === "") {
-    name = "merged";
-  }
+    // Lazy load pdf-lib
+    const { PDFDocument } = await import("pdf-lib");
 
-  // Remove illegal filename characters
-  name = name.replace(/[^a-zA-Z0-9-_ ]/g, "");
+    let name = prompt("Enter a name for the merged PDF:", "merged");
+    if (!name || name.trim() === "") name = "merged";
 
-  const mergedPdf = await PDFDocument.create();
+    name = name.replace(/[^a-zA-Z0-9-_ ]/g, "");
 
-  for (const file of files) {
-    const bytes = await file.arrayBuffer();
-    const pdf = await PDFDocument.load(bytes);
-    const pages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
-    pages.forEach((p) => mergedPdf.addPage(p));
-  }
+    const mergedPdf = await PDFDocument.create();
 
-  const mergedBytes = await mergedPdf.save();
-  const blob = new Blob([mergedBytes], { type: "application/pdf" });
-  const url = URL.createObjectURL(blob);
+    for (const file of files) {
+      const bytes = await file.arrayBuffer();
+      const pdf = await PDFDocument.load(bytes);
 
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `${name}.pdf`;
-  a.click();
+      const pages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
+      pages.forEach((p) => mergedPdf.addPage(p));
+    }
 
-  URL.revokeObjectURL(url);
-};
+    const mergedBytes = await mergedPdf.save();
+    const blob = new Blob([mergedBytes], { type: "application/pdf" });
+    const url = URL.createObjectURL(blob);
 
-return (
-  <div className="space-y-6">
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${name}.pdf`;
+    a.click();
 
-    {/* File Picker */}
-    <label className="block w-full cursor-pointer">
-      <div className="w-full border border-slate-300 bg-white rounded-xl p-4 text-center font-semibold 
-                      flex items-center justify-center gap-2 text-slate-700
-                      hover:bg-slate-100 active:scale-[0.98] transition shadow">
-        <FolderIcon size={20} />
-        Choose PDF Files
-      </div>
+    URL.revokeObjectURL(url);
+  };
 
-      <input
-        type="file"
-        accept="application/pdf"
-        multiple
-        onChange={handleFileSelect}
-        className="hidden"
-      />
-    </label>
+  return (
+    <div className="space-y-6">
 
-    {/* Thumbnails Grid */}
-    {files.length > 0 && (
-      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-5">
-        {files.map((file, index) => (
-          <div key={index} className="relative flex flex-col items-center">
+      {/* File Picker */}
+      <label className="block w-full cursor-pointer">
+        <div className="w-full border border-slate-300 bg-white rounded-xl p-4 text-center font-semibold 
+                        flex items-center justify-center gap-2 text-slate-700
+                        hover:bg-slate-100 active:scale-[0.98] transition shadow">
+          <FolderIcon size={20} /> Choose PDF Files
+        </div>
 
-            {/* Number Badge */}
-            <span className="absolute top-2 left-2 bg-black/70 text-white text-xs px-2 py-0.5 rounded-full z-10">
-              {index + 1}
-            </span>
+        <input
+          type="file"
+          accept="application/pdf"
+          multiple
+          onChange={handleFileSelect}
+          className="hidden"
+        />
+      </label>
 
-            {/* Remove Button */}
-            <button
-              onClick={() => removeFile(index)}
-              className="absolute top-2 right-2 bg-red-600 text-white rounded-full p-1.5 hover:bg-red-700 shadow z-10"
+      {/* File List */}
+      {files.length > 0 && (
+        <div className="space-y-3">
+          {files.map((file, index) => (
+            <div
+              key={index}
+              className="flex items-center justify-between p-3 bg-slate-100 rounded-lg shadow"
             >
-              <Trash2 size={14} />
-            </button>
+              {/* Number + Name */}
+              <div className="flex items-center gap-3">
+                <span className="bg-slate-800 text-white text-xs px-2 py-1 rounded-full">
+                  {index + 1}
+                </span>
+                <p className="text-sm font-medium truncate max-w-[150px] sm:max-w-[200px]">
+                  {file.name}
+                </p>
+              </div>
 
-            {/* Full-Page Thumbnail */}
-            <div className="w-full bg-white rounded-lg border shadow overflow-hidden">
-              <img
-                src={previews[index]}
-                alt="PDF preview"
-                className="w-full aspect-[3/4] object-contain bg-white"
-              />
+              {/* Actions */}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => moveUp(index)}
+                  disabled={index === 0}
+                  className={`p-1 rounded hover:bg-slate-200 ${
+                    index === 0 ? "opacity-30" : ""
+                  }`}
+                >
+                  <ArrowUp size={17} />
+                </button>
+
+                <button
+                  onClick={() => moveDown(index)}
+                  disabled={index === files.length - 1}
+                  className={`p-1 rounded hover:bg-slate-200 ${
+                    index === files.length - 1 ? "opacity-30" : ""
+                  }`}
+                >
+                  <ArrowDown size={17} />
+                </button>
+
+                <button
+                  onClick={() => removeFile(index)}
+                  className="p-1 text-red-600 hover:bg-red-100 rounded"
+                >
+                  <Trash2 size={17} />
+                </button>
+              </div>
             </div>
+          ))}
+        </div>
+      )}
 
-            {/* Reorder Buttons */}
-            <div className="flex items-center justify-center gap-3 mt-2">
-              <button
-                onClick={() => moveUp(index)}
-                disabled={index === 0}
-                className={`p-1.5 rounded-full border shadow 
-                            ${index === 0 ? "opacity-30" : "hover:bg-slate-200"}`}
-              >
-                <ArrowUp size={16} />
-              </button>
-
-              <button
-                onClick={() => moveDown(index)}
-                disabled={index === files.length - 1}
-                className={`p-1.5 rounded-full border shadow 
-                            ${index === files.length - 1 ? "opacity-30" : "hover:bg-slate-200"}`}
-              >
-                <ArrowDown size={16} />
-              </button>
-            </div>
-
-            {/* Filename */}
-            <div className="text-center mt-1 text-xs font-medium truncate px-1 w-full">
-              {file.name}
-            </div>
-          </div>
-        ))}
-      </div>
-    )}
-
-    {/* Merge Button */}
-    {files.length > 1 && (
-      <button
-        onClick={mergePDFs}
-        className="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold shadow hover:bg-indigo-700 active:scale-[0.98]"
-      >
-        Merge PDFs
-      </button>
-    )}
-  </div>
-);
+      {/* Merge Button */}
+      {files.length > 1 && (
+        <button
+          onClick={mergePDFs}
+          className="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold shadow hover:bg-indigo-700 active:scale-[0.98]"
+        >
+          Merge PDFs
+        </button>
+      )}
+    </div>
+  );
 }

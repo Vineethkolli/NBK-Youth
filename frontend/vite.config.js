@@ -20,6 +20,10 @@ export default defineConfig({
       filename: 'sw.js',
       registerType: 'autoUpdate',
 
+      injectManifest: {
+        maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
+      },
+
       includeAssets: [
         '/logo/*.png',
         'developerImage.png',
@@ -72,6 +76,6 @@ export default defineConfig({
   build: {
     sourcemap: false,
     minify: 'esbuild',
-    chunkSizeWarningLimit: 2000,
+    chunkSizeWarningLimit: 3000,
   }
 })
