@@ -2,6 +2,8 @@ import { useState } from "react";
 import { CloudSun, Timer, Coins, CalculatorIcon } from "lucide-react";
 import Weather from "../components/tools/Weather";
 import Calculator from "../components/tools/Calculator";
+import Stopwatch from "../components/tools/Stopwatch";
+import Toss from "../components/tools/Toss";
 
 export default function Tools() {
   const [active, setActive] = useState("weather");
