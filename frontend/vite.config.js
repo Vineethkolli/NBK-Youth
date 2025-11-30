@@ -50,6 +50,7 @@ export default defineConfig({
       },
 
       workbox: {
+        globIgnores: ['**/assets/*.js'],
         cleanupOutdatedCaches: true,
         clientsClaim: true,
         runtimeCaching: [
