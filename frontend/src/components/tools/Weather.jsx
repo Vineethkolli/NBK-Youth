@@ -53,7 +53,6 @@ export default function Weather() {
 
   const currentIndex = findClosestHourIndex(weather?.hourly);
 
-  // Next 24 hours
   const hourlyWindow = useMemo(() => {
     if (!weather?.hourly) return [];
     const h = weather.hourly;
@@ -68,7 +67,6 @@ export default function Weather() {
     }));
   }, [weather, currentIndex]);
 
-  // Daily data
   const dailyList = useMemo(() => {
     if (!weather?.daily) return [];
     const d = weather.daily;

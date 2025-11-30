@@ -4,13 +4,11 @@ import { ArrowUp, ArrowDown, Trash2, FolderIcon } from "lucide-react";
 export default function PdfMergerTool() {
   const [files, setFiles] = useState([]);
 
-  // Handle selection
   const handleFileSelect = async (e) => {
     const selected = Array.from(e.target.files);
     setFiles((prev) => [...prev, ...selected]);
   };
 
-  // Move up
   const moveUp = (index) => {
     if (index === 0) return;
 
@@ -19,7 +17,6 @@ export default function PdfMergerTool() {
     setFiles(updated);
   };
 
-  // Move down
   const moveDown = (index) => {
     if (index === files.length - 1) return;
 
@@ -28,19 +25,16 @@ export default function PdfMergerTool() {
     setFiles(updated);
   };
 
-  // Remove
   const removeFile = (index) => {
     setFiles(files.filter((_, i) => i !== index));
   };
 
-  // MERGE PDFS (Lazy import pdf-lib)
   const mergePDFs = async () => {
     if (files.length < 2) {
       alert("Select at least 2 PDF files!");
       return;
     }
 
-    // Lazy load pdf-lib
     const { PDFDocument } = await import("pdf-lib");
 
     let name = prompt("Enter a name for the merged PDF:", "merged");
@@ -73,7 +67,6 @@ export default function PdfMergerTool() {
   return (
     <div className="space-y-6">
 
-      {/* File Picker */}
       <label className="block w-full cursor-pointer">
         <div className="w-full border border-slate-300 bg-white rounded-xl p-4 text-center font-semibold 
                         flex items-center justify-center gap-2 text-slate-700
@@ -90,7 +83,6 @@ export default function PdfMergerTool() {
         />
       </label>
 
-      {/* File List */}
       {files.length > 0 && (
         <div className="space-y-3">
           {files.map((file, index) => (
@@ -98,7 +90,6 @@ export default function PdfMergerTool() {
               key={index}
               className="flex items-center justify-between p-3 bg-slate-100 rounded-lg shadow"
             >
-              {/* Number + Name */}
               <div className="flex items-center gap-3">
                 <span className="bg-slate-800 text-white text-xs px-2 py-1 rounded-full">
                   {index + 1}
@@ -108,7 +99,6 @@ export default function PdfMergerTool() {
                 </p>
               </div>
 
-              {/* Actions */}
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => moveUp(index)}
@@ -142,7 +132,6 @@ export default function PdfMergerTool() {
         </div>
       )}
 
-      {/* Merge Button */}
       {files.length > 1 && (
         <button
           onClick={mergePDFs}

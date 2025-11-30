@@ -81,7 +81,7 @@ export default function Toss({
   };
 
   return (
-    <div className="w-full flex flex-col items-center mt-8 select-none">
+    <div className="w-full flex flex-col items-center p-8 select-none">
       <div
         ref={wrapperRef}
         style={coinStyle}

@@ -20,7 +20,6 @@ export default function Tools() {
   return (
     <div className="min-h-screen text-slate-900">
 
-      {/* WRAPPING BUTTONS */}
       <div className="flex flex-wrap gap-3 mb-6">
         {tabs.map((t) => {
           const Icon = t.icon;
@@ -40,7 +39,6 @@ export default function Tools() {
         })}
       </div>
 
-      {/* Selected Tool */}
       {active === "weather" && <Weather />}
       {active === "stopwatch" && <Stopwatch />}
       {active === "toss" && <Toss />}
