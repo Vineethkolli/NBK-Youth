@@ -4,7 +4,6 @@ import { Printer } from 'lucide-react';
 import { useHiddenProfiles } from '../../context/HiddenProfileContext';
 import { formatDateTime } from '../../utils/dateTime';
 import { useEventLabel } from '../../context/EventLabelContext';
-import { API_URL } from '../../utils/config';
 
 const IncomePrint = ({ incomes, visibleColumns }) => {
   const { hiddenProfiles } = useHiddenProfiles();
@@ -78,31 +77,21 @@ const handlePrint = () => {
   });
 
   // Footer
- const pageCount = doc.getNumberOfPages();
-for (let i = 1; i <= pageCount; i++) {
-  doc.setPage(i);
-  doc.setFontSize(9);
-
-  const pageHeight = doc.internal.pageSize.height;
-  const pageWidth = doc.internal.pageSize.width;
-
-  const leftText = `Generated on: ${timestamp}`;
-  const centerText = `NBK Youth App | ${API_URL}`;
-  const rightText = `Page ${i} of ${pageCount}`;
-
-  doc.text(leftText, 10, pageHeight - 10);
-
-  const centerX =
-    pageWidth / 2 - doc.getTextWidth(centerText) / 2;
-
-  doc.setTextColor(70, 70, 255);
-  doc.textWithLink(centerText, centerX, pageHeight - 10, {
-    url: API_URL,
-  });
-
-  doc.setTextColor(0, 0, 0);
-  doc.text(rightText, pageWidth - 30, pageHeight - 10);
-}
+  const pageCount = doc.getNumberOfPages();
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    doc.setFontSize(9);
+    doc.text(
+      `Generated on: ${timestamp}`,
+      10,
+      doc.internal.pageSize.height - 10
+    );
+    doc.text(
+      `Page ${i} of ${pageCount}`,
+      doc.internal.pageSize.width - 30,
+      doc.internal.pageSize.height - 10
+    );
+  }
 
   doc.save('Income_Report.pdf');
 };
