@@ -61,18 +61,18 @@ export const developerController = {
           break;
 
         case 'activityLog': {
-          // Selective deletion for activity logs
           const payload = (req.body && Object.keys(req.body).length) ? req.body : (req.query || {});
-          const entityFilter = payload.entity || 'All';
+          const entitiesArray = payload.entities || [];
           const fromDateRaw = payload.fromDate;
           const toDateRaw = payload.toDate;
 
-          const filter = {};
-          if (entityFilter && entityFilter !== 'All') {
-            filter.entityType = entityFilter;
+          if (!entitiesArray || entitiesArray.length === 0) {
+            return res.status(400).json({ message: 'Please select at least one entity type to delete' });
           }
 
-          // Parse and normalize dates
+          const filter = {};
+          filter.entityType = { $in: entitiesArray };
+
           let fromDateObj = null;
           let toDateObj = null;
           try {
@@ -102,7 +102,10 @@ export const developerController = {
 
           const result = await ActivityLog.deleteMany(filter);
           description = `Cleared ${result.deletedCount || 0} activity logs`;
-          if (entityFilter && entityFilter !== 'All') description += ` for entity '${entityFilter}'`;
+          if (entitiesArray.length > 0) {
+            const entityList = entitiesArray.join(', ');
+            description += ` for entities: ${entityList}`;
+          }
           if (fromDateObj || toDateObj) {
             const fromStr = fromDateObj ? fromDateObj.toISOString() : 'earliest';
             const toStr = toDateObj ? toDateObj.toISOString() : 'now';
