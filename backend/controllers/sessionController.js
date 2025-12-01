@@ -143,6 +143,9 @@ export const updateLastActive = async (req, res) => {
 
 export const getUserSessions = async (req, res) => {
   try {
+    // Prefer the access-token-bound sessionId (set by auth middleware)
+    const currentSessionId = req.sessionId ? String(req.sessionId) : null;
+    // Fallback to refresh token cookie comparison if available
     const refreshToken = req.cookies.refreshToken;
     const currentTokenHash = refreshToken ? hashToken(refreshToken) : null;
 
@@ -157,7 +160,10 @@ export const getUserSessions = async (req, res) => {
 
     const sessionsWithCurrent = sessions.map((s) => ({
       ...s,
-      isCurrent: s.tokenHash === currentTokenHash
+      isCurrent:
+        (currentSessionId && String(s._id) === currentSessionId) ||
+        (currentTokenHash && s.tokenHash === currentTokenHash) ||
+        false,
     }));
 
     res.json({ sessions: sessionsWithCurrent });
