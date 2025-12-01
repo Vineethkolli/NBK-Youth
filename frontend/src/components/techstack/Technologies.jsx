@@ -1,7 +1,7 @@
 
 import { SiVercel, SiRender, SiMongodb, SiGmail, SiCloudinary, SiGoogledrive, SiReact, SiTailwindcss, SiVite, 
   SiNodedotjs, SiExpress, SiGoogleanalytics, SiPostman, SiGit, SiGithub, SiGoogletranslate, SiGooglechrome, SiOpenai, 
-  SiYoutube, SiGithubcopilot, SiHuggingface, SiGooglecloud, SiRedis, SiFirebase } from "react-icons/si";
+  SiYoutube, SiGithubcopilot, SiHuggingface, SiGooglecloud, SiRedis, SiFirebase, SiDocker } from "react-icons/si";
 import { FaCode, FaWhatsapp, FaRobot, FaClock } from "react-icons/fa";
 import Footer from "../Footer";
 
@@ -86,7 +86,7 @@ const features = [
 ];
 
 const tools = [
-  { name: "GitHub", icon: <SiGithub className="h-8 w-8 mr-2 text-gray-800" /> },
+  { name: "Docker", icon: <SiDocker className="h-8 w-8 mr-2 text-blue-500" /> },
   { name: "Git", icon: <SiGit className="h-8 w-8 mr-2 text-red-600" /> },
   { name: "VS Code", icon: <FaCode className="h-8 w-8 mr-2 text-blue-500" /> },
   { name: "Postman", icon: <SiPostman className="h-8 w-8 mr-2 text-orange-500" /> },
