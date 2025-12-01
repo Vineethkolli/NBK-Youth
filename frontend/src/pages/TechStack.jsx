@@ -54,7 +54,7 @@ function TechStack() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row items-center justify-between mb-16">
+      <div className="flex flex-col md:flex-row items-center justify-between mb-10">
     
         <div className="mb-4">
           <span className="block font-semibold text-gray-500">Follow us</span>
@@ -121,10 +121,13 @@ function TechStack() {
           <p className="mt-4 text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 font-extrabold text-2xl">
             Developed by Kolli Vineeth
           </p>
+          <p className="mt-2 text-sm font-semibold text-gray-600">
+  🚀 App Live Since Oct 2024
+</p>
         </div>
       </div>
 
-      <section className="mb-16">
+      <section className="mb-12">
         <h2 className="text-2xl font-semibold text-gray-900 mb-8">
           Principles
         </h2>
