@@ -28,43 +28,49 @@ export default function PdfMergerTool() {
   const removeFile = (index) => {
     setFiles(files.filter((_, i) => i !== index));
   };
+const mergePDFs = async () => {
+  if (files.length < 2) {
+    alert("Select at least 2 PDF files!");
+    return;
+  }
 
-  const mergePDFs = async () => {
-    if (files.length < 2) {
-      alert("Select at least 2 PDF files!");
-      return;
-    }
+  const { PDFDocument } = await import("pdf-lib");
 
-    const { PDFDocument } = await import("pdf-lib");
+  let name = prompt("Enter a name for the merged PDF:", "merged");
 
-    let name = prompt("Enter a name for the merged PDF:", "merged");
-    if (!name || name.trim() === "") name = "merged";
+  // ❗ If user clicks Cancel → stop completely
+  if (name === null) {
+    return;
+  }
 
-    name = name.replace(/[^a-zA-Z0-9-_ ]/g, "");
+  // Trim and clean
+  name = name.trim();
+  if (name === "") name = "merged";
+  name = name.replace(/[^a-zA-Z0-9-_ ]/g, "");
 
-    const mergedPdf = await PDFDocument.create();
+  const mergedPdf = await PDFDocument.create();
 
-    for (const file of files) {
-      const bytes = await file.arrayBuffer();
-      const pdf = await PDFDocument.load(bytes);
+  for (const file of files) {
+    const bytes = await file.arrayBuffer();
+    const pdf = await PDFDocument.load(bytes);
+    const pages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
+    pages.forEach((p) => mergedPdf.addPage(p));
+  }
 
-      const pages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
-      pages.forEach((p) => mergedPdf.addPage(p));
-    }
+  const mergedBytes = await mergedPdf.save();
+  const blob = new Blob([mergedBytes], { type: "application/pdf" });
+  const url = URL.createObjectURL(blob);
 
-    const mergedBytes = await mergedPdf.save();
-    const blob = new Blob([mergedBytes], { type: "application/pdf" });
-    const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${name}.pdf`;
+  a.click();
 
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${name}.pdf`;
-    a.click();
+  URL.revokeObjectURL(url);
 
-    URL.revokeObjectURL(url);
-    
-    setFiles([]);
-  };
+  // Clear only after successful download
+  setFiles([]);
+};
 
   return (
     <div className="space-y-6">
@@ -86,7 +92,7 @@ export default function PdfMergerTool() {
       </label>
 
       {files.length > 0 && (
-        <div className="space-y-3">
+        <div className="space-y-3 notranslate">
           {files.map((file, index) => (
             <div
               key={index}

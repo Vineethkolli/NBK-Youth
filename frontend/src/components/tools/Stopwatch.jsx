@@ -89,7 +89,7 @@ function Stopwatch() {
   return (
     <div>
       <div className="w-60 h-60 mx-auto rounded-full border-8 border-gray-200 flex items-center justify-center">
-        <div className="text-4xl font-mono">{format(time)}</div>
+        <div className="text-4xl font-mono notranslate">{format(time)}</div>
       </div>
 
       <div className="flex justify-center gap-6 mt-6">
@@ -213,17 +213,17 @@ function Timer() {
     <div className="flex flex-col items-center">
       <div className="relative w-60 h-60 mx-auto rounded-full border-8 border-gray-200 flex flex-col items-center justify-center">
 
-        <div className="absolute top-6 text-lg font-semibold text-gray-600">
+        <div className="absolute top-6 text-lg font-semibold text-gray-600 notranslate">
           {formatReadable()}
         </div>
 
-        <div className="text-4xl font-mono">
+        <div className="text-4xl font-mono notranslate">
           {left > 0 ? format(left) : format(totalMs)}
         </div>
       </div>
 
       {!running && !paused && (
-        <div className="flex gap-3 mt-5">
+        <div className="flex gap-3 mt-5 notranslate">
           {["h", "m", "s"].map((k) => (
             <div key={k} className="flex flex-col items-center">
               <input

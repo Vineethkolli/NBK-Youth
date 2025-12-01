@@ -315,7 +315,7 @@ export default function Calculator() {
   );
 
   return (
-    <div className="px-4 pb-10 select-none max-w-md mx-auto">
+    <div className="px-4 pb-10 select-none max-w-md mx-auto notranslate">
       <div
         ref={displayRef}
         className="w-full bg-white rounded-xl mt-3 relative overflow-hidden"
