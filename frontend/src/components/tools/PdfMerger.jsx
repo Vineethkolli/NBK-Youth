@@ -36,14 +36,12 @@ const mergePDFs = async () => {
 
   const { PDFDocument } = await import("pdf-lib");
 
-  let name = prompt("Enter a name for the merged PDF:", "merged");
+  let name = prompt("Enter a name for the merged PDF:");
 
-  // ❗ If user clicks Cancel → stop completely
   if (name === null) {
     return;
   }
 
-  // Trim and clean
   name = name.trim();
   if (name === "") name = "merged";
   name = name.replace(/[^a-zA-Z0-9-_ ]/g, "");
@@ -68,7 +66,6 @@ const mergePDFs = async () => {
 
   URL.revokeObjectURL(url);
 
-  // Clear only after successful download
   setFiles([]);
 };
 
