@@ -62,6 +62,8 @@ export default function PdfMergerTool() {
     a.click();
 
     URL.revokeObjectURL(url);
+    
+    setFiles([]);
   };
 
   return (
