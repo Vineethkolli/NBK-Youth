@@ -99,7 +99,7 @@ export default function Weather() {
 
   if (error)
     return (
-      <div className="min-h-screen flex items-center justify-center bg-red-500 text-white">
+      <div className="min-h-screen flex items-center justify-center text-xl">
         <div className="text-center">
           <Cloud className="w-16 h-16 mx-auto mb-4 opacity-50" />
           <p className="text-xl">{error}</p>
