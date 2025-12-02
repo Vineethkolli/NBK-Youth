@@ -92,7 +92,8 @@ export const refreshAccessToken = async (req, res) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      maxAge: fifteenMonths
+      maxAge: fifteenMonths,
+      path: "/"
     });
 
     res.json({
@@ -192,7 +193,8 @@ export const signOutCurrent = async (req, res) => {
     res.clearCookie("refreshToken", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax"
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      path: "/"
     });
 
     res.json({ message: "Signed out successfully" });
