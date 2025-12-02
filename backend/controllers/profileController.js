@@ -1,10 +1,12 @@
 import User from '../models/User.js';
 import Session from '../models/Session.js';
+import OTP from '../models/OTP.js';
 import cloudinary from '../config/cloudinary.js';
 import { logActivity } from '../middleware/activityLogger.js';
 import { hashToken } from '../utils/tokenUtils.js';
 import { normalizePhoneNumber } from '../utils/phoneValidation.js';
 import { OAuth2Client } from 'google-auth-library';
+import { sendOTPEmail } from '../services/emailOTPService.js';
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -39,7 +41,7 @@ export const updateProfile = async (req, res) => {
       phoneNumber: user.phoneNumber
     };
 
-    const normalizedEmail = email?.trim().toLowerCase();
+    const normalizedEmail = email?.trim().toLowerCase() || '';
 
     if (
       user.email === 'gangavaramnbkyouth@gmail.com' &&
@@ -47,7 +49,13 @@ export const updateProfile = async (req, res) => {
     ) {
       return res
         .status(403)
-        .json({ message: 'Cannot change default developer email' });
+        .json({ message: 'Developer email cannot be changed' });
+    }
+
+    if (user.email) {
+      if (!normalizedEmail) {
+        return res.status(400).json({ message: 'Email is required' });
+      }
     }
 
     if (normalizedEmail) {
@@ -87,7 +95,9 @@ export const updateProfile = async (req, res) => {
     }
 
     user.name = name || user.name;
-    user.email = normalizedEmail || user.email;
+    if (normalizedEmail) {
+      user.email = normalizedEmail;
+    }
     user.phoneNumber = phoneNumber || user.phoneNumber;
 
     if (normalizedEmail && normalizedEmail !== originalData.email) {
@@ -421,5 +431,65 @@ export const unlinkGoogleAccount = async (req, res) => {
   } catch (error) {
     console.error('Unlink Google account error:', error);
     res.status(500).json({ message: 'Failed to unlink Google account' });
+  }
+};
+
+
+export const sendEmailOTP = async (req, res) => {
+  try {
+    const { email: rawEmail } = req.body;
+
+    if (!rawEmail || typeof rawEmail !== 'string') {
+      return res.status(400).json({ message: 'Email is required' });
+    }
+
+    const email = rawEmail.trim().toLowerCase();
+    if (!email) {
+      return res.status(400).json({ message: 'Email is required' });
+    }
+
+    const currentUser = await User.findById(req.user.id).lean();
+    if (!currentUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    if (currentUser.email === 'gangavaramnbkyouth@gmail.com' && email !== currentUser.email) {
+      return res.status(403).json({ message: 'Developer email cannot be changed' });
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ message: 'Invalid email format' });
+    }
+
+    const existingUser = await User.findOne({ email }).lean();
+    if (existingUser && existingUser._id.toString() !== req.user.id) {
+      return res.status(400).json({ message: 'Email already in use by another account' });
+    }
+
+    await OTP.deleteMany({ email });
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    await OTP.create({ email, otp });
+
+    const emailSent = await sendOTPEmail(email, otp, 'verify_email');
+
+    if (!emailSent) {
+      return res.status(500).json({ message: 'Failed to send OTP email' });
+    }
+
+    await logActivity(
+      req,
+      'CREATE',
+      'Email',
+      req.user.registerId,
+      { before: null, after: { type: 'profile_email_verify', email } },
+      `Email verification OTP sent to ${req.user.name} for updating profile email`
+    );
+
+    res.json({ message: 'OTP sent to email successfully' });
+  } catch (error) {
+    console.error('Send email OTP error:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 };

@@ -9,6 +9,7 @@ import ProfileDetails from '../components/profile/ProfileDetails';
 import PasswordChangeForm from '../components/profile/PasswordChangeForm';
 import GoogleLinkButton from '../components/profile/GoogleLinkButton';
 import SessionsManager from '../components/profile/SessionsManager';
+import ProfileOTPVerification from '../components/profile/ProfileOTPVerification';
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 
 function Profile() {
@@ -21,6 +22,8 @@ function Profile() {
   const [showImageDialog, setShowImageDialog] = useState(false);
   const [showSignoutConfirm, setShowSignoutConfirm] = useState(false);
   const [showGoogleUnlinkConfirm, setShowGoogleUnlinkConfirm] = useState(false);
+  const [showOTPVerification, setShowOTPVerification] = useState(false);
+  const [pendingProfileData, setPendingProfileData] = useState(null);
 
   const [userData, setUserData] = useState({
     name: user?.name || '',
@@ -42,13 +45,13 @@ function Profile() {
   });
 
   const passwordFormRef = useRef(null);
-  const togglePasswordVisibility = (field) => {
-  setShowPasswords((prev) => ({
-    ...prev,
-    [field]: !prev[field],
-  }));
-};
 
+  const togglePasswordVisibility = (field) => {
+    setShowPasswords((prev) => ({
+      ...prev,
+      [field]: !prev[field],
+    }));
+  };
 
   useEffect(() => {
     if (user) {
@@ -69,13 +72,38 @@ function Profile() {
     setUserData({ ...userData, [e.target.name]: e.target.value });
   };
 
+  const handleCancelEdit = () => {
+    setUserData({
+      name: user.name || '',
+      email: user.email || '',
+      phoneNumber: user.phoneNumber || '',
+      profileImage: user.profileImage || null
+    });
+    setIsEditing(false);
+  };
+
   const handleUpdateProfile = async (e) => {
     e?.preventDefault?.();
 
-    const normalizedEmail = userData.email.trim().toLowerCase();
+    const normalizedEmail = userData.email?.trim().toLowerCase() || '';
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (normalizedEmail && !emailRegex.test(normalizedEmail)) {
-      return toast.error("Please enter a valid email address");
+    
+    // Check if developer is trying to change email
+    if (user.email === 'gangavaramnbkyouth@gmail.com' && normalizedEmail !== user.email) {
+      return toast.error("Developer email cannot be changed");
+    }
+
+    if (user.email) {
+      if (!normalizedEmail) {
+        return toast.error("Email is required");
+      }
+      if (!emailRegex.test(normalizedEmail)) {
+        return toast.error("Please enter a valid email address");
+      }
+    } else {
+      if (normalizedEmail && !emailRegex.test(normalizedEmail)) {
+        return toast.error("Please enter a valid email address");
+      }
     }
 
     let phoneNumber = userData.phoneNumber.trim();
@@ -98,20 +126,52 @@ function Profile() {
       finalPhoneNumber = parsed.number;
     }
 
-    try {
-      setIsUpdatingProfile(true);
-      const { data } = await axios.patch(`${API_URL}/api/profile/profile`, {
-        ...userData,
-        email: normalizedEmail,
-        phoneNumber: finalPhoneNumber,
-      });
-      updateUserData(data);
-      toast.success("Profile updated successfully");
-      setIsEditing(false);
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to update profile");
-    } finally {
-      setIsUpdatingProfile(false);
+    const currentEmail = user.email?.trim().toLowerCase() || '';
+    const emailChanged = normalizedEmail !== currentEmail;
+
+    if (emailChanged) {
+      if (!normalizedEmail) {
+        return;
+      }
+
+      try {
+        setIsUpdatingProfile(true);
+
+        await axios.post(`${API_URL}/api/profile/send-email-otp`, {
+          email: normalizedEmail,
+        });
+
+        setPendingProfileData({
+          ...userData,
+          email: normalizedEmail,
+          phoneNumber: finalPhoneNumber,
+        });
+
+        setShowOTPVerification(true);
+        toast.success('OTP sent to your new email');
+      } catch (error) {
+        toast.error(error.response?.data?.message || "Failed to send OTP");
+      } finally {
+        setIsUpdatingProfile(false);
+      }
+    } else {
+      try {
+        setIsUpdatingProfile(true);
+
+        const { data } = await axios.patch(`${API_URL}/api/profile/profile`, {
+          ...userData,
+          email: normalizedEmail,
+          phoneNumber: finalPhoneNumber,
+        });
+
+        updateUserData(data);
+        toast.success("Profile updated successfully");
+        setIsEditing(false);
+      } catch (error) {
+        toast.error(error.response?.data?.message || "Failed to update profile");
+      } finally {
+        setIsUpdatingProfile(false);
+      }
     }
   };
 
@@ -134,52 +194,46 @@ function Profile() {
     }
   };
 
-const handleSubmit = async (e) => {
-  e?.preventDefault?.();
+  const handleSubmit = async (e) => {
+    e?.preventDefault?.();
 
-  if (passwordData.newPassword.length < 4) {
-    return toast.error('Password must be at least 4 characters long');
-  }
-
-  if (passwordData.newPassword !== passwordData.confirmPassword) {
-    return toast.error('New passwords do not match');
-  }
-
-  setIsUpdatingPassword(true);
-  try {
-    const payload = {
-      newPassword: passwordData.newPassword
-    };
-
-    if (user.hasPassword) {
-      payload.currentPassword = passwordData.currentPassword;
+    if (passwordData.newPassword.length < 4) {
+      return toast.error('Password must be at least 4 characters long');
     }
 
-    const { data } = await axios.post(`${API_URL}/api/profile/change-password`, payload);
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      return toast.error('New passwords do not match');
+    }
 
-    toast.success(data.message || 'Password updated successfully');
-    setIsChangingPassword(false);
-    setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    setIsUpdatingPassword(true);
 
-    // Backend now returns the updated user as data.user
-    if (data.user) {
-      updateUserData(data.user);
-    } else {
-      // Fallback: fetch profile if backend didn't return user
-      try {
-        const profileRes = await axios.get(`${API_URL}/api/profile/profile`);
-        updateUserData(profileRes.data);
-      } catch (fetchErr) {
-        // ignore - user still updated password server-side
+    try {
+      const payload = { newPassword: passwordData.newPassword };
+
+      if (user.hasPassword) {
+        payload.currentPassword = passwordData.currentPassword;
       }
-    }
-  } catch (error) {
-    toast.error(error.response?.data?.message || 'Failed to update password');
-  } finally {
-    setIsUpdatingPassword(false);
-  }
-};
 
+      const { data } = await axios.post(`${API_URL}/api/profile/change-password`, payload);
+
+      toast.success(data.message || 'Password updated successfully');
+      setIsChangingPassword(false);
+      setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+
+      if (data.user) {
+        updateUserData(data.user);
+      } else {
+        try {
+          const profileRes = await axios.get(`${API_URL}/api/profile/profile`);
+          updateUserData(profileRes.data);
+        } catch {}
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to update password');
+    } finally {
+      setIsUpdatingPassword(false);
+    }
+  };
 
   const toggleChangePassword = () => {
     setIsChangingPassword((prev) => {
@@ -194,10 +248,12 @@ const handleSubmit = async (e) => {
   };
 
   const confirmSignout = () => setShowSignoutConfirm(true);
+
   const handleConfirmSignout = () => {
     setShowSignoutConfirm(false);
     signout();
   };
+
   const handleCancelSignout = () => setShowSignoutConfirm(false);
 
   const confirmUnlinkGoogle = () => setShowGoogleUnlinkConfirm(true);
@@ -216,10 +272,36 @@ const handleSubmit = async (e) => {
 
   const handleCancelUnlinkGoogle = () => setShowGoogleUnlinkConfirm(false);
 
+  const handleOTPVerified = async () => {
+    try {
+      setIsUpdatingProfile(true);
+
+      const { data } = await axios.patch(`${API_URL}/api/profile/profile`, pendingProfileData);
+
+      updateUserData(data);
+      toast.success("Profile updated successfully");
+
+      setIsEditing(false);
+      setShowOTPVerification(false);
+      setPendingProfileData(null);
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to update profile");
+    } finally {
+      setIsUpdatingProfile(false);
+    }
+  };
+
+  const handleCancelOTP = () => {
+    setShowOTPVerification(false);
+    setPendingProfileData(null);
+    toast.info('Profile update cancelled');
+  };
+
   if (!user) return null;
 
   return (
     <div className="max-w-3xl mx-auto relative">
+
       <div className="bg-white shadow overflow-hidden rounded-lg">
         <div className="px-4 py-5 sm:px-6 flex justify-between items-center">
           <h3 className="text-2xl font-semibold">
@@ -233,7 +315,7 @@ const handleSubmit = async (e) => {
 
           <button
             onClick={confirmSignout}
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700"
+            className="inline-flex items-center px-4 py-2 rounded-md text-white bg-red-600 hover:bg-red-700 text-sm font-medium"
           >
             <LogOut className="mr-2 h-4 w-4" />
             Sign out
@@ -242,6 +324,7 @@ const handleSubmit = async (e) => {
 
         <div className="border-t border-gray-200">
           <div className="px-4 py-5 sm:px-6">
+
             {showImageDialog && (
               <ProfileImageDialog
                 image={userData.profileImage}
@@ -259,47 +342,49 @@ const handleSubmit = async (e) => {
               isUpdatingProfile={isUpdatingProfile}
               onImageClick={() => setShowImageDialog(true)}
             />
+
           </div>
         </div>
 
-       <div className="px-4 py-5 sm:px-6 space-y-4">
-
-  {/* Show message ONLY when "Set Password" button is shown */}
-  {!user.hasPassword && (
-    <div className="bg-yellow-100 text-yellow-800 border border-yellow-300 px-4 py-2 rounded-md text-sm">
-      You signed up using Google. Please set a password for manually login.
-    </div>
-  )}
+        <div className="px-4 py-5 sm:px-6 space-y-4">
+          {!user.hasPassword && (
+            <div className="bg-yellow-100 text-yellow-800 border border-yellow-300 px-4 py-2 rounded-md text-sm">
+              You signed up using Google. Please set a password for manual login.
+            </div>
+          )}
 
   <div className="space-x-4 space-y-4">
     <button
-      onClick={() => setIsEditing(!isEditing)}
+      onClick={() => {
+        if (isEditing) {
+          handleCancelEdit();
+        } else {
+          setIsEditing(true);
+        }
+      }}
       className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-gray-300 hover:bg-gray-50"
     >
       <Edit2 className="mr-2 h-4 w-4" />
       {isEditing ? 'Cancel' : 'Edit Profile'}
-    </button>
+    </button>            <button
+              onClick={toggleChangePassword}
+              className="inline-flex items-center px-3 py-2 rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700"
+            >
+              {isChangingPassword ? 'Cancel' : (user.hasPassword ? 'Change Password' : 'Set Password')}
+            </button>
 
-    <button
-      onClick={toggleChangePassword}
-      className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
-    >
-      {isChangingPassword ? 'Cancel' : (user.hasPassword ? 'Change Password' : 'Set Password')}
-    </button>
-
-    {user.googleId ? (
-      <button
-        onClick={confirmUnlinkGoogle}
-        className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700"
-      >
-        Remove Google Connection
-      </button>
-    ) : (
-      <GoogleLinkButton onLinked={() => {}} />
-    )}
-  </div>
-</div>
-
+            {user.googleId ? (
+              <button
+                onClick={confirmUnlinkGoogle}
+                className="inline-flex items-center px-3 py-2 rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700"
+              >
+                Remove Google Connection
+              </button>
+            ) : (
+              <GoogleLinkButton onLinked={() => {}} />
+            )}
+          </div>
+        </div>
 
         {isChangingPassword && (
           <div ref={passwordFormRef} className="px-4 py-5 sm:px-6">
@@ -361,6 +446,15 @@ const handleSubmit = async (e) => {
           </div>
         </div>
       )}
+
+      {showOTPVerification && pendingProfileData && (
+        <ProfileOTPVerification
+          email={pendingProfileData.email}
+          onVerified={handleOTPVerified}
+          onCancel={handleCancelOTP}
+        />
+      )}
+
     </div>
   );
 }
