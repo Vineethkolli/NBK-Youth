@@ -157,11 +157,10 @@ export const signUp = async (req, res) => {
       req
     );
 
-    const isHttps = req.secure || (process.env.FRONTEND_URL || '').startsWith('https://');
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
-      secure: isHttps,
-      sameSite: isHttps ? 'none' : 'lax',
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
       maxAge: 365 * 24 * 60 * 60 * 1000
     });
 
@@ -249,11 +248,10 @@ export const signIn = async (req, res) => {
       req
     );
 
-    const isHttps2 = req.secure || (process.env.FRONTEND_URL || '').startsWith('https://');
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
-      secure: isHttps2,
-      sameSite: isHttps2 ? 'none' : 'lax',
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
       maxAge: 365 * 24 * 60 * 60 * 1000
     });
 
@@ -322,11 +320,10 @@ export const googleAuth = async (req, res) => {
         req
       );
 
-      const isHttps3 = req.secure || (process.env.FRONTEND_URL || '').startsWith('https://');
       res.cookie('refreshToken', refreshToken, {
         httpOnly: true,
-        secure: isHttps3,
-        sameSite: isHttps3 ? 'none' : 'lax',
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
         maxAge: 365 * 24 * 60 * 60 * 1000
       });
 
@@ -392,11 +389,10 @@ export const googleAuth = async (req, res) => {
       req
     );
 
-    const isHttps4 = req.secure || (process.env.FRONTEND_URL || '').startsWith('https://');
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
-      secure: isHttps4,
-      sameSite: isHttps4 ? 'none' : 'lax',
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
       maxAge: 365 * 24 * 60 * 60 * 1000
     });
 
