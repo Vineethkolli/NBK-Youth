@@ -92,8 +92,7 @@ export const refreshAccessToken = async (req, res) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      maxAge: fifteenMonths,
-      path: "/"
+      maxAge: fifteenMonths
     });
 
     res.json({
@@ -144,9 +143,6 @@ export const updateLastActive = async (req, res) => {
 
 export const getUserSessions = async (req, res) => {
   try {
-    // Prefer the access-token-bound sessionId (set by auth middleware)
-    const currentSessionId = req.sessionId ? String(req.sessionId) : null;
-    // Fallback to refresh token cookie comparison if available
     const refreshToken = req.cookies.refreshToken;
     const currentTokenHash = refreshToken ? hashToken(refreshToken) : null;
 
@@ -161,10 +157,7 @@ export const getUserSessions = async (req, res) => {
 
     const sessionsWithCurrent = sessions.map((s) => ({
       ...s,
-      isCurrent:
-        (currentSessionId && String(s._id) === currentSessionId) ||
-        (currentTokenHash && s.tokenHash === currentTokenHash) ||
-        false,
+      isCurrent: s.tokenHash === currentTokenHash
     }));
 
     res.json({ sessions: sessionsWithCurrent });
@@ -183,18 +176,12 @@ export const signOutCurrent = async (req, res) => {
 
     const tokenHash = hashToken(refreshToken);
 
-    // Set isValid to false for the current session
-    await Session.findOneAndUpdate(
-      { tokenHash }, 
-      { $set: { isValid: false } },
-      { new: true }
-    );
+    await Session.findOneAndUpdate({ tokenHash }, { isValid: false });
 
     res.clearCookie("refreshToken", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      path: "/"
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax"
     });
 
     res.json({ message: "Signed out successfully" });
