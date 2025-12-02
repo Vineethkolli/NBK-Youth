@@ -88,10 +88,11 @@ export const refreshAccessToken = async (req, res) => {
     session.lastActive = new Date();
     await session.save();
 
+    const isHttps = req.secure || (process.env.FRONTEND_URL || '').startsWith('https://');
     res.cookie("refreshToken", newRefreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      secure: isHttps,
+      sameSite: isHttps ? "none" : "lax",
       maxAge: fifteenMonths
     });
 
@@ -178,10 +179,11 @@ export const signOutCurrent = async (req, res) => {
 
     await Session.findOneAndUpdate({ tokenHash }, { isValid: false });
 
+    const isHttps2 = req.secure || (process.env.FRONTEND_URL || '').startsWith('https://');
     res.clearCookie("refreshToken", {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax"
+      secure: isHttps2,
+      sameSite: isHttps2 ? "none" : "lax"
     });
 
     res.json({ message: "Signed out successfully" });
