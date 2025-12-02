@@ -182,7 +182,12 @@ export const signOutCurrent = async (req, res) => {
 
     const tokenHash = hashToken(refreshToken);
 
-    await Session.findOneAndUpdate({ tokenHash }, { isValid: false });
+    // Set isValid to false for the current session
+    await Session.findOneAndUpdate(
+      { tokenHash }, 
+      { $set: { isValid: false } },
+      { new: true }
+    );
 
     res.clearCookie("refreshToken", {
       httpOnly: true,
