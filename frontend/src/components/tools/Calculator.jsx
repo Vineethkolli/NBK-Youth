@@ -1,11 +1,23 @@
-import { useEffect, useRef, useState, useLayoutEffect  } from "react";
-import { Clock, X, Trash2, CalculatorIcon } from "lucide-react";
+import { useEffect, useRef, useState, useLayoutEffect } from "react";
+import { Clock, X, CalculatorIcon } from "lucide-react";
 
 export default function Calculator() {
   const [input, setInput] = useState("0");
   const [cursorPos, setCursorPos] = useState(0);
   const [history, setHistory] = useState([]);
   const [showHistory, setShowHistory] = useState(false);
+
+  // Lazy-loaded math.js instance
+  const [math, setMath] = useState(null);
+
+  // Load mathjs lazily only once
+  useEffect(() => {
+    import("mathjs").then((m) => {
+      const { create, all } = m;
+      const mathInstance = create(all, { number: "number" });
+      setMath(mathInstance);
+    });
+  }, []);
 
   const exprRef = useRef(null);
   const displayRef = useRef(null);
@@ -14,99 +26,129 @@ export default function Calculator() {
   const [cursorVisible, setCursorVisible] = useState(true);
   const [cursorCoords, setCursorCoords] = useState({ left: 0, top: 0, height: 36 });
 
-const firstRender = useRef(true);
-useLayoutEffect(() => {
-  if (firstRender.current) {
-    firstRender.current = false;
-    setCursorPos(input.length);
-  }
-}, [input]);
-
+  const firstRender = useRef(true);
 
   useLayoutEffect(() => {
-  requestAnimationFrame(() => {
-    updateCursorOverlay();
-    ensureCursorVisible();
-  });
-}, [input, cursorPos]);
+    if (firstRender.current) {
+      firstRender.current = false;
+      setCursorPos(input.length);
+    }
+  }, [input]);
+
+  useLayoutEffect(() => {
+    requestAnimationFrame(() => {
+      updateCursorOverlay();
+      ensureCursorVisible();
+    });
+  }, [input, cursorPos]);
 
   const saveHistory = (exp, res) => {
-  const item = { exp, res, time: Date.now() };
-
-  const THREE_MONTHS = 90 * 24 * 60 * 60 * 1000;
-  const cutoff = Date.now() - THREE_MONTHS;
-
-  const filtered = history.filter(h => h.time >= cutoff);
-
-  const newHistory = [item, ...filtered].slice(0, 100);
-  setHistory(newHistory);
-  localStorage.setItem("calc-history", JSON.stringify(newHistory));
-};
-
-useEffect(() => {
-  const saved = localStorage.getItem("calc-history");
-  if (saved) {
-    const items = JSON.parse(saved);
+    const item = { exp, res, time: Date.now() };
 
     const THREE_MONTHS = 90 * 24 * 60 * 60 * 1000;
     const cutoff = Date.now() - THREE_MONTHS;
 
-    const filtered = items.filter(h => h.time >= cutoff);
+    const filtered = history.filter((h) => h.time >= cutoff);
 
-    setHistory(filtered);
-    localStorage.setItem("calc-history", JSON.stringify(filtered));
-  }
+    const newHistory = [item, ...filtered].slice(0, 100);
+    setHistory(newHistory);
+    localStorage.setItem("calc-history", JSON.stringify(newHistory));
+  };
 
-  const id = setInterval(() => setCursorVisible((s) => !s), 600);
-  return () => clearInterval(id);
-}, []);
+  useEffect(() => {
+    const saved = localStorage.getItem("calc-history");
+    if (saved) {
+      const items = JSON.parse(saved);
 
-const formatDate = (ts) => {
-  const d = new Date(ts);
+      const THREE_MONTHS = 90 * 24 * 60 * 60 * 1000;
+      const cutoff = Date.now() - THREE_MONTHS;
 
-  const day = String(d.getDate()).padStart(2, "0");
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const year = d.getFullYear();
+      const filtered = items.filter((h) => h.time >= cutoff);
 
-  let hours = d.getHours();
-  const minutes = String(d.getMinutes()).padStart(2, "0");
-  const ampm = hours >= 12 ? "PM" : "AM";
-
-  hours = hours % 12;
-  hours = hours ? hours : 12;
-
-  return `${day}/${month}/${year} ${hours}:${minutes} ${ampm}`;
-};
-
-  const insertAtCursor = (text) => {
-  const operators = ["+", "-", "×", "÷"];
-
-  if (operators.includes(text)) {
-    const prev = input[cursorPos - 1];
-
-    if (operators.includes(prev)) {
-      const left = input.slice(0, cursorPos - 1);
-      const right = input.slice(cursorPos);
-      const newVal = left + text + right;
-      setInput(newVal);
-      setCursorPos(cursorPos);
-      return;
+      setHistory(filtered);
+      localStorage.setItem("calc-history", JSON.stringify(filtered));
     }
-  }
 
-  const isNumberOrDot = /^[0-9.]$/.test(text);
-  if (input === "0" && isNumberOrDot) {
-    setInput(text);
-    setCursorPos(text.length);
-    return;
-  }
+    const id = setInterval(() => setCursorVisible((s) => !s), 600);
+    return () => clearInterval(id);
+  }, []);
 
-  const left = input.slice(0, cursorPos);
-  const right = input.slice(cursorPos);
-  const newVal = left + text + right;
-  setInput(newVal);
-  setCursorPos(cursorPos + text.length);
-};
+  const formatDate = (ts) => {
+    const d = new Date(ts);
+    const day = String(d.getDate()).padStart(2, "0");
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const year = d.getFullYear();
+    let hours = d.getHours();
+    const minutes = String(d.getMinutes()).padStart(2, "0");
+    const ampm = hours >= 12 ? "PM" : "AM";
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+    return `${day}/${month}/${year} ${hours}:${minutes} ${ampm}`;
+  };
+
+  // -----------------------------
+  // INSERT AT CURSOR LOGIC
+  // -----------------------------
+  const insertAtCursor = (text) => {
+    const operators = ["+", "-", "×", "÷"];
+
+    // Replace operator when previous is also operator
+    if (operators.includes(text)) {
+      const prev = input[cursorPos - 1];
+      if (operators.includes(prev)) {
+        const left = input.slice(0, cursorPos - 1);
+        const right = input.slice(cursorPos);
+        const newVal = left + text + right;
+        setInput(newVal);
+        setCursorPos(cursorPos);
+        return;
+      }
+    }
+
+    // Prevent multiple dots
+    if (text === ".") {
+      const left = input.slice(0, cursorPos);
+      const lastNumber = left.match(/[0-9.]*$/);
+      if (lastNumber && lastNumber[0].includes(".")) return;
+    }
+
+    // Replace default 0
+    const isNumberOrDot = /^[0-9.]$/.test(text);
+    if (input === "0" && cursorPos === 1) {
+      if (isNumberOrDot || text === "(") {
+        setInput(text);
+        setCursorPos(text.length);
+        return;
+      }
+    }
+
+    // Insert × before (
+    if (text === "(") {
+      const prev = input[cursorPos - 1];
+      if (/[0-9)]/.test(prev)) {
+        const newVal = input.slice(0, cursorPos) + "×(" + input.slice(cursorPos);
+        setInput(newVal);
+        setCursorPos(cursorPos + 2);
+        return;
+      }
+    }
+
+    // Insert × after )
+    if (/^[0-9]$/.test(text)) {
+      const prev = input[cursorPos - 1];
+      if (prev === ")") {
+        const newVal = input.slice(0, cursorPos) + "×" + text + input.slice(cursorPos);
+        setInput(newVal);
+        setCursorPos(cursorPos + 2);
+        return;
+      }
+    }
+
+    // Normal insert
+    const newVal = input.slice(0, cursorPos) + text + input.slice(cursorPos);
+    setInput(newVal);
+    setCursorPos(cursorPos + text.length);
+  };
 
   const deleteLeft = () => {
     if (input === "Error") {
@@ -115,62 +157,15 @@ const formatDate = (ts) => {
       return;
     }
     if (cursorPos <= 0) return;
-    const left = input.slice(0, cursorPos - 1);
-    const right = input.slice(cursorPos);
-    const newVal = left + right;
+
+    const newVal = input.slice(0, cursorPos - 1) + input.slice(cursorPos);
     setInput(newVal === "" ? "0" : newVal);
-    setCursorPos(Math.max(0, cursorPos - 1));
+    setCursorPos((p) => Math.max(0, p - 1));
   };
 
-  function safeEval(expr) {
-    if (!/^[0-9+\-*/().\s]*$/.test(expr)) throw new Error();
-
-    const tokens = expr.match(/[()+\-*/]|\d*\.?\d+/g);
-    if (!tokens) throw new Error();
-
-    const toRPN = (tokens) => {
-      const out = [];
-      const stack = [];
-      const prec = { "+": 1, "-": 1, "*": 2, "/": 2 };
-      for (let t of tokens) {
-        if (!isNaN(t)) out.push(t);
-        else if ("+-*/".includes(t)) {
-          while (
-            stack.length &&
-            "+-*/".includes(stack.at(-1)) &&
-            prec[stack.at(-1)] >= prec[t]
-          )
-            out.push(stack.pop());
-          stack.push(t);
-        } else if (t === "(") stack.push(t);
-        else if (t === ")") {
-          while (stack.length && stack.at(-1) !== "(") out.push(stack.pop());
-          stack.pop();
-        }
-      }
-      while (stack.length) out.push(stack.pop());
-      return out;
-    };
-
-    const evalRPN = (rpn) => {
-      const stack = [];
-      for (let t of rpn) {
-        if (!isNaN(t)) stack.push(parseFloat(t));
-        else {
-          const b = stack.pop();
-          const a = stack.pop();
-          if (t === "+") stack.push(a + b);
-          else if (t === "-") stack.push(a - b);
-          else if (t === "*") stack.push(a * b);
-          else if (t === "/") stack.push(a / b);
-        }
-      }
-      return stack[0];
-    };
-
-    return evalRPN(toRPN(tokens));
-  }
-
+  // -----------------------------
+  // LIVE RESULT (Lazy mathjs)
+  // -----------------------------
   let liveResult = "";
   const isExpressionComplete = () => {
     if (input.trim() === "") return false;
@@ -178,47 +173,67 @@ const formatDate = (ts) => {
     if (/%$/.test(input)) return true;
     return false;
   };
-  try {
-    if (isExpressionComplete()) {
-      const expr = input.replace(/×/g, "*").replace(/÷/g, "/").replace(/(\d+)%/g, "($1 * 0.01)");
-      const v = safeEval(expr);
-      if (typeof v !== "undefined" && !Number.isNaN(v)) liveResult = v.toString();
-    }
-  } catch {
-    liveResult = "";
-  }
 
+  try {
+    if (math && isExpressionComplete()) {
+      let expr = input;
+
+      const open = (expr.match(/\(/g) || []).length;
+      const close = (expr.match(/\)/g) || []).length;
+      if (open > close) expr += ")".repeat(open - close);
+
+      expr = expr
+        .replace(/×/g, "*")
+        .replace(/÷/g, "/")
+        .replace(/(\d+)%/g, "($1/100)");
+
+      const value = math.evaluate(expr);
+      if (!Number.isNaN(value)) liveResult = value.toString();
+    }
+  } catch {}
+
+  // -----------------------------
+  // CALCULATE
+  // -----------------------------
   const calculate = () => {
-  try {
-    const trimmed = input.trim();
+    try {
+      if (!math) return; // still loading
 
-    if (trimmed === "" || trimmed === "0") return;
+      let trimmed = input.trim();
+      if (trimmed === "" || trimmed === "0") return;
 
-    const hasOperator = /[+\-×÷%]/.test(trimmed);
-    if (!hasOperator) {
-      return;
+      if (!/[+\-×÷%()]/.test(trimmed)) return;
+
+      const open = (trimmed.match(/\(/g) || []).length;
+      const close = (trimmed.match(/\)/g) || []).length;
+      if (open > close) trimmed += ")".repeat(open - close);
+
+      trimmed = trimmed.replace(/[+\-×÷]+$/, "");
+
+      const expr = trimmed
+        .replace(/×/g, "*")
+        .replace(/÷/g, "/")
+        .replace(/(\d+)%/g, "($1/100)");
+
+      const result = math.evaluate(expr);
+      const res = result.toString();
+
+      const last = history[0];
+      if (!(last && last.exp === trimmed && last.res === res)) {
+        saveHistory(trimmed, res);
+      }
+
+      setInput(res);
+      setCursorPos(res.length);
+    } catch {
+      setInput("Error");
+      setCursorPos(5);
     }
+  };
 
-    const expr = trimmed
-      .replace(/×/g, "*")
-      .replace(/÷/g, "/")
-      .replace(/(\d+)%/g, "($1 * 0.01)");
-
-    const res = safeEval(expr).toString();
-
-    const last = history[0];
-    if (!(last && last.exp === trimmed && last.res === res)) {
-      saveHistory(trimmed, res);
-    }
-
-    setInput(res);
-    setCursorPos(res.length);
-  } catch {
-    setInput("Error");
-    setCursorPos(5);
-  }
-};
-
+  // -----------------------------
+  // KEYBOARD INPUT
+  // -----------------------------
   useEffect(() => {
     const handleKey = (e) => {
       const key = e.key;
@@ -231,14 +246,12 @@ const formatDate = (ts) => {
         e.preventDefault();
         return calculate();
       }
-
       if (/^[0-9+\-*/().%]$/.test(key)) {
         e.preventDefault();
         if (key === "*") return insertAtCursor("×");
         if (key === "/") return insertAtCursor("÷");
         return insertAtCursor(key);
       }
-
       if (key === "ArrowLeft") {
         e.preventDefault();
         setCursorPos((p) => Math.max(0, p - 1));
@@ -253,110 +266,92 @@ const formatDate = (ts) => {
     return () => window.removeEventListener("keydown", handleKey);
   }, [input]);
 
+  // -----------------------------
+  // CURSOR POSITIONING
+  // -----------------------------
   const updateCursorOverlay = () => {
-  const exprEl = exprRef.current;
-  if (!exprEl) return;
+    const exprEl = exprRef.current;
+    if (!exprEl) return;
 
-  const el = cursorPos > 0 ? charRefs.current[cursorPos - 1] : null;
+    const el = cursorPos > 0 ? charRefs.current[cursorPos - 1] : null;
 
-  let left = 6;
-  let top = 4;
-  let height = 36;
+    let left = 6,
+      top = 4,
+      height = 36;
 
-  if (el) {
-    // match wrapped text position
-    left = el.offsetLeft + el.offsetWidth;
-    top = el.offsetTop;
-    height = el.offsetHeight;
-  } else {
-    // cursor at start
-    const first = charRefs.current[0];
-    if (first) {
-      top = first.offsetTop;
-      height = first.offsetHeight;
+    if (el) {
+      left = el.offsetLeft + el.offsetWidth;
+      top = el.offsetTop;
+      height = el.offsetHeight;
+    } else {
+      const first = charRefs.current[0];
+      if (first) {
+        top = first.offsetTop;
+        height = first.offsetHeight;
+      }
     }
-    left = 6;
-  }
 
-  setCursorCoords({ left, top, height });
-};
-
-  const getLineHeight = (el) => {
-    const cs = window.getComputedStyle(el);
-    const lh = parseFloat(cs.lineHeight);
-    if (!Number.isNaN(lh)) return lh;
-    return parseFloat(cs.fontSize) * 1.1;
+    setCursorCoords({ left, top, height });
   };
 
   const ensureCursorVisible = () => {
-  const expr = exprRef.current;
-  if (!expr) return;
+    const expr = exprRef.current;
+    if (!expr) return;
 
-  const cursorX = cursorCoords.left;
-  const viewLeft = expr.scrollLeft;
-  const viewRight = expr.scrollLeft + expr.clientWidth;
-  const margin = 30;
+    const cursorX = cursorCoords.left;
+    const viewLeft = expr.scrollLeft;
+    const viewRight = expr.scrollLeft + expr.clientWidth;
+    const margin = 30;
 
-  if (cursorX < viewLeft + margin) {
-    expr.scrollLeft = Math.max(0, cursorX - margin);
-  }
-
-  else if (cursorX > viewRight - margin) {
-    expr.scrollLeft = cursorX - expr.clientWidth + margin;
-  }
-};
+    if (cursorX < viewLeft + margin)
+      expr.scrollLeft = Math.max(0, cursorX - margin);
+    else if (cursorX > viewRight - margin)
+      expr.scrollLeft = cursorX - expr.clientWidth + margin;
+  };
 
   const draggingRef = useRef(false);
 
- const computePosFromPointer = (clientX, clientY) => {
-  const exprEl = exprRef.current;
-  if (!exprEl) return 0;
+  const computePosFromPointer = (clientX, clientY) => {
+    const exprEl = exprRef.current;
+    if (!exprEl) return 0;
 
-  const rect = exprEl.getBoundingClientRect();
-  const x = clientX - rect.left + exprEl.scrollLeft;
-  const y = clientY - rect.top + exprEl.scrollTop;
+    const rect = exprEl.getBoundingClientRect();
+    const x = clientX - rect.left + exprEl.scrollLeft;
 
-  let closestIndex = input.length;
-  let bestDist = Infinity;
+    let closestIndex = input.length;
+    let bestDist = Infinity;
 
-  for (let i = 0; i < input.length; i++) {
-    const el = charRefs.current[i];
-    if (!el) continue;
+    for (let i = 0; i < input.length; i++) {
+      const el = charRefs.current[i];
+      if (!el) continue;
 
-    const cx = el.offsetLeft + el.offsetWidth / 2;
-    const cy = el.offsetTop + el.offsetHeight / 2;
+      const cx = el.offsetLeft + el.offsetWidth / 2;
+      const dx = cx - x;
 
-    const dx = cx - x;
-    const dy = cy - y;
-    const dist = dx * dx + dy * dy;
-
-    if (dist < bestDist) {
-      bestDist = dist;
-      closestIndex = i;
+      const dist = dx * dx;
+      if (dist < bestDist) {
+        bestDist = dist;
+        closestIndex = i;
+      }
     }
-  }
 
-  // decide left or right of closest character
-  const el = charRefs.current[closestIndex];
-  if (el && x > el.offsetLeft + el.offsetWidth / 2) {
-    return closestIndex + 1;
-  }
+    const el = charRefs.current[closestIndex];
+    if (el && x > el.offsetLeft + el.offsetWidth / 2)
+      return closestIndex + 1;
 
-  return closestIndex;
-};
+    return closestIndex;
+  };
 
   const onPointerDown = (e) => {
-  draggingRef.current = true;
-  e.currentTarget.setPointerCapture(e.pointerId);
-  const pos = computePosFromPointer(e.clientX, e.clientY);
-  setCursorPos(pos);
-};
+    draggingRef.current = true;
+    e.currentTarget.setPointerCapture(e.pointerId);
+    setCursorPos(computePosFromPointer(e.clientX, e.clientY));
+  };
 
-const onPointerMove = (e) => {
-  if (!draggingRef.current) return;
-  const pos = computePosFromPointer(e.clientX, e.clientY);
-  setCursorPos(pos);
-};
+  const onPointerMove = (e) => {
+    if (!draggingRef.current) return;
+    setCursorPos(computePosFromPointer(e.clientX, e.clientY));
+  };
 
   const onPointerUp = (e) => {
     draggingRef.current = false;
@@ -365,56 +360,19 @@ const onPointerMove = (e) => {
     } catch {}
   };
 
-  const handlePress = (lbl) => {
-    if (lbl === "C") {
-      setInput("0");
-      setCursorPos(1);
-      return;
-    }
-    if (lbl === "=") {
-      calculate();
-      return;
-    }
-    if (lbl === "()") {
-      const open = (input.match(/\(/g) || []).length;
-      const close = (input.match(/\)/g) || []).length;
-      insertAtCursor(open === close ? "(" : ")");
-      return;
-    }
-    if (lbl === "+/-") {
-      let i = cursorPos;
-      while (i > 0 && /[0-9.]/.test(input[i - 1])) i--;
-      if (i === 0) {
-        if (input.startsWith("-")) {
-          setInput(input.slice(1));
-          setCursorPos(Math.max(0, cursorPos - 1));
-        } else {
-          setInput("-" + input);
-          setCursorPos(cursorPos + 1);
-        }
-      } else {
-        const left = input.slice(0, i);
-        const right = input.slice(i);
-        setInput(left + "-" + right);
-        setCursorPos(cursorPos + 1);
-      }
-      return;
-    }
-    insertAtCursor(lbl);
-  };
-
   charRefs.current = Array.from({ length: input.length }).map(
-    (v, i) => charRefs.current[i] || null
+    (_, i) => charRefs.current[i] || null
   );
+
   const historyRef = useRef(null);
+  useEffect(() => {
+    if (showHistory && historyRef.current)
+      historyRef.current.scrollTop = historyRef.current.scrollHeight;
+  }, [showHistory, history]);
 
-useEffect(() => {
-  if (showHistory && historyRef.current) {
-    historyRef.current.scrollTop = historyRef.current.scrollHeight;
-  }
-}, [showHistory, history]);
-
-
+  // -----------------------------
+  // RENDER
+  // -----------------------------
   return (
     <div className="select-none max-w-md mx-auto notranslate">
       <div
@@ -427,6 +385,7 @@ useEffect(() => {
           flexDirection: "column",
         }}
       >
+        {/* EXPRESSION AREA */}
         <div
           ref={exprRef}
           className="flex-1 overflow-y-auto"
@@ -461,6 +420,7 @@ useEffect(() => {
             ))}
           </div>
 
+          {/* CURSOR BAR */}
           <div
             aria-hidden
             style={{
@@ -476,6 +436,7 @@ useEffect(() => {
           />
         </div>
 
+        {/* LIVE RESULT */}
         <div
           style={{
             fontSize: 24,
@@ -490,17 +451,18 @@ useEffect(() => {
         </div>
       </div>
 
+      {/* TOP BAR */}
       <div className="flex justify-between items-center mt-2 px-4">
         <button
-  onClick={() => setShowHistory(!showHistory)}
-  className="w-8 h-8 flex justify-center items-center rounded-full bg-gray-200 text-gray-600"
->
-  {showHistory ? (
-    <CalculatorIcon size={24} strokeWidth={1.5} />
-  ) : (
-    <Clock size={24} strokeWidth={1.5} />
-  )}
-</button>
+          onClick={() => setShowHistory(!showHistory)}
+          className="w-8 h-8 flex justify-center items-center rounded-full bg-gray-200 text-gray-600"
+        >
+          {showHistory ? (
+            <CalculatorIcon size={24} strokeWidth={1.5} />
+          ) : (
+            <Clock size={24} strokeWidth={1.5} />
+          )}
+        </button>
         <button
           onClick={deleteLeft}
           className="w-10 h-8 flex justify-center items-center rounded-full border-2 border-green-500 text-green-600"
@@ -509,90 +471,93 @@ useEffect(() => {
         </button>
       </div>
 
+      {/* HISTORY */}
       {showHistory && (
-  <div
-    ref={historyRef}
-    className="mt-4 p-4 rounded-xl space-y-4 h-80 overflow-y-auto scrollbar-thin"
-  >
-    {history.length === 0 ? (
-      <div className="text-center py-4 text-lg">No history</div>
-    ) : (
-      [...history].reverse().map((h, i) => (
         <div
-          key={i}
-          onClick={() => {
-            setInput(h.exp);
-            setCursorPos(h.exp.length);
-            setShowHistory(false);
-          }}
-          className="py-3 border-b border-gray-700 cursor-pointer"
+          ref={historyRef}
+          className="mt-4 p-4 rounded-xl space-y-4 h-80 overflow-y-auto scrollbar-thin"
         >
-          <div className="text-lg">{h.exp}</div>
-          <div className="text-xl font-bold">= {h.res}</div>
-          <div className="text-gray-500 text-xs">{formatDate(h.time)}</div>
+          {history.length === 0 ? (
+            <div className="text-center py-4 text-lg">No history</div>
+          ) : (
+            [...history].reverse().map((h, i) => (
+              <div
+                key={i}
+                onClick={() => {
+                  setInput(h.exp);
+                  setCursorPos(h.exp.length);
+                  setShowHistory(false);
+                }}
+                className="py-3 border-b border-gray-700 cursor-pointer"
+              >
+                <div className="text-lg">{h.exp}</div>
+                <div className="text-xl font-bold">= {h.res}</div>
+                <div className="text-gray-500 text-xs">
+                  {formatDate(h.time)}
+                </div>
+              </div>
+            ))
+          )}
+
+          <button
+            onClick={() => {
+              setHistory([]);
+              localStorage.removeItem("calc-history");
+            }}
+            className="bg-gray-800 py-2 px-4 rounded-full text-white text-center text-lg"
+          >
+            Clear history
+          </button>
         </div>
-      ))
-    )}
+      )}
 
-    <button
-      onClick={() => {
-        setHistory([]);
-        localStorage.removeItem("calc-history");
-      }}
-      className="bg-gray-800 py-2 px-4 rounded-full text-white text-center text-lg"
-    >
-      Clear history
-    </button>
-  </div>
-)}
-
+      {/* BUTTON GRID */}
       {!showHistory && (
-  <div className="grid grid-cols-4 gap-3 mt-4">
-    {[
-      "C",
-      "()",
-      "%",
-      "÷",
-      "7",
-      "8",
-      "9",
-      "×",
-      "4",
-      "5",
-      "6",
-      "-",
-      "1",
-      "2",
-      "3",
-      "+",
-      "+/-",
-      "0",
-      ".",
-      "=",
-    ].map((lbl, i) => {
-      let style =
-        "h-15 rounded-full flex items-center justify-center text-2xl active:scale-95 transition";
+        <div className="grid grid-cols-4 gap-3 mt-4">
+          {[
+            "C",
+            "()",
+            "%",
+            "÷",
+            "7",
+            "8",
+            "9",
+            "×",
+            "4",
+            "5",
+            "6",
+            "-",
+            "1",
+            "2",
+            "3",
+            "+",
+            "+/-",
+            "0",
+            ".",
+            "=",
+          ].map((lbl, i) => {
+            let style =
+              "h-15 rounded-full flex items-center justify-center text-2xl active:scale-95 transition";
 
-      if (["C", "()", "%"].includes(lbl))
-        style += " bg-gray-200 text-gray-700";
-      else if (["÷", "×", "-", "+"].includes(lbl))
-        style += " bg-gray-700 text-white";
-      else if (lbl === "=") style += " bg-green-600 text-white";
-      else style += " bg-white text-gray-800";
+            if (["C", "()", "%"].includes(lbl))
+              style += " bg-gray-200 text-gray-700";
+            else if (["÷", "×", "-", "+"].includes(lbl))
+              style += " bg-gray-700 text-white";
+            else if (lbl === "=") style += " bg-green-600 text-white";
+            else style += " bg-white text-gray-800";
 
-      return (
-        <button
-          key={i}
-          className={style}
-          onClick={() => handlePress(lbl)}
-        >
-          {lbl}
-        </button>
-      );
-    })}
-  </div>
-)}
-
+            return (
+              <button
+                key={i}
+                className={style}
+                onClick={() => handlePress(lbl)}
+              >
+                {lbl}
+              </button>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
