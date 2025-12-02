@@ -75,23 +75,34 @@ const handlePrint = () => {
     startY: eventLabel ? 30 : 25,
     margin: { top: 10 },
   });
+// Footer
+const pageCount = doc.getNumberOfPages();
+for (let i = 1; i <= pageCount; i++) {
+  doc.setPage(i);
+  doc.setFontSize(9);
 
-  // Footer
-  const pageCount = doc.getNumberOfPages();
-  for (let i = 1; i <= pageCount; i++) {
-    doc.setPage(i);
-    doc.setFontSize(9);
-    doc.text(
-      `Generated on: ${timestamp}`,
-      10,
-      doc.internal.pageSize.height - 10
-    );
-    doc.text(
-      `Page ${i} of ${pageCount}`,
-      doc.internal.pageSize.width - 30,
-      doc.internal.pageSize.height - 10
-    );
-  }
+  const pageWidth = doc.internal.pageSize.width;
+  const pageHeight = doc.internal.pageSize.height;
+
+  const leftText = `${timestamp}`;
+  const centerText = `NBK Youth App | https://nbkyouth.vercel.app`;
+  const rightText = `Page ${i} of ${pageCount}`;
+
+  // LEFT - normal color
+  doc.setTextColor(70, 70, 70);
+  doc.text(leftText, 10, pageHeight - 10);
+
+  // CENTER - clickable + blue
+  doc.setTextColor(0, 102, 204);
+  doc.textWithLink(centerText, pageWidth / 2, pageHeight - 10, {
+    url: "https://nbkyouth.vercel.app",
+    align: "center"
+  });
+
+  // RIGHT - normal color
+  doc.setTextColor(70, 70, 70);
+  doc.text(rightText, pageWidth - 10, pageHeight - 10, { align: "right" });
+}
 
   doc.save('Income_Report.pdf');
 };
