@@ -14,17 +14,14 @@ export default function Calculator() {
   const [cursorVisible, setCursorVisible] = useState(true);
   const [cursorCoords, setCursorCoords] = useState({ left: 0, top: 0, height: 36 });
 
-  useEffect(() => {
-    const saved = localStorage.getItem("calc-history");
-    if (saved) setHistory(JSON.parse(saved));
+const firstRender = useRef(true);
+useLayoutEffect(() => {
+  if (firstRender.current) {
+    firstRender.current = false;
+    setCursorPos(input.length);
+  }
+}, [input]);
 
-    const id = setInterval(() => setCursorVisible((s) => !s), 600);
-    return () => clearInterval(id);
-  }, []);
-
-  useEffect(() => {
-    setCursorPos(() => Math.max(0, input.length));
-  }, []);
 
   useLayoutEffect(() => {
   requestAnimationFrame(() => {
@@ -35,11 +32,52 @@ export default function Calculator() {
 
 
   const saveHistory = (exp, res) => {
-    const item = { exp, res, time: new Date().toLocaleString() };
-    const newHistory = [item, ...history].slice(0, 50);
-    setHistory(newHistory);
-    localStorage.setItem("calc-history", JSON.stringify(newHistory));
-  };
+  const item = { exp, res, time: Date.now() };
+
+  const THREE_MONTHS = 90 * 24 * 60 * 60 * 1000;
+  const cutoff = Date.now() - THREE_MONTHS;
+
+  const filtered = history.filter(h => h.time >= cutoff);
+
+  const newHistory = [item, ...filtered].slice(0, 50);
+  setHistory(newHistory);
+  localStorage.setItem("calc-history", JSON.stringify(newHistory));
+};
+
+useEffect(() => {
+  const saved = localStorage.getItem("calc-history");
+  if (saved) {
+    const items = JSON.parse(saved);
+
+    const THREE_MONTHS = 90 * 24 * 60 * 60 * 1000;
+    const cutoff = Date.now() - THREE_MONTHS;
+
+    const filtered = items.filter(h => h.time >= cutoff);
+
+    setHistory(filtered);
+    localStorage.setItem("calc-history", JSON.stringify(filtered));
+  }
+
+  const id = setInterval(() => setCursorVisible((s) => !s), 600);
+  return () => clearInterval(id);
+}, []);
+
+const formatDate = (ts) => {
+  const d = new Date(ts);
+
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const year = d.getFullYear();
+
+  let hours = d.getHours();
+  const minutes = String(d.getMinutes()).padStart(2, "0");
+  const ampm = hours >= 12 ? "PM" : "AM";
+
+  hours = hours % 12;
+  hours = hours ? hours : 12; // 0 → 12
+
+  return `${day}/${month}/${year} ${hours}:${minutes} ${ampm}`;
+};
 
   const insertAtCursor = (text) => {
     const isNumberOrDot = /^[0-9.]$/.test(text);
@@ -183,28 +221,32 @@ export default function Calculator() {
   }, [input]);
 
   const updateCursorOverlay = () => {
-    const exprEl = exprRef.current;
-    if (!exprEl) return;
+  const exprEl = exprRef.current;
+  if (!exprEl) return;
 
-    const len = input.length;
-    let left = 6;
-    let height = 36;
-    if (cursorPos === 0) {
-      left = 6;
-      height = getLineHeight(exprEl) || 36;
-    } else {
-      const el = charRefs.current[cursorPos - 1];
-      if (el && typeof el.offsetLeft === "number") {
-        left = el.offsetLeft + el.offsetWidth;
-        height = el.offsetHeight || getLineHeight(exprEl) || 36;
-      } else {
-        left = exprEl.scrollWidth;
-        height = getLineHeight(exprEl) || 36;
-      }
+  const el = cursorPos > 0 ? charRefs.current[cursorPos - 1] : null;
+
+  let left = 6;
+  let top = 4;
+  let height = 36;
+
+  if (el) {
+    // match wrapped text position
+    left = el.offsetLeft + el.offsetWidth;
+    top = el.offsetTop;
+    height = el.offsetHeight;
+  } else {
+    // cursor at start
+    const first = charRefs.current[0];
+    if (first) {
+      top = first.offsetTop;
+      height = first.offsetHeight;
     }
+    left = 6;
+  }
 
-    setCursorCoords({ left, top: 4, height });
-  };
+  setCursorCoords({ left, top, height });
+};
 
   const getLineHeight = (el) => {
     const cs = window.getComputedStyle(el);
@@ -233,38 +275,56 @@ export default function Calculator() {
 
   const draggingRef = useRef(false);
 
-  const computePosFromPointer = (clientX) => {
-    const exprEl = exprRef.current;
-    if (!exprEl) return 0;
-    const rect = exprEl.getBoundingClientRect();
-    const relativeX = clientX - rect.left + exprEl.scrollLeft;
+ const computePosFromPointer = (clientX, clientY) => {
+  const exprEl = exprRef.current;
+  if (!exprEl) return 0;
 
-    const len = input.length;
-    let pos = len;
-    for (let i = 0; i < len; i++) {
-      const el = charRefs.current[i];
-      if (!el) continue;
-      const center = el.offsetLeft + el.offsetWidth / 2;
-      if (relativeX < center) {
-        pos = i;
-        break;
-      }
+  const rect = exprEl.getBoundingClientRect();
+  const x = clientX - rect.left + exprEl.scrollLeft;
+  const y = clientY - rect.top + exprEl.scrollTop;
+
+  let closestIndex = input.length;
+  let bestDist = Infinity;
+
+  for (let i = 0; i < input.length; i++) {
+    const el = charRefs.current[i];
+    if (!el) continue;
+
+    const cx = el.offsetLeft + el.offsetWidth / 2;
+    const cy = el.offsetTop + el.offsetHeight / 2;
+
+    const dx = cx - x;
+    const dy = cy - y;
+    const dist = dx * dx + dy * dy;
+
+    if (dist < bestDist) {
+      bestDist = dist;
+      closestIndex = i;
     }
-    return pos;
-  };
+  }
+
+  // decide left or right of closest character
+  const el = charRefs.current[closestIndex];
+  if (el && x > el.offsetLeft + el.offsetWidth / 2) {
+    return closestIndex + 1;
+  }
+
+  return closestIndex;
+};
 
   const onPointerDown = (e) => {
-    if (e.pointerType && e.button !== 0 && e.pointerType === "mouse") return;
-    draggingRef.current = true;
-    e.currentTarget.setPointerCapture(e.pointerId);
-    const pos = computePosFromPointer(e.clientX);
-    setCursorPos(pos);
-  };
-  const onPointerMove = (e) => {
-    if (!draggingRef.current) return;
-    const pos = computePosFromPointer(e.clientX);
-    setCursorPos(pos);
-  };
+  draggingRef.current = true;
+  e.currentTarget.setPointerCapture(e.pointerId);
+  const pos = computePosFromPointer(e.clientX, e.clientY);
+  setCursorPos(pos);
+};
+
+const onPointerMove = (e) => {
+  if (!draggingRef.current) return;
+  const pos = computePosFromPointer(e.clientX, e.clientY);
+  setCursorPos(pos);
+};
+
   const onPointerUp = (e) => {
     draggingRef.current = false;
     try {
@@ -315,13 +375,13 @@ export default function Calculator() {
   );
 
   return (
-    <div className="px-4 pb-10 select-none max-w-md mx-auto notranslate">
+    <div className="select-none max-w-md mx-auto notranslate">
       <div
         ref={displayRef}
-        className="w-full bg-white rounded-xl mt-3 relative overflow-hidden"
+        className="w-full bg-white rounded-xl relative overflow-hidden"
         style={{
           height: 180,
-          padding: 16,
+          padding: 8,
           display: "flex",
           flexDirection: "column",
         }}
@@ -334,10 +394,10 @@ export default function Calculator() {
             whiteSpace: "pre-wrap",
             wordBreak: "break-word",
             direction: "ltr",
-            fontSize: 44,
+            fontSize: 40,
             fontWeight: 300,
-            lineHeight: "1.05",
-            paddingRight: 6,
+            lineHeight: "1",
+            paddingRight: 8,
             position: "relative",
             cursor: "text",
             userSelect: "none",
@@ -389,24 +449,24 @@ export default function Calculator() {
         </div>
       </div>
 
-      <div className="flex justify-between items-center mt-3 px-2">
+      <div className="flex justify-between items-center mt-2 px-4">
         <button
           onClick={() => setShowHistory(!showHistory)}
-          className="w-10 h-10 flex justify-center items-center rounded-full bg-gray-200 text-gray-600"
+          className="w-8 h-8 flex justify-center items-center rounded-full bg-gray-200 text-gray-600"
         >
-          <Clock size={22} strokeWidth={1.5} />
+          <Clock size={24} strokeWidth={1.5} />
         </button>
 
         <button
           onClick={deleteLeft}
-          className="w-10 h-10 flex justify-center items-center rounded-full border-2 border-green-500 text-green-600"
+          className="w-10 h-8 flex justify-center items-center rounded-full border-2 border-green-500 text-green-600"
         >
           <X size={24} strokeWidth={2.5} />
         </button>
       </div>
 
       {showHistory && (
-        <div className="bg-white rounded-lg shadow p-3 mt-3 max-h-48 overflow-y-auto border">
+        <div className="bg-white rounded-lg shadow p-3 mt-2 max-h-30 overflow-y-auto border">
           <div className="flex justify-between items-center mb-2">
             <div className="text-sm font-medium">History</div>
             <button
@@ -434,14 +494,14 @@ export default function Calculator() {
               >
                 <div className="text-gray-500 text-sm">{h.exp}</div>
                 <div className="font-semibold text-lg">{h.res}</div>
-                <div className="text-gray-400 text-xs">{h.time}</div>
+                <div className="text-gray-400 text-xs">  {formatDate(h.time)}</div>
               </div>
             ))
           )}
         </div>
       )}
 
-      <div className="grid grid-cols-4 gap-3 mt-6">
+      <div className="grid grid-cols-4 gap-3 mt-4">
         {[
           "C",
           "()",
@@ -465,7 +525,7 @@ export default function Calculator() {
           "=",
         ].map((lbl, i) => {
           let style =
-            "h-16 rounded-full flex items-center justify-center text-2xl active:scale-95 transition";
+            "h-15 rounded-full flex items-center justify-center text-2xl active:scale-95 transition";
 
           if (["C", "()", "%"].includes(lbl))
             style += " bg-gray-200 text-gray-700";
