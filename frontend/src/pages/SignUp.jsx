@@ -114,8 +114,8 @@ function SignUp() {
         {step === 1 && (
           <form onSubmit={handleSubmitStep1} className="space-y-6">
             <div className="text-center">
-              <h1 className="mt-2 text-4xl font-extrabold text-green-600">NBK YOUTH</h1>
-              <h2 className="text-lg text-gray-600">Gangavaram</h2>
+              <h1 className="mt-2 text-4xl font-extrabold tracking-wide text-green-600">NBK YOUTH</h1>
+              <h2 className="text-xl font-medium text-gray-600">Gangavaram</h2>
             </div>
 
             <input
