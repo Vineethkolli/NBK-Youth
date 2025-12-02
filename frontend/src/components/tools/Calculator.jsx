@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useLayoutEffect  } from "react";
-import { Clock, X, Trash2 } from "lucide-react";
+import { Clock, X, Trash2, CalculatorIcon } from "lucide-react";
 
 export default function Calculator() {
   const [input, setInput] = useState("0");
@@ -30,7 +30,6 @@ useLayoutEffect(() => {
   });
 }, [input, cursorPos]);
 
-
   const saveHistory = (exp, res) => {
   const item = { exp, res, time: Date.now() };
 
@@ -39,7 +38,7 @@ useLayoutEffect(() => {
 
   const filtered = history.filter(h => h.time >= cutoff);
 
-  const newHistory = [item, ...filtered].slice(0, 50);
+  const newHistory = [item, ...filtered].slice(0, 100);
   setHistory(newHistory);
   localStorage.setItem("calc-history", JSON.stringify(newHistory));
 };
@@ -74,24 +73,40 @@ const formatDate = (ts) => {
   const ampm = hours >= 12 ? "PM" : "AM";
 
   hours = hours % 12;
-  hours = hours ? hours : 12; // 0 → 12
+  hours = hours ? hours : 12;
 
   return `${day}/${month}/${year} ${hours}:${minutes} ${ampm}`;
 };
 
   const insertAtCursor = (text) => {
-    const isNumberOrDot = /^[0-9.]$/.test(text);
-    if (input === "0" && isNumberOrDot) {
-      setInput(text);
-      setCursorPos(text.length);
+  const operators = ["+", "-", "×", "÷"];
+
+  if (operators.includes(text)) {
+    const prev = input[cursorPos - 1];
+
+    if (operators.includes(prev)) {
+      const left = input.slice(0, cursorPos - 1);
+      const right = input.slice(cursorPos);
+      const newVal = left + text + right;
+      setInput(newVal);
+      setCursorPos(cursorPos);
       return;
     }
-    const left = input.slice(0, cursorPos);
-    const right = input.slice(cursorPos);
-    const newVal = left + text + right;
-    setInput(newVal);
-    setCursorPos(cursorPos + text.length);
-  };
+  }
+
+  const isNumberOrDot = /^[0-9.]$/.test(text);
+  if (input === "0" && isNumberOrDot) {
+    setInput(text);
+    setCursorPos(text.length);
+    return;
+  }
+
+  const left = input.slice(0, cursorPos);
+  const right = input.slice(cursorPos);
+  const newVal = left + text + right;
+  setInput(newVal);
+  setCursorPos(cursorPos + text.length);
+};
 
   const deleteLeft = () => {
     if (input === "Error") {
@@ -174,17 +189,35 @@ const formatDate = (ts) => {
   }
 
   const calculate = () => {
-    try {
-      const expr = input.replace(/×/g, "*").replace(/÷/g, "/").replace(/(\d+)%/g, "($1 * 0.01)");
-      const res = safeEval(expr).toString();
-      saveHistory(input, res);
-      setInput(res);
-      setCursorPos(res.length);
-    } catch {
-      setInput("Error");
-      setCursorPos(5);
+  try {
+    const trimmed = input.trim();
+
+    if (trimmed === "" || trimmed === "0") return;
+
+    const hasOperator = /[+\-×÷%]/.test(trimmed);
+    if (!hasOperator) {
+      return;
     }
-  };
+
+    const expr = trimmed
+      .replace(/×/g, "*")
+      .replace(/÷/g, "/")
+      .replace(/(\d+)%/g, "($1 * 0.01)");
+
+    const res = safeEval(expr).toString();
+
+    const last = history[0];
+    if (!(last && last.exp === trimmed && last.res === res)) {
+      saveHistory(trimmed, res);
+    }
+
+    setInput(res);
+    setCursorPos(res.length);
+  } catch {
+    setInput("Error");
+    setCursorPos(5);
+  }
+};
 
   useEffect(() => {
     const handleKey = (e) => {
@@ -373,6 +406,14 @@ const onPointerMove = (e) => {
   charRefs.current = Array.from({ length: input.length }).map(
     (v, i) => charRefs.current[i] || null
   );
+  const historyRef = useRef(null);
+
+useEffect(() => {
+  if (showHistory && historyRef.current) {
+    historyRef.current.scrollTop = historyRef.current.scrollHeight;
+  }
+}, [showHistory, history]);
+
 
   return (
     <div className="select-none max-w-md mx-auto notranslate">
@@ -451,12 +492,15 @@ const onPointerMove = (e) => {
 
       <div className="flex justify-between items-center mt-2 px-4">
         <button
-          onClick={() => setShowHistory(!showHistory)}
-          className="w-8 h-8 flex justify-center items-center rounded-full bg-gray-200 text-gray-600"
-        >
-          <Clock size={24} strokeWidth={1.5} />
-        </button>
-
+  onClick={() => setShowHistory(!showHistory)}
+  className="w-8 h-8 flex justify-center items-center rounded-full bg-gray-200 text-gray-600"
+>
+  {showHistory ? (
+    <CalculatorIcon size={24} strokeWidth={1.5} />
+  ) : (
+    <Clock size={24} strokeWidth={1.5} />
+  )}
+</button>
         <button
           onClick={deleteLeft}
           className="w-10 h-8 flex justify-center items-center rounded-full border-2 border-green-500 text-green-600"
@@ -466,85 +510,89 @@ const onPointerMove = (e) => {
       </div>
 
       {showHistory && (
-        <div className="bg-white rounded-lg shadow p-3 mt-2 max-h-30 overflow-y-auto border">
-          <div className="flex justify-between items-center mb-2">
-            <div className="text-sm font-medium">History</div>
-            <button
-              onClick={() => {
-                setHistory([]);
-                localStorage.removeItem("calc-history");
-              }}
-              className="text-red-500"
-            >
-              <Trash2 size={18} />
-            </button>
-          </div>
-
-          {history.length === 0 ? (
-            <div className="text-gray-400 text-sm">No history</div>
-          ) : (
-            history.map((h, i) => (
-              <div
-                key={i}
-                onClick={() => {
-                  setInput(h.res);
-                  setCursorPos(h.res.length);
-                }}
-                className="py-2 border-b cursor-pointer"
-              >
-                <div className="text-gray-500 text-sm">{h.exp}</div>
-                <div className="font-semibold text-lg">{h.res}</div>
-                <div className="text-gray-400 text-xs">  {formatDate(h.time)}</div>
-              </div>
-            ))
-          )}
+  <div
+    ref={historyRef}
+    className="mt-4 p-4 rounded-xl space-y-4 h-80 overflow-y-auto scrollbar-thin"
+  >
+    {history.length === 0 ? (
+      <div className="text-center py-4 text-lg">No history</div>
+    ) : (
+      [...history].reverse().map((h, i) => (
+        <div
+          key={i}
+          onClick={() => {
+            setInput(h.exp);
+            setCursorPos(h.exp.length);
+            setShowHistory(false);
+          }}
+          className="py-3 border-b border-gray-700 cursor-pointer"
+        >
+          <div className="text-lg">{h.exp}</div>
+          <div className="text-xl font-bold">= {h.res}</div>
+          <div className="text-gray-500 text-xs">{formatDate(h.time)}</div>
         </div>
-      )}
+      ))
+    )}
 
-      <div className="grid grid-cols-4 gap-3 mt-4">
-        {[
-          "C",
-          "()",
-          "%",
-          "÷",
-          "7",
-          "8",
-          "9",
-          "×",
-          "4",
-          "5",
-          "6",
-          "-",
-          "1",
-          "2",
-          "3",
-          "+",
-          "+/-",
-          "0",
-          ".",
-          "=",
-        ].map((lbl, i) => {
-          let style =
-            "h-15 rounded-full flex items-center justify-center text-2xl active:scale-95 transition";
+    <button
+      onClick={() => {
+        setHistory([]);
+        localStorage.removeItem("calc-history");
+      }}
+      className="bg-gray-800 py-2 px-4 rounded-full text-white text-center text-lg"
+    >
+      Clear history
+    </button>
+  </div>
+)}
 
-          if (["C", "()", "%"].includes(lbl))
-            style += " bg-gray-200 text-gray-700";
-          else if (["÷", "×", "-", "+"].includes(lbl))
-            style += " bg-gray-700 text-white";
-          else if (lbl === "=") style += " bg-green-600 text-white";
-          else style += " bg-white text-gray-800";
+      {!showHistory && (
+  <div className="grid grid-cols-4 gap-3 mt-4">
+    {[
+      "C",
+      "()",
+      "%",
+      "÷",
+      "7",
+      "8",
+      "9",
+      "×",
+      "4",
+      "5",
+      "6",
+      "-",
+      "1",
+      "2",
+      "3",
+      "+",
+      "+/-",
+      "0",
+      ".",
+      "=",
+    ].map((lbl, i) => {
+      let style =
+        "h-15 rounded-full flex items-center justify-center text-2xl active:scale-95 transition";
 
-          return (
-            <button
-              key={i}
-              className={style}
-              onClick={() => handlePress(lbl)}
-            >
-              {lbl}
-            </button>
-          );
-        })}
-      </div>
+      if (["C", "()", "%"].includes(lbl))
+        style += " bg-gray-200 text-gray-700";
+      else if (["÷", "×", "-", "+"].includes(lbl))
+        style += " bg-gray-700 text-white";
+      else if (lbl === "=") style += " bg-green-600 text-white";
+      else style += " bg-white text-gray-800";
+
+      return (
+        <button
+          key={i}
+          className={style}
+          onClick={() => handlePress(lbl)}
+        >
+          {lbl}
+        </button>
+      );
+    })}
+  </div>
+)}
+
     </div>
   );
 }
