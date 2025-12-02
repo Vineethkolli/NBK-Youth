@@ -445,7 +445,7 @@ export const forgotPassword = async (req, res) => {
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     await OTP.create({ email, otp });
 
-    const emailSent = await sendOTPEmail(email, otp);
+    const emailSent = await sendOTPEmail(email, otp, 'reset_password');
     if (!emailSent) return res.status(500).json({ message: 'Failed to send OTP email' });
 
     await logActivity(

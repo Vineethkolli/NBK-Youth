@@ -32,7 +32,7 @@ export const sendOTPEmail = async (email, otp, mode = "verify_email") => {
 
         const purposeText =
             mode === "verify_email"
-                ? "Please use the following OTP to verify your email address and continue signup:"
+                ? "Please use the following OTP to verify your email address:"
                 : "You have requested to reset your password. Please use the following OTP to proceed:";
 
         const html = `
