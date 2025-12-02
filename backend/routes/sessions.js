@@ -9,7 +9,7 @@ router.post('/refresh', refreshAccessToken);
 router.post('/last-active', updateLastActive);
 
 router.get('/', auth, getUserSessions);
-router.post('/signout', signOutCurrent);
+router.post('/signout', auth, signOutCurrent);
 router.delete('/:sessionId', auth, signOutSession);
 
 router.get('/auth-sessions', auth, checkRole('Developer'), getAllSessions);

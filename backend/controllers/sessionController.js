@@ -92,8 +92,7 @@ export const refreshAccessToken = async (req, res) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      maxAge: fifteenMonths,
-      path: "/"
+      maxAge: fifteenMonths
     });
 
     res.json({
@@ -158,7 +157,7 @@ export const getUserSessions = async (req, res) => {
 
     const sessionsWithCurrent = sessions.map((s) => ({
       ...s,
-      isCurrent: s.tokenHash === currentTokenHash
+      isCurrent: (currentTokenHash ? s.tokenHash === currentTokenHash : false) || String(s._id) === String(req.sessionId || '')
     }));
 
     res.json({ sessions: sessionsWithCurrent });
@@ -173,17 +172,21 @@ export const signOutCurrent = async (req, res) => {
   try {
     const refreshToken = req.cookies.refreshToken;
 
-    if (!refreshToken) return res.json({ message: "Already signed out" });
+    // Prefer sessionId from auth middleware (access token), fallback to cookie-based lookup
+    if (req.sessionId) {
+      await Session.findOneAndUpdate({ _id: req.sessionId }, { isValid: false });
+    } else if (refreshToken) {
+      const tokenHash = hashToken(refreshToken);
+      await Session.findOneAndUpdate({ tokenHash }, { isValid: false });
+    } else {
+      return res.json({ message: "Already signed out" });
+    }
 
-    const tokenHash = hashToken(refreshToken);
-
-    await Session.findOneAndUpdate({ tokenHash }, { isValid: false });
-
+    // Clear cookie if present; ignore if not set (prod may use different domain)
     res.clearCookie("refreshToken", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      path: "/"
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax"
     });
 
     res.json({ message: "Signed out successfully" });

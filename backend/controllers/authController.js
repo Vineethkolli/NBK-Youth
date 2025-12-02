@@ -161,8 +161,7 @@ export const signUp = async (req, res) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-      maxAge: 365 * 24 * 60 * 60 * 1000,
-      path: '/'
+      maxAge: 365 * 24 * 60 * 60 * 1000
     });
 
     if (user.email) {
@@ -253,8 +252,7 @@ export const signIn = async (req, res) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-      maxAge: 365 * 24 * 60 * 60 * 1000,
-      path: '/'
+      maxAge: 365 * 24 * 60 * 60 * 1000
     });
 
     res.json({
@@ -326,8 +324,7 @@ export const googleAuth = async (req, res) => {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-        maxAge: 365 * 24 * 60 * 60 * 1000,
-        path: '/'
+        maxAge: 365 * 24 * 60 * 60 * 1000
       });
 
       return res.json({
@@ -396,8 +393,7 @@ export const googleAuth = async (req, res) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-      maxAge: 365 * 24 * 60 * 60 * 1000,
-      path: '/'
+      maxAge: 365 * 24 * 60 * 60 * 1000
     });
 
     if (user.email) {
