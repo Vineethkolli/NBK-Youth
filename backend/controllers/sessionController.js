@@ -2,6 +2,9 @@ import Session from "../models/Session.js";
 import { generateAccessToken, generateRefreshToken, hashToken } from "../utils/tokenUtils.js";
 import { getLocationFromIP } from "../utils/ipLocation.js";
 
+const getIsHttps = (req) =>
+  req.secure || (process.env.FRONTEND_URL || "").startsWith("https://");
+
 export const createSessionAndTokens = async (user, deviceInfo, action, req) => {
   const ip =
     req.headers["x-forwarded-for"]?.split(",")[0] ||
@@ -88,10 +91,11 @@ export const refreshAccessToken = async (req, res) => {
     session.lastActive = new Date();
     await session.save();
 
+    const isHttps = getIsHttps(req);
     res.cookie("refreshToken", newRefreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      secure: isHttps,
+      sameSite: isHttps ? "none" : "lax",
       maxAge: fifteenMonths
     });
 
@@ -182,11 +186,12 @@ export const signOutCurrent = async (req, res) => {
       return res.json({ message: "Already signed out" });
     }
 
-    // Clear cookie if present; ignore if not set (prod may use different domain)
+    // Clear cookie if present
+    const isHttps = getIsHttps(req);
     res.clearCookie("refreshToken", {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax"
+      secure: isHttps,
+      sameSite: isHttps ? "none" : "lax"
     });
 
     res.json({ message: "Signed out successfully" });

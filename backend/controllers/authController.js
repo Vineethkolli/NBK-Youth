@@ -28,6 +28,8 @@ const createAuthResponse = (user) => ({
   googleId: user.googleId || null,
 });
 
+const getIsHttps = (req) =>
+  req.secure || (process.env.FRONTEND_URL || "").startsWith("https://");
 
 export const checkSignupInfo = async (req, res) => {
   try {
@@ -157,12 +159,13 @@ export const signUp = async (req, res) => {
       req
     );
 
-    res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-      maxAge: 365 * 24 * 60 * 60 * 1000
-    });
+    const isHttps = getIsHttps(req);
+res.cookie("refreshToken", refreshToken, {
+  httpOnly: true,
+  secure: isHttps,
+  sameSite: isHttps ? "none" : "lax",
+  maxAge: 365 * 24 * 60 * 60 * 1000
+});
 
     if (user.email) {
       sendSignupEmail(user.email, user.name);
@@ -248,12 +251,13 @@ export const signIn = async (req, res) => {
       req
     );
 
-    res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-      maxAge: 365 * 24 * 60 * 60 * 1000
-    });
+    const isHttps = getIsHttps(req);
+res.cookie("refreshToken", refreshToken, {
+  httpOnly: true,
+  secure: isHttps,
+  sameSite: isHttps ? "none" : "lax",
+  maxAge: 365 * 24 * 60 * 60 * 1000
+});
 
     res.json({
       token: accessToken,
@@ -320,12 +324,13 @@ export const googleAuth = async (req, res) => {
         req
       );
 
-      res.cookie('refreshToken', refreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-        maxAge: 365 * 24 * 60 * 60 * 1000
-      });
+      const isHttps = getIsHttps(req);
+res.cookie("refreshToken", refreshToken, {
+  httpOnly: true,
+  secure: isHttps,
+  sameSite: isHttps ? "none" : "lax",
+  maxAge: 365 * 24 * 60 * 60 * 1000
+});
 
       return res.json({
         status: "success",
@@ -389,12 +394,13 @@ export const googleAuth = async (req, res) => {
       req
     );
 
-    res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-      maxAge: 365 * 24 * 60 * 60 * 1000
-    });
+    const isHttps = getIsHttps(req);
+res.cookie("refreshToken", refreshToken, {
+  httpOnly: true,
+  secure: isHttps,
+  sameSite: isHttps ? "none" : "lax",
+  maxAge: 365 * 24 * 60 * 60 * 1000
+});
 
     if (user.email) {
       sendSignupEmail(user.email, user.name);
