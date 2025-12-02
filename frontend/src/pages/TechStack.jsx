@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ExternalLink, Share2 } from "lucide-react";
-import { SiYoutube, SiInstagram } from "react-icons/si";
+import { SiYoutube, SiInstagram, SiGithub } from "react-icons/si";
 import TechStackDetails from "../components/techstack/Technologies";
 import MindMap from "../components/techstack/MindMap";
 import Access from "../components/techstack/Access";
@@ -124,6 +124,15 @@ function TechStack() {
           <p className="mt-2 text-sm font-semibold text-gray-600">
   🚀 App Live Since Oct 2024
 </p>
+  <button
+    onClick={() =>
+      window.open("https://github.com/Vineethkolli", "_blank", "noopener,noreferrer")
+    }
+    className="mt-4 inline-flex items-center px-4 py-2 rounded-full shadow hover:bg-gray-200 transition"
+  >
+    <SiGithub className="h-5 w-5 mr-2" />
+    GitHub
+  </button>
         </div>
       </div>
 
