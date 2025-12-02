@@ -1,6 +1,7 @@
 import { formatDateTime } from '../../utils/dateTime';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-function AuthSessionsTable({ sessions, visibleColumns }) {
+function AuthSessionsTable({ sessions, visibleColumns, pagination, onPageChange }) {
   if (sessions.length === 0) {
     return (
       <div>
@@ -163,6 +164,31 @@ function AuthSessionsTable({ sessions, visibleColumns }) {
           })}
         </tbody>
       </table>
+
+      {pagination && (
+        <div className="flex items-center justify-between px-6 py-3 border-t">
+          <div className="text-sm text-gray-700">
+            Showing page {pagination.currentPage} of {pagination.totalPages} (
+            {pagination.totalCount} total entries)
+          </div>
+          <div className="flex space-x-2">
+            <button
+              onClick={() => onPageChange(pagination.currentPage - 1)}
+              disabled={!pagination.hasPrev}
+              className="px-3 py-1 border rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => onPageChange(pagination.currentPage + 1)}
+              disabled={!pagination.hasNext}
+              className="px-3 py-1 border rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

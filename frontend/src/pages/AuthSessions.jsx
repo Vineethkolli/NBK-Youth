@@ -24,6 +24,14 @@ function AuthSessions() {
     sortOrder: '',
   });
 
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+    totalCount: 0,
+    hasNext: false,
+    hasPrev: false,
+  });
+
   const [visibleColumns, setVisibleColumns] = useState({
     sno: true,
     registerId: true,
@@ -44,17 +52,20 @@ function AuthSessions() {
     } else {
       fetchStats();
     }
-  }, [search, filters, activeTab]);
+  }, [search, filters, activeTab, pagination.currentPage]);
 
   const fetchSessions = async () => {
     try {
       const params = new URLSearchParams({
         search,
+        page: pagination.currentPage,
+        limit: 50,
         ...filters,
       });
 
       const { data } = await axios.get(`${API_URL}/api/sessions/auth-sessions?${params}`);
-      setSessions(data);
+      setSessions(data.sessions);
+      setPagination(data.pagination);
     } catch {
       toast.error('Failed to fetch sessions');
     }
@@ -69,7 +80,14 @@ function AuthSessions() {
     }
   };
 
-  const handleFilterChange = (newFilters) => setFilters(newFilters);
+  const handleFilterChange = (newFilters) => {
+    setFilters(newFilters);
+    setPagination({ ...pagination, currentPage: 1 });
+  };
+
+  const handlePageChange = (newPage) => {
+    setPagination({ ...pagination, currentPage: newPage });
+  };
 
   const handleColumnToggle = (column) => {
     setVisibleColumns((prev) => ({ ...prev, [column]: !prev[column] }));
@@ -172,7 +190,12 @@ function AuthSessions() {
           </div>
 
           <div className="bg-white rounded-lg shadow">
-            <AuthSessionsTable sessions={sessions} visibleColumns={visibleColumns} />
+            <AuthSessionsTable
+              sessions={sessions}
+              visibleColumns={visibleColumns}
+              pagination={pagination}
+              onPageChange={handlePageChange}
+            />
           </div>
         </>
       )}

@@ -226,7 +226,7 @@ export const signOutSession = async (req, res) => {
 
 export const getAllSessions = async (req, res) => {
   try {
-    const { search, isValid, action, sortOrder } = req.query;
+    const { search, isValid, action, sortOrder, page = 1, limit = 50 } = req.query;
 
     let query = {};
 
@@ -271,7 +271,24 @@ export const getAllSessions = async (req, res) => {
       });
     }
 
-    res.json(sessions);
+    const totalCount = sessions.length;
+    const pageNum = parseInt(page);
+    const limitNum = parseInt(limit);
+    const totalPages = Math.ceil(totalCount / limitNum);
+    const startIndex = (pageNum - 1) * limitNum;
+    const endIndex = startIndex + limitNum;
+    const paginatedSessions = sessions.slice(startIndex, endIndex);
+
+    res.json({
+      sessions: paginatedSessions,
+      pagination: {
+        currentPage: pageNum,
+        totalPages,
+        totalCount,
+        hasNext: pageNum < totalPages,
+        hasPrev: pageNum > 1,
+      },
+    });
   } catch (error) {
     console.error("Get all sessions error:", error);
     res.status(500).json({ message: "Server error" });
