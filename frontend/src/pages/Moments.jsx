@@ -28,6 +28,41 @@ function Moments() {
     fetchMoments();
   }, []);
 
+  // Handle browser back/forward buttons
+  useEffect(() => {
+    const handlePopState = () => {
+      const path = window.location.pathname;
+      
+      // Check current path and update state accordingly
+      if (path === '/moments') {
+        // Closed everything, back to moments list
+        setSelectedMoment(null);
+        setSelectedMediaId(null);
+      } else if (path.startsWith('/moments/')) {
+        const parts = path.split('/');
+        const momentId = parts[2];
+        const mediaId = parts[4]; // parts[3] is 'media', parts[4] is mediaId
+        
+        if (mediaId) {
+          // Back to lightbox from somewhere, keep both open
+          // selectedMoment should already be set, just update mediaId
+          setSelectedMediaId(mediaId);
+        } else if (momentId) {
+          // Back to gallery, close lightbox
+          setSelectedMediaId(null);
+          // If selectedMoment isn't set, find it from moments
+          if (!selectedMoment || selectedMoment._id !== momentId) {
+            const moment = moments.find(m => m._id === momentId);
+            if (moment) setSelectedMoment(moment);
+          }
+        }
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [moments, selectedMoment]);
+
   // Handle URL params for deep linking (when user opens shared link)
   useEffect(() => {
     if (moments.length > 0 && urlMomentId) {
