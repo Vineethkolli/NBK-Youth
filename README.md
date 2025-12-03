@@ -1,9 +1,9 @@
 <div align="center">
 
-# 🌟 **NBK-YOUTH**  
+# 🌟 **NBK YOUTH**  
 ### *Empowering Youth, Celebrating Unity and Joy*
 
-**NBK YOUTH WEB APP** — *Started on OCT 2024*
+**A Gangavaram Village Web App** — *Started on OCT 2024*
 
 <br/>
 </div>
@@ -42,7 +42,7 @@
 
 ## 🔍 Overview
 
-**NBK-Youth** is a full-stack, secure, and scalable web application. It combines a robust **React + Vite** frontend with a feature-rich **Node.js + Express** backend, powered by **MongoDB**, **Google Cloud**, **Cloudinary**  and **PWA** support. It's under active development with frequent updates, new features, and ongoing improvements.
+**NBK Youth** is a full-stack, secure, and scalable web application. It combines a robust **React + Vite** frontend with a feature-rich **Node.js + Express** backend, powered by **MongoDB**, **Google Cloud**, **Cloudinary**  and **PWA** support. It's under active development with frequent updates, new features, and ongoing improvements.
 
 ---
 
