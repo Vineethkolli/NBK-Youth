@@ -26,6 +26,7 @@ function GalleryGrid({
   const [deletingFiles, setDeletingFiles] = useState({});
 
   const longPressTimeout = useRef(null);
+  const galleryScrollRef = useRef(null);
   
   const canManageMedia = hasAccess('Privileged');
 
@@ -38,6 +39,17 @@ function GalleryGrid({
       setLocalMediaFiles(sorted);
     }
   }, [moment]);
+
+  // Restore gallery scroll position when returning from lightbox
+  useEffect(() => {
+    const savedScrollPos = sessionStorage.getItem('galleryGridScrollPos');
+    if (savedScrollPos && galleryScrollRef.current) {
+      setTimeout(() => {
+        galleryScrollRef.current.scrollTop = parseInt(savedScrollPos, 10);
+        sessionStorage.removeItem('galleryGridScrollPos');
+      }, 0);
+    }
+  }, []);
 
   const getThumbnailUrl = (url) => {
     const fileId = url.match(/[?&]id=([^&]+)/)?.[1];
@@ -287,7 +299,7 @@ function GalleryGrid({
           onCancel={() => setIsReorderMode(false)}
         />
       ) : (
-        <div className="flex-1 overflow-y-auto p-4">
+        <div ref={galleryScrollRef} className="flex-1 overflow-y-auto p-4">
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {localMediaFiles?.map((file, index) => {
               const isSelected = selectedFiles.find((f) => f._id === file._id);
@@ -300,6 +312,10 @@ function GalleryGrid({
                       if (selectionModeActive) {
                         toggleFileSelect(file);
                       } else {
+                        // Save gallery scroll position before opening lightbox
+                        if (galleryScrollRef.current) {
+                          sessionStorage.setItem('galleryGridScrollPos', galleryScrollRef.current.scrollTop.toString());
+                        }
                         onMediaClick(file._id); // pass mediaId to open lightbox
                       }
                     }}
