@@ -6,7 +6,8 @@
 
   <title>NBK Youth Gangavaram</title>
   <meta name="description" content="Discover village life, events, culture and youth celebrations. Developed by Kolli Vineeth." />
-
+  <meta name="author" content="Kolli Vineeth" />
+  
   <!-- Local SEO -->
   <meta name="geo.region" content="IN-AP" />
   <meta name="geo.placename" content="Gangavaram, Inkollu Mandal" />
@@ -18,8 +19,12 @@
   {
     "@context": "https://schema.org",
     "@type": "Organization",
-    "name": "NBK Youth",
-    "alternateName": "NBK Youth Gangavaram",
+    "name": "NBK Youth Gangavaram",
+    "alternateName": [
+    "NBK Youth",
+    "Gangavaram",
+    "Gangavaram Youth"
+  ],
     "url": "https://nbkyouth.vercel.app",
     "logo": "https://nbkyouth.vercel.app/logo/512.png",
     "description": "Discover village life, events, culture and youth celebrations. Developed by Kolli Vineeth.",
@@ -27,6 +32,7 @@
       "@type": "PostalAddress",
       "addressLocality": "Gangavaram, Inkollu Mandal",
       "addressRegion": "Andhra Pradesh",
+      "postalCode": "523167",
       "addressCountry": "India"
     },
     "creator": {
@@ -36,9 +42,29 @@
   }
   </script>
 
+  <!-- 3. Place Schema for Gangavaram -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Place",
+    "name": "Gangavaram",
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "Gangavaram, Inkollu Mandal",
+      "addressRegion": "Andhra Pradesh",
+      "postalCode": "523167",
+      "addressCountry": "India"
+    },
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": 15.8091769,
+      "longitude": 80.1640130
+    }
+  }
+  </script>
+
   <!-- Favicons -->
   <link rel="icon" href="/logo/favicon.ico" />
-  <link rel="apple-touch-icon" href="/logo/apple-touch-icon.png" />
   <link rel="icon" type="image/png" sizes="16x16" href="/logo/16.png" />
   <link rel="icon" type="image/png" sizes="32x32" href="/logo/32.png" />
   <link rel="icon" type="image/png" sizes="192x192" href="/logo/192.png" />
@@ -58,11 +84,17 @@
   <link rel="canonical" href="https://nbkyouth.vercel.app/" />
 
   <!-- Open Graph -->
-  <meta property="og:title" content="NBK Youth Gangavaram" />
-  <meta property="og:description" content="Kolli Vineeth" />
-  <meta property="og:image" content="https://nbkyouth.vercel.app/logo/192.png" />
-  <meta property="og:url" content="https://nbkyouth.vercel.app/" />
   <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://nbkyouth.vercel.app/" />
+  <meta property="og:title" content="NBK Youth Gangavaram" />
+  <meta property="og:description" content="Discover village life, events, culture and youth celebrations. Developed by Kolli Vineeth." />
+  <meta property="og:image" content="https://nbkyouth.vercel.app/logo/512.png" />
+  <meta property="og:site_name" content="NBK Youth Gangavaram" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="NBK Youth Gangavaram" />
+  <meta name="twitter:description" content="Discover village life, events, culture and youth celebrations. Developed by Kolli Vineeth." />
+  <meta name="twitter:image" content="https://nbkyouth.vercel.app/logo/512.png" />
 
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
