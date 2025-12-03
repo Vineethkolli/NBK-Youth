@@ -14,17 +14,32 @@ import Lightbox from '../components/momentsGallery/Lightbox';
 
 function Moments() {
   const { hasAccess } = useAuth();
-  const { id, mediaId } = useParams();
+  const { id: urlMomentId, mediaId: urlMediaId } = useParams();
   const navigate = useNavigate();
   const [moments, setMoments] = useState([]);
   const [isEditMode, setIsEditMode] = useState(false);
   const [isReorderMode, setIsReorderMode] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [formType, setFormType] = useState(null);
+  const [selectedMoment, setSelectedMoment] = useState(null);
+  const [selectedMediaId, setSelectedMediaId] = useState(null);
 
   useEffect(() => {
     fetchMoments();
   }, []);
+
+  // Handle URL params for deep linking (when user opens shared link)
+  useEffect(() => {
+    if (moments.length > 0 && urlMomentId) {
+      const moment = moments.find(m => m._id === urlMomentId);
+      if (moment) {
+        setSelectedMoment(moment);
+        if (urlMediaId) {
+          setSelectedMediaId(urlMediaId);
+        }
+      }
+    }
+  }, [moments, urlMomentId, urlMediaId]);
 
   const fetchMoments = async () => {
     try {
@@ -218,53 +233,39 @@ if (formType === 'drive') {
     setShowForm(true);
   };
 
-  // Determine which view to render based on URL params
-  const selectedMoment = id ? moments.find(m => m._id === id) : null;
-  
-  // Find the media file and its index if mediaId is provided
-  let currentMediaIndex = null;
-  let currentMedia = null;
-  if (selectedMoment && mediaId) {
-    currentMediaIndex = selectedMoment.mediaFiles?.findIndex(mf => mf._id === mediaId);
-    if (currentMediaIndex !== -1 && currentMediaIndex !== undefined) {
-      currentMedia = selectedMoment.mediaFiles[currentMediaIndex];
+  const handleOpenGallery = (moment) => {
+    setSelectedMoment(moment);
+    // Update URL for sharing without triggering re-render
+    window.history.pushState(null, '', `/moments/${moment._id}`);
+  };
+
+  const handleCloseGallery = () => {
+    setSelectedMoment(null);
+    setSelectedMediaId(null);
+    // Return to base moments URL
+    window.history.pushState(null, '', '/moments');
+  };
+
+  const handleOpenLightbox = (mediaId) => {
+    setSelectedMediaId(mediaId);
+    // Update URL for sharing without triggering re-render
+    if (selectedMoment) {
+      window.history.pushState(null, '', `/moments/${selectedMoment._id}/media/${mediaId}`);
     }
-  }
+  };
 
-  if (id && !selectedMoment && moments.length > 0) {
-    // Moment not found, redirect to moments list
-    navigate('/moments', { replace: true });
-    return null;
-  }
+  const handleCloseLightbox = () => {
+    setSelectedMediaId(null);
+    // Return to gallery URL
+    if (selectedMoment) {
+      window.history.pushState(null, '', `/moments/${selectedMoment._id}`);
+    }
+  };
 
-  if (selectedMoment && mediaId && currentMedia) {
-    return (
-      <div className="max-w-7xl mx-auto">
-        <Lightbox
-          mediaFiles={selectedMoment.mediaFiles}
-          currentIndex={currentMediaIndex}
-          momentTitle={selectedMoment.title}
-          momentId={id}
-          onClose={() => navigate(`/moments/${id}`)}
-        />
-      </div>
-    );
-  }
-
-  if (selectedMoment) {
-    return (
-      <div className="max-w-7xl mx-auto">
-        <GalleryGrid
-          moment={selectedMoment}
-          onClose={() => navigate('/moments')}
-          onMediaClick={(clickedMediaId) => navigate(`/moments/${id}/media/${clickedMediaId}`)}
-          onDeleteGalleryFile={handleDeleteGalleryFile}
-          onUploadMediaInGallery={handleUploadMediaInGallery}
-          onCopyToServiceDriveGallery={handleCopyToServiceDriveGallery}
-          onGalleryOrderSave={handleGalleryOrderSave}
-        />
-      </div>
-    );
+  // Find the media index for lightbox
+  let currentMediaIndex = null;
+  if (selectedMoment && selectedMediaId) {
+    currentMediaIndex = selectedMoment.mediaFiles?.findIndex(mf => mf._id === selectedMediaId);
   }
 
   return (
@@ -322,11 +323,35 @@ if (formType === 'drive') {
           onCopyToServiceDriveGallery={handleCopyToServiceDriveGallery}
           onGalleryOrderSave={handleGalleryOrderSave}
           onSyncDriveFolder={handleSyncDriveFolder}
+          onOpenGallery={handleOpenGallery}
         />
       )}
 
       {showForm && (
         <MomentForm type={formType} onClose={() => setShowForm(false)} onSubmit={handleMomentFormSubmit} />
+      )}
+
+      {selectedMoment && !selectedMediaId && (
+        <GalleryGrid
+          moment={selectedMoment}
+          onClose={handleCloseGallery}
+          onMediaClick={handleOpenLightbox}
+          onDeleteGalleryFile={handleDeleteGalleryFile}
+          onUploadMediaInGallery={handleUploadMediaInGallery}
+          onCopyToServiceDriveGallery={handleCopyToServiceDriveGallery}
+          onGalleryOrderSave={handleGalleryOrderSave}
+        />
+      )}
+
+      {selectedMoment && selectedMediaId && currentMediaIndex !== null && currentMediaIndex !== -1 && (
+        <Lightbox
+          mediaFiles={selectedMoment.mediaFiles}
+          currentIndex={currentMediaIndex}
+          momentTitle={selectedMoment.title}
+          momentId={selectedMoment._id}
+          onClose={handleCloseLightbox}
+          onMediaChange={handleOpenLightbox}
+        />
       )}
     </div>
   );

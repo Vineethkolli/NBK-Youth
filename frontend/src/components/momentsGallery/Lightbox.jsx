@@ -1,11 +1,9 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, X, ChevronLeft, ChevronRight, Download, Share2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { API_URL } from '../../utils/config';
 
-function Lightbox({ mediaFiles, currentIndex, momentTitle, momentId, onClose }) {
-  const navigate = useNavigate();
+function Lightbox({ mediaFiles, currentIndex, momentTitle, momentId, onClose, onMediaChange }) {
   const [activeIndex, setActiveIndex] = useState(currentIndex);
   const [touchStart, setTouchStart] = useState(null);
   const [touchEnd, setTouchEnd] = useState(null);
@@ -29,14 +27,14 @@ function Lightbox({ mediaFiles, currentIndex, momentTitle, momentId, onClose }) 
     const newIndex = Math.max(activeIndex - 1, 0);
     const newMediaId = mediaFiles[newIndex]._id;
     setActiveIndex(newIndex);
-    navigate(`/moments/${momentId}/media/${newMediaId}`, { replace: true });
+    if (onMediaChange) onMediaChange(newMediaId);
   };
 
   const handleNext = () => {
     const newIndex = Math.min(activeIndex + 1, mediaFiles.length - 1);
     const newMediaId = mediaFiles[newIndex]._id;
     setActiveIndex(newIndex);
-    navigate(`/moments/${momentId}/media/${newMediaId}`, { replace: true });
+    if (onMediaChange) onMediaChange(newMediaId);
   };
 
   const extractFileId = (url) => {

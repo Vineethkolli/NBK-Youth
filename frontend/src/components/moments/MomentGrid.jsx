@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Trash2, Loader2, FolderOpen, RefreshCcw, Edit2, Check, ChevronRight } from 'lucide-react';
 import DriveMediaPreview from './DriveMediaPreview.jsx';
 
@@ -9,14 +8,14 @@ function MomentGrid({
   onDeleteMoment,
   onUpdateMomentTitle,
   onSyncDriveFolder,
+  onOpenGallery,
 }) {
-  const navigate = useNavigate();
   const [editingTitleId, setEditingTitleId] = useState(null);
   const [tempTitle, setTempTitle] = useState('');
   const [deletingId, setDeletingId] = useState(null);
 
   const openGallery = (moment) => {
-    navigate(`/moments/${moment._id}`);
+    onOpenGallery(moment);
   };
 
   const getEmbedUrl = (url) => {
