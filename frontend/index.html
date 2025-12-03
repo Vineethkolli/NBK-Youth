@@ -14,17 +14,13 @@
   <meta name="geo.position" content="15.8091769;80.1640130" />
   <meta name="ICBM" content="15.8091769,80.1640130" />
 
-  <!-- Structured Data -->
+  <!-- Organization Schema -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "Organization",
     "name": "NBK Youth Gangavaram",
-    "alternateName": [
-    "NBK Youth",
-    "Gangavaram",
-    "Gangavaram Youth"
-  ],
+    "alternateName": ["NBK Youth", "Gangavaram", "Gangavaram Youth", "Gangavaram App"],
     "url": "https://nbkyouth.vercel.app",
     "logo": "https://nbkyouth.vercel.app/logo/512.png",
     "description": "Discover village life, events, culture and youth celebrations. Developed by Kolli Vineeth.",
@@ -42,7 +38,22 @@
   }
   </script>
 
-  <!-- 3. Place Schema for Gangavaram -->
+  <!-- WebSite Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "NBK Youth",
+    "alternateName": ["NBK Youth Gangavaram", "NBK Youth App"],
+    "url": "https://nbkyouth.vercel.app",
+    "publisher": {
+      "@type": "Organization",
+      "name": "NBK Youth"
+    }
+  }
+  </script>
+
+  <!-- Place Schema -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
