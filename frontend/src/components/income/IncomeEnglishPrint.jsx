@@ -77,21 +77,27 @@ const handlePrint = () => {
   });
 
   // Footer
-  const pageCount = doc.getNumberOfPages();
-  for (let i = 1; i <= pageCount; i++) {
-    doc.setPage(i);
-    doc.setFontSize(9);
-    doc.text(
-      `Generated on: ${timestamp}`,
-      10,
-      doc.internal.pageSize.height - 10
-    );
-    doc.text(
-      `Page ${i} of ${pageCount}`,
-      doc.internal.pageSize.width - 30,
-      doc.internal.pageSize.height - 10
-    );
-  }
+const pageCount = doc.getNumberOfPages();
+for (let i = 1; i <= pageCount; i++) {
+  doc.setPage(i);
+  doc.setFontSize(9);
+
+  const pageWidth = doc.internal.pageSize.width;
+  const pageHeight = doc.internal.pageSize.height;
+
+  doc.text(`${timestamp}`, 10, pageHeight - 10);
+
+  const centerText = "NBK Youth App | https://nbkyouth.vercel.app";
+  const centerTextWidth = doc.getTextWidth(centerText);
+  const centerX = (pageWidth - centerTextWidth) / 2;
+
+  doc.text(centerText, centerX, pageHeight - 10);
+
+  doc.text(
+    `Page ${i} of ${pageCount}`,
+    pageWidth - 30, pageHeight - 10
+  );
+}
 
   doc.save('Income_Report.pdf');
 };
