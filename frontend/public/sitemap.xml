@@ -2,6 +2,18 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://nbkyouth.vercel.app/</loc>
-    <lastmod>2025-11-27</lastmod>
+    <lastmod>2025-12-03</lastmod>
+  </url>
+  <url>
+    <loc>https://nbkyouth.vercel.app/explore</loc>
+  </url>
+  <url>
+    <loc>https://nbkyouth.vercel.app/moments</loc>
+  </url>
+  <url>
+    <loc>https://nbkyouth.vercel.app/committee</loc>
+  </url>
+  <url>
+    <loc>https://nbkyouth.vercel.app/tech-stack</loc>
   </url>
 </urlset>
