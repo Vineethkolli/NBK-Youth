@@ -9,7 +9,7 @@ const ConfirmationModal = ({ isOpen, title, message, onConfirm, onCancel, confir
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
       <div className={`bg-white rounded-xl p-6 max-w-sm w-full transform transition-all duration-300 scale-100`}>
         <h3 className={`text-xl font-bold mb-3 ${isDestructive ? 'text-red-600' : 'text-gray-800'}`}>{title}</h3>
         <p className="text-gray-600 mb-6">{message}</p>
@@ -406,7 +406,7 @@ else {
         {item.modifiedTime ? new Date(item.modifiedTime).toLocaleDateString() : '-'}
       </td>
       <td className="p-3 whitespace-nowrap space-x-2">
-        {/* Action buttons (same as before) */}
+        {/* Action buttons */}
         <button
           onClick={() => handleDownload(item)}
           title="Download"

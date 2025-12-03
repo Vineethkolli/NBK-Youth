@@ -48,7 +48,7 @@
 
 ## 📌 Why This Project ?
 
-NBK-Youth is designed to streamline content, finance, and user management in a unified platform. Key highlights:
+NBK Youth is designed to streamline content, finance, and user management in a unified platform. Key highlights:
 
 - 🔐 **Role-Based Access Control**
 - 📈 **Activity Logs & Analytics**

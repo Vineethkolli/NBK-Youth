@@ -93,15 +93,15 @@ function InstallApp() {
           <div>
             <h3 className="text-lg font-medium">Download App</h3>
             <p className="text-sm text-gray-500">
-              Click &quot;Download Now&quot; to get better performance.
+              Click &quot;Install Now&quot; to get better performance.
             </p>
           </div>
           <button
             onClick={handleInstall}
             className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 flex items-center transition"
           >
-            <Download className="h-4 w-4 mr-2" />
-            Download Now
+            <Download className="h-5 w-5 mr-2" />
+            Install Now
           </button>
         </div>
       </div>

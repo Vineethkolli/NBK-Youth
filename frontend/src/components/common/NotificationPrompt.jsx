@@ -130,7 +130,7 @@ function NotificationPrompt() {
     >
       <div>
         <h3 className="text-lg font-medium flex items-center">
-          <Bell className="mr-2" /> Allow Notifications
+          <Bell className="mr-2" /> Notifications
         </h3>
       </div>
       <div className="flex items-center space-x-2">
