@@ -229,19 +229,44 @@ if (formType === 'drive') {
   };
 
 
-  const handleUploadMediaInGallery = (arg1) => {
-    if (arg1 && typeof arg1 === 'object' && arg1._id) {
-      const updatedMoment = arg1;
-      setMoments((prev) => prev.map((m) => (m._id === updatedMoment._id ? updatedMoment : m)));
-      toast.success('Media uploaded successfully');
-      return updatedMoment;
+  const handleUploadMediaInGallery = async (momentId, files) => {
+    if (!files) {
+      // Legacy support: if called with updatedMoment object
+      if (momentId && typeof momentId === 'object' && momentId._id) {
+        const updatedMoment = momentId;
+        setMoments((prev) => prev.map((m) => (m._id === updatedMoment._id ? updatedMoment : m)));
+        if (selectedMoment && selectedMoment._id === updatedMoment._id) {
+          setSelectedMoment(updatedMoment);
+        }
+        toast.success('Media uploaded successfully');
+        return updatedMoment;
+      }
+      await fetchMoments();
+      return null;
     }
 
-    (async () => {
+    // New implementation: momentId and files provided
+    try {
+      const toastId = toast.loading('Uploading media...');
+      // The actual upload happens in MediaUploadForm, we just wait for completion signal
       await fetchMoments();
-    })();
-
-    return null;
+      const updatedMoments = await axios.get(`${API_URL}/api/moments`);
+      const updatedMoment = updatedMoments.data.find(m => m._id === momentId);
+      
+      if (updatedMoment) {
+        setMoments((prev) => prev.map((m) => (m._id === updatedMoment._id ? updatedMoment : m)));
+        if (selectedMoment && selectedMoment._id === updatedMoment._id) {
+          setSelectedMoment(updatedMoment);
+        }
+        toast.success('Media uploaded successfully', { id: toastId });
+        return updatedMoment;
+      }
+      toast.dismiss(toastId);
+      return null;
+    } catch (error) {
+      toast.error('Failed to upload media');
+      throw error;
+    }
   };
 
   const handleCopyToServiceDriveGallery = async (momentId, driveUrl) => {
@@ -255,11 +280,16 @@ if (formType === 'drive') {
         prev.map((moment) => (moment._id === momentId ? updatedMoment : moment))
       );
 
+      if (selectedMoment && selectedMoment._id === momentId) {
+        setSelectedMoment(updatedMoment);
+      }
+
       toast.success('Drive media copied and added successfully');
       return updatedMoment;
     } catch (error) {
       console.error(error);
       toast.error('Failed to copy drive media');
+      throw error;
     }
   };
 
@@ -299,8 +329,14 @@ if (formType === 'drive') {
 
   // Find the media index for lightbox
   let currentMediaIndex = null;
+  let sortedMediaFiles = [];
   if (selectedMoment && selectedMediaId) {
-    currentMediaIndex = selectedMoment.mediaFiles?.findIndex(mf => mf._id === selectedMediaId);
+    // Sort media files the same way as GalleryGrid
+    sortedMediaFiles = selectedMoment.mediaFiles ? [...selectedMoment.mediaFiles].sort((a, b) => {
+      if (a.order !== undefined && b.order !== undefined) return b.order - a.order;
+      return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+    }) : [];
+    currentMediaIndex = sortedMediaFiles.findIndex(mf => mf._id === selectedMediaId);
   }
 
   return (
@@ -380,7 +416,7 @@ if (formType === 'drive') {
 
       {selectedMoment && selectedMediaId && currentMediaIndex !== null && currentMediaIndex !== -1 && (
         <Lightbox
-          mediaFiles={selectedMoment.mediaFiles}
+          mediaFiles={sortedMediaFiles}
           currentIndex={currentMediaIndex}
           momentTitle={selectedMoment.title}
           momentId={selectedMoment._id}

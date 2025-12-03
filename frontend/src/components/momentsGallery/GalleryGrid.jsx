@@ -109,7 +109,14 @@ function GalleryGrid({
 
   const handleAddMedia = async (files) => {
     try {
-      await onUploadMediaInGallery(moment._id, files);
+      const updatedMoment = await onUploadMediaInGallery(moment._id, files);
+      if (updatedMoment && updatedMoment.mediaFiles) {
+        const sorted = [...updatedMoment.mediaFiles].sort((a, b) => {
+          if (a.order !== undefined && b.order !== undefined) return b.order - a.order;
+          return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+        });
+        setLocalMediaFiles(sorted);
+      }
       setShowUploadForm(false);
     } catch (error) {
       console.error(error);
@@ -118,7 +125,14 @@ function GalleryGrid({
 
   const handleAddDriveMedia = async (driveUrl) => {
     try {
-      await onCopyToServiceDriveGallery(moment._id, driveUrl);
+      const updatedMoment = await onCopyToServiceDriveGallery(moment._id, driveUrl);
+      if (updatedMoment && updatedMoment.mediaFiles) {
+        const sorted = [...updatedMoment.mediaFiles].sort((a, b) => {
+          if (a.order !== undefined && b.order !== undefined) return b.order - a.order;
+          return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+        });
+        setLocalMediaFiles(sorted);
+      }
       setShowDriveForm(false);
     } catch (error) {
       console.error(error);

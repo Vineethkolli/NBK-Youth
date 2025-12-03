@@ -25,7 +25,7 @@ const StatsPrint = ({ stats }) => {
     // Title
     doc.setFontSize(20);
     doc.setTextColor(0, 0, 0);
-    const title = 'NBK Youth Statistics Report';
+    const title = 'Statistics Report';
     const titleWidth = doc.getTextWidth(title);
     const xPos = (doc.internal.pageSize.width - titleWidth) / 2;
     doc.text(title, xPos, yPos);
