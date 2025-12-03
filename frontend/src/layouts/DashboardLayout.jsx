@@ -38,14 +38,6 @@ function DashboardLayout() {
     closeSidebar();
   };
 
-  useLayoutEffect(() => {
-    if (mainRef.current) {
-      mainRef.current.scrollTo({ top: 0, left: 0, behavior: 'auto' }); // Scroll to top on route change
-    } else {
-      window.scrollTo(0, 0);
-    }
-  }, [location.pathname]);
-
   // Device detection
   useEffect(() => {
   const ua = navigator.userAgent;
