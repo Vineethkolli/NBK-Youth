@@ -87,7 +87,7 @@ for (let i = 1; i <= pageCount; i++) {
 
   doc.text(`${timestamp}`, 10, pageHeight - 10);
 
-  const centerText = "NBK Youth App | https://nbkyouth.vercel.app";
+  const centerText = "NBK Youth Gangavaram | https://nbkyouth.vercel.app";
   const centerTextWidth = doc.getTextWidth(centerText);
   const centerX = (pageWidth - centerTextWidth) / 2;
 
