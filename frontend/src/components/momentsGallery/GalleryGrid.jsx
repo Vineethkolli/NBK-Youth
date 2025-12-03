@@ -24,6 +24,7 @@ function GalleryGrid({
   const [localMediaFiles, setLocalMediaFiles] = useState([]);
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [deletingFiles, setDeletingFiles] = useState({});
+  const [isSharing, setIsSharing] = useState(false);
 
   const longPressTimeout = useRef(null);
   
@@ -79,19 +80,80 @@ function GalleryGrid({
     }
   };
 
-    const handleShare = async () => { 
-    const url = window.location.href;
-    const text = `Watch ${moment.title} moments in NBK Youth APP`;
+  const buildCoverShareFile = async (fileMeta) => {
+    const shareSource = fileMeta.type === 'image' ? getBackendDownloadUrl(fileMeta.url) : getThumbnailUrl(fileMeta.url);
+    if (!shareSource || typeof File === 'undefined' || typeof fetch === 'undefined') return null;
 
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: moment.title, text, url });
-      } catch (e) {
-        console.log("Share cancelled or failed");
-      }
+    try {
+      const response = await fetch(shareSource, { mode: 'cors' });
+      if (!response.ok) throw new Error('Failed to fetch cover media');
+
+      const blob = await response.blob();
+      const inferredExtension = blob.type?.split('/')?.[1] || (fileMeta.type === 'video' ? 'jpg' : 'png');
+      const normalizedBaseName = (fileMeta.name || `${moment.title || 'moment'}-cover`)
+        .replace(/[^a-z0-9-_.]/gi, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '') || 'moment-cover';
+      const finalFileName = normalizedBaseName.includes('.')
+        ? normalizedBaseName
+        : `${normalizedBaseName}.${inferredExtension}`;
+      return new File([blob], finalFileName, { type: blob.type || 'image/jpeg' });
+    } catch (error) {
+      console.error('Cover share asset error:', error);
+      return null;
+    }
+  };
+
+  const copyShareMessageToClipboard = async (message) => {
+    if (navigator?.clipboard?.writeText) {
+      await navigator.clipboard.writeText(message);
+      toast.success('Share message copied to clipboard');
     } else {
-      navigator.clipboard.writeText(url);
-      toast.success("Link copied to clipboard");
+      window.prompt('Copy this link to share', message);
+    }
+  };
+
+  const handleShare = async () => {
+    const pageUrl = window.location.href;
+    const shareText = `Watch ${moment.title} moments in NBK Youth APP`;
+    const coverMedia = localMediaFiles?.[0];
+    const coverPreviewUrl = coverMedia ? getThumbnailUrl(coverMedia.url) : null;
+
+    const sharePayload = {
+      title: moment.title,
+      text: shareText,
+      url: pageUrl,
+    };
+
+    try {
+      setIsSharing(true);
+
+      if (coverMedia && navigator?.canShare) {
+        const coverFile = await buildCoverShareFile(coverMedia);
+        if (coverFile && navigator.canShare({ files: [coverFile] })) {
+          sharePayload.files = [coverFile];
+        }
+      }
+
+      if (navigator?.share) {
+        try {
+          await navigator.share(sharePayload);
+          toast.success('Shared successfully');
+          return;
+        } catch (error) {
+          if (error.name === 'AbortError') {
+            return; // user cancelled share sheet
+          }
+          console.error('Native share failed:', error);
+        }
+      }
+
+      const fallbackMessage = [shareText, pageUrl, coverPreviewUrl ? `Cover: ${coverPreviewUrl}` : null]
+        .filter(Boolean)
+        .join('\n');
+      await copyShareMessageToClipboard(fallbackMessage);
+    } finally {
+      setIsSharing(false);
     }
   };
 
@@ -266,12 +328,13 @@ function GalleryGrid({
                 </>
               )}
               <button
-              onClick={handleShare}
-              className="text-gray-800 hover:text-gray-900"
-              title="Share"
-            >
-              <Share2 className="h-5 w-5" />
-            </button>
+                onClick={handleShare}
+                className="text-gray-800 hover:text-gray-900 disabled:opacity-40 disabled:cursor-not-allowed"
+                title="Share"
+                disabled={isSharing}
+              >
+                {isSharing ? <Loader2 className="h-5 w-5 animate-spin" /> : <Share2 className="h-5 w-5" />}
+              </button>
               <button onClick={onClose} className="text-gray-800 hover:text-gray-900">
                 <X className="h-6 w-6" />
               </button>
