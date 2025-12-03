@@ -114,7 +114,7 @@ export const sendSignupEmail = async (email, name) => {
           <tr>
             <td style="padding:20px 20px; font-family:'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
               <p style="color:#2d3748; font-size:16px; line-height:1.6; margin:0 0 20px 0;">
-                We're delighted to welcome you to <b>NBK Youth</b> — a community that celebrates togetherness, culture, and pride of Gangavaram.
+                We're delighted to welcome you to <b>NBK Youth Gangavaram</b> - a community that celebrates togetherness, culture, and pride of Gangavaram.
               </p>
 
               <p style="color:#4a5568; font-size:16px; line-height:1.6; margin:0 0 20px 0;">
@@ -150,7 +150,7 @@ export const sendSignupEmail = async (email, name) => {
           <tr>
             <td align="center" class="footer-td" style="background-color:#edf2f7; padding:12px;">
               <p class="dark-text-gray" style="margin:0; color:#718096; font-family:'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size:13px; line-height:1.6;">
-                © 2024 Developed by <b>Kolli Vineeth</b><br>Stay active. Stay connected...
+                © 2024 Developed by <b>Kolli Vineeth</b><br>Stay connected. Stay active...
               </p>
             </td>
           </tr>
