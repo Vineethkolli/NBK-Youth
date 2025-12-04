@@ -29,7 +29,7 @@ import AdminPanel from './pages/AdminPanel';
 import DeveloperOptions from './pages/DeveloperOptions';
 import Vibe from './pages/Vibe';
 import Moments from './pages/Moments';
-import LetsPlay from './pages/LetsPlay';
+import Activities from './pages/Activities';
 import Notifications from './pages/Notifications';
 import MaintenancePage from './pages/Maintenance';
 import TechStack from './pages/TechStack';
@@ -108,7 +108,7 @@ function AppContent() {
           <Route path="/moments" element={<Moments />} />
           <Route path="/moments/:id" element={<Moments />} />
           <Route path="/moments/:id/media/:mediaId" element={<Moments />} />
-          <Route path="/lets-play" element={<LetsPlay />} />
+          <Route path="/activities" element={<Activities />} />
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/tech-stack" element={<TechStack />} />
           <Route path="/activity-logs" element={<ActivityLogs />} />

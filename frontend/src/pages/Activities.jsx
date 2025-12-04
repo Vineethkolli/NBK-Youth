@@ -4,16 +4,16 @@ import { Plus, Edit2, ArrowLeft } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { API_URL } from '../utils/config';
-import GameForm from '../components/games/GameForm';
-import PlayerForm from '../components/games/PlayerForm';
-import TimeForm from '../components/games/TimeForm';
-import GameCard from '../components/games/GameCard';
-import PlayerList from '../components/games/PlayerList';
-import ActivitiesEnglishPrint from '../components/games/EnglishPrint';
-import ActivitiesTeluguPrint from '../components/games/TeluguPrint';
+import GameForm from '../components/activities/GameForm';
+import PlayerForm from '../components/activities/PlayerForm';
+import TimeForm from '../components/activities/TimeForm';
+import GameCard from '../components/activities/GameCard';
+import PlayerList from '../components/activities/PlayerList';
+import ActivitiesEnglishPrint from '../components/activities/EnglishPrint';
+import ActivitiesTeluguPrint from '../components/activities/TeluguPrint';
 import { useLanguage } from '../context/LanguageContext';
 
-function LetsPlay() {
+function Activities() {
   const { hasAccess } = useAuth();
   const { language } = useLanguage();
   const [games, setGames] = useState([]);
@@ -187,33 +187,36 @@ function LetsPlay() {
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
-      {/* Game List View */}
-      {!selectedGame && (
-        <div>
-          <div className="flex justify-between items-center mb-6">
-            <div className="space-y-2">
-              <h1 className="text-2xl font-semibold">Activities</h1>
-            </div>
-            {hasAccess('Privileged') && (
-              <div className="space-x-2">
-                <button
-                  onClick={() => setShowGameForm(true)}
-                  className="btn-primary"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create Game
-                </button>
-                <button
-                  onClick={() => setIsEditMode(!isEditMode)}
-                  className={`btn-secondary ${isEditMode ? 'bg-red-100' : ''}`}
-                >
-                  <Edit2 className="h-4 w-4 mr-2" />
-                  {isEditMode ? 'Done' : 'Edit'}
-                </button>
-                <PrintComponent games={games} />
-              </div>
-            )}
-          </div>
+  {!selectedGame && (
+    <div>
+      <div className="flex justify-between items-center mb-6">
+        <div className="space-y-2">
+          <h1 className="text-2xl font-semibold">Activities</h1>
+        </div>
+
+        <div className="space-x-2">
+          {hasAccess('Privileged') && (
+            <>
+              <button
+                onClick={() => setShowGameForm(true)}
+                className="btn-primary"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Create Game
+              </button>
+
+              <button
+                onClick={() => setIsEditMode(!isEditMode)}
+                className={`btn-secondary ${isEditMode ? 'bg-red-100' : ''}`}
+              >
+                <Edit2 className="h-4 w-4 mr-2" />
+                {isEditMode ? 'Done' : 'Edit'}
+              </button>
+            </>
+          )}
+          <PrintComponent games={games} />
+        </div>
+      </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {games.length > 0 ? (
@@ -317,4 +320,4 @@ function LetsPlay() {
   );
 }
 
-export default LetsPlay;
+export default Activities;

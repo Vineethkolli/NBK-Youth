@@ -17,7 +17,7 @@ function Explore() {
         { to: "/committee", icon: Users, label: "Committee" },
         { to: "/moments", icon: CameraIcon, label: "Moments" },
         { to: "/vibe", icon: MusicIcon, label: "Vibe" },
-        { to: "/lets-play", icon: TrophyIcon, label: "Activities" },
+        { to: "/activities", icon: TrophyIcon, label: "Activities" },
         { to: "/tools", icon: ToolCase, label: "Tools" },
       ],
     },

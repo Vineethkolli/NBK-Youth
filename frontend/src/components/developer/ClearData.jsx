@@ -97,7 +97,7 @@ function ClearData() {
           { name: 'Event Labels', type: 'eventLabels' },
           { name: 'Previous Year Amount', type: 'previousYear' },
           { name: 'Event Timeline', type: 'events' },
-          { name: 'Activities', type: 'letsPlay' },
+          { name: 'Activities', type: 'activities' },
           { name: 'User Payments', type: 'payment' },
           { name: 'Notification History', type: 'notifications' },
           { name: 'Activity Logs', type: 'activityLog' },

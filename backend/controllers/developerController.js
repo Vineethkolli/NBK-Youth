@@ -55,7 +55,7 @@ export const developerController = {
           description = 'Cleared all estimated expense records';
           break;
 
-        case 'letsPlay':
+        case 'activities':
           await Game.deleteMany({});
           description = 'Cleared all activities records';
           break;

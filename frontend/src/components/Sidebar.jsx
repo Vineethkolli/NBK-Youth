@@ -24,7 +24,7 @@ function Sidebar({ isOpen, isCollapsed = false, onNavigate }) {
   { to: '/pay-online', icon: ShieldCheck, label: 'Pay Online' },
   { to: '/notifications', icon: Bell, label: 'Notifications' },
   { to: '/settings', icon: Settings, label: 'Settings' },
-  { to: '/lets-play', icon: TrophyIcon, label: 'Activities' },
+  { to: '/activities', icon: TrophyIcon, label: 'Activities' },
   { to: '/tools', icon: ToolCase, label: 'Tools' },
   { to: '/tech-stack', icon: Layers, label: 'Tech Stack' },
   

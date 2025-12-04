@@ -1,27 +1,34 @@
-NBK YOUTH (WEB APP)
+NBK YOUTH GANGAVARAM (WEB APP)
 Designed and Developed by KOLLI VINEETH
 Started on OCT 2024
 
-Frontend 188 files, Backend 117 files
+
 DIRECTORY STRUCTURE
 |   
+|   
+|   .git
 |   .gitignore
+|   LICENSE
 |   README.md
 |   
 +---.github
 |   \---workflows
 |           gmailtoken-keep-alive.yml
+|           mongodb-backup.yml
 |           renderbackend-keep-alive.yml
 |           
-+---backend 
++---backend
+|   |   .dockerignore
 |   |   .env
 |   |   .gitignore
+|   |   Dockerfile
 |   |   package-lock.json
 |   |   package.json
 |   |   Readme.md
 |   |   server.js
 |   |   
 |   +---config
+|   |       access.js
 |   |       cloudinary.js
 |   |       
 |   +---controllers
@@ -49,9 +56,11 @@ DIRECTORY STRUCTURE
 |   |       notificationController.js
 |   |       paymentController.js
 |   |       paymentDetailsController.js
+|   |       profileController.js
 |   |       recordsController.js
 |   |       scheduledNotificationController.js
 |   |       serviceDriveStorageController.js
+|   |       sessionController.js
 |   |       snapshotController.js
 |   |       statsController.js
 |   |       usersController.js
@@ -92,6 +101,7 @@ DIRECTORY STRUCTURE
 |   |       ProcessedChunk.js
 |   |       ProcessedRecords.js
 |   |       ScheduledNotification.js
+|   |       Session.js
 |   |       Slide.js
 |   |       Snapshot.js
 |   |       User.js
@@ -119,8 +129,10 @@ DIRECTORY STRUCTURE
 |   |       notifications.js
 |   |       payment.js
 |   |       paymentDetails.js
+|   |       profile.js
 |   |       records.js
 |   |       scheduledNotifications.js
+|   |       sessions.js
 |   |       snapshots.js
 |   |       stats.js
 |   |       users.js
@@ -128,18 +140,28 @@ DIRECTORY STRUCTURE
 |   |       vibe.js
 |   |       vini.js
 |   |       
+|   +---scripts
+|   |       checkServiceDriveStorage.js
+|   |       getRefreshToken.js
+|   |       migrate.js
+|   |       
 |   +---services
+|   |       emailOTPService.js
 |   |       embeddingService.js
 |   |       processedRecordsService.js
+|   |       SignupEmail.js
 |   |       viniService.js
 |   |       
 |   \---utils
-|           checkServiceDriveStorage.js
 |           driveUtils.js
-|           emailService.js
-|           getRefreshToken.js
+|           firebaseAdmin.js
+|           ipLocation.js
 |           keepRefreshTokenAlive.js
+|           phoneValidation.js
+|           redis.js
 |           setupDefaults.js
+|           statsAggregator.js
+|           tokenUtils.js
 |           
 \---frontend
     |   .env
@@ -157,7 +179,12 @@ DIRECTORY STRUCTURE
     +---public
     |   |   developerImage.png
     |   |   google1f3713de9cdfe399.html
+    |   |   homepage.html
     |   |   manifest.json
+    |   |   privacy_policy.html
+    |   |   robots.txt
+    |   |   sitemap.xml
+    |   |   terms_of_service.html
     |   |   
     |   \---logo
     |           1200x630.png
@@ -172,6 +199,7 @@ DIRECTORY STRUCTURE
     |           384.png
     |           512.png
     |           96.png
+    |           favicon.ico
     |           notificationlogo.png
     |           
     \---src
@@ -181,11 +209,21 @@ DIRECTORY STRUCTURE
         |   sw.js
         |   
         +---components
+        |   |   Explore.jsx
         |   |   Footer.jsx
         |   |   Header.jsx
         |   |   ProtectedRoute.jsx
         |   |   Sidebar.jsx
         |   |   
+        |   +---activities
+        |   |       EnglishPrint.jsx
+        |   |       GameCard.jsx
+        |   |       GameForm.jsx
+        |   |       PlayerForm.jsx
+        |   |       PlayerList.jsx
+        |   |       TeluguPrint.jsx
+        |   |       TimeForm.jsx
+        |   |       
         |   +---activityLogs
         |   |       LogFilters.jsx
         |   |       LogPrint.jsx
@@ -200,18 +238,33 @@ DIRECTORY STRUCTURE
         |   |       PaymentDetails.jsx
         |   |       PopupBanner.jsx
         |   |       ScheduledNotifications.jsx
-        |   |       Stats.jsx
         |   |       
         |   +---auth
         |   |       ForgotPassword.jsx
+        |   |       GoogleAuthButton.jsx
+        |   |       GooglePhoneStep.jsx
         |   |       InstallApp.jsx
         |   |       LanguageToggle.jsx
         |   |       OTPVerification.jsx
+        |   |       PhoneInput.jsx
         |   |       ResetPassword.jsx
+        |   |       SetPassword.jsx
+        |   |       SmartAuthInput.jsx
+        |   |       
+        |   +---authSessions
+        |   |       Filters.jsx
+        |   |       SessionsTable.jsx
+        |   |       Stats.jsx
         |   |       
         |   +---common
+        |   |       ErrorBoundary.jsx
         |   |       EventLabelDisplay.jsx
+        |   |       InstallApp.jsx
         |   |       LockIndicator.jsx
+        |   |       NotificationPrompt.jsx
+        |   |       OfflineIndicator.jsx
+        |   |       UpdateNameForm.jsx
+        |   |       VersionUpdate.jsx
         |   |       
         |   +---developer
         |   |       ClearData.jsx
@@ -240,13 +293,6 @@ DIRECTORY STRUCTURE
         |   |       ExpenseTable.jsx
         |   |       ExpenseTeluguPrint.jsx
         |   |       
-        |   +---games
-        |   |       GameCard.jsx
-        |   |       GameForm.jsx
-        |   |       PlayerForm.jsx
-        |   |       PlayerList.jsx
-        |   |       TimeForm.jsx
-        |   |       
         |   +---histories
         |   |       HistoryEnglishPrint.jsx
         |   |       HistoryEvents.jsx
@@ -257,10 +303,9 @@ DIRECTORY STRUCTURE
         |   |       HistoryTeluguPrint.jsx
         |   |       
         |   +---home
-        |   |       InstallApp.jsx
-        |   |       NotificationPrompt.jsx
         |   |       Slideshow.jsx
         |   |       SlidesOrder.jsx
+        |   |       SlidesUpload.jsx
         |   |       Timeline.jsx
         |   |       
         |   +---income
@@ -305,8 +350,13 @@ DIRECTORY STRUCTURE
         |   |       PaymentReceipt.jsx
         |   |       
         |   +---profile
-        |   |       ProfileImage.jsx
+        |   |       GoogleLinkButton.jsx
+        |   |       PasswordChangeForm.jsx
+        |   |       PhoneInput.jsx
+        |   |       ProfileDetails.jsx
         |   |       ProfileImageDialog.jsx
+        |   |       ProfileOTPVerification.jsx
+        |   |       SessionsManager.jsx
         |   |       
         |   +---records
         |   |       EventRecordForm.jsx
@@ -319,6 +369,7 @@ DIRECTORY STRUCTURE
         |   |       NotificationSettings.jsx
         |   |       
         |   +---stats
+        |   |       Overview.jsx
         |   |       StatsEnglishPrint.jsx
         |   |       StatsTeluguPrint.jsx
         |   |       
@@ -327,8 +378,21 @@ DIRECTORY STRUCTURE
         |   |       MindMap.jsx
         |   |       Technologies.jsx
         |   |       
+        |   +---tools
+        |   |       Calculator.jsx
+        |   |       LocationControls.jsx
+        |   |       PdfMerger.jsx
+        |   |       Stopwatch.jsx
+        |   |       Toss.jsx
+        |   |       Weather.jsx
+        |   |       WeatherDisplay.jsx
+        |   |       
+        |   +---users
+        |   |       DeleteUserForm.jsx
+        |   |       UpdateUserForm.jsx
+        |   |       UserStats.jsx
+        |   |       
         |   +---verification
-        |   |       VerificationFilters.jsx
         |   |       VerificationTable.jsx
         |   |       
         |   +---vibe
@@ -336,7 +400,6 @@ DIRECTORY STRUCTURE
         |   |       CollectionManager.jsx
         |   |       FloatingMusicIcon.jsx
         |   |       MusicPlayer.jsx
-        |   |       Search.jsx
         |   |       SongItem.jsx
         |   |       UploadToCollection.jsx
         |   |       
@@ -351,15 +414,16 @@ DIRECTORY STRUCTURE
         |       LanguageContext.jsx
         |       LockContext.jsx
         |       MaintenanceModeContext.jsx
-        |       MusicContext.jsx
         |       
         +---layouts
         |       AuthLayout.jsx
         |       DashboardLayout.jsx
         |       
         +---pages
+        |       Activities.jsx
         |       ActivityLogs.jsx
         |       AdminPanel.jsx
+        |       AuthSessions.jsx
         |       Committee.jsx
         |       DeveloperOptions.jsx
         |       Estimation.jsx
@@ -367,7 +431,6 @@ DIRECTORY STRUCTURE
         |       Histories.jsx
         |       Home.jsx
         |       Income.jsx
-        |       LetsPlay.jsx
         |       Maintenance.jsx
         |       Moments.jsx
         |       Monitor.jsx
@@ -381,19 +444,26 @@ DIRECTORY STRUCTURE
         |       SignUp.jsx
         |       Stats.jsx
         |       TechStack.jsx
+        |       Tools.jsx
         |       Users.jsx
         |       Verification.jsx
         |       Vibe.jsx
         |       vini.jsx
         |       
+        +---stores
+        |       useMusicStore.js
+        |       
         \---utils
+                access.js
                 analytics.js
                 cloudinaryUpload.js
                 config.js
                 dateTime.js
+                deviceInfo.js
+                firebase.js
                 notifications.js
                 songQueue.js
                 vapidKeys.js
-                
+
                 
 tree /F /A  > directory_structure.txt

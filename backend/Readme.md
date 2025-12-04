@@ -2,6 +2,13 @@
 Total API Routes: 31
 Total Endpoints: 197
 
+## HTTP Methods
+- GET: 68 endpoints
+- POST: 63 endpoints
+- PUT: 20 endpoints
+- PATCH: 12 endpoints
+- DELETE: 33 endpoints
+
 
 # Endpoints Breakdown
 
@@ -46,14 +53,7 @@ Total Endpoints: 197
 - Lock Settings Routes: 2 endpoints
 - Activity Logs Routes: 2 endpoints
 - Monitor Routes: 17 endpoints
-- Cloudinary/Uploads Routes: 1 endpoint
+- Cloudinary Upload Routes: 1 endpoint
 
 ## Health & Status
 - Health Check: 2 endpoints
-
-## HTTP Methods Distribution
-- GET: 68 endpoints
-- POST: 63 endpoints
-- PUT: 20 endpoints
-- PATCH: 12 endpoints
-- DELETE: 33 endpoints
