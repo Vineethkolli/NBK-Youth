@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { ArrowLeft, X, ChevronLeft, ChevronRight, Download, Share2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { API_URL } from '../../utils/config';
@@ -119,28 +120,27 @@ function Lightbox({ mediaFiles, currentIndex, momentTitle, momentId, onClose, on
     if (distance < -50 && activeIndex > 0) handlePrevious();
   };
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 bg-black z-50 flex flex-col h-screen w-screen"
-      style={{ height: '100dvh' }}
+      className="fixed inset-0 bg-black z-50 flex flex-col"
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
-      <div className="bg-black/75 text-white p-4 flex items-center justify-between flex-shrink-0 min-h-16">
-        <div className="flex items-center space-x-2 sm:space-x-4 min-w-0">
-          <button onClick={onClose} className="text-white hover:text-gray-300 flex-shrink-0">
+      <div className="bg-black/75 text-white p-4 flex items-center justify-between">
+        <div className="flex items-center space-x-4">
+          <button onClick={onClose} className="text-white hover:text-gray-300">
             <ArrowLeft className="h-6 w-6" />
           </button>
-          <div className="min-w-0">
-            <h3 className="font-medium truncate text-sm sm:text-base">{momentTitle}</h3>
-            <p className="text-xs sm:text-sm text-gray-300">
+          <div>
+            <h3 className="font-medium">{momentTitle}</h3>
+            <p className="text-sm text-gray-300">
               {activeIndex + 1} of {mediaFiles.length}
             </p>
           </div>
         </div>
         
-        <div className="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
+        <div className="flex items-center space-x-4">
           <button
             onClick={handleShare}
             className="text-white hover:text-gray-300"
@@ -161,7 +161,7 @@ function Lightbox({ mediaFiles, currentIndex, momentTitle, momentId, onClose, on
         </div>
       </div>
 
-      <div className="flex-1 flex items-center justify-center relative overflow-hidden min-h-0">
+      <div className="flex-1 flex items-center justify-center relative overflow-hidden">
         {currentMedia.type === 'image' ? (
           <img
             src={getImageUrl(currentMedia.url)}
@@ -217,7 +217,8 @@ function Lightbox({ mediaFiles, currentIndex, momentTitle, momentId, onClose, on
           <p className="font-medium notranslate">{currentMedia.name}</p>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 

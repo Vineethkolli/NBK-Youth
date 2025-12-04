@@ -54,23 +54,23 @@ function GalleryReorder({ mediaFiles, onSave, onCancel }) {
   };
 
   return (
-    <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 min-h-0">
+    <div className="flex-1 overflow-y-auto p-4">
       {/* Info + Save/Cancel */}
-      <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-3 sm:p-4 flex flex-col items-center space-y-3 mb-6 flex-shrink-0">
-        <p className="text-indigo-800 text-xs sm:text-sm text-center">
+      <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4 flex flex-col items-center space-y-3 mb-6">
+        <p className="text-indigo-800 text-sm text-center">
           <GripHorizontal className="h-4 w-4 inline mb-1" /> Drag or use arrows to change order of media files.
         </p>
-        <div className="flex justify-center space-x-2 sm:space-x-4 flex-wrap">
+        <div className="flex justify-center space-x-4">
           <button
             onClick={onCancel}
-            className="px-3 sm:px-4 py-2 border border-gray-300 rounded-md shadow-sm text-xs sm:text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+            className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
           >
             Cancel
           </button>
           <button
             onClick={handleSave}
             disabled={!hasChanges}
-            className="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-md disabled:opacity-50 transition"
+            className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-md disabled:opacity-50 transition"
           >
             Save
           </button>
@@ -82,7 +82,7 @@ function GalleryReorder({ mediaFiles, onSave, onCancel }) {
         <Droppable droppableId="media-reorder">
           {(provided) => (
             <div
-              className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4"
+              className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
               ref={provided.innerRef}
               {...provided.droppableProps}
             >
