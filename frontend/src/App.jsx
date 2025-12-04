@@ -42,7 +42,6 @@ import ViniPage from './pages/vini';
 import AuthSessions from './pages/AuthSessions';
 import Tools from './pages/Tools';
 import Explore from './components/Explore';
-import Gangavaram from './pages/Gangavaram';
 
 import ProtectedRoute from './components/ProtectedRoute';
 import PopupBanner from './components/adminPanel/PopupBanner';
@@ -78,8 +77,6 @@ function AppContent() {
       <PopupBanner />
 
       <Routes>
-        <Route path="/" element={<Gangavaram />} />
-        <Route path="/gangavaram" element={<Gangavaram />} />
         {/* Public Auth Routes */}
         <Route element={<AuthLayout />}>
           <Route path="/signin" element={<SignIn />} />
@@ -94,7 +91,7 @@ function AppContent() {
             </ProtectedRoute>
           }
         >
-          <Route path="/home" element={<Home />} />
+          <Route path="/" element={<Home />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/stats" element={<Stats />} />
           <Route path="/users" element={<Users />} />
