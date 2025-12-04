@@ -37,7 +37,7 @@ export const sendOTPEmail = async (email, otp, mode = "verify_email") => {
 
         const html = `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                <h1 style="color: #23984eff;">NBK Youth Gangavaram</h1>
+                <h2 style="color: #23984eff;">NBK Youth Gangavaram App</h2>
                 <h2 style="color: #333;">${title}</h2>
                 <p>${purposeText}</p>
                 <div style="background-color: #f4f4f4; padding: 15px;
