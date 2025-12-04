@@ -121,25 +121,26 @@ function Lightbox({ mediaFiles, currentIndex, momentTitle, momentId, onClose, on
 
   return (
     <div
-      className="fixed inset-0 bg-black z-50 flex flex-col"
+      className="fixed inset-0 bg-black z-50 flex flex-col h-screen w-screen"
+      style={{ height: '100dvh' }}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
-      <div className="bg-black/75 text-white p-4 flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <button onClick={onClose} className="text-white hover:text-gray-300">
+      <div className="bg-black/75 text-white p-4 flex items-center justify-between flex-shrink-0 min-h-16">
+        <div className="flex items-center space-x-2 sm:space-x-4 min-w-0">
+          <button onClick={onClose} className="text-white hover:text-gray-300 flex-shrink-0">
             <ArrowLeft className="h-6 w-6" />
           </button>
-          <div>
-            <h3 className="font-medium">{momentTitle}</h3>
-            <p className="text-sm text-gray-300">
+          <div className="min-w-0">
+            <h3 className="font-medium truncate text-sm sm:text-base">{momentTitle}</h3>
+            <p className="text-xs sm:text-sm text-gray-300">
               {activeIndex + 1} of {mediaFiles.length}
             </p>
           </div>
         </div>
         
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
           <button
             onClick={handleShare}
             className="text-white hover:text-gray-300"
@@ -160,7 +161,7 @@ function Lightbox({ mediaFiles, currentIndex, momentTitle, momentId, onClose, on
         </div>
       </div>
 
-      <div className="flex-1 flex items-center justify-center relative overflow-hidden">
+      <div className="flex-1 flex items-center justify-center relative overflow-hidden min-h-0">
         {currentMedia.type === 'image' ? (
           <img
             src={getImageUrl(currentMedia.url)}

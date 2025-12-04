@@ -200,18 +200,18 @@ function GalleryGrid({
   const selectionModeActive = selectedFiles.length > 0;
 
   return (
-    <div className="fixed inset-0 bg-black/90 flex flex-col z-50">
-      <div className="bg-white p-4 flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <button onClick={onClose} className="text-gray-800 hover:text-gray-900">
+    <div className="fixed inset-0 bg-black/90 flex flex-col z-50 h-screen w-screen" style={{ height: '100dvh' }}>
+      <div className="bg-white p-4 flex items-center justify-between flex-shrink-0 min-h-16">
+        <div className="flex items-center space-x-4 min-w-0">
+          <button onClick={onClose} className="text-gray-800 hover:text-gray-900 flex-shrink-0">
             <ArrowLeft className="h-6 w-6" />
           </button>
 
           {selectedFiles.length > 0 ? (
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-4 min-w-0">
               <button
                 onClick={toggleSelectAll}
-                className="flex flex-col items-center justify-center w-10"
+                className="flex flex-col items-center justify-center w-10 flex-shrink-0"
                 title={isAllSelected ? 'Deselect all' : 'Select all'}
               >
                 <div
@@ -223,19 +223,19 @@ function GalleryGrid({
                 </div>
                 <span className="text-xs mt-1">All</span>
               </button>
-              <div className="text-xl font-medium">{selectedFiles.length} selected</div>
+              <div className="text-xl font-medium truncate">{selectedFiles.length} selected</div>
             </div>
           ) : (
-            <h2 className="text-xl font-semibold">{moment.title}</h2>
+            <h2 className="text-xl font-semibold truncate">{moment.title}</h2>
           )}
         </div>
 
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
           {selectedFiles.length > 0 ? (
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-2 sm:space-x-3">
               <button
                 onClick={() => downloadFiles(selectedFiles)}
-                className="p-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 flex items-center"
+                className="p-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 flex items-center flex-shrink-0"
                 title="Download selected"
               >
                 <Download className="h-4 w-4" />
@@ -243,7 +243,7 @@ function GalleryGrid({
               {canManageMedia && (
   <button
     onClick={bulkDeleteFiles}
-    className="p-2 bg-red-600 text-white rounded hover:bg-red-700 flex items-center"
+    className="p-2 bg-red-600 text-white rounded hover:bg-red-700 flex items-center flex-shrink-0"
     title="Delete selected"
   >
     <Trash2 className="h-4 w-4" />
@@ -251,7 +251,7 @@ function GalleryGrid({
 )}
               <button
                 onClick={() => setSelectedFiles([])}
-                className="text-red-600 hover:text-red-700 font-semibold"
+                className="text-red-600 hover:text-red-700 font-semibold flex-shrink-0 text-sm"
                 title="Cancel selection"
               >
                 Cancel
@@ -263,42 +263,65 @@ function GalleryGrid({
                 <>
                   {moment.type !== 'drive' && (
                     <>
-                      <button onClick={() => setShowUploadForm(true)} className="btn-primary">
+                      <button onClick={() => setShowUploadForm(true)} className="btn-primary hidden sm:flex">
                         <Upload className="h-4 w-4 mr-2" />
                       </button>
-                      <button onClick={() => setShowDriveForm(true)} className="btn-primary">
+                      <button onClick={() => setShowUploadForm(true)} className="btn-primary sm:hidden p-2 flex-shrink-0">
+                        <Upload className="h-4 w-4" />
+                      </button>
+                      <button onClick={() => setShowDriveForm(true)} className="btn-primary hidden sm:flex">
                         <Copy className="h-4 w-4 mr-2" />
+                      </button>
+                      <button onClick={() => setShowDriveForm(true)} className="btn-primary sm:hidden p-2 flex-shrink-0">
+                        <Copy className="h-4 w-4" />
                       </button>
                     </>
                   )}
                   <button
                     onClick={() => setIsReorderMode(true)}
                     disabled={isReorderMode}
-                    className={`btn-secondary ${isReorderMode ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    className={`btn-secondary hidden sm:flex ${isReorderMode ? 'opacity-50 cursor-not-allowed' : ''}`}
                     title={isReorderMode ? 'Reorder is active' : 'Enter reorder mode'}
                   >
                     <GripHorizontal className="h-4 w-4 mr-2" />
+                  </button>
+                  <button
+                    onClick={() => setIsReorderMode(true)}
+                    disabled={isReorderMode}
+                    className={`btn-secondary sm:hidden p-2 flex-shrink-0 ${isReorderMode ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    title={isReorderMode ? 'Reorder is active' : 'Enter reorder mode'}
+                  >
+                    <GripHorizontal className="h-4 w-4" />
                   </button>
                   <button
                     onClick={() => {
                       setIsEditMode(!isEditMode);
                       setIsReorderMode(false);
                     }}
-                    className={`btn-secondary ${isEditMode ? 'bg-red-100' : ''}`}
+                    className={`btn-secondary hidden sm:flex ${isEditMode ? 'bg-red-100' : ''}`}
                   >
                     <Edit2 className="h-4 w-4 mr-2" />
                     {isEditMode ? 'Done' : ''}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setIsEditMode(!isEditMode);
+                      setIsReorderMode(false);
+                    }}
+                    className={`btn-secondary sm:hidden p-2 flex-shrink-0 ${isEditMode ? 'bg-red-100' : ''}`}
+                  >
+                    <Edit2 className="h-4 w-4" />
                   </button>
                 </>
               )}
               <button
               onClick={handleShare}
-              className="text-gray-800 hover:text-gray-900"
+              className="text-gray-800 hover:text-gray-900 flex-shrink-0"
               title="Share"
             >
               <Share2 className="h-5 w-5" />
             </button>
-              <button onClick={onClose} className="text-gray-800 hover:text-gray-900">
+              <button onClick={onClose} className="text-gray-800 hover:text-gray-900 flex-shrink-0">
                 <X className="h-6 w-6" />
               </button>
             </>
@@ -313,8 +336,8 @@ function GalleryGrid({
           onCancel={() => setIsReorderMode(false)}
         />
       ) : (
-        <div ref={galleryScrollRef} className="flex-1 overflow-y-auto p-4">
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div ref={galleryScrollRef} className="flex-1 overflow-y-auto overflow-x-hidden p-4 min-h-0">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
             {localMediaFiles?.map((file, index) => {
               const isSelected = selectedFiles.find((f) => f._id === file._id);
               return (
