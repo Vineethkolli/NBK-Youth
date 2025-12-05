@@ -4,7 +4,7 @@ import { Toaster } from 'react-hot-toast';
 import { initializeAnalytics, trackPageView, setAnalyticsUser, clearAnalyticsUser } from './utils/analytics';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { HiddenProfileProvider } from './context/HiddenProfileContext';
-import { LanguageProvider, useLanguage } from './context/LanguageContext';
+import { LanguageProvider } from './context/LanguageContext';
 import { MaintenanceModeProvider, useMaintenanceMode } from './context/MaintenanceModeContext';
 import { EventLabelProvider } from './context/EventLabelContext';
 import { LockProvider } from './context/LockContext';
@@ -56,7 +56,6 @@ function AppContent() {
   const { user } = useAuth();
   const { isMaintenanceMode } = useMaintenanceMode();
   const location = useLocation(); 
-  const { language, applyTranslation } = useLanguage();
 
   useEffect(() => {
     if (user && user.registerId) {
@@ -66,12 +65,7 @@ function AppContent() {
     }
     const path = location.pathname + location.search;
     trackPageView(path);
-
-    // Re-apply translation on route change
-    if (language === 'te') {
-      applyTranslation(language);
-    }
-  }, [user, location, language, applyTranslation]); 
+  }, [user, location]); 
 
   if (isMaintenanceMode && user?.role !== 'developer') {
     return <MaintenancePage />;

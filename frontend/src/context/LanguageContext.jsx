@@ -38,7 +38,7 @@ export const LanguageProvider = ({ children }) => {
   }, [user]);
 
   // Initialize translation
-  const initializeTranslation = useCallback((lang) => {
+  const initializeTranslation = (lang) => {
     return new Promise((resolve) => {
       if (lang === 'te') {
         // Check if Google Translate is already loaded and working
@@ -124,7 +124,7 @@ export const LanguageProvider = ({ children }) => {
         resolve();
       }
     });
-  }, []);
+  };
 
   const changeLanguage = async (newLanguage) => {
     if (language === newLanguage) return;
@@ -163,7 +163,7 @@ export const LanguageProvider = ({ children }) => {
 
   return (
     <LanguageContext.Provider
-      value={{ language, changeLanguage, isChanging, changingTo, applyTranslation: initializeTranslation }}
+      value={{ language, changeLanguage, isChanging, changingTo }}
     >
       {children}
     </LanguageContext.Provider>
