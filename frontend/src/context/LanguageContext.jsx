@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { API_URL } from '../utils/config';
 import { useAuth } from './AuthContext';
@@ -38,7 +38,7 @@ export const LanguageProvider = ({ children }) => {
   }, [user]);
 
   // Initialize translation
-  const initializeTranslation = (lang) => {
+  const initializeTranslation = useCallback((lang) => {
     return new Promise((resolve) => {
       if (lang === 'te') {
         // Check if Google Translate is already loaded and working
@@ -124,7 +124,7 @@ export const LanguageProvider = ({ children }) => {
         resolve();
       }
     });
-  };
+  }, []);
 
   const changeLanguage = async (newLanguage) => {
     if (language === newLanguage) return;
@@ -163,7 +163,7 @@ export const LanguageProvider = ({ children }) => {
 
   return (
     <LanguageContext.Provider
-      value={{ language, changeLanguage, isChanging, changingTo }}
+      value={{ language, changeLanguage, isChanging, changingTo, applyTranslation: initializeTranslation }}
     >
       {children}
     </LanguageContext.Provider>
