@@ -41,6 +41,7 @@ import Monitor from './pages/Monitor';
 import ViniPage from './pages/vini';
 import AuthSessions from './pages/AuthSessions';
 import Tools from './pages/Tools';
+import Gangavaram from './pages/Gangavaram';
 import Explore from './components/Explore';
 
 import ProtectedRoute from './components/ProtectedRoute';
@@ -77,7 +78,7 @@ function AppContent() {
       <PopupBanner />
 
       <Routes>
-        {/* Public Auth Routes */}
+        <Route path="/gangavaram" element={<Gangavaram />} />
         <Route element={<AuthLayout />}>
           <Route path="/signin" element={<SignIn />} />
           <Route path="/signup" element={<SignUp />} />
