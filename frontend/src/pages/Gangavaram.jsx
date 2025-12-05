@@ -12,7 +12,7 @@ export default function Gangavaram() {
 
         <div className="flex items-center justify-center mt-10 gap-3">
         <img
-          src="/logo/512.png"   // <-- Put logo.png in public folder
+          src="/logo/512.png"
           alt="Gangavaram Logo"
           className="w-12 h-12 rounded-full shadow-md"
         />
