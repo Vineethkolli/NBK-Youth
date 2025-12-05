@@ -5,12 +5,21 @@ import LanguageToggle from '../components/auth/LanguageToggle';
 export default function Gangavaram() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-blue-100 flex flex-col items-center p-6">
-      <h1 className="text-5xl font-extrabold text-blue-800 drop-shadow-md mt-8">
-        GANGAVARAM 🌾
-      </h1>
-        <div className="absolute top-4 right-4">
+
+        <div className="absolute top-3 right-4">
           <LanguageToggle />
         </div>
+
+        <div className="flex items-center justify-center mt-10 gap-3">
+        <img
+          src="/logo/512.png"   // <-- Put logo.png in public folder
+          alt="Gangavaram Logo"
+          className="w-12 h-12 rounded-full shadow-md"
+        />
+        <h1 className="text-4xl font-extrabold text-blue-800 drop-shadow-md">
+          GANGAVARAM
+        </h1>
+      </div>
 
       <p className="text-gray-700 text-lg mt-3 max-w-2xl text-center">
         Our Roots, Our Culture, Our Pride
@@ -21,7 +30,7 @@ export default function Gangavaram() {
       <section className="bg-white shadow-lg rounded-2xl p-6 mt-6 max-w-3xl w-full">
         <p className="leading-relaxed text-justify text-gray-700">
           This website and app are the official digital platform of Gangavaram village — connecting our people
-          wherever they are in the world. Stay connected with village news, culture, and youth celebrations.
+          wherever they are in the world. Stay connected with village, culture, and youth celebrations.
         </p>
       </section>
 
@@ -55,16 +64,16 @@ export default function Gangavaram() {
       <section className="bg-white shadow-lg rounded-2xl p-6 mt-6 max-w-3xl w-full">
         <h2 className="text-2xl font-bold text-blue-700 mb-4">Village Highlights ✨</h2>
         <ul className="list-disc pl-5 text-gray-700 space-y-2">
-          <li><strong>Agriculture</strong> — Farming is the backbone of our land 🌱</li>
-          <li><strong>Community & Unity</strong> — Strong village bonding and neighbourly spirit 🫂</li>
-          <li><strong>Culture & Tradition</strong> — We follow the rich cultural heritage of Andhra Pradesh 🎶🛕 </li>
-          <li><strong>Festivities & Youth Celebrations</strong> — Festivals, feasts and community events bring us together 🎉</li>
+          <li>Farming is the backbone of our land 🌱</li>
+          <li>Strong village bonding and neighbourly spirit 🫂</li>
+          <li>We follow the rich cultural heritage 🎶🛕 </li>
+          <li>Festivals and community events bring us together 🎉</li>
         </ul>
       </section>
 
       {/* Footer */}
       <footer className="mt-16 text-gray-600 text-sm">
-        © 2024 NBK Youth | Developed by Kolli Vineeth ✨
+        © 2024 Developed by Kolli Vineeth ✨
       </footer>
     </div>
   );
