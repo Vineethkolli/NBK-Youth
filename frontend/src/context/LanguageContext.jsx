@@ -161,9 +161,19 @@ export const LanguageProvider = ({ children }) => {
     }
   };
 
+  const reapplyLanguage = useCallback(async () => {
+    if (language === 'en') return;
+
+    try {
+      await initializeTranslation(language);
+    } catch (error) {
+      console.error('Failed to reapply language', error);
+    }
+  }, [language]);
+
   return (
     <LanguageContext.Provider
-      value={{ language, changeLanguage, isChanging, changingTo }}
+      value={{ language, changeLanguage, isChanging, changingTo, reapplyLanguage }}
     >
       {children}
     </LanguageContext.Provider>
