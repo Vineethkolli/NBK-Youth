@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { toast } from 'react-hot-toast';
@@ -167,9 +168,9 @@ function SignIn() {
           <div className="text-center">
             <p>
               Don't have an account?{' '}
-              <a href="/signup" className="text-green-600 font-medium">
+              <Link to="/signup" className="text-green-600 font-medium">
                 Sign up
-              </a>
+              </Link>
             </p>
           </div>
 
