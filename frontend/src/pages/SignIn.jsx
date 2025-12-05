@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import { toast } from 'react-hot-toast';
 import { Eye, EyeOff } from 'lucide-react';
 import ForgotPassword from '../components/auth/ForgotPassword';
@@ -17,6 +18,7 @@ function SignIn() {
   const [showPassword, setShowPassword] = useState(false);
 
   const { signin } = useAuth();
+  const { language } = useLanguage();
   const [googleCredential, setGoogleCredential] = useState(null);
 
   const resetInitialState = {
