@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { toast } from 'react-hot-toast';
@@ -103,8 +102,6 @@ function SignUp() {
 
   return (
     <>
-      <div id="google_translate_element" style={{ display: "none" }}></div>
-
       <div className="relative">
         {step === 1 && (
         <div className="absolute top-10 right-0">
@@ -156,7 +153,7 @@ function SignUp() {
 
             <div className="text-center">
               <span>Already have an account? </span>
-              <Link to="/signin" className="text-green-600 font-medium">Sign in</Link>
+              <a href="/signin" className="text-green-600 font-medium">Sign in</a>
             </div>
 
     <p className="text-[11px] text-gray-500 text-center leading-snug">

@@ -44,7 +44,6 @@ function Settings() {
               తెలుగు
             </button>
           </div>
-          <div id="google_translate_element" className={language === 'te' ? '' : 'hidden'}></div>
         </div>
 
         <div className="space-y-4">

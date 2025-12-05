@@ -1,7 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { useLanguage } from '../context/LanguageContext';
 import { toast } from 'react-hot-toast';
 import { Eye, EyeOff } from 'lucide-react';
 import ForgotPassword from '../components/auth/ForgotPassword';
@@ -19,7 +17,6 @@ function SignIn() {
   const [showPassword, setShowPassword] = useState(false);
 
   const { signin } = useAuth();
-  const { language } = useLanguage();
   const [googleCredential, setGoogleCredential] = useState(null);
 
   const resetInitialState = {
@@ -113,8 +110,6 @@ function SignIn() {
 
   return (
     <>
-      <div id="google_translate_element" style={{ display: 'none' }}></div>
-
       <div className="relative">
         <div className="absolute top-10 right-0">
           <LanguageToggle />
@@ -168,9 +163,9 @@ function SignIn() {
           <div className="text-center">
             <p>
               Don't have an account?{' '}
-              <Link to="/signup" className="text-green-600 font-medium">
+              <a href="/signup" className="text-green-600 font-medium">
                 Sign up
-              </Link>
+              </a>
             </p>
           </div>
 
