@@ -78,7 +78,6 @@ function AppContent() {
       <PopupBanner />
 
       <Routes>
-        <Route path="/gangavaram" element={<Gangavaram />} />
         <Route element={<AuthLayout />}>
           <Route path="/signin" element={<SignIn />} />
           <Route path="/signup" element={<SignUp />} />
