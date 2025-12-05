@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 import { API_URL } from '../utils/config';
 import { useAuth } from './AuthContext';
@@ -41,19 +41,6 @@ export const LanguageProvider = ({ children }) => {
   const initializeTranslation = (lang) => {
     return new Promise((resolve) => {
       if (lang === 'te') {
-        // Check if Google Translate is already loaded and working
-        if (window.google && window.google.translate && window.google.translate.TranslateElement) {
-          const selectLang = document.querySelector('.goog-te-combo');
-          if (selectLang) {
-            if (selectLang.value !== 'te') {
-              selectLang.value = 'te';
-              selectLang.dispatchEvent(new Event('change'));
-            }
-            resolve();
-            return;
-          }
-        }
-
         // Remove any existing Google Translate script and clear container
         const existingScript = document.getElementById('google-translate-script');
         if (existingScript) {
@@ -76,13 +63,9 @@ export const LanguageProvider = ({ children }) => {
           } catch (err) {
             console.error('Translate element init error', err);
             resolve();
-            return;
           }
 
           // Poll until the language dropdown is available, then switch to Telugu
-          let attempts = 0;
-          const maxAttempts = 40; // 20 seconds
-
           const interval = setInterval(() => {
             const selectLang = document.querySelector('.goog-te-combo');
             if (selectLang) {
@@ -90,14 +73,20 @@ export const LanguageProvider = ({ children }) => {
               selectLang.dispatchEvent(new Event('change'));
               clearInterval(interval);
               resolve();
-            } else {
-              attempts++;
-              if (attempts >= maxAttempts) {
-                clearInterval(interval);
-                resolve();
-              }
             }
           }, 500);
+
+          setTimeout(() => {
+            try {
+              const selectLang = document.querySelector('.goog-te-combo');
+              if (selectLang) {
+                selectLang.value = 'te';
+                selectLang.dispatchEvent(new Event('change'));
+              }
+            } catch (e) {
+            }
+            resolve();
+          }, 10000);
         };
 
         // Load Google Translate script
@@ -106,10 +95,6 @@ export const LanguageProvider = ({ children }) => {
         script.src =
           'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
         script.async = true;
-        script.onerror = () => {
-          console.error('Google Translate script failed to load');
-          resolve();
-        };
         document.body.appendChild(script);
       } else {
         // For English, remove translation elements if they exist and resolve
@@ -127,8 +112,6 @@ export const LanguageProvider = ({ children }) => {
   };
 
   const changeLanguage = async (newLanguage) => {
-    if (language === newLanguage) return;
-
     setIsChanging(true);
     setChangingTo(newLanguage);
 
@@ -143,37 +126,25 @@ export const LanguageProvider = ({ children }) => {
       }
     }
 
+    try {
+      await initializeTranslation(newLanguage);
+    } catch (e) {
+      console.error('initializeTranslation error', e);
+    }
+
+    setLanguage(newLanguage);
+    setIsChanging(false);
+    setChangingTo(null);
+
     if (newLanguage === 'en') {
       // Reloading the page ensures that the default English state is applied
       window.location.reload();
-      return;
-    }
-
-    try {
-      await initializeTranslation(newLanguage);
-      setLanguage(newLanguage);
-    } catch (e) {
-      console.error('initializeTranslation error', e);
-      setLanguage('en');
-    } finally {
-      setIsChanging(false);
-      setChangingTo(null);
     }
   };
 
-  const reapplyLanguage = useCallback(async () => {
-    if (language === 'en') return;
-
-    try {
-      await initializeTranslation(language);
-    } catch (error) {
-      console.error('Failed to reapply language', error);
-    }
-  }, [language]);
-
   return (
     <LanguageContext.Provider
-      value={{ language, changeLanguage, isChanging, changingTo, reapplyLanguage }}
+      value={{ language, changeLanguage, isChanging, changingTo }}
     >
       {children}
     </LanguageContext.Provider>

@@ -165,7 +165,7 @@ function Histories() {
                   onClick={() => setSelectedHistory(history)}
                   className={`w-full p-2 rounded-lg border-2 transition-colors ${selectedHistory?._id === history._id ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200 hover:border-gray-300'}`}
                 >
-                  <div className="text-sm font-medium" {...(selectedHistory?._id === history._id ? { 'data-snapshot-name': true } : {})}>{history.snapshotName}</div>
+                  <div className="text-sm font-medium">{history.snapshotName}</div>
                 </button>
 
                 {isEditMode && (

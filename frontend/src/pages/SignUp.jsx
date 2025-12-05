@@ -102,6 +102,8 @@ function SignUp() {
 
   return (
     <>
+      <div id="google_translate_element" style={{ display: "none" }}></div>
+
       <div className="relative">
         {step === 1 && (
         <div className="absolute top-10 right-0">

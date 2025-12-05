@@ -4,7 +4,7 @@ import { Toaster } from 'react-hot-toast';
 import { initializeAnalytics, trackPageView, setAnalyticsUser, clearAnalyticsUser } from './utils/analytics';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { HiddenProfileProvider } from './context/HiddenProfileContext';
-import { LanguageProvider, useLanguage } from './context/LanguageContext';
+import { LanguageProvider } from './context/LanguageContext';
 import { MaintenanceModeProvider, useMaintenanceMode } from './context/MaintenanceModeContext';
 import { EventLabelProvider } from './context/EventLabelContext';
 import { LockProvider } from './context/LockContext';
@@ -41,7 +41,6 @@ import Monitor from './pages/Monitor';
 import ViniPage from './pages/vini';
 import AuthSessions from './pages/AuthSessions';
 import Tools from './pages/Tools';
-import Gangavaram from './pages/Gangavaram';
 import Explore from './components/Explore';
 
 import ProtectedRoute from './components/ProtectedRoute';
@@ -55,7 +54,6 @@ import VersionUpdate from './components/common/VersionUpdate';
 function AppContent() {
   const { user } = useAuth();
   const { isMaintenanceMode } = useMaintenanceMode();
-  const { reapplyLanguage } = useLanguage();
   const location = useLocation(); 
 
   useEffect(() => {
@@ -68,10 +66,6 @@ function AppContent() {
     trackPageView(path);
   }, [user, location]); 
 
-  useEffect(() => {
-    reapplyLanguage();
-  }, [location, reapplyLanguage]);
-
   if (isMaintenanceMode && user?.role !== 'developer') {
     return <MaintenancePage />;
   }
@@ -83,6 +77,7 @@ function AppContent() {
       <PopupBanner />
 
       <Routes>
+        {/* Public Auth Routes */}
         <Route element={<AuthLayout />}>
           <Route path="/signin" element={<SignIn />} />
           <Route path="/signup" element={<SignUp />} />
