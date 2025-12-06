@@ -15,7 +15,7 @@ function ExpensePrint({ expenses, visibleColumns }) {
       '<style>table { width: 100%; border-collapse: collapse; } th, td { border: 1px solid #ccc; padding: 8px; text-align: left; font-size: 12px; vertical-align: top; } th { background: #f4f4f4; }</style>'
     );
     printWindow.document.write('</head><body>');
-    printWindow.document.write('<div style="text-align: center;"><h2><span translate="no">ఖర్చు నిర్వహణ</span></h2></div>');
+    printWindow.document.write('<div style="text-align: center;"><h2><span translate="no">ఖర్చుల నివేదిక</span></h2></div>');
     if (renderedLabel) {
       printWindow.document.write(`<div class="event-label" style="text-align: center; margin-bottom: 10px; color: #666;">${renderedLabel}</div>`);
     } else if (eventLabel?.label) {

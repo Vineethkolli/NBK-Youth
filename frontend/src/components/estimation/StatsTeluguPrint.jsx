@@ -27,7 +27,7 @@ const StatsTeluguPrint = ({ stats, budgetStats }) => {
       </style>
     `);
     printWindow.document.write('</head><body>');
-    printWindow.document.write('<h2><span translate="no">అంచనా గణాంకాలు రిపోర్ట్</span></h2>');
+    printWindow.document.write('<h2><span translate="no">అంచనా గణాంకాల నివేదిక</span></h2>');
     if (renderedLabel) {
       printWindow.document.write(`<div class="event-label" style="text-align: center; margin-bottom: 10px; color: #666;">${renderedLabel}</div>`);
     } else if (eventLabel?.label) {

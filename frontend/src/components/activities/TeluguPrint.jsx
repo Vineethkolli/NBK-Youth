@@ -24,7 +24,7 @@ const handlePrint = () => {
     </head>
     <body>
       <div style="text-align:center;">
-        <h2>కార్యకలాపాలు</h2>
+        <h2>కార్యకలాపాల నివేదిక</h2>
       </div>
   `);
 

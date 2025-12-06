@@ -64,19 +64,19 @@ function TeluguPrint({ selectedHistory, activeTab, data, showBelongsTo }) {
     let teluguTitle = '';
     switch (activeTab) {
       case 'stats':
-        teluguTitle = 'NBK యూత గణాంకాలు రిపోర్ట్';
+        teluguTitle = 'గణాంకాల నివేదిక';
         break;
       case 'income':
-        teluguTitle = 'ఆదాయ రిపోర్ట్';
+        teluguTitle = 'ఆదాయ నివేదిక';
         break;
       case 'expense':
-        teluguTitle = 'ఖర్చు రిపోర్ట్';
+        teluguTitle = 'ఖర్చుల నివేదిక';
         break;
       case 'events':
-        teluguTitle = 'కార్యక్రమాలు రిపోర్ట్';
+        teluguTitle = 'కార్యక్రమాల నివేదిక';
         break;
       default:
-        teluguTitle = 'రిపోర్ట్';
+        teluguTitle = 'నివేదిక';
     }
 
     printWindow.document.write(`<h2><span translate="no">${teluguTitle}</span></h2>`);
