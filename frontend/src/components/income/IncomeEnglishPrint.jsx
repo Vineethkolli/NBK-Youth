@@ -76,7 +76,7 @@ const handlePrint = () => {
     margin: { top: 10 },
   });
 
-  // Footer
+// Footer
 const pageCount = doc.getNumberOfPages();
 for (let i = 1; i <= pageCount; i++) {
   doc.setPage(i);
@@ -87,11 +87,13 @@ for (let i = 1; i <= pageCount; i++) {
 
   doc.text(`${timestamp}`, 10, pageHeight - 10);
 
-  const centerText = "NBK Youth Gangavaram | https://nbkyouth.vercel.app";
-  const centerTextWidth = doc.getTextWidth(centerText);
-  const centerX = (pageWidth - centerTextWidth) / 2;
+  const linkText = "Gangavaram App | https://nbkyouth.vercel.app";
+  const textWidth = doc.getTextWidth(linkText);
+  const centerX = (pageWidth - textWidth) / 2;
 
-  doc.text(centerText, centerX, pageHeight - 10);
+  doc.textWithLink(linkText, centerX, pageHeight - 10, {
+    url: "https://nbkyouth.vercel.app"
+  });
 
   doc.text(
     `Page ${i} of ${pageCount}`,
