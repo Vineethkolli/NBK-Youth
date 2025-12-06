@@ -8,6 +8,10 @@ import FinancialTimeline from '../components/records/FinancialTimeline';
 import EventRecordsGrid from '../components/records/EventRecordsGrid';
 import FinancialRecordForm from '../components/records/FinancialRecordForm';
 import EventRecordForm from '../components/records/EventRecordForm';
+import FinancialEnglishPrint from '../components/records/FinancialEnglishPrint';
+import FinancialTeluguPrint from '../components/records/FinancialTeluguPrint';
+import { useLanguage } from '../context/LanguageContext';
+
 
 function Records() {
   const { hasAccess } = useAuth();
@@ -22,6 +26,9 @@ function Records() {
   const [showRecordForm, setShowRecordForm] = useState(false);
   const [editingFinancialRecord, setEditingFinancialRecord] = useState(null);
   const [editingEventRecord, setEditingEventRecord] = useState(null);
+  const { language } = useLanguage();
+  
+  const PrintComponent = language === 'te'? FinancialTeluguPrint : FinancialEnglishPrint;
 
   useEffect(() => {
     fetchFinancialRecords();
@@ -216,24 +223,33 @@ function Records() {
               </div>
             </div>
 
-            {hasAccess('Developer') && (
-              <div className="flex justify-end space-x-3">
-                <button
-                  onClick={() => setShowFinancialForm(true)}
-                  className="btn-primary flex items-center"
-                >
-                  <Plus className="h-4 w-4 mr-1" />
-                  Add
-                </button>
-                <button
-                  onClick={() => setIsEditMode(!isEditMode)}
-                  className={`btn-primary flex items-center ${isEditMode ? 'bg-red-100' : ''}`}
-                >
-                  <Edit2 className="h-4 w-4 mr-1" />
-                  {isEditMode ? 'Done' : 'Edit'}
-                </button>
-              </div>
-            )}
+            <div className="flex justify-end space-x-3">
+  {hasAccess('Developer') && (
+    <>
+      <button
+        onClick={() => setShowFinancialForm(true)}
+        className="btn-primary flex items-center"
+      >
+        <Plus className="h-4 w-4 mr-1" />
+        Add
+      </button>
+
+      <button
+        onClick={() => setIsEditMode(!isEditMode)}
+        className={`btn-primary flex items-center ${
+          isEditMode ? "bg-red-100" : ""
+        }`}
+      >
+        <Edit2 className="h-4 w-4 mr-1" />
+        {isEditMode ? "Done" : "Edit"}
+      </button>
+    </>
+  )}
+ <PrintComponent
+    records={filteredFinancialRecords}
+    selectedEvent={selectedEvent}
+  />
+</div>
           </div>
 
           {/* Financial Timeline */}
