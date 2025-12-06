@@ -96,11 +96,8 @@ for (let i = 1; i <= pageCount; i++) {
   });
 
   doc.text(
-    `Page ${i} of ${pageCount}`,
-    pageWidth - 30, pageHeight - 10
-  );
+    `Page ${i} of ${pageCount}`, pageWidth - 30, pageHeight - 10);
 }
-
   doc.save('Income_Report.pdf');
 };
 

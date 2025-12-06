@@ -69,23 +69,26 @@ const IncomePrint = ({ incomes, visibleColumns, incomeFilters }) => {
 
     // Footer
     const pageCount = doc.getNumberOfPages();
-    for (let i = 1; i <= pageCount; i++) {
-      doc.setPage(i);
-      doc.setFontSize(9);
+for (let i = 1; i <= pageCount; i++) {
+  doc.setPage(i);
+  doc.setFontSize(9);
 
-      doc.text(
-        `Generated on: ${timestamp}`,
-        10,
-        doc.internal.pageSize.height - 10
-      );
+  const pageWidth = doc.internal.pageSize.width;
+  const pageHeight = doc.internal.pageSize.height;
 
-      doc.text(
-        `Page ${i} of ${pageCount}`,
-        doc.internal.pageSize.width - 30,
-        doc.internal.pageSize.height - 10
-      );
-    }
+  doc.text(`${timestamp}`, 10, pageHeight - 10);
 
+  const linkText = "Gangavaram App | https://nbkyouth.vercel.app";
+  const textWidth = doc.getTextWidth(linkText);
+  const centerX = (pageWidth - textWidth) / 2;
+
+  doc.textWithLink(linkText, centerX, pageHeight - 10, {
+    url: "https://nbkyouth.vercel.app"
+  });
+
+  doc.text(
+    `Page ${i} of ${pageCount}`, pageWidth - 30, pageHeight - 10);
+}
     doc.save('Estimated_Income.pdf');
   };
 
