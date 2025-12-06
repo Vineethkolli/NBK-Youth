@@ -89,7 +89,7 @@ for (let i = 1; i <= pageCount; i++) {
     `Page ${i} of ${pageCount}`, pageWidth - 30, pageHeight - 10);
 }
 
-    doc.save("Activities_Report.pdf");
+    doc.save("Activities.pdf");
   };
 
   return (
