@@ -54,7 +54,7 @@ const StatsPrint = ({ stats, budgetStats }) => {
 
     doc.setFontSize(20);
     doc.setTextColor(0, 0, 0);
-    const title = 'Estimation Statistics Report';
+    const title = 'Estimated Statistics Report';
     const titleWidth = doc.getTextWidth(title);
     const xPos = (doc.internal.pageSize.width - titleWidth) / 2;
     doc.text(title, xPos, yPos);
@@ -234,7 +234,7 @@ for (let i = 1; i <= pageCount; i++) {
   doc.text(
     `Page ${i} of ${pageCount}`, pageWidth - 30, pageHeight - 10);
 }
-    doc.save('Estimation_Statistics_Report.pdf');
+    doc.save('Estimated_Statistics.pdf');
   };
   
   return (

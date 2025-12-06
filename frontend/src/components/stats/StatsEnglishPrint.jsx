@@ -186,7 +186,7 @@ for (let i = 1; i <= pageCount; i++) {
   doc.text(
     `Page ${i} of ${pageCount}`, pageWidth - 30, pageHeight - 10);
 }
-    doc.save('Statistics_Report.pdf');
+    doc.save('Statistics.pdf');
   };
 
   return (
