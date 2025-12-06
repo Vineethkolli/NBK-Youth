@@ -14,7 +14,7 @@ const ExpensePrint = ({ expenses, visibleColumns }) => {
 
     // Title
     doc.setFontSize(16);
-    doc.text('Estimated Expense', pageWidth / 2, 15, { align: 'center' });
+    doc.text('Estimated Expense Report', pageWidth / 2, 15, { align: 'center' });
 
     if (eventLabel) {
       doc.setFontSize(12);

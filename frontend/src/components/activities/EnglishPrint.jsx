@@ -8,7 +8,7 @@ const ActivitiesEnglishPrint = ({ games }) => {
 
   const handlePrint = () => {
     const doc = new jsPDF();
-    const title = "Activities";
+    const title = "Activities Report";
     const timestamp = new Date().toLocaleString();
 
     doc.setFontSize(16);

@@ -26,7 +26,7 @@ const IncomePrint = ({ incomes, visibleColumns, incomeFilters }) => {
 
     // Title
     doc.setFontSize(16);
-    doc.text('Estimated Income', pageWidth / 2, 15, { align: 'center' });
+    doc.text('Estimated Income Report', pageWidth / 2, 15, { align: 'center' });
 
     if (eventLabel) {
       doc.setFontSize(12);
