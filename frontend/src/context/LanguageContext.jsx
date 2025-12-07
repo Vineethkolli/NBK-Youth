@@ -36,7 +36,6 @@ export const LanguageProvider = ({ children }) => {
     }
     setLanguage(storedLang);
     
-    // Initialize script once if needed
     if (storedLang === 'te') {
       initializeTranslation('te');
     }
@@ -47,24 +46,18 @@ export const LanguageProvider = ({ children }) => {
     return new Promise((resolve) => {
       const container = createTranslationContainer();
       
-      // If script is already loaded, just trigger change
       if (window.google?.translate?.TranslateElement) {
         triggerLanguageChange(lang);
         resolve();
         return;
       }
 
-      // If script tag exists but not initialized, wait? 
-      // Or if we are here, maybe we should just ensure script is loaded.
       if (document.getElementById('google-translate-script')) {
-         // Script exists but maybe not ready. 
-         // We can rely on the callback if it was just added, or check periodically.
-         // For simplicity, let's assume if script exists, we wait for it.
          resolve();
          return;
       }
 
-      // Define the callback for Google Translate
+      // Callback for Google Translate
       window.googleTranslateElementInit = () => {
         try {
           new window.google.translate.TranslateElement(
@@ -76,7 +69,6 @@ export const LanguageProvider = ({ children }) => {
             'google_translate_element'
           );
           
-          // Once initialized, trigger the language change
           triggerLanguageChange(lang);
           resolve();
         } catch (err) {
@@ -96,22 +88,26 @@ export const LanguageProvider = ({ children }) => {
   };
 
   const triggerLanguageChange = (lang) => {
-    if (lang === 'te') {
-        const interval = setInterval(() => {
-          const selectLang = document.querySelector('.goog-te-combo');
-          if (selectLang) {
-            if (selectLang.value !== 'te') {
-                selectLang.value = 'te';
-                selectLang.dispatchEvent(new Event('change'));
-            }
-            clearInterval(interval);
-          }
-        }, 500);
-        
-        // Timeout to stop polling
-        setTimeout(() => clearInterval(interval), 10000);
-    }
-  };
+  if (lang === 'te') {
+    let attempts = 0;
+    const interval = setInterval(() => {
+      const selectLang = document.querySelector('.goog-te-combo');
+      attempts++;
+
+      if (selectLang) {
+        if (selectLang.value !== 'te') {
+          selectLang.value = 'te';
+          selectLang.dispatchEvent(new Event('change'));
+        }
+        clearInterval(interval);
+      }
+
+      if (attempts > 25) {
+        clearInterval(interval);
+      }
+    }, 500);
+  }
+};
 
   const changeLanguage = async (newLanguage) => {
     setIsChanging(true);
@@ -139,7 +135,6 @@ export const LanguageProvider = ({ children }) => {
     setChangingTo(null);
 
     if (newLanguage === 'en') {
-      // Reloading the page ensures that the default English state is applied
       window.location.reload();
     }
   };
