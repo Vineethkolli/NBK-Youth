@@ -54,12 +54,6 @@ function Home() {
         </div>
 
         <Timeline events={events} isEditing={isEditing} onUpdate={fetchEvents} />
-        
-        <div className="bg-gray-100 border-t border-gray-200 rounded-lg">
-          <p className="mt-4 text-sm text-gray-500 px-4">
-            If any issue is faced at any time, just refresh the page by scrolling down. We are working hard to sort out the errors.
-          </p>
-        </div>
 
         <Footer />
       </div>
