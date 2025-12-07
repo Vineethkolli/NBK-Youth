@@ -12,6 +12,7 @@ const createTranslationContainer = () => {
   if (!container) {
     container = document.createElement('div');
     container.id = 'google_translate_element';
+    container.style.display = 'none';
     document.body.appendChild(container);
   }
   return container;
@@ -34,81 +35,82 @@ export const LanguageProvider = ({ children }) => {
       storedLang = localStorage.getItem('preferredLanguage') || 'en';
     }
     setLanguage(storedLang);
-    initializeTranslation(storedLang);
+    
+    // Initialize script once if needed
+    if (storedLang === 'te') {
+      initializeTranslation('te');
+    }
   }, [user]);
 
   // Initialize translation
   const initializeTranslation = (lang) => {
     return new Promise((resolve) => {
-      if (lang === 'te') {
-        // Remove any existing Google Translate script and clear container
-        const existingScript = document.getElementById('google-translate-script');
-        if (existingScript) {
-          existingScript.remove();
+      const container = createTranslationContainer();
+      
+      // If script is already loaded, just trigger change
+      if (window.google?.translate?.TranslateElement) {
+        triggerLanguageChange(lang);
+        resolve();
+        return;
+      }
+
+      // If script tag exists but not initialized, wait? 
+      // Or if we are here, maybe we should just ensure script is loaded.
+      if (document.getElementById('google-translate-script')) {
+         // Script exists but maybe not ready. 
+         // We can rely on the callback if it was just added, or check periodically.
+         // For simplicity, let's assume if script exists, we wait for it.
+         resolve();
+         return;
+      }
+
+      // Define the callback for Google Translate
+      window.googleTranslateElementInit = () => {
+        try {
+          new window.google.translate.TranslateElement(
+            {
+              pageLanguage: 'en',
+              includedLanguages: 'te,en',
+              autoDisplay: false,
+            },
+            'google_translate_element'
+          );
+          
+          // Once initialized, trigger the language change
+          triggerLanguageChange(lang);
+          resolve();
+        } catch (err) {
+          console.error('Translate element init error', err);
+          resolve();
         }
-        const container = createTranslationContainer();
-        container.innerHTML = '';
+      };
 
-        // Define the callback for Google Translate
-        window.googleTranslateElementInit = () => {
-          try {
-            new window.google.translate.TranslateElement(
-              {
-                pageLanguage: 'en',
-                includedLanguages: 'te,en',
-                autoDisplay: false,
-              },
-              'google_translate_element'
-            );
-          } catch (err) {
-            console.error('Translate element init error', err);
-            resolve();
-          }
+      // Load Google Translate script
+      const script = document.createElement('script');
+      script.id = 'google-translate-script';
+      script.src =
+        'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+      script.async = true;
+      document.body.appendChild(script);
+    });
+  };
 
-          // Poll until the language dropdown is available, then switch to Telugu
-          const interval = setInterval(() => {
-            const selectLang = document.querySelector('.goog-te-combo');
-            if (selectLang) {
-              selectLang.value = 'te';
-              selectLang.dispatchEvent(new Event('change'));
-              clearInterval(interval);
-              resolve();
-            }
-          }, 500);
-
-          setTimeout(() => {
-            try {
-              const selectLang = document.querySelector('.goog-te-combo');
-              if (selectLang) {
+  const triggerLanguageChange = (lang) => {
+    if (lang === 'te') {
+        const interval = setInterval(() => {
+          const selectLang = document.querySelector('.goog-te-combo');
+          if (selectLang) {
+            if (selectLang.value !== 'te') {
                 selectLang.value = 'te';
                 selectLang.dispatchEvent(new Event('change'));
-              }
-            } catch (e) {
             }
-            resolve();
-          }, 10000);
-        };
-
-        // Load Google Translate script
-        const script = document.createElement('script');
-        script.id = 'google-translate-script';
-        script.src =
-          'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
-        script.async = true;
-        document.body.appendChild(script);
-      } else {
-        // For English, remove translation elements if they exist and resolve
-        const container = document.getElementById('google_translate_element');
-        if (container) container.innerHTML = '';
-
-        const script = document.getElementById('google-translate-script');
-        if (script) script.remove();
-
-        const gtFrame = document.querySelector('iframe.goog-te-banner-frame');
-        if (gtFrame) gtFrame.style.display = 'none';
-        resolve();
-      }
-    });
+            clearInterval(interval);
+          }
+        }, 500);
+        
+        // Timeout to stop polling
+        setTimeout(() => clearInterval(interval), 10000);
+    }
   };
 
   const changeLanguage = async (newLanguage) => {

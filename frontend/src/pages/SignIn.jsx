@@ -110,8 +110,6 @@ function SignIn() {
 
   return (
     <>
-      <div id="google_translate_element" style={{ display: 'none' }}></div>
-
       <div className="relative">
         <div className="absolute top-10 right-0">
           <LanguageToggle />
