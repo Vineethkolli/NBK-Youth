@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { ArrowLeft, X, Download, Trash2, Loader2, Upload, Copy, Edit2, GripHorizontal, CheckCircle, Share2 } from 'lucide-react';
+import { ArrowLeft, X, Download, Trash2, Loader2, Upload, Copy, Edit2, GripHorizontal, CheckCircle, Share2, Plus } from 'lucide-react';
 import GalleryReorder from './GalleryReorder';
 import MediaUploadForm from './MediaUploadForm';
 import CopyToServiceDriveForm from './CopyToServiceDriveForm';
@@ -20,6 +20,7 @@ function GalleryGrid({
   const { hasAccess } = useAuth();
   const [isEditMode, setIsEditMode] = useState(false);
   const [isReorderMode, setIsReorderMode] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showUploadForm, setShowUploadForm] = useState(false);
   const [showDriveForm, setShowDriveForm] = useState(false);
   const [localMediaFiles, setLocalMediaFiles] = useState([]);
@@ -86,6 +87,7 @@ function GalleryGrid({
         setTimeout(() => window.URL.revokeObjectURL(downloadUrl), 1000);
       }
       toast.success('Files downloaded successfully', { id: toastId });
+      setSelectedFiles([]);
     } catch (error) {
       console.error('Download error:', error);
       toast.error('Download failed. Please try again.', { id: toastId });
@@ -261,36 +263,50 @@ function GalleryGrid({
           ) : (
             <>
               {canManageMedia && (
-                <>
-                  {moment.type !== 'drive' && (
-                    <>
-                      <button onClick={() => setShowUploadForm(true)} className="btn-primary">
-                        <Upload className="h-4 w-4 mr-2" />
-                      </button>
-                      <button onClick={() => setShowDriveForm(true)} className="btn-primary">
-                        <Copy className="h-4 w-4 mr-2" />
-                      </button>
-                    </>
-                  )}
-                  <button
-                    onClick={() => setIsReorderMode(true)}
-                    disabled={isReorderMode}
-                    className={`btn-secondary ${isReorderMode ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    title={isReorderMode ? 'Reorder is active' : 'Enter reorder mode'}
+                <div className="relative flex items-center">
+                  <div
+                    className={`flex items-center space-x-2 transition-all duration-300 overflow-hidden ${
+                      isMenuOpen ? 'w-auto opacity-100 mr-2' : 'w-0 opacity-0'
+                    }`}
                   >
-                    <GripHorizontal className="h-4 w-4 mr-2" />
-                  </button>
+                    {moment.type !== 'drive' && (
+                      <>
+                        <button onClick={() => setShowUploadForm(true)} className="btn-primary p-2" title="Upload Media">
+                          <Upload className="h-4 w-4" />
+                        </button>
+                        <button onClick={() => setShowDriveForm(true)} className="btn-primary p-2" title="Copy from Drive">
+                          <Copy className="h-4 w-4" />
+                        </button>
+                      </>
+                    )}
+                    <button
+                      onClick={() => setIsReorderMode(true)}
+                      disabled={isReorderMode}
+                      className={`btn-secondary p-2 ${isReorderMode ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      title={isReorderMode ? 'Reorder is active' : 'Enter reorder mode'}
+                    >
+                      <GripHorizontal className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => {
+                        setIsEditMode(!isEditMode);
+                        setIsReorderMode(false);
+                      }}
+                      className={`btn-secondary p-2 ${isEditMode ? 'bg-red-100' : ''}`}
+                      title={isEditMode ? 'Done Editing' : 'Edit Mode'}
+                    >
+                      <Edit2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                  
                   <button
-                    onClick={() => {
-                      setIsEditMode(!isEditMode);
-                      setIsReorderMode(false);
-                    }}
-                    className={`btn-secondary ${isEditMode ? 'bg-red-100' : ''}`}
+                    onClick={() => setIsMenuOpen(!isMenuOpen)}
+                    className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
+                    title={isMenuOpen ? 'Close Menu' : 'Open Menu'}
                   >
-                    <Edit2 className="h-4 w-4 mr-2" />
-                    {isEditMode ? 'Done' : ''}
+                    {isMenuOpen ? <X className="h-5 w-5" /> : <Plus className="h-5 w-5" />}
                   </button>
-                </>
+                </div>
               )}
               <button
               onClick={handleShare}
