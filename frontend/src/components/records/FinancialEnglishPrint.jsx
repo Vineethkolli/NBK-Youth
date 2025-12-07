@@ -7,64 +7,127 @@ const FinancialEnglishPrint = ({ records, selectedEvent }) => {
 
   const handlePrint = () => {
     const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.width;
+    const pageHeight = doc.internal.pageSize.height;
     const timestamp = new Date().toLocaleString();
+    let yPos = 20;
 
-    const title = "Financial Timeline";
-    doc.setFontSize(16);
-    doc.text(title, 105, 15, { align: "center" });
+    doc.setFontSize(20);
+    doc.setTextColor(0, 0, 0);
+    const title = "Financial Timeline Report";
+    const titleWidth = doc.getTextWidth(title);
+    doc.text(title, (pageWidth - titleWidth) / 2, yPos);
+    yPos += 10;
 
     if (selectedEvent) {
       doc.setFontSize(12);
       doc.setTextColor(100, 100, 100);
-      doc.text(selectedEvent, 105, 22, { align: "center" });
+      doc.text(selectedEvent, pageWidth / 2, yPos, { align: "center" });
+      yPos += 10;
     }
 
-    const tableHead = [
-      ["Year", "Amount Left", "Interest", "Maturity Amount", "FD Start", "FD Maturity", "FD Account", "Remarks"]
-    ];
+    const formatAmount = (amount) =>
+      new Intl.NumberFormat("en-IN", {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+      }).format(amount);
 
-    const tableBody = records.map(rec => [
-      rec.year,
-      rec.amountLeft,
-      rec.maturityAmount - rec.amountLeft,
-      rec.maturityAmount,
-      rec.fdStartDate ? formatDateTime(rec.fdStartDate).split(",")[0] : '-',
-      rec.fdMaturityDate ? formatDateTime(rec.fdMaturityDate).split(",")[0] : '-',
-      rec.fdAccount || '-',
-      rec.remarks || '-'
-    ]);
+    const printRecord = (rec) => {
+      if (yPos > 230) {
+        doc.addPage();
+        yPos = 20;
+      }
 
-    autoTable(doc, {
-      head: tableHead,
-      body: tableBody,
-      startY: selectedEvent ? 30 : 25,
-      margin: { left: 10, right: 10 },
-      styles: { fontSize: 10 }
-    });
+      const interest = rec.maturityAmount - rec.amountLeft;
+      const interestText = `${interest > 0 ? "+" : ""}${formatAmount(interest)}`;
+
+      doc.setFontSize(14);
+      doc.setTextColor(0, 0, 0);
+      doc.text(String(rec.year), 15, yPos);
+      yPos += 4;
+
+      autoTable(doc, {
+        startY: yPos,
+        theme: "grid",
+        margin: { left: 15, right: 15 },
+        head: [["Amount Left", "Interest", "Maturity Amount"]],
+        body: [
+          [
+            formatAmount(rec.amountLeft),
+            interestText,
+            formatAmount(rec.maturityAmount),
+          ],
+          [
+            {
+              content: "FD Start",
+              styles: { fillColor: [230, 230, 230], fontStyle: "bold" },
+            },
+            {
+              content: "FD Maturity",
+              styles: { fillColor: [230, 230, 230], fontStyle: "bold" },
+            },
+            {
+              content: "FD Account",
+              styles: { fillColor: [230, 230, 230], fontStyle: "bold" },
+            },
+          ],
+          [
+            rec.fdStartDate ? formatDateTime(rec.fdStartDate).split(",")[0] : "-",
+            rec.fdMaturityDate
+              ? formatDateTime(rec.fdMaturityDate).split(",")[0]
+              : "-",
+            rec.fdAccount || "-",
+          ],
+        ],
+        headStyles: {
+          fillColor: [33, 115, 175],
+          textColor: [255, 255, 255],
+          fontSize: 10,
+          halign: "center",
+        },
+        styles: {
+          fontSize: 10,
+          cellPadding: 3,
+          halign: "center",
+        },
+      });
+
+      yPos = doc.lastAutoTable.finalY + 6;
+
+      if (rec.remarks && rec.remarks.trim() !== "") {
+        doc.setFontSize(11);
+        doc.setTextColor(60);
+        doc.text(rec.remarks, 20, yPos);
+        yPos += 10;
+      }
+
+      yPos += 4;
+    };
+
+    records.forEach(printRecord);
 
     const pageCount = doc.getNumberOfPages();
     for (let i = 1; i <= pageCount; i++) {
       doc.setPage(i);
       doc.setFontSize(9);
-      doc.setTextColor(80, 80, 80);
+      doc.setTextColor(100);
 
-      const pageWidth = doc.internal.pageSize.width;
-      const pageHeight = doc.internal.pageSize.height;
+      doc.text(timestamp, 10, pageHeight - 8);
 
-      doc.text(`${timestamp}`, 10, pageHeight - 10);
+      const footerText = "Gangavaram App | https://nbkyouth.vercel.app";
+      const linkWidth = doc.getTextWidth(footerText);
 
-      const linkText = "NBK Youth App | https://nbkyouth.vercel.app";
-      const textWidth = doc.getTextWidth(linkText);
-      const centerX = (pageWidth - textWidth) / 2;
+      doc.textWithLink(
+        footerText,
+        (pageWidth - linkWidth) / 2,
+        pageHeight - 8,
+        { url: "https://nbkyouth.vercel.app" }
+      );
 
-      doc.textWithLink(linkText, centerX, pageHeight - 10, {
-        url: "https://nbkyouth.vercel.app",
-      });
-
-      doc.text(`Page ${i} of ${pageCount}`, pageWidth - 30, pageHeight - 10);
+      doc.text(`Page ${i} of ${pageCount}`, pageWidth - 35, pageHeight - 8);
     }
 
-    doc.save(`${selectedEvent || " "} Financial Timeline.pdf`);
+    doc.save(`${selectedEvent || ""} Financial Timeline.pdf`);
   };
 
   return (
