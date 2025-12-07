@@ -2,6 +2,9 @@ NBK YOUTH GANGAVARAM (WEB APP)
 Designed and Developed by KOLLI VINEETH
 Started on OCT 2024
 
+Dated: 7-12-2025
+Total files - 364
+Frontend - 230 files, Backend - 128 files
 
 DIRECTORY STRUCTURE
 |   
