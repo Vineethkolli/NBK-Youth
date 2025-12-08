@@ -31,7 +31,7 @@ const createChunksFromLines = (lines = [], maxWords = 200, overlapLines = 3) => 
     if (currentWordCount + wordsInLine > maxWords && currentLines.length > 0) {
       const start = lineIndex;
       const end = i - 1;
-      const chunkText = currentLines.join(' ');
+      const chunkText = currentLines.join('\n');
 
       const incomeIds = new Set();
       const expenseIds = new Set();
@@ -60,7 +60,7 @@ const createChunksFromLines = (lines = [], maxWords = 200, overlapLines = 3) => 
       const overlapStart = Math.max(0, currentLines.length - overlapLines);
       const overlapPart = currentLines.slice(overlapStart);
       currentLines = [...overlapPart];
-      currentWordCount = currentLines.join(' ').split(/\s+/).filter(Boolean).length;
+      currentWordCount = currentLines.join('\n').split(/\s+/).filter(Boolean).length;
       lineIndex = i - currentLines.length;
     }
 
@@ -72,7 +72,7 @@ const createChunksFromLines = (lines = [], maxWords = 200, overlapLines = 3) => 
   if (currentLines.length > 0) {
     const start = lineIndex;
     const end = lines.length - 1;
-    const chunkText = currentLines.join(' ');
+    const chunkText = currentLines.join('\n');
 
     const incomeIds = new Set();
     const expenseIds = new Set();
@@ -101,7 +101,7 @@ const createChunksFromLines = (lines = [], maxWords = 200, overlapLines = 3) => 
   return chunks;
 };
 
-// Small helper: normalized array of non-empty lines
+// Normalized array of non-empty lines
 const linesFromText = (text) =>
   text
     .split(/\r?\n/)
@@ -157,7 +157,7 @@ export const processRecordIntoChunks = async (
   return processedChunks.length;
 };
 
-// Build snapshot text from record (only Income, Expense, Events, Stats)
+// Build snapshot text from record
 export const buildSnapshotTextFromRecord = (record) => {
   const snapshot = record.snapshotId;
   let allText = '';

@@ -9,18 +9,15 @@ export const generateEmbedding = async (text) => {
       inputs: text
     });
 
-    // Response could be [[...]] or [...]
     let embedding = response;
     if (Array.isArray(response) && Array.isArray(response[0])) {
       embedding = response[0];
     }
 
-    // Convert any nested arrays to flat 1D numeric array if necessary
     if (Array.isArray(embedding) && embedding.some(el => Array.isArray(el))) {
       embedding = embedding.flat(Infinity);
     }
 
-    // Ensure numbers
     embedding = embedding.map(n => Number(n));
 
     return embedding;

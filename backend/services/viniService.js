@@ -52,7 +52,6 @@ export const isNameQuestion = (message) => {
 
 export const isCurrentEventQuestion = (message) => {
   const msg = message.toLowerCase();
-  // Exclude questions about upcoming/future events so they fall through to LLM
   if (msg.includes('coming up') || msg.includes('upcoming') || msg.includes('next event') || msg.includes('future event')) {
     return false;
   }
@@ -153,10 +152,7 @@ export const searchCurrentData = async (query) => {
   }
 };
 
-/**
- * Robust name-based amount extraction from a text block.
- * Returns first matching numeric amount found on the same or adjacent lines as the name.
- */
+// Robust name-based amount extraction
 const extractAmountForNameFromText = (chunkText, searchName) => {
   // split into lines and find lines mentioning the name
   const lines = chunkText.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
@@ -184,10 +180,7 @@ const extractAmountForNameFromText = (chunkText, searchName) => {
   return null;
 };
 
-/**
- * Extract structured income entries from chunk text using expected formatting.
- * Returns array of { name, amount }
- */
+// Extract structured income entries from chunk text
 const extractIncomeLines = (chunkText) => {
   const lines = chunkText.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
   const extracted = [];
@@ -211,7 +204,6 @@ export const chatWithViniLogic = async ({ message, registerId }) => {
   const msg = message.toLowerCase();
 
   try {
-    // greetings / identity / creator / name / current event / my incomes 
     if (isGreeting(msg)) {
       response = getCreativeGreeting(userName);
     } else if (isIdentityQuestion(msg)) {
@@ -283,7 +275,7 @@ export const chatWithViniLogic = async ({ message, registerId }) => {
         const year = parseInt(yearMatch[0], 10);
         const eventName = eventMatch ? eventMatch[1] : null;
 
-        // Step 1: similarity retrieval across historical chunks (wider slice)
+        // Similarity retrieval across historical chunks
         const historicalChunks = await ProcessedChunk.find({ status: 'ready', year });
         if (!historicalChunks || historicalChunks.length === 0) {
           response = `No historical chunks found for year ${year}.`;
@@ -294,19 +286,19 @@ export const chatWithViniLogic = async ({ message, registerId }) => {
             return { chunk: c, similarity: sim };
           }).sort((a, b) => b.similarity - a.similarity);
 
-          // take top 20 for a second-stage filter
+          // Take top 20 for a second-stage filter
           const topCandidates = scored.slice(0, 20).map(s => s.chunk);
 
           // Prefer chunks that explicitly contain the person's name or have name in metadata
           let foundAmount = null;
           for (const candidate of topCandidates) {
             const candidateText = candidate.chunkText || candidate.text || '';
-            // check metadata names / ids first
+
             const meta = candidate.metadata || {};
             const metaNames = (meta.names || []).map(n => n.toLowerCase());
             const hasNameInMeta = metaNames.includes(searchName.toLowerCase());
             if (hasNameInMeta || (candidateText.toLowerCase().includes(searchName.toLowerCase()))) {
-              // try to extract amount near the name
+
               const amt = extractAmountForNameFromText(candidateText, searchName);
               if (amt !== null) {
                 foundAmount = { amount: amt, eventName: candidate.eventName || candidate.metadata?.eventName || '?', year };
@@ -322,7 +314,7 @@ export const chatWithViniLogic = async ({ message, registerId }) => {
           }
         }
       } else {
-        // current incomes simple DB query
+        // Current incomes simple DB query
         const currentIncomes = await Income.find({
           isDeleted: false,
           name: { $regex: searchName, $options: 'i' }
@@ -348,45 +340,73 @@ export const chatWithViniLogic = async ({ message, registerId }) => {
       if (yearMatch) {
         const year = parseInt(yearMatch[0], 10);
         const eventName = eventMatch ? eventMatch[1] : null;
-        const historicalChunks = await ProcessedChunk.find({ status: 'ready', year });
+        
+        // Filter chunks by year and by event name
+        let query = { status: 'ready', year };
+        if (eventName) {
+          query.eventName = { $regex: eventName, $options: 'i' };
+        }
+        const historicalChunks = await ProcessedChunk.find(query);
 
         if (!historicalChunks || historicalChunks.length === 0) {
-          response = `No historical data found for ${year}.`;
+          response = `No historical data found for ${eventName ? eventName + ' ' : ''}${year}.`;
         } else {
-          // similarity retrieval
-          const queryEmbedding = await generateEmbedding(message);
-          const scored = historicalChunks.map(c => {
-            const sim = (Array.isArray(c.embedding) && c.embedding.length > 0) ? cosineSimilarity(queryEmbedding, c.embedding) : -1;
-            return { chunk: c, similarity: sim };
-          }).sort((a, b) => b.similarity - a.similarity);
-
-          const topCandidates = scored.slice(0, 30).map(s => s.chunk); // take more and parse for incomes
-
-          // Attempt to parse structured incomes from the candidates
+          // Process ALL chunks for the matching event/year
           const allIncomes = [];
-          for (const cand of topCandidates) {
-            try {
-              const found = extractIncomeLines(cand.chunkText || cand.text || '');
-              found.forEach(f => {
-                allIncomes.push({ ...f, eventName: cand.eventName || cand.metadata?.eventName || '', year: cand.year });
-              });
-            } catch (err) {
-              // ignore parse errors
+          
+          for (const chunk of historicalChunks) {
+            const chunkText = chunk.chunkText || chunk.text || '';
+            
+            // Pattern to match income entries - with newlines they'll be on separate lines
+            const primaryPattern = /Income ID:\s*([^,]+),\s*Name:\s*([^,]+),\s*Amount:\s*₹\s*([\d,]+)/gi;
+            
+            let match;
+            while ((match = primaryPattern.exec(chunkText)) !== null) {
+              const incomeId = match[1].trim();
+              const name = match[2].trim();
+              const amountStr = match[3].replace(/,/g, '');
+              const amt = parseInt(amountStr, 10);
+              
+              if (amt > 0 && name && name.length > 1) {
+                allIncomes.push({ incomeId, name, amount: amt });
+              }
             }
           }
 
-          // aggregate by name
-          const aggregator = {};
+          // Deduplicate by Income ID
+          const uniqueIncomes = {};
           for (const inc of allIncomes) {
-            const n = inc.name || 'Unknown';
-            aggregator[n] = (aggregator[n] || 0) + (Number(inc.amount) || 0);
+            if (!uniqueIncomes[inc.incomeId]) {
+              uniqueIncomes[inc.incomeId] = inc;
+            }
+          }
+          const deduplicatedIncomes = Object.values(uniqueIncomes);
+
+          // Aggregate by name - handle exact duplicates and case variations
+          const aggregator = {};
+          for (const inc of deduplicatedIncomes) {
+            const normalizedName = inc.name.trim();
+            const key = normalizedName.toLowerCase();
+            
+            if (!aggregator[key]) {
+              aggregator[key] = { name: normalizedName, amount: 0, count: 0 };
+            }
+            aggregator[key].amount += inc.amount;
+            aggregator[key].count += 1;
           }
 
-          const sorted = Object.entries(aggregator).sort((a, b) => b[1] - a[1]).slice(0, topN);
+          const sorted = Object.values(aggregator)
+            .sort((a, b) => b.amount - a.amount)
+            .slice(0, topN);
 
           if (sorted.length > 0) {
-            const tableData = sorted.map((row, idx) => [(idx + 1).toString(), row[0], `₹${row[1].toLocaleString('en-IN')}`]);
-            response = `Top ${topN} contributors for ${eventName ? eventName + ' ' : ''}${year}:\n\n`;
+            const tableData = sorted.map((row, idx) => [
+              (idx + 1).toString(),
+              row.name,
+              `₹${row.amount.toLocaleString('en-IN')}`
+            ]);
+            const matchedEvent = historicalChunks[0]?.eventName || eventName;
+            response = `Top ${topN} contributors for ${matchedEvent} ${year}:\n\n`;
             response += formatTableResponse(tableData, ['Rank', 'Name', 'Amount']);
           } else {
             response = `No top contributors found for ${eventName ? eventName + ' ' : ''}${year}.`;
@@ -460,7 +480,7 @@ export const chatWithViniLogic = async ({ message, registerId }) => {
         }
       }
     }
-    // Fallback - LLM assisted using current + historical context
+    // Fallback LLM assisted using current + historical context
     else {
       try {
         let queryEmbedding;
@@ -539,7 +559,7 @@ export const chatWithViniLogic = async ({ message, registerId }) => {
             response = result.response.text();
           } catch (flashError) {
             console.error('Gemini API Error (both models failed):', flashError.message);
-            // Fallback response when Gemini fails
+
             response = `I'm still learning to answer that type of question! 🤔 Try asking about:\n\n• Current event details\n• Total income/expenses\n• Top contributors\n• Specific person's contributions\n• Your income records\n\nOr ask about any specific year like "Sankranti 2024" for historical data!`;
           }
         }
@@ -549,7 +569,6 @@ export const chatWithViniLogic = async ({ message, registerId }) => {
       }
     }
 
-    // Save chat history (non-blocking)
     setImmediate(async () => {
       try {
         await ChatHistory.findOneAndUpdate(
