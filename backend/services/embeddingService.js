@@ -5,7 +5,7 @@ const hf = new HfInference(process.env.HUGGINGFACE_API_KEY);
 export const generateEmbedding = async (text) => {
   try {
     const response = await hf.featureExtraction({
-      model: 'sentence-transformers/all-MiniLM-L6-v2',
+      model: 'BAAI/bge-small-en-v1.5',
       inputs: text
     });
 
