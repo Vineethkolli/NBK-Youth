@@ -485,7 +485,6 @@ export const chatWithViniLogic = async ({ message, registerId }) => {
           };
         }).sort((a, b) => b.similarity - a.similarity).slice(0, 10);
 
-        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
         let context = `You are VINI, NBK Youth AI assistant. Answer based on this data:\n\n`;
 
         if (eventLabel) {
@@ -521,15 +520,28 @@ export const chatWithViniLogic = async ({ message, registerId }) => {
 
         let result;
         try {
-          result = await model.generateContent(context);
+          // Try primary model: gemini-2.5-flash-lite
+          const modelLite = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
+          result = await modelLite.generateContent(context);
           if (!result || !result.response) {
-            throw new Error('Invalid response from Gemini API');
+            throw new Error('Invalid response from Gemini Flash Lite');
           }
           response = result.response.text();
-        } catch (geminiErr) {
-          console.error('Gemini API Error:', geminiErr.message);
-          // Fallback response when Gemini fails
-          response = `I'm still learning to answer that type of question! 🤔 Try asking about:\n\n• Current event details\n• Total income/expenses\n• Top contributors\n• Specific person's contributions\n• Your income records\n\nOr ask about any specific year like "Sankranti 2024" for historical data!`;
+        } catch (liteError) {
+          console.warn('Gemini Flash Lite failed, switching to Flash:', liteError.message);
+          try {
+            // Try fallback model: gemini-2.5-flash
+            const modelFlash = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+            result = await modelFlash.generateContent(context);
+            if (!result || !result.response) {
+              throw new Error('Invalid response from Gemini Flash');
+            }
+            response = result.response.text();
+          } catch (flashError) {
+            console.error('Gemini API Error (both models failed):', flashError.message);
+            // Fallback response when Gemini fails
+            response = `I'm still learning to answer that type of question! 🤔 Try asking about:\n\n• Current event details\n• Total income/expenses\n• Top contributors\n• Specific person's contributions\n• Your income records\n\nOr ask about any specific year like "Sankranti 2024" for historical data!`;
+          }
         }
       } catch (error) {
         console.error('LLM Error:', error);
