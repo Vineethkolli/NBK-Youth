@@ -1,7 +1,7 @@
 import ProcessedChunk from '../models/ProcessedChunk.js';
 import { generateEmbedding } from './embeddingService.js';
 
-const createChunksFromLines = (lines = [], maxWords = 300, overlapLines = 3) => {
+const createChunksFromLines = (lines = [], maxWords = 200, overlapLines = 3) => {
   const chunks = [];
   let currentLines = [];
   let currentWordCount = 0;
@@ -121,7 +121,7 @@ export const processRecordIntoChunks = async (
   });
 
   const lines = linesFromText(snapshotDataText);
-  const rawChunks = createChunksFromLines(lines, 300, 3);
+  const rawChunks = createChunksFromLines(lines, 200, 3);
 
   const processedChunks = [];
 

@@ -483,7 +483,7 @@ export const chatWithViniLogic = async ({ message, registerId }) => {
             ...chunk.toObject(),
             similarity: (Array.isArray(emb) && emb.length > 0 && queryEmbedding.length > 0) ? cosineSimilarity(queryEmbedding, emb) : -1
           };
-        }).sort((a, b) => b.similarity - a.similarity).slice(0, 10);
+        }).sort((a, b) => b.similarity - a.similarity).slice(0, 20);
 
         let context = `You are VINI, NBK Youth AI assistant. Answer based on this data:\n\n`;
 
@@ -512,7 +512,7 @@ export const chatWithViniLogic = async ({ message, registerId }) => {
         if (similarities.length > 0) {
           context += `Historical Data (most relevant chunks):\n`;
           similarities.forEach(chunk => {
-            context += `${chunk.eventName || chunk.metadata?.eventName || ''} ${chunk.year || ''}: ${chunk.chunkText?.substring(0, 400) || chunk.text?.substring(0,400)}...\n\n`;
+            context += `${chunk.eventName || chunk.metadata?.eventName || ''} ${chunk.year || ''}: ${chunk.chunkText || chunk.text || ''}\n\n`;
           });
         }
 
