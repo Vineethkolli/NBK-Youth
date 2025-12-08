@@ -2,6 +2,7 @@ import User from '../models/User.js';
 import Income from '../models/Income.js';
 import Expense from '../models/Expense.js';
 import EventLabel from '../models/EventLabel.js';
+import Event from '../models/Event.js';
 import ProcessedChunk from '../models/ProcessedChunk.js';
 import ProcessedRecord from '../models/ProcessedRecords.js';
 import ChatHistory from '../models/ChatHistory.js';
@@ -31,7 +32,7 @@ export const getCreativeGreeting = (userName) => {
 
 export const isGreeting = (message) => {
   const greetings = ['hi', 'hello', 'hey', 'good morning', 'good afternoon', 'good evening', 'namaste'];
-  return greetings.some(greeting => message.toLowerCase().includes(greeting));
+  return greetings.some(greeting => new RegExp(`\\b${greeting}\\b`, 'i').test(message));
 };
 
 export const isIdentityQuestion = (message) => {
@@ -50,15 +51,19 @@ export const isNameQuestion = (message) => {
 };
 
 export const isCurrentEventQuestion = (message) => {
+  const msg = message.toLowerCase();
+  // Exclude questions about upcoming/future events so they fall through to LLM
+  if (msg.includes('coming up') || msg.includes('upcoming') || msg.includes('next event') || msg.includes('future event')) {
+    return false;
+  }
   const eventKeywords = ['current event', 'what event', 'event label', 'what data', 'show event data', 'present event'];
-  return eventKeywords.some(keyword => message.toLowerCase().includes(keyword));
+  return eventKeywords.some(keyword => msg.includes(keyword));
 };
 
 export const isStatsQuestion = (message) => {
   const msg = message.toLowerCase();
-  // Check for explicit stats keywords or "year" combined with stats-related words
   const statsKeywords = ['stats', 'statistics', 'overview', 'summary', 'report', 'insights'];
-  const yearPatterns = ['this year','year stats', 'stats of', 'of this year', 'of the year'];
+  const yearPatterns = ['year stats', 'stats of', 'of this year', 'of the year'];
   
   const hasStatsKeyword = statsKeywords.some(keyword => msg.includes(keyword));
   const hasYearPattern = yearPatterns.some(pattern => msg.includes(pattern));
@@ -210,9 +215,9 @@ export const chatWithViniLogic = async ({ message, registerId }) => {
     if (isGreeting(msg)) {
       response = getCreativeGreeting(userName);
     } else if (isIdentityQuestion(msg)) {
-      response = `I'm VINI, your NBK Youth AI assistant! 🤖 I'm here to help you explore and understand all about nbk youth. I can answer questions about current events, past celebrations, financial data, historical records and much more!\n\nWhat would you like to know, ${userName}? ✨`;
+      response = `I'm VINI, your AI assistant! 🤖 Created and developed by Kolli Vineeth. 👨‍💻\n\nI'm here to help you explore and understand everything about the NBK Youth Gangavaram — current events, past celebrations, financial data, historical records, and much more!\n\nWhat would you like to know, ${userName}? ✨`;
     } else if (isCreatorQuestion(msg)) {
-      response = `I was created by Kolli Vineeth for the NBK Youth website and AI assistant. He developed this entire platform to help manage and track all your community activities! 👨‍💻`;
+      response = `I was created and developed by Kolli Vineeth for the NBK Youth AI assistant. He developed this entire platform to help manage and track all your community activities! 👨‍💻`;
     } else if (isNameQuestion(msg)) {
       response = `Your name is ${userName}! 😊 Is there anything specific you'd like to know about your data or activities?`;
     } else if (isCurrentEventQuestion(msg) || isStatsQuestion(msg)) {
@@ -468,6 +473,7 @@ export const chatWithViniLogic = async ({ message, registerId }) => {
 
         const currentStats = await getCurrentStats();
         const eventLabel = await EventLabel.findOne().sort({ createdAt: -1 });
+        const events = await Event.find().sort({ dateTime: -1 }).limit(10);
         const historicalChunks = await ProcessedChunk.find({ status: 'ready' });
         const processedRecords = await ProcessedRecord.find({ status: 'ready' });
 
@@ -484,6 +490,14 @@ export const chatWithViniLogic = async ({ message, registerId }) => {
 
         if (eventLabel) {
           context += `Current Event: ${eventLabel.label}\n`;
+        }
+
+        if (events.length > 0) {
+          context += `Scheduled/Upcoming Events:\n`;
+          events.forEach(e => {
+            context += `- ${e.name} on ${new Date(e.dateTime).toDateString()}\n`;
+          });
+          context += '\n';
         }
 
         context += `Current Stats: Total Income: ₹${currentStats.totalIncome?.toLocaleString('en-IN')}, Total Expense: ₹${currentStats.totalExpense?.toLocaleString('en-IN')}, Amount Received: ₹${currentStats.amountReceived?.toLocaleString('en-IN')}, Users: ${currentStats.totalUsers}, Income Entries: ${currentStats.incomeCount}, Expense Entries: ${currentStats.expenseCount}\n\n`;
