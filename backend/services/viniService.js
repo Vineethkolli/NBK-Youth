@@ -23,7 +23,7 @@ export const getCreativeGreeting = (userName) => {
   const greetings = [
     `${getTimeBasedGreeting()}, ${userName}! 🌟 Ready to explore app?`,
     `Hey there, ${userName}! ${getTimeBasedGreeting()}! ✨ What can I help you discover today?`,
-    `${getTimeBasedGreeting()}, ${userName}! 🚀 Let's dive into NBK Youth data!`,
+    `${getTimeBasedGreeting()}, ${userName}! 🚀 Let's dive into NBK Youth app!`,
     `Hello ${userName}! ${getTimeBasedGreeting()}! 💫 I'm here to help with all your queries!`
   ];
   return greetings[Math.floor(Math.random() * greetings.length)];
@@ -54,6 +54,18 @@ export const isCurrentEventQuestion = (message) => {
   return eventKeywords.some(keyword => message.toLowerCase().includes(keyword));
 };
 
+export const isStatsQuestion = (message) => {
+  const msg = message.toLowerCase();
+  // Check for explicit stats keywords or "year" combined with stats-related words
+  const statsKeywords = ['stats', 'statistics', 'overview', 'summary', 'report', 'insights'];
+  const yearPatterns = ['this year','year stats', 'stats of', 'of this year', 'of the year'];
+  
+  const hasStatsKeyword = statsKeywords.some(keyword => msg.includes(keyword));
+  const hasYearPattern = yearPatterns.some(pattern => msg.includes(pattern));
+  
+  return hasStatsKeyword || (hasYearPattern && msg.includes('year'));
+};
+
 export const isMyIncomesQuestion = (message) => {
   const incomeKeywords = ['my incomes', 'show my incomes', 'all my incomes', 'my payments', 'my contributions'];
   return incomeKeywords.some(keyword => message.toLowerCase().includes(keyword));
@@ -67,6 +79,12 @@ export const formatTableResponse = (data, headers) => {
     table += '| ' + row.join(' | ') + ' |\n';
   });
   return table;
+};
+
+const formatCurrency = (value = 0) => {
+  const numericValue = Number(value);
+  const safeValue = Number.isNaN(numericValue) ? 0 : numericValue;
+  return `₹${safeValue.toLocaleString('en-IN')}`;
 };
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
@@ -192,19 +210,34 @@ export const chatWithViniLogic = async ({ message, registerId }) => {
     if (isGreeting(msg)) {
       response = getCreativeGreeting(userName);
     } else if (isIdentityQuestion(msg)) {
-      response = `I'm VINI, your NBK Youth AI assistant! 🤖 I'm here to help you explore and understand all your app data - from income and expenses to historical records. I can answer questions about current events, past celebrations, financial data, and much more!\n\nWhat would you like to know, ${userName}? ✨`;
+      response = `I'm VINI, your NBK Youth AI assistant! 🤖 I'm here to help you explore and understand all about nbk youth. I can answer questions about current events, past celebrations, financial data, historical records and much more!\n\nWhat would you like to know, ${userName}? ✨`;
     } else if (isCreatorQuestion(msg)) {
       response = `I was created by Kolli Vineeth for the NBK Youth website and AI assistant. He developed this entire platform to help manage and track all your community activities! 👨‍💻`;
     } else if (isNameQuestion(msg)) {
       response = `Your name is ${userName}! 😊 Is there anything specific you'd like to know about your data or activities?`;
-    } else if (isCurrentEventQuestion(msg)) {
+    } else if (isCurrentEventQuestion(msg) || isStatsQuestion(msg)) {
       const eventLabel = await EventLabel.findOne().sort({ createdAt: -1 });
-      if (eventLabel) {
-        const currentStats = await getCurrentStats();
-        response = `The current event is ${eventLabel.label}! 🎉\n\nCurrent data summary:\n• Total Income: ₹${currentStats.totalIncome?.toLocaleString('en-IN') || '0'}\n• Amount Received: ₹${currentStats.amountReceived?.toLocaleString('en-IN') || '0'}\n• Total Expenses: ₹${currentStats.totalExpense?.toLocaleString('en-IN') || '0'}\n• Total Users: ${currentStats.totalUsers || 0}\n• Income Entries: ${currentStats.incomeCount || 0}\n• Expense Entries: ${currentStats.expenseCount || 0}`;
-      } else {
-        response = `No current event label is set. The system is showing general data without a specific event context.`;
+      const currentStats = await getCurrentStats();
+      const eventName = eventLabel?.label || 'current records';
+      const totalIncome = Number(currentStats.totalIncome) || 0;
+      const totalExpense = Number(currentStats.totalExpense) || 0;
+      const amountReceived = Number(currentStats.amountReceived) || 0;
+      const amountLeft = totalIncome - totalExpense;
+
+      let intro = '';
+      if (eventLabel && isCurrentEventQuestion(msg)) {
+        intro = `The current event is ${eventName}! 🎉\n\n`;
+      } else if (!eventLabel) {
+        intro = `No current event label is set. Here's the latest overview:\n\n`;
       }
+
+      response = `${intro}Latest stats:\n`;
+      response += `• Current Event: ${eventName}\n`;
+      response += `• Total App Users: ${currentStats.totalUsers || 0}\n`;
+      response += `• Total Income: ${formatCurrency(totalIncome)}\n`;
+      response += `• Amount Received: ${formatCurrency(amountReceived)}\n`;
+      response += `• Total Expenses: ${formatCurrency(totalExpense)}\n`;
+      response += `• Amount Left: ${formatCurrency(amountLeft)}\n`;
     } else if (isMyIncomesQuestion(msg)) {
       const userIncomes = await Income.find({
         isDeleted: false,
@@ -425,7 +458,14 @@ export const chatWithViniLogic = async ({ message, registerId }) => {
     // Fallback - LLM assisted using current + historical context
     else {
       try {
-        const queryEmbedding = await generateEmbedding(message);
+        let queryEmbedding;
+        try {
+          queryEmbedding = await generateEmbedding(message);
+        } catch (embErr) {
+          console.error('Embedding generation failed:', embErr.message);
+          queryEmbedding = [];
+        }
+
         const currentStats = await getCurrentStats();
         const eventLabel = await EventLabel.findOne().sort({ createdAt: -1 });
         const historicalChunks = await ProcessedChunk.find({ status: 'ready' });
@@ -435,11 +475,11 @@ export const chatWithViniLogic = async ({ message, registerId }) => {
           const emb = chunk.embedding || [];
           return {
             ...chunk.toObject(),
-            similarity: (Array.isArray(emb) && emb.length > 0) ? cosineSimilarity(queryEmbedding, emb) : -1
+            similarity: (Array.isArray(emb) && emb.length > 0 && queryEmbedding.length > 0) ? cosineSimilarity(queryEmbedding, emb) : -1
           };
         }).sort((a, b) => b.similarity - a.similarity).slice(0, 10);
 
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
         let context = `You are VINI, NBK Youth AI assistant. Answer based on this data:\n\n`;
 
         if (eventLabel) {
@@ -465,8 +505,18 @@ export const chatWithViniLogic = async ({ message, registerId }) => {
 
         context += `\nUser Question: ${message}\n\nUser asking: ${userName} (${registerId})\n\nProvide a helpful, natural response as VINI. Keep it concise and friendly. If you mention amounts, use Indian number formatting with ₹ symbol.`;
 
-        const result = await model.generateContent(context);
-        response = result.response.text();
+        let result;
+        try {
+          result = await model.generateContent(context);
+          if (!result || !result.response) {
+            throw new Error('Invalid response from Gemini API');
+          }
+          response = result.response.text();
+        } catch (geminiErr) {
+          console.error('Gemini API Error:', geminiErr.message);
+          // Fallback response when Gemini fails
+          response = `I'm still learning to answer that type of question! 🤔 Try asking about:\n\n• Current event details\n• Total income/expenses\n• Top contributors\n• Specific person's contributions\n• Your income records\n\nOr ask about any specific year like "Sankranti 2024" for historical data!`;
+        }
       } catch (error) {
         console.error('LLM Error:', error);
         response = `I'm still learning to answer that type of question! 🤔 Try asking about:\n\n• Current event details\n• Total income/expenses\n• Top contributors\n• Specific person's contributions\n• Your income records\n\nOr ask about any specific year like "Sankranti 2024" for historical data!`;
