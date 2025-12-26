@@ -13,6 +13,7 @@ import cloudinary from '../config/cloudinary.js';
 import Counter from '../models/Counter.js';
 import PreviousYear from '../models/PreviousYear.js';
 import EventLabel from '../models/EventLabel.js';
+import { redis } from '../utils/redis.js';
 
 export const developerController = {
   clearData: async (req, res) => {
@@ -116,6 +117,7 @@ export const developerController = {
 
         case 'events':
           await Event.deleteMany({});
+          await redis.del('home:events');
           description = 'Cleared all events records';
           break;
         
