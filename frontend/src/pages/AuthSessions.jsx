@@ -22,6 +22,7 @@ function AuthSessions() {
     isValid: '',
     action: '',
     sortOrder: '',
+    timeFilter: 'sessions',
   });
 
   const [pagination, setPagination] = useState({

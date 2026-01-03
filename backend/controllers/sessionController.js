@@ -226,7 +226,7 @@ export const signOutSession = async (req, res) => {
 
 export const getAllSessions = async (req, res) => {
   try {
-    const { search, isValid, action, sortOrder, page = 1, limit = 50 } = req.query;
+    const { search, isValid, action, sortOrder, timeFilter = 'sessions', page = 1, limit = 50 } = req.query;
 
     let query = {};
 
@@ -242,6 +242,24 @@ export const getAllSessions = async (req, res) => {
       .populate('userId', 'registerId name')
       .sort({ createdAt: -1 })
       .lean();
+
+    // Apply time filter based on lastActive
+    if (timeFilter && timeFilter !== 'sessions') {
+      const now = new Date();
+      sessions = sessions.filter(session => {
+        const lastActiveDate = new Date(session.lastActive);
+        
+        if (timeFilter === 'today') {
+          // Check if session was last active today
+          return lastActiveDate.toDateString() === now.toDateString();
+        } else if (timeFilter === 'monthly') {
+          // Check if session was last active in current month
+          return lastActiveDate.getMonth() === now.getMonth() && 
+                 lastActiveDate.getFullYear() === now.getFullYear();
+        }
+        return true;
+      });
+    }
 
     if (search && search.trim() !== '') {
       const searchLower = search.toLowerCase();
@@ -263,10 +281,14 @@ export const getAllSessions = async (req, res) => {
         const regIdA = a.userId?.registerId || '';
         const regIdB = b.userId?.registerId || '';
         
+        // Extract numeric part for proper numeric sorting
+        const numA = parseInt(regIdA.replace(/\D/g, '')) || 0;
+        const numB = parseInt(regIdB.replace(/\D/g, '')) || 0;
+        
         if (sortOrder === 'asc') {
-          return regIdA.localeCompare(regIdB);
+          return numA - numB;
         } else {
-          return regIdB.localeCompare(regIdA);
+          return numB - numA;
         }
       });
     }

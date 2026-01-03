@@ -40,6 +40,16 @@ function AuthSessionsFilters({ filters, onChange }) {
           <option value="asc">Ascending</option>
           <option value="desc">Descending</option>
         </select>
+
+        <select
+          value={filters.timeFilter || 'sessions'}
+          onChange={(e) => handleChange('timeFilter', e.target.value)}
+          className="form-select"
+        >
+          <option value="sessions">Overall</option>
+          <option value="today">Today</option>
+          <option value="monthly">This Month</option>
+        </select>
       </div>
     </div>
   );
