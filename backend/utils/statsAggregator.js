@@ -52,21 +52,27 @@ const incomeAggregationPipeline = [
       dateStats: [
         {
           $project: {
-            date: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
+            createdDate: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
+            paidDate: {
+              $cond: [
+                { $eq: ['$status', 'paid'] },
+                { $dateToString: { format: '%Y-%m-%d', date: '$paidDate' } },
+                null,
+              ],
+            },
             amount: '$amount',
             status: '$status',
           },
         },
         {
           $group: {
-            _id: '$date',
-            totalIncome: { $sum: '$amount' },
-            totalIncomeEntries: { $sum: 1 },
-            amountReceived: {
-              $sum: { $cond: [{ $eq: ['$status', 'paid'] }, '$amount', 0] },
-            },
-            amountReceivedEntries: {
-              $sum: { $cond: [{ $eq: ['$status', 'paid'] }, 1, 0] },
+            _id: null,
+            dateEntries: {
+              $push: {
+                createdDate: '$createdDate',
+                paidDate: '$paidDate',
+                amount: '$amount',
+              },
             },
           },
         },
@@ -182,12 +188,21 @@ const mergeDateWiseStats = (incomeDateStats = [], expenseDateStats = []) => {
     return dateMap.get(dateString);
   };
 
-  incomeDateStats.forEach((stat) => {
-    const entry = ensureDate(stat._id);
-    entry.totalIncome += stat.totalIncome || 0;
-    entry.totalIncomeEntries += stat.totalIncomeEntries || 0;
-    entry.amountReceived += stat.amountReceived || 0;
-    entry.amountReceivedEntries += stat.amountReceivedEntries || 0;
+  // Process income stats
+  const incomeDateStatsData = incomeDateStats?.[0]?.dateEntries || [];
+
+  incomeDateStatsData.forEach((stat) => {
+    // Add to totalIncome by created date
+    const createdEntry = ensureDate(stat.createdDate);
+    createdEntry.totalIncome += stat.amount || 0;
+    createdEntry.totalIncomeEntries += 1;
+
+    // Add to amountReceived by paid date (only if paidDate exists)
+    if (stat.paidDate) {
+      const paidEntry = ensureDate(stat.paidDate);
+      paidEntry.amountReceived += stat.amount || 0;
+      paidEntry.amountReceivedEntries += 1;
+    }
   });
 
   expenseDateStats.forEach((stat) => {
