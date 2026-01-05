@@ -317,6 +317,15 @@ export const googleAuth = async (req, res) => {
         await user.save();
       }
 
+      logActivity(
+        { user: { registerId: user.registerId, name: user.name } },
+        "UPDATE",
+        "User",
+        user.registerId,
+        { before: null, after: { deviceInfo } },
+        `User ${user.name} signed in via Google`
+      );
+
       const { accessToken: newAccessToken, refreshToken } = await createSessionAndTokens(
         user,
         deviceInfo,
