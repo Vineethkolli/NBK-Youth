@@ -92,11 +92,11 @@ export const sendNotification = async (req, res) => {
     if (target === 'All') {
       const allUsers = await User.find({}, 'registerId').lean();
       eligibleRegisterIds = allUsers.map((user) => user.registerId);
-      subscriptionUsers = await Subscription.find({ registerId: { $in: eligibleRegisterIds } }).lean();
+      subscriptionUsers = await Subscription.find({ registerId: { $in: eligibleRegisterIds } });
 
     } else if (target === 'Admins_Financiers_Developers') {
       eligibleRegisterIds = await getRoleBasedRegisterIds(['admin', 'financier', 'developer']);
-      subscriptionUsers = await Subscription.find({ registerId: { $in: eligibleRegisterIds } }).lean();
+      subscriptionUsers = await Subscription.find({ registerId: { $in: eligibleRegisterIds } });
 
     } else if (target === 'Specific User' && registerId) {
       // Check if user exists or not
