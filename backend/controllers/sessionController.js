@@ -245,17 +245,22 @@ export const getAllSessions = async (req, res) => {
 
     // Apply time filter based on lastActive
     if (timeFilter && timeFilter !== 'sessions') {
+      // Get current time in IST (UTC+5:30)
       const now = new Date();
+      const istOffset = 5.5 * 60 * 60 * 1000; // IST offset in milliseconds
+      const nowIST = new Date(now.getTime() + istOffset + (now.getTimezoneOffset() * 60 * 1000));
+      
       sessions = sessions.filter(session => {
         const lastActiveDate = new Date(session.lastActive);
+        const lastActiveIST = new Date(lastActiveDate.getTime() + istOffset + (lastActiveDate.getTimezoneOffset() * 60 * 1000));
         
         if (timeFilter === 'today') {
-          // Check if session was last active today
-          return lastActiveDate.toDateString() === now.toDateString();
+          // Check if session was last active today in IST
+          return lastActiveIST.toDateString() === nowIST.toDateString();
         } else if (timeFilter === 'monthly') {
-          // Check if session was last active in current month
-          return lastActiveDate.getMonth() === now.getMonth() && 
-                 lastActiveDate.getFullYear() === now.getFullYear();
+          // Check if session was last active in current month in IST
+          return lastActiveIST.getMonth() === nowIST.getMonth() && 
+                 lastActiveIST.getFullYear() === nowIST.getFullYear();
         }
         return true;
       });
@@ -320,10 +325,19 @@ export const getAllSessions = async (req, res) => {
 
 export const getSessionsStats = async (req, res) => {
   try {
-    const startOfToday = new Date();
-    startOfToday.setHours(0, 0, 0, 0);
+    // Get start of today in IST (UTC+5:30)
+    const now = new Date();
+    const istOffset = 5.5 * 60 * 60 * 1000; // IST offset in milliseconds
+    const nowIST = new Date(now.getTime() + istOffset + (now.getTimezoneOffset() * 60 * 1000));
+    
+    const startOfTodayIST = new Date(nowIST);
+    startOfTodayIST.setHours(0, 0, 0, 0);
+    
+    // Convert back to UTC for MongoDB query
+    const startOfToday = new Date(startOfTodayIST.getTime() - istOffset - (startOfTodayIST.getTimezoneOffset() * 60 * 1000));
 
-    const startOfMonth = new Date(startOfToday.getFullYear(), startOfToday.getMonth(), 1);
+    const startOfMonth = new Date(startOfTodayIST.getFullYear(), startOfTodayIST.getMonth(), 1);
+    startOfMonth.setHours(startOfMonth.getHours() - 5, startOfMonth.getMinutes() - 30);
 
     const activeSessionToday = Session.countDocuments({ lastActive: { $gte: startOfToday } });
     const activeSessionMonth = Session.countDocuments({ lastActive: { $gte: startOfMonth } });
