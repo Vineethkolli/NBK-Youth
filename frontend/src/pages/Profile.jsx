@@ -455,6 +455,13 @@ function Profile() {
         />
       )}
 
+      <div className="mt-6 text-center text-sm text-gray-600">
+        To delete your account, mail us at 
+        <a href="mailto:gangavaramnbkyouth@gmail.com" className="ml-1">
+          gangavaramnbkyouth@gmail.com
+        </a>
+      </div>
+
     </div>
   );
 }
