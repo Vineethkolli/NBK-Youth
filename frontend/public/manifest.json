@@ -1,12 +1,12 @@
 {
-  "id": "com.nbkyouth",
+  "id": "app.nbkyouth.gangavaram",
   "name": "NBK Youth Gangavaram",
   "short_name": "NBK Youth",
   "description": "Discover village life, events, culture and youth celebrations. Developed by Kolli Vineeth.",
   "theme_color": "#ffffff",
   "background_color": "#ffffff",
   "display": "standalone",
-  "start_url": "/?homescreen=1",
+  "start_url": "/",
   "scope": "/",
   "categories": ["community", "events", "entertainment", "lifestyle", "social", "finance"],
   
