@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "app.nbkyouth.gangavaram",
+        "sha256_cert_fingerprints": ["4F:5A:17:15:99:DD:A0:3E:7A:C8:42:C7:02:73:3E:03:16:F6:F3:D1:82:37:C8:B5:E0:EA:BA:94:79:66:FE:1C"]
+      }
+    }]
