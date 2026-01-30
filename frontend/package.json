@@ -16,7 +16,7 @@
     "firebase": "^12.6.0",
     "jspdf": "^4.0.0",
     "jspdf-autotable": "^5.0.7",
-    "libphonenumber-js": "^1.12.35",
+    "libphonenumber-js": "^1.12.36",
     "lucide-react": "^0.563.0",
     "pdf-lib": "^1.17.1",
     "qrcode.react": "^4.2.0",
