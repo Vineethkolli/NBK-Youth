@@ -5,7 +5,6 @@ import { API_URL } from '../../utils/config';
 import { urlBase64ToUint8Array } from '../../utils/vapidKeys';
 import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
-import { isInstalledApp, isAndroid, openAndroidNotificationSettings } from '../../utils/notifications';
 
 function NotificationPrompt() {
   const { user } = useAuth();
@@ -13,13 +12,14 @@ function NotificationPrompt() {
   const [showPrompt, setShowPrompt] = useState(false);
   const [subscription, setSubscription] = useState(null);
   const promptRef = useRef(null);
-  const isAndroidDevice = isAndroid();
-  const androidPackageName = import.meta.env.VITE_ANDROID_PACKAGE_NAME;
 
   useEffect(() => {
     const checkInstalled = () => {
       try {
-        setIsInstalled(isInstalledApp());
+        const isStandalone =
+          window.matchMedia?.('(display-mode: standalone)').matches ||
+          window.navigator.standalone === true;
+        setIsInstalled(isStandalone);
       } catch (err) {
         console.warn('Install detection failed:', err);
         setIsInstalled(false);
@@ -77,16 +77,8 @@ function NotificationPrompt() {
     }
 
     try {
-      if (isAndroidDevice && Notification.permission === 'denied') {
-        openAndroidNotificationSettings(androidPackageName);
-        return;
-      }
-
       const permissionResult = await Notification.requestPermission();
       if (permissionResult !== 'granted') {
-        if (isAndroidDevice) {
-          openAndroidNotificationSettings(androidPackageName);
-        }
         toast.error('Notification permission denied');
         return;
       }
