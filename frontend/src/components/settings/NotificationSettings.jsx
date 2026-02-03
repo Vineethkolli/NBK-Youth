@@ -2,7 +2,16 @@ import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import { useAuth } from '../../context/AuthContext';
 import { Bell } from 'lucide-react';
-import { getSubscription, subscribeToPush, isIos, isInStandaloneMode, getServiceWorkerRegistration } from '../../utils/notifications';
+import {
+  getSubscription,
+  subscribeToPush,
+  isIos,
+  isInStandaloneMode,
+  isAndroid,
+  isInstalledApp,
+  openAndroidNotificationSettings,
+  getServiceWorkerRegistration
+} from '../../utils/notifications';
 
 const NotificationSettings = () => {
   const { user } = useAuth();
@@ -11,6 +20,9 @@ const NotificationSettings = () => {
     typeof Notification !== 'undefined' ? Notification.permission : 'default'
   );
   const [showResetPrompt, setShowResetPrompt] = useState(false);
+  const isAndroidDevice = isAndroid();
+  const installedApp = isInstalledApp();
+  const androidPackageName = import.meta.env.VITE_ANDROID_PACKAGE_NAME;
 
   if (isIos() && !isInStandaloneMode()) {
     return (
@@ -18,6 +30,17 @@ const NotificationSettings = () => {
         <h3 className="text-lg font-medium">Notifications Permission</h3>
         <p className="text-sm text-gray-500">
           To allow notifications, please download the app.
+        </p>
+      </div>
+    );
+  }
+
+  if (isAndroidDevice && !installedApp) {
+    return (
+      <div className="bg-white rounded-lg shadow p-6">
+        <h3 className="text-lg font-medium">Notifications Permission</h3>
+        <p className="text-sm text-gray-500">
+          Notifications are available only in the installed app. Please open the app from your home screen or install it first.
         </p>
       </div>
     );
@@ -31,11 +54,20 @@ const NotificationSettings = () => {
 
   const askPermission = async () => {
     try {
+      if (isAndroidDevice && installedApp && Notification.permission === 'denied') {
+        openAndroidNotificationSettings(androidPackageName);
+        setShowResetPrompt(true);
+        return;
+      }
+
       const permission = await Notification.requestPermission();
       setPermissionStatus(permission);
 
       if (permission !== 'granted') {
         setShowResetPrompt(true);
+        if (isAndroidDevice && installedApp) {
+          openAndroidNotificationSettings(androidPackageName);
+        }
         throw new Error('Permission denied');
       }
       setShowResetPrompt(false);
