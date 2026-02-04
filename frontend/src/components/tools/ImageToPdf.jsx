@@ -49,29 +49,35 @@ export default function ImageToPdfTool() {
 
     const imgData = await getImageData(image);
 
-    // Calculate image dimensions to fit on page
-    const img = new Image();
-    img.src = imgData;
+    // Wait for image to load before accessing dimensions
+    await new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        const maxWidth = pageWidth - 2 * margin;
+        const maxHeight = pageHeight - 2 * margin;
+        let imgWidth = maxWidth;
+        let imgHeight = (img.height / img.width) * imgWidth;
 
-    const maxWidth = pageWidth - 2 * margin;
-    const maxHeight = pageHeight - 2 * margin;
-    let imgWidth = maxWidth;
-    let imgHeight = (img.height / img.width) * imgWidth;
+        // If image is taller than page, scale down
+        if (imgHeight > maxHeight) {
+          imgHeight = maxHeight;
+          imgWidth = (img.width / img.height) * imgHeight;
+        }
 
-    // If image is taller than page, scale down
-    if (imgHeight > maxHeight) {
-      imgHeight = maxHeight;
-      imgWidth = (img.width / img.height) * imgHeight;
-    }
+        // Center image on page
+        const x = (pageWidth - imgWidth) / 2;
+        const y = (pageHeight - imgHeight) / 2;
 
-    // Center image on page
-    const x = (pageWidth - imgWidth) / 2;
-    const y = (pageHeight - imgHeight) / 2;
-
-    pdf.addImage(imgData, "JPEG", x, y, imgWidth, imgHeight);
-
-    pdf.save(`${name}.pdf`);
-    setImage(null);
+        pdf.addImage(imgData, "JPEG", x, y, imgWidth, imgHeight);
+        pdf.save(`${name}.pdf`);
+        setImage(null);
+        resolve();
+      };
+      img.onerror = () => {
+        reject(new Error("Failed to load image"));
+      };
+      img.src = imgData;
+    });
   };
 
   const getImageData = (file) => {
