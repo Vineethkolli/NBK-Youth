@@ -43,5 +43,15 @@
       "url": "/moments",
       "icons": [{ "src": "/logo/192.png", "sizes": "192x192" }]
     }
-  ]
+  ],
+  
+    "related_applications": [
+    {
+      "platform": "play",
+      "url": "https://play.google.com/store/apps/details?id=app.nbkyouth.gangavaram",
+      "id": "app.nbkyouth.gangavaram"
+    }
+  ],
+  "prefer_related_applications": true
+
 }
