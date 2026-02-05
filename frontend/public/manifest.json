@@ -8,6 +8,7 @@
   "display": "standalone",
   "start_url": "/",
   "scope": "/",
+  "orientation": "any",
   "categories": ["community", "events", "entertainment", "lifestyle", "social", "finance"],
   
   "icons": [
