@@ -137,12 +137,16 @@ function App() {
   useEffect(() => {
     initializeAnalytics();
 
-    // Service worker registration is handled automatically by Vite PWA plugin
-    // Listen for controller changes to prompt user for updates
-    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-      navigator.serviceWorker.addEventListener('controllerchange', () => {
-        setShowUpdateDialog(true);
-      });
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js', { scope: '/' })
+        .catch((error) => console.error('Service Worker registration failed:', error));
+
+      // Only show dialog if a service worker was already controlling the page
+      if (navigator.serviceWorker.controller) {
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          setShowUpdateDialog(true);
+        });
+      }
     }
   }, []);
 
