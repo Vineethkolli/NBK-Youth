@@ -117,18 +117,6 @@ export const AuthProvider = ({ children }) => {
       // proactive refresh when token is ≥ 14 days old
       if (tokenAge >= 14) {
         try {
-          // Check if offline - don't attempt refresh if no connection
-          if (!navigator.onLine) {
-            console.warn("Offline detected - skipping proactive token refresh");
-            axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-            const cached = sessionStorage.getItem("cachedUser");
-            if (cached) {
-              setUser(JSON.parse(cached));
-            }
-            setLoading(false);
-            return;
-          }
-
           if (!refreshPromiseRef.current) {
             refreshPromiseRef.current = axios.post(
               `${API_URL}/api/sessions/refresh`,
@@ -145,51 +133,18 @@ export const AuthProvider = ({ children }) => {
           axios.defaults.headers.common["Authorization"] = `Bearer ${data.token}`;
 
           setUser(data.user);
-          sessionStorage.setItem("cachedUser", JSON.stringify(data.user));
           if (data.user.language)
             localStorage.setItem("preferredLanguage", data.user.language);
 
           updateLastActiveIfNeeded();
         } catch (error) {
           console.error("Proactive refresh failed:", error);
-          
-          // Only sign out on auth errors, not network errors
-          const status = error.response?.status;
-          if (status === 401 || status === 403) {
-            localStorage.removeItem("token");
-            localStorage.removeItem("lastActiveUpdate");
-            delete axios.defaults.headers.common["Authorization"];
-          } else if (!error.response) {
-            // Network error - keep session, use cached user if available
-            console.warn("Network error during token refresh - keeping session");
-            const cached = sessionStorage.getItem("cachedUser");
-            if (cached) {
-              setUser(JSON.parse(cached));
-            }
-          }
+          localStorage.removeItem("token");
+          localStorage.removeItem("lastActiveUpdate");
+          delete axios.defaults.headers.common["Authorization"];
         }
 
         setLoading(false);
-        return;
-      }
-
-      // Check if offline before fetching profile
-      if (!navigator.onLine) {
-        console.warn("Offline detected - using cached user data");
-        axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-        const cached = sessionStorage.getItem("cachedUser");
-        if (cached) {
-          setUser(JSON.parse(cached));
-        }
-        setLoading(false);
-        
-        // Listen for connection and fetch profile when back online
-        const handleOnline = async () => {
-          console.log("Connection restored - fetching fresh profile");
-          await fetchProfile();
-          window.removeEventListener('online', handleOnline);
-        };
-        window.addEventListener('online', handleOnline);
         return;
       }
 
@@ -206,38 +161,13 @@ export const AuthProvider = ({ children }) => {
     try {
       const { data } = await axios.get(`${API_URL}/api/profile/profile`);
       setUser(data);
-      sessionStorage.setItem("cachedUser", JSON.stringify(data));
 
       if (data.language)
         localStorage.setItem("preferredLanguage", data.language);
     } catch (error) {
       console.error("Fetch profile failed:", error);
-      
-      // Differentiate between error types
-      const status = error.response?.status;
-      const isNetworkError = !error.response; // No response = network error
-      
-      if (isNetworkError) {
-        // Network error (offline, timeout, etc.) - keep session alive
-        console.warn("Network error while fetching profile - keeping session active");
-        const cached = sessionStorage.getItem("cachedUser");
-        if (cached) {
-          setUser(JSON.parse(cached));
-        }
-      } else if (status === 401 || status === 403) {
-        // Auth error - sign out user
-        console.warn("Auth error (401/403) - signing out user");
-        localStorage.removeItem("token");
-        localStorage.removeItem("lastActiveUpdate");
-        delete axios.defaults.headers.common["Authorization"];
-      } else {
-        // Other server errors (5xx, etc.) - keep session, try again later
-        console.warn(`Server error (${status}) - keeping session alive for retry`);
-        const cached = sessionStorage.getItem("cachedUser");
-        if (cached) {
-          setUser(JSON.parse(cached));
-        }
-      }
+      localStorage.removeItem("token");
+      delete axios.defaults.headers.common["Authorization"];
     } finally {
       setLoading(false);
     }
@@ -264,7 +194,6 @@ export const AuthProvider = ({ children }) => {
 
   const setTokenAndUser = (token, userObj) => {
     localStorage.setItem("token", token);
-    sessionStorage.setItem("cachedUser", JSON.stringify(userObj)); // Cache user data
     axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
     setUser(userObj);
 
@@ -324,7 +253,6 @@ export const AuthProvider = ({ children }) => {
     } finally {
       localStorage.removeItem("token");
       localStorage.removeItem("lastActiveUpdate");
-      sessionStorage.removeItem("cachedUser"); // Also clear cached user data
       delete axios.defaults.headers.common["Authorization"];
       setUser(null);
     }

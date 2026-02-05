@@ -21,12 +21,13 @@ export default defineConfig({
       registerType: 'autoUpdate',
 
       injectManifest: {
-        maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
       },
 
       includeAssets: [
-        '/logo/*.png',
+        '/logo/**/*.png',
         'developerImage.png',
+        'index.html',
       ],
       
       manifest: {
