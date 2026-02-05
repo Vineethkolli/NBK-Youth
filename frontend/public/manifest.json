@@ -6,7 +6,7 @@
   "theme_color": "#ffffff",
   "background_color": "#ffffff",
   "display": "standalone",
-  "start_url": "/?homescreen=1",
+  "start_url": "/",
   "scope": "/",
   "orientation": "any",
   "categories": ["community", "events", "entertainment", "lifestyle", "social", "finance"],
