@@ -29,6 +29,29 @@ const getTokenAgeDays = (issuedAt) => {
   return ageSeconds / (60 * 60 * 24);
 };
 
+const getCachedUser = () => {
+  try {
+    const cached = localStorage.getItem("cachedUser");
+    return cached ? JSON.parse(cached) : null;
+  } catch {
+    return null;
+  }
+};
+
+const setCachedUser = (userObj) => {
+  try {
+    if (userObj) {
+      localStorage.setItem("cachedUser", JSON.stringify(userObj));
+    } else {
+      localStorage.removeItem("cachedUser");
+    }
+  } catch {
+    // Ignore cache errors
+  }
+};
+
+const isOfflineError = (error) => !error?.response;
+
 const wasLastActiveUpdatedToday = () => {
   const lastUpdate = localStorage.getItem("lastActiveUpdate");
   if (!lastUpdate) return false;
@@ -75,15 +98,19 @@ export const AuthProvider = ({ children }) => {
             originalRequest.headers["Authorization"] = `Bearer ${data.token}`;
 
             setUser(data.user);
+            setCachedUser(data.user);
             if (data.user.language)
               localStorage.setItem("preferredLanguage", data.user.language);
 
             return axios(originalRequest);
           } catch (err) {
-            localStorage.removeItem("token");
-            localStorage.removeItem("lastActiveUpdate");
-            delete axios.defaults.headers.common["Authorization"];
-            setUser(null);
+            if (!isOfflineError(err)) {
+              localStorage.removeItem("token");
+              localStorage.removeItem("lastActiveUpdate");
+              delete axios.defaults.headers.common["Authorization"];
+              setCachedUser(null);
+              setUser(null);
+            }
             return Promise.reject(err);
           }
         }
@@ -133,15 +160,22 @@ export const AuthProvider = ({ children }) => {
           axios.defaults.headers.common["Authorization"] = `Bearer ${data.token}`;
 
           setUser(data.user);
+          setCachedUser(data.user);
           if (data.user.language)
             localStorage.setItem("preferredLanguage", data.user.language);
 
           updateLastActiveIfNeeded();
         } catch (error) {
           console.error("Proactive refresh failed:", error);
-          localStorage.removeItem("token");
-          localStorage.removeItem("lastActiveUpdate");
-          delete axios.defaults.headers.common["Authorization"];
+          if (!isOfflineError(error)) {
+            localStorage.removeItem("token");
+            localStorage.removeItem("lastActiveUpdate");
+            delete axios.defaults.headers.common["Authorization"];
+            setCachedUser(null);
+          } else {
+            const cachedUser = getCachedUser();
+            if (cachedUser) setUser(cachedUser);
+          }
         }
 
         setLoading(false);
@@ -161,13 +195,20 @@ export const AuthProvider = ({ children }) => {
     try {
       const { data } = await axios.get(`${API_URL}/api/profile/profile`);
       setUser(data);
+      setCachedUser(data);
 
       if (data.language)
         localStorage.setItem("preferredLanguage", data.language);
     } catch (error) {
       console.error("Fetch profile failed:", error);
-      localStorage.removeItem("token");
-      delete axios.defaults.headers.common["Authorization"];
+      if (!isOfflineError(error)) {
+        localStorage.removeItem("token");
+        delete axios.defaults.headers.common["Authorization"];
+        setCachedUser(null);
+      } else {
+        const cachedUser = getCachedUser();
+        if (cachedUser) setUser(cachedUser);
+      }
     } finally {
       setLoading(false);
     }
@@ -189,13 +230,18 @@ export const AuthProvider = ({ children }) => {
   };
 
   const updateUserData = (newData) => {
-    setUser((prev) => ({ ...(prev || {}), ...newData }));
+    setUser((prev) => {
+      const next = { ...(prev || {}), ...newData };
+      setCachedUser(next);
+      return next;
+    });
   };
 
   const setTokenAndUser = (token, userObj) => {
     localStorage.setItem("token", token);
     axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
     setUser(userObj);
+    setCachedUser(userObj);
 
     if (userObj.language)
       localStorage.setItem("preferredLanguage", userObj.language);
@@ -254,6 +300,7 @@ export const AuthProvider = ({ children }) => {
       localStorage.removeItem("token");
       localStorage.removeItem("lastActiveUpdate");
       delete axios.defaults.headers.common["Authorization"];
+      setCachedUser(null);
       setUser(null);
     }
   };
