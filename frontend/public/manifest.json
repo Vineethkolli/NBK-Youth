@@ -21,11 +21,11 @@
   ],
 
   "screenshots": [
-  { "src": "/appscreenshots/home.png",      "sizes": "1080x1920", "type": "image/png" },
-  { "src": "/appscreenshots/explore.png",   "sizes": "1080x1920", "type": "image/png" },
-  { "src": "/appscreenshots/moments.png",   "sizes": "1080x1920", "type": "image/png" },
-  { "src": "/appscreenshots/stats.png",     "sizes": "1080x1920", "type": "image/png" },    
-  { "src": "/appscreenshots/techstack.png", "sizes": "1080x1920", "type": "image/png" }
+  { "src": "/appscreenshots/home.png",      "type": "image/png" },
+  { "src": "/appscreenshots/explore.png",   "type": "image/png" },
+  { "src": "/appscreenshots/moments.png",   "type": "image/png" },
+  { "src": "/appscreenshots/stats.png",     "type": "image/png" },    
+  { "src": "/appscreenshots/techstack.png", "type": "image/png" }
  ],
 
   "shortcuts": [
