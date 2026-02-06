@@ -54,7 +54,7 @@ const defineJobs = (agenda) => {
     const { historyId } = job.attrs.data || {};
     if (!historyId) return;
 
-    const history = await EmailHistory.findById(historyId);
+    const history = await MailerHistory.findById(historyId);
     if (!history || ['completed', 'retry_completed'].includes(history.status)) return;
 
     history.sentAt = history.sentAt || new Date();
@@ -80,7 +80,7 @@ const defineJobs = (agenda) => {
     const { historyId } = job.attrs.data || {};
     if (!historyId) return;
 
-    const history = await EmailHistory.findById(historyId);
+    const history = await MailerHistory.findById(historyId);
     if (!history || !['partially_failed', 'failed'].includes(history.status)) return;
 
     if (!history.failedRecipients?.length) {
