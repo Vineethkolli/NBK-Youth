@@ -13,7 +13,7 @@
     "@hello-pangea/dnd": "^18.0.1",
     "axios": "^1.13.4",
     "country-flag-icons": "^1.6.12",
-    "firebase": "^12.6.0",
+    "firebase": "^12.9.0",
     "jspdf": "^4.1.0",
     "jspdf-autotable": "^5.0.7",
     "libphonenumber-js": "^1.12.36",
