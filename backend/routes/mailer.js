@@ -1,6 +1,6 @@
 import express from 'express';
 import { auth, checkRole } from '../middleware/auth.js';
-import { sendEmailNow, scheduleEmail, listScheduledEmails, listEmailHistory } from '../controllers/emailSenderController.js';
+import { sendEmailNow, scheduleEmail, listScheduledEmails, listEmailHistory } from '../controllers/mailerController.js';
 
 const router = express.Router();
 

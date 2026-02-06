@@ -1,8 +1,8 @@
 import Agenda from 'agenda';
 import { DateTime } from 'luxon';
-import EmailSchedule from '../models/EmailSchedule.js';
-import EmailHistory from '../models/EmailHistory.js';
-import { sendEmailsSequential } from './emailSenderService.js';
+import MailerSchedule from '../models/MailerSchedule.js';
+import MailerHistory from '../models/MailerHistory.js';
+import { sendEmailsSequential } from './mailerService.js';
 
 let agendaInstance = null;
 
@@ -104,7 +104,7 @@ const defineJobs = (agenda) => {
   agenda.define('process-scheduled-emails', { concurrency: 1, lockLifetime: 60 * 60 * 1000 }, async () => {
     const { startOfDay, endOfDay } = getDayBounds();
 
-    const schedules = await EmailSchedule.find({
+    const schedules = await MailerSchedule.find({
       scheduledAt: { $gte: startOfDay, $lte: endOfDay },
       status: 'pending'
     });
@@ -120,7 +120,7 @@ const defineJobs = (agenda) => {
         footer: schedule.footer
       });
 
-      const history = await EmailHistory.create({
+      const history = await MailerHistory.create({
         senderRegisterId: schedule.senderRegisterId,
         subject: schedule.subject,
         body: schedule.body,
@@ -144,7 +144,7 @@ const defineJobs = (agenda) => {
   agenda.define('retry-scheduled-emails', { concurrency: 1, lockLifetime: 60 * 60 * 1000 }, async () => {
     const { startOfDay, endOfDay } = getDayBounds();
 
-    const schedules = await EmailSchedule.find({
+    const schedules = await MailerSchedule.find({
       scheduledAt: { $gte: startOfDay, $lte: endOfDay },
       status: { $in: ['partially_failed', 'failed'] }
     });
@@ -167,7 +167,7 @@ const defineJobs = (agenda) => {
       await updateScheduleAfterSend({ schedule, failedRecipients, isRetry: true });
 
       if (schedule.historyId) {
-        const history = await EmailHistory.findById(schedule.historyId);
+        const history = await MailerHistory.findById(schedule.historyId);
         if (history) {
           history.failedRecipients = failedRecipients;
           history.completedAt = schedule.completedAt;

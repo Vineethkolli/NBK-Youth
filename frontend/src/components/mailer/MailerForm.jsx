@@ -9,7 +9,7 @@ const targetOptions = [
   { value: 'Email', label: 'Specific Email' }
 ];
 
-function EmailSenderForm({ onScheduled, onSent }) {
+function MailerForm({ onScheduled, onSent }) {
   const [subject, setSubject] = useState('');
   const [content, setContent] = useState('');
   const [footer, setFooter] = useState('');
@@ -75,7 +75,7 @@ function EmailSenderForm({ onScheduled, onSent }) {
     setIsSubmitting(true);
     try {
       const payload = buildPayload();
-      const { data } = await axios.post(`${API_URL}/api/email-sender/send`, payload);
+      const { data } = await axios.post(`${API_URL}/api/mailer/send`, payload);
       toast.success(data?.message || 'Email send started');
       if (onSent && data?.history) onSent(data.history);
       resetForm();
@@ -97,7 +97,7 @@ function EmailSenderForm({ onScheduled, onSent }) {
     setIsSubmitting(true);
     try {
       const payload = { ...buildPayload(), scheduleDate };
-      const { data } = await axios.post(`${API_URL}/api/email-sender/schedule`, payload);
+      const { data } = await axios.post(`${API_URL}/api/mailer/schedule`, payload);
       toast.success(data?.message || 'Email scheduled');
       if (onScheduled && data?.schedule) onScheduled(data.schedule);
       resetForm();
@@ -253,4 +253,4 @@ function EmailSenderForm({ onScheduled, onSent }) {
   );
 }
 
-export default EmailSenderForm;
+export default MailerForm;

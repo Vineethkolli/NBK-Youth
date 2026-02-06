@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon';
-import EmailSchedule from '../models/EmailSchedule.js';
-import EmailHistory from '../models/EmailHistory.js';
+import MailerSchedule from '../models/MailerSchedule.js';
+import MailerHistory from '../models/MailerHistory.js';
 import User from '../models/User.js';
 import { scheduleImmediateEmail } from '../services/agendaService.js';
 import { logActivity } from '../middleware/activityLogger.js';
@@ -99,7 +99,7 @@ export const sendEmailNow = async (req, res) => {
       return res.status(404).json({ error: 'No eligible recipients found' });
     }
 
-    const history = await EmailHistory.create({
+    const history = await MailerHistory.create({
       senderRegisterId: req.user.registerId,
       ...emailPayload,
       targetType: target,
@@ -115,7 +115,7 @@ export const sendEmailNow = async (req, res) => {
     await logActivity(
       req,
       'CREATE',
-      'Email',
+      'Mailer',
       req.user.registerId,
       { before: null, after: { subject: emailPayload.subject, target } },
       `Email send initiated by ${req.user.name} to ${target}`
@@ -149,7 +149,7 @@ export const scheduleEmail = async (req, res) => {
       return res.status(404).json({ error: 'No eligible recipients found' });
     }
 
-    const schedule = await EmailSchedule.create({
+    const schedule = await MailerSchedule.create({
       senderRegisterId: req.user.registerId,
       ...emailPayload,
       targetType: target,
@@ -162,7 +162,7 @@ export const scheduleEmail = async (req, res) => {
     await logActivity(
       req,
       'CREATE',
-      'EmailSchedule',
+      'Mailer',
       req.user.registerId,
       { before: null, after: { subject: emailPayload.subject, scheduledAt: schedule.scheduledAt } },
       `Scheduled email by ${req.user.name} for ${schedule.scheduledAt.toISOString()}`
@@ -177,7 +177,7 @@ export const scheduleEmail = async (req, res) => {
 
 export const listScheduledEmails = async (req, res) => {
   try {
-    const schedules = await EmailSchedule.find().sort({ scheduledAt: -1 }).lean();
+    const schedules = await MailerSchedule.find().sort({ scheduledAt: -1 }).lean();
     res.json(schedules);
   } catch (error) {
     console.error('List schedules error:', error.message);
@@ -187,7 +187,7 @@ export const listScheduledEmails = async (req, res) => {
 
 export const listEmailHistory = async (req, res) => {
   try {
-    const history = await EmailHistory.find().sort({ sentAt: -1, createdAt: -1 }).lean();
+    const history = await MailerHistory.find().sort({ sentAt: -1, createdAt: -1 }).lean();
     res.json(history);
   } catch (error) {
     console.error('List history error:', error.message);

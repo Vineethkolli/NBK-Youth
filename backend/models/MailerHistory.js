@@ -8,7 +8,7 @@ const recipientSchema = new mongoose.Schema(
   { _id: false }
 );
 
-const emailHistorySchema = new mongoose.Schema(
+const mailerHistorySchema = new mongoose.Schema(
   {
     senderRegisterId: { type: String, required: true },
     subject: { type: String, required: true },
@@ -24,7 +24,7 @@ const emailHistorySchema = new mongoose.Schema(
     failedRecipients: { type: [recipientSchema], default: [] },
     sentAt: { type: Date, default: null },
     completedAt: { type: Date, default: null },
-    scheduleId: { type: mongoose.Schema.Types.ObjectId, ref: 'EmailSchedule', default: null },
+    scheduleId: { type: mongoose.Schema.Types.ObjectId, ref: 'MailerSchedule', default: null },
     status: {
       type: String,
       enum: ['pending', 'completed', 'partially_failed', 'retry_completed', 'failed'],
@@ -39,4 +39,4 @@ const emailHistorySchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export default mongoose.model('EmailHistory', emailHistorySchema);
+export default mongoose.model('MailerHistory', mailerHistorySchema);

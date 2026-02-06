@@ -40,7 +40,7 @@ import snapshotRoutes from './routes/snapshots.js';
 import historiesRoutes from './routes/histories.js';
 import cloudinaryRoutes from './routes/cloudinary.js';
 import monitorRoutes from './routes/monitor.js';
-import emailSenderRoutes from './routes/emailSender.js';
+import mailerRoutes from './routes/mailer.js';
 import { processDueNotifications } from './controllers/scheduledNotificationController.js';
 import { createDefaultDeveloper } from './utils/setupDefaults.js';
 import { startAgenda } from './services/agendaService.js';
@@ -123,7 +123,7 @@ app.use('/api/snapshots', snapshotRoutes);
 app.use('/api/histories', historiesRoutes);
 app.use('/api/uploads', cloudinaryRoutes);
 app.use('/api/monitor', monitorRoutes);
-app.use('/api/email-sender', emailSenderRoutes);
+app.use('/api/mailer', mailerRoutes);
 
 // Health Check
 app.get('/', (req, res) => res.json({ status: 'API is running' }));

@@ -52,7 +52,7 @@ function Explore() {
           ? [
               { to: "/users", icon: UserCog, label: "Users & Roles" },
               { to: "/admin-panel", icon: LayoutDashboard, label: "Admin Panel" },
-              { to: "/email-sender", icon: MailCheck, label: "Email Sender" },
+              { to: "/mailer", icon: MailCheck, label: "Mailer" },
             ]
           : []),
         ...(hasAccess("Pro")

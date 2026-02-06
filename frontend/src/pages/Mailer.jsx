@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { API_URL } from '../utils/config';
-import EmailSenderForm from '../components/emailSender/EmailSenderForm';
-import EmailScheduleList from '../components/emailSender/EmailScheduleList';
-import EmailHistoryList from '../components/emailSender/EmailHistoryList';
+import MailerForm from '../components/mailer/MailerForm';
+import MailerScheduleList from '../components/mailer/MailerScheduleList';
+import MailerHistoryList from '../components/mailer/MailerHistoryList';
 
-function EmailSender() {
+function Mailer() {
   const [scheduled, setScheduled] = useState([]);
   const [history, setHistory] = useState([]);
   const [loadingScheduled, setLoadingScheduled] = useState(true);
@@ -13,7 +13,7 @@ function EmailSender() {
 
   const fetchScheduled = async () => {
     try {
-      const { data } = await axios.get(`${API_URL}/api/email-sender/scheduled`);
+      const { data } = await axios.get(`${API_URL}/api/mailer/scheduled`);
       setScheduled(data || []);
     } catch (error) {
       console.error('Failed to fetch scheduled emails:', error);
@@ -24,7 +24,7 @@ function EmailSender() {
 
   const fetchHistory = async () => {
     try {
-      const { data } = await axios.get(`${API_URL}/api/email-sender/history`);
+      const { data } = await axios.get(`${API_URL}/api/mailer/history`);
       setHistory(data || []);
     } catch (error) {
       console.error('Failed to fetch email history:', error);
@@ -50,18 +50,18 @@ function EmailSender() {
     <div className="max-w-6xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-semibold text-gray-900">Email Sender</h2>
+          <h2 className="text-2xl font-semibold text-gray-900">Mailer</h2>
         </div>
       </div>
 
-      <EmailSenderForm onScheduled={handleScheduled} onSent={handleSent} />
+      <MailerForm onScheduled={handleScheduled} onSent={handleSent} />
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <EmailScheduleList schedules={scheduled} loading={loadingScheduled} />
-        <EmailHistoryList history={history} loading={loadingHistory} />
+        <MailerScheduleList schedules={scheduled} loading={loadingScheduled} />
+        <MailerHistoryList history={history} loading={loadingHistory} />
       </div>
     </div>
   );
 }
 
-export default EmailSender;
+export default Mailer;

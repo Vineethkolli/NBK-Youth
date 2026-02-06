@@ -1,4 +1,4 @@
-import { CalendarClock } from 'lucide-react';
+import { Clock } from 'lucide-react';
 import { formatDateTime } from '../../utils/dateTime';
 
 const statusStyles = {
@@ -19,42 +19,42 @@ const formatRecipients = (recipients) => {
   return remaining > 0 ? `${preview} +${remaining}` : preview;
 };
 
-function EmailScheduleList({ schedules, loading }) {
+function MailerHistoryList({ history, loading }) {
   return (
     <div className="bg-white rounded-lg shadow p-6">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h3 className="text-lg font-semibold text-gray-900">Scheduled Emails</h3>
-          <p className="text-xs text-gray-500">Runs at 1:00 AM IST daily</p>
+          <h3 className="text-lg font-semibold text-gray-900">Mailer History</h3>
         </div>
-        <CalendarClock className="h-5 w-5 text-gray-400" />
+        <Clock className="h-5 w-5 text-gray-400" />
       </div>
 
       {loading ? (
         <div className="text-sm text-gray-500">Loading...</div>
-      ) : schedules.length === 0 ? (
-        <div className="text-sm text-gray-500">No scheduled emails.</div>
+      ) : history.length === 0 ? (
+        <div className="text-sm text-gray-500">No emails sent yet.</div>
       ) : (
         <div className="space-y-3">
-          {schedules.map((schedule) => (
-            <div key={schedule._id} className="border rounded-lg p-4 space-y-2">
+          {history.map((entry) => (
+            <div key={entry._id} className="border rounded-lg p-4 space-y-2">
               <div className="flex items-center justify-between">
-                <h4 className="font-semibold text-gray-900">{schedule.subject}</h4>
+                <h4 className="font-semibold text-gray-900">{entry.subject}</h4>
                 <span
                   className={`text-xs font-semibold px-2 py-1 rounded-full ${
-                    statusStyles[schedule.status] || 'bg-gray-100 text-gray-600'
+                    statusStyles[entry.status] || 'bg-gray-100 text-gray-600'
                   }`}
                 >
-                  {schedule.status.replace('_', ' ')}
+                  {entry.status.replace('_', ' ')}
                 </span>
               </div>
-              <p className="text-sm text-gray-600 line-clamp-2">{schedule.body}</p>
+              <p className="text-sm text-gray-600 line-clamp-2">{entry.body}</p>
               <div className="text-xs text-gray-500 flex flex-wrap gap-2">
-                <span>Send Date: {formatDateTime(schedule.scheduledAt)}</span>
-                <span>Recipients: {schedule.totalRecipients}</span>
-                <span>Target: {schedule.targetType}</span>
+                <span>Sent: {formatDateTime(entry.sentAt)}</span>
+                <span>Completed: {formatDateTime(entry.completedAt)}</span>
+                <span>Recipients: {entry.totalRecipients}</span>
+                <span>Target: {entry.targetType}</span>
               </div>
-              <div className="text-xs text-gray-500">{formatRecipients(schedule.recipients)}</div>
+              <div className="text-xs text-gray-500">{formatRecipients(entry.recipients)}</div>
             </div>
           ))}
         </div>
@@ -63,4 +63,4 @@ function EmailScheduleList({ schedules, loading }) {
   );
 }
 
-export default EmailScheduleList;
+export default MailerHistoryList;

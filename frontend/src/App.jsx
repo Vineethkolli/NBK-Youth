@@ -41,7 +41,7 @@ import Monitor from './pages/Monitor';
 import ViniPage from './pages/vini';
 import AuthSessions from './pages/AuthSessions';
 import Tools from './pages/Tools';
-import EmailSender from './pages/EmailSender';
+import Mailer from './pages/Mailer';
 import Explore from './components/Explore';
 
 import ProtectedRoute from './components/ProtectedRoute';
@@ -120,7 +120,7 @@ function AppContent() {
           <Route path="/auth-sessions" element={<AuthSessions />} />
           <Route path="/explore" element={<Explore />} />
           <Route path="/tools" element={<Tools />} />
-          <Route path="/email-sender" element={<EmailSender />} />
+          <Route path="/mailer" element={<Mailer />} />
         </Route>
       </Routes>
 
