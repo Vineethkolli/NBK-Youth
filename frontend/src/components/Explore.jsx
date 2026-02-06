@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Home, User, History, FolderOpen, UserCog, Users, Bell, ShieldCheck, Settings, IndianRupee, DollarSign,
   Trash2, CheckSquare, BarChart2, Terminal, MusicIcon, CameraIcon, TrophyIcon, Calculator, Layers, LayoutDashboard,
-  FileClock, Cpu, Globe2, CreditCard, LockKeyhole, Code2, Fingerprint, ToolCase } from "lucide-react";
+  FileClock, Cpu, Globe2, CreditCard, LockKeyhole, Code2, Fingerprint, ToolCase, MailCheck } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import Footer from "./Footer";
 
@@ -52,6 +52,7 @@ function Explore() {
           ? [
               { to: "/users", icon: UserCog, label: "Users & Roles" },
               { to: "/admin-panel", icon: LayoutDashboard, label: "Admin Panel" },
+              { to: "/email-sender", icon: MailCheck, label: "Email Sender" },
             ]
           : []),
         ...(hasAccess("Pro")

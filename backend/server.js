@@ -40,8 +40,10 @@ import snapshotRoutes from './routes/snapshots.js';
 import historiesRoutes from './routes/histories.js';
 import cloudinaryRoutes from './routes/cloudinary.js';
 import monitorRoutes from './routes/monitor.js';
+import emailSenderRoutes from './routes/emailSender.js';
 import { processDueNotifications } from './controllers/scheduledNotificationController.js';
 import { createDefaultDeveloper } from './utils/setupDefaults.js';
+import { startAgenda } from './services/agendaService.js';
 
 dotenv.config({ quiet: true });
 const app = express();
@@ -121,6 +123,7 @@ app.use('/api/snapshots', snapshotRoutes);
 app.use('/api/histories', historiesRoutes);
 app.use('/api/uploads', cloudinaryRoutes);
 app.use('/api/monitor', monitorRoutes);
+app.use('/api/email-sender', emailSenderRoutes);
 
 // Health Check
 app.get('/', (req, res) => res.json({ status: 'API is running' }));
@@ -138,6 +141,9 @@ mongoose.connect(process.env.MONGODB_URI, mongooseOptions)
   .then(() => {
     console.log('Connected to MongoDB');
     createDefaultDeveloper();
+    startAgenda().catch((err) => {
+      console.error('Agenda failed to start:', err.message);
+    });
   })
   .catch(err => {
     console.error('MongoDB connection error:', err);
