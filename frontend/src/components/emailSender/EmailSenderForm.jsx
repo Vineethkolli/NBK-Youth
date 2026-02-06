@@ -25,8 +25,8 @@ function EmailSenderForm({ onScheduled, onSent }) {
 
   const preview = useMemo(() => {
     return {
-      subject: subject || 'Email subject preview',
-      body: content || 'Write your email body here...'
+      subject: subject || 'Subject...',
+      body: content || 'Email body...'
     };
   }, [subject, content]);
 
@@ -114,7 +114,6 @@ function EmailSenderForm({ onScheduled, onSent }) {
       <div className="bg-white rounded-lg shadow-lg p-6 space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold text-gray-900">Compose Email</h3>
-          <span className="text-xs text-gray-500">Schedule runs at 1:00 AM IST</span>
         </div>
 
         <div className="grid gap-4">
@@ -125,7 +124,6 @@ function EmailSenderForm({ onScheduled, onSent }) {
               value={subject}
               onChange={(event) => setSubject(event.target.value)}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-              placeholder="Enter subject"
             />
           </div>
 
@@ -147,7 +145,6 @@ function EmailSenderForm({ onScheduled, onSent }) {
               value={footer}
               onChange={(event) => setFooter(event.target.value)}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-              placeholder="Footer message"
             />
           </div>
 
@@ -194,7 +191,7 @@ function EmailSenderForm({ onScheduled, onSent }) {
 
           {scheduleMode && (
             <div>
-              <label className="block text-sm font-medium text-gray-700">Schedule Date (IST)</label>
+              <label className="block text-sm font-medium text-gray-700">Schedule Date</label>
               <input
                 type="date"
                 value={scheduleDate}
@@ -231,7 +228,7 @@ function EmailSenderForm({ onScheduled, onSent }) {
             type="button"
             onClick={scheduleEmail}
             disabled={isSubmitting}
-            className={`w-full rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-emerald-700 ${
+            className={`w-full rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 ${
               isSubmitting ? 'opacity-60 cursor-not-allowed' : ''
             }`}
           >
@@ -243,15 +240,12 @@ function EmailSenderForm({ onScheduled, onSent }) {
       <div className="bg-white rounded-lg shadow-lg p-6 space-y-4">
         <h3 className="text-lg font-semibold text-gray-900">Email Preview</h3>
         <div className="border border-gray-200 rounded-xl overflow-hidden">
-          <div className="bg-gray-900 text-white px-4 py-3">
-            <p className="text-sm font-semibold">NBK Youth</p>
-          </div>
           <div className="p-4 space-y-3">
             <h4 className="text-base font-semibold text-gray-900">{preview.subject}</h4>
             <p className="text-sm text-gray-600 whitespace-pre-line">{preview.body}</p>
           </div>
           <div className="border-t border-gray-200 bg-gray-50 px-4 py-3 text-xs text-gray-500 whitespace-pre-line">
-            {footer || 'Add a footer message to preview.'}
+            {footer || 'Footer...'}
           </div>
         </div>
       </div>

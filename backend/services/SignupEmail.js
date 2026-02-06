@@ -172,7 +172,7 @@ export const sendSignupEmail = async (email, name) => {
 `;
 
     const messageParts = [
-      `From: "NBK Youth" <${from}>`,
+      `From: "NBK Youth Gangavaram" <${from}>`,
       `To: ${to}`,
       'MIME-Version: 1.0',
       'Content-Type: text/html; charset="UTF-8"',

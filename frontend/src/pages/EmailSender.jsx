@@ -51,9 +51,6 @@ function EmailSender() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-semibold text-gray-900">Email Sender</h2>
-          <p className="text-sm text-gray-500">
-            Send now or schedule emails to users with a 5-second interval.
-          </p>
         </div>
       </div>
 

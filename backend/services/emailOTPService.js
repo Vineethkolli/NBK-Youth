@@ -53,7 +53,7 @@ export const sendOTPEmail = async (email, otp, mode = "verify_email") => {
         `;
 
         const messageParts = [
-            `From: "NBK Youth" <${from}>`,
+            `From: "NBK Youth Gangavaram" <${from}>`,
             `To: ${to}`,
             'Content-Type: text/html; charset=utf-8',
             'MIME-Version: 1.0',

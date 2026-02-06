@@ -25,7 +25,6 @@ function EmailHistoryList({ history, loading }) {
       <div className="flex items-center justify-between mb-4">
         <div>
           <h3 className="text-lg font-semibold text-gray-900">Sent History</h3>
-          <p className="text-xs text-gray-500">Tracks send and completion times</p>
         </div>
         <Clock className="h-5 w-5 text-gray-400" />
       </div>
