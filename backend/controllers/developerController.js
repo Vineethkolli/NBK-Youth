@@ -13,6 +13,7 @@ import cloudinary from '../config/cloudinary.js';
 import Counter from '../models/Counter.js';
 import PreviousYear from '../models/PreviousYear.js';
 import EventLabel from '../models/EventLabel.js';
+import MailerHistory from '../models/MailerHistory.js';
 import { redis } from '../utils/redis.js';
 
 export const developerController = {
@@ -59,6 +60,11 @@ export const developerController = {
         case 'activities':
           await Game.deleteMany({});
           description = 'Cleared all activities records';
+          break;
+
+        case 'mailer':
+          await MailerHistory.deleteMany({});
+          description = 'Cleared all mailer history records';
           break;
 
         case 'activityLog': {

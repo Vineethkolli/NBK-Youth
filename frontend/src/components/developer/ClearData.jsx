@@ -18,7 +18,7 @@ function ClearData() {
     'User', 'Income', 'Expense', 'Payment', 'Vibe', 'Moment', 'Game', 'Banner', 'EstimatedIncome', 
     'EstimatedExpense', 'HiddenProfile', 'Slide', 'Event', 'Notification', 'PreviousYear', 'MaintenanceMode', 
     'DeveloperOptions', 'Committee', 'PaymentDetails', 'EventLabel', 'LockSettings', 'FinancialRecord', 
-    'EventRecord', 'Snapshot', 'History', 'ScheduledNotification', 'Email', 'Mobile'
+    'EventRecord', 'Snapshot', 'History', 'ScheduledNotification', 'Email', 'Mobile', 'Mailer'
   ];
 
   const openConfirmDialog = (type) => {
@@ -100,6 +100,7 @@ function ClearData() {
           { name: 'Activities', type: 'activities' },
           { name: 'User Payments', type: 'payment' },
           { name: 'Notification History', type: 'notifications' },
+          { name: 'Mailer History', type: 'mailer' },
           { name: 'Activity Logs', type: 'activityLog' },
         ].map(({ name, type }) => (
           <div key={type} className="flex items-center justify-between">

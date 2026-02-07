@@ -100,13 +100,17 @@ const buildEmailHtml = ({ subject, body, footer }) => {
               ${safeBody}
             </td>
           </tr>
+          <tr>
+            <td style="padding:22px; font-family:'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color:#374151; font-size:15px; line-height:1.7;">
+              ${safeFooter}
+            </td>
+          </tr>
 
           <!-- FOOTER -->
           <tr>
-            <td align="center" style="background-color:#edf2f7; padding:18px; border-top:1px solid #e5e7eb;">
-              <p class="text-gray" style="margin-top:12px; font-size:12px; color:#718096;">
-                © 2024 Developed by <b>Kolli Vineeth</b><br/>
-                Stay connected. Stay active...
+            <td align="center" class="footer-td" style="background-color:#edf2f7; padding:12px;">
+              <p class="dark-text-gray" style="margin:0; color:#718096; font-family:'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size:13px; line-height:1.6;">
+                © 2024 Developed by <b>Kolli Vineeth</b><br>Stay connected. Stay active...
               </p>
             </td>
           </tr>

@@ -23,7 +23,7 @@ function MailerScheduleList({ schedules, loading }) {
       <div className="flex items-center justify-between mb-4">
         <div>
           <h3 className="text-lg font-semibold text-gray-900">Scheduled Emails</h3>
-          <p className="text-xs text-gray-500">Emails will be sent at their exact scheduled time (IST)</p>
+          <p className="text-xs text-gray-500">Emails will be sent at their scheduled time (IST)</p>
         </div>
         <CalendarClock className="h-5 w-5 text-gray-400" />
       </div>
