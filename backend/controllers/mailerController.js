@@ -2,7 +2,7 @@ import { DateTime } from 'luxon';
 import MailerSchedule from '../models/MailerSchedule.js';
 import MailerHistory from '../models/MailerHistory.js';
 import User from '../models/User.js';
-import { scheduleImmediateEmail } from '../services/agendaService.js';
+import { scheduleImmediateEmail, scheduleEmailAtExactTime } from '../services/agendaService.js';
 import { logActivity } from '../middleware/activityLogger.js';
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -137,11 +137,14 @@ export const scheduleEmail = async (req, res) => {
       return res.status(400).json({ error: 'scheduleDate is required' });
     }
 
-    const scheduledAt = DateTime.fromISO(scheduleDate, { zone: 'Asia/Kolkata' })
-      .set({ hour: 1, minute: 0, second: 0, millisecond: 0 });
+    const scheduledAt = DateTime.fromISO(scheduleDate, { zone: 'Asia/Kolkata' });
 
     if (!scheduledAt.isValid) {
       return res.status(400).json({ error: 'Invalid schedule date' });
+    }
+
+    if (scheduledAt.toJSDate() <= new Date()) {
+      return res.status(400).json({ error: 'Schedule date must be in the future' });
     }
 
     const recipients = await buildRecipients({ target, registerId, email });
@@ -158,6 +161,8 @@ export const scheduleEmail = async (req, res) => {
       scheduledAt: scheduledAt.toJSDate(),
       status: 'pending'
     });
+
+    await scheduleEmailAtExactTime(schedule._id, scheduledAt.toJSDate());
 
     await logActivity(
       req,

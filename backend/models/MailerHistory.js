@@ -27,7 +27,7 @@ const mailerHistorySchema = new mongoose.Schema(
     scheduleId: { type: mongoose.Schema.Types.ObjectId, ref: 'MailerSchedule', default: null },
     status: {
       type: String,
-      enum: ['pending', 'completed', 'partially_failed', 'retry_completed', 'failed'],
+      enum: ['pending', 'completed', 'failed'],
       default: 'pending'
     },
     source: {

@@ -4,8 +4,6 @@ import { formatDateTime } from '../../utils/dateTime';
 const statusStyles = {
   pending: 'bg-amber-100 text-amber-700',
   completed: 'bg-emerald-100 text-emerald-700',
-  partially_failed: 'bg-orange-100 text-orange-700',
-  retry_completed: 'bg-blue-100 text-blue-700',
   failed: 'bg-rose-100 text-rose-700'
 };
 
@@ -25,7 +23,7 @@ function MailerScheduleList({ schedules, loading }) {
       <div className="flex items-center justify-between mb-4">
         <div>
           <h3 className="text-lg font-semibold text-gray-900">Scheduled Emails</h3>
-          <p className="text-xs text-gray-500">Runs at 1:00 AM IST daily</p>
+          <p className="text-xs text-gray-500">Emails will be sent at their exact scheduled time (IST)</p>
         </div>
         <CalendarClock className="h-5 w-5 text-gray-400" />
       </div>
