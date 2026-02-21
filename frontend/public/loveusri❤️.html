@@ -1,0 +1,412 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes" />
+    <meta name="theme-color" content="#ffe8ef" />
+    <meta name="description" content="Happy Birthday Sri 💖" />
+    <title>Love U Sri 💖</title>
+    <link rel="icon" href="/logo/16.png" />
+
+    <style>
+      * {
+        -webkit-tap-highlight-color: transparent;
+        -webkit-touch-callout: none;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      :root {
+        --rose: #ff7a8a;
+        --sun: #ffcc7a;
+        --leaf: #6cc9a7;
+        --shadow: rgba(22, 16, 12, 0.14);
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: "Montserrat", "Segoe UI", sans-serif;
+        background: linear-gradient(140deg, #ffe8ef, #fff7e5);
+        min-height: 100vh;
+        padding: clamp(20px, 5vh, 40px) clamp(12px, 4vw, 20px) clamp(40px, 8vh, 80px);
+        overflow-x: hidden;
+        text-align: center;
+      }
+
+      /** FLOATING EMOJIS */
+      .emoji-field {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: -1;
+        overflow: hidden;
+      }
+
+      .emoji-field span {
+        position: absolute;
+        font-size: clamp(1rem, 2.5vw, 2rem);
+        opacity: 0.35;
+        animation: floatEmoji 14s linear infinite;
+        will-change: transform;
+      }
+
+      @keyframes floatEmoji {
+        0% {
+          transform: translateY(110vh) translateX(0) rotate(0deg);
+          opacity: 0;
+        }
+        10% {
+          opacity: 0.35;
+        }
+        100% {
+          transform: translateY(-20vh) translateX(40px) rotate(20deg);
+          opacity: 0;
+        }
+      }
+
+      /** HEADER */
+      h1 {
+        margin: 0 0 clamp(12px, 3vh, 20px);
+        font-size: clamp(1.8rem, 7vw, 4.4rem);
+        line-height: 1.1;
+        animation: softGlow 4s ease-in-out infinite alternate;
+        padding: 0 10px;
+        word-wrap: break-word;
+      }
+
+      @keyframes softGlow {
+        0% { text-shadow: 0 0 10px rgba(255, 118, 137, 0.5); }
+        100% { text-shadow: 0 0 20px rgba(255, 193, 104, 0.7); }
+      }
+
+      .name {
+        background: linear-gradient(120deg, var(--rose), var(--sun));
+        -webkit-background-clip: text;
+        color: transparent;
+      }
+
+      /** SLIDER */
+      .slider {
+        margin: 0 auto;
+        width: min(420px, 94%);
+        max-width: 100%;
+        display: grid;
+        gap: 10px;
+      }
+
+      .slides {
+        display: grid;
+        place-items: center;
+      }
+
+      .slide {
+        display: none;
+        animation: slideFade 0.5s ease both;
+        width: 100%;
+        text-align: center;
+        box-sizing: border-box;
+      }
+
+      @keyframes slideFade {
+        from { opacity: 0; transform: translateY(20px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+
+      .slide.is-active {
+        display: block;
+      }
+
+      .slide img {
+        width: 100%;
+        border-radius: 14px;
+        object-fit: contain;
+        display: block;
+        max-height: 60vh;
+      }
+
+      /** QUOTES BELOW CONTAINER */
+      .quotes-container {
+        margin-top: 16px;
+        min-height: 50px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .quote {
+        display: none;
+        font-family: "Cormorant Garamond", serif;
+        font-size: clamp(1.05rem, 3.5vw, 1.3rem);
+        color: #444;
+        padding: 0 12px;
+        margin: 0;
+        font-weight: 500;
+        text-align: center;
+        animation: quoteFade 0.4s ease both;
+      }
+
+      .quote.is-active {
+        display: block;
+      }
+
+      @keyframes quoteFade {
+        from { opacity: 0; transform: translateY(10px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+
+      /** CONTROLS */
+      .controls {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: clamp(12px, 3vw, 16px);
+        margin-top: 10px;
+        flex-wrap: wrap;
+      }
+
+      .controls button {
+        padding: clamp(8px, 2vw, 10px) clamp(14px, 4vw, 18px);
+        border-radius: 999px;
+        background: white;
+        border: none;
+        cursor: pointer;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        font-size: clamp(0.75rem, 2vw, 0.9rem);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        transition: 0.2s;
+        min-height: 44px;
+        min-width: 80px;
+        touch-action: manipulation;
+      }
+
+      .controls button:hover {
+        transform: translateY(-2px);
+      }
+
+      .controls button:active {
+        transform: translateY(0);
+      }
+
+      /** EMOJI BURST ANIMATION */
+      .emoji-burst {
+        position: fixed;
+        pointer-events: none;
+        font-size: clamp(1.3rem, 4vw, 1.8rem);
+        z-index: 9999;
+        animation: burstUp 1.2s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
+      }
+
+      @keyframes burstUp {
+        0% {
+          opacity: 1;
+          transform: translate(0, 0) scale(0.3) rotate(0deg);
+        }
+        50% {
+          opacity: 1;
+          transform: translate(var(--spread-x, 0px), -80px) scale(1.2) rotate(180deg);
+        }
+        100% {
+          opacity: 0;
+          transform: translate(var(--spread-x, 0px), -150px) scale(0.5) rotate(360deg);
+        }
+      }
+
+      /** MEDIA QUERIES FOR SPECIFIC DEVICES */
+      @media (max-width: 480px) {
+        .slider {
+          width: 96%;
+        }
+
+        .slide img {
+          border-radius: 12px;
+          max-height: 55vh;
+        }
+      }
+
+      @media (min-width: 768px) and (max-width: 1024px) {
+        .slider {
+          width: min(500px, 90%);
+        }
+      }
+
+      @media (min-width: 1025px) {
+        .slider {
+          width: min(520px, 85%);
+        }
+      }
+
+      @media (orientation: landscape) and (max-height: 600px) {
+        body {
+          padding: 15px 20px 30px;
+        }
+        
+        h1 {
+          margin-bottom: 10px;
+          font-size: clamp(1.5rem, 5vh, 2.5rem);
+        }
+
+        .slide img {
+          max-height: 50vh;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+
+    <!-- Floating Emojis -->
+    <div class="emoji-field">
+      <span style="left: 8%; animation-delay: 0s;">❤️</span>
+      <span style="left: 18%; animation-delay: 3s;">✨</span>
+      <span style="left: 30%; animation-delay: 6s;">💝</span>
+      <span style="left: 42%; animation-delay: 2s;">💫</span>
+      <span style="left: 52%; animation-delay: 8s;">💖</span>
+      <span style="left: 63%; animation-delay: 4s;">🌷</span>
+      <span style="left: 72%; animation-delay: 10s;">💕</span>
+      <span style="left: 80%; animation-delay: 1s;">🎉</span>
+      <span style="left: 90%; animation-delay: 7s;">🫶</span>
+    </div>
+
+    <!-- MAIN CONTENT DIRECTLY ON BACKGROUND -->
+    <h1>Happy Birthday <span class="name">Sri ❤️</span></h1>
+
+    <section class="slider">
+      <div class="slides">
+        <figure class="slide is-active">
+          <img src="https://res.cloudinary.com/dlsmkjgjb/image/upload/v1771685921/20260210_112258.jpg_uzstvp.jpg" alt="Usri memory" />
+        </figure>
+
+        <figure class="slide">
+          <img src="https://res.cloudinary.com/dlsmkjgjb/image/upload/v1771685920/20260213_230433.jpg_owzcxa.jpg" alt="Usri memory" />
+        </figure>
+
+        <figure class="slide">
+          <img src="https://res.cloudinary.com/dlsmkjgjb/image/upload/v1771685907/20260210_113349.jpg_ehpham.jpg" alt="Usri memory" />
+        </figure>
+
+        <figure class="slide">
+          <img src="https://res.cloudinary.com/dlsmkjgjb/image/upload/v1771685903/20260213_215148_1.jpg_ovku6r.jpg" alt="Usri memory" />
+        </figure>
+
+        <figure class="slide">
+          <img src="https://res.cloudinary.com/dlsmkjgjb/image/upload/v1771685882/20260215_125711.jpg_hfd8ij.jpg" alt="Usri memory" />
+        </figure>
+
+        <figure class="slide">
+          <img src="https://res.cloudinary.com/dlsmkjgjb/image/upload/v1771685890/20260208_234920.jpg_rinepe.jpg" alt="Usri memory" />
+        </figure>
+
+        <figure class="slide">
+          <img src="https://res.cloudinary.com/dlsmkjgjb/image/upload/v1771685899/20260209_234336.jpg_vnikkj.jpg" alt="Usri memory" />
+        </figure>
+
+        <figure class="slide">
+          <img src="https://res.cloudinary.com/dlsmkjgjb/image/upload/v1771685876/20260209_224133.jpg_vdxi46.jpg" alt="Usri memory" />
+        </figure>
+
+        <figure class="slide">
+          <img src="https://res.cloudinary.com/dlsmkjgjb/image/upload/v1771685909/20260215_133455.jpg_pmfhns.jpg" alt="Usri memory" />
+        </figure>
+      </div>
+
+      <!-- Quotes below image container -->
+      <div class="quotes-container">
+        <p class="quote is-active">Be happy, Stay Strong 😊</p>
+        <p class="quote">Always keep Smiling 😄</p>
+        <p class="quote">Keep shining bright always ✨</p>
+        <p class="quote">Your presence brings happiness I can’t explain. 🤍🌟</p>
+        <p class="quote">You make every moment special 💖</p>
+        <p class="quote">You deserve all the happiness 💝</p>
+        <p class="quote">Every day with you is a blessing 🌸</p>
+        <p class="quote">Forever grateful for you 💕</p>
+        <p class="quote">All the best ✨</p>
+      </div>
+
+      <div class="controls">
+        <button id="prevSlide">← 💝</button>
+        <button id="nextSlide">💖 →</button>
+      </div>
+    </section>
+
+    <script>
+      const slides = [...document.querySelectorAll(".slide")];
+      const quotes = [...document.querySelectorAll(".quote")];
+      const counter = document.getElementById("slideCounter");
+      const prevBtn = document.getElementById("prevSlide");
+      const nextBtn = document.getElementById("nextSlide");
+
+      let index = 0;
+
+      const pad = (v) => String(v).padStart(2, "0");
+
+      const updateSlide = () => {
+        slides.forEach((s, i) => s.classList.toggle("is-active", i === index));
+        quotes.forEach((q, i) => q.classList.toggle("is-active", i === index));
+      };
+
+      prevBtn.onclick = (e) => {
+        index = (index - 1 + slides.length) % slides.length;
+        updateSlide();
+        createEmojiBurst(e);
+      };
+
+      nextBtn.onclick = (e) => {
+        index = (index + 1) % slides.length;
+        updateSlide();
+        createEmojiBurst(e);
+      };
+
+      // Emoji burst effect
+      function createEmojiBurst(event) {
+        const emojis = ['💖', '❤️', '💕', '💝', '💗', '💓', '💞', '💘', '🌸', '✨', '🎉', '🫶', '🌹', '💐', '🌺', '🦋'];
+        
+        // Adjust number of emojis based on screen size
+        const isMobile = window.innerWidth < 768;
+        const numEmojis = isMobile ? 15 : 25;
+        
+        const rect = event.target.getBoundingClientRect();
+        const startX = rect.left + rect.width / 2;
+        const startY = rect.top + rect.height / 2;
+
+        for (let i = 0; i < numEmojis; i++) {
+          const emoji = document.createElement('span');
+          emoji.className = 'emoji-burst';
+          emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+          
+          // Spread across entire page width
+          const targetX = Math.random() * window.innerWidth;
+          const spreadX = targetX - startX;
+          
+          emoji.style.left = startX + 'px';
+          emoji.style.top = startY + 'px';
+          emoji.style.transform = `rotate(${Math.random() * 360}deg)`;
+          
+          // Vary animation for dramatic effect
+          emoji.style.animationDelay = (i * 0.03) + 's';
+          emoji.style.animationDuration = (1.2 + Math.random() * 0.8) + 's';
+          
+          // Spread horizontally across entire page
+          emoji.style.setProperty('--spread-x', spreadX + 'px');
+          
+          document.body.appendChild(emoji);
+          
+          // Remove after animation
+          setTimeout(() => emoji.remove(), 2000);
+        }
+      }
+    </script>
+
+  </body>
+</html>
