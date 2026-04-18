@@ -7,13 +7,15 @@ dotenv.config({ quiet: true });
 export const createDefaultDeveloper = async () => {
   try {
     const Counter = mongoose.model('Counter');
+
     await Counter.findByIdAndUpdate(
       'registerId',
       { $setOnInsert: { seq: 0 } },
-      { upsert: true, new: true }
+      { upsert: true, returnDocument: 'after' }
     );
 
     const existingDev = await User.findOne({ email: 'gangavaramnbkyouth@gmail.com' });
+
     if (!existingDev) {
       await User.create({
         name: 'Dev Vineeth',
@@ -25,6 +27,7 @@ export const createDefaultDeveloper = async () => {
       });
       console.log('Default developer account created');
     }
+
   } catch (error) {
     console.error('Error creating default developer:', error);
   }

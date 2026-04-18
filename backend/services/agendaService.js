@@ -1,5 +1,5 @@
-import Agenda from 'agenda';
-import { DateTime } from 'luxon';
+import { Agenda } from 'agenda';
+import { MongoBackend } from '@agendajs/mongo-backend';
 import MailerSchedule from '../models/MailerSchedule.js';
 import MailerHistory from '../models/MailerHistory.js';
 import { sendEmailsSequential } from './mailerService.js';
@@ -99,7 +99,10 @@ export const startAgenda = async () => {
   if (agendaInstance) return agendaInstance;
 
   agendaInstance = new Agenda({
-    db: { address: process.env.MONGODB_URI, collection: 'agendaJobs' },
+    backend: new MongoBackend({
+      address: process.env.MONGODB_URI,
+      collection: 'agendaJobs'
+    }),
     processEvery: '5 minutes'
   });
 
