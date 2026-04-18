@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Edit2, Youtube, Upload, FolderOpen, Copy, GripHorizontal } from 'lucide-react';
+import { Edit2, Play, Upload, FolderOpen, Copy, GripHorizontal } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { API_URL } from '../utils/config';
@@ -344,7 +344,7 @@ if (formType === 'drive') {
       {hasAccess('Privileged') && (
         <div className="flex justify-start items-center mb-6 space-x-3">
           <button onClick={() => openForm('youtube')} className="btn-primary">
-            <Youtube className="h-4 w-4 mr-2" /> Add YouTube
+            <Play className="h-4 w-4 mr-2" /> Add YouTube
           </button>
           <button onClick={() => openForm('upload')} className="btn-primary">
             <Upload className="h-4 w-4 mr-2" /> Upload Media

@@ -1,4 +1,4 @@
-import { X, Youtube, Upload, FolderOpen, Copy } from 'lucide-react';
+import { X, Play, Upload, FolderOpen, Copy } from 'lucide-react';
 import YoutubeUploadForm from './YoutubeUploadForm';
 import DriveUploadForm from './DriveUploadForm';
 import CopyToServiceDriveForm from './CopyToServiceDriveForm';
@@ -23,7 +23,7 @@ function MomentForm({ type, onClose, onSubmit }) {
   const getFormIcon = () => {
     switch (type) {
       case 'youtube':
-        return <Youtube className="h-5 w-5 mr-2" />;
+        return <Play className="h-5 w-5 mr-2" />;
       case 'drive':
         return <FolderOpen className="h-5 w-5 mr-2" />;
       case 'copy-service-drive':
