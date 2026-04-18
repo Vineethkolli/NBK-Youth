@@ -43,6 +43,24 @@ export const isIos = () => {
   return /iphone|ipad|ipod/.test(userAgent);
 };
 
-// Check if PWA is in standalone mode 
-export const isInStandaloneMode = () =>
-  ('standalone' in window.navigator) && window.navigator.standalone;
+// Detect whether app is running in Android TWA (Play Store install flow).
+export const isTwa = () => {
+  try {
+    return document.referrer.startsWith('android-app://');
+  } catch {
+    return false;
+  }
+};
+
+// Check whether app is running in an installed context (PWA/iOS A2HS/TWA).
+export const isInStandaloneMode = () => {
+  try {
+    return Boolean(
+      window.matchMedia?.('(display-mode: standalone)').matches ||
+      window.navigator.standalone === true ||
+      isTwa()
+    );
+  } catch {
+    return false;
+  }
+};
