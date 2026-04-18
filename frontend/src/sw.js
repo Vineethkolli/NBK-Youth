@@ -2,27 +2,6 @@ import { precacheAndRoute } from 'workbox-precaching';
 
 precacheAndRoute(self.__WB_MANIFEST || []);
 
-const DEFAULT_NOTIFICATION_ICON = '/logo/192.png';
-const DEFAULT_NOTIFICATION_BADGE = '/logo/notificationlogo.png';
-const DEFAULT_NOTIFICATION_ROUTE = '/notifications';
-
-const parsePushPayload = (event) => {
-  if (!event?.data) {
-    return {};
-  }
-
-  try {
-    return event.data.json();
-  } catch {
-    try {
-      const text = event.data.text();
-      return text ? { body: text } : {};
-    } catch {
-      return {};
-    }
-  }
-};
-
 // Force the new service worker to activate immediately
 self.addEventListener('install', () => {
   self.skipWaiting();
@@ -34,31 +13,18 @@ self.addEventListener('activate', (event) => {
 
 // Notification logic with high priority
 self.addEventListener('push', (event) => {
-  const data = parsePushPayload(event);
-  const title = data.title || 'NBK Youth';
-  const link = data.link || DEFAULT_NOTIFICATION_ROUTE;
+  const data = event.data ? event.data.json() : {};
+  const title = data.title || 'Default Title';
 
   const options = {
-    body: data.body || 'You have a new update',
-    icon: data.icon || DEFAULT_NOTIFICATION_ICON,
-    badge: data.badge || DEFAULT_NOTIFICATION_BADGE,
-    requireInteraction: data.requireInteraction ?? true,
-    renotify: Boolean(data.renotify),
-    tag: data.tag || 'nbk-youth-general',
-    timestamp: data.timestamp || Date.now(),
+    body: data.body || 'Default message',
+    icon: '/logo/192.png',
+    badge: '/logo/notificationlogo.png',
+    requireInteraction: true,
     data: {
-      ...data.data,
-      link,
+      link: data.link,
     },
   };
-
-  if (Array.isArray(data.actions) && data.actions.length > 0) {
-    options.actions = data.actions.slice(0, 2);
-  }
-
-  if (data.image) {
-    options.image = data.image;
-  }
 
   event.waitUntil(self.registration.showNotification(title, options));
 });
@@ -67,27 +33,18 @@ self.addEventListener('push', (event) => {
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
 
-  const link = event.notification.data?.link || DEFAULT_NOTIFICATION_ROUTE;
+  const link = event.notification.data?.link || '/notifications';
   const isExternal = link.startsWith('http');
   const targetLink = isExternal ? link : new URL(link, self.location.origin).href;
 
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
-      const matchingClient = clientList.find((c) => c.url === targetLink || c.url === self.location.origin + '/');
-      if (matchingClient && !isExternal) {
-        return matchingClient.focus().then(() => matchingClient.navigate(targetLink));
-      }
-
-      const fallbackClient = clientList.find((c) => 'focus' in c) || clientList[0];
-      if (fallbackClient && !isExternal) {
-        return fallbackClient.focus().then(() => fallbackClient.navigate(targetLink));
-      }
-
-      if ('openWindow' in self.clients) {
+      const client = clientList.find((c) => 'focus' in c) || clientList[0];
+      if (client && !isExternal) {
+        return client.focus().then(() => client.navigate(targetLink));
+      } else {
         return self.clients.openWindow(targetLink);
       }
-
-      return null;
     })
   );
 });
