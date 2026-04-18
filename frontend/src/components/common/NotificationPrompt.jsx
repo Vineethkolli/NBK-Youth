@@ -18,8 +18,7 @@ function NotificationPrompt() {
       try {
         const isStandalone =
           window.matchMedia?.('(display-mode: standalone)').matches ||
-          window.navigator.standalone === true ||
-          document.referrer.includes('android-app://');
+          window.navigator.standalone === true;
         setIsInstalled(isStandalone);
       } catch (err) {
         console.warn('Install detection failed:', err);
@@ -36,7 +35,7 @@ function NotificationPrompt() {
       isInstalled &&
       !alreadyShown &&
       'Notification' in window &&
-      Notification.permission === 'default'
+      Notification.permission !== 'granted'
     ) {
       setShowPrompt(true);
       sessionStorage.setItem('notifPromptShown', 'true');
@@ -118,7 +117,7 @@ function NotificationPrompt() {
     !isInstalled ||
     subscription ||
     !showPrompt ||
-    Notification.permission !== 'default'
+    Notification.permission === 'granted'
   ) {
     return null;
   }
