@@ -5,7 +5,6 @@ import { API_URL } from '../../utils/config';
 import { urlBase64ToUint8Array } from '../../utils/vapidKeys';
 import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
-import { isInStandaloneMode, isTwa } from '../../utils/notifications';
 
 function NotificationPrompt() {
   const { user } = useAuth();
@@ -17,7 +16,11 @@ function NotificationPrompt() {
   useEffect(() => {
     const checkInstalled = () => {
       try {
-        setIsInstalled(isInStandaloneMode());
+        const isStandalone =
+          window.matchMedia?.('(display-mode: standalone)').matches ||
+          window.navigator.standalone === true ||
+          document.referrer.includes('android-app://');
+        setIsInstalled(isStandalone);
       } catch (err) {
         console.warn('Install detection failed:', err);
         setIsInstalled(false);
@@ -77,11 +80,7 @@ function NotificationPrompt() {
     try {
       const permissionResult = await Notification.requestPermission();
       if (permissionResult !== 'granted') {
-        if (isTwa()) {
-          toast.error('Notification permission denied. Enable it in Android App Info > Notifications.');
-        } else {
-          toast.error('Notification permission denied');
-        }
+        toast.error('Notification permission denied');
         return;
       }
 
