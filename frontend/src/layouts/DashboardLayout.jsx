@@ -73,7 +73,7 @@ function DashboardLayout() {
     <div className="flex h-screen bg-gray-100 relative overflow-hidden">
       {/* Overlay Install Prompt */}
       {isMobileDevice && <InstallApp />}
-      {isMobileDevice && <NotificationPrompt />}
+     {/* {isMobileDevice && <NotificationPrompt />} */}
       <NotificationAutoRegister />
 
       <Header toggleSidebar={toggleSidebar} />
