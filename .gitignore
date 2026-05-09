@@ -8,9 +8,10 @@ android/app/build/
 android/local.properties
 
 # Android build outputs
-*.apk
-*.aab
+android/*.apk
+android/*.aab
+android/*.idsig
 
 # Signing keys
-*.keystore
-*.jks
+android/*.keystore
+android/*.jks
