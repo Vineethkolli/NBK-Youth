@@ -1,2 +1,16 @@
 node_modules/
 .env
+
+# Android / Gradle
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+
+# Android build outputs
+*.apk
+*.aab
+
+# Signing keys
+*.keystore
+*.jks
