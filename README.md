@@ -72,6 +72,9 @@ NBK Youth is designed to streamline content, finance, and user management in a u
 - **🔔 Notifications & Utilities:**  
   Web push notifications, site maintenance toggle, log tracking, PDF exports, and QR generator.
 
+- **📧 Email Automation & Communication:**  
+  Send and schedule emails, automate announcements and reminders using Agenda. 
+
 - **🧩 PWA & Multilingual:**  
   Built as a Progressive Web App with support for languages like Telugu and English.
 
