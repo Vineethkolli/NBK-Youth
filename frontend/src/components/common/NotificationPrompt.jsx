@@ -5,6 +5,7 @@ import { API_URL } from '../../utils/config';
 import { urlBase64ToUint8Array } from '../../utils/vapidKeys';
 import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
+import { isTrustedWebActivity } from '../../utils/notifications';
 
 function NotificationPrompt() {
   const { user } = useAuth();
@@ -12,6 +13,7 @@ function NotificationPrompt() {
   const [showPrompt, setShowPrompt] = useState(false);
   const [subscription, setSubscription] = useState(null);
   const promptRef = useRef(null);
+  const isTwa = isTrustedWebActivity();
 
   useEffect(() => {
     const checkInstalled = () => {
@@ -79,7 +81,7 @@ function NotificationPrompt() {
     try {
       const permissionResult = await Notification.requestPermission();
       if (permissionResult !== 'granted') {
-        toast.error('Notification permission denied');
+        toast.error(isTwa ? 'Android notification permission denied' : 'Notification permission denied');
         return;
       }
 
@@ -109,7 +111,7 @@ function NotificationPrompt() {
       setShowPrompt(false);
     } catch (error) {
       console.error('Subscription error:', error);
-      toast.error('Failed to subscribe to notifications');
+      toast.error(isTwa ? 'Failed to subscribe to Android notifications' : 'Failed to subscribe to notifications');
     }
   };
 

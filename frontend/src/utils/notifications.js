@@ -46,3 +46,12 @@ export const isIos = () => {
 // Check if PWA is in standalone mode 
 export const isInStandaloneMode = () =>
   ('standalone' in window.navigator) && window.navigator.standalone;
+
+// Detect whether the app is running inside a Trusted Web Activity.
+export const isTrustedWebActivity = () => {
+  try {
+    return typeof document !== 'undefined' && document.referrer.includes('android-app://');
+  } catch {
+    return false;
+  }
+};
