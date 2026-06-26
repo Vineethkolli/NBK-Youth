@@ -10,7 +10,7 @@ const targetOptions = [
 ];
 
 const bodyFormatOptions = [
-  { value: 'text', label: 'Plain Text' },
+  { value: 'text', label: 'Text' },
   { value: 'html', label: 'HTML' }
 ];
 
