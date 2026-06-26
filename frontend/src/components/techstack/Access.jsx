@@ -25,6 +25,7 @@ const accessControl = {
     'RecycleBin': { full: ['Financier'], view: [] },
     'Users & Roles': { full: [], view: ['Admin','Financier'] },
     'AdminPanel': { full: ['Admin','Financier'], view: [] },
+    'Mailer': { full: ['Admin','Financier'], view: [] },
     'DeveloperOptions': { full: [], view: [] },
     'ActivityLogs': { full: [], view: [] },
     'AuthSessions': { full: [], view: [] },

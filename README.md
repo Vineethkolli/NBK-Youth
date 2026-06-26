@@ -91,7 +91,10 @@ NBK Youth is designed to streamline content, finance, and user management in a u
    Automated MongoDB backups using GitHub Actions, stored securely as GitHub artifacts.
 
 - **☁️ Google Cloud Integration:**  
-   A Service Account is used for storing media on Google Drive, and OAuth credentials are used for sending OTPs.  
+   A Service Account is used for storing media on Google Drive, and OAuth credentials are used for sending OTPs. 
+
+- **📱 Android App:**  
+   Available on the Google Play Store with a native app-like experience.  
 
 - **🤖 Vini AI**  
   - Chat with data using natural language.  
