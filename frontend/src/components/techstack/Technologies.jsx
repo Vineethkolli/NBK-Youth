@@ -1,7 +1,7 @@
 
 import { SiVercel, SiRender, SiMongodb, SiGmail, SiCloudinary, SiGoogledrive, SiReact, SiTailwindcss, SiVite, 
   SiNodedotjs, SiExpress, SiGoogleanalytics, SiPostman, SiGit, SiGithub, SiGoogletranslate, SiGooglechrome, SiOpenai, 
-  SiYoutube, SiGithubcopilot, SiHuggingface, SiGooglecloud, SiRedis, SiFirebase, SiDocker } from "react-icons/si";
+  SiYoutube, SiGithubcopilot, SiHuggingface, SiGooglecloud, SiRedis, SiFirebase, SiDocker, SiGoogleplay } from "react-icons/si";
 import { FaCode, FaWhatsapp, FaRobot, FaClock } from "react-icons/fa";
 import Footer from "../Footer";
 
@@ -37,15 +37,24 @@ const infrastructure = [
     description: "Memory cache for faster API responses",
   },
   {
-  name: "Firebase & Gmail API",
+  name: "Firebase",
   icon: (
     <div className="flex space-x-2">
-      <SiFirebase className="h-10 w-10 text-yellow-500" />
-      <SiGmail className="h-10 w-10 text-red-600" />
+      <SiFirebase className="h-12 w-12 text-yellow-500" />
     </div>
   ),
-  description: "Delivers OTPs via SMS and Email",
+  description: "Delivers OTPs via SMS",
   },
+  {
+    name: "Gmail API",
+    icon: <SiGmail className="h-12 w-12 text-red-600" />,
+    description: "Sends scheduled emails, announcements, and OTPs",
+  },
+  {
+  name: "Google Play Store",
+  icon: <SiGoogleplay className="h-12 w-12 text-green-600" />,
+  description: "Publishes and distributes the Android app",
+},
   {
     name: "Google Cloud",
     icon: <SiGooglecloud className="h-12 w-12 text-blue-600" />,

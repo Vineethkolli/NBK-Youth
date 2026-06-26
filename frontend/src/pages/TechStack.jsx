@@ -9,6 +9,10 @@ import { toast } from "react-hot-toast";
 function TechStack() {
   const [websites] = useState([
     {
+      name: "Android App",
+      url: "https://play.google.com/store/apps/details?id=app.nbkyouth.gangavaram&pcampaignid=web_share",
+    },
+    {
       name: "Current Website",
       url: "https://nbkyouth.vercel.app/",
     },
