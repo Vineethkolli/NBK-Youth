@@ -13,6 +13,11 @@ const mailerScheduleSchema = new mongoose.Schema(
     senderRegisterId: { type: String, required: true },
     subject: { type: String, required: true },
     body: { type: String, required: true },
+    bodyFormat: {
+      type: String,
+      enum: ['text', 'html'],
+      default: 'text'
+    },
     footer: { type: String, required: true },
     targetType: {
       type: String,

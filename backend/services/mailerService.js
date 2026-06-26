@@ -23,9 +23,9 @@ const escapeHtml = (value) =>
 
 const toHtmlText = (value) => escapeHtml(value).replace(/\n/g, '<br />');
 
-const buildEmailHtml = ({ subject, body, footer }) => {
+const buildEmailHtml = ({ subject, body, footer, bodyFormat = 'text' }) => {
   const safeSubject = escapeHtml(subject);
-  const safeBody = toHtmlText(body);
+  const safeBody = bodyFormat === 'html' ? body : toHtmlText(body);
   const safeFooter = toHtmlText(footer);
 
   return `
@@ -147,10 +147,10 @@ const buildRawMessage = ({ from, to, subject, html }) => {
     .replace(/=+$/, '');
 };
 
-export const sendSingleEmail = async ({ to, subject, body, footer }) => {
+export const sendSingleEmail = async ({ to, subject, body, bodyFormat, footer }) => {
   const gmail = google.gmail({ version: 'v1', auth: oAuth2Client });
   const from = process.env.GMAIL_USER;
-  const html = buildEmailHtml({ subject, body, footer });
+  const html = buildEmailHtml({ subject, body, bodyFormat, footer });
 
   const raw = buildRawMessage({ from, to, subject, html });
 
@@ -162,7 +162,7 @@ export const sendSingleEmail = async ({ to, subject, body, footer }) => {
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-export const sendEmailsSequential = async ({ recipients, subject, body, footer }) => {
+export const sendEmailsSequential = async ({ recipients, subject, body, bodyFormat, footer }) => {
   const successRecipients = [];
   const failedRecipients = [];
 
@@ -178,6 +178,7 @@ export const sendEmailsSequential = async ({ recipients, subject, body, footer }
         to: recipient.email,
         subject,
         body,
+        bodyFormat,
         footer
       });
       successRecipients.push(recipient);

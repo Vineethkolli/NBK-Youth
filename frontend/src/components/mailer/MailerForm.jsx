@@ -9,9 +9,15 @@ const targetOptions = [
   { value: 'Email', label: 'Specific Email' }
 ];
 
+const bodyFormatOptions = [
+  { value: 'text', label: 'Plain Text' },
+  { value: 'html', label: 'HTML' }
+];
+
 function MailerForm({ onScheduled, onSent }) {
   const [subject, setSubject] = useState('');
   const [content, setContent] = useState('');
+  const [bodyFormat, setBodyFormat] = useState('text');
   const [footer, setFooter] = useState('');
   const [target, setTarget] = useState('All');
   const [registerId, setRegisterId] = useState('');
@@ -33,6 +39,7 @@ function MailerForm({ onScheduled, onSent }) {
   const resetForm = () => {
     setSubject('');
     setContent('');
+    setBodyFormat('text');
     setFooter('');
     setTarget('All');
     setRegisterId('');
@@ -44,6 +51,7 @@ function MailerForm({ onScheduled, onSent }) {
   const buildPayload = () => ({
     subject,
     content,
+    bodyFormat,
     footer,
     target,
     registerId: isTargetRegister ? registerId.trim() : undefined,
@@ -128,13 +136,26 @@ function MailerForm({ onScheduled, onSent }) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">Body *</label>
+            <div className="flex items-center justify-between">
+              <label className="block text-sm font-medium text-gray-700">Body *</label>
+              <select
+                value={bodyFormat}
+                onChange={(event) => setBodyFormat(event.target.value)}
+                className="rounded-md border-gray-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              >
+                {bodyFormatOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
             <textarea
               rows={5}
               value={content}
               onChange={(event) => setContent(event.target.value)}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-              placeholder="Write email body"
+              placeholder={bodyFormat === 'html' ? 'Write HTML for email body' : 'Write email body'}
             />
           </div>
 
@@ -242,7 +263,14 @@ function MailerForm({ onScheduled, onSent }) {
         <div className="border border-gray-200 rounded-xl overflow-hidden">
           <div className="p-4 space-y-3">
             <h4 className="text-base font-semibold text-gray-900">{preview.subject}</h4>
-            <p className="text-sm text-gray-600 whitespace-pre-line">{preview.body}</p>
+            {bodyFormat === 'html' ? (
+              <div
+                className="text-sm text-gray-600"
+                dangerouslySetInnerHTML={{ __html: content || '<p>Email body...</p>' }}
+              />
+            ) : (
+              <p className="text-sm text-gray-600 whitespace-pre-line">{preview.body}</p>
+            )}
           </div>
           <div className="border-t border-gray-200 bg-gray-50 px-4 py-3 text-xs text-gray-500 whitespace-pre-line">
             {footer || 'Footer...'}

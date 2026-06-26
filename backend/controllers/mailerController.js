@@ -74,7 +74,7 @@ const buildRecipients = async ({ target, registerId, email }) => {
 };
 
 const buildEmailPayload = (body) => {
-  const { subject, content, footer } = body;
+  const { subject, content, footer, bodyFormat } = body;
 
   if (!subject?.trim() || !content?.trim() || !footer?.trim()) {
     const error = new Error('Subject, body, and footer are required');
@@ -85,7 +85,8 @@ const buildEmailPayload = (body) => {
   return {
     subject: subject.trim(),
     body: content.trim(),
-    footer: footer.trim()
+    footer: footer.trim(),
+    bodyFormat: bodyFormat === 'html' ? 'html' : 'text'
   };
 };
 

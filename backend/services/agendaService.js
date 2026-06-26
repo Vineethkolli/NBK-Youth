@@ -49,6 +49,7 @@ const defineJobs = (agenda) => {
       recipients: history.recipients,
       subject: history.subject,
       body: history.body,
+      bodyFormat: history.bodyFormat,
       footer: history.footer
     });
 
@@ -70,6 +71,7 @@ const defineJobs = (agenda) => {
       recipients: schedule.recipients,
       subject: schedule.subject,
       body: schedule.body,
+      bodyFormat: schedule.bodyFormat,
       footer: schedule.footer
     });
 
@@ -77,6 +79,7 @@ const defineJobs = (agenda) => {
       senderRegisterId: schedule.senderRegisterId,
       subject: schedule.subject,
       body: schedule.body,
+      bodyFormat: schedule.bodyFormat,
       footer: schedule.footer,
       targetType: schedule.targetType,
       recipients: schedule.recipients,
