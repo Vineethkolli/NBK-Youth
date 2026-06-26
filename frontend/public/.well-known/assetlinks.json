@@ -1,16 +1,11 @@
 [
   {
-    "relation": [
-      "delegate_permission/common.handle_all_urls",
-      "delegate_permission/common.show_notification"
-    ],
+    "relation": ["delegate_permission/common.handle_all_urls"],
     "target": {
       "namespace": "android_app",
       "package_name": "app.nbkyouth.gangavaram",
-      "sha256_cert_fingerprints": [
-        "8C:2A:2D:4B:A9:B8:88:53:E0:D6:91:12:33:A3:00:9A:FA:20:10:60:5D:49:3E:D5:79:0B:31:24:9A:32:9D:80",
-        "BB:E3:7D:57:D9:2D:A2:F1:CF:DF:8C:36:FA:8A:CA:60:D8:74:08:F1:49:5A:10:40:DC:20:52:E9:B3:7C:48:AC"
-      ]
+      "sha256_cert_fingerprints":
+        ["BB:E3:7D:57:D9:2D:A2:F1:CF:DF:8C:36:FA:8A:CA:60:D8:74:08:F1:49:5A:10:40:DC:20:52:E9:B3:7C:48:AC"]
     }
   }
 ]

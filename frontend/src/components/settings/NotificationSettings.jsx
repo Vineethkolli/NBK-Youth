@@ -2,14 +2,7 @@ import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import { useAuth } from '../../context/AuthContext';
 import { Bell } from 'lucide-react';
-import {
-  getSubscription,
-  subscribeToPush,
-  isIos,
-  isInStandaloneMode,
-  isTrustedWebActivity,
-  getServiceWorkerRegistration,
-} from '../../utils/notifications';
+import { getSubscription, subscribeToPush, isIos, isInStandaloneMode, getServiceWorkerRegistration } from '../../utils/notifications';
 
 const NotificationSettings = () => {
   const { user } = useAuth();
@@ -18,29 +11,32 @@ const NotificationSettings = () => {
     typeof Notification !== 'undefined' ? Notification.permission : 'default'
   );
   const [showResetPrompt, setShowResetPrompt] = useState(false);
-  const isIosBrowser = isIos() && !isInStandaloneMode();
-  const isTwa = isTrustedWebActivity();
+
+  if (isIos() && !isInStandaloneMode()) {
+    return (
+      <div className="bg-white rounded-lg shadow p-6">
+        <h3 className="text-lg font-medium">Notifications Permission</h3>
+        <p className="text-sm text-gray-500">
+          To allow notifications, please download the app.
+        </p>
+      </div>
+    );
+  }
 
   useEffect(() => {
-    if (isIosBrowser) return;
-
     getServiceWorkerRegistration()
       .then(() => getSubscription().then(setSubscription))
       .catch((error) => console.error('Service Worker Error:', error));
-  }, [isIosBrowser]);
+  }, []);
 
   const askPermission = async () => {
     try {
-      if (typeof Notification === 'undefined') {
-        throw new Error('Notifications are not supported on this device');
-      }
-
       const permission = await Notification.requestPermission();
       setPermissionStatus(permission);
 
       if (permission !== 'granted') {
         setShowResetPrompt(true);
-        throw new Error(isTwa ? 'Android notification permission was denied' : 'Permission denied');
+        throw new Error('Permission denied');
       }
       setShowResetPrompt(false);
 
@@ -52,44 +48,17 @@ const NotificationSettings = () => {
     }
   };
 
-  if (isIosBrowser) {
-    return (
-      <div className="bg-white rounded-lg shadow p-6">
-        <h3 className="text-lg font-medium">Notifications Permission</h3>
-        <p className="text-sm text-gray-500">
-          To allow notifications on iPhone or iPad, install the app to your home screen first.
-        </p>
-      </div>
-    );
-  }
-
-  const permissionMessage = isTwa
-    ? 'On the Play Store app, Allow will request the Android notification permission.'
-    : 'Click "Allow" to receive real-time updates.';
-
-  const resetMessage = isTwa
-    ? 'Notifications are blocked at the Android app level. Open the app info page on your device and allow notifications, or reinstall the app if you already denied it.'
-    : 'Notifications are blocked. Reset permissions by clearing the app data in your settings or clicking the info "i" icon near the URL bar.';
-
-  const permissionLabel =
-    permissionStatus === 'granted'
-      ? 'Allowed'
-      : permissionStatus === 'denied'
-        ? 'Blocked'
-        : 'Not requested yet';
-
   return (
     <div className="bg-white rounded-lg shadow p-6 space-y-4">
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-lg font-medium">Notifications Permission</h3>
-          <p className="text-sm text-gray-500">{permissionMessage}</p>
-          <p className="mt-1 text-xs uppercase tracking-wide text-gray-400">
-            Current status: {permissionLabel}
+          <p className="text-sm text-gray-500">
+            Click &quot;Allow&quot; to receive real-time updates.
           </p>
           {showResetPrompt && (
             <p className="mt-2 text-sm text-red-600">
-              {resetMessage}
+              Notifications are blocked. Reset permissions by clearing the app data in your settings or clicking the info &quot;i&quot; icon near the URL bar.
             </p>
           )}
         </div>
