@@ -1,6 +1,6 @@
 
 import { SiVercel, SiRender, SiMongodb, SiGmail, SiCloudinary, SiGoogledrive, SiReact, SiTailwindcss, SiVite, 
-  SiNodedotjs, SiExpress, SiGoogleanalytics, SiPostman, SiGit, SiGithub, SiGoogletranslate, SiGooglechrome, SiOpenai, 
+  SiNodedotjs, SiExpress, SiGoogleanalytics, SiPostman, SiGit, SiGithub, SiGoogletranslate, SiGooglechrome, 
   SiYoutube, SiGithubcopilot, SiHuggingface, SiGooglecloud, SiRedis, SiFirebase, SiDocker, SiGoogleplay } from "react-icons/si";
 import { FaCode, FaWhatsapp, FaRobot, FaClock } from "react-icons/fa";
 import Footer from "../Footer";
@@ -112,7 +112,7 @@ const techCategories = [
 const sources = [
   { name: "Browser", icon: <SiGooglechrome className="h-8 w-8 mr-2 text-blue-500" /> },
   { name: "YouTube", icon: <SiYoutube className="h-8 w-8 mr-2 text-red-500" /> },
-  { name: "ChatGPT", icon: <SiOpenai className="h-8 w-8 mr-2 text-green-500" /> },
+  { name: "ChatGPT", icon: <FaRobot className="h-8 w-8 mr-2 text-green-500" /> },
   { name: "GitHub", icon: <SiGithub className="h-8 w-8 mr-2 text-gray-800" /> },
   { name: "AI Tools", icon: <FaRobot className="h-8 w-8 mr-2 text-purple-500" /> },
   { name: "Copilot", icon: <SiGithubcopilot className="h-8 w-8 mr-2 text-indigo-500" /> },

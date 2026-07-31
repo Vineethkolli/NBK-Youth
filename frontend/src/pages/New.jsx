@@ -61,7 +61,7 @@ function New() {
 
       <div className="relative overflow-hidden min-h-screen bg-gradient-to-br from-indigo-50 via-white to-blue-100 flex items-center justify-center">
 
-        <div className="w-full max-w-6xl bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-gray-100 overflow-hidden relative z-10">
+        <div className="w-full max-w-6xl bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-gray-100 overflow-hidden relative ">
 
           {/* HEADER */}
 
@@ -94,7 +94,7 @@ function New() {
             </h1>
 
             <p className="mt-4 text-indigo-100 max-w-2xl mx-auto text-lg">
-              We're crafting a faster, smarter and more beautiful experience.
+              We're crafting a faster, smarter and more attractive experience.
               Great things are on the way.
             </p>
 
