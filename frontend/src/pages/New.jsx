@@ -65,7 +65,7 @@ function New() {
 
           {/* HEADER */}
 
-          <div className="relative bg-gradient-to-r from-indigo-700 via-blue-600 to-cyan-500 px-8 py-12 text-center text-white overflow-hidden">
+          <div className="relative bg-gradient-to-r from-indigo-600 via-blue-500 to-cyan-400 px-8 py-12 text-center text-white overflow-hidden">
 
             {/* Rocket */}
 
