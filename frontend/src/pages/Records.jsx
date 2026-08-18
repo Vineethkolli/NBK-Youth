@@ -19,7 +19,7 @@ import { useLanguage } from '../context/LanguageContext';
 
 function Records() {
   const { hasAccess } = useAuth();
-  const [activeTab, setActiveTab] = useState('timeline');
+  const [activeTab, setActiveTab] = useState('records-timeline');
   const [financialRecords, setFinancialRecords] = useState([]);
   const [timelineRecords, setTimelineRecords] = useState([]);
   const [eventRecords, setEventRecords] = useState([]);
@@ -255,7 +255,7 @@ function Records() {
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-3 lg:space-y-0">
         <h1 className="text-2xl font-semibold">Records</h1>
 
-        <div className="flex space-x-3">
+        <div className="flex space-x-4">
                     <button
             onClick={() => setActiveTab('records-timeline')}
             className={`px-2 py-2 rounded-md font-semibold flex items-center ${
