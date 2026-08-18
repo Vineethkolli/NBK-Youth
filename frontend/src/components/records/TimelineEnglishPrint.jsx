@@ -37,8 +37,9 @@ const TimelineEnglishPrint = ({ records, selectedEvent }) => {
       }
 
       const amountLeft = (rec.amountCollected || 0) - (rec.amountSpent || 0);
+      const additionalAmount = rec.additionalAmount || 0;
       const previousAmount = rec.previousAmount || 0;
-      const finalAmountLeft = amountLeft + previousAmount;
+      const finalAmountLeft = amountLeft + additionalAmount + previousAmount;
 
       doc.setFontSize(14);
       doc.setTextColor(0, 0, 0);
@@ -49,12 +50,13 @@ const TimelineEnglishPrint = ({ records, selectedEvent }) => {
         startY: yPos,
         theme: 'grid',
         margin: { left: 15, right: 15 },
-        head: [['Amount Collected', 'Amount Spent', 'Amount Left', 'Previous Amount', 'Final Amount Left']],
+        head: [['Amount Collected', 'Amount Spent', 'Amount Left', 'Additional Amount', 'Previous Amount', 'Final Amount Left']],
         body: [
           [
             formatAmount(rec.amountCollected),
             formatAmount(rec.amountSpent),
             formatAmount(amountLeft),
+            formatAmount(additionalAmount),
             formatAmount(previousAmount),
             formatAmount(finalAmountLeft)
           ]

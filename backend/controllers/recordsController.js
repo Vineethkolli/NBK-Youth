@@ -185,6 +185,7 @@ export const recordsController = {
         amountCollected,
         amountSpent,
         previousAmount,
+        additionalAmount,
         remarks
       } = req.body;
 
@@ -204,6 +205,7 @@ export const recordsController = {
         amountCollected: amountCollected || 0,
         amountSpent: amountSpent || 0,
         previousAmount,
+        additionalAmount: additionalAmount ?? 0,
         remarks,
         createdBy: req.user.registerId
       });
@@ -256,6 +258,9 @@ export const recordsController = {
           return res.status(400).json({ message: 'Previous amount is required' });
         }
         updatePayload.previousAmount = req.body.previousAmount;
+      }
+      if (Object.prototype.hasOwnProperty.call(req.body, 'additionalAmount')) {
+        updatePayload.additionalAmount = req.body.additionalAmount;
       }
       if (Object.prototype.hasOwnProperty.call(req.body, 'remarks')) updatePayload.remarks = req.body.remarks;
 

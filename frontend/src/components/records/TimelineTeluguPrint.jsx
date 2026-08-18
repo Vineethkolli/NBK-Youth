@@ -82,8 +82,9 @@ const TimelineTeluguPrint = ({ records, selectedEvent }) => {
           const formatAmount = (val) =>
             typeof val === 'number' ? new Intl.NumberFormat('te-IN').format(val) : '-';
           const amountLeft = (rec.amountCollected || 0) - (rec.amountSpent || 0);
+          const additionalAmount = rec.additionalAmount || 0;
           const previousAmount = rec.previousAmount || 0;
-          const finalAmountLeft = amountLeft + previousAmount;
+          const finalAmountLeft = amountLeft + additionalAmount + previousAmount;
 
           return (
             <div key={i} className="section">
@@ -95,6 +96,7 @@ const TimelineTeluguPrint = ({ records, selectedEvent }) => {
                     <th>సేకరించిన మొత్తం</th>
                     <th>ఖర్చు చేసిన మొత్తం</th>
                     <th>మిగిలిన మొత్తం</th>
+                    <th>అదనపు మొత్తం</th>
                     <th>గత మొత్తం</th>
                     <th>తుది మిగిలిన మొత్తం</th>
                   </tr>
@@ -104,6 +106,7 @@ const TimelineTeluguPrint = ({ records, selectedEvent }) => {
                     <td><span translate="no">{formatAmount(rec.amountCollected)}</span></td>
                     <td><span translate="no">{formatAmount(rec.amountSpent)}</span></td>
                     <td><span translate="no">{formatAmount(amountLeft)}</span></td>
+                    <td><span translate="no">{formatAmount(additionalAmount)}</span></td>
                     <td><span translate="no">{formatAmount(previousAmount)}</span></td>
                     <td><span translate="no">{formatAmount(finalAmountLeft)}</span></td>
                   </tr>

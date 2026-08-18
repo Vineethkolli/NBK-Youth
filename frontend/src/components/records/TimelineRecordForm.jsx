@@ -12,6 +12,7 @@ function TimelineRecordForm({ record, onClose, onSubmit }) {
     status: 'Conducted',
     amountCollected: '',
     amountSpent: '',
+    additionalAmount: '0',
     previousAmount: '',
     remarks: ''
   });
@@ -32,6 +33,7 @@ function TimelineRecordForm({ record, onClose, onSubmit }) {
         status: record.status || 'Conducted',
         amountCollected: record.amountCollected?.toString() || '',
         amountSpent: record.amountSpent?.toString() || '',
+        additionalAmount: (record.additionalAmount ?? 0).toString(),
         previousAmount: record.previousAmount?.toString() || '',
         remarks: record.remarks || ''
       });
@@ -55,6 +57,7 @@ function TimelineRecordForm({ record, onClose, onSubmit }) {
         status: formData.status,
         amountCollected: parseFloat(formData.amountCollected) || 0,
         amountSpent: parseFloat(formData.amountSpent) || 0,
+        additionalAmount: parseFloat(formData.additionalAmount) || 0,
         previousAmount: parseFloat(formData.previousAmount),
         remarks: formData.remarks.trim() || ''
       };
@@ -164,6 +167,19 @@ function TimelineRecordForm({ record, onClose, onSubmit }) {
               step="0.01"
               value={formData.amountSpent}
               onChange={(e) => setFormData({ ...formData, amountSpent: e.target.value })}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Additional Amount *</label>
+            <input
+              type="number"
+              required
+              min="0"
+              step="0.01"
+              value={formData.additionalAmount}
+              onChange={(e) => setFormData({ ...formData, additionalAmount: e.target.value })}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
             />
           </div>

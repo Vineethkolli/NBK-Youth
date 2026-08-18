@@ -17,11 +17,13 @@ function TimelineRecordsTimeline({ records, isEditMode, onEdit, onDelete }) {
     if (!previousRecord) return null;
     const currentAmountLeft = (currentRecord.amountCollected || 0) - (currentRecord.amountSpent || 0);
     const currentPreviousAmount = currentRecord.previousAmount || 0;
-    const currentFinalAmountLeft = currentAmountLeft + currentPreviousAmount;
+    const currentAdditionalAmount = currentRecord.additionalAmount || 0;
+    const currentFinalAmountLeft = currentAmountLeft + currentAdditionalAmount + currentPreviousAmount;
 
     const previousAmountLeft = (previousRecord.amountCollected || 0) - (previousRecord.amountSpent || 0);
     const previousPreviousAmount = previousRecord.previousAmount || 0;
-    const previousFinalAmountLeft = previousAmountLeft + previousPreviousAmount;
+    const previousAdditionalAmount = previousRecord.additionalAmount || 0;
+    const previousFinalAmountLeft = previousAmountLeft + previousAdditionalAmount + previousPreviousAmount;
 
     return currentFinalAmountLeft - previousFinalAmountLeft;
   };
@@ -82,8 +84,9 @@ function TimelineRecordsTimeline({ records, isEditMode, onEdit, onDelete }) {
             const difference = calculateDifference(record, previousRecord);
             const differenceDisplay = getDifferenceDisplay(difference);
             const amountLeft = (record.amountCollected || 0) - (record.amountSpent || 0);
+            const additionalAmount = record.additionalAmount || 0;
             const previousAmount = record.previousAmount || 0;
-            const finalAmountLeft = amountLeft + previousAmount;
+            const finalAmountLeft = amountLeft + additionalAmount + previousAmount;
 
             return (
               <div key={record._id} className="relative">
@@ -138,8 +141,12 @@ function TimelineRecordsTimeline({ records, isEditMode, onEdit, onDelete }) {
                         </p>
                       </div>
                       <div>
-                        <p className="text-sm text-gray-500">Previous Amount</p>
+                        <p className="text-sm text-gray-500">Previous Amount (incl. interest)</p>
                         <p className="text-lg font-semibold">{formatAmount(previousAmount)}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-500">Additional Amount</p>
+                        <p className="text-lg font-semibold">{formatAmount(additionalAmount)}</p>
                       </div>
                       <div>
                         <p className="text-sm text-gray-500">Final Amount Left</p>

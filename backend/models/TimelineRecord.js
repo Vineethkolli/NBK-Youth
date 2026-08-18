@@ -28,6 +28,11 @@ const timelineRecordSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
+  additionalAmount: {
+    type: Number,
+    required: true,
+    default: 0
+  },
   remarks: {
     type: String,
     trim: true
