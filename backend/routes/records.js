@@ -12,6 +12,14 @@ router.post('/financial', auth, checkRole('Developer'), recordsController.create
 router.put('/financial/:id', auth, checkRole('Developer'), recordsController.updateFinancialRecord);
 router.delete('/financial/:id', auth, checkRole('Developer'), recordsController.deleteFinancialRecord);
 
+// Records Timeline Routes
+router.get('/timeline', recordsController.getAllTimelineRecords);
+router.get('/timeline/events/:eventName', recordsController.getTimelineRecordsByEvent);
+router.get('/timeline/event-names', recordsController.getUniqueTimelineEventNames);
+router.post('/timeline', auth, checkRole('Developer'), recordsController.createTimelineRecord);
+router.put('/timeline/:id', auth, checkRole('Developer'), recordsController.updateTimelineRecord);
+router.delete('/timeline/:id', auth, checkRole('Developer'), recordsController.deleteTimelineRecord);
+
 // Event Records Routes
 router.get('/event-records', recordsController.getAllEventRecords);
 router.get('/event-records/event-names', recordsController.getUniqueEventRecordNames);

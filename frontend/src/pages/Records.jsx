@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Plus, Edit2, FileText, TrendingUp } from 'lucide-react';
+import { Plus, Edit2, FileText, TrendingUp, IndianRupeeIcon } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { API_URL } from '../utils/config';
@@ -10,6 +10,10 @@ import FinancialRecordForm from '../components/records/FinancialRecordForm';
 import EventRecordForm from '../components/records/EventRecordForm';
 import FinancialEnglishPrint from '../components/records/FinancialEnglishPrint';
 import FinancialTeluguPrint from '../components/records/FinancialTeluguPrint';
+import TimelineRecordsTimeline from '../components/records/TimelineRecordsTimeline';
+import TimelineRecordForm from '../components/records/TimelineRecordForm';
+import TimelineEnglishPrint from '../components/records/TimelineEnglishPrint';
+import TimelineTeluguPrint from '../components/records/TimelineTeluguPrint';
 import { useLanguage } from '../context/LanguageContext';
 
 
@@ -17,23 +21,31 @@ function Records() {
   const { hasAccess } = useAuth();
   const [activeTab, setActiveTab] = useState('timeline');
   const [financialRecords, setFinancialRecords] = useState([]);
+  const [timelineRecords, setTimelineRecords] = useState([]);
   const [eventRecords, setEventRecords] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState('');
+  const [selectedTimelineEvent, setSelectedTimelineEvent] = useState('');
   const [eventNames, setEventNames] = useState([]);
+  const [timelineEventNames, setTimelineEventNames] = useState([]);
   const [recordEventNames, setRecordEventNames] = useState([]);
   const [isEditMode, setIsEditMode] = useState(false);
   const [showFinancialForm, setShowFinancialForm] = useState(false);
+  const [showTimelineForm, setShowTimelineForm] = useState(false);
   const [showRecordForm, setShowRecordForm] = useState(false);
   const [editingFinancialRecord, setEditingFinancialRecord] = useState(null);
+  const [editingTimelineRecord, setEditingTimelineRecord] = useState(null);
   const [editingEventRecord, setEditingEventRecord] = useState(null);
   const { language } = useLanguage();
   
   const PrintComponent = language === 'te'? FinancialTeluguPrint : FinancialEnglishPrint;
+  const TimelinePrintComponent = language === 'te' ? TimelineTeluguPrint : TimelineEnglishPrint;
 
   useEffect(() => {
     fetchFinancialRecords();
+    fetchTimelineRecords();
     fetchEventRecords();
     fetchEventNames();
+    fetchTimelineEventNames();
     fetchRecordEventNames();
   }, []);
 
@@ -42,6 +54,12 @@ function Records() {
       setSelectedEvent(eventNames[0]);
     }
   }, [eventNames]);
+
+  useEffect(() => {
+    if (timelineEventNames.length > 0 && !selectedTimelineEvent) {
+      setSelectedTimelineEvent(timelineEventNames[0]);
+    }
+  }, [timelineEventNames]);
 
   const fetchFinancialRecords = async () => {
     try {
@@ -61,6 +79,15 @@ function Records() {
     }
   };
 
+  const fetchTimelineRecords = async () => {
+    try {
+      const { data } = await axios.get(`${API_URL}/api/records/timeline`);
+      setTimelineRecords(data);
+    } catch (error) {
+      toast.error('Failed to fetch timeline records');
+    }
+  };
+
   const fetchEventNames = async () => {
     try {
       const { data } = await axios.get(`${API_URL}/api/records/financial/event-names`);
@@ -76,6 +103,15 @@ function Records() {
       setRecordEventNames(data);
     } catch (error) {
       console.error('Failed to fetch record event names');
+    }
+  };
+
+  const fetchTimelineEventNames = async () => {
+    try {
+      const { data } = await axios.get(`${API_URL}/api/records/timeline/event-names`);
+      setTimelineEventNames(data);
+    } catch (error) {
+      console.error('Failed to fetch timeline event names');
     }
   };
 
@@ -128,6 +164,30 @@ function Records() {
     }
   };
 
+  const handleTimelineRecordSubmit = async (formData) => {
+    try {
+      if (editingTimelineRecord) {
+        await axios.put(`${API_URL}/api/records/timeline/${editingTimelineRecord._id}`, formData);
+        toast.success('Timeline record updated successfully');
+      } else {
+        await axios.post(`${API_URL}/api/records/timeline`, formData);
+        toast.success('Timeline record created successfully');
+      }
+      fetchTimelineRecords();
+      fetchTimelineEventNames();
+      setShowTimelineForm(false);
+      setEditingTimelineRecord(null);
+    } catch (error) {
+      const msg = error?.response?.data?.message;
+      if (error?.response?.status === 400 && msg) {
+        toast.error(msg);
+        return;
+      }
+      toast.error('Failed to save timeline record');
+      console.error(error);
+    }
+  };
+
   const handleFinancialRecordEdit = (record) => {
     setEditingFinancialRecord(record);
     setShowFinancialForm(true);
@@ -164,8 +224,30 @@ function Records() {
     }
   };
 
+  const handleTimelineRecordEdit = (record) => {
+    setEditingTimelineRecord(record);
+    setShowTimelineForm(true);
+  };
+
+  const handleTimelineRecordDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this timeline record?')) return;
+
+    try {
+      await axios.delete(`${API_URL}/api/records/timeline/${id}`);
+      toast.success('Timeline record deleted successfully');
+      fetchTimelineRecords();
+      fetchTimelineEventNames();
+    } catch (error) {
+      toast.error('Failed to delete timeline record');
+    }
+  };
+
   const filteredFinancialRecords = selectedEvent 
     ? financialRecords.filter(record => record.eventName === selectedEvent)
+    : [];
+
+  const filteredTimelineRecords = selectedTimelineEvent
+    ? timelineRecords.filter(record => record.eventName === selectedTimelineEvent)
     : [];
 
   return (
@@ -174,6 +256,18 @@ function Records() {
         <h1 className="text-2xl font-semibold">Records</h1>
 
         <div className="flex space-x-6">
+                    <button
+            onClick={() => setActiveTab('records-timeline')}
+            className={`px-4 py-2 rounded-md font-semibold flex items-center ${
+              activeTab === 'records-timeline'
+                ? 'bg-indigo-600 text-white'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+          >
+            <TrendingUp className="h-4 w-4 mr-2" />
+            Timeline
+          </button>
+          
           <button
             onClick={() => setActiveTab('timeline')}
             className={`px-4 py-2 rounded-md font-semibold flex items-center ${
@@ -182,8 +276,8 @@ function Records() {
                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
             }`}
           >
-            <TrendingUp className="h-4 w-4 mr-2" />
-            Financial Timeline
+            <IndianRupeeIcon className="h-4 w-4 mr-2" />
+            Financial
           </button>
 
           <button
@@ -293,6 +387,65 @@ function Records() {
         </div>
       )}
 
+      {activeTab === 'records-timeline' && (
+        <div className="space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+            <div className="flex items-center space-x-4">
+              <span className="text-sm font-medium">Event:</span>
+              <div className="flex flex-wrap gap-2">
+                {timelineEventNames.map(eventName => (
+                  <button
+                    key={eventName}
+                    onClick={() => setSelectedTimelineEvent(eventName)}
+                    className={`px-3 py-1 rounded-md text-sm font-medium ${
+                      selectedTimelineEvent === eventName
+                        ? 'bg-indigo-600 text-white'
+                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    }`}
+                  >
+                    {eventName}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex justify-end space-x-3">
+              {hasAccess('Developer') && (
+                <>
+                  <button
+                    onClick={() => setShowTimelineForm(true)}
+                    className="btn-primary flex items-center"
+                  >
+                    <Plus className="h-4 w-4 mr-1" />
+                    Add
+                  </button>
+
+                  <button
+                    onClick={() => setIsEditMode(!isEditMode)}
+                    className={`btn-primary flex items-center ${isEditMode ? 'bg-red-100' : ''}`}
+                  >
+                    <Edit2 className="h-4 w-4 mr-1" />
+                    {isEditMode ? 'Done' : 'Edit'}
+                  </button>
+                </>
+              )}
+
+              <TimelinePrintComponent
+                records={filteredTimelineRecords}
+                selectedEvent={selectedTimelineEvent}
+              />
+            </div>
+          </div>
+
+          <TimelineRecordsTimeline
+            records={filteredTimelineRecords}
+            isEditMode={isEditMode}
+            onEdit={handleTimelineRecordEdit}
+            onDelete={handleTimelineRecordDelete}
+          />
+        </div>
+      )}
+
       {/* Forms */}
       {showFinancialForm && (
         <FinancialRecordForm
@@ -313,6 +466,17 @@ function Records() {
             setEditingEventRecord(null);
           }}
           onSubmit={handleEventRecordSubmit}
+        />
+      )}
+
+      {showTimelineForm && (
+        <TimelineRecordForm
+          record={editingTimelineRecord}
+          onClose={() => {
+            setShowTimelineForm(false);
+            setEditingTimelineRecord(null);
+          }}
+          onSubmit={handleTimelineRecordSubmit}
         />
       )}
 
