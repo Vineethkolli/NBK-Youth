@@ -7,6 +7,7 @@ export const getServiceWorkerRegistration = async () => {
   if ('serviceWorker' in navigator) {
     return await navigator.serviceWorker.ready;
   }
+
   throw new Error('Service Worker not supported');
 };
 
@@ -18,16 +19,33 @@ export const getSubscription = async () => {
 
 // Subscribe user to push
 export const subscribeToPush = async (registerId) => {
+  if (!registerId) {
+    throw new Error('User registration ID is missing');
+  }
+
   const registration = await navigator.serviceWorker.ready;
 
-  const response = await axios.get(`${API_URL}/api/notifications/publicKey`);
+  const response = await axios.get(
+    `${API_URL}/api/notifications/publicKey`
+  );
+
   const publicVapidKey = response.data.publicKey;
+
+  if (!publicVapidKey) {
+    throw new Error('VAPID public key not received');
+  }
+
   const converted = urlBase64ToUint8Array(publicVapidKey);
 
-  const subscription = await registration.pushManager.subscribe({
-    userVisibleOnly: true,
-    applicationServerKey: converted,
-  });
+  // Reuse an existing subscription when possible.
+  let subscription = await registration.pushManager.getSubscription();
+
+  if (!subscription) {
+    subscription = await registration.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: converted,
+    });
+  }
 
   await axios.post(`${API_URL}/api/notifications/subscribe`, {
     registerId,
@@ -43,6 +61,17 @@ export const isIos = () => {
   return /iphone|ipad|ipod/.test(userAgent);
 };
 
-// Check if PWA is in standalone mode 
+// Check if PWA is in iOS standalone mode
 export const isInStandaloneMode = () =>
-  ('standalone' in window.navigator) && window.navigator.standalone;
+  ('standalone' in window.navigator) &&
+  window.navigator.standalone;
+
+// Detect Android TWA
+export const isAndroidTwa = () => {
+  const userAgent = window.navigator.userAgent || '';
+
+  return (
+    /android/i.test(userAgent) &&
+    document.referrer.startsWith('android-app://')
+  );
+};
