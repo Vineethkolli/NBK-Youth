@@ -58,9 +58,22 @@ function SessionsManager() {
   };
 
   const getAccessModeLabel = (mode) => {
-  const appModes = ['pwa', 'twa', 'standalone', 'addtohomescreen'];
-  if (appModes.includes(mode)) return 'App';
-  return 'Browser';
+  switch (mode) {
+    case 'twa':
+      return 'Play Store App';
+
+    case 'pwa':
+      return 'Browser App';
+
+    case 'addtohomescreen':
+      return 'Homescreen App';
+
+    case 'website':
+      return 'Browser';
+
+    default:
+      return 'Unknown';
+  }
 };
 
   const formatFullDateTime = (dateString) => {

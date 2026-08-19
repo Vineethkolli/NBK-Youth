@@ -33,7 +33,7 @@ const sessionSchema = new mongoose.Schema({
     },
     accessMode: {
       type: String,
-      enum: ['pwa', 'standalone', 'twa', 'website', 'addtohomescreen', 'unknown'],
+      enum: ['pwa', 'twa', 'website', 'addtohomescreen', 'unknown'],
       default: 'website'
     }
   },

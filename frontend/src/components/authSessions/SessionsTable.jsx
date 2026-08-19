@@ -121,18 +121,45 @@ function AuthSessionsTable({ sessions, visibleColumns, pagination, onPageChange 
                   </td>
                 )}
                 {visibleColumns.accessMode && (
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                      session.deviceInfo?.accessMode === 'pwa' ? 'bg-indigo-100 text-indigo-800' :
-                      session.deviceInfo?.accessMode === 'standalone' ? 'bg-teal-100 text-teal-800' :
-                      session.deviceInfo?.accessMode === 'twa' ? 'bg-cyan-100 text-cyan-800' :
-                      session.deviceInfo?.accessMode === 'website' ? 'bg-gray-100 text-gray-800' :
-                      'bg-yellow-100 text-yellow-800'
-                    }`}>
-                      {session.deviceInfo?.accessMode || 'unknown'}
-                    </span>
-                  </td>
-                )}
+  <td className="px-6 py-4 whitespace-nowrap text-sm">
+    {(() => {
+      const mode = session.deviceInfo?.accessMode;
+
+      const config = {
+        pwa: {
+          label: 'Browser App',
+          className: 'bg-indigo-100 text-indigo-800',
+        },
+        twa: {
+          label: 'Play Store App',
+          className: 'bg-cyan-100 text-cyan-800',
+        },
+        addtohomescreen: {
+          label: 'Homescreen App',
+          className: 'bg-indigo-100 text-indigo-800',
+        },
+        website: {
+          label: 'Browser',
+          className: 'bg-gray-100 text-gray-800',
+        },
+        unknown: {
+          label: 'Unknown',
+          className: 'bg-yellow-100 text-yellow-800',
+        },
+      };
+
+      const { label, className } = config[mode] || config.unknown;
+
+      return (
+        <span
+          className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${className}`}
+        >
+          {label}
+        </span>
+      );
+    })()}
+  </td>
+)}
                 {visibleColumns.deviceInfo && (
                   <td className="px-6 py-4 text-sm">
                     {formatDeviceInfo(session.deviceInfo)}

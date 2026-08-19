@@ -13,16 +13,19 @@ export const getDeviceInfo = async () => {
   let deviceModel = parsed.device.model || "unknown";
 
   // Access Mode
-  let accessMode = "website";
-  try {
-    if (window.matchMedia?.("(display-mode: standalone)").matches) {
-      accessMode = "pwa";
-    } else if (navigator.standalone) {
-      accessMode = "addtohomescreen";
-    } else if (document.referrer.includes("android-app://")) {
-      accessMode = "twa";
-    }
-  } catch {}
+let accessMode = "website";
+
+try {
+  const isTWA = document.referrer?.startsWith("android-app://");
+
+  if (isTWA) {
+    accessMode = "twa";
+  } else if (window.matchMedia?.("(display-mode: standalone)").matches) {
+    accessMode = "pwa";
+  } else if (navigator.standalone) {
+    accessMode = "addtohomescreen";
+  }
+} catch {}
 
   // Client Hints
   if (navigator.userAgentData) {
