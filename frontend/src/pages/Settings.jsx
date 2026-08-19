@@ -61,7 +61,7 @@ function Settings() {
         </div>
       </div>
 
-      <div className="text-center text-gray-500 text-sm mt-4">WEB APP Version 3.0 </div>
+      <div className="text-center text-gray-500 text-sm mt-4">WEB APP Version 4.0 </div>
       <div className="text-center text-gray-500 text-sm mt-4">
   <a href="/privacy_policy.html" className="text-indigo-700">Privacy Policy</a>
   {" "}and{" "}
