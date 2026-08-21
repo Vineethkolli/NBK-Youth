@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { CloudSun, Timer, Coins, CalculatorIcon, FileStack, ImageIcon } from "lucide-react";
+import { CloudSun, Timer, Coins, CalculatorIcon, FileStack, ImageIcon, Mic } from "lucide-react";
 import Weather from "../components/tools/Weather";
 import Calculator from "../components/tools/Calculator";
 import Stopwatch from "../components/tools/Stopwatch";
 import Toss from "../components/tools/Toss";
 import PdfMergerTool from "../components/tools/PdfMerger";
 import ImageToPdfTool from "../components/tools/ImageToPdf";
+import VoiceRecorder from "../components/tools/VoiceRecorder";
 
 export default function Tools() {
   const [active, setActive] = useState("weather");
@@ -17,6 +18,7 @@ export default function Tools() {
     { id: "pdfmerger", label: "PDF Merger", icon: FileStack },
     { id: "imagetopdf", label: "Image to PDF", icon: ImageIcon },
     { id: "calculator", label: "Calci", icon: CalculatorIcon },
+    { id: "voicerecorder", label: "Voice Rec", icon: Mic },
   ];
 
   return (
@@ -44,6 +46,7 @@ export default function Tools() {
       {active === "weather" && <Weather />}
       {active === "stopwatch" && <Stopwatch />}
       {active === "toss" && <Toss />}
+      {active === "voicerecorder" && <VoiceRecorder />}
       {active === "calculator" && <Calculator />}
       {active === "pdfmerger" && <PdfMergerTool />}
       {active === "imagetopdf" && <ImageToPdfTool />}
