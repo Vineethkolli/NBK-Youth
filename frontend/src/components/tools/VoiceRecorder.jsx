@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Mic, Pause, Play, RotateCcw, Save } from "lucide-react";
+import { FFmpeg } from "@ffmpeg/ffmpeg";
+import { fetchFile } from "@ffmpeg/util";
 
 function formatTime(totalSeconds) {
   const hrs = Math.floor(totalSeconds / 3600);
@@ -17,7 +19,6 @@ function sanitizeFileName(name) {
 }
 
 export default function VoiceRecorder() {
-
   const [hasStarted, setHasStarted] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -32,7 +33,8 @@ export default function VoiceRecorder() {
   const [isDragging, setIsDragging] = useState(false);
 
   const [showSaveModal, setShowSaveModal] = useState(false);
-  const [recordingName, setRecordingName] = useState("recording");
+  const [recordingName, setRecordingName] = useState("");
+  const [isConverting, setIsConverting] = useState(false);
 
   const streamRef = useRef(null);
   const recorderRef = useRef(null);
@@ -51,6 +53,9 @@ export default function VoiceRecorder() {
   const waveformDataRef = useRef([]);
 
   const isDraggingRef = useRef(false);
+
+  // FFmpeg instance
+  const ffmpegRef = useRef(null);
 
   const stopTimer = () => {
     if (timerRef.current) {
@@ -84,10 +89,7 @@ export default function VoiceRecorder() {
     }
   };
 
-  const drawWaveform = (
-    progress = 0,
-    mode = "recorded"
-  ) => {
+  const drawWaveform = (progress = 0, mode = "recorded") => {
     const canvas = waveformCanvasRef.current;
 
     if (!canvas) return;
@@ -129,10 +131,9 @@ export default function VoiceRecorder() {
         mode === "live" ? "#64748b" : "#475569";
 
       for (let i = 0; i < data.length; i += 1) {
-        const amplitude = Math.max(
-          0.015,
-          Math.min(1, data[i])
-        ) * (height * 0.42);
+        const amplitude =
+          Math.max(0.015, Math.min(1, data[i])) *
+          (height * 0.42);
 
         const x = Math.min(
           width,
@@ -197,9 +198,7 @@ export default function VoiceRecorder() {
       return;
     }
 
-    const buffer = new Uint8Array(
-      analyser.fftSize
-    );
+    const buffer = new Uint8Array(analyser.fftSize);
 
     const draw = () => {
       if (!analyserRef.current) return;
@@ -240,8 +239,7 @@ export default function VoiceRecorder() {
 
   const createWaveform = async (blob) => {
     try {
-      const arrayBuffer =
-        await blob.arrayBuffer();
+      const arrayBuffer = await blob.arrayBuffer();
 
       const AudioContextClass =
         window.AudioContext ||
@@ -249,8 +247,7 @@ export default function VoiceRecorder() {
 
       if (!AudioContextClass) return;
 
-      const audioContext =
-        new AudioContextClass();
+      const audioContext = new AudioContextClass();
 
       const audioBuffer =
         await audioContext.decodeAudioData(
@@ -261,6 +258,7 @@ export default function VoiceRecorder() {
         audioBuffer.getChannelData(0);
 
       const samples = 900;
+
       const blockSize = Math.max(
         1,
         Math.floor(rawData.length / samples)
@@ -270,6 +268,7 @@ export default function VoiceRecorder() {
 
       for (let i = 0; i < samples; i += 1) {
         const start = i * blockSize;
+
         const end = Math.min(
           start + blockSize,
           rawData.length
@@ -374,6 +373,7 @@ export default function VoiceRecorder() {
 
         audioContextRef.current =
           audioContext;
+
         analyserRef.current = analyser;
       }
 
@@ -387,9 +387,7 @@ export default function VoiceRecorder() {
           event.data &&
           event.data.size > 0
         ) {
-          chunksRef.current.push(
-            event.data
-          );
+          chunksRef.current.push(event.data);
         }
       };
 
@@ -432,8 +430,7 @@ export default function VoiceRecorder() {
   };
 
   const requestLatestChunk = async () => {
-    const recorder =
-      recorderRef.current;
+    const recorder = recorderRef.current;
 
     if (!recorder) return;
 
@@ -450,9 +447,7 @@ export default function VoiceRecorder() {
   };
 
   const buildAudioPreview = async () => {
-    if (
-      chunksRef.current.length === 0
-    ) {
+    if (chunksRef.current.length === 0) {
       return null;
     }
 
@@ -480,8 +475,7 @@ export default function VoiceRecorder() {
   };
 
   const handlePause = async () => {
-    const recorder =
-      recorderRef.current;
+    const recorder = recorderRef.current;
 
     if (
       !recorder ||
@@ -509,8 +503,7 @@ export default function VoiceRecorder() {
   };
 
   const handleContinue = async () => {
-    const recorder =
-      recorderRef.current;
+    const recorder = recorderRef.current;
 
     if (
       !recorder ||
@@ -535,8 +528,7 @@ export default function VoiceRecorder() {
   };
 
   const handleTogglePlayback = async () => {
-    const audio =
-      audioRef.current;
+    const audio = audioRef.current;
 
     if (!audio || !audioUrl) {
       return;
@@ -559,8 +551,7 @@ export default function VoiceRecorder() {
   };
 
   const handleAudioTimeUpdate = () => {
-    const audio =
-      audioRef.current;
+    const audio = audioRef.current;
 
     if (!audio) return;
 
@@ -587,8 +578,7 @@ export default function VoiceRecorder() {
   };
 
   const handleAudioLoaded = () => {
-    const audio =
-      audioRef.current;
+    const audio = audioRef.current;
 
     if (!audio) return;
 
@@ -596,9 +586,7 @@ export default function VoiceRecorder() {
       audio.duration &&
       Number.isFinite(audio.duration)
     ) {
-      setPlaybackDuration(
-        audio.duration
-      );
+      setPlaybackDuration(audio.duration);
     }
 
     requestAnimationFrame(() => {
@@ -607,8 +595,7 @@ export default function VoiceRecorder() {
   };
 
   const handleAudioEnded = () => {
-    const audio =
-      audioRef.current;
+    const audio = audioRef.current;
 
     if (!audio) return;
 
@@ -628,8 +615,7 @@ export default function VoiceRecorder() {
     const container =
       waveformContainerRef.current;
 
-    const audio =
-      audioRef.current;
+    const audio = audioRef.current;
 
     if (
       !container ||
@@ -639,9 +625,6 @@ export default function VoiceRecorder() {
     ) {
       return;
     }
-
-    const rect =
-      container.getBoundingClientRect();
 
     const canvas =
       waveformCanvasRef.current;
@@ -700,6 +683,7 @@ export default function VoiceRecorder() {
           event.pointerId
         );
       } catch {
+        // Ignore pointer capture errors
       }
     }
 
@@ -721,7 +705,8 @@ export default function VoiceRecorder() {
     setIsDragging(false);
 
     if (
-      event?.currentTarget?.releasePointerCapture &&
+      event?.currentTarget
+        ?.releasePointerCapture &&
       event.pointerId != null
     ) {
       try {
@@ -729,6 +714,7 @@ export default function VoiceRecorder() {
           event.pointerId
         );
       } catch {
+        // Ignore pointer capture errors
       }
     }
   };
@@ -738,6 +724,7 @@ export default function VoiceRecorder() {
       if (!isDraggingRef.current) return;
 
       event.preventDefault();
+
       seekFromPointer(event.clientX);
     };
 
@@ -787,10 +774,13 @@ export default function VoiceRecorder() {
       requestAnimationFrame(() => {
         if (isRecording) {
           drawWaveform(0, "live");
-        } else if (waveformDataRef.current.length) {
+        } else if (
+          waveformDataRef.current.length
+        ) {
           const progress =
             playbackDuration > 0
-              ? playbackTime / playbackDuration
+              ? playbackTime /
+                playbackDuration
               : 0;
 
           drawWaveform(
@@ -798,7 +788,10 @@ export default function VoiceRecorder() {
             "playback"
           );
         } else {
-          drawWaveform(0, "recorded");
+          drawWaveform(
+            0,
+            "recorded"
+          );
         }
       });
     };
@@ -821,8 +814,7 @@ export default function VoiceRecorder() {
   ]);
 
   const handleReset = async () => {
-    const recorder =
-      recorderRef.current;
+    const recorder = recorderRef.current;
 
     if (
       recorder &&
@@ -846,7 +838,9 @@ export default function VoiceRecorder() {
     if (streamRef.current) {
       streamRef.current
         .getTracks()
-        .forEach((track) => track.stop());
+        .forEach((track) =>
+          track.stop()
+        );
 
       streamRef.current = null;
     }
@@ -883,16 +877,19 @@ export default function VoiceRecorder() {
     setIsDragging(false);
 
     setShowSaveModal(false);
+    setIsConverting(false);
     setError("");
 
     requestAnimationFrame(() => {
-      drawWaveform(0, "recorded");
+      drawWaveform(
+        0,
+        "recorded"
+      );
     });
   };
 
   const handleOpenSave = async () => {
-    const recorder =
-      recorderRef.current;
+    const recorder = recorderRef.current;
 
     if (
       recorder &&
@@ -909,11 +906,70 @@ export default function VoiceRecorder() {
       setError(
         "No recording yet. Record audio first."
       );
+
       return;
     }
 
     await buildAudioPreview();
+
     setShowSaveModal(true);
+  };
+
+  const convertWebMToMP3 = async (
+    webmBlob
+  ) => {
+    if (!ffmpegRef.current) {
+      const ffmpeg = new FFmpeg();
+
+      ffmpegRef.current = ffmpeg;
+
+      await ffmpeg.load();
+    }
+
+    const ffmpeg = ffmpegRef.current;
+
+    await ffmpeg.writeFile(
+      "recording.webm",
+      await fetchFile(webmBlob)
+    );
+
+    await ffmpeg.exec([
+      "-i",
+      "recording.webm",
+      "-vn",
+      "-codec:a",
+      "libmp3lame",
+      "-b:a",
+      "192k",
+      "recording.mp3",
+    ]);
+
+    const mp3Data =
+      await ffmpeg.readFile(
+        "recording.mp3"
+      );
+
+    try {
+      await ffmpeg.deleteFile(
+        "recording.webm"
+      );
+
+      await ffmpeg.deleteFile(
+        "recording.mp3"
+      );
+    } catch (cleanupError) {
+      console.warn(
+        "FFmpeg cleanup warning:",
+        cleanupError
+      );
+    }
+
+    return new Blob(
+      [mp3Data.buffer],
+      {
+        type: "audio/mpeg",
+      }
+    );
   };
 
   const handleSaveToDevice = async () => {
@@ -923,39 +979,67 @@ export default function VoiceRecorder() {
       return;
     }
 
-    await requestLatestChunk();
+    try {
+      setError("");
+      setIsConverting(true);
 
-    const cleanName =
-      sanitizeFileName(
-        recordingName
-      ) || "recording";
+      await requestLatestChunk();
 
-    const blob = new Blob(
-      chunksRef.current,
-      {
-        type: "audio/webm",
-      }
-    );
+      const cleanName =
+        sanitizeFileName(
+          recordingName
+        ) || "recording";
 
-    const url =
-      URL.createObjectURL(blob);
+      const webmBlob = new Blob(
+        chunksRef.current,
+        {
+          type: "audio/webm",
+        }
+      );
 
-    const link =
-      document.createElement("a");
+      const mp3Blob =
+        await convertWebMToMP3(
+          webmBlob
+        );
 
-    link.href = url;
-    link.download =
-      `${cleanName}.webm`;
+      const url =
+        URL.createObjectURL(
+          mp3Blob
+        );
 
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
+      const link =
+        document.createElement("a");
 
-    setTimeout(() => {
-      URL.revokeObjectURL(url);
-    }, 1000);
+      link.href = url;
 
-    setShowSaveModal(false);
+      link.download =
+        `${cleanName}.mp3`;
+
+      document.body.appendChild(
+        link
+      );
+
+      link.click();
+
+      link.remove();
+
+      setTimeout(() => {
+        URL.revokeObjectURL(url);
+      }, 1000);
+
+      setShowSaveModal(false);
+    } catch (err) {
+      console.error(
+        "MP3 conversion error:",
+        err
+      );
+
+      setError(
+        "Failed to convert recording to MP3. Please try again."
+      );
+    } finally {
+      setIsConverting(false);
+    }
   };
 
   useEffect(() => {
@@ -982,7 +1066,9 @@ export default function VoiceRecorder() {
       }
 
       if (audioUrl) {
-        URL.revokeObjectURL(audioUrl);
+        URL.revokeObjectURL(
+          audioUrl
+        );
       }
     };
   }, []);
@@ -1002,10 +1088,10 @@ export default function VoiceRecorder() {
 
   const currentProgress =
     playbackDuration > 0
-      ? Math.max(
-          0,
-          Math.min(
-            1,
+      ? Math.min(
+          1,
+          Math.max(
+            0,
             playbackTime /
               playbackDuration
           )
@@ -1040,7 +1126,8 @@ export default function VoiceRecorder() {
           </button>
 
           <p className="mt-5 text-sm text-slate-500">
-            Tap the microphone to start recording
+            Tap the microphone to start
+            recording
           </p>
         </div>
       ) : (
@@ -1072,9 +1159,11 @@ export default function VoiceRecorder() {
               border border-slate-200
               bg-slate-50 p-2
               overflow-hidden select-none
-              ${audioUrl
-                ? "cursor-ew-resize"
-                : "cursor-default"}
+              ${
+                audioUrl
+                  ? "cursor-ew-resize"
+                  : "cursor-default"
+              }
             `}
             style={{
               touchAction: audioUrl
@@ -1083,7 +1172,9 @@ export default function VoiceRecorder() {
             }}
           >
             <canvas
-              ref={waveformCanvasRef}
+              ref={
+                waveformCanvasRef
+              }
               width={900}
               height={180}
               className="block w-full h-32 sm:h-40 rounded-lg"
@@ -1098,7 +1189,8 @@ export default function VoiceRecorder() {
 
             {!isRecording &&
               audioUrl &&
-              playbackDuration > 0 && (
+              playbackDuration >
+                0 && (
                 <div
                   className="absolute top-2 bottom-2 left-2 right-2 pointer-events-none"
                   aria-hidden="true"
@@ -1108,12 +1200,17 @@ export default function VoiceRecorder() {
                       absolute top-0 bottom-0
                       w-0.5
                       bg-rose-600
-                      ${isDragging
-                        ? "shadow-[0_0_0_3px_rgba(225,29,72,0.12)]"
-                        : ""}
+                      ${
+                        isDragging
+                          ? "shadow-[0_0_0_3px_rgba(225,29,72,0.12)]"
+                          : ""
+                      }
                     `}
                     style={{
-                      left: `${currentProgress * 100}%`,
+                      left: `${
+                        currentProgress *
+                        100
+                      }%`,
                     }}
                   >
                     <div
@@ -1132,13 +1229,19 @@ export default function VoiceRecorder() {
           </div>
 
           {audioUrl &&
-            playbackDuration > 0 && (
+            playbackDuration >
+              0 && (
               <div className="mt-2 flex items-center justify-between text-xs text-slate-400 font-mono">
                 <span>
-                  {formatTime(playbackTime)}
+                  {formatTime(
+                    playbackTime
+                  )}
                 </span>
+
                 <span>
-                  {formatTime(playbackDuration)}
+                  {formatTime(
+                    playbackDuration
+                  )}
                 </span>
               </div>
             )}
@@ -1153,58 +1256,66 @@ export default function VoiceRecorder() {
               </span>
             )}
 
-            {isPaused && !isDragging && (
-              <span className="text-amber-600 font-medium">
-                Recording paused • drag the line to seek
-              </span>
-            )}
+            {isPaused &&
+              !isDragging && (
+                <span className="text-amber-600 font-medium">
+                  Recording paused •
+                  drag the line to seek
+                </span>
+              )}
 
             {isDragging && (
               <span className="text-indigo-600 font-medium">
-                Seeking {formatTime(playbackTime)}
+                Seeking{" "}
+                {formatTime(
+                  playbackTime
+                )}
               </span>
             )}
           </div>
 
-          {isPaused && audioUrl && (
-            <div className="mt-5 flex items-center justify-start">
-              <button
-                onClick={
-                  handleTogglePlayback
-                }
-                className="
-                  w-12 h-12 rounded-full
-                  bg-indigo-600 hover:bg-indigo-700
-                  active:scale-95 transition
-                  text-white shadow-md
-                  flex items-center justify-center
-                "
-                title={
-                  isPlaying
-                    ? "Pause playback"
-                    : "Play recording"
-                }
-                aria-label={
-                  isPlaying
-                    ? "Pause playback"
-                    : "Play recording"
-                }
-              >
-                {isPlaying ? (
-                  <Pause size={22} />
-                ) : (
-                  <Play
-                    size={22}
-                    className="ml-0.5"
-                  />
-                )}
-              </button>
-            </div>
-          )}
+          {isPaused &&
+            audioUrl && (
+              <div className="mt-5 flex items-center justify-start">
+                <button
+                  onClick={
+                    handleTogglePlayback
+                  }
+                  className="
+                    w-12 h-12 rounded-full
+                    bg-indigo-600 hover:bg-indigo-700
+                    active:scale-95 transition
+                    text-white shadow-md
+                    flex items-center justify-center
+                  "
+                  title={
+                    isPlaying
+                      ? "Pause playback"
+                      : "Play recording"
+                  }
+                  aria-label={
+                    isPlaying
+                      ? "Pause playback"
+                      : "Play recording"
+                  }
+                >
+                  {isPlaying ? (
+                    <Pause size={22} />
+                  ) : (
+                    <Play
+                      size={22}
+                      className="ml-0.5"
+                    />
+                  )}
+                </button>
+              </div>
+            )}
 
           <div className="mt-6 grid grid-cols-3 gap-2 sm:gap-3">
             <button
-              onClick={handleReset}
+              onClick={
+                handleReset
+              }
               className="
                 py-3 rounded-xl
                 bg-slate-200 hover:bg-slate-300
@@ -1214,12 +1325,17 @@ export default function VoiceRecorder() {
               "
             >
               <RotateCcw size={18} />
-              <span>Reset</span>
+
+              <span>
+                Reset
+              </span>
             </button>
 
             {isPaused ? (
               <button
-                onClick={handleContinue}
+                onClick={
+                  handleContinue
+                }
                 className="
                   py-3 rounded-xl
                   bg-emerald-600 hover:bg-emerald-700
@@ -1229,11 +1345,16 @@ export default function VoiceRecorder() {
                 "
               >
                 <Play size={18} />
-                <span>Continue</span>
+
+                <span>
+                  Continue
+                </span>
               </button>
             ) : (
               <button
-                onClick={handlePause}
+                onClick={
+                  handlePause
+                }
                 className="
                   py-3 rounded-xl
                   bg-rose-600 hover:bg-rose-700
@@ -1243,12 +1364,17 @@ export default function VoiceRecorder() {
                 "
               >
                 <Pause size={18} />
-                <span>Pause</span>
+
+                <span>
+                  Pause
+                </span>
               </button>
             )}
 
             <button
-              onClick={handleOpenSave}
+              onClick={
+                handleOpenSave
+              }
               className="
                 py-3 rounded-xl
                 bg-indigo-600 hover:bg-indigo-700
@@ -1258,7 +1384,10 @@ export default function VoiceRecorder() {
               "
             >
               <Save size={18} />
-              <span>Save</span>
+
+              <span>
+                Save
+              </span>
             </button>
           </div>
 
@@ -1272,16 +1401,21 @@ export default function VoiceRecorder() {
             onLoadedMetadata={
               handleAudioLoaded
             }
-            onEnded={handleAudioEnded}
+            onEnded={
+              handleAudioEnded
+            }
             onPlay={() =>
               setIsPlaying(true)
             }
             onPause={() => {
               if (
                 audioRef.current &&
-                !audioRef.current.ended
+                !audioRef.current
+                  .ended
               ) {
-                setIsPlaying(false);
+                setIsPlaying(
+                  false
+                );
               }
             }}
           />
@@ -1298,19 +1432,25 @@ export default function VoiceRecorder() {
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
           <div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl">
             <h4 className="text-lg font-semibold text-slate-900">
-              Save Recording
+              Save Recording as MP3
             </h4>
 
             <input
               autoFocus
-              value={recordingName}
+              value={
+                recordingName
+              }
               onChange={(e) =>
                 setRecordingName(
                   e.target.value
                 )
               }
               onKeyDown={(e) => {
-                if (e.key === "Enter") {
+                if (
+                  e.key ===
+                  "Enter" &&
+                  !isConverting
+                ) {
                   handleSaveToDevice();
                 }
               }}
@@ -1328,11 +1468,17 @@ export default function VoiceRecorder() {
             <div className="mt-5 flex justify-end gap-2">
               <button
                 onClick={() =>
-                  setShowSaveModal(false)
+                  setShowSaveModal(
+                    false
+                  )
+                }
+                disabled={
+                  isConverting
                 }
                 className="
                   px-4 py-2 rounded-lg
                   bg-slate-200 hover:bg-slate-300
+                  disabled:opacity-50
                   text-slate-900 font-medium
                 "
               >
@@ -1343,13 +1489,19 @@ export default function VoiceRecorder() {
                 onClick={
                   handleSaveToDevice
                 }
+                disabled={
+                  isConverting
+                }
                 className="
                   px-4 py-2 rounded-lg
                   bg-indigo-600 hover:bg-indigo-700
+                  disabled:opacity-50
                   text-white font-medium
                 "
               >
-                Save
+                {isConverting
+                  ? "Converting..."
+                  : "Save"}
               </button>
             </div>
           </div>
