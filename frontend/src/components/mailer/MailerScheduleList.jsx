@@ -19,13 +19,13 @@ const formatRecipients = (recipients) => {
 
 function MailerScheduleList({ schedules, loading }) {
   return (
-    <div className="bg-white rounded-lg shadow p-6">
-      <div className="flex items-center justify-between mb-4">
-        <div>
+    <div className="min-w-0 bg-white rounded-lg shadow p-4 sm:p-6">
+      <div className="flex min-w-0 items-center justify-between mb-4">
+        <div className="min-w-0">
           <h3 className="text-lg font-semibold text-gray-900">Scheduled Emails</h3>
           <p className="text-xs text-gray-500">Emails will be sent at their scheduled time (IST)</p>
         </div>
-        <CalendarClock className="h-5 w-5 text-gray-400" />
+        <CalendarClock className="h-5 w-5 shrink-0 text-gray-400" />
       </div>
 
       {loading ? (
@@ -35,24 +35,24 @@ function MailerScheduleList({ schedules, loading }) {
       ) : (
         <div className="space-y-3">
           {schedules.map((schedule) => (
-            <div key={schedule._id} className="border rounded-lg p-4 space-y-2">
-              <div className="flex items-center justify-between">
-                <h4 className="font-semibold text-gray-900">{schedule.subject}</h4>
+            <div key={schedule._id} className="min-w-0 border rounded-lg p-4 space-y-2">
+              <div className="flex min-w-0 items-start justify-between gap-2">
+                <h4 className="min-w-0 break-words font-semibold text-gray-900">{schedule.subject}</h4>
                 <span
-                  className={`text-xs font-semibold px-2 py-1 rounded-full ${
+                  className={`shrink-0 text-xs font-semibold px-2 py-1 rounded-full ${
                     statusStyles[schedule.status] || 'bg-gray-100 text-gray-600'
                   }`}
                 >
                   {schedule.status.replace('_', ' ')}
                 </span>
               </div>
-              <p className="text-sm text-gray-600 line-clamp-2">{schedule.body}</p>
+              <p className="break-words text-sm text-gray-600 line-clamp-2">{schedule.body}</p>
               <div className="text-xs text-gray-500 flex flex-wrap gap-2">
                 <span>Send Date: {formatDateTime(schedule.scheduledAt)}</span>
                 <span>Recipients: {schedule.totalRecipients}</span>
                 <span>Target: {schedule.targetType}</span>
               </div>
-              <div className="text-xs text-gray-500">{formatRecipients(schedule.recipients)}</div>
+              <div className="break-words text-xs text-gray-500">{formatRecipients(schedule.recipients)}</div>
             </div>
           ))}
         </div>

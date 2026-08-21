@@ -19,12 +19,12 @@ const formatRecipients = (recipients) => {
 
 function MailerHistoryList({ history, loading }) {
   return (
-    <div className="bg-white rounded-lg shadow p-6">
-      <div className="flex items-center justify-between mb-4">
-        <div>
+    <div className="min-w-0 bg-white rounded-lg shadow p-4 sm:p-6">
+      <div className="flex min-w-0 items-center justify-between mb-4">
+        <div className="min-w-0">
           <h3 className="text-lg font-semibold text-gray-900">Mailer History</h3>
         </div>
-        <Clock className="h-5 w-5 text-gray-400" />
+        <Clock className="h-5 w-5 shrink-0 text-gray-400" />
       </div>
 
       {loading ? (
@@ -34,25 +34,25 @@ function MailerHistoryList({ history, loading }) {
       ) : (
         <div className="space-y-3">
           {history.map((entry) => (
-            <div key={entry._id} className="border rounded-lg p-4 space-y-2">
-              <div className="flex items-center justify-between">
-                <h4 className="font-semibold text-gray-900">{entry.subject}</h4>
+            <div key={entry._id} className="min-w-0 border rounded-lg p-4 space-y-2">
+              <div className="flex min-w-0 items-start justify-between gap-2">
+                <h4 className="min-w-0 break-words font-semibold text-gray-900">{entry.subject}</h4>
                 <span
-                  className={`text-xs font-semibold px-2 py-1 rounded-full ${
+                  className={`shrink-0 text-xs font-semibold px-2 py-1 rounded-full ${
                     statusStyles[entry.status] || 'bg-gray-100 text-gray-600'
                   }`}
                 >
                   {entry.status.replace('_', ' ')}
                 </span>
               </div>
-              <p className="text-sm text-gray-600 line-clamp-2">{entry.body}</p>
+              <p className="break-words text-sm text-gray-600 line-clamp-2">{entry.body}</p>
               <div className="text-xs text-gray-500 flex flex-wrap gap-2">
                 <span>Sent: {formatDateTime(entry.sentAt)}</span>
                 <span>Completed: {formatDateTime(entry.completedAt)}</span>
                 <span>Recipients: {entry.totalRecipients}</span>
                 <span>Target: {entry.targetType}</span>
               </div>
-              <div className="text-xs text-gray-500">{formatRecipients(entry.recipients)}</div>
+              <div className="break-words text-xs text-gray-500">{formatRecipients(entry.recipients)}</div>
             </div>
           ))}
         </div>
