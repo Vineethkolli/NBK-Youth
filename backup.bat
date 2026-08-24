@@ -1,4 +1,4 @@
-REM Run this script: .\backup.bat
+REM Command: .\backup.bat
 
 @echo off
 setlocal
