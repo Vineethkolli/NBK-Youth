@@ -19,14 +19,14 @@ const facilities = [
     icon: HeartPulse,
   },
   {
-    title: "Society Office",
-    subtitle: "Cooperative bank",
-    icon: Building2,
-  },
-  {
     title: "Panchayat Office",
     subtitle: "Local administration",
     icon: Landmark,
+  },
+  {
+    title: "Society Office",
+    subtitle: "Cooperative bank",
+    icon: Building2,
   },
   {
     title: "Post Office",

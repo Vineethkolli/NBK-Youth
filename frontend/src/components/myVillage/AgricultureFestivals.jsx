@@ -22,8 +22,13 @@ const festivals = [
   "Ganesh Chaturthi",
   "Dasara",
   "Diwali",
-  "Poleramma Pongal",
+  "Poleramma Pongallu",
+  "Ugadi",
+  "Devara Kolupulu",
+  "Brahamam Gari Aradhana",
   "Moharram",
+  "Ramzan",
+  "Christmas",  
 ];
 
 export default function AgricultureFestivals() {

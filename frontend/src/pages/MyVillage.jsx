@@ -1,15 +1,4 @@
-import {
-  House,
-  MapPin,
-  Users,
-  LandPlot,
-  ArrowUpRight,
-  UserRound,
-  Mail,
-  UsersRound,
-  Landmark,
-  Church,
-} from "lucide-react";
+import {House, MapPin, Users, LandPlot, UserRound, Mail, UsersRound, Landmark, Church, Mosque, MapPinned } from "lucide-react";
 
 import OnlineServices from "../components/myVillage/OnlineServices";
 import VillageFacilities from "../components/myVillage/VillageFacilities";
@@ -49,7 +38,7 @@ const temples = [
   "Ganesh Temple",
   "Lord Venkateswara",
   "Ramalayam",
-  "Poleramma",
+  "Poleramma Thalli",
   "Malluchamma Ammavaru",
   "Reddys Devara",
   "Brahmam Gari Temple",
@@ -152,7 +141,7 @@ export default function MyVillage() {
                   title="Open in Google Maps"
                   className="inline-flex rounded-full bg-white/10 p-2 text-white backdrop-blur transition hover:scale-110 hover:bg-white/20"
                 >
-                  <MapPin size={20} />
+                  <MapPinned size={20} />
                 </a>
               </div>
 
@@ -188,8 +177,6 @@ export default function MyVillage() {
                 <div className="rounded-xl bg-emerald-50 p-2 text-emerald-600">
                   <Icon size={19} />
                 </div>
-
-                <ArrowUpRight size={16} className="text-gray-300" />
               </div>
 
               <p className="mt-4 text-xs font-medium text-gray-500">
@@ -240,7 +227,6 @@ export default function MyVillage() {
               <PopulationCard
                 label="Total Population"
                 value="2,949"
-                icon={Users}
               />
 
               <PopulationCard
@@ -305,9 +291,9 @@ export default function MyVillage() {
               </div>
 
               <div className="grid gap-3 sm:grid-cols-3">
-                <SmallStat label="Hindu" value="2,102" icon={Users} />
-                <SmallStat label="Muslim" value="252" icon={Users} />
-                <SmallStat label="Christian" value="595" icon={Users} />
+                <SmallStat label="Hindus" value="2,102" icon={Users} />
+                <SmallStat label="Muslims" value="252" icon={Users} />
+                <SmallStat label="Christians" value="595" icon={Users} />
               </div>
             </div>
           </section>
@@ -377,39 +363,41 @@ export default function MyVillage() {
           <VillageFacilities />
 
           {/* Temples & Places of Worship */}
-          <section className="rounded-3xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
-            <SectionTitle
-              icon={Landmark}
-              title="Temples & Places of Worship"
-              description="Religious places in and around our village"
-            />
+<section className="rounded-3xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
+  <SectionTitle
+    icon={Landmark}
+    title="Temples & Places of Worship"
+    description="Religious places in our village"
+  />
 
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {temples.map((place) => {
-                const isReligiousBuilding =
-                  place === "Mosque" || place === "Church";
+  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+    {temples.map((place) => {
+      const isMosque = place === "Mosque";
+      const isChurch = place === "Church";
 
-                return (
-                  <div
-                    key={place}
-                    className="flex items-center gap-3 rounded-2xl border border-gray-100 bg-gray-50 p-4 transition hover:border-emerald-100 hover:bg-emerald-50/50"
-                  >
-                    <div className="shrink-0 rounded-xl bg-emerald-50 p-2.5 text-emerald-600">
-                      {isReligiousBuilding ? (
-                        <Church size={18} />
-                      ) : (
-                        <Landmark size={18} />
-                      )}
-                    </div>
+      const Icon = isMosque
+        ? Mosque
+        : isChurch
+          ? Church
+          : Landmark;
 
-                    <p className="text-sm font-semibold text-gray-800">
-                      {place}
-                    </p>
-                  </div>
-                );
-              })}
-            </div>
-          </section>
+      return (
+        <div
+          key={place}
+          className="flex items-center gap-3 rounded-2xl border border-gray-100 bg-gray-50 p-4 transition hover:border-emerald-100 hover:bg-emerald-50/50"
+        >
+          <div className="shrink-0 rounded-xl bg-emerald-50 p-2.5 text-emerald-600">
+            <Icon size={18} />
+          </div>
+
+          <p className="text-sm font-semibold text-gray-800">
+            {place}
+          </p>
+        </div>
+      );
+    })}
+  </div>
+</section>
 
           {/* Agriculture + Festivals */}
           <AgricultureFestivals />
