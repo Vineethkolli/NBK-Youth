@@ -15,7 +15,7 @@ function WatchMore() {
           className="cursor-pointer h-6 w-6 text-pink-500 hover:scale-110 transition"
           title="Instagram"
           onClick={() =>
-            openLink("https://www.instagram.com/gvrm_legendz?igsh=MTNjeThoZGtiNTFjNQ==")
+            openLink("https://www.instagram.com/nbk_youth_gangavaram_?igsi=MTNjeThoZGtiNTFjNQ%3D%3D")
           }
         />
         <SiYoutube

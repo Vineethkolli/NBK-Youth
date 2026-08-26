@@ -79,7 +79,7 @@ function TechStack() {
               title="Instagram"
               onClick={() =>
                 window.open(
-                  "https://www.instagram.com/mana_station_gangavaram/?igsh=MXU5cjM1ajVpemJm#",
+                  "https://www.instagram.com/nbk_youth_gangavaram_?igsi=MTNjeThoZGtiNTFjNQ%3D%3D",
                   "_blank",
                   "noopener,noreferrer"
                 )
