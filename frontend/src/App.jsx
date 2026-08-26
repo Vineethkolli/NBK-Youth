@@ -43,6 +43,7 @@ import AuthSessions from './pages/AuthSessions';
 import Tools from './pages/Tools';
 import Mailer from './pages/Mailer';
 import New from './pages/New';
+import MyVillage from './pages/MyVillage';
 import Explore from './components/Explore';
 
 import ProtectedRoute from './components/ProtectedRoute';
@@ -123,6 +124,7 @@ function AppContent() {
           <Route path="/explore" element={<Explore />} />
           <Route path="/tools" element={<Tools />} />
           <Route path="/mailer" element={<Mailer />} />
+          <Route path="/my-village" element={<MyVillage />} />
         </Route>
       </Routes>
 

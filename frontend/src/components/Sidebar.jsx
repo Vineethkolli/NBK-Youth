@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Home, User, History, FolderOpen, UserCog, Users, Bell, ShieldCheck, Settings, IndianRupee, DollarSign,
   Trash2, CheckSquare, BarChart2, Terminal, MusicIcon, CameraIcon, TrophyIcon, X, ChevronLeft, Calculator, 
-  Layers, LayoutDashboard, FileClock, Cpu, Fingerprint, ToolCase, MailCheck, Sparkles } from 'lucide-react';
+  Layers, LayoutDashboard, FileClock, Cpu, Fingerprint, ToolCase, MailCheck, Tractor} from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 function Sidebar({ isOpen, isCollapsed = false, onNavigate }) {
@@ -26,7 +26,7 @@ function Sidebar({ isOpen, isCollapsed = false, onNavigate }) {
   { to: '/activities', icon: TrophyIcon, label: 'Activities' },
   { to: '/tools', icon: ToolCase, label: 'Tools' },
   { to: '/tech-stack', icon: Layers, label: 'Tech Stack' },
-  { to: '/new', icon: Sparkles, label: 'New' },
+  { to: '/my-village', icon: Tractor, label: 'My Village' },
   
   ...(hasAccess('Pro') ? [
     { to: '/verification', icon: CheckSquare, label: 'Verification' },
