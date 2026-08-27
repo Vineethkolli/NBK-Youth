@@ -14,6 +14,8 @@ import TimelineRecordsTimeline from '../components/records/TimelineRecordsTimeli
 import TimelineRecordForm from '../components/records/TimelineRecordForm';
 import TimelineEnglishPrint from '../components/records/TimelineEnglishPrint';
 import TimelineTeluguPrint from '../components/records/TimelineTeluguPrint';
+import OverallEnglishPrint from '../components/records/OverallEnglishPrint';
+import OverallTeluguPrint from '../components/records/OverallTeluguPrint';
 import OverallStats from '../components/records/OverallStats';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -40,6 +42,7 @@ function Records() {
   
   const PrintComponent = language === 'te'? FinancialTeluguPrint : FinancialEnglishPrint;
   const TimelinePrintComponent = language === 'te' ? TimelineTeluguPrint : TimelineEnglishPrint;
+  const OverallPrintComponent = language === 'te' ? OverallTeluguPrint : OverallEnglishPrint;
 
   useEffect(() => {
     fetchFinancialRecords();
@@ -458,7 +461,7 @@ function Records() {
       )}
 
       {activeTab === 'overall-stats' && (
-        <OverallStats records={timelineRecords} />
+        <OverallStats records={timelineRecords} PrintComponent={OverallPrintComponent} />
       )}
 
       {/* Forms */}

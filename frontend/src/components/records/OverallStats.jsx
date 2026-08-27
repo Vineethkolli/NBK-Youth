@@ -3,7 +3,7 @@ import { BarChart3, Info, X } from 'lucide-react';
 
 const START_YEAR = 2023;
 
-function OverallStats({ records = [] }) {
+function OverallStats({ records = [], PrintComponent }) {
   const [showInflowInfo, setShowInflowInfo] = useState(false);
 
   const recordsSinceStart = records.filter(
@@ -112,7 +112,7 @@ function OverallStats({ records = [] }) {
 
   return (
     <section className="space-y-4">
-      <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between gap-2">
         <div>
           <h2 className="text-xl font-semibold text-gray-900">
             Overall Stats
@@ -121,6 +121,14 @@ function OverallStats({ records = [] }) {
             Data from 2023 onwards
           </p>
         </div>
+        {PrintComponent && (
+          <PrintComponent
+            events={Array.from(eventStats.values())}
+            totals={totals}
+            totalInflow={totalInflow}
+            amountLeft={amountLeft}
+          />
+        )}
       </div>
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-5">

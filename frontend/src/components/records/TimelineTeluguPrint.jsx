@@ -97,7 +97,7 @@ const TimelineTeluguPrint = ({ records, selectedEvent }) => {
                     <th>ఖర్చు చేసిన మొత్తం</th>
                     <th>మిగిలిన మొత్తం</th>
                     <th>అదనపు మొత్తం</th>
-                    <th>గత మొత్తం</th>
+                    <th>గత సంవత్సరం మొత్తం</th>
                     <th>తుది మిగిలిన మొత్తం</th>
                   </tr>
                 </thead>
