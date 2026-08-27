@@ -41,7 +41,8 @@ export const timelineRecordsController = {
         amountSpent,
         previousAmount,
         additionalAmount,
-        remarks
+        remarks,
+        responsible
       } = req.body;
 
       if (previousAmount === undefined || previousAmount === null || previousAmount === '') {
@@ -62,6 +63,7 @@ export const timelineRecordsController = {
         previousAmount,
         additionalAmount: additionalAmount ?? 0,
         remarks,
+        responsible,
         createdBy: req.user.registerId
       });
 
@@ -119,6 +121,7 @@ export const timelineRecordsController = {
         updatePayload.additionalAmount = req.body.additionalAmount;
       }
       if (Object.prototype.hasOwnProperty.call(req.body, 'remarks')) updatePayload.remarks = req.body.remarks;
+      if (Object.prototype.hasOwnProperty.call(req.body, 'responsible')) updatePayload.responsible = req.body.responsible;
 
       const record = await TimelineRecord.findByIdAndUpdate(recordId, updatePayload, { new: true });
 

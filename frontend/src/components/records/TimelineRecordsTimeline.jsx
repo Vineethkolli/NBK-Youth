@@ -1,8 +1,14 @@
 import { useState } from 'react';
-import { Edit2, Trash2, Loader2, TrendingUp, TrendingDown, Minus, Calendar } from 'lucide-react';
+import { Edit2, Trash2, Loader2, TrendingUp, TrendingDown, Minus, Calendar, Info, X, UserRound, ChevronDown, ChevronUp } from 'lucide-react';
 
 function TimelineRecordsTimeline({ records, isEditMode, onEdit, onDelete }) {
   const [deletingId, setDeletingId] = useState(null);
+  const [infoRecord, setInfoRecord] = useState(null);
+  const [expandedRecords, setExpandedRecords] = useState({});
+
+  const toggleRecord = (id) => {
+    setExpandedRecords((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
 
   const handleDelete = async (id) => {
     setDeletingId(id);
@@ -87,6 +93,7 @@ function TimelineRecordsTimeline({ records, isEditMode, onEdit, onDelete }) {
             const additionalAmount = record.additionalAmount || 0;
             const previousAmount = record.previousAmount || 0;
             const finalAmountLeft = amountLeft + additionalAmount + previousAmount;
+            const isResponsibleExpanded = expandedRecords[record._id];
 
             return (
               <div key={record._id} className="relative">
@@ -148,11 +155,48 @@ function TimelineRecordsTimeline({ records, isEditMode, onEdit, onDelete }) {
                         <p className="text-sm text-gray-500">Additional Amount</p>
                         <p className="text-lg font-semibold">{formatAmount(additionalAmount)}</p>
                       </div>
+                     
+                      {/* Final Amount Left */}
                       <div>
-                        <p className="text-sm text-gray-500">Final Amount Left</p>
-                        <p className="text-lg font-semibold">{formatAmount(finalAmountLeft)}</p>
+                        <div className="flex items-center gap-1.5">
+                          <p className="text-sm text-gray-500">
+                            Final Amount Left
+                          </p>
+                          <button
+                            type="button"
+                            onClick={() => setInfoRecord(record)}
+                            className="text-gray-400 hover:text-indigo-600 transition-colors"
+                            aria-label="Show final amount information"
+                          >
+                            <Info className="h-4 w-4" />
+                          </button>
+                        </div>
+
+                        <p className="text-lg font-semibold">
+                          {formatAmount(finalAmountLeft)}
+                        </p>
                       </div>
                     </div>
+
+                    {record.responsible && (
+                      <div>
+                        <button
+                          type="button"
+                          onClick={() => toggleRecord(record._id)}
+                          className="flex items-center space-x-2 text-indigo-600"
+                        >
+                          <UserRound className="h-4 w-4" />
+                          <span>Responsible Details</span>
+                          {isResponsibleExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                        </button>
+
+                        {isResponsibleExpanded && (
+                          <p className="mt-2 text-sm text-gray-700">
+                            <span className="font-medium">Responsible:</span> {record.responsible}
+                          </p>
+                        )}
+                      </div>
+                    )}
 
                     {record.remarks && <p>{record.remarks}</p>}
                   </div>
@@ -160,9 +204,13 @@ function TimelineRecordsTimeline({ records, isEditMode, onEdit, onDelete }) {
 
                 {differenceDisplay && index < records.length - 1 && (
                   <div className="absolute left-8 transform -translate-x-1/2 top-full flex justify-center">
-                    <div className={`flex items-center space-x-1 px-2 py-1 rounded-full bg-white shadow-sm border ${differenceDisplay.color}`}>
+                    <div
+                      className={`flex items-center space-x-1 px-2 py-1 rounded-full bg-white shadow-sm border ${differenceDisplay.color}`}
+                    >
                       {differenceDisplay.icon}
-                      <span className="text-xs font-medium">{differenceDisplay.text}</span>
+                      <span className="text-xs font-medium">
+                        {differenceDisplay.text}
+                      </span>
                     </div>
                   </div>
                 )}
@@ -171,8 +219,41 @@ function TimelineRecordsTimeline({ records, isEditMode, onEdit, onDelete }) {
           })}
         </div>
       </div>
+
+      {/* Info Dialog */}
+      {infoRecord && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          onClick={() => setInfoRecord(null)}
+        >
+          <div
+            className="relative w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => setInfoRecord(null)}
+              className="absolute right-3 top-3 rounded-full p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-700"
+              aria-label="Close"
+            >
+              <X className="h-5 w-5" />
+            </button>
+
+            <div className="pr-8">
+              <h3 className="text-lg font-semibold text-gray-900">
+                Final Amount Left
+              </h3>
+
+              <p className="mt-3 text-sm leading-6 text-gray-600">
+                Amount Left + Previous Amount (incl. interest) + Additional Amount
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+
 
 export default TimelineRecordsTimeline;

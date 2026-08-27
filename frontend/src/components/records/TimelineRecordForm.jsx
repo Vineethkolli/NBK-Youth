@@ -14,7 +14,8 @@ function TimelineRecordForm({ record, onClose, onSubmit }) {
     amountSpent: '',
     additionalAmount: '0',
     previousAmount: '',
-    remarks: ''
+    remarks: '',
+    responsible: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -35,7 +36,8 @@ function TimelineRecordForm({ record, onClose, onSubmit }) {
         amountSpent: record.amountSpent?.toString() || '',
         additionalAmount: (record.additionalAmount ?? 0).toString(),
         previousAmount: record.previousAmount?.toString() || '',
-        remarks: record.remarks || ''
+        remarks: record.remarks || '',
+        responsible: record.responsible || ''
       });
     }
   }, [record]);
@@ -59,7 +61,8 @@ function TimelineRecordForm({ record, onClose, onSubmit }) {
         amountSpent: parseFloat(formData.amountSpent) || 0,
         additionalAmount: parseFloat(formData.additionalAmount) || 0,
         previousAmount: parseFloat(formData.previousAmount),
-        remarks: formData.remarks.trim() || ''
+        remarks: formData.remarks.trim() || '',
+        responsible: formData.responsible.trim() || ''
       };
 
       await onSubmit(submitData);
@@ -193,6 +196,17 @@ function TimelineRecordForm({ record, onClose, onSubmit }) {
               step="0.01"
               value={formData.previousAmount}
               onChange={(e) => setFormData({ ...formData, previousAmount: e.target.value })}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Responsible</label>
+            <input
+              type="text"
+              value={formData.responsible}
+              onChange={(e) => setFormData({ ...formData, responsible: e.target.value })}
+              placeholder="Enter responsible person or team"
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
             />
           </div>

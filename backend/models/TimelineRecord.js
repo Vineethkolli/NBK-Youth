@@ -37,6 +37,10 @@ const timelineRecordSchema = new mongoose.Schema({
     type: String,
     trim: true
   },
+  responsible: {
+    type: String,
+    trim: true
+  },
   createdBy: {
     type: String,
     required: true
