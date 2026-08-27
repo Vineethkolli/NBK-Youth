@@ -250,16 +250,29 @@ export const getAllSessions = async (req, res) => {
       query.action = action;
     }
 
-    if (timeFilter === 'today') {
-      query.lastActive = { $gte: getStartOfPeriod('day') };
-    } else if (timeFilter === 'monthly') {
-      query.lastActive = { $gte: getStartOfPeriod('month') };
-    }
-
     let sessions = await Session.find(query)
       .populate('userId', 'registerId name')
       .sort({ createdAt: -1 })
       .lean();
+
+    // Apply time filter based on IST
+if (timeFilter === 'today') {
+  const startOfToday = getStartOfPeriod('day');
+
+  sessions = sessions.filter(
+    session =>
+      session.lastActive &&
+      new Date(session.lastActive) >= startOfToday
+  );
+} else if (timeFilter === 'monthly') {
+  const startOfMonth = getStartOfPeriod('month');
+
+  sessions = sessions.filter(
+    session =>
+      session.lastActive &&
+      new Date(session.lastActive) >= startOfMonth
+  );
+}
 
     if (search && search.trim() !== '') {
       const searchLower = search.toLowerCase();
@@ -320,17 +333,16 @@ export const getAllSessions = async (req, res) => {
 
 export const getSessionsStats = async (req, res) => {
   try {
-    const now = new Date();
-    const startOfToday = getStartOfPeriod('day');
-    const startOfMonth = getStartOfPeriod('month');
-    const activeSessionQuery = { isValid: true, expiresAt: { $gt: now } };
+    // IST-based date boundaries
+const startOfToday = getStartOfPeriod('day');
+const startOfMonth = getStartOfPeriod('month');
 
-    const activeSessionToday = Session.countDocuments({ ...activeSessionQuery, lastActive: { $gte: startOfToday } });
-    const activeSessionMonth = Session.countDocuments({ ...activeSessionQuery, lastActive: { $gte: startOfMonth } });
+    const activeSessionToday = Session.countDocuments({ lastActive: { $gte: startOfToday } });
+    const activeSessionMonth = Session.countDocuments({ lastActive: { $gte: startOfMonth } });
     const activeSessionOverall = Session.countDocuments({});
 
-    const activeUserToday = Session.distinct("userId", { ...activeSessionQuery, lastActive: { $gte: startOfToday } });
-    const activeUserMonth = Session.distinct("userId", { ...activeSessionQuery, lastActive: { $gte: startOfMonth } });
+    const activeUserToday = Session.distinct("userId", { lastActive: { $gte: startOfToday } });
+    const activeUserMonth = Session.distinct("userId", { lastActive: { $gte: startOfMonth } });
     const activeUserOverall = Session.distinct("userId", {});
 
     const actionAgg = Session.aggregate([{ $group: { _id: '$action', count: { $sum: 1 } } }]);

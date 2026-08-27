@@ -3,17 +3,14 @@ export function formatDateTime(dateString) {
   const date = new Date(dateString);
   if (isNaN(date.getTime())) return 'Invalid Date';
 
-  return date.toLocaleString('en-IN', {
-    timeZone: 'Asia/Kolkata',
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true,
-  });
-}
+  const day = date.getDate().toString().padStart(2, '0');
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const year = date.getFullYear();
 
-export function getIndiaDateKey(date = new Date()) {
-  return date.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
+  let hours = date.getHours();
+  const minutes = date.getMinutes().toString().padStart(2, '0');
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12 || 12; // converts 0 -> 12
+
+  return `${day}/${month}/${year}, ${hours}:${minutes} ${ampm}`;
 }

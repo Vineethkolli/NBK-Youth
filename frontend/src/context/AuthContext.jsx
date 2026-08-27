@@ -3,7 +3,6 @@ import axios from "axios";
 import { API_URL } from "../utils/config";
 import { getDeviceInfo } from "../utils/deviceInfo";
 import { Access } from "../utils/access";
-import { getIndiaDateKey } from "../utils/dateTime";
 
 const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
@@ -57,8 +56,8 @@ const wasLastActiveUpdatedToday = () => {
   const lastUpdate = localStorage.getItem("lastActiveUpdate");
   if (!lastUpdate) return false;
 
-  const today = getIndiaDateKey();
-  const last = getIndiaDateKey(new Date(parseInt(lastUpdate)));
+  const today = new Date().toDateString();
+  const last = new Date(parseInt(lastUpdate)).toDateString();
   return today === last;
 };
 
