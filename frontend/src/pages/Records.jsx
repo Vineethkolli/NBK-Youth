@@ -496,7 +496,7 @@ function Records() {
       )}
 
     <footer className="pt-8 text-center text-sm text-gray-500">
-      Since 2023 — We moved all records from paper to digital
+      Since 2023 — From Paper to Digital
     </footer>
     </div>
   );
