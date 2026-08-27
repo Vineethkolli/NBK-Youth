@@ -14,7 +14,7 @@ const StatsPrint = ({ stats }) => {
 
   const displayAmountWithShortage = (amount) =>
     amount < 0
-      ? `<span translate="no">${formatAmount(amount)} (Shortage)</span>`
+      ? `<span>${formatAmount(amount)} (Shortage)</span>`
       : formatAmount(amount);
 
   const handlePrint = () => {
