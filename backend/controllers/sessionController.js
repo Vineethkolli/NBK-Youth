@@ -1,6 +1,18 @@
 import Session from "../models/Session.js";
 import { generateAccessToken, generateRefreshToken, hashToken } from "../utils/tokenUtils.js";
 import { getLocationFromIP } from "../utils/ipLocation.js";
+import { DateTime } from "luxon";
+
+const APP_TIMEZONE = "Asia/Kolkata";
+
+const getStartOfPeriod = (period) => {
+  const indiaNow = DateTime.now().setZone(APP_TIMEZONE);
+  const start = period === "month"
+    ? indiaNow.startOf("month")
+    : indiaNow.startOf("day");
+
+  return start.toUTC().toJSDate();
+};
 
 const getIsHttps = (req) =>
   req.secure || (process.env.FRONTEND_URL || "").startsWith("https://");
@@ -238,28 +250,16 @@ export const getAllSessions = async (req, res) => {
       query.action = action;
     }
 
+    if (timeFilter === 'today') {
+      query.lastActive = { $gte: getStartOfPeriod('day') };
+    } else if (timeFilter === 'monthly') {
+      query.lastActive = { $gte: getStartOfPeriod('month') };
+    }
+
     let sessions = await Session.find(query)
       .populate('userId', 'registerId name')
       .sort({ createdAt: -1 })
       .lean();
-
-    // Apply time filter based on lastActive
-    if (timeFilter && timeFilter !== 'sessions') {
-      const now = new Date();
-      sessions = sessions.filter(session => {
-        const lastActiveDate = new Date(session.lastActive);
-        
-        if (timeFilter === 'today') {
-          // Check if session was last active today
-          return lastActiveDate.toDateString() === now.toDateString();
-        } else if (timeFilter === 'monthly') {
-          // Check if session was last active in current month
-          return lastActiveDate.getMonth() === now.getMonth() && 
-                 lastActiveDate.getFullYear() === now.getFullYear();
-        }
-        return true;
-      });
-    }
 
     if (search && search.trim() !== '') {
       const searchLower = search.toLowerCase();
@@ -320,17 +320,17 @@ export const getAllSessions = async (req, res) => {
 
 export const getSessionsStats = async (req, res) => {
   try {
-    const startOfToday = new Date();
-    startOfToday.setHours(0, 0, 0, 0);
+    const now = new Date();
+    const startOfToday = getStartOfPeriod('day');
+    const startOfMonth = getStartOfPeriod('month');
+    const activeSessionQuery = { isValid: true, expiresAt: { $gt: now } };
 
-    const startOfMonth = new Date(startOfToday.getFullYear(), startOfToday.getMonth(), 1);
-
-    const activeSessionToday = Session.countDocuments({ lastActive: { $gte: startOfToday } });
-    const activeSessionMonth = Session.countDocuments({ lastActive: { $gte: startOfMonth } });
+    const activeSessionToday = Session.countDocuments({ ...activeSessionQuery, lastActive: { $gte: startOfToday } });
+    const activeSessionMonth = Session.countDocuments({ ...activeSessionQuery, lastActive: { $gte: startOfMonth } });
     const activeSessionOverall = Session.countDocuments({});
 
-    const activeUserToday = Session.distinct("userId", { lastActive: { $gte: startOfToday } });
-    const activeUserMonth = Session.distinct("userId", { lastActive: { $gte: startOfMonth } });
+    const activeUserToday = Session.distinct("userId", { ...activeSessionQuery, lastActive: { $gte: startOfToday } });
+    const activeUserMonth = Session.distinct("userId", { ...activeSessionQuery, lastActive: { $gte: startOfMonth } });
     const activeUserOverall = Session.distinct("userId", {});
 
     const actionAgg = Session.aggregate([{ $group: { _id: '$action', count: { $sum: 1 } } }]);
