@@ -22,6 +22,8 @@ const OverallEnglishPrint = ({
       }).format(amount || 0);
 
     doc.setFontSize(20);
+    doc.setTextColor(0, 0, 0);
+
     doc.text(
       'Overall Records Report',
       pageWidth / 2,
@@ -31,6 +33,7 @@ const OverallEnglishPrint = ({
 
     doc.setFontSize(11);
     doc.setTextColor(100, 100, 100);
+
     doc.text(
       'Data from 2023 onwards',
       pageWidth / 2,
@@ -116,7 +119,7 @@ const OverallEnglishPrint = ({
     });
 
     const additionalDetails = events.flatMap((event) =>
-      event.additionalDetails.map((detail) => [
+      (event.additionalDetails || []).map((detail) => [
         event.eventName,
         detail.year,
         formatAmount(detail.amount),
@@ -169,6 +172,20 @@ const OverallEnglishPrint = ({
         timestamp,
         10,
         pageHeight - 8
+      );
+
+      const footerText =
+        'Gangavaram App | https://nbkyouth.vercel.app';
+
+      const linkWidth = doc.getTextWidth(footerText);
+
+      doc.textWithLink(
+        footerText,
+        (pageWidth - linkWidth) / 2,
+        pageHeight - 8,
+        {
+          url: 'https://nbkyouth.vercel.app'
+        }
       );
 
       doc.text(

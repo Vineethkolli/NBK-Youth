@@ -83,7 +83,7 @@ const OverallTeluguPrint = ({
 
     printWindow.document.write(`
       <h2 translate="no">
-        మొత్తం రికార్డుల నివేదిక
+        మొత్తం గణాంకాలు నివేదిక
       </h2>
 
       <p
@@ -194,7 +194,7 @@ const OverallTeluguPrint = ({
 
               return (
                 <tr key={event.eventName}>
-                  <td translate="no">
+                  <td>
                     {event.eventName}
                   </td>
 
@@ -249,7 +249,7 @@ const OverallTeluguPrint = ({
                       <tr
                         key={`${event.eventName}-${detail.year}`}
                       >
-                        <td translate="no">
+                        <td>
                           {event.eventName}
                         </td>
 
