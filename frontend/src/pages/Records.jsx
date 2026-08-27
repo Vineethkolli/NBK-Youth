@@ -256,7 +256,7 @@ function Records() {
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-3 lg:space-y-0">
         <h1 className="text-2xl font-semibold">Records</h1>
 
-        <div className="flex space-x-4">
+        <div className="flex space-x-3">
           <button
             onClick={() => setActiveTab('overall-stats')}
             className={`px-2 py-2 rounded-md font-semibold flex items-center ${
@@ -265,7 +265,7 @@ function Records() {
                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
             }`}
           >
-            <BarChart3 className="h-4 w-4 mr-1" />
+            <BarChart3 className="h-4 w-4" />
           </button>
                     <button
             onClick={() => setActiveTab('records-timeline')}
