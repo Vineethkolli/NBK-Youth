@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Plus, Edit2, FileText, TrendingUp, IndianRupeeIcon } from 'lucide-react';
+import { Plus, Edit2, FileText, TrendingUp, IndianRupeeIcon, BarChart3 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { API_URL } from '../utils/config';
@@ -14,12 +14,13 @@ import TimelineRecordsTimeline from '../components/records/TimelineRecordsTimeli
 import TimelineRecordForm from '../components/records/TimelineRecordForm';
 import TimelineEnglishPrint from '../components/records/TimelineEnglishPrint';
 import TimelineTeluguPrint from '../components/records/TimelineTeluguPrint';
+import OverallStats from '../components/records/OverallStats';
 import { useLanguage } from '../context/LanguageContext';
 
 
 function Records() {
   const { hasAccess } = useAuth();
-  const [activeTab, setActiveTab] = useState('records-timeline');
+  const [activeTab, setActiveTab] = useState('overall-stats');
   const [financialRecords, setFinancialRecords] = useState([]);
   const [timelineRecords, setTimelineRecords] = useState([]);
   const [eventRecords, setEventRecords] = useState([]);
@@ -256,6 +257,16 @@ function Records() {
         <h1 className="text-2xl font-semibold">Records</h1>
 
         <div className="flex space-x-4">
+          <button
+            onClick={() => setActiveTab('overall-stats')}
+            className={`px-2 py-2 rounded-md font-semibold flex items-center ${
+              activeTab === 'overall-stats'
+                ? 'bg-indigo-600 text-white'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+          >
+            <BarChart3 className="h-4 w-4 mr-1" />
+          </button>
                     <button
             onClick={() => setActiveTab('records-timeline')}
             className={`px-2 py-2 rounded-md font-semibold flex items-center ${
@@ -444,6 +455,10 @@ function Records() {
             onDelete={handleTimelineRecordDelete}
           />
         </div>
+      )}
+
+      {activeTab === 'overall-stats' && (
+        <OverallStats records={timelineRecords} />
       )}
 
       {/* Forms */}
