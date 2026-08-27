@@ -137,7 +137,9 @@ function TeluguPrint({ selectedHistory, activeTab, data, showBelongsTo }) {
     const budgetStats = stats.budgetStats || {};
     const amountLeft = budgetStats.amountLeft?.amount || 0;
     const previousYearAmount = budgetStats.previousYearAmount?.amount || 0;
-    const totalIncludingPrevious = amountLeft + previousYearAmount;
+    const additionalAmount = budgetStats.previousYearAmount?.additionalAmount || 0;
+    const remarks = budgetStats.previousYearAmount?.remarks || '';
+    const totalIncludingPrevious = amountLeft + previousYearAmount + additionalAmount;
 
     // Budget Stats
     const budgetCols = ['Category', 'Count', 'Amount'];
@@ -148,7 +150,9 @@ function TeluguPrint({ selectedHistory, activeTab, data, showBelongsTo }) {
       ['Total Expenses', `${budgetStats.totalExpenses?.count || 0} entries`, formatAmount(budgetStats.totalExpenses?.amount)],
       ['Amount Left', '-', displayAmountWithShortage(amountLeft)],
       ['Previous Year Amount', '-', formatAmount(previousYearAmount)],
-      ['Amount Left (including previous)', '-', displayAmountWithShortage(totalIncludingPrevious)]
+      ['Additional Amount', '-', formatAmount(additionalAmount)],
+      ['Remarks', { content: remarks || '-', colSpan: 2 }],
+      ['Final Amount Left (including previous + additional)', '-', displayAmountWithShortage(totalIncludingPrevious)]
     ];
 
     // Payment Mode Stats

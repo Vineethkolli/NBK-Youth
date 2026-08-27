@@ -1,6 +1,9 @@
-import { IndianRupee, Users } from 'lucide-react';
+import { useState } from 'react';
+import { IndianRupee, Users, Info, X } from 'lucide-react';
 
 function HistoryStats({ stats, snapshotName }) {
+  const [infoDialog, setInfoDialog] = useState(null);
+
   if (!stats || Object.keys(stats).length === 0) {
     return (
       <div className="p-6 text-center text-gray-500">
@@ -26,6 +29,11 @@ function HistoryStats({ stats, snapshotName }) {
   const formatNumber = (num) => noTranslate(num || 0);
 
   const { budgetStats = {}, userStats = {}, villagers = {}, youth = {}, dateWiseStats = [] } = stats;
+  const amountLeft = budgetStats.amountLeft?.amount || 0;
+  const previousYearAmount = budgetStats.previousYearAmount?.amount || 0;
+  const additionalAmount = budgetStats.previousYearAmount?.additionalAmount || 0;
+  const remarks = budgetStats.previousYearAmount?.remarks || '';
+  const finalAmountLeft = amountLeft + previousYearAmount + additionalAmount;
 
   return (
     <div className="space-y-6">
@@ -96,23 +104,46 @@ function HistoryStats({ stats, snapshotName }) {
             <div>
               <p className="font-semibold">Previous Year Amount</p>
               <p className="text-lg font-bold">
-                {formatAmount(budgetStats.previousYearAmount?.amount)}
+                {formatAmount(previousYearAmount)}
               </p>
+              <div className="mt-1 space-y-1">
+                <div>
+                  <p className="font-semibold">Additional Amount</p>
+                  <p className="text-lg font-bold">
+                    {formatAmount(additionalAmount)}
+                  </p>
+                </div>
+                <div>
+                  <p className="font-semibold">Remarks</p>
+                  <p className="text-sm text-gray-600">
+                    {remarks || 'NA'}
+                  </p>
+                </div>
+              </div>
             </div>
 
             {/* Amount Left */}
             <div>
-              <p className="font-semibold">Amount Left</p>
-              <p className="text-xs text-gray-500">(Excluding Previous Year Amount)</p>
+              <div className="flex items-center gap-1.5">
+                <p className="font-semibold">Amount Left</p>
+                <button
+                  type="button"
+                  onClick={() => setInfoDialog('amountLeft')}
+                  className="text-gray-400 transition-colors hover:text-indigo-600"
+                  aria-label="Amount Left information"
+                >
+                  <Info className="h-4 w-4" />
+                </button>
+              </div>
               <p
                 className={`text-lg font-bold ${
-                  (budgetStats.amountLeft?.amount || 0) < 0
+                  amountLeft < 0
                     ? 'text-red-600'
-                    : 'text-green-700'
+                    : ''
                 }`}
               >
-                {formatAmount(budgetStats.amountLeft?.amount)}
-                {(budgetStats.amountLeft?.amount || 0) < 0 && (
+                {formatAmount(amountLeft)}
+                {amountLeft < 0 && (
                   <span className="ml-2 text-red-500 font-semibold">(Shortage)</span>
                 )}
               </p>
@@ -120,6 +151,20 @@ function HistoryStats({ stats, snapshotName }) {
                 <p>Online: {formatAmount(budgetStats.amountLeft?.onlineAmount)}</p>
                 <p>Offline: {formatAmount(budgetStats.amountLeft?.cashAmount)}</p>
               </div>
+              <div className="flex items-center gap-1.5 mt-3">
+                <p className="font-semibold">Final Amount Left</p>
+                <button
+                  type="button"
+                  onClick={() => setInfoDialog('finalAmountLeft')}
+                  className="text-gray-400 transition-colors hover:text-indigo-600"
+                  aria-label="Final Amount Left information"
+                >
+                  <Info className="h-4 w-4" />
+                </button>
+              </div>
+              <p className={`text-lg font-bold ${finalAmountLeft < 0 ? 'text-red-600' : ''}`}>
+                {formatAmount(finalAmountLeft)}
+              </p>
             </div>
           </div>
         </div>
@@ -278,6 +323,35 @@ function HistoryStats({ stats, snapshotName }) {
             <div className="text-center py-2 text-sm text-gray-500">
               Total: {formatNumber(dateWiseStats.length)} days
             </div>
+          </div>
+        </div>
+      )}
+
+      {infoDialog && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          onClick={() => setInfoDialog(null)}
+        >
+          <div
+            className="relative w-full max-w-sm rounded-lg bg-white p-5 shadow-xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => setInfoDialog(null)}
+              className="absolute right-3 top-3 text-gray-400 hover:text-gray-700"
+              aria-label="Close information"
+            >
+              <X className="h-5 w-5" />
+            </button>
+            <h3 className="pr-8 text-lg font-semibold">
+              {infoDialog === 'amountLeft' ? 'Amount Left' : 'Final Amount Left'}
+            </h3>
+            <p className="mt-3 text-sm leading-6 text-gray-600">
+              {infoDialog === 'amountLeft'
+                ? 'Excluding previous year amount and additional amount'
+                : 'Including previous year amount and additional amount'}
+            </p>
           </div>
         </div>
       )}
