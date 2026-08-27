@@ -25,7 +25,7 @@ function Stats() {
       amountReceived: { count: 0, amount: 0 },
       amountPending: { count: 0, amount: 0 },
       totalExpenses: { count: 0, amount: 0, onlineAmount: 0, cashAmount: 0 },
-      previousYearAmount: { amount: 0 },
+      previousYearAmount: { amount: 0, additionalAmount: 0, remarks: '' },
       amountLeft: { amount: 0, onlineAmount: 0, cashAmount: 0 },
       online: { count: 0, amount: 0 },
       offline: { count: 0, amount: 0 }
@@ -49,6 +49,8 @@ function Stats() {
 
   const [isEditingPreviousYear, setIsEditingPreviousYear] = useState(false);
   const [previousYearAmount, setPreviousYearAmount] = useState(0);
+  const [additionalAmount, setAdditionalAmount] = useState(0);
+  const [remarks, setRemarks] = useState('');
   const [isAddingPreviousYear, setIsAddingPreviousYear] = useState(false);
 
   useEffect(() => {
@@ -59,7 +61,9 @@ function Stats() {
     try {
       const { data } = await axios.get(`${API_URL}/api/stats`);
       setStats(data);
-      setPreviousYearAmount(data.budgetStats.previousYearAmount.amount);
+        setPreviousYearAmount(data.budgetStats.previousYearAmount.amount || 0);
+        setAdditionalAmount(data.budgetStats.previousYearAmount.additionalAmount || 0);
+        setRemarks(data.budgetStats.previousYearAmount.remarks || '');
     } catch (error) {
       toast.error('Failed to fetch stats');
     }
@@ -69,7 +73,9 @@ function Stats() {
     try {
       setIsAddingPreviousYear(true);
       await axios.patch(`${API_URL}/api/stats/previous-year`, {
-        amount: previousYearAmount
+        amount: previousYearAmount,
+        additionalAmount,
+        remarks
       });
       toast.success('Previous year amount updated');
       setIsEditingPreviousYear(false);
@@ -125,6 +131,10 @@ function Stats() {
           setIsEditingPreviousYear={setIsEditingPreviousYear}
           previousYearAmount={previousYearAmount}
           setPreviousYearAmount={setPreviousYearAmount}
+          additionalAmount={additionalAmount}
+          setAdditionalAmount={setAdditionalAmount}
+          remarks={remarks}
+          setRemarks={setRemarks}
           isAddingPreviousYear={isAddingPreviousYear}
           handlePreviousYearUpdate={handlePreviousYearUpdate}
         />

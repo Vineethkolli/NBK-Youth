@@ -47,7 +47,9 @@ const StatsPrint = ({ stats }) => {
     yPos += 4;
     const amountLeft = stats.budgetStats.amountLeft.amount;
     const previousYearAmount = stats.budgetStats.previousYearAmount.amount;
-    const totalIncludingPrevious = amountLeft + previousYearAmount;
+    const additionalAmount = stats.budgetStats.previousYearAmount.additionalAmount || 0;
+    const remarks = stats.budgetStats.previousYearAmount.remarks || '';
+    const finalAmountLeft = amountLeft + previousYearAmount + additionalAmount;
     const budgetHead = ['Category', 'Count', 'Amount'];
     const budgetBody = [
       ['Total Income', `${stats.budgetStats.totalIncome.count} entries`, formatAmount(stats.budgetStats.totalIncome.amount)],
@@ -56,7 +58,9 @@ const StatsPrint = ({ stats }) => {
       ['Total Expenses', `${stats.budgetStats.totalExpenses.count} entries`, formatAmount(stats.budgetStats.totalExpenses.amount)],
       ['Amount Left', '-', displayAmountWithShortage(amountLeft)],
       ['Previous Year Amount', '-', formatAmount(previousYearAmount)],
-      ['Amount Left (including previous)', '-', displayAmountWithShortage(totalIncludingPrevious)]
+      ['Additional Amount', '-', formatAmount(additionalAmount)],
+      ['Remarks', { content: remarks || '-', colSpan: 2 }],
+      ['Final Amount Left (including previous + additional)', '-', displayAmountWithShortage(finalAmountLeft)]
     ];
 
     autoTable(doc, {

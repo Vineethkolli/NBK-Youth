@@ -1,4 +1,5 @@
-import { IndianRupee, Users, Edit2 } from 'lucide-react';
+import { useState } from 'react';
+import { IndianRupee, Users, Edit2, Info, X } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 export default function StatsOverview({
@@ -10,10 +11,20 @@ export default function StatsOverview({
   setIsEditingPreviousYear,
   previousYearAmount,
   setPreviousYearAmount,
+  additionalAmount,
+  setAdditionalAmount,
+  remarks,
+  setRemarks,
   isAddingPreviousYear,
   handlePreviousYearUpdate
 }) {
   const { hasAccess } = useAuth();
+  const [infoDialog, setInfoDialog] = useState(null);
+
+  const infoText = {
+    amountLeft: 'Excluding previous year amount and additional amount',
+    finalAmountLeft: 'Including previous year amount and additional amount'
+  };
   
   return (
     <>
@@ -77,11 +88,30 @@ export default function StatsOverview({
                     className="w-full rounded border-gray-300"
                     disabled={lockSettings.isLocked}
                   />
+                  <p className="font-semibold">Additional Amount</p>
+                  <input
+                    type="number"
+                    value={additionalAmount}
+                    onChange={(e) => setAdditionalAmount(Number(e.target.value))}
+                    placeholder="Additional Amount"
+                    className="w-full rounded border-gray-300"
+                    disabled={lockSettings.isLocked}
+                  />
+                  <textarea
+                  value={remarks}
+                  onChange={(e) => setRemarks(e.target.value)}
+              placeholder="Remarks"
+              rows={1}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              disabled={lockSettings.isLocked}
+            />
                   <div className="flex space-x-2">
                     <button
                       onClick={() => {
                         setIsEditingPreviousYear(false);
                         setPreviousYearAmount(stats.budgetStats.previousYearAmount.amount);
+                        setAdditionalAmount(stats.budgetStats.previousYearAmount.additionalAmount || 0);
+                        setRemarks(stats.budgetStats.previousYearAmount.remarks || '');
                       }}
                       className="px-2 py-1 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
                       disabled={lockSettings.isLocked}
@@ -113,11 +143,36 @@ export default function StatsOverview({
                   )}
                 </div>
               )}
+              {!isEditingPreviousYear && (
+                <div className="mt-1 space-y-1">
+                  <div>
+                    <p className="font-semibold">Additional Amount</p>
+                    <p className="text-lg font-bold">
+                      {formatAmount(stats.budgetStats.previousYearAmount.additionalAmount || 0)}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="font-semibold">Remarks</p>
+                    <p className=" text-sm text-gray-600">
+                      {stats.budgetStats.previousYearAmount.remarks || 'NA'}
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div>
-              <p className="font-semibold">Amount Left</p>
-              <p className="text-xs text-gray-500">(Excluding Previous Year Amount)</p>
+              <div className="flex items-center gap-1.5">
+                <p className="font-semibold">Amount Left</p>
+                <button
+                  type="button"
+                  onClick={() => setInfoDialog('amountLeft')}
+                  className="text-gray-400 transition-colors hover:text-indigo-600"
+                  aria-label="Amount Left information"
+                >
+                  <Info className="h-4 w-4" />
+                </button>
+              </div>
               <p className={`text-lg font-bold ${stats.budgetStats.amountLeft.amount < 0 ? 'text-red-600' : ''}`}>
                 {formatAmount(stats.budgetStats.amountLeft.amount)}
                 {stats.budgetStats.amountLeft.amount < 0 && (
@@ -128,10 +183,46 @@ export default function StatsOverview({
                 <p>Online: {formatAmount(stats.budgetStats.amountLeft.onlineAmount)}</p>
                 <p>Offline: {formatAmount(stats.budgetStats.amountLeft.cashAmount)}</p>
               </div>
+              <div className="flex items-center gap-1.5 mt-3">
+                <p className="font-semibold">Final Amount Left</p>
+                <button
+                  type="button"
+                  onClick={() => setInfoDialog('finalAmountLeft')}
+                  className="text-gray-400 transition-colors hover:text-indigo-600"
+                  aria-label="Final Amount Left information"
+                >
+                  <Info className="h-4 w-4" />
+                </button>
+              </div>
+              <p className={`text-lg font-bold ${((stats.budgetStats.amountLeft.amount || 0) + (stats.budgetStats.previousYearAmount.amount || 0) + (stats.budgetStats.previousYearAmount.additionalAmount || 0)) < 0 ? 'text-red-600' : ''}`}>
+                {formatAmount((stats.budgetStats.amountLeft.amount || 0) + (stats.budgetStats.previousYearAmount.amount || 0) + (stats.budgetStats.previousYearAmount.additionalAmount || 0))}
+              </p>
             </div>
           </div>
         </div>
       </div>
+
+      {infoDialog && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          onClick={() => setInfoDialog(null)}
+        >
+          <div
+            className="relative w-full max-w-sm rounded-lg bg-white p-5 shadow-xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => setInfoDialog(null)}
+              className="absolute right-3 top-3 text-gray-400 hover:text-gray-700"
+              aria-label="Close information"
+            >
+              <X className="h-5 w-5" />
+            </button>
+            <p className="pr-6 text-sm text-gray-700">{infoText[infoDialog]}</p>
+          </div>
+        </div>
+      )}
 
       {/* User Stats */}
       <div className="bg-white rounded-lg shadow p-6">

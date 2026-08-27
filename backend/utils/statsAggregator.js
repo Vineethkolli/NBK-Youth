@@ -230,7 +230,7 @@ export const computeBudgetStats = async () => {
   const [userCount, successfulPaymentCount, previousYear] = await Promise.all([
     User.countDocuments(),
     Payment.countDocuments({ transactionStatus: 'successful' }),
-    PreviousYear.findOne().select('amount').lean(),
+    PreviousYear.findOne().select('amount additionalAmount remarks').lean(),
   ]);
 
   const incomeTotals = incomeFacets?.overall?.[0] || {};
@@ -283,7 +283,11 @@ export const computeBudgetStats = async () => {
       amountReceived,
       amountPending,
       totalExpenses,
-      previousYearAmount: { amount: roundNumber(previousYear?.amount || 0) },
+      previousYearAmount: {
+        amount: roundNumber(previousYear?.amount || 0),
+        additionalAmount: roundNumber(previousYear?.additionalAmount || 0),
+        remarks: previousYear?.remarks || '',
+      },
       amountLeft,
       online,
       offline,

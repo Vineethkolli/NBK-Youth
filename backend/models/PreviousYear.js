@@ -5,6 +5,14 @@ const previousYearSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
+  additionalAmount: {
+    type: Number,
+    default: 0
+  },
+  remarks: {
+    type: String,
+    default: ''
+  },
     registerId: {   
     type: String,
     required: true

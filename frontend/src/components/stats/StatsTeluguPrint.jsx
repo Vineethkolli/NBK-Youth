@@ -55,7 +55,9 @@ const StatsPrint = ({ stats }) => {
             .map(
               row =>
                 `<tr>${row
-                  .map(cell => `<td>${cell}</td>`)
+                  .map(cell => typeof cell === 'object'
+                    ? `<td colspan="${cell.colSpan}">${cell.content}</td>`
+                    : `<td>${cell}</td>`)
                   .join('')}</tr>`
             )
             .join('')}
@@ -68,7 +70,9 @@ const StatsPrint = ({ stats }) => {
   const bs = stats.budgetStats;
   const amountLeft = bs.amountLeft.amount;
   const prevYear = bs.previousYearAmount.amount;
-  const totalLeft = amountLeft + prevYear;
+  const additionalAmount = bs.previousYearAmount.additionalAmount || 0;
+  const remarks = bs.previousYearAmount.remarks || '';
+  const finalAmountLeft = amountLeft + prevYear + additionalAmount;
   const budgetCols = ['Category', 'Count', 'Amount'];
   const budgetRows = [
     ['Total Income', `${bs.totalIncome.count} entries`, formatAmount(bs.totalIncome.amount)],
@@ -77,7 +81,9 @@ const StatsPrint = ({ stats }) => {
     ['Total Expenses', `${bs.totalExpenses.count} entries`, formatAmount(bs.totalExpenses.amount)],
     ['Amount Left', '-', displayAmountWithShortage(amountLeft)],
     ['Previous Year Amount', '-', formatAmount(prevYear)],
-    ['Amount Left (incl. prev)', '-', displayAmountWithShortage(totalLeft)],
+    ['Additional Amount', '-', formatAmount(additionalAmount)],
+    ['Remarks', { content: remarks || '-', colSpan: 2 }],
+    ['Final Amount Left (incl. previous + additional)', '-', displayAmountWithShortage(finalAmountLeft)],
   ];
 
   // Payment Mode Stats

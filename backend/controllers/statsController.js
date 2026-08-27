@@ -15,15 +15,22 @@ export const statsController = {
 
   updatePreviousYear: async (req, res) => {
     try {
-      const { amount } = req.body;
+      const { amount, additionalAmount, remarks } = req.body;
 
       const currentData = await PreviousYear.findOne().lean();
       const originalAmount = currentData ? currentData.amount : 0;
+      const originalAdditionalAmount = currentData ? currentData.additionalAmount : 0;
+      const originalRemarks = currentData ? currentData.remarks : '';
+      const updatedAmount = Math.round(Number(amount) || 0);
+      const updatedAdditionalAmount = Math.round(Number(additionalAmount) || 0);
+      const updatedRemarks = remarks || '';
 
       await PreviousYear.findOneAndUpdate(
         {},
         {
-          amount: Math.round(amount),
+          amount: updatedAmount,
+          additionalAmount: updatedAdditionalAmount,
+          remarks: updatedRemarks,
           registerId: req.user?.registerId
         },
         { upsert: true, new: true }
@@ -34,7 +41,7 @@ export const statsController = {
         'UPDATE',
         'PreviousYear',
         'previous-year-amount',
-        { before: { amount: originalAmount }, after: { amount: Math.round(amount) } },
+        { before: { amount: originalAmount, additionalAmount: originalAdditionalAmount, remarks: originalRemarks }, after: { amount: updatedAmount, additionalAmount: updatedAdditionalAmount, remarks: updatedRemarks } },
         `Previous year amount updated by ${req.user.name}`
       );
 
