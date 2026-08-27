@@ -22,9 +22,15 @@ export default function StatsOverview({
   const [infoDialog, setInfoDialog] = useState(null);
 
   const infoText = {
-    amountLeft: 'Excluding previous year amount and additional amount',
-    finalAmountLeft: 'Including previous year amount and additional amount'
-  };
+  amountLeft: {
+    title: 'Amount Left',
+    description: 'Excluding previous year amount and additional amount'
+  },
+  finalAmountLeft: {
+    title: 'Final Amount Left',
+    description: 'Including previous year amount and additional amount'
+  }
+};
   
   return (
     <>
@@ -219,7 +225,14 @@ export default function StatsOverview({
             >
               <X className="h-5 w-5" />
             </button>
-            <p className="pr-6 text-sm text-gray-700">{infoText[infoDialog]}</p>
+            <div className="pr-6">
+  <h3 className="text-base font-semibold text-gray-900 mb-1">
+    {infoText[infoDialog].title}
+  </h3>
+  <p className="text-sm text-gray-700">
+    {infoText[infoDialog].description}
+  </p>
+</div>
           </div>
         </div>
       )}

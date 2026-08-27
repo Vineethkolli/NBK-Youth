@@ -103,15 +103,20 @@ function TeluguPrint({ selectedHistory, activeTab, data, showBelongsTo }) {
           <tr>${columns.map(col => `<th>${col}</th>`).join('')}</tr>
         </thead>
         <tbody>
-          ${rows
-            .map(
-              row =>
-                `<tr>${row
-                  .map(cell => `<td>${cell}</td>`)
-                  .join('')}</tr>`
-            )
-            .join('')}
-        </tbody>
+        ${rows
+          .map(
+            row =>
+              `<tr>${row
+                .map(
+                  cell =>
+                    typeof cell === 'object' && cell !== null
+                      ? `<td colspan="${cell.colSpan || 1}">${cell.content || '-'}</td>`
+                      : `<td>${cell}</td>`
+                )
+                .join('')}</tr>`
+          )
+          .join('')}
+      </tbody>
       </table>
     `;
   };
