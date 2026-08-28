@@ -1,11 +1,4 @@
-import {
-  Building2,
-  GraduationCap,
-  HeartPulse,
-  Landmark,
-  Mail,
-  BadgeIndianRupee,
-} from "lucide-react";
+import { Building2, GraduationCap, HeartPulse, Landmark, Mail, BadgeIndianRupee } from "lucide-react";
 
 const facilities = [
   {

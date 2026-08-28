@@ -1,5 +1,4 @@
 import {House, MapPin, Users, LandPlot, UserRound, Mail, UsersRound, Landmark, Church, Mosque, MapPinned } from "lucide-react";
-
 import OnlineServices from "../components/myVillage/OnlineServices";
 import VillageFacilities from "../components/myVillage/VillageFacilities";
 import AgricultureFestivals from "../components/myVillage/AgricultureFestivals";
@@ -121,51 +120,51 @@ export default function MyVillage() {
         <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-white/10" />
         <div className="absolute -bottom-32 -left-20 h-72 w-72 rounded-full bg-white/10" />
 
-        <div className="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-          <div className="flex flex-col gap-8 md:flex-row md:items-center md:justify-between">
-            <div>
-              <h1 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl">
-                My Village
-              </h1>
+        <div className="relative mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-12 lg:px-8">
+  <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+    
+    <div>
+      <div className="mt-2 flex items-center gap-3">
+        <p className="text-4xl font-bold text-emerald-100">
+          Gangavaram
+        </p>
 
-              <div className="mt-2 flex items-center gap-3">
-                <p className="text-2xl font-semibold text-emerald-100">
-                  Gangavaram
-                </p>
+        <a
+          href={mapsUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Open Gangavaram in Google Maps"
+          title="Open in Google Maps"
+          className="inline-flex rounded-full bg-white/10 p-2 text-white backdrop-blur transition hover:scale-110 hover:bg-white/20"
+        >
+          <MapPinned size={20} />
+        </a>
+      </div>
 
-                <a
-                  href={mapsUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Open Gangavaram in Google Maps"
-                  title="Open in Google Maps"
-                  className="inline-flex rounded-full bg-white/10 p-2 text-white backdrop-blur transition hover:scale-110 hover:bg-white/20"
-                >
-                  <MapPinned size={20} />
-                </a>
-              </div>
+      <p className="mt-4 max-w-xl text-sm leading-6 text-emerald-50 sm:text-base">
+        A peaceful village rooted in tradition, surrounded by nature and
+        united by the warmth of its people. Here, generations grow together,
+        traditions live on, festivals bring hearts closer, and every corner
+        carries a story.
+      </p>
+    </div>
 
-              <p className="mt-4 max-w-xl text-sm leading-6 text-emerald-50 sm:text-base">
-                A single place for village information, people, government
-                services, useful resources and important information about
-                Gangavaram.
-              </p>
-            </div>
+    <div className="w-full rounded-3xl border border-white/20 bg-white/10 p-5 text-white backdrop-blur sm:p-6 md:w-auto md:min-w-[220px]">
+      <House size={42} strokeWidth={1.5} />
 
-            <div className="hidden rounded-3xl border border-white/20 bg-white/10 p-6 text-white backdrop-blur md:block">
-              <House size={48} strokeWidth={1.5} />
+      <p className="mt-4 text-sm text-emerald-100">
+        Our People • Our Land
+      </p>
 
-              <p className="mt-4 text-sm text-emerald-100">
-                Our People • Our Land
-              </p>
+      <p className="font-semibold">
+        Our Future
+      </p>
+    </div>
 
-              <p className="font-semibold">Our Future</p>
-            </div>
-          </div>
+  </div>
         </div>
       </section>
 
-      {/* Quick Stats */}
       <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {stats.map(({ label, value, note, icon: Icon }) => (
@@ -193,10 +192,8 @@ export default function MyVillage() {
         </div>
       </section>
 
-      {/* Main Content */}
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="space-y-6">
-          {/* Village Overview */}
           <section className="rounded-3xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
             <SectionTitle
               icon={House}
@@ -214,7 +211,6 @@ export default function MyVillage() {
             </div>
           </section>
 
-          {/* Population */}
           <section className="rounded-3xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
             <SectionTitle
               icon={Users}
@@ -222,7 +218,6 @@ export default function MyVillage() {
               description="Gender, social category and community-wise population"
             />
 
-            {/* Gender */}
             <div className="grid gap-3 sm:grid-cols-3">
               <PopulationCard
                 label="Total Population"
@@ -240,14 +235,12 @@ export default function MyVillage() {
               />
             </div>
 
-            {/* Additional Population */}
             <div className="mt-4 grid gap-3 sm:grid-cols-3">
               <InfoRow label="Households" value="848" />
               <InfoRow label="Children (0–6)" value="248" />
               <InfoRow label="Female / 1000 Male" value="980" />
             </div>
 
-            {/* Social Category */}
             <div className="mt-6 pt-6">
               <div className="mb-3">
                 <h3 className="text-sm font-semibold text-gray-900">
@@ -298,9 +291,7 @@ export default function MyVillage() {
             </div>
           </section>
 
-          {/* Community Information */}
           <section className="grid gap-6 lg:grid-cols-2">
-            {/* Youth Clubs */}
             <div className="rounded-3xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
               <SectionTitle
                 icon={UsersRound}
@@ -315,7 +306,7 @@ export default function MyVillage() {
                   </p>
 
                   <p className="mt-1 text-3xl font-bold text-emerald-950">
-                    6
+                    8
                   </p>
                 </div>
 
@@ -325,7 +316,6 @@ export default function MyVillage() {
               </div>
             </div>
 
-            {/* Secretary */}
             <div className="rounded-3xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
               <SectionTitle
                 icon={UserRound}
@@ -356,13 +346,10 @@ export default function MyVillage() {
             </div>
           </section>
 
-          {/* Online Services */}
           <OnlineServices />
 
-          {/* Village Facilities */}
           <VillageFacilities />
 
-          {/* Temples & Places of Worship */}
 <section className="rounded-3xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
   <SectionTitle
     icon={Landmark}
@@ -399,12 +386,10 @@ export default function MyVillage() {
   </div>
 </section>
 
-          {/* Agriculture + Festivals */}
           <AgricultureFestivals />
         </div>
       </main>
 
-      {/* Footer */}
       <footer className="text-center text-sm text-gray-500">
        Population and demographic figures are based on Census 2011
     </footer>

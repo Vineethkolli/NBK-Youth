@@ -1,10 +1,4 @@
-import {
-  Wheat,
-  Smartphone,
-  ExternalLink,
-  CalendarDays,
-  Store,
-} from "lucide-react";
+import { Wheat, Smartphone, ExternalLink, CalendarDays, Store } from "lucide-react";
 
 const marketApps = [
   {
@@ -34,7 +28,6 @@ const festivals = [
 export default function AgricultureFestivals() {
   return (
     <div className="grid gap-8 lg:grid-cols-2">
-      {/* Agriculture */}
       <section className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm">
         <div className="mb-5 flex items-start gap-3">
           <div className="rounded-xl bg-amber-100 p-2.5 text-amber-700">
@@ -52,7 +45,6 @@ export default function AgricultureFestivals() {
           </div>
         </div>
 
-        {/* Guntur Mirchi Market */}
         <a
           href="https://gunturmirchi.in/"
           target="_blank"
@@ -79,7 +71,6 @@ export default function AgricultureFestivals() {
           />
         </a>
 
-        {/* Market Apps */}
         <div className="mt-5">
           <div className="mb-3 flex items-center gap-2">
             <Smartphone size={17} className="text-gray-500" />
@@ -109,7 +100,6 @@ export default function AgricultureFestivals() {
         </div>
       </section>
 
-      {/* Festivals */}
       <section className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm">
         <div className="mb-5 flex items-start gap-3">
           <div className="rounded-xl bg-rose-100 p-2.5 text-rose-700">

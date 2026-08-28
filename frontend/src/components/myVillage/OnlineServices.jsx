@@ -1,12 +1,4 @@
-import {
-  Building2,
-  CreditCard,
-  FileText,
-  Landmark,
-  ExternalLink,
-  Fingerprint,
-  ReceiptText,
-} from "lucide-react";
+import { Building2, CreditCard, FileText, Landmark, ExternalLink, Fingerprint, ReceiptText } from "lucide-react";
 
 const services = [
   {
@@ -67,7 +59,6 @@ function ServiceCard({ service }) {
       className="group block rounded-2xl border border-gray-100 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-emerald-200 hover:shadow-md"
     >
       <div className="flex items-start gap-4">
-        {/* Clickable Navigation Icon */}
         <div className="shrink-0 rounded-xl bg-emerald-50 p-3 text-emerald-600 transition group-hover:bg-emerald-600 group-hover:text-white">
           <Icon size={21} />
         </div>
