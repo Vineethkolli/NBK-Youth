@@ -71,8 +71,6 @@ function Estimation() {
               <span>Stats</span>
             </button>
 
-            {user?.category === 'youth' && (
-              <>
                 <button
                   onClick={() => setActiveTab('income')}
                   className={`px-3 py-2 rounded-md font-semibold flex items-center space-x-2 ${
@@ -95,21 +93,15 @@ function Estimation() {
                   <DollarSign size={18} />
                   <span>Expense</span>
                 </button>
-              </>
-            )}
           </div>
         </div>
       </div>
 
       {activeTab === 'stats' && <EstimationStats stats={stats} budgetStats={budgetStats} />}
 
-      {activeTab === 'income' && user?.category === 'youth' && (
-        <IncomeSection refreshStats={fetchStats} />
-      )}
+      {activeTab === 'income' && <IncomeSection refreshStats={fetchStats} />}
 
-      {activeTab === 'expense' && user?.category === 'youth' && (
-        <ExpenseSection refreshStats={fetchStats} />
-      )}
+      {activeTab === 'expense' && <ExpenseSection refreshStats={fetchStats} />}
     </div>
   );
 }
