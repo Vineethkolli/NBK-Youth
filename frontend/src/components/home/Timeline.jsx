@@ -11,13 +11,43 @@ function Timeline({ events, isEditing, onUpdate }) {
   const [deletingId, setDeletingId] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const getEventStatus = (dateTime) => {
+    const eventDate = new Date(dateTime);
+    const now = new Date();
+
+    if (Number.isNaN(eventDate.getTime())) {
+      return 'upcoming';
+    }
+
+    const startOfToday = new Date(now);
+    startOfToday.setHours(0, 0, 0, 0);
+
+    const endOfToday = new Date(now);
+    endOfToday.setHours(23, 59, 59, 999);
+
+    if (eventDate < startOfToday) {
+      return 'completed';
+    }
+
+    if (eventDate >= startOfToday && eventDate <= endOfToday) {
+      return 'today';
+    }
+
+    return 'upcoming';
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     try {
       const dateTime = new Date(formData.dateTime).toISOString();
-      await axios.post(`${API_URL}/api/homepage/events`, { ...formData, dateTime });
+
+      await axios.post(`${API_URL}/api/homepage/events`, {
+        ...formData,
+        dateTime,
+      });
+
       toast.success('Event added successfully');
       setShowForm(false);
       setFormData({ name: '', dateTime: '' });
@@ -30,7 +60,9 @@ function Timeline({ events, isEditing, onUpdate }) {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this event?')) return;
+    if (!window.confirm('Are you sure you want to delete this event?')) {
+      return;
+    }
 
     try {
       setDeletingId(id);
@@ -63,7 +95,10 @@ function Timeline({ events, isEditing, onUpdate }) {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-lg">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Add New Event</h3>
+              <h3 className="text-lg font-semibold text-gray-900">
+                Add New Event
+              </h3>
+
               <button
                 onClick={() => setShowForm(false)}
                 className="text-gray-500 hover:text-gray-700 transition"
@@ -74,23 +109,39 @@ function Timeline({ events, isEditing, onUpdate }) {
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">Event Name</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  Event Name
+                </label>
+
                 <input
                   type="text"
                   required
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      name: e.target.value,
+                    })
+                  }
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">Date & Time</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  Date & Time
+                </label>
+
                 <input
                   type="datetime-local"
                   required
                   value={formData.dateTime}
-                  onChange={(e) => setFormData({ ...formData, dateTime: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      dateTime: e.target.value,
+                    })
+                  }
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                 />
               </div>
@@ -104,11 +155,14 @@ function Timeline({ events, isEditing, onUpdate }) {
                 >
                   Cancel
                 </button>
+
                 <button
                   type="submit"
                   disabled={isSubmitting}
                   className={`px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 ${
-                    isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+                    isSubmitting
+                      ? 'opacity-50 cursor-not-allowed'
+                      : ''
                   }`}
                 >
                   {isSubmitting ? 'Adding...' : 'Add'}
@@ -121,38 +175,76 @@ function Timeline({ events, isEditing, onUpdate }) {
 
       <div className="space-y-4">
         {events.length === 0 ? (
-          <p className="text-gray-500 text-center py-4">No events scheduled</p>
+          <p className="text-gray-500 text-center py-4">
+            No events scheduled
+          </p>
         ) : (
           <div className="relative">
             <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-200" />
-            {events.map((event) => (
-              <div key={event._id} className="relative pl-8 pb-8">
-                <div className="absolute left-2 top-2 w-4 h-4 bg-indigo-600 rounded-full border-4 border-white" />
-                <div className="bg-white rounded-lg shadow p-4">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="font-medium">{event.name}</h3>
-                      <p className="text-sm text-gray-500">{formatDateTime(event.dateTime)}</p>
+
+            {events.map((event) => {
+              const status = getEventStatus(event.dateTime);
+
+              const dotColor =
+                status === 'completed'
+                  ? 'bg-green-500'
+                  : status === 'today'
+                  ? 'bg-blue-600'
+                  : 'bg-gray-400';
+
+              return (
+                <div
+                  key={event._id}
+                  className="relative pl-8 pb-8"
+                >
+<div
+  className={`absolute left-2 top-2 w-4 h-4 rounded-full border-4 border-white ${
+    status === 'completed'
+      ? 'bg-green-500'
+      : status === 'today'
+      ? 'bg-blue-600 shadow-md'
+      : 'bg-gray-500'
+  }`}
+>
+  {status === 'today' && (
+    <span className="absolute -inset-0.5 rounded-full border-2 border-blue-300 animate-ping" />
+  )}
+</div>
+
+                  <div className="bg-white rounded-lg shadow p-4">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h3 className="font-medium">
+                          {event.name}
+                        </h3>
+
+                        <p className="text-sm text-gray-500">
+                          {formatDateTime(event.dateTime)}
+                        </p>
+                      </div>
+
+                      {isEditing && (
+                        <button
+                          onClick={() => handleDelete(event._id)}
+                          disabled={deletingId === event._id}
+                          className={`text-red-600 hover:text-red-800 transition ${
+                            deletingId === event._id
+                              ? 'opacity-50 cursor-not-allowed'
+                              : ''
+                          }`}
+                        >
+                          {deletingId === event._id ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Trash2 className="h-4 w-4" />
+                          )}
+                        </button>
+                      )}
                     </div>
-                    {isEditing && (
-                      <button
-                        onClick={() => handleDelete(event._id)}
-                        disabled={deletingId === event._id}
-                        className={`text-red-600 hover:text-red-800 transition ${
-                          deletingId === event._id ? 'opacity-50 cursor-not-allowed' : ''
-                        }`}
-                      >
-                        {deletingId === event._id ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <Trash2 className="h-4 w-4" />
-                        )}
-                      </button>
-                    )}
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
