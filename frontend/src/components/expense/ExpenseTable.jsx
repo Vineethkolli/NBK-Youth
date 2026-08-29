@@ -66,7 +66,7 @@ function ExpenseTable({
             {hasAccess('Privileged') && visibleColumns.phoneNumber && (
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Phone Number</th>
             )}
-            {hasAccess('Privileged') && (
+            {hasAccess('Pro') && (
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
             )}
           </tr>
@@ -142,7 +142,7 @@ function ExpenseTable({
                 <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{expense.phoneNumber}</td>
               )}
 
-              {hasAccess('Privileged') && (
+              {hasAccess('Pro') && (
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   <div className="flex space-x-2">
                     <button
