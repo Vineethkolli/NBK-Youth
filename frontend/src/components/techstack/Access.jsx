@@ -21,6 +21,7 @@ const accessControl = {
     'Activities': { full: ['Admin', 'Financier'], view: ['User'] },
     'Tools': { full: ['User', 'Admin','Financier'], view: [] },
     'TechStack': { full: [], view: ['User','Admin', 'Financier'] },
+    'MyVillage': { full: [], view: ['User','Admin', 'Financier'] },
     'Verification': { full: ['Financier'], view: [] },
     'RecycleBin': { full: ['Financier'], view: [] },
     'Users & Roles': { full: [], view: ['Admin','Financier'] },
