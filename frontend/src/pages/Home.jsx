@@ -58,6 +58,7 @@ function Home() {
           isTimelineEditing={isTimelineEditing}
           setIsTimelineEditing={setIsTimelineEditing}
           onUpdate={fetchEvents}
+          canEdit={hasAccess('Privileged')}
         />
 
         <Footer />

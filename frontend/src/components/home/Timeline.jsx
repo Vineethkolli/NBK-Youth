@@ -5,7 +5,7 @@ import axios from 'axios';
 import { API_URL } from '../../utils/config';
 import { formatDateTime } from '../../utils/dateTime';
 
-function Timeline({ events, isTimelineEditing, setIsTimelineEditing, onUpdate }) {
+function Timeline({ events, isTimelineEditing, setIsTimelineEditing, onUpdate, canEdit }) {
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({ name: '', dateTime: '' });
   const [deletingId, setDeletingId] = useState(null);
@@ -114,25 +114,26 @@ function Timeline({ events, isTimelineEditing, setIsTimelineEditing, onUpdate })
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold">Event Timeline</h2>
-        <div className="flex gap-2">
-  {isTimelineEditing && (
+        {canEdit && (
+  <div className="flex gap-2">
+    {isTimelineEditing && (
+      <button
+        onClick={() => setShowForm(true)}
+        className="inline-flex items-center px-1.5 py-1.5 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition"
+      >
+        <Plus className="h-4 w-4 mr-1" />
+        Add Event
+      </button>
+    )}
     <button
-      onClick={() => setShowForm(true)}
-      className="inline-flex items-center px-1.5 py-1.5 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition"
+      onClick={() => setIsTimelineEditing(!isTimelineEditing)}
+      className="inline-flex items-center px-1.5 py-1.5 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition"
     >
-      <Plus className="h-4 w-4 mr-1" />
-      Add Event
+      <Edit2 className="h-4 w-4 mr-1" />
+      {isTimelineEditing ? 'Done' : 'Edit'}
     </button>
-  )}
-
-  <button
-    onClick={() => setIsTimelineEditing(!isTimelineEditing)}
-    className="inline-flex items-center px-1.5 py-1.5 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition"
-  >
-    <Edit2 className="h-4 w-4 mr-1" />
-    {isTimelineEditing ? 'Done' : 'Edit'}
-  </button>
-</div>
+  </div>
+)}
       </div>
 
       {showForm && (
