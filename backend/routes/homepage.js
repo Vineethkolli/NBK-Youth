@@ -13,6 +13,7 @@ router.put('/slides/order', auth, checkRole('Privileged'), homepageController.up
 // Event routes
 router.get('/events', homepageController.getEvents);
 router.post('/events', auth, checkRole('Privileged'), homepageController.addEvent);
+router.put('/events/:id', auth, checkRole('Privileged'), homepageController.updateEvent);
 router.delete('/events/:id', auth, checkRole('Privileged'), homepageController.deleteEvent);
 
 export default router;

@@ -204,5 +204,36 @@ export const homepageController = {
     } catch (error) {
       res.status(500).json({ message: 'Failed to delete event' });
     }
+  },
+
+  updateEvent: async (req, res) => {
+    try {
+      const event = await Event.findById(req.params.id);
+      if (!event) {
+        return res.status(404).json({ message: 'Event not found' });
+      }
+
+      const originalData = event.toObject();
+
+      const { name, dateTime } = req.body;
+      if (name) event.name = name;
+      if (dateTime) event.dateTime = dateTime;
+
+      await event.save();
+
+      await logActivity(
+        req,
+        'UPDATE',
+        'Event',
+        event._id.toString(),
+        { before: originalData, after: event.toObject() },
+        `Event "${event.name}" updated by ${req.user.name}`
+      );
+
+      redis.del('home:events');
+      res.json(event);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to update event' });
+    }
   }
 };

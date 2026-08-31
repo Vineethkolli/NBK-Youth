@@ -10,7 +10,8 @@ import Footer from '../components/Footer';
 
 function Home() {
   const { user, hasAccess } = useAuth();
-  const [isEditing, setIsEditing] = useState(false);
+  const [isSlidesEditing, setIsSlidesEditing] = useState(false);
+  const [isTimelineEditing, setIsTimelineEditing] = useState(false);
   const [events, setEvents] = useState([]);
 
   useEffect(() => {
@@ -33,16 +34,16 @@ function Home() {
         {hasAccess('Privileged') && (
           <div className="flex justify-end">
             <button
-              onClick={() => setIsEditing(!isEditing)}
+              onClick={() => setIsSlidesEditing(!isSlidesEditing)}
               className="inline-flex items-center px-2 rounded-md"
             >
-              <Edit2 className="h-4 w-4 mr-2" />
-              {isEditing ? 'Done' : 'Edit'}
+              <Edit2 className="h-4 w-4 mr-1" />
+              {isSlidesEditing ? 'Done' : 'Edit Slides'}
             </button>
           </div>
         )}
 
-        <Slideshow isEditing={isEditing} />
+        <Slideshow isEditing={isSlidesEditing} />
 
         <div className="bg-white shadow rounded-lg p-6">
           <h1 className="text-2xl font-semibold text-gray-900">
@@ -53,7 +54,7 @@ function Home() {
           </p>
         </div>
 
-        <Timeline events={events} isEditing={isEditing} onUpdate={fetchEvents} />
+        <Timeline events={events} isTimelineEditing={isTimelineEditing} setIsTimelineEditing={setIsTimelineEditing} onUpdate={fetchEvents} />
 
         <Footer />
       </div>
