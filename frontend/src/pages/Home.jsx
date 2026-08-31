@@ -29,10 +29,9 @@ function Home() {
 
   return (
     <div>
-
       <div className="space-y-8">
         {hasAccess('Privileged') && (
-          <div className="flex justify-end">
+          <div className="flex justify-end mb-2">
             <button
               onClick={() => setIsSlidesEditing(!isSlidesEditing)}
               className="inline-flex items-center px-2 rounded-md"
@@ -54,7 +53,12 @@ function Home() {
           </p>
         </div>
 
-        <Timeline events={events} isTimelineEditing={isTimelineEditing} setIsTimelineEditing={setIsTimelineEditing} onUpdate={fetchEvents} />
+        <Timeline
+          events={events}
+          isTimelineEditing={isTimelineEditing}
+          setIsTimelineEditing={setIsTimelineEditing}
+          onUpdate={fetchEvents}
+        />
 
         <Footer />
       </div>
