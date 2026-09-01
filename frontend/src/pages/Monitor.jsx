@@ -3,6 +3,7 @@ import ServiceDriveMonitor from '../components/monitor/ServiceDriveMonitor';
 import CloudinaryMonitor from '../components/monitor/CloudinaryMonitor';
 import MongoDBMonitor from '../components/monitor/MongodbMonitor';
 import GithubActionsMonitor from '../components/monitor/GithubActionsMonitor';
+import RenderMonitor from '../components/monitor/RenderMonitor';
 
 export default function Monitor() {
   const { hasAccess } = useAuth();
@@ -28,6 +29,7 @@ export default function Monitor() {
         </a>
       </div>
 
+      <RenderMonitor />
       <ServiceDriveMonitor />
       <CloudinaryMonitor />
       <MongoDBMonitor />

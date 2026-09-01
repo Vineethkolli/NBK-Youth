@@ -4,6 +4,7 @@ import { serviceDriveStorageController } from '../controllers/serviceDriveStorag
 import { cloudinaryStorageController } from '../controllers/cloudinaryStorageController.js';
 import { mongodbStorageController } from '../controllers/mongodbStorageController.js';
 import { githubActionsController } from '../controllers/githubActionsController.js';
+import { renderController } from '../controllers/renderController.js';
 
 const router = express.Router();
 
@@ -28,5 +29,8 @@ router.get('/mongodb/collections', auth, checkRole('Developer'), mongodbStorageC
 router.get('/github/actions/all', auth, checkRole('Developer'), githubActionsController.getAllData);
 router.get('/github/actions/metrics', auth, checkRole('Developer'), githubActionsController.getMetricsOnly);
 router.get('/github/actions/workflows', auth, checkRole('Developer'), githubActionsController.getWorkflowsOnly);
+
+// Render Monitor Routes
+router.get('/render/usage', auth, checkRole('Developer'), renderController.getUsage);
 
 export default router;
