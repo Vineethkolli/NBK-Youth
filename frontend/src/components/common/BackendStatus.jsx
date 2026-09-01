@@ -13,7 +13,7 @@ const BackendStatus = ({ children }) => {
 
       const timeout = setTimeout(() => {
         controller.abort();
-      }, 10000);
+      }, 120000);
 
       const response = await fetch(`${API_URL}/health`, {
         method: "GET",
