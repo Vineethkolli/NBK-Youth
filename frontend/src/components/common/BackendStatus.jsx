@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { API_URL } from "../utils/config";
+import { API_URL } from "../../utils/config";
 
 const BackendStatus = ({ children }) => {
   const [backendDown, setBackendDown] = useState(false);
@@ -13,7 +13,7 @@ const BackendStatus = ({ children }) => {
 
       const timeout = setTimeout(() => {
         controller.abort();
-      }, 60000);
+      }, 10000);
 
       const response = await fetch(`${API_URL}/health`, {
         method: "GET",
@@ -41,7 +41,7 @@ const BackendStatus = ({ children }) => {
 
     const interval = setInterval(() => {
       checkBackend();
-    }, 30000);
+    }, 10000);
 
     return () => clearInterval(interval);
   }, []);
@@ -51,28 +51,23 @@ const BackendStatus = ({ children }) => {
       <div className="min-h-screen flex items-center justify-center bg-gray-50 px-6">
         <div className="text-center max-w-md">
 
-          {/* Icon */}
           <div className="text-6xl mb-6">
             🛠️
           </div>
 
-          {/* Heading */}
           <h1 className="text-3xl font-bold text-gray-900 mb-3">
             We'll be back shortly
           </h1>
 
-          {/* Message */}
           <p className="text-gray-600 mb-4">
             We're currently experiencing a temporary service
-            interruption. Services are back
-            by <strong>September 1, 2026 at 6:00 AM IST</strong>.
+            interruption.
           </p>
 
           <p className="text-sm text-gray-500 mb-6">
             Thank you for your patience and understanding.
           </p>
 
-          {/* Try Again */}
           <button
             onClick={checkBackend}
             disabled={checking}
