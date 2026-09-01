@@ -41,7 +41,7 @@ const BackendStatus = ({ children }) => {
 
     const interval = setInterval(() => {
       checkBackend();
-    }, 10000);
+    }, 120000);
 
     return () => clearInterval(interval);
   }, []);
