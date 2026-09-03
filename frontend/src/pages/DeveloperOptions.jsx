@@ -7,6 +7,7 @@ import { useState } from 'react';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import { API_URL } from '../utils/config';
+import UniversalPinManager from '../components/developer/UniversalPinManager';
 
 function DeveloperOptions() {
   const {hasAccess} = useAuth();
@@ -50,6 +51,7 @@ function DeveloperOptions() {
       </div>
 
       <LockManager />
+      <UniversalPinManager />
 
       {/* Reset Roles */}
       <div className="bg-white rounded-lg shadow p-6 flex items-center justify-between">

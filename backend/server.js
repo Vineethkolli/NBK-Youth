@@ -41,6 +41,8 @@ import historiesRoutes from './routes/histories.js';
 import cloudinaryRoutes from './routes/cloudinary.js';
 import monitorRoutes from './routes/monitor.js';
 import mailerRoutes from './routes/mailer.js';
+import myFilesRoutes from './routes/myFiles.js';
+import universalPinRoutes from './routes/universalPin.js';
 import { processDueNotifications } from './controllers/scheduledNotificationController.js';
 import { createDefaultDeveloper } from './utils/setupDefaults.js';
 import { startAgenda } from './services/agendaService.js';
@@ -124,6 +126,8 @@ app.use('/api/histories', historiesRoutes);
 app.use('/api/uploads', cloudinaryRoutes);
 app.use('/api/monitor', monitorRoutes);
 app.use('/api/mailer', mailerRoutes);
+app.use('/api/my-files', myFilesRoutes);
+app.use('/api/universal-pin', universalPinRoutes);
 
 // Health Check
 app.get('/', (req, res) => res.json({ status: 'API is running' }));

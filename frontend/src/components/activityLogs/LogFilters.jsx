@@ -134,6 +134,9 @@ function LogFilters({ filters, onChange }) {
         <option value="History">History</option>
         <option value="Mailer">Mailer</option>
         <option value="ScheduledNotification">Scheduled Notification</option>
+        <option value="FileAsset">File Asset</option>
+        <option value="Note">Note</option>
+        <option value="UniversalPin">Universal PIN</option>
       </select>
 
       {/* Start Date Picker */}
