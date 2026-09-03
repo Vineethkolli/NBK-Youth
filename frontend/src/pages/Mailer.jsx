@@ -1,15 +1,19 @@
+
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { API_URL } from '../utils/config';
 import MailerForm from '../components/mailer/MailerForm';
 import MailerScheduleList from '../components/mailer/MailerScheduleList';
 import MailerHistoryList from '../components/mailer/MailerHistoryList';
+import MailerEmailDialog from '../components/mailer/MailerEmailDialog';
 
 function Mailer() {
   const [scheduled, setScheduled] = useState([]);
   const [history, setHistory] = useState([]);
   const [loadingScheduled, setLoadingScheduled] = useState(true);
   const [loadingHistory, setLoadingHistory] = useState(true);
+
+  const [selectedEmail, setSelectedEmail] = useState(null);
 
   const fetchScheduled = async () => {
     try {
@@ -54,12 +58,29 @@ function Mailer() {
         </div>
       </div>
 
-      <MailerForm onScheduled={handleScheduled} onSent={handleSent} />
+      <MailerForm
+        onScheduled={handleScheduled}
+        onSent={handleSent}
+      />
 
       <div className="grid min-w-0 gap-6 lg:grid-cols-2">
-        <MailerScheduleList schedules={scheduled} loading={loadingScheduled} />
-        <MailerHistoryList history={history} loading={loadingHistory} />
+        <MailerScheduleList
+          schedules={scheduled}
+          loading={loadingScheduled}
+          onView={setSelectedEmail}
+        />
+
+        <MailerHistoryList
+          history={history}
+          loading={loadingHistory}
+          onView={setSelectedEmail}
+        />
       </div>
+
+      <MailerEmailDialog
+        email={selectedEmail}
+        onClose={() => setSelectedEmail(null)}
+      />
     </div>
   );
 }
