@@ -21,7 +21,7 @@ export const sendSignupEmail = async (email, name) => {
     const subject = 'Welcome to NBK Youth 🎉';
 
     const baseUrl = process.env.FRONTEND_URL;
-    const logoUrl = `https://res.cloudinary.com/dlsmkjgjb/image/upload/v1763906348/192_zpahrw.png`;
+    const logoUrl = `https://res.cloudinary.com/dlsmkjgjb/image/upload/v1788427251/Assets/gsfy0pn8n77yofq6thue.png`;
 
     const html = `
 <!DOCTYPE html>

@@ -309,14 +309,26 @@ const openNote = async (note, pin) => {
     }
 
     if (pinRequest.action === 'edit') {
-      await getFile(pinRequest.file, pin);
+  try {
+    await getFile(pinRequest.file, pin);
 
-      setModal({
-        type: 'file',
-        item: pinRequest.file,
-        pin,
-      });
+    setModal({
+      type: 'file',
+      item: pinRequest.file,
+      pin,
+    });
+  } catch (error) {
+    const data = await getErrorData(error);
+
+    if (data.pinRequired) {
+      throw new Error(data.message || 'Wrong PIN');
     }
+
+    throw new Error(
+      data.message || 'Could not access file'
+    );
+  }
+}
 
     if (pinRequest.action === 'delete') {
       await deleteItem(pinRequest.file, pin);
@@ -341,6 +353,7 @@ const openNote = async (note, pin) => {
   }
 
   if (request.action === 'edit') {
+  try {
     await axios.get(
       `${API_URL}/api/my-files/notes/${request.note._id}`,
       {
@@ -355,7 +368,18 @@ const openNote = async (note, pin) => {
       item: request.note,
       pin,
     });
+  } catch (error) {
+    const data = await getErrorData(error);
+
+    if (data.pinRequired) {
+      throw new Error(data.message || 'Wrong PIN');
+    }
+
+    throw new Error(
+      data.message || 'Could not access note'
+    );
   }
+}
 
   setPinRequest(null);
 };
