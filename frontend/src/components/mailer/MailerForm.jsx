@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import { API_URL } from '../../utils/config';
@@ -14,7 +14,18 @@ const bodyFormatOptions = [
   { value: 'html', label: 'HTML' }
 ];
 
-function MailerForm({ onScheduled, onSent }) {
+const toIstInput = (value) => {
+  if (!value) return '';
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Kolkata',
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', hourCycle: 'h23'
+  }).formatToParts(new Date(value));
+  const values = Object.fromEntries(parts.map(({ type, value: part }) => [type, part]));
+  return `${values.year}-${values.month}-${values.day}T${values.hour}:${values.minute}`;
+};
+
+function MailerForm({ onScheduled, onSent, editingSchedule, onCancelEdit }) {
   const [subject, setSubject] = useState('');
   const [content, setContent] = useState('');
   const [bodyFormat, setBodyFormat] = useState('text');
@@ -25,6 +36,20 @@ function MailerForm({ onScheduled, onSent }) {
   const [scheduleMode, setScheduleMode] = useState(false);
   const [scheduleDate, setScheduleDate] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!editingSchedule) return;
+    const recipient = editingSchedule.recipients?.[0] || {};
+    setSubject(editingSchedule.subject || '');
+    setContent(editingSchedule.body || '');
+    setBodyFormat(editingSchedule.bodyFormat || 'text');
+    setFooter(editingSchedule.footer || '');
+    setTarget(editingSchedule.targetType || 'All');
+    setRegisterId(recipient.registerId || '');
+    setEmail(recipient.email || '');
+    setScheduleDate(toIstInput(editingSchedule.scheduledAt));
+    setScheduleMode(true);
+  }, [editingSchedule]);
 
   const isTargetRegister = target === 'RegisterId';
   const isTargetEmail = target === 'Email';
@@ -105,10 +130,17 @@ function MailerForm({ onScheduled, onSent }) {
     setIsSubmitting(true);
     try {
       const payload = { ...buildPayload(), scheduleDate };
-      const { data } = await axios.post(`${API_URL}/api/mailer/schedule`, payload);
+      const endpoint = editingSchedule
+        ? editingSchedule.status === 'pending'
+          ? `${API_URL}/api/mailer/scheduled/${editingSchedule._id}`
+          : `${API_URL}/api/mailer/scheduled/${editingSchedule._id}/reschedule`
+        : `${API_URL}/api/mailer/schedule`;
+      const method = editingSchedule?.status === 'pending' ? 'put' : 'post';
+      const { data } = await axios[method](endpoint, payload);
       toast.success(data?.message || 'Email scheduled');
       if (onScheduled && data?.schedule) onScheduled(data.schedule);
       resetForm();
+      if (onCancelEdit) onCancelEdit();
     } catch (error) {
       const message = error.response?.data?.error || 'Failed to schedule email';
       toast.error(message);
@@ -121,7 +153,16 @@ function MailerForm({ onScheduled, onSent }) {
     <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
       <div className="bg-white rounded-lg shadow-lg p-6 space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-gray-900">Compose Email</h3>
+          <div className="flex min-w-0 items-center justify-between gap-3">
+            <h3 className="text-lg font-semibold text-gray-900">
+              {editingSchedule ? (editingSchedule.status === 'pending' ? 'Edit Scheduled Email' : 'Reschedule Email') : 'Compose Email'}
+            </h3>
+            {editingSchedule && (
+              <button type="button" onClick={() => { resetForm(); onCancelEdit?.(); }} className="text-sm text-gray-500 hover:text-gray-900">
+                Cancel
+              </button>
+            )}
+          </div>
         </div>
 
         <div className="grid gap-4">
@@ -237,7 +278,7 @@ function MailerForm({ onScheduled, onSent }) {
           <button
             type="button"
             onClick={() => setScheduleMode((prev) => !prev)}
-            disabled={isSubmitting}
+            disabled={isSubmitting || Boolean(editingSchedule)}
             className="flex-1 rounded-md border border-indigo-200 px-4 py-2 text-sm font-medium text-indigo-600 hover:bg-indigo-50"
           >
             {scheduleMode ? 'Cancel Schedule' : 'Schedule It'}
@@ -253,7 +294,7 @@ function MailerForm({ onScheduled, onSent }) {
               isSubmitting ? 'opacity-60 cursor-not-allowed' : ''
             }`}
           >
-            Confirm Schedule
+            {editingSchedule ? (editingSchedule.status === 'pending' ? 'Save Changes' : 'Reschedule Email') : 'Confirm Schedule'}
           </button>
         )}
       </div>

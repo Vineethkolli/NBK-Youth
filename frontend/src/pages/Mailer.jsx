@@ -14,6 +14,8 @@ function Mailer() {
   const [loadingHistory, setLoadingHistory] = useState(true);
 
   const [selectedEmail, setSelectedEmail] = useState(null);
+  const [editingSchedule, setEditingSchedule] = useState(null);
+  const [scheduleEditMode, setScheduleEditMode] = useState(false);
 
   const fetchScheduled = async () => {
     try {
@@ -43,7 +45,17 @@ function Mailer() {
   }, []);
 
   const handleScheduled = (schedule) => {
-    setScheduled((prev) => [schedule, ...prev]);
+    setScheduled((prev) => editingSchedule
+      ? [schedule, ...prev.filter((item) => item._id !== editingSchedule._id)]
+      : [schedule, ...prev]);
+    setEditingSchedule(null);
+  };
+
+  const handleDeleteScheduled = (id) => {
+    setScheduled((prev) => prev.filter((schedule) => schedule._id !== id));
+    if (editingSchedule?._id === id) {
+      setEditingSchedule(null);
+    }
   };
 
   const handleSent = (historyEntry) => {
@@ -61,6 +73,8 @@ function Mailer() {
       <MailerForm
         onScheduled={handleScheduled}
         onSent={handleSent}
+        editingSchedule={editingSchedule}
+        onCancelEdit={() => setEditingSchedule(null)}
       />
 
       <div className="grid min-w-0 gap-6 lg:grid-cols-2">
@@ -68,6 +82,13 @@ function Mailer() {
           schedules={scheduled}
           loading={loadingScheduled}
           onView={setSelectedEmail}
+          onEdit={setEditingSchedule}
+          onDelete={handleDeleteScheduled}
+          editMode={scheduleEditMode}
+          onToggleEditMode={() => {
+            setScheduleEditMode((previous) => !previous);
+            setEditingSchedule(null);
+          }}
         />
 
         <MailerHistoryList

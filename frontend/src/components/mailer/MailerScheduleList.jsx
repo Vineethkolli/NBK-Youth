@@ -1,4 +1,7 @@
-import { CalendarClock, Eye } from 'lucide-react';
+import { CalendarClock, Eye, Pencil, RefreshCw, Trash2 } from 'lucide-react';
+import axios from 'axios';
+import { toast } from 'react-hot-toast';
+import { API_URL } from '../../utils/config';
 import { formatDateTime } from '../../utils/dateTime';
 
 const statusStyles = {
@@ -20,7 +23,25 @@ const formatRecipients = (recipients) => {
   return remaining > 0 ? `${preview} +${remaining}` : preview;
 };
 
-function MailerScheduleList({ schedules, loading, onView }) {
+function MailerScheduleList({
+  schedules,
+  loading,
+  onView,
+  onEdit,
+  onDelete,
+  editMode,
+  onToggleEditMode
+}) {
+  const deleteSchedule = async (schedule) => {
+    if (!window.confirm('Delete this scheduled email?')) return;
+    try {
+      await axios.delete(`${API_URL}/api/mailer/scheduled/${schedule._id}`);
+      onDelete(schedule._id);
+      toast.success('Scheduled email deleted');
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'Failed to delete scheduled email');
+    }
+  };
   return (
     <div className="min-w-0 bg-white rounded-lg shadow p-4 sm:p-6">
       <div className="flex min-w-0 items-center justify-between mb-4">
@@ -34,7 +55,23 @@ function MailerScheduleList({ schedules, loading, onView }) {
           </p>
         </div>
 
-        <CalendarClock className="h-5 w-5 shrink-0 text-gray-400" />
+        <div className="flex shrink-0 items-center gap-2">
+          <button
+            type="button"
+            onClick={onToggleEditMode}
+            className={`flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium transition ${
+              editMode
+                ? 'bg-indigo-100 text-indigo-700'
+                : 'text-gray-500 hover:bg-gray-100 hover:text-indigo-600'
+            }`}
+            title={editMode ? 'Done editing scheduled emails' : 'Edit scheduled emails'}
+            aria-label={editMode ? 'Done editing scheduled emails' : 'Edit scheduled emails'}
+          >
+            <Pencil className="h-4 w-4" />
+            {editMode ? 'Done' : 'Edit'}
+          </button>
+          <CalendarClock className="h-5 w-5 text-gray-400" />
+        </div>
       </div>
 
       {loading ? (
@@ -69,6 +106,29 @@ function MailerScheduleList({ schedules, loading, onView }) {
                   >
                     <Eye className="h-5 w-5" />
                   </button>
+
+                  {editMode && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => onEdit(schedule)}
+                        className="rounded-md p-2 text-gray-400 hover:bg-gray-100 hover:text-indigo-600 transition"
+                        title={schedule.status === 'pending' ? 'Edit scheduled email' : 'Reschedule email'}
+                        aria-label={schedule.status === 'pending' ? 'Edit scheduled email' : 'Reschedule email'}
+                      >
+                        {schedule.status === 'pending' ? <Pencil className="h-5 w-5" /> : <RefreshCw className="h-5 w-5" />}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => deleteSchedule(schedule)}
+                        className="rounded-md p-2 text-gray-400 hover:bg-rose-50 hover:text-rose-600 transition"
+                        title="Delete scheduled email"
+                        aria-label="Delete scheduled email"
+                      >
+                        <Trash2 className="h-5 w-5" />
+                      </button>
+                    </>
+                  )}
 
                   {/* Status */}
                   <span

@@ -2,7 +2,11 @@ import { DateTime } from 'luxon';
 import MailerSchedule from '../models/MailerSchedule.js';
 import MailerHistory from '../models/MailerHistory.js';
 import User from '../models/User.js';
-import { scheduleImmediateEmail, scheduleEmailAtExactTime } from '../services/agendaService.js';
+import {
+  scheduleImmediateEmail,
+  scheduleEmailAtExactTime,
+  cancelScheduledEmail
+} from '../services/agendaService.js';
 import { logActivity } from '../middleware/activityLogger.js';
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -198,5 +202,110 @@ export const listEmailHistory = async (req, res) => {
   } catch (error) {
     console.error('List history error:', error.message);
     res.status(500).json({ error: 'Failed to fetch email history' });
+  }
+};
+
+const parseScheduleDate = (scheduleDate) => {
+  if (!scheduleDate) {
+    const error = new Error('scheduleDate is required');
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const scheduledAt = DateTime.fromISO(scheduleDate, { zone: 'Asia/Kolkata' });
+  if (!scheduledAt.isValid) {
+    const error = new Error('Invalid schedule date');
+    error.statusCode = 400;
+    throw error;
+  }
+  if (scheduledAt.toJSDate() <= new Date()) {
+    const error = new Error('Schedule date must be in the future');
+    error.statusCode = 400;
+    throw error;
+  }
+  return scheduledAt.toJSDate();
+};
+
+const createSchedule = async ({ req, emailPayload, target, registerId, email, scheduledAt }) => {
+  const recipients = await buildRecipients({ target, registerId, email });
+  if (!recipients.length) {
+    const error = new Error('No eligible recipients found');
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const schedule = await MailerSchedule.create({
+    senderRegisterId: req.user.registerId,
+    ...emailPayload,
+    targetType: target,
+    recipients,
+    totalRecipients: recipients.length,
+    scheduledAt,
+    status: 'pending'
+  });
+
+  await scheduleEmailAtExactTime(schedule._id, scheduledAt);
+  return schedule;
+};
+
+export const updateScheduledEmail = async (req, res) => {
+  try {
+    const schedule = await MailerSchedule.findById(req.params.id);
+    if (!schedule) return res.status(404).json({ error: 'Scheduled email not found' });
+    if (schedule.status !== 'pending') {
+      return res.status(409).json({ error: 'Sent emails must be rescheduled' });
+    }
+
+    const { target, registerId, email, scheduleDate } = req.body;
+    const scheduledAt = parseScheduleDate(scheduleDate);
+    const emailPayload = buildEmailPayload(req.body);
+    const replacement = await createSchedule({
+      req, emailPayload, target, registerId, email, scheduledAt
+    });
+
+    await cancelScheduledEmail(schedule._id.toString());
+    await MailerSchedule.findByIdAndDelete(schedule._id);
+    res.json({ message: 'Scheduled email updated', schedule: replacement });
+  } catch (error) {
+    console.error('Update scheduled email error:', error.message);
+    res.status(error.statusCode || 500).json({ error: error.message || 'Failed to update scheduled email' });
+  }
+};
+
+export const rescheduleEmail = async (req, res) => {
+  try {
+    const schedule = await MailerSchedule.findById(req.params.id);
+    if (!schedule) return res.status(404).json({ error: 'Scheduled email not found' });
+    if (schedule.status === 'pending') {
+      return res.status(409).json({ error: 'Pending emails should be edited' });
+    }
+
+    const { target, registerId, email, scheduleDate } = req.body;
+    const replacement = await createSchedule({
+      req,
+      emailPayload: buildEmailPayload(req.body),
+      target,
+      registerId,
+      email,
+      scheduledAt: parseScheduleDate(scheduleDate)
+    });
+    res.status(201).json({ message: 'Email rescheduled', schedule: replacement });
+  } catch (error) {
+    console.error('Reschedule email error:', error.message);
+    res.status(error.statusCode || 500).json({ error: error.message || 'Failed to reschedule email' });
+  }
+};
+
+export const deleteScheduledEmail = async (req, res) => {
+  try {
+    const schedule = await MailerSchedule.findById(req.params.id);
+    if (!schedule) return res.status(404).json({ error: 'Scheduled email not found' });
+
+    await cancelScheduledEmail(schedule._id.toString());
+    await schedule.deleteOne();
+    res.json({ message: 'Scheduled email deleted' });
+  } catch (error) {
+    console.error('Delete scheduled email error:', error.message);
+    res.status(500).json({ error: error.message || 'Failed to delete scheduled email' });
   }
 };

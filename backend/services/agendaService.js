@@ -1,5 +1,6 @@
 import Agenda from 'agenda';
 import { DateTime } from 'luxon';
+import mongoose from 'mongoose';
 import MailerSchedule from '../models/MailerSchedule.js';
 import MailerHistory from '../models/MailerHistory.js';
 import { sendEmailsSequential } from './mailerService.js';
@@ -125,4 +126,21 @@ export const scheduleEmailAtExactTime = async (scheduleId, scheduledAt) => {
     throw new Error('Agenda is not started');
   }
   await agendaInstance.schedule(scheduledAt, 'send-scheduled-email', { scheduleId });
+};
+
+export const cancelScheduledEmail = async (scheduleId) => {
+  if (!agendaInstance) {
+    throw new Error('Agenda is not started');
+  }
+  await agendaInstance.cancel({
+    name: 'send-scheduled-email',
+    'data.scheduleId': {
+      $in: [
+        scheduleId,
+        ...(mongoose.Types.ObjectId.isValid(scheduleId)
+          ? [new mongoose.Types.ObjectId(scheduleId)]
+          : [])
+      ]
+    }
+  });
 };
