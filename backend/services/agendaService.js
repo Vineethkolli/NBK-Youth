@@ -144,3 +144,11 @@ export const cancelScheduledEmail = async (scheduleId) => {
     }
   });
 };
+
+export const clearAllAgendaJobs = async () => {
+  if (!agendaInstance) {
+    throw new Error('Agenda is not started');
+  }
+
+  await agendaInstance.cancel({});
+};

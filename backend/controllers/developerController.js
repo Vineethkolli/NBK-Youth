@@ -14,6 +14,7 @@ import Counter from '../models/Counter.js';
 import PreviousYear from '../models/PreviousYear.js';
 import EventLabel from '../models/EventLabel.js';
 import MailerHistory from '../models/MailerHistory.js';
+import { clearAllAgendaJobs } from '../services/agendaService.js';
 import { redis } from '../utils/redis.js';
 
 export const developerController = {
@@ -62,10 +63,12 @@ export const developerController = {
           description = 'Cleared all activities records';
           break;
 
-        case 'mailer':
-          await MailerHistory.deleteMany({});
-          description = 'Cleared all mailer history records';
-          break;
+        case 'mailerHistory&AgendaJobs':
+  await MailerHistory.deleteMany({});
+  await clearAllAgendaJobs();
+
+  description = 'Cleared all mailer history records and Agenda jobs';
+  break;
 
         case 'activityLog': {
           const payload = (req.body && Object.keys(req.body).length) ? req.body : (req.query || {});

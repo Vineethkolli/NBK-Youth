@@ -100,7 +100,7 @@ function ClearData() {
           { name: 'Activities', type: 'activities' },
           { name: 'User Payments', type: 'payment' },
           { name: 'Notification History', type: 'notifications' },
-          { name: 'Mailer History', type: 'mailer' },
+          { name: 'Mailer History & Agenda Jobs', type: 'mailerHistory&AgendaJobs' },
           { name: 'Activity Logs', type: 'activityLog' },
         ].map(({ name, type }) => (
           <div key={type} className="flex items-center justify-between">
