@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Home, User, History, FolderOpen, UserCog, Users, Bell, ShieldCheck, Settings, IndianRupee, DollarSign,
   Trash2, CheckSquare, BarChart2, Terminal, MusicIcon, CameraIcon, TrophyIcon, X, ChevronLeft, Calculator, 
-  Layers, LayoutDashboard, FileClock, Cpu, Fingerprint, ToolCase, MailCheck, Tractor, Files} from 'lucide-react';
+  Layers, LayoutDashboard, FileClock, Cpu, Fingerprint, ToolCase, MailCheck, Tractor, Files, BookMarked } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 function Sidebar({ isOpen, isCollapsed = false, onNavigate }) {
@@ -45,6 +45,7 @@ function Sidebar({ isOpen, isCollapsed = false, onNavigate }) {
     { to: '/activity-logs', icon: FileClock, label: 'Activity Logs' },
     { to: '/auth-sessions', icon: Fingerprint, label: 'Auth Sessions' },
     { to: '/monitor', icon: Cpu, label: 'Monitor' },
+    { to: '/documentation', icon: BookMarked, label: 'Documentation' },
   ] : []),
 ];
 

@@ -27,6 +27,7 @@ const accessControl = {
     'Users & Roles': { full: [], view: ['Admin','Financier'] },
     'AdminPanel': { full: ['Admin','Financier'], view: [] },
     'Mailer': { full: ['Admin','Financier'], view: [] },
+    'My Files': { full: ['Admin','Financier'], view: [] },
     'DeveloperOptions': { full: [], view: [] },
     'ActivityLogs': { full: [], view: [] },
     'AuthSessions': { full: [], view: [] },

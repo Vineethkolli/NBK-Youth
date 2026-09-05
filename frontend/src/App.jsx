@@ -45,6 +45,7 @@ import Mailer from './pages/Mailer';
 import New from './pages/New';
 import MyVillage from './pages/MyVillage';
 import MyFiles from './pages/MyFiles';
+import Documentation from './pages/Documentation';
 import Explore from './components/Explore';
 
 import ProtectedRoute from './components/ProtectedRoute';
@@ -127,6 +128,7 @@ function AppContent() {
           <Route path="/mailer" element={<Mailer />} />
           <Route path="/my-village" element={<MyVillage />} />
           <Route path="/my-files" element={<MyFiles />} />
+          <Route path="/documentation" element={<Documentation />} />
         </Route>
       </Routes>
 

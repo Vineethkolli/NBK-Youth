@@ -2,7 +2,7 @@
 import { SiVercel, SiRender, SiMongodb, SiGmail, SiCloudinary, SiGoogledrive, SiReact, SiTailwindcss, SiVite, 
   SiNodedotjs, SiExpress, SiGoogleanalytics, SiPostman, SiGit, SiGithub, SiGoogletranslate, SiGooglechrome, 
   SiYoutube, SiGithubcopilot, SiHuggingface, SiGooglecloud, SiRedis, SiFirebase, SiDocker, SiGoogleplay } from "react-icons/si";
-import { FaCode, FaWhatsapp, FaRobot, FaClock } from "react-icons/fa";
+import { FaCode, FaWhatsapp, FaRobot, FaClock, FaEnvelope } from "react-icons/fa";
 import Footer from "../Footer";
 
 const infrastructure = [
@@ -92,6 +92,8 @@ const features = [
   { name: "WhatsApp (Auto Load Message)", icon: <FaWhatsapp className="h-8 w-8 mr-2 text-green-500" /> },
   { name: "Google Analytics (User Interactions)", icon: <SiGoogleanalytics className="h-8 w-8 mr-2 text-yellow-500" /> },
   { name: "Cron-job.org (Keeps server warm)", icon: <FaClock className="h-8 w-8 mr-2 text-orange-600" /> },
+  { name: "GMail Api (Mail Sending Automation)", icon: <FaEnvelope className="h-8 w-8 mr-2 text-indigo-500" /> },
+  { name: "Vini AI (Smart AI Assistant)", icon: <FaRobot className="h-8 w-8 mr-2 text-purple-500" /> },
 ];
 
 const tools = [
