@@ -10,12 +10,14 @@ function Notifications() {
   const { user } = useAuth();
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [historyType, setHistoryType] = useState('received');
 
   const fetchHistory = async () => {
     if (!user?.registerId) return;
+    setLoading(true);
     try {
       const response = await axios.get(`${API_URL}/api/notifications/history`, {
-        params: { registerId: user.registerId },
+        params: { registerId: user.registerId, type: historyType },
       });
       setHistory(response.data);
     } catch (err) {
@@ -27,7 +29,7 @@ function Notifications() {
 
   useEffect(() => {
     fetchHistory();
-  }, [user]);
+  }, [user, historyType]);
 
   const handleNewNotification = (notificationData) => {
     const newEntry = {
@@ -39,7 +41,7 @@ function Notifications() {
       sentBy: user?.registerId || 'System',
       createdAt: new Date().toISOString(),
     };
-    setHistory((prev) => [newEntry, ...prev]);
+    fetchHistory();
   };
 
   return (
@@ -47,7 +49,12 @@ function Notifications() {
       <h2 className="text-2xl font-semibold">Notifications</h2>
       <NotificationSettings />
       <NotificationForm onSuccess={handleNewNotification} />
-      <NotificationHistory history={history} loading={loading} />
+      <NotificationHistory
+        history={history}
+        loading={loading}
+        activeTab={historyType}
+        onTabChange={setHistoryType}
+      />
     </div>
   );
 }

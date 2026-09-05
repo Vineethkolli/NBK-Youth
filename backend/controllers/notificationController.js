@@ -176,11 +176,18 @@ export const sendNotification = async (req, res) => {
 
 export const getNotificationHistory = async (req, res) => {
   try {
-    const { registerId } = req.query;
+    const { registerId, type = 'received' } = req.query;
     if (!registerId) {
       return res.status(400).json({ error: 'registerId is required' });
     }
-    const history = await NotificationHistory.find({ recipients: registerId }).sort({ createdAt: -1 });
+    if (!['received', 'sent'].includes(type)) {
+      return res.status(400).json({ error: 'type must be received or sent' });
+    }
+
+    const historyQuery = type === 'sent'
+      ? { sentBy: req.user?.registerId }
+      : { recipients: registerId };
+    const history = await NotificationHistory.find(historyQuery).sort({ createdAt: -1 });
     res.status(200).json(history);
   } catch (error) {
     console.error('Error fetching notification history:', error);
