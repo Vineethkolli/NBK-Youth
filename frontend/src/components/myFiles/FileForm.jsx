@@ -5,6 +5,33 @@ import { toast } from 'react-hot-toast';
 import { API_URL } from '../../utils/config';
 import { uploadDirectToCloudinary } from '../../utils/cloudinaryUpload';
 
+const FILE_SIZE_LIMITS = {
+  image: 10 * 1024 * 1024,
+  video: 100 * 1024 * 1024,
+  other: 10 * 1024 * 1024,
+};
+
+const getFileSizeLimit = (file) => {
+  if (file.type.startsWith('image/')) return FILE_SIZE_LIMITS.image;
+  if (file.type.startsWith('video/')) return FILE_SIZE_LIMITS.video;
+  return FILE_SIZE_LIMITS.other;
+};
+
+const validateFileSize = (file) => {
+  const limit = getFileSizeLimit(file);
+
+  if (file.size <= limit) return null;
+
+  const limitInMb = limit / (1024 * 1024);
+  const fileType = file.type.startsWith('image/')
+    ? 'Image'
+    : file.type.startsWith('video/')
+      ? 'Video'
+      : 'Raw';
+
+  return `${fileType} files must be ${limitInMb} MB or smaller`;
+};
+
 export default function FileForm({
   kind,
   file,
@@ -19,20 +46,30 @@ export default function FileForm({
   const [description, setDescription] = useState(
     file?.description || ''
   );
+
   const [passwordProtected, setPasswordProtected] = useState(
     Boolean(file?.passwordProtected)
   );
 
   const [selected, setSelected] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [uploadPercent, setUploadPercent] = useState(0);
 
   const isEditing = Boolean(file);
 
-  const extension = selected?.name?.match(/\.[^.]+$/)?.[0] || '';
-  const titleWithExtension = title.trim().endsWith(extension)
-    ? title.trim()
-    : `${title.trim()}${extension}`;
-  const cloudinaryName = titleWithExtension.replace(/[^a-zA-Z0-9._-]+/g, '_');
+  const extension =
+    selected?.name?.match(/\.[^.]+$/)?.[0] || '';
+
+  const titleWithExtension =
+    title.trim().endsWith(extension)
+      ? title.trim()
+      : `${title.trim()}${extension}`;
+
+  const cloudinaryName =
+    titleWithExtension.replace(
+      /[^a-zA-Z0-9._-]+/g,
+      '_'
+    );
 
   const save = async (event) => {
     event.preventDefault();
@@ -47,24 +84,38 @@ export default function FileForm({
       return;
     }
 
+    if (!isEditing) {
+      const fileSizeError = validateFileSize(selected);
+
+      if (fileSizeError) {
+        toast.error(fileSizeError);
+        return;
+      }
+    }
+
     setSaving(true);
+    setUploadPercent(0);
 
     try {
       if (isEditing) {
-
         await axios.put(
           `${API_URL}/api/my-files/files/${file._id}`,
           {
             title: title.trim(),
             description: description.trim(),
             passwordProtected,
-          }
-          , pin ? { headers: { 'X-Universal-Pin': pin } } : undefined
+          },
+          pin
+            ? {
+                headers: {
+                  'X-Universal-Pin': pin,
+                },
+              }
+            : undefined
         );
 
         toast.success('File updated');
       } else {
-
         const uploaded =
           await uploadDirectToCloudinary({
             file: selected,
@@ -74,8 +125,11 @@ export default function FileForm({
                 ? 'Dumps'
                 : 'Assets',
             resourceType: 'auto',
-          });
 
+            onProgress: (percent) => {
+              setUploadPercent(percent);
+            },
+          });
 
         await axios.post(
           `${API_URL}/api/my-files/files`,
@@ -107,9 +161,9 @@ export default function FileForm({
       );
     } finally {
       setSaving(false);
+      setUploadPercent(0);
     }
   };
-
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
@@ -126,7 +180,9 @@ export default function FileForm({
           <button
             type="button"
             onClick={onClose}
+            disabled={saving}
             aria-label="Close"
+            className="disabled:opacity-50"
           >
             <X />
           </button>
@@ -141,7 +197,8 @@ export default function FileForm({
               setTitle(event.target.value)
             }
             required
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+            disabled={saving}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm disabled:bg-gray-100"
           />
         </label>
 
@@ -151,14 +208,29 @@ export default function FileForm({
 
             <input
               type="file"
-              onChange={(event) =>
-                setSelected(
-                  event.target.files?.[0] || null
-                )
-              }
+              onChange={(event) => {
+                const nextFile = event.target.files?.[0] || null;
+
+                if (!nextFile) {
+                  setSelected(null);
+                  return;
+                }
+
+                const fileSizeError = validateFileSize(nextFile);
+
+                if (fileSizeError) {
+                  toast.error(fileSizeError);
+                  event.target.value = '';
+                  setSelected(null);
+                  return;
+                }
+
+                setSelected(nextFile);
+              }}
               required
-              className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
-              />
+              disabled={saving}
+              className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 disabled:opacity-50"
+            />
           </label>
         )}
 
@@ -166,17 +238,22 @@ export default function FileForm({
           <input
             type="checkbox"
             checked={passwordProtected}
-            onChange={(event) => setPasswordProtected(event.target.checked)}
+            disabled={saving}
+            onChange={(event) =>
+              setPasswordProtected(
+                event.target.checked
+              )
+            }
             className="rounded border-gray-300 text-indigo-600"
           />
+
           Password protect this file
-           <Lock className="h-4 w-4 text-red-600" />
+
+          <Lock className="h-4 w-4 text-red-600" />
         </label>
 
         <label className="mt-4 block text-sm font-medium text-gray-700">
-          Description{' '}
-          <span className="font-normal text-gray-500">
-          </span>
+          Description
 
           <textarea
             value={description}
@@ -184,7 +261,8 @@ export default function FileForm({
               setDescription(event.target.value)
             }
             rows="1"
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+            disabled={saving}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm disabled:bg-gray-100"
           />
         </label>
 
@@ -193,15 +271,19 @@ export default function FileForm({
           disabled={saving}
           className="mt-5 flex w-full items-center justify-center gap-2 rounded-md bg-indigo-600 px-4 py-2 font-semibold text-white disabled:opacity-50"
         >
-          <Upload className="h-4 w-4" />
+          <Upload
+            className={`h-4 w-4 ${
+              saving ? 'animate-spin' : ''
+            }`}
+          />
 
           {saving
-    ? isEditing
-      ? 'Updating...'
-      : 'Uploading...'
-    : isEditing
-      ? 'Update'
-      : 'Upload'}
+            ? isEditing
+              ? 'Updating...'
+              : `Uploading... ${uploadPercent}%`
+            : isEditing
+              ? 'Update'
+              : 'Upload'}
         </button>
       </form>
     </div>
