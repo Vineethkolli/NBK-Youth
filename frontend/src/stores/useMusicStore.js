@@ -52,36 +52,30 @@ const scheduleAudioRecovery = () => {
   if (!audio.src) return;
   if (!audio.paused) return;
   if (recoveryTimer) return;
+
   if (recoveryAttempts >= MAX_RECOVERY_ATTEMPTS) {
     console.warn("Audio recovery attempts exhausted.");
     clearRecoveryTimer();
-    useMusicStore.setState({
-      isPlaying: false,
-    });
-
     shouldResumePlayback = false;
+    useMusicStore.setState({ isPlaying: false });
     setMediaSessionPlaybackState("paused");
     return;
   }
 
   recoveryAttempts += 1;
   const delay = getRecoveryDelay();
-  console.warn(
-    `Scheduling audio recovery attempt ${recoveryAttempts} in ${delay}ms`
-  );
 
   recoveryTimer = setTimeout(async () => {
     recoveryTimer = null;
-    if (!shouldResumePlayback || !audio.src) {
-      return;
-    }
+
+    if (!shouldResumePlayback || !audio.src || !audio.paused) return;
+
     try {
       await audio.play();
+
       if (shouldResumePlayback) {
-        recoveryAttempts = 0;
-        useMusicStore.setState({
-          isPlaying: true,
-        });
+        resetRecovery();
+        useMusicStore.setState({ isPlaying: true });
         setMediaSessionPlaybackState("playing");
       }
     } catch (error) {
@@ -95,14 +89,33 @@ const scheduleAudioRecovery = () => {
 
 const playAudioElement = async () => {
   if (!audio.src) return false;
+
   try {
     await audio.play();
-    resetRecovery();
     return true;
   } catch (error) {
     console.warn("Audio play failed:", error);
     return false;
   }
+};
+
+const setAudioSource = (url) => {
+  if (!url) return false;
+
+  const absoluteUrl = new URL(url, window.location.href).href;
+
+  if (audio.src !== absoluteUrl) {
+    audio.src = absoluteUrl;
+    audio.load();
+  } else {
+    try {
+      audio.currentTime = 0;
+    } catch (error) {
+      console.warn("Audio reset failed:", error);
+    }
+  }
+
+  return true;
 };
 
 const useMusicStore = create((set, get) => ({
@@ -117,19 +130,17 @@ const useMusicStore = create((set, get) => ({
     if (audioEventsInitialized) return;
 
     audioEventsInitialized = true;
+
     audio.addEventListener("timeupdate", () => {
       const currentTime = Number.isFinite(audio.currentTime)
         ? audio.currentTime
         : 0;
-      set({
-        progress: currentTime,
-      });
+
+      set({ progress: currentTime });
     });
 
     audio.addEventListener("loadedmetadata", () => {
-      const duration = Number.isFinite(audio.duration)
-        ? audio.duration
-        : 0;
+      const duration = Number.isFinite(audio.duration) ? audio.duration : 0;
 
       set({
         duration,
@@ -138,14 +149,10 @@ const useMusicStore = create((set, get) => ({
     });
 
     audio.addEventListener("durationchange", () => {
-      const duration = Number.isFinite(audio.duration)
-        ? audio.duration
-        : 0;
+      const duration = Number.isFinite(audio.duration) ? audio.duration : 0;
 
       if (duration > 0) {
-        set({
-          duration,
-        });
+        set({ duration });
       }
     });
 
@@ -154,10 +161,9 @@ const useMusicStore = create((set, get) => ({
         audio.pause();
         return;
       }
+
       resetRecovery();
-      set({
-        isPlaying: true,
-      });
+      set({ isPlaying: true });
       setMediaSessionPlaybackState("playing");
     });
 
@@ -166,97 +172,94 @@ const useMusicStore = create((set, get) => ({
         audio.pause();
         return;
       }
+
       resetRecovery();
-      set({
-        isPlaying: true,
-      });
+      set({ isPlaying: true });
       setMediaSessionPlaybackState("playing");
     });
 
     audio.addEventListener("pause", () => {
       if (!shouldResumePlayback) {
-        set({
-          isPlaying: false,
-        });
+        set({ isPlaying: false });
         setMediaSessionPlaybackState("paused");
+        return;
       }
+
+      if (audio.ended || audio.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) {
+        return;
+      }
+
+      set({ isPlaying: false });
+      setMediaSessionPlaybackState("paused");
+      scheduleAudioRecovery();
     });
 
     audio.addEventListener("waiting", () => {
-      if (shouldResumePlayback) {
-        set({
-          isPlaying: false,
-        });
-        setMediaSessionPlaybackState("paused");
-        scheduleAudioRecovery();
-      }
+      if (!shouldResumePlayback) return;
+
+      set({ isPlaying: false });
+      setMediaSessionPlaybackState("paused");
+      scheduleAudioRecovery();
     });
 
     audio.addEventListener("stalled", () => {
-      if (shouldResumePlayback) {
-        set({
-          isPlaying: false,
-        });
-        setMediaSessionPlaybackState("paused");
-        scheduleAudioRecovery();
-      }
-    });
+      if (!shouldResumePlayback) return;
 
-    audio.addEventListener("suspend", () => {
+      set({ isPlaying: false });
+      setMediaSessionPlaybackState("paused");
+      scheduleAudioRecovery();
     });
 
     audio.addEventListener("canplay", () => {
-      if (!shouldResumePlayback) return;
-      if (!audio.paused) return;
+      if (!shouldResumePlayback || !audio.paused) return;
+
       clearRecoveryTimer();
-      playAudioElement()
-        .then((success) => {
-          if (success && shouldResumePlayback) {
-            resetRecovery();
-            set({
-              isPlaying: true,
-            });
-            setMediaSessionPlaybackState("playing");
-          } else if (shouldResumePlayback) {
-            scheduleAudioRecovery();
-          }
-        })
-        .catch(() => {
-          if (shouldResumePlayback) {
-            scheduleAudioRecovery();
-          }
-        });
+
+      playAudioElement().then((success) => {
+        if (success && shouldResumePlayback) {
+          resetRecovery();
+          set({ isPlaying: true });
+          setMediaSessionPlaybackState("playing");
+        } else if (shouldResumePlayback) {
+          scheduleAudioRecovery();
+        }
+      });
     });
 
     audio.addEventListener("error", () => {
       const mediaError = audio.error;
+
       console.error("Audio error:", {
         code: mediaError?.code,
         message: mediaError?.message,
         src: audio.src,
       });
-      if (shouldResumePlayback) {
-        set({
-          isPlaying: false,
-        });
+
+      if (!shouldResumePlayback) {
+        set({ isPlaying: false });
         setMediaSessionPlaybackState("paused");
-        scheduleAudioRecovery();
-      } else {
-        set({
-          isPlaying: false,
-        });
-        setMediaSessionPlaybackState("paused");
+        return;
       }
+
+      if (mediaError?.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED) {
+        shouldResumePlayback = false;
+        set({ isPlaying: false });
+        setMediaSessionPlaybackState("paused");
+        return;
+      }
+
+      set({ isPlaying: false });
+      setMediaSessionPlaybackState("paused");
+      scheduleAudioRecovery();
     });
 
     audio.addEventListener("ended", () => {
       if (!shouldResumePlayback) {
-        set({
-          isPlaying: false,
-        });
+        set({ isPlaying: false });
         setMediaSessionPlaybackState("paused");
         return;
       }
+
       resetRecovery();
       get().handleNext();
     });
@@ -274,60 +277,50 @@ const useMusicStore = create((set, get) => ({
 
   playAudio: async () => {
     get().initAudioEvents();
+
     shouldResumePlayback = true;
     const requestId = ++playbackRequestId;
+
     clearRecoveryTimer();
-    try {
-      const success = await playAudioElement();
-      if (requestId !== playbackRequestId) {
-        return false;
-      }
-      if (success) {
-        resetRecovery();
-        set({
-          isPlaying: true,
-        });
+
+    const success = await playAudioElement();
+
+    if (requestId !== playbackRequestId) return false;
+
+    if (success) {
+      resetRecovery();
+
+      if (shouldResumePlayback) {
+        set({ isPlaying: true });
         setMediaSessionPlaybackState("playing");
-        return true;
       }
 
-      if (shouldResumePlayback) {
-        set({
-          isPlaying: false,
-        });
-        setMediaSessionPlaybackState("paused");
-        scheduleAudioRecovery();
-      }
-      return false;
-    } catch (error) {
-      console.warn("Audio play error:", error);
-
-      if (requestId !== playbackRequestId) {
-        return false;
-      }
-      if (shouldResumePlayback) {
-        set({
-          isPlaying: false,
-        });
-        setMediaSessionPlaybackState("paused");
-        scheduleAudioRecovery();
-      }
-      return false;
+      return true;
     }
+
+    if (shouldResumePlayback) {
+      set({ isPlaying: false });
+      setMediaSessionPlaybackState("paused");
+      scheduleAudioRecovery();
+    }
+
+    return false;
   },
 
   handleSongSelect: (song, queue) => {
-    if (!song || !Array.isArray(queue) || queue.length === 0) {
-      return;
-    }
+    if (!song || !Array.isArray(queue) || queue.length === 0) return;
+
     get().initAudioEvents();
+
     const idx = queue.findIndex((s) => s._id === song._id);
+
     if (idx < 0) {
       console.warn("Selected song was not found in queue.");
       return;
     }
 
-    const nextSong = queue[idx];
+    const selectedSong = queue[idx];
+
     playbackRequestId += 1;
     clearRecoveryTimer();
     resetRecovery();
@@ -336,51 +329,42 @@ const useMusicStore = create((set, get) => ({
     set({
       songQueue: queue,
       currentSongIndex: idx,
-      currentSong: nextSong,
+      currentSong: selectedSong,
       isPlaying: false,
       progress: 0,
       duration: 0,
     });
 
-    const nextUrl = nextSong.url;
-    if (!nextUrl) {
+    if (!selectedSong.url) {
       console.error("Selected song has no audio URL.");
       shouldResumePlayback = false;
-      set({
-        isPlaying: false,
-      });
+      set({ isPlaying: false });
       return;
     }
 
-    audio.pause();
-    if (audio.src !== nextUrl) {
-      audio.src = nextUrl;
-      audio.load();
-    } else {
-      audio.currentTime = 0;
-    }
-    get().updateMediaSessionMeta(nextSong);
+    setAudioSource(selectedSong.url);
+    get().updateMediaSessionMeta(selectedSong);
     get().playAudio();
   },
 
   handleNext: () => {
     const { songQueue, currentSongIndex } = get();
+
     if (!songQueue.length) {
       shouldResumePlayback = false;
-      set({
-        isPlaying: false,
-      });
+      set({ isPlaying: false });
+      setMediaSessionPlaybackState("paused");
       return;
     }
 
-    const nextIndex =
-      (currentSongIndex + 1) % songQueue.length;
+    const nextIndex = (currentSongIndex + 1) % songQueue.length;
     const nextSong = songQueue[nextIndex];
+
     if (!nextSong?.url) {
       console.error("Next song has no audio URL.");
-      set({
-        isPlaying: false,
-      });
+      shouldResumePlayback = false;
+      set({ isPlaying: false });
+      setMediaSessionPlaybackState("paused");
       return;
     }
 
@@ -388,6 +372,7 @@ const useMusicStore = create((set, get) => ({
     clearRecoveryTimer();
     resetRecovery();
     shouldResumePlayback = true;
+
     set({
       currentSongIndex: nextIndex,
       currentSong: nextSong,
@@ -396,36 +381,30 @@ const useMusicStore = create((set, get) => ({
       duration: 0,
     });
 
-    audio.pause();
-    if (audio.src !== nextSong.url) {
-      audio.src = nextSong.url;
-      audio.load();
-    } else {
-      audio.currentTime = 0;
-    }
+    setAudioSource(nextSong.url);
     get().updateMediaSessionMeta(nextSong);
     get().playAudio();
   },
 
   handlePrevious: () => {
     const { songQueue, currentSongIndex } = get();
+
     if (!songQueue.length) {
       shouldResumePlayback = false;
-      set({
-        isPlaying: false,
-      });
+      set({ isPlaying: false });
+      setMediaSessionPlaybackState("paused");
       return;
     }
 
     const prevIndex =
-      (currentSongIndex - 1 + songQueue.length) %
-      songQueue.length;
+      (currentSongIndex - 1 + songQueue.length) % songQueue.length;
     const prevSong = songQueue[prevIndex];
+
     if (!prevSong?.url) {
       console.error("Previous song has no audio URL.");
-      set({
-        isPlaying: false,
-      });
+      shouldResumePlayback = false;
+      set({ isPlaying: false });
+      setMediaSessionPlaybackState("paused");
       return;
     }
 
@@ -433,6 +412,7 @@ const useMusicStore = create((set, get) => ({
     clearRecoveryTimer();
     resetRecovery();
     shouldResumePlayback = true;
+
     set({
       currentSongIndex: prevIndex,
       currentSong: prevSong,
@@ -441,31 +421,26 @@ const useMusicStore = create((set, get) => ({
       duration: 0,
     });
 
-    audio.pause();
-    if (audio.src !== prevSong.url) {
-      audio.src = prevSong.url;
-      audio.load();
-    } else {
-      audio.currentTime = 0;
-    }
+    setAudioSource(prevSong.url);
     get().updateMediaSessionMeta(prevSong);
     get().playAudio();
   },
 
   togglePlay: async () => {
     const { currentSong } = get();
+
     if (!currentSong) return;
+
     if (audio.paused) {
       shouldResumePlayback = true;
-      set({
-        isPlaying: false,
-      });
+      set({ isPlaying: false });
+
       const success = await get().playAudio();
+
       if (!success && shouldResumePlayback) {
-        set({
-          isPlaying: false,
-        });
+        set({ isPlaying: false });
       }
+
       return;
     }
 
@@ -473,16 +448,18 @@ const useMusicStore = create((set, get) => ({
     playbackRequestId += 1;
     clearRecoveryTimer();
     resetRecovery();
+
     audio.pause();
-    set({
-      isPlaying: false,
-    });
+
+    set({ isPlaying: false });
     setMediaSessionPlaybackState("paused");
   },
 
   seek: (t) => {
     const { duration } = get();
+
     if (!Number.isFinite(t)) return;
+
     const safeDuration =
       Number.isFinite(duration) && duration > 0
         ? duration
@@ -494,14 +471,14 @@ const useMusicStore = create((set, get) => ({
       Math.max(0, t),
       safeDuration
     );
+
     try {
       audio.currentTime = clamped;
     } catch (error) {
       console.warn("Audio seek failed:", error);
     }
-    set({
-      progress: clamped,
-    });
+
+    set({ progress: clamped });
   },
 
   closeMusicPlayer: () => {
@@ -509,9 +486,11 @@ const useMusicStore = create((set, get) => ({
     playbackRequestId += 1;
     clearRecoveryTimer();
     resetRecovery();
+
     audio.pause();
     audio.removeAttribute("src");
     audio.load();
+
     set({
       currentSong: null,
       isPlaying: false,
@@ -533,6 +512,7 @@ const useMusicStore = create((set, get) => ({
 
   updateMediaSessionMeta: (song) => {
     if (!isMediaSessionSupported() || !song) return;
+
     try {
       navigator.mediaSession.metadata = new MediaMetadata({
         title: song.name || "Unknown Song",
@@ -576,9 +556,9 @@ const useMusicStore = create((set, get) => ({
   },
 }));
 
-
 const registerMediaSessionHandler = (action, handler) => {
   if (!isMediaSessionSupported()) return;
+
   try {
     navigator.mediaSession.setActionHandler(action, handler);
   } catch (error) {
@@ -591,49 +571,56 @@ const registerMediaSessionHandler = (action, handler) => {
 
 if (isMediaSessionSupported() && !mediaSessionInitialized) {
   mediaSessionInitialized = true;
+
   registerMediaSessionHandler("play", () => {
     const { currentSong } = useMusicStore.getState();
     if (!currentSong) return;
+
     useMusicStore.getState().playAudio();
   });
 
   registerMediaSessionHandler("pause", () => {
     const { currentSong } = useMusicStore.getState();
     if (!currentSong) return;
+
     shouldResumePlayback = false;
     playbackRequestId += 1;
     clearRecoveryTimer();
     resetRecovery();
+
     audio.pause();
-    useMusicStore.setState({
-      isPlaying: false,
-    });
+
+    useMusicStore.setState({ isPlaying: false });
     setMediaSessionPlaybackState("paused");
   });
 
   registerMediaSessionHandler("previoustrack", () => {
     useMusicStore.getState().handlePrevious();
   });
+
   registerMediaSessionHandler("nexttrack", () => {
     useMusicStore.getState().handleNext();
   });
+
   registerMediaSessionHandler("seekbackward", (details) => {
     const { progress, seek } = useMusicStore.getState();
+
     const offset =
-      Number.isFinite(details?.seekOffset) &&
-      details.seekOffset > 0
+      Number.isFinite(details?.seekOffset) && details.seekOffset > 0
         ? details.seekOffset
         : 10;
+
     seek(progress - offset);
   });
 
   registerMediaSessionHandler("seekforward", (details) => {
     const { progress, seek } = useMusicStore.getState();
+
     const offset =
-      Number.isFinite(details?.seekOffset) &&
-      details.seekOffset > 0
+      Number.isFinite(details?.seekOffset) && details.seekOffset > 0
         ? details.seekOffset
         : 10;
+
     seek(progress + offset);
   });
 
@@ -649,14 +636,16 @@ if (
   !visibilityHandlersInitialized
 ) {
   visibilityHandlersInitialized = true;
+
   document.addEventListener("visibilitychange", () => {
     const { currentSong } = useMusicStore.getState();
+
     if (!currentSong) return;
+
     if (document.hidden) {
       setMediaSessionPlaybackState(
         shouldResumePlayback ? "playing" : "paused"
       );
-
       return;
     }
 
@@ -669,7 +658,9 @@ if (
 
   window.addEventListener("focus", () => {
     const { currentSong } = useMusicStore.getState();
+
     if (!currentSong) return;
+
     if (shouldResumePlayback && audio.paused) {
       useMusicStore.getState().playAudio();
     } else {
@@ -681,7 +672,9 @@ if (
 
   window.addEventListener("pageshow", () => {
     const { currentSong } = useMusicStore.getState();
+
     if (!currentSong) return;
+
     if (shouldResumePlayback && audio.paused) {
       useMusicStore.getState().playAudio();
     }
@@ -691,13 +684,17 @@ if (
 useMusicStore.subscribe((state) => {
   if (!isMediaSessionSupported()) return;
   if (!state.currentSong) return;
+
   const duration = Number.isFinite(state.duration)
     ? state.duration
     : 0;
+
   const progress = Number.isFinite(state.progress)
     ? state.progress
     : 0;
+
   if (duration <= 0) return;
+
   const position = Math.min(
     Math.max(0, progress),
     duration
