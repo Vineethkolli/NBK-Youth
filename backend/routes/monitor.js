@@ -27,6 +27,8 @@ router.delete('/cloudinary/items', auth, checkRole('Developer'), cloudinaryStora
 // MongoDB Monitor Routes
 router.get('/mongodb/cluster', auth, checkRole('Developer'), mongodbStorageController.getClusterInfo);
 router.get('/mongodb/collections', auth, checkRole('Developer'), mongodbStorageController.getCollectionsInfo);
+router.get('/mongodb/collection-documents', auth, checkRole('Developer'), mongodbStorageController.getCollectionDocuments);
+router.get( '/mongodb/download-collection', auth, checkRole('Developer'), mongodbStorageController.downloadCollection);
 
 // GitHub Actions Monitor Routes
 router.get('/github/actions/all', auth, checkRole('Developer'), githubActionsController.getAllData);
