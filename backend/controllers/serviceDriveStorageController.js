@@ -134,7 +134,7 @@ export const serviceDriveStorageController = {
       do {
         const response = await drive.files.list({
           q,
-          fields: 'nextPageToken, files(id, name, size, mimeType, parents, modifiedTime)',
+          fields: 'nextPageToken, files(id, name, size, mimeType, parents, modifiedTime, webViewLink, webContentLink)',
           pageSize: 1000,
           pageToken: nextPageToken,
           orderBy: 'folder, name',
@@ -161,6 +161,8 @@ export const serviceDriveStorageController = {
                 isFolder: true,
                 mimeType: f.mimeType,
                 modifiedTime: f.modifiedTime,
+                webViewLink: f.webViewLink,
+                webContentLink: f.webContentLink,
               };
             })
         );
@@ -176,6 +178,8 @@ export const serviceDriveStorageController = {
           isFolder: f.mimeType === 'application/vnd.google-apps.folder',
           mimeType: f.mimeType,
           modifiedTime: f.modifiedTime,
+          webViewLink: f.webViewLink,
+          webContentLink: f.webContentLink,
         }));
       }
 

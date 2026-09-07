@@ -20,6 +20,9 @@ router.delete('/item/trash/empty', auth, checkRole('Developer'), serviceDriveSto
 // Cloudinary Monitor Routes
 router.get('/cloudinary/quota', auth, checkRole('Developer'), cloudinaryStorageController.getStorageQuota);
 router.get('/cloudinary/folders', auth, checkRole('Developer'), cloudinaryStorageController.listCloudinaryFolders);
+router.get('/cloudinary/files', auth, checkRole('Developer'), cloudinaryStorageController.listCloudinaryFiles);
+router.get('/cloudinary/download', auth, checkRole('Developer'), cloudinaryStorageController.downloadCloudinaryFolder);
+router.delete('/cloudinary/items', auth, checkRole('Developer'), cloudinaryStorageController.deleteCloudinaryItem);
 
 // MongoDB Monitor Routes
 router.get('/mongodb/cluster', auth, checkRole('Developer'), mongodbStorageController.getClusterInfo);

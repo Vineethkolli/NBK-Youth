@@ -133,11 +133,9 @@ export default function ServiceDriveMonitor() {
 
   const handleItemClick = (item) => {
     if (item.isFolder) {
-      if (showTrash) {
-        handleNavigation(item.id, item.name);
-      } else {
-        handleNavigation(item.id, item.name);
-      }
+      handleNavigation(item.id, item.name);
+    } else if (item.webViewLink || item.webContentLink) {
+      window.open(item.webViewLink || item.webContentLink, '_blank', 'noopener,noreferrer');
     }
   };
 
@@ -378,7 +376,7 @@ else {
     <th className="p-3 text-left font-bold text-gray-700 w-0">S.No.</th>
     <th className="p-3 text-left font-bold text-gray-700">Name</th>
     <th className="p-3 text-left font-bold text-gray-700">Size</th>
-    <th className="p-3 text-center font-bold text-gray-700">Count</th>
+    <th className="p-3 text-center font-bold text-gray-700">{currentFolderId === 'root' ? 'Count' : 'Type'}</th>
     <th className="p-3 text-left font-bold text-gray-700">Modified</th>
     <th className="p-3 text-left font-bold text-gray-700">Actions</th>
   </tr>
@@ -388,7 +386,7 @@ else {
     <tr key={item.id} className="hover:bg-indigo-50 transition duration-150">
       <td className="p-3 text-gray-600 text-center">{index + 1}</td>
       <td
-        className={`p-3 whitespace-nowrap ${item.isFolder ? 'cursor-pointer' : 'cursor-default'}`}
+        className={`p-3 whitespace-nowrap ${item.isFolder || item.webViewLink || item.webContentLink ? 'cursor-pointer' : 'cursor-default'}`}
         onClick={() => handleItemClick(item)}
       >
         <div className="flex items-center space-x-3 font-medium text-gray-800">
@@ -401,7 +399,7 @@ else {
         </div>
       </td>
       <td className="p-3 text-gray-600">{item.size}</td>
-      <td className="p-3 text-gray-600 text-center">{item.count || '-'}</td>
+      <td className="p-3 text-gray-600 text-center">{item.isFolder ? (item.count || '-') : (item.mimeType || '-')}</td>
       <td className="p-3 text-gray-600">
         {item.modifiedTime ? new Date(item.modifiedTime).toLocaleDateString() : '-'}
       </td>

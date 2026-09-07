@@ -21,6 +21,25 @@ const formatSize = (bytes) => {
 
 const FREE_TIER_LIMIT_BYTES = 25 * 1024 * 1024 * 1024; 
 
+const findFolderResources = async (folder) => {
+  let nextCursor = null;
+  const resources = [];
+
+  do {
+    const searchBuilder = cloudinary.search
+      .expression(`folder="${folder}" AND (resource_type:image OR resource_type:video OR resource_type:raw)`)
+      .max_results(500);
+
+    if (nextCursor) searchBuilder.next_cursor(nextCursor);
+
+    const result = await searchBuilder.execute();
+    resources.push(...(result.resources || []));
+    nextCursor = result.next_cursor || null;
+  } while (nextCursor);
+
+  return resources;
+};
+
 
 export const cloudinaryStorageController = {
   getStorageQuota: async (req, res) => {
@@ -82,7 +101,7 @@ export const cloudinaryStorageController = {
         } while (nextCursor);
 
         return {
-          folder: f.name,
+          name: f.name,
           path: f.path,
           sizeBytes: totalBytes,
           sizeReadable: formatSize(totalBytes),
@@ -97,4 +116,95 @@ export const cloudinaryStorageController = {
     res.status(500).json({ message: 'Failed to fetch Cloudinary folders', error: err.message });
   }
 },
+
+  listCloudinaryFiles: async (req, res) => {
+    const folder = req.query.folder;
+
+    if (!folder) {
+      return res.status(400).json({ message: 'Folder is required' });
+    }
+
+    try {
+      const files = await findFolderResources(folder);
+
+      return res.json({
+        files: files.map((file) => ({
+          publicId: file.public_id,
+          name: file.public_id.split('/').pop() + (file.format ? `.${file.format}` : ''),
+          resourceType: file.resource_type,
+          format: file.format,
+          size: formatSize(file.bytes),
+          bytes: file.bytes,
+          secureUrl: file.secure_url,
+          createdAt: file.created_at,
+        })),
+      });
+    } catch (err) {
+      console.error('Cloudinary files error:', err);
+      return res.status(500).json({ message: 'Failed to fetch Cloudinary files', error: err.message });
+    }
+  },
+
+  downloadCloudinaryFolder: async (req, res) => {
+    const folder = req.query.folder;
+
+    if (!folder) {
+      return res.status(400).json({ message: 'Folder is required' });
+    }
+
+    try {
+      const resources = await findFolderResources(folder);
+
+      if (!resources.length) {
+        return res.status(404).json({ message: 'No files found in this folder' });
+      }
+
+      const archiveUrl = cloudinary.utils.download_archive_url({
+        public_ids: resources.map((resource) => resource.public_id),
+        resource_types: ['image', 'video', 'raw'],
+        target_format: 'zip',
+        flatten_folders: true,
+      });
+
+      return res.json({ url: archiveUrl, count: resources.length });
+    } catch (err) {
+      console.error('Cloudinary folder download error:', err);
+      return res.status(500).json({ message: 'Failed to create Cloudinary folder download', error: err.message });
+    }
+  },
+
+  deleteCloudinaryItem: async (req, res) => {
+    const { publicId, resourceType = 'image', folder } = req.body;
+
+    if (!publicId && !folder) {
+      return res.status(400).json({ message: 'A public ID or folder is required' });
+    }
+
+    try {
+      if (folder) {
+        const resources = await findFolderResources(folder);
+
+        await Promise.all(
+          resources.map((resource) => cloudinary.uploader.destroy(resource.public_id, {
+            resource_type: resource.resource_type,
+            type: 'upload',
+            invalidate: true,
+          }))
+        );
+
+        return res.json({ message: 'Folder deleted', deleted: resources.length });
+      }
+
+      await cloudinary.uploader.destroy(publicId, {
+        resource_type: resourceType,
+        type: 'upload',
+        invalidate: true,
+      });
+
+      return res.json({ message: 'File deleted' });
+    } catch (err) {
+      console.error('Cloudinary delete error:', err);
+      return res.status(500).json({ message: 'Failed to delete Cloudinary item', error: err.message });
+    }
+  },
 };
