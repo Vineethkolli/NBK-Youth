@@ -59,7 +59,12 @@ function IncomePrint({ incomes, visibleColumns }) {
                 {visibleColumns.incomeId && <td><span translate="no">{income.incomeId}</span></td>}
                 {visibleColumns.entryDate && <td><span translate="no">{formatDateTime(income.createdAt)}</span></td>}
                 {visibleColumns.paidDate && <td><span translate="no">{income.paidDate ? formatDateTime(income.paidDate) : '-'}</span></td>}
-                {visibleColumns.name && <td>{income.name}</td>}
+                {visibleColumns.name && (
+                  <td>
+                    <div>{income.name}</div>
+                    {visibleColumns.others && income.others && <div>{income.others}</div>}
+                  </td>
+                )}
                 {visibleColumns.email && <td><span translate="no">{income.email}</span></td>}
                 {visibleColumns.phoneNumber && <td><span translate="no">{income.phoneNumber}</span></td>}
                 {visibleColumns.amount && <td><span translate="no">{income.amount}</span></td>}

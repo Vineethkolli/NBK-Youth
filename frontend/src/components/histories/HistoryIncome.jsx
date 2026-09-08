@@ -25,7 +25,10 @@ function HistoryIncome({ incomes, snapshotName, showBelongsTo }) {
             {incomes.map((income, index) => (
               <tr key={income._id || index}>
                 <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{index + 1}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm">{income.name}</td>
+                <td className="px-6 py-4 text-sm">
+                  <div>{income.name}</div>
+                  {income.others && <div className="text-gray-500">{income.others}</div>}
+                </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{income.amount}</td>
                 {showBelongsTo && (
                   <td className="px-6 py-4 whitespace-nowrap text-sm">{income.belongsTo || '-'}</td>

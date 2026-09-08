@@ -26,6 +26,7 @@ const handlePrint = () => {
       case 'entryDate': headers.push('Entry Date'); break;
       case 'paidDate': headers.push('Paid Date'); break;
       case 'name': headers.push('Name'); break;
+      case 'others': break;
       case 'email': headers.push('Email'); break;
       case 'phoneNumber': headers.push('Phone Number'); break;
       case 'amount': headers.push('Amount'); break;
@@ -46,7 +47,11 @@ const handlePrint = () => {
         case 'incomeId': row.push(income.incomeId); break;
         case 'entryDate': row.push(formatDateTime(income.createdAt)); break;
         case 'paidDate': row.push(income.paidDate ? formatDateTime(income.paidDate) : '-'); break;
-        case 'name': row.push(isHidden ? 'Donor' : income.name); break;
+        case 'name': {
+          const name = isHidden ? 'Donor' : income.name;
+          row.push(visibleColumns.others && !isHidden && income.others ? `${name}\n${income.others}` : name);
+          break;
+        }
         case 'email': row.push(isHidden ? 'Donor' : (income.email || 'N/A')); break;
         case 'phoneNumber': row.push(isHidden ? 'Donor' : (income.phoneNumber || 'N/A')); break;
         case 'amount': row.push(income.amount); break;

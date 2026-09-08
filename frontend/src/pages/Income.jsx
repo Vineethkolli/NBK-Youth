@@ -38,6 +38,7 @@ function Income() {
     entryDate: false,
     paidDate: false,
     name: true,
+    others: true,
     amount: true,
     status: true,
     paymentMode: false,

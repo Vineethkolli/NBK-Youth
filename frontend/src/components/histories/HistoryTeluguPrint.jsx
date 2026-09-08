@@ -244,7 +244,7 @@ function TeluguPrint({ selectedHistory, activeTab, data, showBelongsTo }) {
     const rows = incomes.map((income, index) => {
       const row = [
         `<span translate="no">${index + 1}</span>`,
-        income.name || '-',
+        income.others ? `${income.name || '-'}<br>${income.others}` : (income.name || '-'),
         `<span translate="no">${income.amount || 0}</span>`
       ];
       if (showBelongsTo) row.push(income.belongsTo || '-');

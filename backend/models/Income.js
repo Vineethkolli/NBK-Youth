@@ -15,6 +15,10 @@ const incomeSchema = new mongoose.Schema({
     required: true,
     unique: true, 
   },
+  others: {
+    type: String,
+    default: '',
+  },
 email: {
   type: String,
   trim: true,
