@@ -140,13 +140,17 @@ function IncomeTable({
                 )}
 
                 {visibleColumns.name && (
-                  <td className="px-6 py-4 text-sm">
-                    <div>{isHidden ? 'Donor' : income.name}</div>
-                    {visibleColumns.others && !isHidden && income.others && (
-                      <div className="text-gray-500">{income.others}</div>
-                    )}
-                  </td>
-                )}
+  <td className="px-6 py-4 text-sm">
+    <div className="whitespace-nowrap">
+      {isHidden ? 'Donor' : income.name}
+    </div>
+    {visibleColumns.others && !isHidden && income.others && (
+      <div className="whitespace-nowrap text-gray-500">
+        {income.others}
+      </div>
+    )}
+  </td>
+)}
 
                 {hasAccess('Privileged') && visibleColumns.email && (
                   <td className="px-6 py-4 whitespace-nowrap text-sm">{isHidden ? 'Donor' : income.email}</td>
