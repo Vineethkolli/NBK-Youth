@@ -26,8 +26,8 @@ function HistoryIncome({ incomes, snapshotName, showBelongsTo }) {
               <tr key={income._id || index}>
                 <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{index + 1}</td>
                 <td className="px-6 py-4 text-sm">
-                  <div>{income.name}</div>
-                  {income.others && <div className="text-gray-500">{income.others}</div>}
+                  <div className="whitespace-nowrap">{income.name}</div>
+                  {income.others && <div className="whitespace-nowrap text-gray-500">{income.others}</div>}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{income.amount}</td>
                 {showBelongsTo && (
