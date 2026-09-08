@@ -14,8 +14,10 @@ export default function FileList({
   const [deletingId, setDeletingId] = useState(null);
 
   const getFileIcon = (resourceType, filename) => {
-    const type = `${resourceType || ''}/${filename || ''}`.toLowerCase();
+    const normalizedFilename = (filename || '').toLowerCase();
+    const type = `${resourceType || ''}/${normalizedFilename}`;
 
+    if (normalizedFilename.endsWith('.pdf')) return File;
     if (type.includes('image')) return FileImage;
     if (type.includes('video')) return FileVideo;
     if (type.includes('audio')) return FileAudio;

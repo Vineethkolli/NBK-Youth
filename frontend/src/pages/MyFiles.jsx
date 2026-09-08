@@ -7,6 +7,7 @@ import { useAuth } from '../context/AuthContext';
 import FileForm from '../components/myFiles/FileForm';
 import FileList from '../components/myFiles/FileList';
 import NoteForm from '../components/myFiles/NoteForm';
+import NoteViewer from '../components/myFiles/NoteViewer';
 import NoteList from '../components/myFiles/NoteList';
 import PinDialog from '../components/myFiles/PinDialog';
 
@@ -164,7 +165,7 @@ const openNote = async (note, pin) => {
     );
 
     setModal({
-      type: 'note',
+      type: 'note-view',
       item: response.data,
       pin: pin || null,
     });
@@ -499,6 +500,13 @@ const openNote = async (note, pin) => {
           pin={modal.pin}
           onClose={() => setModal(null)}
           onSaved={load}
+        />
+      )}
+
+      {modal?.type === 'note-view' && (
+        <NoteViewer
+          note={modal.item}
+          onClose={() => setModal(null)}
         />
       )}
 
