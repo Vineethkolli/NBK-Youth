@@ -3,6 +3,8 @@ import { DateTime } from 'luxon';
 import mongoose from 'mongoose';
 import MailerSchedule from '../models/MailerSchedule.js';
 import MailerHistory from '../models/MailerHistory.js';
+import ActivityLog from '../models/ActivityLog.js';
+import User from '../models/User.js';
 import { sendEmailsSequential } from './mailerService.js';
 
 let agendaInstance = null;
@@ -32,6 +34,34 @@ const updateScheduleAfterSend = async ({
   schedule.completedAt = new Date();
   schedule.status = computeStatus(schedule.totalRecipients, failedRecipients.length);
   await schedule.save();
+};
+
+const logScheduledEmailActivity = async ({ schedule, action, description, status }) => {
+  try {
+    const user = await User.findOne({ registerId: schedule.senderRegisterId })
+      .select('name')
+      .lean();
+
+    await ActivityLog.create({
+      action,
+      entityType: 'Mailer',
+      entityId: schedule._id.toString(),
+      registerId: schedule.senderRegisterId,
+      userName: user?.name || 'NA',
+      changes: {
+        before: null,
+        after: {
+          subject: schedule.subject,
+          scheduledAt: schedule.scheduledAt,
+          status,
+          totalRecipients: schedule.totalRecipients
+        }
+      },
+      description
+    });
+  } catch (error) {
+    console.error('Failed to log scheduled email activity:', error.message);
+  }
 };
 
 const defineJobs = (agenda) => {
@@ -68,6 +98,13 @@ const defineJobs = (agenda) => {
     schedule.status = 'pending';
     await schedule.save();
 
+    await logScheduledEmailActivity({
+      schedule,
+      action: 'UPDATE',
+      status: 'pending',
+      description: `Scheduled email sending started: ${schedule.subject}`
+    });
+
     const { failedRecipients } = await sendEmailsSequential({
       recipients: schedule.recipients,
       subject: schedule.subject,
@@ -95,6 +132,13 @@ const defineJobs = (agenda) => {
 
     schedule.historyId = history._id;
     await updateScheduleAfterSend({ schedule, failedRecipients });
+
+    await logScheduledEmailActivity({
+      schedule,
+      action: 'UPDATE',
+      status: schedule.status,
+      description: `Scheduled email sending completed: ${schedule.subject}`
+    });
   });
 
 };

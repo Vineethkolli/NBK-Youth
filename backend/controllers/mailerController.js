@@ -251,36 +251,101 @@ const createSchedule = async ({ req, emailPayload, target, registerId, email, sc
 export const updateScheduledEmail = async (req, res) => {
   try {
     const schedule = await MailerSchedule.findById(req.params.id);
-    if (!schedule) return res.status(404).json({ error: 'Scheduled email not found' });
-    if (schedule.status !== 'pending') {
-      return res.status(409).json({ error: 'Sent emails must be rescheduled' });
+
+    if (!schedule) {
+      return res.status(404).json({
+        error: 'Scheduled email not found'
+      });
     }
 
+    if (schedule.status !== 'pending') {
+      return res.status(409).json({
+        error: 'Sent emails must be rescheduled'
+      });
+    }
+
+    const before = {
+      subject: schedule.subject,
+      target: schedule.targetType,
+      scheduledAt: schedule.scheduledAt
+    };
+
     const { target, registerId, email, scheduleDate } = req.body;
+
     const scheduledAt = parseScheduleDate(scheduleDate);
     const emailPayload = buildEmailPayload(req.body);
+
     const replacement = await createSchedule({
-      req, emailPayload, target, registerId, email, scheduledAt
+      req,
+      emailPayload,
+      target,
+      registerId,
+      email,
+      scheduledAt
     });
 
     await cancelScheduledEmail(schedule._id.toString());
     await MailerSchedule.findByIdAndDelete(schedule._id);
-    res.json({ message: 'Scheduled email updated', schedule: replacement });
+
+    await logActivity(
+      req,
+      'UPDATE',
+      'Mailer',
+      req.user.registerId,
+      {
+        before,
+        after: {
+          subject: replacement.subject,
+          target: replacement.targetType,
+          scheduledAt: replacement.scheduledAt
+        }
+      },
+      `Scheduled email updated by ${req.user.name}`
+    );
+
+    return res.json({
+      message: 'Scheduled email updated',
+      schedule: replacement
+    });
   } catch (error) {
-    console.error('Update scheduled email error:', error.message);
-    res.status(error.statusCode || 500).json({ error: error.message || 'Failed to update scheduled email' });
+    console.error(
+      'Update scheduled email error:',
+      error.message
+    );
+
+    return res.status(error.statusCode || 500).json({
+      error:
+        error.message ||
+        'Failed to update scheduled email'
+    });
   }
 };
+
 
 export const rescheduleEmail = async (req, res) => {
   try {
     const schedule = await MailerSchedule.findById(req.params.id);
-    if (!schedule) return res.status(404).json({ error: 'Scheduled email not found' });
-    if (schedule.status === 'pending') {
-      return res.status(409).json({ error: 'Pending emails should be edited' });
+
+    if (!schedule) {
+      return res.status(404).json({
+        error: 'Scheduled email not found'
+      });
     }
 
+    if (schedule.status === 'pending') {
+      return res.status(409).json({
+        error: 'Pending emails should be edited'
+      });
+    }
+
+    const before = {
+      subject: schedule.subject,
+      target: schedule.targetType,
+      scheduledAt: schedule.scheduledAt
+    };
+
     const { target, registerId, email, scheduleDate } = req.body;
+
     const replacement = await createSchedule({
       req,
       emailPayload: buildEmailPayload(req.body),
@@ -289,23 +354,85 @@ export const rescheduleEmail = async (req, res) => {
       email,
       scheduledAt: parseScheduleDate(scheduleDate)
     });
-    res.status(201).json({ message: 'Email rescheduled', schedule: replacement });
+
+    await logActivity(
+      req,
+      'UPDATE',
+      'Mailer',
+      req.user.registerId,
+      {
+        before,
+        after: {
+          subject: replacement.subject,
+          target: replacement.targetType,
+          scheduledAt: replacement.scheduledAt
+        }
+      },
+      `Email rescheduled by ${req.user.name} for ${replacement.scheduledAt.toISOString()}`
+    );
+
+    return res.status(201).json({
+      message: 'Email rescheduled',
+      schedule: replacement
+    });
   } catch (error) {
-    console.error('Reschedule email error:', error.message);
-    res.status(error.statusCode || 500).json({ error: error.message || 'Failed to reschedule email' });
+    console.error(
+      'Reschedule email error:',
+      error.message
+    );
+
+    return res.status(error.statusCode || 500).json({
+      error:
+        error.message ||
+        'Failed to reschedule email'
+    });
   }
 };
 
 export const deleteScheduledEmail = async (req, res) => {
   try {
     const schedule = await MailerSchedule.findById(req.params.id);
-    if (!schedule) return res.status(404).json({ error: 'Scheduled email not found' });
+
+    if (!schedule) {
+      return res.status(404).json({
+        error: 'Scheduled email not found'
+      });
+    }
+
+    const before = {
+      subject: schedule.subject,
+      target: schedule.targetType,
+      scheduledAt: schedule.scheduledAt
+    };
 
     await cancelScheduledEmail(schedule._id.toString());
     await schedule.deleteOne();
-    res.json({ message: 'Scheduled email deleted' });
+
+    await logActivity(
+      req,
+      'DELETE',
+      'Mailer',
+      req.user.registerId,
+      {
+        before,
+        after: null
+      },
+      `Scheduled email deleted by ${req.user.name}`
+    );
+
+    return res.json({
+      message: 'Scheduled email deleted'
+    });
   } catch (error) {
-    console.error('Delete scheduled email error:', error.message);
-    res.status(500).json({ error: error.message || 'Failed to delete scheduled email' });
+    console.error(
+      'Delete scheduled email error:',
+      error.message
+    );
+
+    return res.status(error.statusCode || 500).json({
+      error:
+        error.message ||
+        'Failed to delete scheduled email'
+    });
   }
 };

@@ -26,7 +26,7 @@ const UserStats = () => {
           financier: { count: 0, registerIds: [] },
           user: { count: 0, registerIds: [] }
         },
-        categoryStats: { youth: 0, general: 0 },
+        categoryStats: { youth: 0, villager: 0, general: 0 },
         googleStats: { linked: 0, notLinked: 0 },
         emailStats: { withEmail: 0, withoutEmail: 0 }
       };
@@ -52,6 +52,7 @@ const UserStats = () => {
         }
 
         if (user.category === 'youth') newStats.categoryStats.youth++;
+        if (user.category === 'villager') newStats.categoryStats.villager++;
         if (user.category === 'general') newStats.categoryStats.general++;
 
         if (user.googleId) {

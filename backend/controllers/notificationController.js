@@ -112,7 +112,11 @@ export const sendNotification = async (req, res) => {
       eligibleRegisterIds = await getCategoryBasedRegisterIds('youth');
       subscriptionUsers = await Subscription.find({ registerId: { $in: eligibleRegisterIds } });
 
-    } else {
+    }  else if (target === 'Youth_Villager_Category') {
+      eligibleRegisterIds = await getCategoryBasedRegisterIds(['youth', 'villager']);
+      subscriptionUsers = await Subscription.find({ registerId: { $in: eligibleRegisterIds } });
+
+    }else {
       return res.status(400).json({ error: 'Invalid target selection' });
     }
 

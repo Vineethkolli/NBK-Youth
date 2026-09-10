@@ -154,6 +154,11 @@ function Users() {
                             Y
                           </span>
                         )}
+                        {user.category === 'villager' && (
+                          <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-green-300 text-green-900 ml-1">
+                            V
+                          </span>
+                        )}
                       </td>
 
                       <td className="px-4 py-3 whitespace-nowrap text-sm notranslate">
@@ -190,6 +195,7 @@ function Users() {
                                      sm:text-sm rounded-md"
                         >
                           <option value="youth">Youth</option>
+                          <option value="villager">Villager</option>
                           <option value="general">General</option>
                         </select>
                       </td>

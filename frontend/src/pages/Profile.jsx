@@ -311,6 +311,11 @@ function Profile() {
                 Youth
               </span>
             )}
+            {user.category === 'villager' && (
+              <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-300 text-green-900">
+                Villager
+              </span>
+            )}
           </h3>
 
           <button
