@@ -83,27 +83,83 @@ export const myFilesController = {
   },
 
   getFile: async (req, res) => {
-    const file = await FileAsset.findById(req.params.id);
-    if (!file) return res.status(404).json({ message: 'File not found' });
-    if (file.passwordProtected && !(await getPin(req))) {
-      const error = pinError(req);
-      return res.status(error.status).json(error);
-    }
-    res.json(file);
-  },
+  const file = await FileAsset.findById(req.params.id);
+  if (!file) return res.status(404).json({ message: 'File not found' });
 
-  downloadFile: async (req, res) => {
-    const file = await FileAsset.findById(req.params.id);
-    if (!file) return res.status(404).json({ message: 'File not found' });
-    if (file.passwordProtected && !(await getPin(req))) {
+  if (file.passwordProtected) {
+    const authenticated = await getPin(req);
+
+    await logActivity(
+      req,
+      'VERIFY',
+      'FileAsset',
+      file._id.toString(),
+      {
+        before: null,
+        after: {
+          title: file.title,
+          authenticated,
+        },
+      },
+      authenticated
+        ? `Protected file "${file.filename}" opened`
+        : `Failed authentication for protected file "${file.filename}"`
+    );
+
+    if (!authenticated) {
       const error = pinError(req);
       return res.status(error.status).json(error);
     }
-    const response = await (await import('axios')).default.get(file.url, { responseType: 'stream' });
-    res.setHeader('Content-Disposition', `attachment; filename="${file.filename}"`);
-    if (response.headers['content-type']) res.setHeader('Content-Type', response.headers['content-type']);
-    response.data.pipe(res);
-  },
+  }
+
+  res.json(file);
+},
+
+downloadFile: async (req, res) => {
+  const file = await FileAsset.findById(req.params.id);
+  if (!file) return res.status(404).json({ message: 'File not found' });
+
+  if (file.passwordProtected) {
+    const authenticated = await getPin(req);
+
+    await logActivity(
+      req,
+      'VERIFY',
+      'FileAsset',
+      file._id.toString(),
+      {
+        before: null,
+        after: {
+          title: file.title,
+          authenticated,
+        },
+      },
+      authenticated
+        ? `Protected file "${file.filename}" download authorized`
+        : `Failed authentication for protected file "${file.filename}" download`
+    );
+
+    if (!authenticated) {
+      const error = pinError(req);
+      return res.status(error.status).json(error);
+    }
+  }
+
+  const response = await (await import('axios')).default.get(file.url, {
+    responseType: 'stream',
+  });
+
+  res.setHeader(
+    'Content-Disposition',
+    `attachment; filename="${file.filename}"`
+  );
+
+  if (response.headers['content-type']) {
+    res.setHeader('Content-Type', response.headers['content-type']);
+  }
+
+  response.data.pipe(res);
+},
 
   listNotes: async (req, res) => {
     const notes = await Note.find().select('title passwordProtected createdAt updatedAt').sort('-updatedAt').lean();
@@ -111,15 +167,37 @@ export const myFilesController = {
   },
 
   getNote: async (req, res) => {
-    const note = await Note.findById(req.params.id).select('+content');
-    if (!note) return res.status(404).json({ message: 'Note not found' });
-    if (note.passwordProtected && !(await getPin(req))) {
+  const note = await Note.findById(req.params.id).select('+content');
+  if (!note) return res.status(404).json({ message: 'Note not found' });
+
+  if (note.passwordProtected) {
+    const authenticated = await getPin(req);
+
+    await logActivity(
+      req,
+      'VERIFY',
+      'Note',
+      note._id.toString(),
+      {
+        before: null,
+        after: {
+          title: note.title,
+          authenticated,
+        },
+      },
+      authenticated
+        ? `Protected note "${note.title}" opened`
+        : `Failed authentication for protected note "${note.title}"`
+    );
+
+    if (!authenticated) {
       const error = pinError(req);
       return res.status(error.status).json(error);
     }
-    await logActivity(req, 'VERIFY', 'Note', note._id.toString(), { before: null, after: { title: note.title } }, `Note "${note.title}" opened`);
-    res.json(note);
-  },
+  }
+
+  res.json(note);
+},
 
   createNote: async (req, res) => {
     const { title, content, passwordProtected } = req.body || {};
@@ -143,13 +221,51 @@ export const myFilesController = {
   },
 
   deleteNote: async (req, res) => {
-    const existing = await Note.findById(req.params.id);
-    if (!existing) return res.status(404).json({ message: 'Note not found' });
-    if (existing.passwordProtected && !(await getPin(req))) { const error = pinError(req); return res.status(error.status).json(error); }
-    const note = await Note.findByIdAndDelete(req.params.id);
-    if (!note) return res.status(404).json({ message: 'Note not found' });
-    await logActivity(req, 'DELETE', 'Note', note._id.toString(), { before: { title: note.title, passwordProtected: note.passwordProtected }, after: null }, `Note "${note.title}" deleted`);
-    res.json({ message: 'Note deleted' });
-  },
+  const existing = await Note.findById(req.params.id);
+  if (!existing) return res.status(404).json({ message: 'Note not found' });
+  if (existing.passwordProtected) {
+    const authenticated = await getPin(req);
+
+    await logActivity(
+      req,
+      'VERIFY',
+      'Note',
+      existing._id.toString(),
+      {
+        before: null,
+        after: {
+          title: existing.title,
+          authenticated,
+        },
+      },
+      authenticated
+        ? `Protected note "${existing.title}" deletion authorized`
+        : `Failed authentication for protected note "${existing.title}" deletion`
+    );
+
+    if (!authenticated) {
+      const error = pinError(req);
+      return res.status(error.status).json(error);
+    }
+  }
+  const note = await Note.findByIdAndDelete(req.params.id);
+  if (!note) return res.status(404).json({ message: 'Note not found' });
+
+  await logActivity(
+    req,
+    'DELETE',
+    'Note',
+    note._id.toString(),
+    {
+      before: {
+        title: note.title,
+        passwordProtected: note.passwordProtected,
+      },
+      after: null,
+    },
+    `Note "${note.title}" deleted`
+  );
+  res.json({ message: 'Note deleted' });
+},
 
 };
