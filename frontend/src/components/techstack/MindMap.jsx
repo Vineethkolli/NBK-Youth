@@ -1,6 +1,6 @@
 
 const roleNodes = [
-  { name: "Developer", color: "bg-green-500" },
+  { name: "Developer", color: "bg-red-500" },
   { name: "Financier", color: "bg-indigo-500" },
   { name: "Admin", color: "bg-orange-500" },
   { name: "User", color: "bg-gray-500" },
@@ -8,6 +8,7 @@ const roleNodes = [
 
 const categoryNodes = [
   { name: "Youth", color: "bg-yellow-500" },
+  { name: "Villager", color: "bg-green-500" },
   { name: "General", color: "bg-purple-500" },
 
 ];
@@ -24,8 +25,9 @@ const MindMap = () => {
         <line x1="50%" y1="40" x2="60%" y2="100" stroke="black" strokeWidth="2" />
         <line x1="50%" y1="40" x2="80%" y2="100" stroke="black" strokeWidth="2" />
         
-        <line x1="50%" y1="240" x2="35%" y2="300" stroke="black" strokeWidth="2" />
-        <line x1="50%" y1="240" x2="65%" y2="300" stroke="black" strokeWidth="2" />
+        <line x1="50%" y1="240" x2="20%" y2="300" stroke="black" strokeWidth="2" />
+        <line x1="50%" y1="240" x2="50%" y2="300" stroke="black" strokeWidth="2" />
+        <line x1="50%" y1="240" x2="80%" y2="300" stroke="black" strokeWidth="2" />
       </svg>
 
       <div className="absolute top-4 left-1/2 transform -translate-x-1/2">
