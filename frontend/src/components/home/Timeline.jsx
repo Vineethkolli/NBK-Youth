@@ -4,8 +4,14 @@ import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { API_URL } from '../../utils/config';
 import { formatDateTime } from '../../utils/dateTime';
+import { useLanguage } from '../../context/LanguageContext';
+import EventLabelDisplay from '../common/EventLabelDisplay';
+import EventTimelineEnglishPrint from './EventTimelineEnglishPrint';
+import EventTimelineTeluguPrint from './EventTimelineTeluguPrint';
 
 function Timeline({ events, isTimelineEditing, setIsTimelineEditing, onUpdate, canEdit }) {
+  const { language } = useLanguage();
+  const PrintComponent = language === 'te' ? EventTimelineTeluguPrint : EventTimelineEnglishPrint;
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({ name: '', dateTime: '' });
   const [deletingId, setDeletingId] = useState(null);
@@ -113,9 +119,14 @@ function Timeline({ events, isTimelineEditing, setIsTimelineEditing, onUpdate, c
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold">Event Timeline</h2>
-        {canEdit && (
-  <div className="flex gap-2">
+        <div>
+          <h2 className="text-xl font-semibold">Event Timeline</h2>
+          <EventLabelDisplay />
+        </div>
+        <div className="flex gap-2">
+          <PrintComponent events={events} />
+          {canEdit && (
+  <>
     {isTimelineEditing && (
       <button
         onClick={() => setShowForm(true)}
@@ -132,8 +143,9 @@ function Timeline({ events, isTimelineEditing, setIsTimelineEditing, onUpdate, c
       <Edit2 className="h-4 w-4 mr-1" />
       {isTimelineEditing ? 'Done' : 'Edit'}
     </button>
-  </div>
+  </>
 )}
+        </div>
       </div>
 
       {showForm && (
