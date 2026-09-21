@@ -37,17 +37,28 @@ function EventTimelineEnglishPrint({ events }) {
       styles: { fontSize: 10, cellPadding: 2, rowHeight: 7 },
     });
 
-    const pageCount = doc.getNumberOfPages();
-    for (let page = 1; page <= pageCount; page += 1) {
-      doc.setPage(page);
-      doc.setFontSize(9);
-      doc.setTextColor(100);
-      const pageHeight = doc.internal.pageSize.height;
-      const pageWidth = doc.internal.pageSize.width;
-      doc.text(timestamp, 10, pageHeight - 10);
-      doc.text(`Page ${page} of ${pageCount}`, pageWidth - 30, pageHeight - 10);
-    }
+    // Footer
+const pageCount = doc.getNumberOfPages();
+for (let i = 1; i <= pageCount; i++) {
+  doc.setPage(i);
+  doc.setFontSize(9);
 
+  const pageWidth = doc.internal.pageSize.width;
+  const pageHeight = doc.internal.pageSize.height;
+
+  doc.text(`${timestamp}`, 10, pageHeight - 10);
+
+  const linkText = "Gangavaram App | https://nbkyouth.vercel.app";
+  const textWidth = doc.getTextWidth(linkText);
+  const centerX = (pageWidth - textWidth) / 2;
+
+  doc.textWithLink(linkText, centerX, pageHeight - 10, {
+    url: "https://nbkyouth.vercel.app"
+  });
+
+  doc.text(
+    `Page ${i} of ${pageCount}`, pageWidth - 30, pageHeight - 10);
+}
     doc.save('Event_Timeline.pdf');
   };
 

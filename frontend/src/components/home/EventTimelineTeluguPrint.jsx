@@ -48,7 +48,7 @@ function EventTimelineTeluguPrint({ events }) {
         <table>
           <thead>
             <tr>
-              <th>క్రమ సంఖ్య</th>
+              <th>క్ర.సం.</th>
               <th>కార్యక్రమం</th>
               <th>తేదీ మరియు సమయం</th>
             </tr>
