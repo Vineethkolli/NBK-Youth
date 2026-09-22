@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
-import { Trash2, Bell, BellOff, Edit2, Search, CheckCircle, XCircle, UsersIcon, BarChart3 } from 'lucide-react';
+import { Trash2, Bell, BellOff, Edit2, Search, CheckCircle, XCircle, UsersIcon, BarChart3, Fingerprint } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { API_URL } from '../utils/config';
 import UpdateUserForm from '../components/users/UpdateUserForm';
@@ -15,6 +15,7 @@ function Users() {
   const { hasAccess } = useAuth();
   const [editingUser, setEditingUser] = useState(null);
   const [userToDelete, setUserToDelete] = useState(null);
+  const [userToInvalidate, setUserToInvalidate] = useState(null);
   const [activeTab, setActiveTab] = useState('users');
   const [loading, setLoading] = useState(false);
 
@@ -58,6 +59,15 @@ function Users() {
       fetchUsers();
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to update category');
+    }
+  };
+
+  const handleInvalidateSessions = async (user) => {
+    try {
+      const { data } = await axios.post(`${API_URL}/api/sessions/user/${user._id}/invalidate`);
+      toast.success(`${data.invalidatedCount} session${data.invalidatedCount === 1 ? '' : 's'} invalidated`);
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to invalidate sessions');
     }
   };
 
@@ -230,6 +240,15 @@ function Users() {
                             <Edit2 className="h-5 w-5" />
                           </button>
                           <button
+                            onClick={() => setUserToInvalidate(user)}
+                            disabled={user.email === 'gangavaramnbkyouth@gmail.com'}
+                            className="text-orange-600 hover:text-orange-900 disabled:opacity-50 disabled:cursor-not-allowed"
+                            title="Invalidate all sessions"
+                            aria-label={`Invalidate all sessions for ${user.name}`}
+                          >
+                            <Fingerprint className="h-5 w-5" />
+                          </button>
+                          <button
                             onClick={() => setUserToDelete(user)}
                             disabled={user.email === 'gangavaramnbkyouth@gmail.com'}
                             className="text-red-600 hover:text-red-900 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -270,6 +289,15 @@ function Users() {
                   toast.error(error.response?.data?.message || 'Failed to delete user');
                 }
               }}
+            />
+          )}
+
+          {userToInvalidate && (
+            <DeleteUserConfirm
+              user={userToInvalidate}
+              action="invalidate"
+              onClose={() => setUserToInvalidate(null)}
+              onConfirm={handleInvalidateSessions}
             />
           )}
         </>

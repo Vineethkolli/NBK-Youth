@@ -8,6 +8,7 @@ import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import { API_URL } from '../utils/config';
 import UniversalPinManager from '../components/developer/UniversalPinManager';
+import AuthSessionsManager from '../components/developer/AuthSessionsManager';
 
 function DeveloperOptions() {
   const {hasAccess} = useAuth();
@@ -52,6 +53,7 @@ function DeveloperOptions() {
 
       <LockManager />
       <UniversalPinManager />
+      <AuthSessionsManager />
 
       {/* Reset Roles */}
       <div className="bg-white rounded-lg shadow p-6 flex items-center justify-between">

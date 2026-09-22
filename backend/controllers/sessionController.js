@@ -1,6 +1,10 @@
 import Session from "../models/Session.js";
+import bcrypt from "bcrypt";
+import UniversalPin from "../models/UniversalPin.js";
+import { logActivity } from "../middleware/activityLogger.js";
 import { generateAccessToken, generateRefreshToken, hashToken } from "../utils/tokenUtils.js";
 import { getLocationFromIP } from "../utils/ipLocation.js";
+import User from "../models/User.js";
 import { DateTime } from "luxon";
 
 const APP_TIMEZONE = "Asia/Kolkata";
@@ -231,6 +235,84 @@ export const signOutSession = async (req, res) => {
     res.json({ message: "Session signed out successfully" });
   } catch (error) {
     console.error("Sign out session error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+
+export const invalidateUserSessions = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const user = await User.findById(userId).select("name registerId");
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    const result = await Session.updateMany(
+      { userId, isValid: true },
+      { $set: { isValid: false } }
+    );
+
+    await logActivity(
+      req,
+      "UPDATE",
+      "User",
+       user.registerId,
+      {
+        before: {
+          validSessions: result.modifiedCount,
+        },
+        after: {
+          validSessions: 0,
+        },
+      },
+      `All authentication sessions invalidated for ${user.name} (${user.registerId})`
+    );
+
+    res.json({
+      message: "All user sessions invalidated successfully",
+      invalidatedCount: result.modifiedCount,
+    });
+  } catch (error) {
+    console.error("Invalidate user sessions error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+
+export const invalidateAllSessions = async (req, res) => {
+  try {
+    const setting = await UniversalPin.findOne({ key: 'default' });
+    const pin = String(req.body?.pin || '');
+
+    if (!setting || !(await bcrypt.compare(pin, setting.pinHash))) {
+      return res.status(401).json({ message: 'Invalid universal PIN' });
+    }
+
+    const result = await Session.updateMany(
+      { isValid: true },
+      { $set: { isValid: false } }
+    );
+
+    await logActivity(
+      req,
+      'UPDATE',
+      'DeveloperOptions',
+      'auth-sessions',
+      { before: { validSessions: result.modifiedCount }, after: { validSessions: 0 } },
+      'All authentication sessions invalidated'
+    );
+
+    res.json({
+      message: 'All authentication sessions invalidated successfully',
+      invalidatedCount: result.modifiedCount,
+    });
+  } catch (error) {
+    console.error("Invalidate all sessions error:", error);
     res.status(500).json({ message: "Server error" });
   }
 };
