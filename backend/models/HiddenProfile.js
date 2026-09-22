@@ -6,6 +6,12 @@ const hiddenProfileSchema = new mongoose.Schema({
     required: true,
     unique: true
   },
+  profileType: {
+    type: String,
+    enum: ['Income', 'Expense'],
+    default: 'Income',
+    required: true
+  },
   hiddenBy: {
     type: String,
     required: true

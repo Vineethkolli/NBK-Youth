@@ -1,10 +1,12 @@
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { Printer } from 'lucide-react';
+import { useHiddenProfiles } from '../../context/HiddenProfileContext';
 import { formatDateTime } from '../../utils/dateTime';
 import { useEventLabel } from '../../context/EventLabelContext';
 
 const ExpensePrint = ({ expenses, visibleColumns }) => {
+  const { isProfileHidden } = useHiddenProfiles();
   const { eventLabel } = useEventLabel();
 
   const handlePrint = () => {
@@ -38,17 +40,18 @@ const ExpensePrint = ({ expenses, visibleColumns }) => {
   
     expenses.forEach((expense, index) => {
       const row = [index + 1];
+      const isHidden = isProfileHidden(expense._id, 'Expense');
       columns.forEach(column => {
         switch (column) {
           case 'expenseId': row.push(expense.expenseId); break;
           case 'registerId': row.push(expense.registerId); break;
           case 'dateTime': row.push(formatDateTime(expense.createdAt)); break;
-          case 'purpose': row.push(expense.purpose); break;
+          case 'purpose': row.push(isHidden ? 'Expense' : expense.purpose); break;
           case 'amount': row.push(expense.amount); break;
           case 'paymentMode': row.push(expense.paymentMode); break;
           case 'bill': row.push(expense.billImage ? 'Available' : 'No Bill'); break;
           case 'name': row.push(expense.name); break;
-          case 'phoneNumber': row.push(expense.phoneNumber || 'N/A'); break;
+          case 'phoneNumber': row.push(isHidden ? 'Expense' : (expense.phoneNumber || 'N/A')); break;
           case 'verifyLog': row.push(expense.verifyLog); break;
           default: break;
         }

@@ -6,7 +6,7 @@ import { formatDateTime } from '../../utils/dateTime';
 import { useEventLabel } from '../../context/EventLabelContext';
 
 const IncomePrint = ({ incomes, visibleColumns }) => {
-  const { hiddenProfiles } = useHiddenProfiles();
+  const { isProfileHidden } = useHiddenProfiles();
   const { eventLabel } = useEventLabel();
 
 const handlePrint = () => {
@@ -40,7 +40,7 @@ const handlePrint = () => {
 
   incomes.forEach((income, index) => {
     const row = [index + 1];
-    const isHidden = hiddenProfiles.has(income._id);
+    const isHidden = isProfileHidden(income._id, 'Income');
     columns.forEach(column => {
       switch (column) {
         case 'registerId': row.push(income.registerId); break;

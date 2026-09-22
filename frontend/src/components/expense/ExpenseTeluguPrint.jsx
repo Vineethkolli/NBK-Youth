@@ -2,10 +2,12 @@ import { useRef } from 'react';
 import { Printer } from 'lucide-react';
 import { formatDateTime } from '../../utils/dateTime';
 import { useEventLabel } from '../../context/EventLabelContext';
+import { useHiddenProfiles } from '../../context/HiddenProfileContext';
 
 function ExpensePrint({ expenses, visibleColumns }) {
   const printRef = useRef();
   const { eventLabel } = useEventLabel();
+  const { isProfileHidden } = useHiddenProfiles();
 
   const handlePrint = () => {
     const renderedLabel = document.getElementById('event-label-display')?.innerText?.trim();
@@ -54,8 +56,10 @@ function ExpensePrint({ expenses, visibleColumns }) {
             </tr>
           </thead>
           <tbody>
-            {expenses.map((expense, idx) => (
-              <tr key={expense._id}>
+            {expenses.map((expense, idx) => {
+              const isHidden = isProfileHidden(expense._id, 'Expense');
+              return (
+                <tr key={expense._id}>
                 <td><span translate="no">{idx + 1}</span></td>
                 {columns.includes('expenseId') && (
                   <td><span translate="no">{expense.expenseId}</span></td>
@@ -64,7 +68,7 @@ function ExpensePrint({ expenses, visibleColumns }) {
                   <td><span translate="no">{expense.registerId}</span></td>
                 )}
                 {columns.includes('dateTime') && <td>{formatDateTime(expense.createdAt)}</td>}
-                {columns.includes('purpose') && <td>{expense.purpose}</td>}
+                {columns.includes('purpose') && <td>{isHidden ? 'Expense' : expense.purpose}</td>}
                 {columns.includes('amount') && (
                   <td><span translate="no">{expense.amount}</span></td>
                 )}
@@ -76,13 +80,14 @@ function ExpensePrint({ expenses, visibleColumns }) {
                 {columns.includes('phoneNumber') && (
                   <td>
                     <span translate="no">
-                      {expense.phoneNumber}
+                      {isHidden ? 'Expense' : expense.phoneNumber}
                     </span>
                   </td>
                 )}
                 {columns.includes('verifyLog') && <td>{expense.verifyLog}</td>}
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
       </div>

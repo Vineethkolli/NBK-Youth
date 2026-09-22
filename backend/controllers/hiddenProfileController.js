@@ -5,7 +5,10 @@ export const hiddenProfileController = {
   getHiddenProfiles: async (req, res) => {
     try {
       const hiddenProfiles = await HiddenProfile.find().lean();
-      res.json(hiddenProfiles.map(profile => profile.profileId));
+      res.json(hiddenProfiles.map(profile => ({
+        profileId: profile.profileId,
+        profileType: profile.profileType || 'Income'
+      })));
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch hidden profiles' });
     }
@@ -14,10 +17,19 @@ export const hiddenProfileController = {
 
   toggleHiddenProfile: async (req, res) => {
     try {
-      const { profileId } = req.body;
+      const { profileId, profileType = 'Income' } = req.body;
       const registerId = req.user.registerId;
 
-      const existingProfile = await HiddenProfile.findOne({ profileId }).lean();
+      if (!profileId || !['Income', 'Expense'].includes(profileType)) {
+        return res.status(400).json({ message: 'Valid profileId and profileType are required' });
+      }
+
+      const existingProfile = await HiddenProfile.findOne({
+        profileId,
+        ...(profileType === 'Income'
+          ? { $or: [{ profileType: 'Income' }, { profileType: { $exists: false } }] }
+          : { profileType })
+      }).lean();
 
       if (existingProfile) {
         await logActivity(
@@ -26,7 +38,7 @@ export const hiddenProfileController = {
           'HiddenProfile',
           profileId,
           { before: { hidden: true }, after: { hidden: false } },
-          `Profile ${profileId} unhidden by ${req.user.name}`
+          `${profileType} profile ${profileId} unhidden by ${req.user.name}`
         );
 
         await HiddenProfile.deleteOne({ profileId });
@@ -38,10 +50,10 @@ export const hiddenProfileController = {
           'HiddenProfile',
           profileId,
           { before: { hidden: false }, after: { hidden: true } },
-          `Profile ${profileId} hidden by ${req.user.name}`
+          `${profileType} profile ${profileId} hidden by ${req.user.name}`
         );
 
-        await HiddenProfile.create({ profileId, hiddenBy: registerId });
+        await HiddenProfile.create({ profileId, profileType, hiddenBy: registerId });
         res.json({ message: 'Profile hidden', hidden: true });
       }
     } catch (error) {

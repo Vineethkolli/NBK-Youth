@@ -13,7 +13,7 @@ function IncomeTable({
   isLocked = false,
 }) {
   const { hasAccess } = useAuth();
-  const { hiddenProfiles, toggleProfileHidden } = useHiddenProfiles();
+  const { isProfileHidden, toggleProfileHidden } = useHiddenProfiles();
   const [deletingId, setDeletingId] = useState(null);
   const [togglingHiddenId, setTogglingHiddenId] = useState(null);
 
@@ -21,7 +21,7 @@ function IncomeTable({
     if (!hasAccess('Privileged') || isLocked) return;
     try {
       setTogglingHiddenId(incomeId);
-      await toggleProfileHidden(incomeId);
+      await toggleProfileHidden(incomeId, 'Income');
     } finally {
       setTogglingHiddenId(null);
     }
@@ -116,7 +116,7 @@ function IncomeTable({
 
         <tbody className="bg-white divide-y divide-gray-200">
           {incomes.map((income, index) => {
-            const isHidden = hiddenProfiles.has(income._id);
+            const isHidden = isProfileHidden(income._id, 'Income');
             return (
               <tr key={income._id}>
                 <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{index + 1}</td>

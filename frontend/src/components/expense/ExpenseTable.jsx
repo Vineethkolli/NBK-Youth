@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Edit2, Trash2, Loader2 } from 'lucide-react';
+import { Eye, EyeOff, Edit2, Trash2, Loader2 } from 'lucide-react';
 import { formatDateTime } from '../../utils/dateTime';
 import { useAuth } from '../../context/AuthContext';
+import { useHiddenProfiles } from '../../context/HiddenProfileContext';
 
 function ExpenseTable({
   expenses,
@@ -11,7 +12,19 @@ function ExpenseTable({
   isLocked = false
 }) {
   const { hasAccess } = useAuth();
+  const { isProfileHidden, toggleProfileHidden } = useHiddenProfiles();
   const [deletingId, setDeletingId] = useState(null);
+  const [togglingHiddenId, setTogglingHiddenId] = useState(null);
+
+  const handleToggleHidden = async (expenseId) => {
+    if (!hasAccess('Privileged') || isLocked) return;
+    try {
+      setTogglingHiddenId(expenseId);
+      await toggleProfileHidden(expenseId, 'Expense');
+    } finally {
+      setTogglingHiddenId(null);
+    }
+  };
 
   const handleDelete = async (id) => {
     try {
@@ -73,7 +86,9 @@ function ExpenseTable({
         </thead>
 
         <tbody className="bg-white divide-y divide-gray-200">
-          {expenses.map((expense, index) => (
+          {expenses.map((expense, index) => {
+            const isHidden = isProfileHidden(expense._id, 'Expense');
+            return (
             <tr key={expense._id}>
               <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{index + 1}</td>
 
@@ -90,7 +105,9 @@ function ExpenseTable({
               )}
 
               {visibleColumns.purpose && (
-                <td className="px-6 py-4 whitespace-nowrap text-sm">{expense.purpose}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm">
+                  {isHidden ? 'Expense' : expense.purpose}
+                </td>
               )}
 
               {visibleColumns.amount && (
@@ -139,12 +156,32 @@ function ExpenseTable({
               )}
 
               {hasAccess('Privileged') && visibleColumns.phoneNumber && (
-                <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{expense.phoneNumber}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">
+                  {isHidden ? 'Expense' : expense.phoneNumber}
+                </td>
               )}
 
               {hasAccess('Pro') && (
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   <div className="flex space-x-2">
+                    {hasAccess('Privileged') && (
+                      <button
+                        onClick={() => handleToggleHidden(expense._id)}
+                        disabled={isLocked || togglingHiddenId === expense._id}
+                        className={`text-gray-600 ${
+                          isLocked ? 'opacity-50 cursor-not-allowed' : 'hover:text-gray-900'
+                        }`}
+                        title={isLocked ? 'Locked' : isHidden ? 'Show Expense' : 'Hide Expense'}
+                      >
+                        {togglingHiddenId === expense._id ? (
+                          <Loader2 className="h-5 w-5 animate-spin" />
+                        ) : isHidden ? (
+                          <EyeOff className="h-5 w-5" />
+                        ) : (
+                          <Eye className="h-5 w-5" />
+                        )}
+                      </button>
+                    )}
                     <button
                       onClick={() => onEdit(expense)}
                       disabled={isLocked}
@@ -175,7 +212,8 @@ function ExpenseTable({
                 </td>
               )}
             </tr>
-          ))}
+            );
+          })}
         </tbody>
       </table>
     </div>
