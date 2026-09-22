@@ -123,9 +123,9 @@ const FinancialTeluguPrint = ({ records, selectedEvent }) => {
               <table>
                 <thead>
                   <tr>
-                    <th>మిగిలిన మొత్తం</th>
-                    <th>వ్యాజ్యం</th>
-                    <th>చివరలో పొందే మొత్తం</th>
+                    <th><span translate="no">మిగిలిన మొత్తం</span></th>
+                    <th><span translate="no">వ్యాజ్యం</span></th>
+                    <th><span translate="no">చివరలో పొందే మొత్తం</span></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -146,9 +146,9 @@ const FinancialTeluguPrint = ({ records, selectedEvent }) => {
               <table>
                 <thead>
                   <tr>
-                    <th>డిపాజిట్ ప్రారంభం</th>
-                    <th>డిపాజిట్ పూర్తయ్యే తేదీ</th>
-                    <th>డిపాజిట్ ఖాతా</th>
+                    <th><span translate="no">డిపాజిట్ ప్రారంభం</span></th>
+                    <th><span translate="no">డిపాజిట్ పూర్తయ్యే తేదీ</span></th>
+                    <th><span translate="no">డిపాజిట్ ఖాతా</span></th>
                   </tr>
                 </thead>
                 <tbody>
