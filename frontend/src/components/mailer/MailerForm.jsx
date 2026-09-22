@@ -5,7 +5,9 @@ import { API_URL } from '../../utils/config';
 
 const targetOptions = [
   { value: 'All', label: 'All Users' },
-  { value: 'RegisterId', label: 'Specific Register ID' },
+  { value: 'Youth_Villager_Category', label: 'Youth & Villagers' },
+  { value: 'Youth_Category', label: 'Youth' },
+  { value: 'RegisterId', label: 'Specific User' },
   { value: 'Email', label: 'Specific Email' }
 ];
 

@@ -39,6 +39,21 @@ const buildRecipients = async ({ target, registerId, email }) => {
     return normalizeRecipients(recipients);
   }
 
+  if (target === 'Youth_Category' || target === 'Youth_Villager_Category') {
+    const categories = target === 'Youth_Category'
+      ? ['youth']
+      : ['youth', 'villager'];
+    const users = await User.find({
+      category: { $in: categories },
+      email: { $exists: true, $ne: null, $ne: '' }
+    }).select('registerId email').lean();
+
+    return normalizeRecipients(users.map((user) => ({
+      registerId: user.registerId,
+      email: user.email
+    })));
+  }
+
   if (target === 'RegisterId') {
     if (!registerId) {
       const error = new Error('registerId is required');

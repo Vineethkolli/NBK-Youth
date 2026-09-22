@@ -21,7 +21,7 @@ const mailerHistorySchema = new mongoose.Schema(
     footer: { type: String, required: true },
     targetType: {
       type: String,
-      enum: ['All', 'RegisterId', 'Email'],
+      enum: ['All', 'Youth_Villager_Category', 'Youth_Category', 'RegisterId', 'Email'],
       required: true
     },
     recipients: { type: [recipientSchema], default: [] },
