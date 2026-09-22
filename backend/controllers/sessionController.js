@@ -336,14 +336,18 @@ export const getSessionsStats = async (req, res) => {
     // IST-based date boundaries
 const startOfToday = getStartOfPeriod('day');
 const startOfMonth = getStartOfPeriod('month');
+    const activeSessionQuery = {
+      isValid: true,
+      expiresAt: { $gt: new Date() }
+    };
 
-    const activeSessionToday = Session.countDocuments({ lastActive: { $gte: startOfToday } });
-    const activeSessionMonth = Session.countDocuments({ lastActive: { $gte: startOfMonth } });
-    const activeSessionOverall = Session.countDocuments({});
+    const activeSessionToday = Session.countDocuments({ ...activeSessionQuery, lastActive: { $gte: startOfToday } });
+    const activeSessionMonth = Session.countDocuments({ ...activeSessionQuery, lastActive: { $gte: startOfMonth } });
+    const activeSessionOverall = Session.countDocuments(activeSessionQuery);
 
-    const activeUserToday = Session.distinct("userId", { lastActive: { $gte: startOfToday } });
-    const activeUserMonth = Session.distinct("userId", { lastActive: { $gte: startOfMonth } });
-    const activeUserOverall = Session.distinct("userId", {});
+    const activeUserToday = Session.distinct("userId", { ...activeSessionQuery, lastActive: { $gte: startOfToday } });
+    const activeUserMonth = Session.distinct("userId", { ...activeSessionQuery, lastActive: { $gte: startOfMonth } });
+    const activeUserOverall = Session.distinct("userId", activeSessionQuery);
 
     const actionAgg = Session.aggregate([{ $group: { _id: '$action', count: { $sum: 1 } } }]);
     const accessModeAgg = Session.aggregate([{ $group: { _id: '$deviceInfo.accessMode', count: { $sum: 1 } } }]);

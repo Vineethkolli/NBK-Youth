@@ -48,38 +48,30 @@ function AuthSessions() {
   });
 
   useEffect(() => {
-    if (activeTab === "sessions") {
-      fetchSessions();
-    } else {
-      fetchStats();
-    }
+    const loadData = async () => {
+      try {
+        if (activeTab === "sessions") {
+          const params = new URLSearchParams({
+            search,
+            page: pagination.currentPage,
+            limit: 50,
+            ...filters,
+          });
+
+          const { data } = await axios.get(`${API_URL}/api/sessions/auth-sessions?${params}`);
+          setSessions(data.sessions);
+          setPagination(data.pagination);
+        } else {
+          const { data } = await axios.get(`${API_URL}/api/sessions/stats`);
+          setStats(data);
+        }
+      } catch {
+        toast.error(activeTab === "sessions" ? 'Failed to fetch sessions' : 'Failed to load stats');
+      }
+    };
+
+    loadData();
   }, [search, filters, activeTab, pagination.currentPage]);
-
-  const fetchSessions = async () => {
-    try {
-      const params = new URLSearchParams({
-        search,
-        page: pagination.currentPage,
-        limit: 50,
-        ...filters,
-      });
-
-      const { data } = await axios.get(`${API_URL}/api/sessions/auth-sessions?${params}`);
-      setSessions(data.sessions);
-      setPagination(data.pagination);
-    } catch {
-      toast.error('Failed to fetch sessions');
-    }
-  };
-
-  const fetchStats = async () => {
-    try {
-      const { data } = await axios.get(`${API_URL}/api/sessions/stats`);
-      setStats(data);
-    } catch {
-      toast.error('Failed to load stats');
-    }
-  };
 
   const handleFilterChange = (newFilters) => {
     setFilters(newFilters);
