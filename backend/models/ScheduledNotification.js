@@ -4,6 +4,12 @@ const scheduledNotificationSchema = new mongoose.Schema({
   title: { type: String, required: true },
   message: { type: String, required: true },
   link: { type: String, required: false },
+  target: {
+    type: String,
+    enum: ['All', 'Youth_Villager_Category', 'Youth_Category', 'Admins_Financiers_Developers', 'Specific User'],
+    default: 'All',
+  },
+  registerId: { type: String, required: false },
   scheduledAt: { type: Date, required: true },
   createdBy: { type: String },
   status: { type: String, enum: ['PENDING', 'SENT'], default: 'PENDING' },

@@ -5,16 +5,48 @@ import NotificationHistory from '../models/NotificationHistory.js';
 import webpush from 'web-push';
 import { logActivity } from '../middleware/activityLogger.js';
 
+const getRoleBasedRegisterIds = async (roles) => {
+  const users = await User.find({ role: { $in: roles } }, 'registerId').lean();
+  return users.map((user) => user.registerId);
+};
+
+const getCategoryBasedRegisterIds = async (categories) => {
+  const users = await User.find({ category: { $in: [].concat(categories) } }, 'registerId').lean();
+  return users.map((user) => user.registerId);
+};
+
+const getRecipientRegisterIds = async (target = 'All', registerId) => {
+  if (target === 'All') {
+    const users = await User.find({}, 'registerId').lean();
+    return users.map((user) => user.registerId);
+  }
+  if (target === 'Admins_Financiers_Developers') {
+    return getRoleBasedRegisterIds(['admin', 'financier', 'developer']);
+  }
+  if (target === 'Youth_Category') return getCategoryBasedRegisterIds('youth');
+  if (target === 'Youth_Villager_Category') return getCategoryBasedRegisterIds(['youth', 'villager']);
+  if (target === 'Specific User' && registerId) {
+    const user = await User.findOne({ registerId }, 'registerId').lean();
+    if (!user) throw new Error('User does not exist');
+    return [registerId];
+  }
+  throw new Error('Invalid target selection');
+};
+
 export const createScheduledNotification = async (req, res) => {
   try {
-    const { title, message, link, scheduledAt } = req.body;
+    const { title, message, link, scheduledAt, target = 'All', registerId } = req.body;
     if (!title || !message || !scheduledAt)
       return res.status(400).json({ error: 'Missing required fields' });
+    if (target === 'Specific User' && !registerId?.trim())
+      return res.status(400).json({ error: 'Register ID is required for the specific user' });
 
     const doc = await ScheduledNotification.create({
       title,
       message,
       link: link?.trim() || '',
+      target,
+      registerId: target === 'Specific User' ? registerId.trim() : undefined,
       scheduledAt: new Date(scheduledAt),
       createdBy: req.user?.registerId || 'SYSTEM',
       status: 'PENDING',
@@ -114,8 +146,7 @@ export const sendScheduledNow = async (req, res) => {
 
     const payload = JSON.stringify({ title: doc.title, body: doc.message, link: doc.link || '' });
 
-    const allUsers = await User.find({}, 'registerId');
-    const eligibleRegisterIds = allUsers.map(u => u.registerId);
+    const eligibleRegisterIds = await getRecipientRegisterIds(doc.target, doc.registerId);
     const subscriptionUsers = await Subscription.find({ registerId: { $in: eligibleRegisterIds } });
 
     const notifications = subscriptionUsers.flatMap(user =>
@@ -183,8 +214,7 @@ export const processDueNotifications = async () => {
       try {
         const payload = JSON.stringify({ title: doc.title, body: doc.message, link: doc.link || '' });
 
-        const allUsers = await User.find({}, 'registerId');
-        const eligibleRegisterIds = allUsers.map(u => u.registerId);
+        const eligibleRegisterIds = await getRecipientRegisterIds(doc.target, doc.registerId);
         const subscriptionUsers = await Subscription.find({ registerId: { $in: eligibleRegisterIds } });
 
         const notifications = subscriptionUsers.flatMap(user =>

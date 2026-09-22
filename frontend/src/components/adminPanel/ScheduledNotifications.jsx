@@ -6,7 +6,7 @@ import { API_URL } from '../../utils/config';
 
 function ScheduledNotifications() {
   const [items, setItems] = useState([]);
-  const [formData, setFormData] = useState({ title: '', message: '', link: '', scheduledAt: '' });
+  const [formData, setFormData] = useState({ title: '', message: '', link: '', scheduledAt: '', target: 'All', registerId: '' });
   const [editingId, setEditingId] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [showActions, setShowActions] = useState(false);
@@ -25,7 +25,7 @@ function ScheduledNotifications() {
   useEffect(() => { fetch(); }, []);
 
   const resetForm = () => {
-    setFormData({ title: '', message: '', link: '', scheduledAt: '' });
+    setFormData({ title: '', message: '', link: '', scheduledAt: '', target: 'All', registerId: '' });
     setEditingId(null);
   };
 
@@ -33,9 +33,13 @@ function ScheduledNotifications() {
     e.preventDefault();
     if (isSubmitting) return;
 
-    const { title, message, link, scheduledAt } = formData;
+    const { title, message, link, scheduledAt, target, registerId } = formData;
     if (!title.trim() || !message.trim() || !scheduledAt) {
       toast.error('Please fill all mandatory fields');
+      return;
+    }
+    if (target === 'Specific User' && !registerId.trim()) {
+      toast.error('Please enter Register ID for the specific user');
       return;
     }
 
@@ -46,7 +50,9 @@ function ScheduledNotifications() {
         message: message.trim(),
         link: link.trim(),
         scheduledAt: new Date(scheduledAt).toISOString(),
+        target,
       };
+      if (target === 'Specific User') payload.registerId = registerId.trim();
 
       if (editingId) {
         await axios.put(`${API_URL}/api/scheduled-notifications/${editingId}`, payload);
@@ -74,7 +80,8 @@ function ScheduledNotifications() {
       message: item.message,
       link: item.link || '',
       scheduledAt: new Date(item.scheduledAt).toISOString().slice(0, 10),
-      frequency: item.frequency || 'ONCE',
+      target: item.target || 'All',
+      registerId: item.registerId || '',
     });
     setShowForm(true);
     setShowActions(true);
@@ -173,6 +180,33 @@ function ScheduledNotifications() {
                 />
               </div>
               <div>
+                <label className="block text-sm font-medium text-gray-700">Send to</label>
+                <select
+                  value={formData.target}
+                  onChange={(e) => setFormData({ ...formData, target: e.target.value, registerId: '' })}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                >
+                  <option value="All">All</option>
+                  <option value="Youth_Villager_Category">Youth & Villagers</option>
+                  <option value="Youth_Category">Youth</option>
+                  <option value="Admins_Financiers_Developers">Admins, Financiers & Developers</option>
+                  <option value="Specific User">Specific User</option>
+                </select>
+              </div>
+              {formData.target === 'Specific User' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Register ID</label>
+                  <input
+                    type="text"
+                    placeholder="Ex: R1"
+                    required
+                    value={formData.registerId}
+                    onChange={(e) => setFormData({ ...formData, registerId: e.target.value })}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  />
+                </div>
+              )}
+              <div>
                 <label className="block text-sm font-medium text-gray-700">Schedule (Date) *</label>
                 <input
                   type="date"
@@ -223,6 +257,9 @@ function ScheduledNotifications() {
     </a>
   </div>
 )}
+              <div className="text-xs text-gray-500">
+                Target: {it.target === 'Specific User' && it.registerId ? `${it.target} (${it.registerId})` : it.target || 'All'}
+              </div>
               <div className="text-xs text-gray-500">Scheduled: {new Date(it.scheduledAt).toLocaleDateString()}</div>
               <div className="text-xs text-gray-500">
                 Status: {it.sendHistory && it.sendHistory.length ? `Sent (${it.sendHistory.map(s => new Date(s.sentAt).toLocaleDateString()).join(', ')})` : 'Not Sent'}
