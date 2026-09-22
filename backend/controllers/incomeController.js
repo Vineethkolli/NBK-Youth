@@ -20,7 +20,8 @@ export const incomeController = {
       if (search) {
         const searchConditions = [
           { incomeId: { $regex: search, $options: 'i' } },
-          { name: { $regex: search, $options: 'i' } }
+          { name: { $regex: search, $options: 'i' } },
+          { others: { $regex: search, $options: 'i' } }
         ];
 
         if (!isNaN(Number(search))) {

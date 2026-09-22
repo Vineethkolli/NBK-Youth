@@ -18,10 +18,21 @@ function EventTimelineTeluguPrint({ events }) {
       return;
     }
 
-    printWindow.document.write('<meta charset="UTF-8" />');
-    printWindow.document.write('<style>body { font-family: sans-serif; } table { width: 100%; border-collapse: collapse; } th, td { border: 1px solid #ccc; padding: 8px; text-align: left; font-size: 12px; } th { background: #f4f4f4; }</style>');
-    printWindow.document.write('</head><body>');
-    printWindow.document.write('<div style="text-align: center;"><h2><span translate="no">కార్యక్రమాల టైమ్‌లైన్</span></h2></div>');
+    printWindow.document.write(`
+      <!doctype html>
+      <html lang="te">
+        <head>
+          <meta charset="UTF-8" />
+          <style>
+            body { font-family: "Nirmala UI", "Noto Sans Telugu", sans-serif; }
+            table { width: 100%; border-collapse: collapse; }
+            th, td { border: 1px solid #ccc; padding: 8px; text-align: left; font-size: 12px; }
+            th { background: #f4f4f4; }
+          </style>
+        </head>
+        <body>
+          <div style="text-align: center;"><h2 translate="no">కార్యక్రమాల టైమ్‌లైన్</h2></div>
+    `);
     if (renderedLabel) {
       printWindow.document.write(`<div class="event-label" style="text-align: center; margin-bottom: 10px; color: #666;">${renderedLabel}</div>`);
     } else if (eventLabel?.label) {
@@ -48,7 +59,7 @@ function EventTimelineTeluguPrint({ events }) {
         <table>
           <thead>
             <tr>
-              <th>క్ర.సం.</th>
+              <th translate="no">క్ర. సం.</th>
               <th>కార్యక్రమం</th>
               <th>తేదీ మరియు సమయం</th>
             </tr>

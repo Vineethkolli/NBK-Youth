@@ -109,6 +109,7 @@ function Histories() {
         const searchLower = searchQuery.toLowerCase();
         filtered = filtered.filter(item =>
           item.name?.toLowerCase().includes(searchLower) ||
+          item.others?.toLowerCase().includes(searchLower) ||
           item.purpose?.toLowerCase().includes(searchLower) ||
           item.incomeId?.toLowerCase().includes(searchLower) ||
           item.expenseId?.toLowerCase().includes(searchLower) ||
