@@ -1,0 +1,29 @@
+name: Keep Render Server2 Alive
+
+on:
+  schedule:
+    # Runs every 30 minutes
+    - cron: '*/30 * * * *'
+  workflow_dispatch: # allows manual trigger
+
+jobs:
+  wakeup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Render Server2 with retry
+        env:
+          BACKEND_URL: ${{ secrets.RENDER_SERVER2_URL }}
+        run: |
+          MAX_RETRIES=2
+          for i in $(seq 1 $MAX_RETRIES); do
+            RESPONSE=$(curl -s --max-time 180 -o /dev/null -w "%{http_code}" "$BACKEND_URL" || true)
+            if [ "$RESPONSE" -ge 200 ] && [ "$RESPONSE" -lt 400 ]; then
+              echo "Backend is awake (HTTP $RESPONSE)"
+              exit 0
+            else
+              echo "Ping failed (HTTP $RESPONSE), retrying in 10s... (Attempt $i/$MAX_RETRIES)"
+              sleep 10
+            fi
+          done
+          echo "All retries failed. Backend did not respond."
+          exit 1
