@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { API_URL } from "../../utils/config";
 
@@ -7,6 +8,7 @@ const BackendStatus = ({ children }) => {
   const [checking, setChecking] = useState(false);
 
   const checkBackend = async () => {
+    // Internet is offline
     if (!navigator.onLine) {
       setOffline(true);
       setBackendDown(false);
@@ -34,10 +36,26 @@ const BackendStatus = ({ children }) => {
         throw new Error("Backend unavailable");
       }
 
+      // Backend is available
       setBackendDown(false);
+
+      // Server is healthy again, clear the one-time reload flag
+      sessionStorage.removeItem("backend-first-reload");
+
     } catch (error) {
       console.error("Backend unavailable:", error);
+
+      // Backend is unavailable
       setBackendDown(true);
+
+      // Reload only the first time the server-down state is detected
+      if (!sessionStorage.getItem("backend-first-reload")) {
+        sessionStorage.setItem("backend-first-reload", "true");
+
+        window.location.reload();
+        return;
+      }
+
     } finally {
       clearTimeout(timeout);
       setChecking(false);
@@ -45,6 +63,7 @@ const BackendStatus = ({ children }) => {
   };
 
   useEffect(() => {
+    // Check backend only once when app starts
     checkBackend();
 
     const handleOffline = () => {
@@ -56,27 +75,29 @@ const BackendStatus = ({ children }) => {
     const handleOnline = () => {
       setOffline(false);
 
+      // Check backend once when internet comes back
       checkBackend();
     };
 
     window.addEventListener("offline", handleOffline);
     window.addEventListener("online", handleOnline);
 
-    const interval = setInterval(() => {
-      checkBackend();
-    }, 120000);
-
     return () => {
       window.removeEventListener("offline", handleOffline);
       window.removeEventListener("online", handleOnline);
-      clearInterval(interval);
     };
   }, []);
 
+  // --------------------------------------------------
+  // USER INTERNET IS OFFLINE
+  // --------------------------------------------------
   if (offline) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 px-6">
         <div className="text-center max-w-md">
+
+          {/* App Name */}
+          <h1 className="text-2xl font-bold text-yellow-700 mb-20">NBK Youth</h1>
 
           <div className="text-6xl mb-6">
             📡
@@ -90,27 +111,43 @@ const BackendStatus = ({ children }) => {
             Please check your internet connection and try again.
           </p>
 
-          <p className="text-sm text-gray-500">
-            The app will automatically reconnect when your internet
-            connection is restored.
+          <p className="text-sm text-gray-500 mb-6">
+            Your internet connection appears to be unavailable.
           </p>
+
+          <button
+            onClick={checkBackend}
+            disabled={checking}
+            className="px-5 py-2.5 bg-indigo-600 text-white
+                       rounded-lg hover:bg-indigo-700
+                       disabled:opacity-50 transition"
+          >
+            {checking ? "Checking..." : "Refresh"}
+          </button>
 
         </div>
       </div>
     );
   }
 
+  // --------------------------------------------------
+  // BACKEND / SERVER IS DOWN
+  // --------------------------------------------------
   if (backendDown) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 px-6">
         <div className="text-center max-w-md">
+
+          {/* App Name */}
+          
+          <h1 className="text-2xl font-bold text-yellow-700 mb-20">NBK Youth</h1>
 
           <div className="text-6xl mb-6">
             🛠️
           </div>
 
           <h1 className="text-3xl font-bold text-gray-900 mb-3">
-            We'll be back shortly
+            Server Down
           </h1>
 
           <p className="text-gray-600 mb-4">
@@ -119,7 +156,7 @@ const BackendStatus = ({ children }) => {
           </p>
 
           <p className="text-sm text-gray-500 mb-6">
-            Thank you for your patience and understanding.
+            Sorry for the inconvenience
           </p>
 
           <button
@@ -137,6 +174,9 @@ const BackendStatus = ({ children }) => {
     );
   }
 
+  // --------------------------------------------------
+  // BACKEND HEALTHY → NORMAL APP
+  // --------------------------------------------------
   return children;
 };
 

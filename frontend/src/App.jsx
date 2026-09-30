@@ -52,6 +52,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import PopupBanner from './components/adminPanel/PopupBanner';
 import FloatingMusicIcon from './components/vibe/FloatingMusicIcon';
 import OfflineIndicator from './components/common/OfflineIndicator';
+import BackendStatus from './components/common/BackendStatus';
 import ErrorBoundary from './components/common/ErrorBoundary';
 import VersionUpdate from './components/common/VersionUpdate';
 
@@ -173,7 +174,9 @@ function App() {
               <LockProvider>
                 <Router>
                   <ErrorBoundary>
-                    <AppContent />
+                    <BackendStatus>
+                      <AppContent />
+                    </BackendStatus>
                   </ErrorBoundary>
                 </Router>
               </LockProvider>
