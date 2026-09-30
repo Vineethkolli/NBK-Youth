@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { API_URL } from "../../utils/config";
 
@@ -8,7 +7,6 @@ const BackendStatus = ({ children }) => {
   const [checking, setChecking] = useState(false);
 
   const checkBackend = async () => {
-    // Internet is offline
     if (!navigator.onLine) {
       setOffline(true);
       setBackendDown(false);
@@ -36,19 +34,15 @@ const BackendStatus = ({ children }) => {
         throw new Error("Backend unavailable");
       }
 
-      // Backend is available
       setBackendDown(false);
 
-      // Server is healthy again, clear the one-time reload flag
       sessionStorage.removeItem("backend-first-reload");
 
     } catch (error) {
       console.error("Backend unavailable:", error);
 
-      // Backend is unavailable
       setBackendDown(true);
 
-      // Reload only the first time the server-down state is detected
       if (!sessionStorage.getItem("backend-first-reload")) {
         sessionStorage.setItem("backend-first-reload", "true");
 
@@ -63,7 +57,6 @@ const BackendStatus = ({ children }) => {
   };
 
   useEffect(() => {
-    // Check backend only once when app starts
     checkBackend();
 
     const handleOffline = () => {
@@ -75,7 +68,6 @@ const BackendStatus = ({ children }) => {
     const handleOnline = () => {
       setOffline(false);
 
-      // Check backend once when internet comes back
       checkBackend();
     };
 
@@ -88,16 +80,14 @@ const BackendStatus = ({ children }) => {
     };
   }, []);
 
-  // --------------------------------------------------
-  // USER INTERNET IS OFFLINE
-  // --------------------------------------------------
   if (offline) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 px-6">
         <div className="text-center max-w-md">
 
-          {/* App Name */}
-          <h1 className="text-2xl font-bold text-yellow-700 mb-20">NBK Youth</h1>
+          <h1 className="text-2xl font-bold text-yellow-700 mb-20">
+            NBK Youth
+          </h1>
 
           <div className="text-6xl mb-6">
             📡
@@ -116,13 +106,13 @@ const BackendStatus = ({ children }) => {
           </p>
 
           <button
-            onClick={checkBackend}
+            onClick={() => window.location.reload()}
             disabled={checking}
             className="px-5 py-2.5 bg-indigo-600 text-white
                        rounded-lg hover:bg-indigo-700
                        disabled:opacity-50 transition"
           >
-            {checking ? "Checking..." : "Refresh"}
+            {checking ? "Refreshing..." : "Refresh"}
           </button>
 
         </div>
@@ -130,17 +120,14 @@ const BackendStatus = ({ children }) => {
     );
   }
 
-  // --------------------------------------------------
-  // BACKEND / SERVER IS DOWN
-  // --------------------------------------------------
   if (backendDown) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 px-6">
         <div className="text-center max-w-md">
 
-          {/* App Name */}
-          
-          <h1 className="text-2xl font-bold text-yellow-700 mb-20">NBK Youth</h1>
+          <h1 className="text-2xl font-bold text-yellow-700 mb-20">
+            NBK Youth
+          </h1>
 
           <div className="text-6xl mb-6">
             🛠️
@@ -160,13 +147,12 @@ const BackendStatus = ({ children }) => {
           </p>
 
           <button
-            onClick={checkBackend}
-            disabled={checking}
+            onClick={() => window.location.reload()}
             className="px-5 py-2.5 bg-indigo-600 text-white
                        rounded-lg hover:bg-indigo-700
-                       disabled:opacity-50 transition"
+                       transition"
           >
-            {checking ? "Checking..." : "Try Again"}
+            Try Again
           </button>
 
         </div>
@@ -174,9 +160,6 @@ const BackendStatus = ({ children }) => {
     );
   }
 
-  // --------------------------------------------------
-  // BACKEND HEALTHY → NORMAL APP
-  // --------------------------------------------------
   return children;
 };
 
