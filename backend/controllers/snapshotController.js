@@ -2,7 +2,7 @@ import Snapshot from '../models/Snapshot.js';
 import Income from '../models/Income.js';
 import Expense from '../models/Expense.js';
 import { logActivity } from '../middleware/activityLogger.js';
-import Event from '../models/Event.js';
+import EventTimeline from '../models/EventTimeline.js';
 import { computeBudgetStats } from '../utils/statsAggregator.js';
 
 export const snapshotController = {
@@ -34,8 +34,8 @@ export const snapshotController = {
         selectedCollections.includes('Expense')
           ? Expense.find({ isDeleted: false }).lean()
           : Promise.resolve(null),
-        selectedCollections.includes('Event')
-          ? Event.find().lean()
+        selectedCollections.includes('EventTimeline')
+          ? EventTimeline.find().lean()
           : Promise.resolve(null)
       ]);
 
@@ -47,7 +47,7 @@ export const snapshotController = {
 
       if (incomeData) collections.Income = incomeData;
       if (expenseData) collections.Expense = expenseData;
-      if (eventData) collections.Event = eventData;
+      if (eventData) collections.EventTimeline = eventData;
 
       if (selectedCollections.includes('Stats')) {
         stats = await generateStats();

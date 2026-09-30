@@ -116,7 +116,7 @@ function LogFilters({ filters, onChange }) {
         <option value="PreviousYear">Previous Year</option>
         <option value="MaintenanceMode">Maintenance Mode</option>
         <option value="HiddenProfile">Hidden Profile</option>
-        <option value="Event">Event</option>
+        <option value="EventTimeline">Event Timeline</option>
         <option value="Slide">Slide</option>
         <option value="Notification">Notification</option>
         <option value="Vibe">Vibe</option>

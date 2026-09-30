@@ -20,7 +20,7 @@ function Home() {
 
   const fetchEvents = async () => {
     try {
-      const { data } = await axios.get(`${API_URL}/api/homepage/events`);
+      const { data } = await axios.get(`${API_URL}/api/homepage/event-timeline`);
       setEvents(data);
     } catch (error) {
       toast.error('Failed to fetch events');

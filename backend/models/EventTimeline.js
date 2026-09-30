@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-const eventSchema = new mongoose.Schema({
+const eventTimelineSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true
@@ -15,4 +15,4 @@ const eventSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-export default mongoose.model('Event', eventSchema);
+export default mongoose.model('EventTimeline', eventTimelineSchema);

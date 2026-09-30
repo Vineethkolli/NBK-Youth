@@ -93,7 +93,7 @@ function Histories() {
       case 'stats': return snapshot.stats || {};
       case 'income': return snapshot.collections?.Income || [];
       case 'expense': return snapshot.collections?.Expense || [];
-      case 'events': return snapshot.collections?.Event || [];
+      case 'eventTimeline': return snapshot.collections?.EventTimeline || [];
       default: return null;
     }
   };
@@ -194,7 +194,7 @@ function Histories() {
               { key: 'stats', label: 'Stats', icon: <BarChart2 className="h-4 w-4 mr-1" /> },
               { key: 'income', label: 'Income', icon: <IndianRupee className="h-4 w-4 mr-1" /> },
               { key: 'expense', label: 'Expense', icon: <DollarSign className="h-4 w-4 mr-1" /> },
-              { key: 'events', label: '', icon: <CalendarDays className="h-4 w-4" /> },
+              { key: 'eventTimeline', label: '', icon: <CalendarDays className="h-4 w-4" /> },
             ].map(tab => (
               <button
                 key={tab.key}
@@ -274,7 +274,7 @@ function Histories() {
   </div>
 ) : null}
 
-{activeTab === 'events' && (
+{activeTab === 'eventTimeline' && (
   <HistoryEvents
     events={getCurrentData()}
     snapshotName={selectedHistory.snapshotName}

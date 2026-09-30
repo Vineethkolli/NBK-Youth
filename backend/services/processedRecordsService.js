@@ -166,7 +166,7 @@ export const buildSnapshotTextFromRecord = (record) => {
   const collections =
     Array.isArray(record.selectedCollections) && record.selectedCollections.length > 0
       ? record.selectedCollections
-      : ['Income', 'Expense', 'Stats', 'Events'];
+      : ['Stats', 'Income', 'Expense', 'EventTimeline'];
 
   collections.forEach((collectionName) => {
     if (snapshot.collections && snapshot.collections[collectionName]) {
@@ -196,8 +196,8 @@ export const buildSnapshotTextFromRecord = (record) => {
         );
       }
 
-      if (collectionName === 'Events') {
-        allText += '\nEVENTS TIMELINE:\n';
+      if (collectionName === 'EventTimeline') {
+        allText += '\nEVENT TIMELINE:\n';
         data.forEach((event) => {
           allText += `Event: ${event.name}, Date: ${event.dateTime}, Register ID: ${event.registerId}\n`;
         });

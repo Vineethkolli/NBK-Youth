@@ -2,7 +2,7 @@ import User from '../models/User.js';
 import Income from '../models/Income.js';
 import Expense from '../models/Expense.js';
 import EventLabel from '../models/EventLabel.js';
-import Event from '../models/Event.js';
+import EventTimeline from '../models/EventTimeline.js';
 import ProcessedChunk from '../models/ProcessedChunk.js';
 import ProcessedRecord from '../models/ProcessedRecords.js';
 import ChatHistory from '../models/ChatHistory.js';
@@ -493,7 +493,7 @@ export const chatWithViniLogic = async ({ message, registerId }) => {
 
         const currentStats = await getCurrentStats();
         const eventLabel = await EventLabel.findOne().sort({ createdAt: -1 });
-        const events = await Event.find().sort({ dateTime: -1 }).limit(10);
+        const events = await EventTimeline.find().sort({ dateTime: -1 }).limit(10);
         const historicalChunks = await ProcessedChunk.find({ status: 'ready' });
         const processedRecords = await ProcessedRecord.find({ status: 'ready' });
 

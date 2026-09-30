@@ -5,7 +5,7 @@ import EstimatedIncome from '../models/EstimatedIncome.js';
 import EstimatedExpense from '../models/EstimatedExpense.js';
 import Game from '../models/Game.js';
 import ActivityLog from '../models/ActivityLog.js';
-import Event from '../models/Event.js';
+import EventTimeline from '../models/EventTimeline.js';
 import { logActivity } from '../middleware/activityLogger.js';
 import User from '../models/User.js';
 import Payment from '../models/Payment.js';
@@ -124,10 +124,10 @@ export const developerController = {
         }
           break;
 
-        case 'events':
-          await Event.deleteMany({});
-          await redis.del('home:events');
-          description = 'Cleared all events records';
+        case 'event-timeline':
+          await EventTimeline.deleteMany({});
+          await redis.del('home:event-timeline');
+          description = 'Cleared all Event Timeline records';
           break;
         
         case 'eventLabels':

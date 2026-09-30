@@ -39,7 +39,7 @@ function HistoryForm({ snapshots, onClose, onSubmit }) {
       if (snapshot.collections[key] && snapshot.collections[key].length > 0) {
         if (key === 'Income') available.push('Income');
         if (key === 'Expense') available.push('Expense');
-        if (key === 'Event') available.push('Event');
+        if (key === 'EventTimeline') available.push('EventTimeline');
       }
     });
 

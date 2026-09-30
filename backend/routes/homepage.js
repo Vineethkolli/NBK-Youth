@@ -10,10 +10,10 @@ router.post('/slides', auth, checkRole('Privileged'), homepageController.addSlid
 router.delete('/slides/:id', auth, checkRole('Privileged'), homepageController.deleteSlide);
 router.put('/slides/order', auth, checkRole('Privileged'), homepageController.updateSlideOrder);
 
-// Event routes
-router.get('/events', homepageController.getEvents);
-router.post('/events', auth, checkRole('Privileged'), homepageController.addEvent);
-router.put('/events/:id', auth, checkRole('Privileged'), homepageController.updateEvent);
-router.delete('/events/:id', auth, checkRole('Privileged'), homepageController.deleteEvent);
+// Event Timeline routes
+router.get('/event-timeline', homepageController.getEventTimeline);
+router.post('/event-timeline', auth, checkRole('Privileged'), homepageController.addEventTimeline);
+router.put('/event-timeline/:id', auth, checkRole('Privileged'), homepageController.updateEventTimeline);
+router.delete('/event-timeline/:id', auth, checkRole('Privileged'), homepageController.deleteEventTimeline);
 
 export default router;

@@ -16,7 +16,7 @@ function ClearData() {
   // Options from ActivityLog entityTypes
   const activityEntities = [
     'User', 'Income', 'Expense', 'Payment', 'Vibe', 'Moment', 'Game', 'Banner', 'EstimatedIncome', 
-    'EstimatedExpense', 'HiddenProfile', 'Slide', 'Event', 'Notification', 'PreviousYear', 'MaintenanceMode', 
+    'EstimatedExpense', 'HiddenProfile', 'Slide', 'EventTimeline', 'Notification', 'PreviousYear', 'MaintenanceMode', 
     'DeveloperOptions', 'Committee', 'PaymentDetails', 'EventLabel', 'LockSettings', 'FinancialRecord', 'TimelineRecord',
     'EventRecord', 'Snapshot', 'History', 'ScheduledNotification', 'Email', 'Mobile', 'Mailer', 'FileAsset', 'Note', 'UniversalPin'
   ];
@@ -96,7 +96,7 @@ function ClearData() {
           { name: 'Estimated Expenses', type: 'estimatedExpense' },
           { name: 'Event Labels', type: 'eventLabels' },
           { name: 'Previous Year Amount', type: 'previousYear' },
-          { name: 'Event Timeline', type: 'events' },
+          { name: 'Event Timeline', type: 'event-timeline' },
           { name: 'Activities', type: 'activities' },
           { name: 'User Payments', type: 'payment' },
           { name: 'Notification History', type: 'notifications' },

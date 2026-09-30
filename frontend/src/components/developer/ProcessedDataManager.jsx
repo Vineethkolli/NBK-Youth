@@ -48,16 +48,15 @@ function ProcessedDataManager() {
     if (!snapshot) return [];
 
     const collections = [];
+    if (snapshot.stats && Object.keys(snapshot.stats).length > 0) {
+      collections.push('Stats');
+    }
+    
     Object.keys(snapshot.collections).forEach(key => {
       if (snapshot.collections[key] && snapshot.collections[key].length > 0) {
         collections.push(key);
       }
     });
-
-    // Add Stats if it exists
-    if (snapshot.stats && Object.keys(snapshot.stats).length > 0) {
-      collections.push('Stats');
-    }
 
     return collections;
   };

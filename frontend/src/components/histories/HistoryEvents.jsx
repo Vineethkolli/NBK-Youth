@@ -4,7 +4,7 @@ function HistoryEvents({ events, snapshotName }) {
   if (!events || events.length === 0) {
     return (
       <div className="p-6 text-center text-gray-500">
-        No events data available for {snapshotName}
+        No Event Timeline data available for {snapshotName}
       </div>
     );
   }
@@ -15,12 +15,12 @@ function HistoryEvents({ events, snapshotName }) {
   return (
     <div className="p-3 space-y-6">
       <div className="mb-4">
-        <h2 className="text-xl font-semibold">Events Timeline</h2>
+        <h2 className="text-xl font-semibold">Event Timeline</h2>
       </div>
 
       <div className="space-y-4">
         {sortedEvents.length === 0 ? (
-          <p className="text-gray-500 text-center py-4">No events scheduled</p>
+          <p className="text-gray-500 text-center py-4">No Event Timeline entries scheduled</p>
         ) : (
           <div className="relative">
             <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-200" />

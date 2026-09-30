@@ -51,7 +51,7 @@ function Timeline({ events, isTimelineEditing, setIsTimelineEditing, onUpdate, c
     try {
       const dateTime = new Date(formData.dateTime).toISOString();
 
-      await axios.post(`${API_URL}/api/homepage/events`, {
+      await axios.post(`${API_URL}/api/homepage/event-timeline`, {
         ...formData,
         dateTime,
       });
@@ -83,7 +83,7 @@ function Timeline({ events, isTimelineEditing, setIsTimelineEditing, onUpdate, c
     try {
       const dateTime = new Date(editFormData.dateTime).toISOString();
 
-      await axios.put(`${API_URL}/api/homepage/events/${editingId}`, {
+      await axios.put(`${API_URL}/api/homepage/event-timeline/${editingId}`, {
         ...editFormData,
         dateTime,
       });
@@ -106,7 +106,7 @@ function Timeline({ events, isTimelineEditing, setIsTimelineEditing, onUpdate, c
 
     try {
       setDeletingId(id);
-      await axios.delete(`${API_URL}/api/homepage/events/${id}`);
+      await axios.delete(`${API_URL}/api/homepage/event-timeline/${id}`);
       toast.success('Event deleted successfully');
       onUpdate();
     } catch (error) {

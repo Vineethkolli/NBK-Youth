@@ -1,5 +1,5 @@
 import Slide from '../models/Slide.js';
-import Event from '../models/Event.js';
+import EventTimeline from '../models/EventTimeline.js';
 import cloudinary from '../config/cloudinary.js';
 import { logActivity } from '../middleware/activityLogger.js';
 import { redis } from '../utils/redis.js';
@@ -137,27 +137,27 @@ export const homepageController = {
   },
 
 
-  getEvents: async (req, res) => {
+  getEventTimeline: async (req, res) => {
     try {
-      const cached = await redis.get('home:events');
+      const cached = await redis.get('home:event-timeline');
       if (cached) {
         return res.json(JSON.parse(cached));
       }
 
-      const events = await Event.find().sort('-dateTime').lean();
+      const eventTimeline = await EventTimeline.find().sort('-dateTime').lean();
 
-      redis.set('home:events', JSON.stringify(events));
+      redis.set('home:event-timeline', JSON.stringify(eventTimeline));
 
-      res.json(events);
+      res.json(eventTimeline);
     } catch (error) {
-      res.status(500).json({ message: 'Failed to fetch events' });
+      res.status(500).json({ message: 'Failed to fetch Event Timeline' });
     }
   },
 
 
-  addEvent: async (req, res) => {
+  addEventTimeline: async (req, res) => {
     try {
-      const event = await Event.create({
+      const eventTimeline = await EventTimeline.create({
         ...req.body,
         registerId: req.user.registerId
       });
@@ -165,75 +165,75 @@ export const homepageController = {
       await logActivity(
         req,
         'CREATE',
-        'Event',
-        event._id.toString(),
-        { before: null, after: event.toObject() },
-        `Event "${event.name}" added by ${req.user.name} for ${new Date(event.dateTime).toLocaleString()}`
+        'EventTimeline',
+        eventTimeline._id.toString(),
+        { before: null, after: eventTimeline.toObject() },
+        `Event Timeline entry "${eventTimeline.name}" added by ${req.user.name} for ${new Date(eventTimeline.dateTime).toLocaleString()}`
       );
 
-      redis.del('home:events');
-      res.status(201).json(event);
+      redis.del('home:event-timeline');
+      res.status(201).json(eventTimeline);
     } catch (error) {
-      res.status(500).json({ message: 'Failed to add event' });
+      res.status(500).json({ message: 'Failed to add Event Timeline entry' });
     }
   },
 
 
-  deleteEvent: async (req, res) => {
+  deleteEventTimeline: async (req, res) => {
     try {
-      const event = await Event.findById(req.params.id);
-      if (!event) {
-        return res.status(404).json({ message: 'Event not found' });
+      const eventTimeline = await EventTimeline.findById(req.params.id);
+      if (!eventTimeline) {
+        return res.status(404).json({ message: 'Event Timeline entry not found' });
       }
 
-      const originalData = event.toObject();
+      const originalData = eventTimeline.toObject();
 
       await logActivity(
         req,
         'DELETE',
-        'Event',
-        event._id.toString(),
+        'EventTimeline',
+        eventTimeline._id.toString(),
         { before: originalData, after: null },
-        `Event "${event.name}" deleted by ${req.user.name}`
+        `Event Timeline entry "${eventTimeline.name}" deleted by ${req.user.name}`
       );
 
-      await Event.findByIdAndDelete(req.params.id);
+      await EventTimeline.findByIdAndDelete(req.params.id);
 
-      redis.del('home:events');
-      res.json({ message: 'Event deleted successfully' });
+      redis.del('home:event-timeline');
+      res.json({ message: 'Event Timeline entry deleted successfully' });
     } catch (error) {
-      res.status(500).json({ message: 'Failed to delete event' });
+      res.status(500).json({ message: 'Failed to delete Event Timeline entry' });
     }
   },
 
-  updateEvent: async (req, res) => {
+  updateEventTimeline: async (req, res) => {
     try {
-      const event = await Event.findById(req.params.id);
-      if (!event) {
-        return res.status(404).json({ message: 'Event not found' });
+      const eventTimeline = await EventTimeline.findById(req.params.id);
+      if (!eventTimeline) {
+        return res.status(404).json({ message: 'Event Timeline entry not found' });
       }
 
-      const originalData = event.toObject();
+      const originalData = eventTimeline.toObject();
 
       const { name, dateTime } = req.body;
-      if (name) event.name = name;
-      if (dateTime) event.dateTime = dateTime;
+      if (name) eventTimeline.name = name;
+      if (dateTime) eventTimeline.dateTime = dateTime;
 
-      await event.save();
+      await eventTimeline.save();
 
       await logActivity(
         req,
         'UPDATE',
-        'Event',
-        event._id.toString(),
-        { before: originalData, after: event.toObject() },
-        `Event "${event.name}" updated by ${req.user.name}`
+        'EventTimeline',
+        eventTimeline._id.toString(),
+        { before: originalData, after: eventTimeline.toObject() },
+        `Event Timeline entry "${eventTimeline.name}" updated by ${req.user.name}`
       );
 
-      redis.del('home:events');
-      res.json(event);
+      redis.del('home:event-timeline');
+      res.json(eventTimeline);
     } catch (error) {
-      res.status(500).json({ message: 'Failed to update event' });
+      res.status(500).json({ message: 'Failed to update Event Timeline entry' });
     }
   }
 };

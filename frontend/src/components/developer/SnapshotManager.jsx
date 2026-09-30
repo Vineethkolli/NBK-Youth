@@ -5,7 +5,7 @@ import axios from 'axios';
 import { API_URL } from '../../utils/config';
 
 const EVENT_OPTIONS = ['Sankranti', 'Ganesh Chaturthi'];
-const COLLECTION_OPTIONS = ['Income', 'Expense', 'Stats', 'Event'];
+const COLLECTION_OPTIONS = ['Stats', 'Income', 'Expense', 'EventTimeline'];
 
 function SnapshotManager() {
   const [snapshots, setSnapshots] = useState([]);
@@ -156,8 +156,11 @@ function SnapshotManager() {
     });
   };
 
-  const getCollectionSummary = (collections) => {
+  const getCollectionSummary = (collections, stats) => {
     const summary = [];
+    if (stats && Object.keys(stats).length > 0) {
+      summary.push('Stats');
+    }
     Object.entries(collections).forEach(([key, value]) => {
       if (Array.isArray(value) && value.length > 0) {
         summary.push(`${key}: ${value.length}`);
@@ -210,7 +213,7 @@ function SnapshotManager() {
                     <span className="font-medium text-lg">{snapshot.year}</span>
                   </div>
                   <p className="text-sm text-gray-600 mb-1">
-                    Collections: {getCollectionSummary(snapshot.collections)}
+                    Collections: {getCollectionSummary(snapshot.collections, snapshot.stats)}
                   </p>
                 </div>
                 
