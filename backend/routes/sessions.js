@@ -6,7 +6,7 @@ import { auth, checkRole } from '../middleware/auth.js';
 const router = express.Router();
 
 router.post('/refresh', refreshAccessToken);
-router.post('/last-active', updateLastActive);
+router.post('/last-active', auth, updateLastActive);
 
 router.get('/', auth, getUserSessions);
 router.post('/signout', auth, signOutCurrent);

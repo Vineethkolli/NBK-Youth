@@ -140,23 +140,25 @@ export const refreshAccessToken = async (req, res) => {
 
 export const updateLastActive = async (req, res) => {
   try {
-    const refreshToken = req.cookies.refreshToken;
-
-    if (!refreshToken) {
+    if (!req.sessionId) {
       return res.status(401).json({ ok: false });
     }
 
-    const tokenHash = hashToken(refreshToken);
-
     await Session.findOneAndUpdate(
-      { tokenHash, isValid: true },
-      { lastActive: new Date() }
+      {
+        _id: req.sessionId,
+        isValid: true,
+        expiresAt: { $gt: new Date() }
+      },
+      {
+        lastActive: new Date()
+      }
     );
 
-    res.json({ ok: true });
+    return res.json({ ok: true });
   } catch (error) {
     console.error("Update last active fatal error:", error);
-    res.status(500).json({ message: "Server error" });
+    return res.status(500).json({ message: "Server error" });
   }
 };
 
