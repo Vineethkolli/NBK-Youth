@@ -23,13 +23,6 @@ function WatchMore() {
           title="YouTube"
           onClick={() => openLink("https://youtube.com/@sivakoniki7335?si=qW0des74LGOFuf3t")}
         />
-        <SiInstagram
-          className="cursor-pointer h-6 w-6 text-pink-500 hover:scale-110 transition"
-          title="Instagram"
-          onClick={() =>
-            openLink("https://www.instagram.com/mana_station_gangavaram?igsh=MXU5cjM1ajVpemJm")
-          }
-        />
       </div>
     </div>
   );

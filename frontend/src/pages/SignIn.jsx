@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-hot-toast';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, X } from 'lucide-react';
 import ForgotPassword from '../components/auth/ForgotPassword';
 import OTPVerification from '../components/auth/OTPVerification';
 import ResetPassword from '../components/auth/ResetPassword';
@@ -15,6 +15,7 @@ function SignIn() {
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [showDeveloperModal, setShowDeveloperModal] = useState(false);
 
   const { signin } = useAuth();
   const [googleCredential, setGoogleCredential] = useState(null);
@@ -189,12 +190,61 @@ function SignIn() {
       <div className="w-full max-w-md text-center mt-8">
         <p className="font-semibold text-gray-700">
           Developed by{' '}
-          <span className="text-green-600 font-bold text-xl">
+          <button
+            type="button"
+            onClick={() => setShowDeveloperModal(true)}
+            className="text-green-600 font-bold text-xl hover:text-green-700"
+          >
             Kolli Vineeth
-          </span>
+          </button>
         </p>
       </div>
 
+{showDeveloperModal && (
+  <div
+    className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4"
+    onClick={(e) => {
+      if (e.target === e.currentTarget) {
+        setShowDeveloperModal(false);
+      }
+    }}
+  >
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="developer-modal-title"
+      className="relative w-full max-w-md rounded-2xl bg-white p-7 text-center shadow-2xl"
+    >
+      <button
+        type="button"
+        onClick={() => setShowDeveloperModal(false)}
+        aria-label="Close developer profile"
+        className="absolute right-4 top-4 rounded-full p-1 text-gray-500 transition hover:bg-gray-100 hover:text-gray-800"
+      >
+        <X className="h-7 w-7" />
+      </button>
+
+      <div className="mt-2 flex justify-center">
+        <img
+          src="/developerImage.png"
+          alt="Kolli Vineeth"
+          className="h-62 w-72 rounded-full object-contain border-3 border-green-500 bg-gray-50 shadow-lg"
+        />
+      </div>
+
+      <h2
+        id="developer-modal-title"
+        className="mt-6 text-3xl font-bold text-gray-800"
+      >
+        Kolli Vineeth
+      </h2>
+
+      <p className="mt-1 text-base font-medium text-gray-700">
+        © 2024 Developed &amp; Maintained
+      </p>
+    </div>
+  </div>
+)}
       <InstallApp />
     </>
   );

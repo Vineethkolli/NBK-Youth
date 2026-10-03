@@ -63,23 +63,23 @@ function TechStack() {
         <div className="mb-4">
           <span className="block font-semibold text-gray-500">Follow us</span>
           <div className="flex items-center space-x-4 mt-2">
-            <SiYoutube
-              className="cursor-pointer h-6 w-6 text-red-500"
-              title="YouTube"
-              onClick={() =>
-                window.open(
-                  "https://www.youtube.com/@sivakoniki7335",
-                  "_blank",
-                  "noopener,noreferrer"
-                )
-              }
-            />
             <SiInstagram
               className="cursor-pointer h-6 w-6 text-pink-500"
               title="Instagram"
               onClick={() =>
                 window.open(
                   "https://www.instagram.com/nbk_youth_gangavaram_?igsi=MTNjeThoZGtiNTFjNQ%3D%3D",
+                  "_blank",
+                  "noopener,noreferrer"
+                )
+              }
+            />
+            <SiYoutube
+              className="cursor-pointer h-6 w-6 text-red-500"
+              title="YouTube"
+              onClick={() =>
+                window.open(
+                  "https://www.youtube.com/@sivakoniki7335",
                   "_blank",
                   "noopener,noreferrer"
                 )
