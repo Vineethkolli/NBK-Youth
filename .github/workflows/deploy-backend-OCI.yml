@@ -1,0 +1,38 @@
+name: Deploy Backend to OCI
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'backend/**'
+
+jobs:
+  deploy:
+    name: Deploy backend to OCI
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to OCI
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.OCI_HOST }}
+          username: ${{ secrets.OCI_USERNAME }}
+          key: ${{ secrets.OCI_SSH_KEY }}
+          script: |
+            set -e
+
+            cd /home/ubuntu/nbkyouth
+
+            echo "Pulling latest backend changes..."
+            git pull origin main
+
+            cd backend
+
+            echo "Installing production dependencies..."
+            npm install --omit=dev
+
+            echo "Restarting backend..."
+            pm2 restart nbkyouth-backend
+
+            echo "Deployment completed successfully."
