@@ -7,7 +7,6 @@ export default function Documentation() {
     return <div className="text-center mt-10 text-red-500 font-semibold">Access denied</div>;
   }
 
-
   return (
       <div className="max-w-5xl mx-auto space-y-6">
       <div>
