@@ -45,7 +45,7 @@ export const createSessionAndTokens = async (user, deviceInfo, action, req) => {
   const refreshToken = generateRefreshToken();
   const tokenHash = hashToken(refreshToken);
 
-  const fifteenMonths = 365 * 24 * 60 * 60 * 1000;
+  const oneYear = 365 * 24 * 60 * 60 * 1000;
 
   const session = await Session.create({
     userId: user._id,
@@ -53,7 +53,7 @@ export const createSessionAndTokens = async (user, deviceInfo, action, req) => {
     deviceInfo: { deviceType: "unknown", deviceModel: "unknown", os: "unknown", browserName: "unknown" },
     location: { city: null, state: null, country: null },
     action,
-    expiresAt: new Date(Date.now() + fifteenMonths)
+    expiresAt: new Date(Date.now() + oneYear)
   });
 
   Promise.all([deviceInfoPromise, locationPromise]).then(async ([dev, loc]) => {
@@ -100,10 +100,10 @@ export const refreshAccessToken = async (req, res) => {
     const newRefreshToken = generateRefreshToken();
     const newTokenHash = hashToken(newRefreshToken);
 
-    const fifteenMonths =  365 * 24 * 60 * 60 * 1000;
+    const oneYear =  365 * 24 * 60 * 60 * 1000;
 
     session.tokenHash = newTokenHash;
-    session.expiresAt = new Date(Date.now() + fifteenMonths);
+    session.expiresAt = new Date(Date.now() + oneYear);
     session.lastActive = new Date();
     await session.save();
 
@@ -112,7 +112,7 @@ export const refreshAccessToken = async (req, res) => {
       httpOnly: true,
       secure: isHttps,
       sameSite: isHttps ? "none" : "lax",
-      maxAge: fifteenMonths
+      maxAge: oneYear
     });
 
     res.json({
