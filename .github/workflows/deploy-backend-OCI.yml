@@ -33,6 +33,6 @@ jobs:
             npm install --omit=dev
 
             echo "Restarting backend..."
-            pm2 restart nbkyouth-backend
+            pm2 reload nbkyouth-backend
 
             echo "Deployment completed successfully."
