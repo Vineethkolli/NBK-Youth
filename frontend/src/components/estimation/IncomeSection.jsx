@@ -38,7 +38,7 @@ function IncomeSection({ refreshStats }) {
   });
 
   useEffect(() => {
-    if (hasAccess('Privileged')) {
+    if (hasAccess('Pro')) {
       setIncomeColumns((prev) => ({ ...prev, registerId: false }));
     }
   }, [user?.role]);
@@ -132,7 +132,7 @@ function IncomeSection({ refreshStats }) {
         </div>
 
         <div className="flex items-center space-x-3">
-          {hasAccess('Privileged') && (
+          {hasAccess('Pro') && (
             <button onClick={handleAdd} className="btn-secondary flex items-center">
               <Plus className="h-4 w-4 mr-1 inline" />
               Add
@@ -215,7 +215,7 @@ function IncomeSection({ refreshStats }) {
 
             {Object.entries(incomeColumns).map(([column, isVisible]) => {
               if (column === 'sno') return null;
-              if (column === 'registerId' && !hasAccess('Privileged')) return null;
+              if (column === 'registerId' && !hasAccess('Pro')) return null;
 
               return (
                 <label key={column} className="inline-flex items-center text-sm">

@@ -103,7 +103,7 @@ function Income() {
           <h1 className="text-2xl font-semibold">Income</h1>
 
           <div className="flex items-center space-x-3">
-            {hasAccess('Privileged') && (
+            {hasAccess('Pro') && (
               <button
                 onClick={() => setShowForm(!showForm)}
                 disabled={lockSettings.isLocked}

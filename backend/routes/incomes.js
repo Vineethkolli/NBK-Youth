@@ -7,12 +7,12 @@ const router = express.Router();
 router.get('/', auth, incomeController.getIncomes);
 
 router.get('/verification', auth, checkRole('Pro'), incomeController.getVerificationData);
-router.post('/', auth, checkRole('Privileged'), incomeController.createIncome);
-router.put('/:id', auth, checkRole('Privileged'), incomeController.updateIncome);
+router.post('/', auth, checkRole('Pro'), incomeController.createIncome);
+router.put('/:id', auth, checkRole('Pro'), incomeController.updateIncome);
 router.patch('/:id/verify', auth, checkRole('Pro'), incomeController.updateVerificationStatus);
 
 // Soft delete income (move to recycle bin)
-router.delete('/:id', auth, checkRole('Privileged'), incomeController.deleteIncome);
+router.delete('/:id', auth, checkRole('Pro'), incomeController.deleteIncome);
 router.get('/recycle-bin', auth, checkRole('Pro'), incomeController.getRecycleBin);
 router.post('/restore/:id', auth, checkRole('Pro'), incomeController.restoreIncome);
 

@@ -17,7 +17,7 @@ function ExpenseTable({
   const [togglingHiddenId, setTogglingHiddenId] = useState(null);
 
   const handleToggleHidden = async (expenseId) => {
-    if (!hasAccess('Privileged') || isLocked) return;
+    if (!hasAccess('Pro') || isLocked) return;
     try {
       setTogglingHiddenId(expenseId);
       await toggleProfileHidden(expenseId, 'Expense');
@@ -164,7 +164,6 @@ function ExpenseTable({
               {hasAccess('Pro') && (
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   <div className="flex space-x-2">
-                    {hasAccess('Privileged') && (
                       <button
                         onClick={() => handleToggleHidden(expense._id)}
                         disabled={isLocked || togglingHiddenId === expense._id}
@@ -181,7 +180,7 @@ function ExpenseTable({
                           <Eye className="h-5 w-5" />
                         )}
                       </button>
-                    )}
+                    
                     <button
                       onClick={() => onEdit(expense)}
                       disabled={isLocked}

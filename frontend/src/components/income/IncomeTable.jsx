@@ -18,7 +18,7 @@ function IncomeTable({
   const [togglingHiddenId, setTogglingHiddenId] = useState(null);
 
   const handleToggleHidden = async (incomeId) => {
-    if (!hasAccess('Privileged') || isLocked) return;
+    if (!hasAccess('Pro') || isLocked) return;
     try {
       setTogglingHiddenId(incomeId);
       await toggleProfileHidden(incomeId, 'Income');
@@ -108,7 +108,7 @@ function IncomeTable({
             {visibleColumns.verifyLog && (
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Verify Log</th>
             )}
-            {hasAccess('Privileged') && (
+            {hasAccess('Pro') && (
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
             )}
           </tr>
@@ -228,7 +228,7 @@ function IncomeTable({
                   </td>
                 )}
 
-                {hasAccess('Privileged') && (
+                {hasAccess('Pro') && (
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     <div className="flex space-x-2">
                       <button

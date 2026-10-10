@@ -5,6 +5,6 @@ import { statsController } from '../controllers/statsController.js';
 const router = express.Router();
 
 router.get('/', auth, statsController.getStats);
-router.patch('/previous-year', auth, checkRole('Privileged'), statsController.updatePreviousYear);
+router.patch('/previous-year', auth, checkRole('Pro'), statsController.updatePreviousYear);
 
 export default router;

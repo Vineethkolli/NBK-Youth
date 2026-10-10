@@ -85,7 +85,7 @@ export default function StatsOverview({
             {/* Previous Year Amount */}
             <div>
               <p className="font-semibold">Previous Year Amount</p>
-              {hasAccess('Privileged') && isEditingPreviousYear ? (
+              {hasAccess('Pro') && isEditingPreviousYear ? (
                 <div className="flex flex-col space-y-2">
                   <input
                     type="number"
@@ -138,7 +138,7 @@ export default function StatsOverview({
                   <p className="text-lg font-bold">
                     {formatAmount(stats.budgetStats.previousYearAmount.amount)}
                   </p>
-                  {hasAccess('Privileged') && (
+                  {hasAccess('Pro') && (
                     <button
                       onClick={() => setIsEditingPreviousYear(true)}
                       className="text-gray-500 hover:text-gray-700"
