@@ -1,5 +1,4 @@
 import Payment from '../models/Payment.js';
-import Income from '../models/Income.js';
 import { logActivity } from '../middleware/activityLogger.js';
 
 const PaymentController = {
@@ -10,7 +9,7 @@ const PaymentController = {
 
       const payments = await Payment.find(query)
         .select(
-          'paymentId registerId name email phoneNumber amount belongsTo screenshot screenshotPublicId transactionStatus verifyLog createdAt'
+          'paymentId registerId name email phoneNumber amount screenshot screenshotPublicId transactionStatus verifyLog createdAt'
         )
         .sort({ createdAt: -1 })
         .lean();
@@ -31,7 +30,7 @@ const PaymentController = {
 
       const payment = await Payment.findOne({ paymentId })
         .select(
-          'paymentId registerId name email phoneNumber amount belongsTo screenshot screenshotPublicId transactionStatus verifyLog verifiedBy verifiedAt createdAt'
+          'paymentId registerId name email phoneNumber amount screenshot screenshotPublicId transactionStatus verifyLog verifiedBy verifiedAt createdAt'
         )
         .lean();
 
@@ -58,7 +57,6 @@ const PaymentController = {
         email,
         phoneNumber,
         amount,
-        belongsTo,
         screenshot,
         screenshotPublicId
       } = req.body;
@@ -76,7 +74,6 @@ const PaymentController = {
         email,
         phoneNumber,
         amount,
-        belongsTo,
         screenshot,
         screenshotPublicId,
         transactionStatus: 'pending',
@@ -109,6 +106,9 @@ const PaymentController = {
       const { verifyLog } = req.query;
 
       const payments = await Payment.find({ verifyLog })
+        .select(
+          'paymentId registerId name email phoneNumber amount screenshot screenshotPublicId transactionStatus verifyLog verifiedBy verifiedAt createdAt'
+        )
         .sort({ createdAt: -1 })
         .lean();
 
@@ -116,54 +116,6 @@ const PaymentController = {
     } catch (error) {
       return res.status(500).json({
         message: 'Failed to fetch verification data',
-        error: error.message
-      });
-    }
-  },
-
-
-  async updatePayment(req, res) {
-    try {
-      const { id } = req.params;
-      const { name, belongsTo } = req.body;
-
-      const payment = await Payment.findById(id);
-      if (!payment) {
-        return res.status(404).json({ message: 'Payment not found' });
-      }
-
-      // Check if name exists in income collection
-      const existingIncome = await Income.findOne({ name }).lean();
-      if (existingIncome) {
-        return res.status(400).json({
-          message: 'Name already exists in income records',
-          existingName: existingIncome.name
-        });
-      }
-
-      const originalData = payment.toObject();
-
-      payment.name = name;
-      payment.belongsTo = belongsTo;
-
-      await payment.save();
-
-      await logActivity(
-        req,
-        'UPDATE',
-        'Payment',
-        payment.paymentId,
-        { before: originalData, after: payment.toObject() },
-        `Payment ${payment.paymentId} details updated - Name: ${name}, Belongs to: ${belongsTo}`
-      );
-
-      return res.json({
-        message: 'Payment updated successfully',
-        payment
-      });
-    } catch (error) {
-      return res.status(500).json({
-        message: 'Failed to update payment',
         error: error.message
       });
     }
@@ -182,34 +134,7 @@ const PaymentController = {
 
       const originalData = payment.toObject();
 
-      // If verifying payment, check for existing name in income
       if (verifyLog === 'verified') {
-        const existingIncome = await Income.findOne({
-          name: payment.name
-        }).lean();
-
-        if (existingIncome) {
-          return res.status(400).json({
-            message: 'Name already exists in income records',
-            existingName: existingIncome.name
-          });
-        }
-
-        // Create new income entry
-        const newIncome = new Income({
-          registerId: payment.registerId,
-          name: payment.name,
-          email: payment.email,
-          phoneNumber: payment.phoneNumber,
-          amount: payment.amount,
-          status: 'paid',
-          paidDate: new Date(),
-          paymentMode: 'web app',
-          belongsTo: payment.belongsTo,
-          verifyLog: 'verified'
-        });
-
-        await newIncome.save();
         payment.transactionStatus = 'successful';
       } else if (verifyLog === 'rejected') {
         payment.transactionStatus = 'failed';

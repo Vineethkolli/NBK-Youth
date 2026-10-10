@@ -20,7 +20,6 @@ function PaymentForm({ onSubmit }) {
   const [screenshot, setScreenshot] = useState(null);
   const [screenshotPreview, setScreenshotPreview] = useState(null);
   const [screenshotInputKey, setScreenshotInputKey] = useState(Date.now());
-  const [belongsTo, setBelongsTo] = useState('youth');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [copiedDetails, setCopiedDetails] = useState({
     upiNumber: '',
@@ -101,7 +100,6 @@ function PaymentForm({ onSubmit }) {
   
       const payload = {
         amount: Number(amount),
-        belongsTo,
         name: user.name,
         email: user.email,
         phoneNumber: user.phoneNumber,

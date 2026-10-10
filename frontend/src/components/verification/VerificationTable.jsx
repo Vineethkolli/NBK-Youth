@@ -1,16 +1,10 @@
 import { useState } from 'react';
-import { CheckCircle, XCircle, AlertCircle, Edit2, Save, Loader2 } from 'lucide-react';
+import { CheckCircle, XCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
 import { formatDateTime } from '../../utils/dateTime';
 
-function VerificationTable({ data, type, onVerifyLogUpdate, onUpdatePayment, isLocked = false }) {
-  const [editingPayment, setEditingPayment] = useState(null);
-  const [editForm, setEditForm] = useState({
-    name: '',
-    belongsTo: ''
-  });
-
+function VerificationTable({ data, type, onVerifyLogUpdate, isLocked = false }) {
   // loadingAction: { id: string|null, type: 'verify'|'notVerified'|'reject'|'save'|null }
   const [loadingAction, setLoadingAction] = useState({ id: null, type: null });
 
@@ -49,49 +43,16 @@ function VerificationTable({ data, type, onVerifyLogUpdate, onUpdatePayment, isL
       : 'text-red-500 hover:text-red-700';
   };
 
-  const handleEdit = (payment) => {
-    if (isLocked) return; 
-    setEditingPayment(payment._id);
-    setEditForm({
-      name: payment.name,
-      belongsTo: payment.belongsTo
-    });
-  };
-
-  const handleSave = async (paymentId) => {
-    if (isLocked) return; 
-    setLoadingAction({ id: paymentId, type: 'save' });
-    try {
-      await onUpdatePayment(paymentId, editForm);
-      setEditingPayment(null);
-      toast.success('Payment details updated successfully');
-    } catch (error) {
-      if (error.response?.data?.message?.includes('already exists')) {
-        toast.error('Name already exists in income records. Please use a different name.');
-      } else {
-        toast.error('Failed to update payment details');
-      }
-    } finally {
-      setLoadingAction({ id: null, type: null });
-    }
-  };
-
-  // For payment verifies needs confirm + existingName handling
   const handlePaymentVerify = async (paymentId) => {
     if (isLocked) return;
-    if (!window.confirm('This will create a new income entry. Are you sure?')) return;
+    if (!window.confirm('Are you sure you want to verify this payment?')) return;
 
     setLoadingAction({ id: paymentId, type: 'verify' });
     try {
       await onVerifyLogUpdate(paymentId, 'verified');
-      toast.success('Payment verified and income entry created successfully');
+      toast.success('Payment verified successfully. Please create a new income entry for this payment.', { duration: 5000 });
     } catch (error) {
-      if (error.response?.data?.existingName) {
-        toast.error(`A user with name "${error.response.data.existingName}" already exists. Please update the name before verifying.`);
-        handleEdit({ _id: paymentId, name: error.response.data.existingName });
-      } else {
-        toast.error('Failed to verify payment');
-      }
+      toast.error('Failed to verify payment');
     } finally {
       setLoadingAction({ id: null, type: null });
     }
@@ -157,38 +118,10 @@ function VerificationTable({ data, type, onVerifyLogUpdate, onUpdatePayment, isL
     <>
       <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{item.paymentId}</td>
       <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{item.registerId}</td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm">
-        {editingPayment === item._id ? (
-          <input
-            type="text"
-            value={editForm.name}
-            onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-            className="border rounded px-2 py-1 w-auto min-w-[120px] inline-block"
-            style={{ width: `${editForm.name.length + 1}ch` }}
-            disabled={isLocked || (loadingAction.id === item._id)}
-          />
-        ) : (
-          item.name
-        )}
-      </td>
+      <td className="px-6 py-4 whitespace-nowrap text-sm">{item.name}</td>
       <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{item.email || '-'}</td>
       <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{item.phoneNumber}</td>
       <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{item.amount}</td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm">
-        {editingPayment === item._id ? (
-          <select
-            value={editForm.belongsTo}
-            onChange={(e) => setEditForm({ ...editForm, belongsTo: e.target.value })}
-            className="w-full border rounded px-2 py-1"
-            disabled={isLocked || (loadingAction.id === item._id)}
-          >
-            <option value="villagers">Villagers</option>
-            <option value="youth">Youth</option>
-          </select>
-        ) : (
-          item.belongsTo
-        )}
-      </td>
       <td className="px-6 py-4 whitespace-nowrap text-sm">
         <a
           href={item.screenshot}
@@ -259,7 +192,6 @@ function VerificationTable({ data, type, onVerifyLogUpdate, onUpdatePayment, isL
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Phone</th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Belongs To</th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Screenshot</th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Transaction Status</th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Created At</th>
@@ -312,35 +244,6 @@ function VerificationTable({ data, type, onVerifyLogUpdate, onUpdatePayment, isL
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex space-x-2">
-                    {type === 'payment' && item.verifyLog !== 'verified' && (
-                      <>
-                        {editingPayment === item._id ? (
-                          <button
-                            onClick={() => handleSave(item._id)}
-                            disabled={isLocked || rowLoading}
-                            className={`text-green-600 hover:text-green-900 ${isLocked || rowLoading ? 'cursor-not-allowed opacity-50' : ''}`}
-                            title="Save"
-                            type="button"
-                          >
-                            {rowLoading && loadingAction.type === 'save' ? (
-                              <Loader2 className="h-5 w-5 animate-spin" />
-                            ) : (
-                              <Save className="h-5 w-5" />
-                            )}
-                          </button>
-                        ) : (
-                          <button
-                            onClick={() => handleEdit(item)}
-                            disabled={isLocked || rowLoading}
-                            className={`text-indigo-600 hover:text-indigo-900 ${isLocked || rowLoading ? 'cursor-not-allowed opacity-50' : ''}`}
-                            title="Edit"
-                            type="button"
-                          >
-                            <Edit2 className="h-5 w-5" />
-                          </button>
-                        )}
-                      </>
-                    )}
                     <button
                       onClick={() =>
                         type === 'payment' ? handlePaymentVerify(item._id) : handleGenericVerify(item._id, 'verified')

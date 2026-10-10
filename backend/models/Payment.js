@@ -25,11 +25,6 @@ const paymentSchema = new mongoose.Schema(
       required: true,
       min: [0, 'Amount must be positive'],
     },
-    belongsTo: {
-      type: String,
-      enum: ['villagers', 'youth'],
-      default: 'youth',
-    },
     screenshot: {
       type: String,
       required: true,

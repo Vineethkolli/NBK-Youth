@@ -64,19 +64,6 @@ function Verification() {
     }
   };
 
-  const handleUpdatePayment = async (id, updateData) => {
-    try {
-      await axios.put(`${API_URL}/api/payments/${id}`, {
-        ...updateData,
-        registerId: user.registerId
-      });
-      fetchData();
-      return true;
-    } catch (error) {
-      throw error;
-    }
-  };
-
   const tabIcons = {
     income: <IndianRupee size={18} />,
     expense: <DollarSign size={18} />,
@@ -142,7 +129,6 @@ function Verification() {
           }
           type={activeTab}
           onVerifyLogUpdate={handleVerifyLogUpdate}
-          onUpdatePayment={handleUpdatePayment}
           isLocked={lockSettings.isLocked}
         />
       </div>

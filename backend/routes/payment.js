@@ -11,7 +11,6 @@ router.get('/verification/data', auth, checkRole('Pro'), PaymentController.getVe
 
 router.post('/', PaymentController.createPayment);
 
-router.put('/:id', auth, checkRole('Pro'), PaymentController.updatePayment);
 router.patch('/:id/verify', auth, checkRole('Pro'), PaymentController.updateVerificationStatus);
 
 router.delete('/:paymentId', PaymentController.deletePayment);
