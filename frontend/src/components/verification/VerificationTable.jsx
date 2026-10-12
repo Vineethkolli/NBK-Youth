@@ -96,16 +96,15 @@ function VerificationTable({ data, type, onVerifyLogUpdate, isLocked = false }) 
       <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{item.expenseId}</td>
       <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{item.registerId}</td>
       <td className="px-6 py-4 text-sm">
-  <div className="whitespace-nowrap">{item.name}</div>
-  {item.remarks && (
+      <div className="whitespace-nowrap">{item.purpose}</div>
+        {item.remarks && (
     <div className="whitespace-nowrap text-gray-500">
       {item.remarks}
     </div>
   )}
-</td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{item.phoneNumber || '-'}</td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{item.amount}</td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm">{item.purpose}</td>
+  </td>
+        <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{item.amount}</td>
+      <td className="px-6 py-4 whitespace-nowrap text-sm">{item.paymentMode}</td>
       <td className="px-6 py-4 whitespace-nowrap text-sm">
         {item.billImage ? (
           <a
@@ -120,7 +119,8 @@ function VerificationTable({ data, type, onVerifyLogUpdate, isLocked = false }) 
           'No Bill'
         )}
       </td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm">{item.paymentMode}</td>
+      <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{item.name}</td>
+      <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{item.phoneNumber || '-'}</td>
     </>
   );
 
@@ -182,12 +182,12 @@ function VerificationTable({ data, type, onVerifyLogUpdate, isLocked = false }) 
         <tr>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Expense ID</th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Register ID</th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Phone</th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Purpose</th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Bill</th>
+          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Payment Mode</th>
+          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Bill</th>
+          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Spender Name</th>
+          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Phone</th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Created At</th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Verify Log</th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>

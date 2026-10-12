@@ -260,7 +260,7 @@ function Histories() {
                       checked={showRemarks}
                       onChange={(e) => setShowRemarks(e.target.checked)}
                     />
-                    <span className="text-sm">Remarks</span>
+                    <span>Remarks</span>
                   </label>
                 )}
               </div>
