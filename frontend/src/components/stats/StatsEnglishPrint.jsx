@@ -50,7 +50,7 @@ const StatsPrint = ({ stats }) => {
     const additionalAmount = stats.budgetStats.previousYearAmount.additionalAmount || 0;
     const remarks = stats.budgetStats.previousYearAmount.remarks || '';
     const finalAmountLeft = amountLeft + previousYearAmount + additionalAmount;
-    const budgetHead = ['Category', 'Count', 'Amount'];
+    const budgetHead = ['Status', 'Count', 'Amount'];
     const budgetBody = [
       ['Total Income', `${stats.budgetStats.totalIncome.count} entries`, formatAmount(stats.budgetStats.totalIncome.amount)],
       ['Amount Received', `${stats.budgetStats.amountReceived.count} entries`, formatAmount(stats.budgetStats.amountReceived.amount)],
@@ -100,7 +100,7 @@ const StatsPrint = ({ stats }) => {
     doc.setTextColor(0, 0, 0);
     doc.text('Villagers Statistics', 15, yPos);
     yPos += 4;
-    const villagersHead = ['Category', 'Cash', 'Online', 'Web App', 'Total'];
+    const villagersHead = ['Status', 'Cash', 'Online', 'Web App', 'Total'];
     const villagersBody = [
       ['Paid', formatAmount(stats.villagers.paid.cash), formatAmount(stats.villagers.paid.online), formatAmount(stats.villagers.paid.webApp), formatAmount(stats.villagers.paid.total)],
       ['Pending', formatAmount(stats.villagers.pending.cash), formatAmount(stats.villagers.pending.online), formatAmount(stats.villagers.pending.webApp), formatAmount(stats.villagers.pending.total)],
@@ -122,7 +122,7 @@ const StatsPrint = ({ stats }) => {
     doc.setTextColor(0, 0, 0);
     doc.text('Youth Statistics', 15, yPos);
     yPos += 4;
-    const youthHead = ['Category', 'Cash', 'Online', 'Web App', 'Total'];
+    const youthHead = ['Status', 'Cash', 'Online', 'Web App', 'Total'];
     const youthBody = [
       ['Paid', formatAmount(stats.youth.paid.cash), formatAmount(stats.youth.paid.online), formatAmount(stats.youth.paid.webApp), formatAmount(stats.youth.paid.total)],
       ['Pending', formatAmount(stats.youth.pending.cash), formatAmount(stats.youth.pending.online), formatAmount(stats.youth.pending.webApp), formatAmount(stats.youth.pending.total)],

@@ -8,7 +8,7 @@ function EstimationForm({ type, mode, data, onSubmit, onClose }) {
           name: '',
           previousAmount: '',
           presentAmount: '',
-          belongsTo: 'youth',
+          category: 'youth',
           status: 'not paid',
           remarks: '',
         }
@@ -103,10 +103,10 @@ function EstimationForm({ type, mode, data, onSubmit, onClose }) {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Belongs to</label>
+                <label className="block text-sm font-medium text-gray-700">Category</label>
                 <select
-                  name="belongsTo"
-                  value={formData.belongsTo}
+                  name="category"
+                  value={formData.category}
                   onChange={handleChange}
                   className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
                   required

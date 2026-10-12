@@ -36,11 +36,11 @@ const incomeAggregationPipeline = [
           },
         },
       ],
-      belongsBreakdown: [
+      CategoryBreakdown: [
         {
           $group: {
             _id: {
-              belongsTo: '$belongsTo',
+              category: '$category',
               status: '$status',
               paymentMode: '$paymentMode',
             },
@@ -132,7 +132,7 @@ const reducePaymentModes = (paymentModes = [], targetModes = []) =>
     { amount: 0, count: 0 }
   );
 
-const buildGroupStats = (belongsBreakdown = [], target) => {
+const buildGroupStats = (CategoryBreakdown = [], target) => {
   const template = () => ({ cash: 0, online: 0, webApp: 0, total: 0 });
   const result = {
     paid: template(),
@@ -141,8 +141,8 @@ const buildGroupStats = (belongsBreakdown = [], target) => {
     count: 0,
   };
 
-  belongsBreakdown
-    .filter((entry) => entry._id?.belongsTo?.toLowerCase() === target)
+  CategoryBreakdown
+    .filter((entry) => entry._id?.category?.toLowerCase() === target)
     .forEach((entry) => {
       const paymentMode = (entry._id.paymentMode || '').toLowerCase();
       const bucket = entry._id.status === 'paid' ? result.paid : result.pending;
@@ -296,8 +296,8 @@ export const computeBudgetStats = async () => {
       totalUsers: userCount,
       successfulPayments: successfulPaymentCount,
     },
-    villagers: buildGroupStats(incomeFacets?.belongsBreakdown, 'villagers'),
-    youth: buildGroupStats(incomeFacets?.belongsBreakdown, 'youth'),
+    villagers: buildGroupStats(incomeFacets?.CategoryBreakdown, 'villagers'),
+    youth: buildGroupStats(incomeFacets?.CategoryBreakdown, 'youth'),
     dateWiseStats: mergeDateWiseStats(incomeFacets?.dateStats, expenseFacets?.dateStats),
   };
 };

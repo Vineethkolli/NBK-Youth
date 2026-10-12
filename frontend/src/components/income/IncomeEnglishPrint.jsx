@@ -32,7 +32,7 @@ const handlePrint = () => {
       case 'amount': headers.push('Amount'); break;
       case 'status': headers.push('Status'); break;
       case 'paymentMode': headers.push('Payment Mode'); break;
-      case 'belongsTo': headers.push('Belongs To'); break;
+      case 'category': headers.push('Category'); break;
       case 'verifyLog': headers.push('Verify Log'); break;
       default: break;
     }
@@ -57,7 +57,7 @@ const handlePrint = () => {
         case 'amount': row.push(income.amount); break;
         case 'status': row.push(income.status); break;
         case 'paymentMode': row.push(income.paymentMode); break;
-        case 'belongsTo': row.push(income.belongsTo); break;
+        case 'category': row.push(income.category); break;
         case 'verifyLog': row.push(income.verifyLog); break;
         default: break;
       }

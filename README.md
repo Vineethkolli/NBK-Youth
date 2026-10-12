@@ -61,7 +61,7 @@ NBK Youth is designed to streamline content, finance, and user management in a u
 ## ✨ Features
 
 - **👤 User Authentication & Profiles:**  
-  Supports sign-up, signin, forget password, role-based access (Developer, Financier, Admin, User),  category-based UI (Youth, General).
+  Supports sign-up, signin, forget password, role-based access (Developer, Financier, Admin, User),  category-based UI (Youth, Villager, General).
 
 - **💰 Finance Management:**  
   Handle income, expenses, estimation, verification, recycle bin, and budgeting with visual statistics.

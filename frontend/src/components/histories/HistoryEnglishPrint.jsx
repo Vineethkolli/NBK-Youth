@@ -4,7 +4,7 @@ import { Printer } from 'lucide-react';
 import { formatDateTime } from '../../utils/dateTime';
 import { toast } from 'react-hot-toast';
 
-function EnglishPrint({ selectedHistory, activeTab, data, showBelongsTo, showRemarks }) {
+function EnglishPrint({ selectedHistory, activeTab, data, showCategory, showRemarks }) {
   const formatAmount = (amount) =>
     new Intl.NumberFormat('en-IN', {
       minimumFractionDigits: 0,
@@ -45,7 +45,7 @@ function EnglishPrint({ selectedHistory, activeTab, data, showBelongsTo, showRem
     if (activeTab === 'stats' && data) {
       printStats(doc, data, yPos);
     } else if (activeTab === 'income' && Array.isArray(data)) {
-      printIncome(doc, data, yPos, showBelongsTo);
+      printIncome(doc, data, yPos, showCategory);
     } else if (activeTab === 'expense' && Array.isArray(data)) {
       printExpense(doc, data, yPos, showRemarks);
     } else if (activeTab === 'events' && Array.isArray(data)) {
@@ -95,7 +95,7 @@ for (let i = 1; i <= pageCount; i++) {
   const remarks = budgetStats.previousYearAmount?.remarks || '';
   const totalIncludingPrevious = amountLeft + previousYearAmount + additionalAmount;
 
-  const budgetHead = ['Category', 'Count', 'Amount'];
+  const budgetHead = ['Status', 'Count', 'Amount'];
   const budgetBody = [
     ['Total Income', `${budgetStats.totalIncome?.count || 0} entries`, formatAmount(budgetStats.totalIncome?.amount)],
     ['Amount Received', `${budgetStats.amountReceived?.count || 0} entries`, formatAmount(budgetStats.amountReceived?.amount)],
@@ -147,7 +147,7 @@ for (let i = 1; i <= pageCount; i++) {
     doc.text('Villagers Statistics', 15, yPos);
     yPos += 4;
 
-    const villagersHead = ['Category', 'Cash', 'Online', 'Web App', 'Total'];
+    const villagersHead = ['Status', 'Cash', 'Online', 'Web App', 'Total'];
     const villagersBody = [
       ['Paid', formatAmount(stats.villagers.paid?.cash), formatAmount(stats.villagers.paid?.online), formatAmount(stats.villagers.paid?.webApp), formatAmount(stats.villagers.paid?.total)],
       ['Pending', formatAmount(stats.villagers.pending?.cash), formatAmount(stats.villagers.pending?.online), formatAmount(stats.villagers.pending?.webApp), formatAmount(stats.villagers.pending?.total)],
@@ -172,7 +172,7 @@ for (let i = 1; i <= pageCount; i++) {
     doc.text('Youth Statistics', 15, yPos);
     yPos += 4;
 
-    const youthHead = ['Category', 'Cash', 'Online', 'Web App', 'Total'];
+    const youthHead = ['Status', 'Cash', 'Online', 'Web App', 'Total'];
     const youthBody = [
       ['Paid', formatAmount(stats.youth.paid?.cash), formatAmount(stats.youth.paid?.online), formatAmount(stats.youth.paid?.webApp), formatAmount(stats.youth.paid?.total)],
       ['Pending', formatAmount(stats.youth.pending?.cash), formatAmount(stats.youth.pending?.online), formatAmount(stats.youth.pending?.webApp), formatAmount(stats.youth.pending?.total)],
@@ -220,15 +220,15 @@ for (let i = 1; i <= pageCount; i++) {
 };
 
 
-  const printIncome = (doc, incomes, startY, showBelongsTo) => {
-    const headers = showBelongsTo
-      ? ['S.No', 'Name', 'Amount', 'Belongs To']
+  const printIncome = (doc, incomes, startY, showCategory) => {
+    const headers = showCategory
+      ? ['S.No', 'Name', 'Amount', 'Category']
       : ['S.No', 'Name', 'Amount'];
 
     const body = incomes.map((income, index) => {
       const name = income.name || '-';
       const row = [index + 1, income.remarks ? `${name}\n${income.remarks}` : name, income.amount || 0];
-      if (showBelongsTo) row.push(income.belongsTo || '-');
+      if (showCategory) row.push(income.category || '-');
       return row;
     });
 

@@ -1,4 +1,4 @@
-function HistoryIncome({ incomes, snapshotName, showBelongsTo }) {
+function HistoryIncome({ incomes, snapshotName, showCategory }) {
   if (!incomes || incomes.length === 0) {
     return (
       <div className="p-6 text-center text-gray-500">
@@ -16,8 +16,8 @@ function HistoryIncome({ incomes, snapshotName, showBelongsTo }) {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">S.No</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
-              {showBelongsTo && (
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Belongs To</th>
+              {showCategory && (
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
               )}
             </tr>
           </thead>
@@ -30,8 +30,8 @@ function HistoryIncome({ incomes, snapshotName, showBelongsTo }) {
                   {income.remarks && <div className="whitespace-nowrap text-gray-500">{income.remarks}</div>}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{income.amount}</td>
-                {showBelongsTo && (
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">{income.belongsTo || '-'}</td>
+                {showCategory && (
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">{income.category || '-'}</td>
                 )}
               </tr>
             ))}

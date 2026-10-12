@@ -426,7 +426,7 @@ export const chatWithViniLogic = async ({ message, registerId }) => {
             (idx + 1).toString(),
             income.name,
             `₹${income.amount.toLocaleString('en-IN')}`,
-            income.belongsTo
+            income.category
           ]);
 
           response += `Top ${topN} contributors ${eventContext}:\n\n`;

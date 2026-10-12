@@ -175,7 +175,7 @@ export const buildSnapshotTextFromRecord = (record) => {
       if (collectionName === 'Income') {
         allText += 'INCOME RECORDS:\n';
         data.forEach((income) => {
-          allText += `Income ID: ${income.incomeId}, Name: ${income.name}, Amount: ₹${income.amount}, Status: ${income.status}, Payment Mode: ${income.paymentMode}, Belongs To: ${income.belongsTo}, Date: ${income.createdAt}\n`;
+          allText += `Income ID: ${income.incomeId}, Name: ${income.name}, Amount: ₹${income.amount}, Status: ${income.status}, Payment Mode: ${income.paymentMode}, Category: ${income.category}, Date: ${income.createdAt}\n`;
         });
         metadata.incomeCount = data.length;
         metadata.totalIncome = data.reduce(

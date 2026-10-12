@@ -5,10 +5,10 @@ import { logActivity } from '../middleware/activityLogger.js';
 export const estimationController = {
   getAllEstimatedIncomes: async (req, res) => {
     try {
-      const { sortOrder, sortField, belongsTo, status, search } = req.query;
+      const { sortOrder, sortField, category, status, search } = req.query;
       const query = {};
 
-      if (belongsTo) query.belongsTo = belongsTo;
+      if (category) query.category = category;
       if (status) query.status = status;
 
       if (search) {
@@ -31,7 +31,7 @@ export const estimationController = {
           : { createdAt: -1 };
 
       const incomes = await EstimatedIncome.find(query)
-        .select('estimatedIncomeId name previousAmount presentAmount belongsTo status remarks createdAt registerId')
+        .select('estimatedIncomeId name previousAmount presentAmount category status remarks createdAt registerId')
         .sort(sortOptions)
         .lean();
 
@@ -294,14 +294,14 @@ export const estimationController = {
       const overallPaidCount = incomes.filter(i => i.status === 'paid').length;
       const overallNotPaidCount = incomes.filter(i => i.status !== 'paid').length;
 
-      const youthIncomes = incomes.filter(i => i.belongsTo === 'youth');
+      const youthIncomes = incomes.filter(i => i.category === 'youth');
       const youthPaid = youthIncomes.filter(i => i.status === 'paid').reduce((a, b) => a + b.presentAmount, 0);
       const youthNotPaid = youthIncomes.filter(i => i.status !== 'paid').reduce((a, b) => a + b.presentAmount, 0);
       const youthCount = youthIncomes.length;
       const youthPaidCount = youthIncomes.filter(i => i.status === 'paid').length;
       const youthNotPaidCount = youthIncomes.filter(i => i.status !== 'paid').length;
 
-      const villagersIncomes = incomes.filter(i => i.belongsTo === 'villagers');
+      const villagersIncomes = incomes.filter(i => i.category === 'villagers');
       const villagersPaid = villagersIncomes.filter(i => i.status === 'paid').reduce((a, b) => a + b.presentAmount, 0);
       const villagersNotPaid = villagersIncomes.filter(i => i.status !== 'paid').reduce((a, b) => a + b.presentAmount, 0);
       const villagersCount = villagersIncomes.length;

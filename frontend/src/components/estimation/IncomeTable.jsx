@@ -34,7 +34,7 @@ function EstimatedIncomeTable({ incomes, visibleColumns, onEdit, onDelete }) {
             {visibleColumns.name && <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>}
             {visibleColumns.previousAmount && <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Previous Amount</th>}
             {visibleColumns.presentAmount && <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Present Amount</th>}
-            {visibleColumns.belongsTo && <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Belongs to</th>}
+            {visibleColumns.category && <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>}
             {visibleColumns.status && <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>}
             {visibleColumns.remarks && <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Remarks</th>}
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
@@ -49,7 +49,7 @@ function EstimatedIncomeTable({ incomes, visibleColumns, onEdit, onDelete }) {
               {visibleColumns.name && <td className="px-6 py-4 whitespace-nowrap text-sm">{income.name}</td>}
               {visibleColumns.previousAmount && <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{income.previousAmount}</td>}
               {visibleColumns.presentAmount && <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{income.presentAmount}</td>}
-              {visibleColumns.belongsTo && <td className="px-6 py-4 whitespace-nowrap text-sm">{income.belongsTo}</td>}
+              {visibleColumns.category && <td className="px-6 py-4 whitespace-nowrap text-sm">{income.category}</td>}
               {visibleColumns.status && <td className="px-6 py-4 whitespace-nowrap text-sm">{income.status}</td>}
               {visibleColumns.remarks && <td className="px-6 py-4 whitespace-nowrap text-sm">{income.remarks}</td>}
 

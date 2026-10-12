@@ -41,7 +41,7 @@ const IncomePrint = ({ incomes, visibleColumns, incomeFilters }) => {
     if (visibleColumns.name) tableColumns.push("Name");
     if (visibleColumns.previousAmount) tableColumns.push("Previous Amount");
     if (visibleColumns.presentAmount) tableColumns.push("Present Amount");
-    if (visibleColumns.belongsTo) tableColumns.push("Belongs To");
+    if (visibleColumns.category) tableColumns.push("Category");
     if (visibleColumns.status) tableColumns.push("Status");
     if (visibleColumns.remarks) tableColumns.push("Remarks");
 
@@ -53,7 +53,7 @@ const IncomePrint = ({ incomes, visibleColumns, incomeFilters }) => {
       if (visibleColumns.name) row.push(income.name);
       if (visibleColumns.previousAmount) row.push(income.previousAmount);
       if (visibleColumns.presentAmount) row.push(income.presentAmount);
-      if (visibleColumns.belongsTo) row.push(income.belongsTo);
+      if (visibleColumns.category) row.push(income.category);
       if (visibleColumns.status) row.push(income.status);
       if (visibleColumns.remarks) row.push(income.remarks);
       return row;

@@ -3,7 +3,7 @@ import { Printer } from 'lucide-react';
 import { formatDateTime } from '../../utils/dateTime';
 import { toast } from 'react-hot-toast';
 
-function TeluguPrint({ selectedHistory, activeTab, data, showBelongsTo, showRemarks }) {
+function TeluguPrint({ selectedHistory, activeTab, data, showCategory, showRemarks }) {
   const printRef = useRef();
 
   // Get translated snapshot name from the webpage or translate it
@@ -128,7 +128,7 @@ function TeluguPrint({ selectedHistory, activeTab, data, showBelongsTo, showRema
       case 'stats':
         return generateStatsContent(data);
       case 'income':
-        return generateIncomeContent(data, showBelongsTo);
+        return generateIncomeContent(data, showCategory);
       case 'expense':
         return generateExpenseContent(data, showRemarks);
       case 'events':
@@ -147,7 +147,7 @@ function TeluguPrint({ selectedHistory, activeTab, data, showBelongsTo, showRema
     const totalIncludingPrevious = amountLeft + previousYearAmount + additionalAmount;
 
     // Budget Stats
-    const budgetCols = ['Category', 'Count', 'Amount'];
+    const budgetCols = ['Status', 'Count', 'Amount'];
     const budgetRows = [
       ['Total Income', `${budgetStats.totalIncome?.count || 0} entries`, formatAmount(budgetStats.totalIncome?.amount)],
       ['Amount Received', `${budgetStats.amountReceived?.count || 0} entries`, formatAmount(budgetStats.amountReceived?.amount)],
@@ -169,7 +169,7 @@ function TeluguPrint({ selectedHistory, activeTab, data, showBelongsTo, showRema
 
     // Villagers & Youth Stats
     const makeGroup = (group, title) => {
-      const cols = ['Category', 'Cash', 'Online', 'Web App', 'Total'];
+      const cols = ['Status', 'Cash', 'Online', 'Web App', 'Total'];
       const rows = [
         [
           'Paid',
@@ -234,11 +234,11 @@ function TeluguPrint({ selectedHistory, activeTab, data, showBelongsTo, showRema
     return content;
   };
 
-  const generateIncomeContent = (incomes, showBelongsTo) => {
+  const generateIncomeContent = (incomes, showCategory) => {
     if (!Array.isArray(incomes) || incomes.length === 0) return '';
 
-    const headers = showBelongsTo
-      ? ['S.No', 'Name', 'Amount', 'Belongs To']
+    const headers = showCategory
+      ? ['S.No', 'Name', 'Amount', 'Category']
       : ['S.No', 'Name', 'Amount'];
 
     const rows = incomes.map((income, index) => {
@@ -247,7 +247,7 @@ function TeluguPrint({ selectedHistory, activeTab, data, showBelongsTo, showRema
         income.remarks ? `${income.name || '-'}<br>${income.remarks}` : (income.name || '-'),
         `<span translate="no">${income.amount || 0}</span>`
       ];
-      if (showBelongsTo) row.push(income.belongsTo || '-');
+      if (showCategory) row.push(income.category || '-');
       return row;
     });
 

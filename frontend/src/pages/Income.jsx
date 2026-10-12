@@ -24,7 +24,7 @@ function Income() {
   const [filters, setFilters] = useState({
     status: '',
     paymentMode: '',
-    belongsTo: '',
+    category: '',
     verifyLog: '',
     sort: '',
     startDate: '',
@@ -42,7 +42,7 @@ function Income() {
     amount: true,
     status: true,
     paymentMode: false,
-    belongsTo: false,
+    category: false,
     verifyLog: false,
   });
 

@@ -41,11 +41,11 @@ function IncomeFilters({ filters, onChange }) {
         </select>
 
         <select
-          value={filters.belongsTo}
-          onChange={(e) => handleChange('belongsTo', e.target.value)}
+          value={filters.category}
+          onChange={(e) => handleChange('category', e.target.value)}
           className="form-select"
         >
-          <option value="">Belongs To</option>
+          <option value="">Category</option>
           <option value="villagers">Villagers</option>
           <option value="youth">Youth</option>
         </select>

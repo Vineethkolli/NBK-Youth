@@ -21,7 +21,7 @@ function IncomeSection({ refreshStats }) {
 
   const [incomeFilters, setIncomeFilters] = useState({
     status: '',
-    belongsTo: '',
+    category: '',
     sortField: 'presentAmount',
     sortOrder: '',
   });
@@ -32,7 +32,7 @@ function IncomeSection({ refreshStats }) {
     name: true,
     previousAmount: false,
     presentAmount: true,
-    belongsTo: false,
+    category: false,
     status: false,
     remarks: false,
   });
@@ -183,13 +183,13 @@ function IncomeSection({ refreshStats }) {
       </select>
 
       <select
-        value={incomeFilters.belongsTo}
+        value={incomeFilters.category}
         onChange={(e) =>
-          setIncomeFilters({ ...incomeFilters, belongsTo: e.target.value })
+          setIncomeFilters({ ...incomeFilters, category: e.target.value })
         }
         className="form-select"
       >
-        <option value="">Belongs To</option>
+        <option value="">Category</option>
         <option value="youth">Youth</option>
         <option value="villagers">Villagers</option>
       </select>

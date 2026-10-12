@@ -47,7 +47,7 @@ function IncomePrint({ incomes, visibleColumns }) {
               {visibleColumns.amount && <th>Amount</th>}
               {visibleColumns.status && <th>Status</th>}
               {visibleColumns.paymentMode && <th>Payment Mode</th>}
-              {visibleColumns.belongsTo && <th>Belongs To</th>}
+              {visibleColumns.category && <th>Category</th>}
               {visibleColumns.verifyLog && <th>Verify Log</th>}
             </tr>
           </thead>
@@ -70,7 +70,7 @@ function IncomePrint({ incomes, visibleColumns }) {
                 {visibleColumns.amount && <td><span translate="no">{income.amount}</span></td>}
                 {visibleColumns.status && <td>{income.status}</td>}
                 {visibleColumns.paymentMode && <td>{income.paymentMode}</td>}
-                {visibleColumns.belongsTo && <td>{income.belongsTo}</td>}
+                {visibleColumns.category && <td>{income.category}</td>}
                 {visibleColumns.verifyLog && <td>{income.verifyLog}</td>}
               </tr>
             ))}

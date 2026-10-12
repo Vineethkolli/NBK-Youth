@@ -8,7 +8,7 @@ export const incomeController = {
         search,
         status,
         paymentMode,
-        belongsTo,
+        category,
         verifyLog,
         startDate,
         endDate,
@@ -33,7 +33,7 @@ export const incomeController = {
 
       if (status) query.status = status;
       if (paymentMode) query.paymentMode = paymentMode;
-      if (belongsTo) query.belongsTo = belongsTo;
+      if (category) query.category = category;
       if (verifyLog) query.verifyLog = verifyLog;
 
       if (startDate || endDate) {
@@ -47,7 +47,7 @@ export const incomeController = {
 
       const incomes = await Income.find(query)
         .select(
-          'incomeId name remarks email phoneNumber amount status paymentMode belongsTo verifyLog paidDate createdAt registerId'
+          'incomeId name remarks email phoneNumber amount status paymentMode category verifyLog paidDate createdAt registerId'
         )
         .sort({ createdAt: -1 })
         .lean();

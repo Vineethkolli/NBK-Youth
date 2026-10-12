@@ -73,7 +73,7 @@ const StatsPrint = ({ stats }) => {
   const additionalAmount = bs.previousYearAmount.additionalAmount || 0;
   const remarks = bs.previousYearAmount.remarks || '';
   const finalAmountLeft = amountLeft + prevYear + additionalAmount;
-  const budgetCols = ['Category', 'Count', 'Amount'];
+  const budgetCols = ['Status', 'Count', 'Amount'];
   const budgetRows = [
     ['Total Income', `${bs.totalIncome.count} entries`, formatAmount(bs.totalIncome.amount)],
     ['Amount Received', `${bs.amountReceived.count} entries`, formatAmount(bs.amountReceived.amount)],
@@ -96,7 +96,7 @@ const StatsPrint = ({ stats }) => {
 
   // Villagers & Youth Stats helper
   const makeGroup = (group, title) => {
-    const cols = ['Category', 'Cash', 'Online', 'Web App', 'Total'];
+    const cols = ['Status', 'Cash', 'Online', 'Web App', 'Total'];
     const rows = [
       [
         'Paid',

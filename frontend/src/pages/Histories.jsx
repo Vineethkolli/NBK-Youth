@@ -23,9 +23,9 @@ function Histories() {
   const [isEditMode, setIsEditMode] = useState(false);
   const [snapshots, setSnapshots] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [showBelongsTo, setShowBelongsTo] = useState(false);
+  const [showCategory, setShowCategory] = useState(false);
   const [showRemarks, setShowRemarks] = useState(false);
-  const [filters, setFilters] = useState({ sort: 'desc', belongsTo: '' });
+  const [filters, setFilters] = useState({ sort: 'desc', category: '' });
   const [deletingId, setDeletingId] = useState(null); 
 
   const PrintComponent = language === 'te' ? TeluguPrint : EnglishPrint;
@@ -118,8 +118,8 @@ function Histories() {
         );
       }
 
-      if (filters.belongsTo && activeTab === 'income') {
-        filtered = filtered.filter(item => item.belongsTo === filters.belongsTo);
+      if (filters.category && activeTab === 'income') {
+        filtered = filtered.filter(item => item.category === filters.category);
       }
 
       if (filters.sort) {
@@ -155,7 +155,7 @@ function Histories() {
             selectedHistory={selectedHistory}
             activeTab={activeTab}
             data={filteredData()}
-            showBelongsTo={showBelongsTo}
+            showCategory={showCategory}
             showRemarks={showRemarks}
           />
         </div>
@@ -240,14 +240,14 @@ function Histories() {
 
                 {activeTab === 'income' && (
                   <>
-                    <select value={filters.belongsTo} onChange={(e) => setFilters({ ...filters, belongsTo: e.target.value })} className="form-select">
-                      <option value="">Belongs To</option>
+                    <select value={filters.category} onChange={(e) => setFilters({ ...filters, category: e.target.value })} className="form-select">
+                      <option value="">Category</option>
                       <option value="villagers">Villagers</option>
                       <option value="youth">Youth</option>
                     </select>
 
                     <label className="flex items-center space-x-2">
-                      <input type="checkbox" checked={showBelongsTo} onChange={(e) => setShowBelongsTo(e.target.checked)} />
+                      <input type="checkbox" checked={showCategory} onChange={(e) => setShowCategory(e.target.checked)} />
                       <span className="text-sm"></span>
                     </label>
                   </>
@@ -280,7 +280,7 @@ function Histories() {
       <HistoryIncome
         incomes={filteredData()}
         snapshotName={selectedHistory.snapshotName}
-        showBelongsTo={showBelongsTo}
+        showCategory={showCategory}
       />
     )}
     {activeTab === 'expense' && (

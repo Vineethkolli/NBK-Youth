@@ -102,8 +102,8 @@ function IncomeTable({
             {visibleColumns.paymentMode && (
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Payment Mode</th>
             )}
-            {visibleColumns.belongsTo && (
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Belongs To</th>
+            {visibleColumns.category && (
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
             )}
             {visibleColumns.verifyLog && (
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Verify Log</th>
@@ -208,8 +208,8 @@ function IncomeTable({
                   <td className="px-6 py-4 whitespace-nowrap text-sm">{income.paymentMode}</td>
                 )}
 
-                {visibleColumns.belongsTo && (
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">{income.belongsTo}</td>
+                {visibleColumns.category && (
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">{income.category}</td>
                 )}
 
                 {visibleColumns.verifyLog && (
