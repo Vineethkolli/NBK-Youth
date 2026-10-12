@@ -17,6 +17,7 @@ router.put('/item/trash/:fileId', auth, checkRole('Developer'), serviceDriveStor
 router.delete('/item/delete/:fileId', auth, checkRole('Developer'), serviceDriveStorageController.deleteItemPermanent);
 router.delete('/item/trash/empty', auth, checkRole('Developer'), serviceDriveStorageController.emptyTrash);
 
+
 // Cloudinary Monitor Routes
 router.get('/cloudinary/quota', auth, checkRole('Developer'), cloudinaryStorageController.getStorageQuota);
 router.get('/cloudinary/folders', auth, checkRole('Developer'), cloudinaryStorageController.listCloudinaryFolders);
@@ -24,16 +25,24 @@ router.get('/cloudinary/files', auth, checkRole('Developer'), cloudinaryStorageC
 router.get('/cloudinary/download', auth, checkRole('Developer'), cloudinaryStorageController.downloadCloudinaryFolder);
 router.delete('/cloudinary/items', auth, checkRole('Developer'), cloudinaryStorageController.deleteCloudinaryItem);
 
+router.get('/cloudinary/trash', auth, checkRole('Developer'), cloudinaryStorageController.listDeletedCloudinaryItems);
+router.post('/cloudinary/restore', auth, checkRole('Developer'), cloudinaryStorageController.restoreCloudinaryItem);
+router.delete('/cloudinary/trash/item', auth, checkRole('Developer'), cloudinaryStorageController.permanentlyDeleteCloudinaryBackup);
+router.delete('/cloudinary/trash/empty', auth, checkRole('Developer'), cloudinaryStorageController.emptyCloudinaryTrash);
+
+
 // MongoDB Monitor Routes
 router.get('/mongodb/cluster', auth, checkRole('Developer'), mongodbStorageController.getClusterInfo);
 router.get('/mongodb/collections', auth, checkRole('Developer'), mongodbStorageController.getCollectionsInfo);
 router.get('/mongodb/collection-documents', auth, checkRole('Developer'), mongodbStorageController.getCollectionDocuments);
 router.get( '/mongodb/download-collection', auth, checkRole('Developer'), mongodbStorageController.downloadCollection);
 
+
 // GitHub Actions Monitor Routes
 router.get('/github/actions/all', auth, checkRole('Developer'), githubActionsController.getAllData);
 router.get('/github/actions/metrics', auth, checkRole('Developer'), githubActionsController.getMetricsOnly);
 router.get('/github/actions/workflows', auth, checkRole('Developer'), githubActionsController.getWorkflowsOnly);
+
 
 // Render Monitor Routes
 router.get('/render/usage', auth, checkRole('Developer'), renderController.getUsage);
