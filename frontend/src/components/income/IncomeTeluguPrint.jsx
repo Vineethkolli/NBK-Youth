@@ -62,7 +62,7 @@ function IncomePrint({ incomes, visibleColumns }) {
                 {visibleColumns.name && (
                   <td>
                     <div>{income.name}</div>
-                    {visibleColumns.others && income.others && <div>{income.others}</div>}
+                    {visibleColumns.remarks && income.remarks && <div>{income.remarks}</div>}
                   </td>
                 )}
                 {visibleColumns.email && <td><span translate="no">{income.email}</span></td>}

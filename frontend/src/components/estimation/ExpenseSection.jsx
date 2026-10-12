@@ -30,7 +30,7 @@ function ExpenseSection({ refreshStats }) {
     purpose: true,
     previousAmount: false,
     presentAmount: true,
-    others: false,
+    remarks: false,
   });
 
   useEffect(() => {

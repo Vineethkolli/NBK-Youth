@@ -16,7 +16,7 @@ const pinError = (req) => ({
   pinRequired: true,
 });
 
-const fileFields = 'title description filename resourceType kind passwordProtected createdBy createdAt updatedAt';
+const fileFields = 'title remarks filename resourceType kind passwordProtected createdBy createdAt updatedAt';
 
 const getFileExtension = (filename = '') => filename.match(/\.[^.]+$/)?.[0] || '';
 
@@ -28,12 +28,12 @@ export const myFilesController = {
   },
 
   createFile: async (req, res) => {
-    const { title, description, filename, url, publicId, resourceType, kind, passwordProtected } = req.body || {};
+    const { title, remarks, filename, url, publicId, resourceType, kind, passwordProtected } = req.body || {};
     if (!title?.trim() || !filename?.trim() || !url || !publicId || !['asset', 'dump'].includes(kind)) {
       return res.status(400).json({ message: 'Title, file, and valid file details are required' });
     }
     const file = await FileAsset.create({
-      title: title.trim(), description: description?.trim() || '',
+      title: title.trim(), remarks: remarks?.trim() || '',
       filename: `${title.trim()}${getFileExtension(filename)}`,
       url, publicId, resourceType: resourceType || 'auto', kind,
       passwordProtected: Boolean(passwordProtected), createdBy: req.user.registerId
@@ -53,7 +53,7 @@ export const myFilesController = {
       req.params.id,
       { $set: {
         title: req.body.title?.trim(),
-        description: req.body.description?.trim() || '',
+        remarks: req.body.remarks?.trim() || '',
         filename: `${req.body.title?.trim()}${getFileExtension(existing.filename)}`,
         passwordProtected: Boolean(req.body.passwordProtected),
       } },

@@ -28,7 +28,7 @@ const ExpensePrint = ({ expenses, visibleColumns }) => {
     if (visibleColumns.purpose) tableColumns.push('Purpose');
     if (visibleColumns.previousAmount) tableColumns.push('Previous Amount');
     if (visibleColumns.presentAmount) tableColumns.push('Present Amount');
-    if (visibleColumns.others) tableColumns.push('Others');
+    if (visibleColumns.remarks) tableColumns.push('Remarks');
 
     const tableRows = expenses.map((expense, index) => {
       const row = [];
@@ -37,7 +37,7 @@ const ExpensePrint = ({ expenses, visibleColumns }) => {
       if (visibleColumns.purpose) row.push(expense.purpose);
       if (visibleColumns.previousAmount) row.push(expense.previousAmount);
       if (visibleColumns.presentAmount) row.push(expense.presentAmount);
-      if (visibleColumns.others) row.push(expense.others);
+      if (visibleColumns.remarks) row.push(expense.remarks);
       return row;
     });
 

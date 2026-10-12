@@ -10,14 +10,14 @@ function EstimationForm({ type, mode, data, onSubmit, onClose }) {
           presentAmount: '',
           belongsTo: 'youth',
           status: 'not paid',
-          others: '',
+          remarks: '',
         }
       : {
           purpose: '',
           previousAmount: '',
           presentAmount: '',
           contact: '',
-          others: '',
+          remarks: '',
         };
 
   const [formData, setFormData] = useState(initialState);
@@ -131,11 +131,11 @@ function EstimationForm({ type, mode, data, onSubmit, onClose }) {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Others</label>
+                <label className="block text-sm font-medium text-gray-700">remarks</label>
                 <input
                   type="text"
-                  name="others"
-                  value={formData.others}
+                  name="remarks"
+                  value={formData.remarks}
                   onChange={handleChange}
                   className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
                   disabled={isSubmitting}
@@ -181,11 +181,11 @@ function EstimationForm({ type, mode, data, onSubmit, onClose }) {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Others</label>
+                <label className="block text-sm font-medium text-gray-700">remarks</label>
                 <input
                   type="text"
-                  name="others"
-                  value={formData.others}
+                  name="remarks"
+                  value={formData.remarks}
                   onChange={handleChange}
                   className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
                   disabled={isSubmitting}

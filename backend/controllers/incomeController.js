@@ -21,7 +21,7 @@ export const incomeController = {
         const searchConditions = [
           { incomeId: { $regex: search, $options: 'i' } },
           { name: { $regex: search, $options: 'i' } },
-          { others: { $regex: search, $options: 'i' } }
+          { remarks: { $regex: search, $options: 'i' } }
         ];
 
         if (!isNaN(Number(search))) {
@@ -47,7 +47,7 @@ export const incomeController = {
 
       const incomes = await Income.find(query)
         .select(
-          'incomeId name others email phoneNumber amount status paymentMode belongsTo verifyLog paidDate createdAt registerId'
+          'incomeId name remarks email phoneNumber amount status paymentMode belongsTo verifyLog paidDate createdAt registerId'
         )
         .sort({ createdAt: -1 })
         .lean();

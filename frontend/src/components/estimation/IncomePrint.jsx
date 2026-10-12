@@ -43,7 +43,7 @@ const IncomePrint = ({ incomes, visibleColumns, incomeFilters }) => {
     if (visibleColumns.presentAmount) tableColumns.push("Present Amount");
     if (visibleColumns.belongsTo) tableColumns.push("Belongs To");
     if (visibleColumns.status) tableColumns.push("Status");
-    if (visibleColumns.others) tableColumns.push("Others");
+    if (visibleColumns.remarks) tableColumns.push("Remarks");
 
     // Prepare table rows dynamically from sorted incomes
     const tableRows = sortedIncomes.map((income, index) => {
@@ -55,7 +55,7 @@ const IncomePrint = ({ incomes, visibleColumns, incomeFilters }) => {
       if (visibleColumns.presentAmount) row.push(income.presentAmount);
       if (visibleColumns.belongsTo) row.push(income.belongsTo);
       if (visibleColumns.status) row.push(income.status);
-      if (visibleColumns.others) row.push(income.others);
+      if (visibleColumns.remarks) row.push(income.remarks);
       return row;
     });
 

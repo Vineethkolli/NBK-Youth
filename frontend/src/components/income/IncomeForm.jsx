@@ -9,7 +9,7 @@ function IncomeForm({ income, onClose, onSuccess }) {
   const { user } = useAuth();
   const [formData, setFormData] = useState({
     name: '',
-    others: '',
+    remarks: '',
     email: '',
     phoneNumber: '',
     amount: '',
@@ -25,7 +25,7 @@ function IncomeForm({ income, onClose, onSuccess }) {
     if (income) {
       setFormData({
         name: income.name,
-        others: income.others || '',
+        remarks: income.remarks || '',
         email: income.email || '',
         phoneNumber: income.phoneNumber,
         amount: income.amount,
@@ -101,12 +101,12 @@ function IncomeForm({ income, onClose, onSuccess }) {
 />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Others</label>
+            <label className="block text-sm font-medium text-gray-700">Remarks</label>
             <input
               type="text"
               placeholder="Sponsor or other details"
-              value={formData.others}
-              onChange={(e) => setFormData({ ...formData, others: e.target.value })}
+              value={formData.remarks}
+              onChange={(e) => setFormData({ ...formData, remarks: e.target.value })}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
             />
           </div>

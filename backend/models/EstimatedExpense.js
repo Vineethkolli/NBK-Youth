@@ -18,7 +18,7 @@ const estimatedExpenseSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
-  others: {
+  remarks: {
     type: String,
     default: ''
   },

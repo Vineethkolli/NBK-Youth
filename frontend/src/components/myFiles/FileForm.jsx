@@ -43,8 +43,8 @@ export default function FileForm({
     file?.title || ''
   );
 
-  const [description, setDescription] = useState(
-    file?.description || ''
+  const [remarks, setremarks] = useState(
+    file?.remarks || ''
   );
 
   const [passwordProtected, setPasswordProtected] = useState(
@@ -102,7 +102,7 @@ export default function FileForm({
           `${API_URL}/api/my-files/files/${file._id}`,
           {
             title: title.trim(),
-            description: description.trim(),
+            remarks: remarks.trim(),
             passwordProtected,
           },
           pin
@@ -135,7 +135,7 @@ export default function FileForm({
           `${API_URL}/api/my-files/files`,
           {
             title: title.trim(),
-            description: description.trim(),
+            remarks: remarks.trim(),
             filename: titleWithExtension,
             url: uploaded.url,
             publicId: uploaded.publicId,
@@ -253,12 +253,12 @@ export default function FileForm({
         </label>
 
         <label className="mt-4 block text-sm font-medium text-gray-700">
-          Description
+          Remarks
 
           <textarea
-            value={description}
+            value={remarks}
             onChange={(event) =>
-              setDescription(event.target.value)
+              setremarks(event.target.value)
             }
             rows="1"
             disabled={saving}

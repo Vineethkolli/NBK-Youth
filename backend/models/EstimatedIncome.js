@@ -29,7 +29,7 @@ const estimatedIncomeSchema = new mongoose.Schema({
     enum: ['paid', 'not paid'],
     default: 'not paid'
   },
-  others: {
+  remarks: {
     type: String,
     default: ''
   },

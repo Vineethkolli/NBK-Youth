@@ -227,7 +227,7 @@ for (let i = 1; i <= pageCount; i++) {
 
     const body = incomes.map((income, index) => {
       const name = income.name || '-';
-      const row = [index + 1, income.others ? `${name}\n${income.others}` : name, income.amount || 0];
+      const row = [index + 1, income.remarks ? `${name}\n${income.remarks}` : name, income.amount || 0];
       if (showBelongsTo) row.push(income.belongsTo || '-');
       return row;
     });

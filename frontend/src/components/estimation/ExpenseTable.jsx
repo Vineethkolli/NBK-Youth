@@ -34,7 +34,7 @@ function EstimatedExpenseTable({ expenses, visibleColumns, onEdit, onDelete }) {
             {visibleColumns.purpose && <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Purpose</th>}
             {visibleColumns.previousAmount && <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Previous Amount</th>}
             {visibleColumns.presentAmount && <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Present Amount</th>}
-            {visibleColumns.others && <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Others</th>}
+            {visibleColumns.remarks && <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Remarks</th>}
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
           </tr>
         </thead>
@@ -47,7 +47,7 @@ function EstimatedExpenseTable({ expenses, visibleColumns, onEdit, onDelete }) {
               {visibleColumns.purpose && <td className="px-6 py-4 whitespace-nowrap text-sm">{expense.purpose}</td>}
               {visibleColumns.previousAmount && <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{expense.previousAmount}</td>}
               {visibleColumns.presentAmount && <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{expense.presentAmount}</td>}
-              {visibleColumns.others && <td className="px-6 py-4 whitespace-nowrap text-sm">{expense.others}</td>}
+              {visibleColumns.remarks && <td className="px-6 py-4 whitespace-nowrap text-sm">{expense.remarks}</td>}
 
               <td className="px-6 py-4 whitespace-nowrap text-sm flex items-center">
                 <button

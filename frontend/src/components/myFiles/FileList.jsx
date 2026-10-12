@@ -67,9 +67,9 @@ export default function FileList({
                   {file.title || file.filename}
                 </div>
 
-                {file.description?.trim() && (
+                {file.remarks?.trim() && (
                   <div className="mt-0.5 truncate text-xs text-gray-500">
-                    {file.description}
+                    {file.remarks}
                   </div>
                 )}
               </div>

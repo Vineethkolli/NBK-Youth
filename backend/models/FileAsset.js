@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 const fileAssetSchema = new mongoose.Schema({
   title: { type: String, required: true, trim: true },
-  description: { type: String, trim: true, default: '' },
+  remarks: { type: String, trim: true, default: '' },
   filename: { type: String, required: true, trim: true },
   url: { type: String, required: true },
   publicId: { type: String, required: true },

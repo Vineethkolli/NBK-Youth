@@ -36,7 +36,7 @@ function EstimatedIncomeTable({ incomes, visibleColumns, onEdit, onDelete }) {
             {visibleColumns.presentAmount && <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Present Amount</th>}
             {visibleColumns.belongsTo && <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Belongs to</th>}
             {visibleColumns.status && <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>}
-            {visibleColumns.others && <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Others</th>}
+            {visibleColumns.remarks && <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Remarks</th>}
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
           </tr>
         </thead>
@@ -51,7 +51,7 @@ function EstimatedIncomeTable({ incomes, visibleColumns, onEdit, onDelete }) {
               {visibleColumns.presentAmount && <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{income.presentAmount}</td>}
               {visibleColumns.belongsTo && <td className="px-6 py-4 whitespace-nowrap text-sm">{income.belongsTo}</td>}
               {visibleColumns.status && <td className="px-6 py-4 whitespace-nowrap text-sm">{income.status}</td>}
-              {visibleColumns.others && <td className="px-6 py-4 whitespace-nowrap text-sm">{income.others}</td>}
+              {visibleColumns.remarks && <td className="px-6 py-4 whitespace-nowrap text-sm">{income.remarks}</td>}
 
               <td className="px-6 py-4 whitespace-nowrap text-sm flex items-center">
                 <button

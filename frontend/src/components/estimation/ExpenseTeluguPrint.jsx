@@ -40,7 +40,7 @@ const ExpenseTeluguPrint = ({ expenses, visibleColumns }) => {
               {visibleColumns.purpose && <th>Purpose</th>}
               {visibleColumns.previousAmount && <th>Previous Amount</th>}
               {visibleColumns.presentAmount && <th>Present Amount</th>}
-              {visibleColumns.others && <th>Others</th>}
+              {visibleColumns.remarks && <th>Remarks</th>}
             </tr>
           </thead>
           <tbody>
@@ -51,7 +51,7 @@ const ExpenseTeluguPrint = ({ expenses, visibleColumns }) => {
                 {visibleColumns.purpose && <td>{expense.purpose}</td>}
                 {visibleColumns.previousAmount && <td><span translate="no">{expense.previousAmount}</span></td>}
                 {visibleColumns.presentAmount && <td><span translate="no">{expense.presentAmount}</span></td>}
-                {visibleColumns.others && <td>{expense.others}</td>}
+                {visibleColumns.remarks && <td>{expense.remarks}</td>}
               </tr>
             ))}
           </tbody>

@@ -31,7 +31,7 @@ export const estimationController = {
           : { createdAt: -1 };
 
       const incomes = await EstimatedIncome.find(query)
-        .select('estimatedIncomeId name previousAmount presentAmount belongsTo status others createdAt registerId')
+        .select('estimatedIncomeId name previousAmount presentAmount belongsTo status remarks createdAt registerId')
         .sort(sortOptions)
         .lean();
 
@@ -178,7 +178,7 @@ export const estimationController = {
           : { createdAt: -1 };
 
       const expenses = await EstimatedExpense.find(query)
-        .select('estimatedExpenseId purpose previousAmount presentAmount others createdAt registerId')
+        .select('estimatedExpenseId purpose previousAmount presentAmount remarks createdAt registerId')
         .sort(sortOptions)
         .lean();
 

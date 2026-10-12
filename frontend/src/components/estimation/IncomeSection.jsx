@@ -34,7 +34,7 @@ function IncomeSection({ refreshStats }) {
     presentAmount: true,
     belongsTo: false,
     status: false,
-    others: false,
+    remarks: false,
   });
 
   useEffect(() => {

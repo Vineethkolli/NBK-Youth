@@ -55,7 +55,7 @@ const IncomeTeluguPrint = ({ incomes, visibleColumns, incomeFilters }) => {
               {visibleColumns.presentAmount && <th>Present Amount</th>}
               {visibleColumns.belongsTo && <th>Belongs To</th>}
               {visibleColumns.status && <th>Status</th>}
-              {visibleColumns.others && <th>Others</th>}
+              {visibleColumns.remarks && <th>Remarks</th>}
             </tr>
           </thead>
           <tbody>
@@ -68,7 +68,7 @@ const IncomeTeluguPrint = ({ incomes, visibleColumns, incomeFilters }) => {
                 {visibleColumns.presentAmount && <td><span translate="no">{income.presentAmount}</span></td>}
                 {visibleColumns.belongsTo && <td>{income.belongsTo}</td>}
                 {visibleColumns.status && <td>{income.status}</td>}
-                {visibleColumns.others && <td>{income.others}</td>}
+                {visibleColumns.remarks && <td>{income.remarks}</td>}
               </tr>
             ))}
           </tbody>

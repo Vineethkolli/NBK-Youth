@@ -144,9 +144,9 @@ function IncomeTable({
     <div className="whitespace-nowrap">
       {isHidden ? 'Donor' : income.name}
     </div>
-    {visibleColumns.others && !isHidden && income.others && (
+    {visibleColumns.remarks && !isHidden && income.remarks && (
       <div className="whitespace-nowrap text-gray-500">
-        {income.others}
+        {income.remarks}
       </div>
     )}
   </td>

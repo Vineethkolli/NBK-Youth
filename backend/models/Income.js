@@ -15,7 +15,7 @@ const incomeSchema = new mongoose.Schema({
     required: true,
     unique: true, 
   },
-  others: {
+  remarks: {
     type: String,
     default: '',
   },
