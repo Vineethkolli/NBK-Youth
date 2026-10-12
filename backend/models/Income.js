@@ -50,7 +50,7 @@ email: {
     enum: ['cash', 'online', 'web app'],
     required: true,
   },
-  belongsTo: {
+  category: {
     type: String,
     enum: ['villagers', 'youth'],
     required: true,
@@ -72,7 +72,7 @@ email: {
   },
 }, { timestamps: true });
 
-incomeSchema.index({ belongsTo: 1, verifyLog: 1, createdAt: -1 });
+incomeSchema.index({ category: 1, verifyLog: 1, createdAt: -1 });
 incomeSchema.index({ status: 1, paymentMode: 1, createdAt: -1 });
 
 incomeSchema.pre('save', async function () {

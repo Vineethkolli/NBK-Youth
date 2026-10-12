@@ -19,7 +19,7 @@ const estimatedIncomeSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
-  belongsTo: {
+  category: {
     type: String,
     enum: ['youth', 'villagers'],
     default: 'youth'
