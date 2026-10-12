@@ -3,7 +3,7 @@ import { Printer } from 'lucide-react';
 import { formatDateTime } from '../../utils/dateTime';
 import { toast } from 'react-hot-toast';
 
-function TeluguPrint({ selectedHistory, activeTab, data, showBelongsTo }) {
+function TeluguPrint({ selectedHistory, activeTab, data, showBelongsTo, showRemarks }) {
   const printRef = useRef();
 
   // Get translated snapshot name from the webpage or translate it
@@ -130,7 +130,7 @@ function TeluguPrint({ selectedHistory, activeTab, data, showBelongsTo }) {
       case 'income':
         return generateIncomeContent(data, showBelongsTo);
       case 'expense':
-        return generateExpenseContent(data);
+        return generateExpenseContent(data, showRemarks);
       case 'events':
         return generateEventsContent(data);
       default:
@@ -254,13 +254,15 @@ function TeluguPrint({ selectedHistory, activeTab, data, showBelongsTo }) {
     return renderTable(headers, rows);
   };
 
-  const generateExpenseContent = (expenses) => {
+  const generateExpenseContent = (expenses, showRemarks) => {
     if (!Array.isArray(expenses) || expenses.length === 0) return '';
 
     const headers = ['S.No', 'Purpose', 'Amount'];
     const rows = expenses.map((expense, index) => [
       `<span translate="no">${index + 1}</span>`,
-      expense.purpose || '-',
+      showRemarks && expense.remarks
+        ? `${expense.purpose || '-'}<br />${expense.remarks}`
+        : (expense.purpose || '-'),
       `<span translate="no">${expense.amount || 0}</span>`
     ]);
 

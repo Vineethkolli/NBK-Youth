@@ -104,7 +104,7 @@ function IncomeForm({ income, onClose, onSuccess }) {
             <label className="block text-sm font-medium text-gray-700">Remarks</label>
             <input
               type="text"
-              placeholder="Sponsor or other details"
+              placeholder="Sponsor or Additional details"
               value={formData.remarks}
               onChange={(e) => setFormData({ ...formData, remarks: e.target.value })}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"

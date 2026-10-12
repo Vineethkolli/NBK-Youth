@@ -10,6 +10,7 @@ function ExpenseForm({ expense, onClose, onSuccess }) {
   const { user } = useAuth();
   const [formData, setFormData] = useState({
     purpose: '',
+    remarks: '',
     amount: '',
     paymentMode: 'cash',
     name: '',
@@ -26,6 +27,7 @@ function ExpenseForm({ expense, onClose, onSuccess }) {
     if (expense) {
       setFormData({
         purpose: expense.purpose,
+        remarks: expense.remarks || '',
         amount: String(expense.amount),
         paymentMode: expense.paymentMode,
         name: expense.name,
@@ -93,6 +95,7 @@ function ExpenseForm({ expense, onClose, onSuccess }) {
 
       const payload = {
         purpose: formData.purpose,
+        remarks: formData.remarks,
         amount: formData.amount,
         paymentMode: formData.paymentMode,
         name: formData.name,
@@ -146,6 +149,17 @@ function ExpenseForm({ expense, onClose, onSuccess }) {
               required
               value={formData.purpose}
               onChange={(e) => setFormData({ ...formData, purpose: e.target.value })}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Remarks</label>
+            <input
+              type="text"
+              placeholder="Additional details"
+              value={formData.remarks}
+              onChange={(e) => setFormData({ ...formData, remarks: e.target.value })}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
             />
           </div>

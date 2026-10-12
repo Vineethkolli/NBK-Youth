@@ -75,10 +75,13 @@ function VerificationTable({ data, type, onVerifyLogUpdate, isLocked = false }) 
     <>
       <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{item.incomeId}</td>
       <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{item.registerId}</td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm">
-        {item.paidDate ? formatDateTime(item.paidDate) : '-'}
-      </td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm">{item.name}</td>
+      <td className="px-6 py-4 whitespace-nowrap text-sm">{item.paidDate ? formatDateTime(item.paidDate) : '-'}</td>
+      <td className="px-6 py-4 text-sm">
+      <div className="whitespace-nowrap">{item.name}</div>
+      {item.remarks && ( <div className="whitespace-nowrap text-gray-500">
+          {item.remarks}
+        </div>
+      )}  </td>
       <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{item.email || '-'}</td>
       <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{item.phoneNumber || '-'}</td>
       <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{item.amount}</td>
@@ -92,7 +95,14 @@ function VerificationTable({ data, type, onVerifyLogUpdate, isLocked = false }) 
     <>
       <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{item.expenseId}</td>
       <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{item.registerId}</td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm">{item.name}</td>
+      <td className="px-6 py-4 text-sm">
+  <div className="whitespace-nowrap">{item.name}</div>
+  {item.remarks && (
+    <div className="whitespace-nowrap text-gray-500">
+      {item.remarks}
+    </div>
+  )}
+</td>
       <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{item.phoneNumber || '-'}</td>
       <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{item.amount}</td>
       <td className="px-6 py-4 whitespace-nowrap text-sm">{item.purpose}</td>

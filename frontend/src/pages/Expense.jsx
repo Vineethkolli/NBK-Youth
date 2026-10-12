@@ -34,6 +34,7 @@ function Expense() {
     registerId: false,
     dateTime: false,
     purpose: true,
+    remarks: false,
     amount: true,
     paymentMode: false,
     bill: false,

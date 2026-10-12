@@ -131,7 +131,7 @@ function EstimationForm({ type, mode, data, onSubmit, onClose }) {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">remarks</label>
+                <label className="block text-sm font-medium text-gray-700">Remarks</label>
                 <input
                   type="text"
                   name="remarks"
@@ -181,7 +181,7 @@ function EstimationForm({ type, mode, data, onSubmit, onClose }) {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">remarks</label>
+                <label className="block text-sm font-medium text-gray-700">Remarks</label>
                 <input
                   type="text"
                   name="remarks"

@@ -12,7 +12,8 @@ export const expenseController = {
         const searchConditions = [
           { expenseId: { $regex: search, $options: 'i' } },
           { name: { $regex: search, $options: 'i' } },
-          { purpose: { $regex: search, $options: 'i' } }
+          { purpose: { $regex: search, $options: 'i' } },
+          { remarks: { $regex: search, $options: 'i' } }
         ];
 
         if (!isNaN(Number(search))) {
@@ -32,7 +33,7 @@ export const expenseController = {
       }
 
       const expenses = await Expense.find(query)
-        .select('expenseId name amount purpose paymentMode verifyLog billImage billImagePublicId createdAt registerId')
+        .select('expenseId name remarks amount purpose paymentMode verifyLog billImage billImagePublicId createdAt registerId phoneNumber')
         .sort({ createdAt: -1 })
         .lean();
 

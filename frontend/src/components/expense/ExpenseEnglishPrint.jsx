@@ -27,6 +27,7 @@ const ExpensePrint = ({ expenses, visibleColumns }) => {
         case 'registerId': headers.push('Register ID'); break;
         case 'dateTime': headers.push('Date & Time'); break;
         case 'purpose': headers.push('Purpose'); break;
+        case 'remarks': break;
         case 'amount': headers.push('Amount'); break;
         case 'paymentMode': headers.push('Payment Mode'); break;
         case 'bill': headers.push('Bill'); break;
@@ -46,11 +47,22 @@ const ExpensePrint = ({ expenses, visibleColumns }) => {
           case 'expenseId': row.push(expense.expenseId); break;
           case 'registerId': row.push(expense.registerId); break;
           case 'dateTime': row.push(formatDateTime(expense.createdAt)); break;
-          case 'purpose': row.push(isHidden ? 'Expense' : expense.purpose); break;
+          case 'purpose': {
+            const purpose = isHidden ? 'Expense' : expense.purpose;
+            row.push(visibleColumns.remarks && !isHidden && expense.remarks
+              ? `${purpose}\n${expense.remarks}`
+              : purpose);
+            break;
+          }
+          case 'remarks': break;
           case 'amount': row.push(expense.amount); break;
           case 'paymentMode': row.push(expense.paymentMode); break;
           case 'bill': row.push(expense.billImage ? 'Available' : 'No Bill'); break;
-          case 'name': row.push(expense.name); break;
+          case 'name': {
+            const name = isHidden ? 'Expense' : expense.name;
+            row.push(name);
+            break;
+          }
           case 'phoneNumber': row.push(isHidden ? 'Expense' : (expense.phoneNumber || 'N/A')); break;
           case 'verifyLog': row.push(expense.verifyLog); break;
           default: break;

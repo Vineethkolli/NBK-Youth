@@ -4,7 +4,7 @@ import { Printer } from 'lucide-react';
 import { formatDateTime } from '../../utils/dateTime';
 import { toast } from 'react-hot-toast';
 
-function EnglishPrint({ selectedHistory, activeTab, data, showBelongsTo }) {
+function EnglishPrint({ selectedHistory, activeTab, data, showBelongsTo, showRemarks }) {
   const formatAmount = (amount) =>
     new Intl.NumberFormat('en-IN', {
       minimumFractionDigits: 0,
@@ -47,7 +47,7 @@ function EnglishPrint({ selectedHistory, activeTab, data, showBelongsTo }) {
     } else if (activeTab === 'income' && Array.isArray(data)) {
       printIncome(doc, data, yPos, showBelongsTo);
     } else if (activeTab === 'expense' && Array.isArray(data)) {
-      printExpense(doc, data, yPos);
+      printExpense(doc, data, yPos, showRemarks);
     } else if (activeTab === 'events' && Array.isArray(data)) {
       printEvents(doc, data, yPos);
     }
@@ -242,11 +242,13 @@ for (let i = 1; i <= pageCount; i++) {
     });
   };
 
-  const printExpense = (doc, expenses, startY) => {
+  const printExpense = (doc, expenses, startY, showRemarks) => {
     const headers = ['S.No', 'Purpose', 'Amount'];
     const body = expenses.map((expense, index) => [
       index + 1,
-      expense.purpose || '-',
+      showRemarks && expense.remarks
+        ? `${expense.purpose || '-'}\n${expense.remarks}`
+        : (expense.purpose || '-'),
       expense.amount || 0,
     ]);
 

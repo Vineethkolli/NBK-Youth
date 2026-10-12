@@ -24,6 +24,7 @@ function Histories() {
   const [snapshots, setSnapshots] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [showBelongsTo, setShowBelongsTo] = useState(false);
+  const [showRemarks, setShowRemarks] = useState(false);
   const [filters, setFilters] = useState({ sort: 'desc', belongsTo: '' });
   const [deletingId, setDeletingId] = useState(null); 
 
@@ -150,7 +151,13 @@ function Histories() {
               </button>
             </>
           )}
-          <PrintComponent selectedHistory={selectedHistory} activeTab={activeTab} data={filteredData()} showBelongsTo={showBelongsTo} />
+          <PrintComponent
+            selectedHistory={selectedHistory}
+            activeTab={activeTab}
+            data={filteredData()}
+            showBelongsTo={showBelongsTo}
+            showRemarks={showRemarks}
+          />
         </div>
       </div>
 
@@ -245,6 +252,17 @@ function Histories() {
                     </label>
                   </>
                 )}
+
+                {activeTab === 'expense' && (
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      checked={showRemarks}
+                      onChange={(e) => setShowRemarks(e.target.checked)}
+                    />
+                    <span className="text-sm">Remarks</span>
+                  </label>
+                )}
               </div>
             </div>
           )}
@@ -269,6 +287,7 @@ function Histories() {
       <HistoryExpense
         expenses={filteredData()}
         snapshotName={selectedHistory.snapshotName}
+        showRemarks={showRemarks}
       />
     )}
   </div>

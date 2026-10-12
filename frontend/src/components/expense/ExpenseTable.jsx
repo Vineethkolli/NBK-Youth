@@ -105,8 +105,15 @@ function ExpenseTable({
               )}
 
               {visibleColumns.purpose && (
-                <td className="px-6 py-4 whitespace-nowrap text-sm">
-                  {isHidden ? 'Expense' : expense.purpose}
+                <td className="px-6 py-4 text-sm">
+                  <div className="whitespace-nowrap">
+                    {isHidden ? 'Expense' : expense.purpose}
+                  </div>
+                  {visibleColumns.remarks && !isHidden && expense.remarks && (
+                    <div className="whitespace-nowrap text-gray-500">
+                      {expense.remarks}
+                    </div>
+                  )}
                 </td>
               )}
 
@@ -152,7 +159,11 @@ function ExpenseTable({
               )}
 
               {visibleColumns.name && (
-                <td className="px-6 py-4 whitespace-nowrap text-sm">{expense.name}</td>
+                <td className="px-6 py-4 text-sm">
+                  <div className="whitespace-nowrap">
+                    {isHidden ? 'Expense' : expense.name}
+                  </div>
+                </td>
               )}
 
               {hasAccess('Privileged') && visibleColumns.phoneNumber && (

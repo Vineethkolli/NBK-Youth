@@ -1,4 +1,4 @@
-function HistoryExpense({ expenses, snapshotName }) {
+function HistoryExpense({ expenses, snapshotName, showRemarks }) {
   if (!expenses || expenses.length === 0) {
     return (
       <div className="p-6 text-center text-gray-500">
@@ -22,7 +22,12 @@ function HistoryExpense({ expenses, snapshotName }) {
             {expenses.map((expense, index) => (
               <tr key={expense._id || index}>
                 <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{index + 1}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm">{expense.purpose}</td>
+                <td className="px-6 py-4 text-sm">
+                  <div className="whitespace-nowrap">{expense.purpose}</div>
+                  {showRemarks && expense.remarks && (
+                    <div className="whitespace-nowrap text-gray-500">{expense.remarks}</div>
+                  )}
+                </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{expense.amount}</td>
               </tr>
             ))}

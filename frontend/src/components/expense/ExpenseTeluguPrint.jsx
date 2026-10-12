@@ -68,7 +68,14 @@ function ExpensePrint({ expenses, visibleColumns }) {
                   <td><span translate="no">{expense.registerId}</span></td>
                 )}
                 {columns.includes('dateTime') && <td>{formatDateTime(expense.createdAt)}</td>}
-                {columns.includes('purpose') && <td>{isHidden ? 'Expense' : expense.purpose}</td>}
+                {columns.includes('purpose') && (
+                  <td>
+                    <div>{isHidden ? 'Expense' : expense.purpose}</div>
+                    {columns.includes('remarks') && !isHidden && expense.remarks && (
+                      <div>{expense.remarks}</div>
+                    )}
+                  </td>
+                )}
                 {columns.includes('amount') && (
                   <td><span translate="no">{expense.amount}</span></td>
                 )}
@@ -76,7 +83,11 @@ function ExpensePrint({ expenses, visibleColumns }) {
                 {columns.includes('bill') && (
                   <td>{expense.billImage ? 'Available' : 'No Bill'}</td>
                 )}
-                {columns.includes('name') && <td>{expense.name}</td>}
+                {columns.includes('name') && (
+                  <td>
+                    <div>{isHidden ? 'Expense' : expense.name}</div>
+                  </td>
+                )}
                 {columns.includes('phoneNumber') && (
                   <td>
                     <span translate="no">
