@@ -52,8 +52,8 @@ function EstimatedExpenseTable({ expenses, visibleColumns, onEdit, onDelete, isL
               <td className="px-6 py-4 whitespace-nowrap text-sm flex items-center">
                 <button
                   onClick={() => onEdit(expense)}
-                  className="text-indigo-600 hover:text-indigo-900"
-                  disabled={isLocked || deletingId === expense._id}
+                  className={`ml-2 ${isLocked || deletingId === expense._id ? 'text-indigo-400 cursor-not-allowed' : 'text-indigo-600 hover:text-indigo-900'}`}
+                  disabled={isLocked || deletingId === expense._id }
                   title={isLocked ? 'Locked' : 'Edit'}
                 >
                   <Edit2 className="h-5 w-5" />
