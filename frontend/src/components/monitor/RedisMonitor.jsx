@@ -159,7 +159,7 @@ return (
     ) : (
       <div className="overflow-x-auto rounded-xl border border-gray-200">
         <table className="min-w-full divide-y divide-gray-200 text-sm">
-          <thead className="bg-gray-100">
+          <thead className="bg-gray-100 sticky top-0">
             <tr>
               <th className="p-3 text-left font-bold text-gray-700">S.No.</th>
               <th className="p-3 text-left font-bold text-gray-700">Key Name</th>
@@ -171,10 +171,10 @@ return (
             {(data?.keys || []).map((item, index) => (
               <tr key={item.key} className="hover:bg-indigo-50">
                 <td className="p-3 text-gray-600">{index + 1}</td>
-                <td className="break-all p-3 font-medium text-gray-800">
+                <td className="whitespace-nowrap p-3 font-medium text-gray-800">
                   {item.key}
                 </td>
-                <td className="p-3 text-gray-600">
+                <td className="whitespace-nowrap p-3 text-gray-600">
                   {formatBytes(item.size)}
                 </td>
                 <td className="p-3">

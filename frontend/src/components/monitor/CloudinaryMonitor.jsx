@@ -578,10 +578,10 @@ setTrashActionLoading(true);
                           {item.name || item.folder || item.publicId}
                         </button>
                       </td>
-                      <td className="p-3 text-gray-600">
+                      <td className="whitespace-nowrap p-3 text-gray-600">
                         {isFolder ? item.sizeReadable : item.size}
                       </td>
-                      <td className="p-3 text-gray-600">
+                      <td className="whitespace-nowrap p-3 text-gray-600">
                         {isFolder ? `${item.count} files` : item.resourceType}
                       </td>
                       <td className="p-3">{renderActions(item, isFolder)}</td>

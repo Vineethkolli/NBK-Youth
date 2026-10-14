@@ -562,7 +562,7 @@ export default function MongoDBMonitor() {
                     <td className="p-3 text-center text-gray-600">
                       {c.documents}
                     </td>
-                    <td className="p-3 text-left text-gray-600">
+                    <td className="whitespace-nowrap p-3 text-left text-gray-600">
                       {formatBytes(
                         c.storage
                       )}
@@ -570,7 +570,7 @@ export default function MongoDBMonitor() {
                     <td className="p-3 text-center text-gray-600">
                       {c.indexes}
                     </td>
-                    <td className="p-3 text-left text-gray-600">
+                    <td className="whitespace-nowrap p-3 text-left text-gray-600">
                       {formatBytes(
                         c.indexSize
                       )}

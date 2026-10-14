@@ -398,7 +398,7 @@ else {
           <span className={item.isFolder ? 'hover:text-indigo-600' : ''}>{item.name}</span>
         </div>
       </td>
-      <td className="p-3 text-gray-600">{item.size}</td>
+      <td className="whitespace-nowrap p-3 text-gray-600">{item.size}</td>
       <td className="p-3 text-gray-600 text-center">{item.isFolder ? (item.count || '-') : (item.mimeType || '-')}</td>
       <td className="p-3 text-gray-600">
         {item.modifiedTime ? new Date(item.modifiedTime).toLocaleDateString() : '-'}
