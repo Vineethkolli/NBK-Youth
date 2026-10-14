@@ -5,6 +5,7 @@ import { cloudinaryStorageController } from '../controllers/cloudinaryStorageCon
 import { mongodbStorageController } from '../controllers/mongodbStorageController.js';
 import { githubActionsController } from '../controllers/githubActionsController.js';
 import { renderController } from '../controllers/renderController.js';
+import { redisController } from '../controllers/redisController.js';
 
 const router = express.Router();
 
@@ -46,5 +47,10 @@ router.get('/github/actions/workflows', auth, checkRole('Developer'), githubActi
 
 // Render Monitor Routes
 router.get('/render/usage', auth, checkRole('Developer'), renderController.getUsage);
+
+// Upstash Redis Monitor Routes
+router.get('/redis', auth, checkRole('Developer'), redisController.getOverview);
+router.delete('/redis/key', auth, checkRole('Developer'), redisController.deleteKey);
+router.delete('/redis/all', auth, checkRole('Developer'), redisController.deleteAll);
 
 export default router;
