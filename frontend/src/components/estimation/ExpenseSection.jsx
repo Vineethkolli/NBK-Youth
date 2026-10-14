@@ -9,12 +9,14 @@ import ExpensePrint from './ExpensePrint';
 import ExpenseTeluguPrint from './ExpenseTeluguPrint';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
+import { useLockSettings } from '../../context/LockContext';
 
 function ExpenseSection({ refreshStats }) {
   const { language } = useLanguage();
   const PrintComponent = language === 'te' ? ExpenseTeluguPrint : ExpensePrint;
 
   const { hasAccess, user } = useAuth();
+  const { lockSettings } = useLockSettings();
   const [expenses, setExpenses] = useState([]);
   const [search, setSearch] = useState('');
   const [openPanel, setOpenPanel] = useState(null);
@@ -70,6 +72,7 @@ function ExpenseSection({ refreshStats }) {
   };
 
   const handleExpenseDelete = async (id) => {
+    if (lockSettings.isLocked) return;
     if (!window.confirm("Are you sure you want to delete this expense?")) return;
 
     try {
@@ -82,10 +85,21 @@ function ExpenseSection({ refreshStats }) {
     }
   };
 
-  const handleAdd = () => { setFormMode("add"); setCurrentRecord(null); setShowForm(true); };
-  const handleEdit = (record) => { setFormMode("edit"); setCurrentRecord(record); setShowForm(true); };
+  const handleAdd = () => {
+    if (lockSettings.isLocked) return;
+    setFormMode("add");
+    setCurrentRecord(null);
+    setShowForm(true);
+  };
+  const handleEdit = (record) => {
+    if (lockSettings.isLocked) return;
+    setFormMode("edit");
+    setCurrentRecord(record);
+    setShowForm(true);
+  };
 
   const handleFormSubmit = async (formData) => {
+    if (lockSettings.isLocked) return;
     try {
       const payload = { ...formData, registerId: user.registerId };
       let data;
@@ -125,7 +139,14 @@ function ExpenseSection({ refreshStats }) {
 
         <div className="flex items-center space-x-3">
           {hasAccess("Pro") && (
-            <button onClick={handleAdd} className="btn-secondary flex items-center">
+            <button
+              onClick={handleAdd}
+              disabled={lockSettings.isLocked}
+              className={`btn-secondary flex items-center ${
+                lockSettings.isLocked ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
+              title={lockSettings.isLocked ? 'Locked - cannot add' : ''}
+            >
               <Plus className="h-4 w-4 mr-1" />
               Add
             </button>
@@ -212,10 +233,11 @@ function ExpenseSection({ refreshStats }) {
           visibleColumns={expenseColumns}
           onEdit={handleEdit}
           onDelete={handleExpenseDelete}
+          isLocked={lockSettings.isLocked}
         />
       </div>
 
-      {showForm && (
+      {showForm && !lockSettings.isLocked && (
         <EstimationForm
           type="expense"
           mode={formMode}

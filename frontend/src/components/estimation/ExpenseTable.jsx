@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Edit2, Trash2, Loader2 } from 'lucide-react';
 
-function EstimatedExpenseTable({ expenses, visibleColumns, onEdit, onDelete }) {
+function EstimatedExpenseTable({ expenses, visibleColumns, onEdit, onDelete, isLocked }) {
   const [deletingId, setDeletingId] = useState(null);
 
   const handleDelete = async (id) => {
@@ -53,15 +53,17 @@ function EstimatedExpenseTable({ expenses, visibleColumns, onEdit, onDelete }) {
                 <button
                   onClick={() => onEdit(expense)}
                   className="text-indigo-600 hover:text-indigo-900"
-                  disabled={deletingId === expense._id}
+                  disabled={isLocked || deletingId === expense._id}
+                  title={isLocked ? 'Locked' : 'Edit'}
                 >
                   <Edit2 className="h-5 w-5" />
                 </button>
 
                 <button
                   onClick={() => handleDelete(expense._id)}
-                  className={`ml-2 ${deletingId === expense._id ? 'text-red-400 cursor-not-allowed' : 'text-red-600 hover:text-red-900'}`}
-                  disabled={deletingId === expense._id}
+                  className={`ml-2 ${isLocked || deletingId === expense._id ? 'text-red-400 cursor-not-allowed' : 'text-red-600 hover:text-red-900'}`}
+                  disabled={isLocked || deletingId === expense._id}
+                  title={isLocked ? 'Locked' : 'Delete'}
                 >
                   {deletingId === expense._id ? <Loader2 className="h-5 w-5 animate-spin" /> : <Trash2 className="h-5 w-5" />}
                 </button>

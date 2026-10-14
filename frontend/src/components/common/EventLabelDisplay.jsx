@@ -8,7 +8,7 @@ function EventLabelDisplay({ className = "" }) {
   return (
     <span
       id="event-label-display"
-      className={`inline-block px-3 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800 ${className}`}
+      className={`inline-block px-2 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800 ${className}`}
     >
       {eventLabel.label}
     </span>

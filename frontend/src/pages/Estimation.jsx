@@ -7,6 +7,7 @@ import IncomeSection from '../components/estimation/IncomeSection';
 import ExpenseSection from '../components/estimation/ExpenseSection';
 import { useAuth } from '../context/AuthContext';
 import EventLabelDisplay from '../components/common/EventLabelDisplay';
+import LockIndicator from '../components/common/LockIndicator';
 import { BarChart2, DollarSign, IndianRupee } from 'lucide-react'; 
 
 function Estimation() {
@@ -56,6 +57,7 @@ function Estimation() {
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
           <h1 className="text-2xl font-semibold mb-2 lg:mb-0">Estimation Management</h1>
           <div className="flex items-center mb-6 lg:mb-0 ">
+            <LockIndicator />
             <EventLabelDisplay />
           </div>
           <div className="flex space-x-4">

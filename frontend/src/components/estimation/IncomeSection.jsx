@@ -9,12 +9,14 @@ import IncomePrint from './IncomePrint';
 import IncomeTeluguPrint from './IncomeTeluguPrint';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
+import { useLockSettings } from '../../context/LockContext';
 
 function IncomeSection({ refreshStats }) {
   const { language } = useLanguage();
   const PrintComponent = language === 'te' ? IncomeTeluguPrint : IncomePrint;
 
   const { hasAccess, user } = useAuth();
+  const { lockSettings } = useLockSettings();
   const [incomes, setIncomes] = useState([]);
   const [search, setSearch] = useState('');
   const [openPanel, setOpenPanel] = useState(null);
@@ -63,6 +65,7 @@ function IncomeSection({ refreshStats }) {
   };
 
   const handleIncomeDelete = async (id) => {
+    if (lockSettings.isLocked) return;
     if (!window.confirm('Are you sure you want to delete this income?')) return;
 
     try {
@@ -77,18 +80,21 @@ function IncomeSection({ refreshStats }) {
   };
 
   const handleAdd = () => {
+    if (lockSettings.isLocked) return;
     setFormMode('add');
     setCurrentRecord(null);
     setShowForm(true);
   };
 
   const handleEdit = (record) => {
+    if (lockSettings.isLocked) return;
     setFormMode('edit');
     setCurrentRecord(record);
     setShowForm(true);
   };
 
   const handleFormSubmit = async (formData) => {
+    if (lockSettings.isLocked) return;
     try {
       const payload = { ...formData, registerId: user?.registerId };
       let data;
@@ -133,7 +139,14 @@ function IncomeSection({ refreshStats }) {
 
         <div className="flex items-center space-x-3">
           {hasAccess('Pro') && (
-            <button onClick={handleAdd} className="btn-secondary flex items-center">
+            <button
+              onClick={handleAdd}
+              disabled={lockSettings.isLocked}
+              className={`btn-secondary flex items-center ${
+                lockSettings.isLocked ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
+              title={lockSettings.isLocked ? 'Locked - cannot add' : ''}
+            >
               <Plus className="h-4 w-4 mr-1 inline" />
               Add
             </button>
@@ -240,10 +253,11 @@ function IncomeSection({ refreshStats }) {
           onAdd={handleAdd}
           onEdit={handleEdit}
           onDelete={handleIncomeDelete}
+          isLocked={lockSettings.isLocked}
         />
       </div>
 
-      {showForm && (
+      {showForm && !lockSettings.isLocked && (
         <EstimationForm
           type="income"
           mode={formMode}

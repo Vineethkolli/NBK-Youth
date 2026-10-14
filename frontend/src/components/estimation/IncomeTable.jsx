@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Edit2, Trash2, Loader2 } from 'lucide-react';
 
-function EstimatedIncomeTable({ incomes, visibleColumns, onEdit, onDelete }) {
+function EstimatedIncomeTable({ incomes, visibleColumns, onEdit, onDelete, isLocked }) {
   const [deletingId, setDeletingId] = useState(null);
 
   const handleDelete = async (id) => {
@@ -57,15 +57,17 @@ function EstimatedIncomeTable({ incomes, visibleColumns, onEdit, onDelete }) {
                 <button
                   onClick={() => onEdit(income)}
                   className="text-indigo-600 hover:text-indigo-900"
-                  disabled={deletingId === income._id}
+                  disabled={isLocked || deletingId === income._id}
+                  title={isLocked ? 'Locked' : 'Edit'}
                 >
                   <Edit2 className="h-5 w-5" />
                 </button>
 
                 <button
                   onClick={() => handleDelete(income._id)}
-                  className={`ml-2 ${deletingId === income._id ? 'text-red-400 cursor-not-allowed' : 'text-red-600 hover:text-red-900'}`}
-                  disabled={deletingId === income._id}
+                  className={`ml-2 ${isLocked || deletingId === income._id ? 'text-red-400 cursor-not-allowed' : 'text-red-600 hover:text-red-900'}`}
+                  disabled={isLocked || deletingId === income._id}
+                  title={isLocked ? 'Locked' : 'Delete'}
                 >
                   {deletingId === income._id ? <Loader2 className="h-5 w-5 animate-spin" /> : <Trash2 className="h-5 w-5" />}
                 </button>

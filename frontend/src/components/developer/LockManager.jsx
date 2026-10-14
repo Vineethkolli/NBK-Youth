@@ -3,8 +3,10 @@ import { Lock, Unlock, Shield } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { API_URL } from '../../utils/config';
+import { useLockSettings } from '../../context/LockContext';
 
 function LockManager() {
+  const { setLockSettings: updateLockSettings } = useLockSettings();
   const [lockSettings, setLockSettings] = useState(null);
   const [isToggling, setIsToggling] = useState(false);
 
@@ -29,6 +31,7 @@ function LockManager() {
         isLocked: !lockSettings.isLocked
       });
       setLockSettings(data.lockSettings);
+      updateLockSettings(data.lockSettings);
       toast.success(data.message);
     } catch (error) {
       toast.error('Failed to toggle lock status');

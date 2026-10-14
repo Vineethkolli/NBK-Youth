@@ -27,7 +27,7 @@ export const LockProvider = ({ children }) => {
   };
 
   return (
-    <LockContext.Provider value={{ lockSettings, refreshLockSettings }}>
+    <LockContext.Provider value={{ lockSettings, setLockSettings, refreshLockSettings }}>
       {children}
     </LockContext.Provider>
   );
