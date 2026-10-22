@@ -1,6 +1,7 @@
 import { Camera } from 'lucide-react';
 import { AsYouType } from 'libphonenumber-js';
 import ProfilePhoneInput from "./PhoneInput";
+import BirthdayInput, { formatBirthday, parseBirthday } from './BirthdayInput';
 
 function ProfileDetails({
   user,
@@ -92,6 +93,19 @@ function ProfileDetails({
   }
 />
             </div>
+
+            <div>
+              <label htmlFor="birthday" className="mt-4 block text-sm font-medium text-gray-700">
+                Birthday
+              </label>
+              <BirthdayInput
+                value={userData.birthday}
+                onChange={(birthday) => handleUserDataChange({ target: { name: 'birthday', value: birthday } })}
+              />
+              {userData.birthday && !parseBirthday(userData.birthday) && (
+                <p className="mt-1 text-xs text-red-600">Use DD-MM or DD-MM-YYYY format</p>
+              )}
+            </div>
           </div>
 
           <button
@@ -130,6 +144,11 @@ function ProfileDetails({
           <div className="sm:col-span-1">
             <dt className="text-sm font-medium text-gray-500">Phone number</dt>
             <dd className="mt-1 text-sm text-gray-900 notranslate">{formattedPhone}</dd>
+          </div>
+
+          <div className="sm:col-span-1">
+            <dt className="text-sm font-medium text-gray-500">Birthday</dt>
+            <dd className="mt-1 text-sm text-gray-900">{formatBirthday(user.birthday)}</dd>
           </div>
 
           <div className="sm:col-span-1">

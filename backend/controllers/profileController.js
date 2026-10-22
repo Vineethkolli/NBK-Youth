@@ -9,6 +9,16 @@ import { OAuth2Client } from 'google-auth-library';
 import { sendOTPEmail } from '../services/emailOTPService.js';
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+const BIRTHDAY_REGEX = /^(0[1-9]|[12]\d|3[01])-(0[1-9]|1[0-2])(?:-(19\d{2}|20\d{2}))?$/;
+
+const validateBirthday = (birthday) => {
+  if (birthday === undefined || birthday === '') return '';
+  if (typeof birthday !== 'string' || !BIRTHDAY_REGEX.test(birthday)) return null;
+  const [day, month, year] = birthday.split('-').map(Number);
+  const date = new Date(year || 2000, month - 1, day);
+  return date.getDate() === day && date.getMonth() === month - 1 &&
+    (!year || year <= new Date().getFullYear()) ? birthday : null;
+};
 
 export const getProfile = async (req, res) => {
   try {
@@ -30,15 +40,20 @@ export const getProfile = async (req, res) => {
 
 export const updateProfile = async (req, res) => {
   try {
-    let { name, email, phoneNumber } = req.body;
+    let { name, email, phoneNumber, birthday } = req.body;
 
     const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ message: 'User not found' });
+    if (Object.prototype.hasOwnProperty.call(req.body, 'birthday')) {
+      birthday = validateBirthday(birthday);
+      if (birthday === null) return res.status(400).json({ message: 'Birthday must be DD-MM or DD-MM-YYYY' });
+    }
 
     const originalData = {
       name: user.name,
       email: user.email,
-      phoneNumber: user.phoneNumber
+      phoneNumber: user.phoneNumber,
+      birthday: user.birthday
     };
 
     const normalizedEmail = email?.trim().toLowerCase() || '';
@@ -99,6 +114,9 @@ export const updateProfile = async (req, res) => {
       user.email = normalizedEmail;
     }
     user.phoneNumber = phoneNumber || user.phoneNumber;
+    if (Object.prototype.hasOwnProperty.call(req.body, 'birthday')) {
+      user.birthday = birthday;
+    }
 
     if (normalizedEmail && normalizedEmail !== originalData.email) {
       if (user.googleId) {
@@ -121,7 +139,7 @@ export const updateProfile = async (req, res) => {
       'UPDATE',
       'User',
       user.registerId,
-      { before: originalData, after: { name, email, phoneNumber } },
+      { before: originalData, after: { name, email, phoneNumber, birthday } },
       `User ${user.name} updated profile`
     );
 

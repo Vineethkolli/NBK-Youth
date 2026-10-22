@@ -4,12 +4,14 @@ import axios from 'axios';
 import { X } from 'lucide-react';
 import { API_URL } from '../../utils/config';
 import ProfilePhoneInput from '../profile/PhoneInput';
+import BirthdayInput, { parseBirthday } from '../profile/BirthdayInput';
 
 export default function UpdateUserForm({ user, onClose, onUpdated }) {
   const [formData, setFormData] = useState({
     name: user.name || '',
     email: user.email || '',
     phoneNumber: user.phoneNumber || '',
+    birthday: user.birthday || '',
   });
   const [loading, setLoading] = useState(false);
 
@@ -36,6 +38,12 @@ export default function UpdateUserForm({ user, onClose, onUpdated }) {
 
     if (!formData.phoneNumber) {
       toast.error('Phone number is required');
+      setLoading(false);
+      return;
+    }
+
+    if (formData.birthday && !parseBirthday(formData.birthday)) {
+      toast.error('Birthday must be DD-MM or DD-MM-YYYY');
       setLoading(false);
       return;
     }
@@ -94,6 +102,14 @@ export default function UpdateUserForm({ user, onClose, onUpdated }) {
               <ProfilePhoneInput
                 value={formData.phoneNumber}
                 onChange={handlePhoneChange}
+              />
+            </div>
+
+            <div>
+              <label htmlFor="birthday" className="mt-4 block text-sm font-medium">Birthday</label>
+              <BirthdayInput
+                value={formData.birthday}
+                onChange={(birthday) => setFormData((prev) => ({ ...prev, birthday }))}
               />
             </div>
           </div>

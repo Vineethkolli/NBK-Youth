@@ -3,6 +3,17 @@ import Notification from '../models/Notification.js';
 import { logActivity } from '../middleware/activityLogger.js';
 import { normalizePhoneNumber } from '../utils/phoneValidation.js';
 
+const BIRTHDAY_REGEX = /^(0[1-9]|[12]\d|3[01])-(0[1-9]|1[0-2])(?:-(19\d{2}|20\d{2}))?$/;
+
+const validateBirthday = (birthday) => {
+  if (birthday === undefined || birthday === '') return '';
+  if (typeof birthday !== 'string' || !BIRTHDAY_REGEX.test(birthday)) return null;
+  const [day, month, year] = birthday.split('-').map(Number);
+  const date = new Date(year || 2000, month - 1, day);
+  return date.getDate() === day && date.getMonth() === month - 1 &&
+    (!year || year <= new Date().getFullYear()) ? birthday : null;
+};
+
 export const getAllUsers = async (req, res) => {
   try {
     const { search, role, category, googleLinked, notifications, language } = req.query;
@@ -26,7 +37,7 @@ export const getAllUsers = async (req, res) => {
     if (googleLinked === 'false') query.googleId = null;
 
     const users = await User.find(query)
-      .select('registerId name email phoneNumber role category profileImage language googleId createdAt')
+      .select('registerId name email phoneNumber birthday role category profileImage language googleId createdAt')
       .lean();
 
     users.sort((a, b) => {
@@ -149,12 +160,16 @@ export const updateUserRole = async (req, res) => {
 
 export const updateUserProfile = async (req, res) => {
   try {
-    let { name, email, phoneNumber } = req.body;
+    let { name, email, phoneNumber, birthday } = req.body;
 
     const userToUpdate = await User.findById(req.params.userId).select(
-      'name email phoneNumber registerId',
+      'name email phoneNumber birthday registerId',
     );
     if (!userToUpdate) return res.status(404).json({ message: 'User not found' });
+    if (Object.prototype.hasOwnProperty.call(req.body, 'birthday')) {
+      birthday = validateBirthday(birthday);
+      if (birthday === null) return res.status(400).json({ message: 'Birthday must be DD-MM or DD-MM-YYYY' });
+    }
 
     const normalizedEmail = email?.trim().toLowerCase();
 
@@ -198,11 +213,15 @@ export const updateUserProfile = async (req, res) => {
       name: userToUpdate.name,
       email: userToUpdate.email,
       phoneNumber: userToUpdate.phoneNumber,
+      birthday: userToUpdate.birthday,
     };
 
     userToUpdate.name = name || userToUpdate.name;
     userToUpdate.email = normalizedEmail || userToUpdate.email;
     userToUpdate.phoneNumber = phoneNumber || userToUpdate.phoneNumber;
+    if (Object.prototype.hasOwnProperty.call(req.body, 'birthday')) {
+      userToUpdate.birthday = birthday;
+    }
 
     await userToUpdate.save();
 
@@ -211,7 +230,7 @@ export const updateUserProfile = async (req, res) => {
       'UPDATE',
       'User',
       userToUpdate.registerId,
-      { before: original, after: { name, email, phoneNumber } },
+      { before: original, after: { name, email, phoneNumber, birthday } },
       `Profile updated by ${req.user.name}`,
     );
 

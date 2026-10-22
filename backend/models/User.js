@@ -23,6 +23,10 @@ const userSchema = new mongoose.Schema({
     unique: true,
     required: true
   },
+  birthday: {
+    type: String,
+    default: ''
+  },
   password: {
     type: String
   },

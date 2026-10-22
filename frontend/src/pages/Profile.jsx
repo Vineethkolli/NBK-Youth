@@ -11,6 +11,7 @@ import GoogleLinkButton from '../components/profile/GoogleLinkButton';
 import SessionsManager from '../components/profile/SessionsManager';
 import ProfileOTPVerification from '../components/profile/ProfileOTPVerification';
 import { parsePhoneNumberFromString } from "libphonenumber-js";
+import { parseBirthday } from '../components/profile/BirthdayInput';
 
 function Profile() {
   const { user, signout, updateUserData } = useAuth();
@@ -29,6 +30,7 @@ function Profile() {
     name: user?.name || '',
     email: user?.email || '',
     phoneNumber: user?.phoneNumber || '',
+    birthday: user?.birthday || '',
     profileImage: user?.profileImage || null
   });
 
@@ -59,6 +61,7 @@ function Profile() {
         name: user.name || '',
         email: user.email || '',
         phoneNumber: user.phoneNumber || '',
+        birthday: user.birthday || '',
         profileImage: user.profileImage || null
       });
     }
@@ -77,6 +80,7 @@ function Profile() {
       name: user.name || '',
       email: user.email || '',
       phoneNumber: user.phoneNumber || '',
+      birthday: user.birthday || '',
       profileImage: user.profileImage || null
     });
     setIsEditing(false);
@@ -84,6 +88,10 @@ function Profile() {
 
   const handleUpdateProfile = async (e) => {
     e?.preventDefault?.();
+
+    if (userData.birthday && !parseBirthday(userData.birthday)) {
+      return toast.error('Birthday must be DD-MM or DD-MM-YYYY');
+    }
 
     const normalizedEmail = userData.email?.trim().toLowerCase() || '';
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

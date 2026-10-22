@@ -24,6 +24,7 @@ import DeleteUserConfirm from '../components/users/DeleteUserForm';
 import UserStats from '../components/users/UserStats';
 import UserFilters from '../components/users/UserFilters';
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
+import { formatBirthday } from '../components/profile/BirthdayInput';
 
 function Users() {
   const [users, setUsers] = useState([]);
@@ -49,6 +50,7 @@ function Users() {
     category: true,
     email: false,
     phoneNumber: false,
+    birthday: false,
     google: false,
     notifications: false,
     language: false,
@@ -231,6 +233,7 @@ function Users() {
                     {visibleColumns.name && <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>}
                     {visibleColumns.email && <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>}
                     {visibleColumns.phoneNumber && <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Phone</th>}
+                    {visibleColumns.birthday && <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Birthday</th>}
                     {visibleColumns.role && <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Role</th>}
                     {visibleColumns.category && <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>}
                     {visibleColumns.google && <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Google</th>}
@@ -273,6 +276,10 @@ function Users() {
 
                       {visibleColumns.phoneNumber && <td className="px-4 py-3 whitespace-nowrap text-sm notranslate">
                         {formatPhone(user.phoneNumber)}
+                      </td>}
+
+                      {visibleColumns.birthday && <td className="px-4 py-3 whitespace-nowrap text-sm">
+                        {formatBirthday(user.birthday)}
                       </td>}
 
                       {visibleColumns.role && <td className="px-4 py-3 whitespace-nowrap text-sm">
