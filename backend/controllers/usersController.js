@@ -5,7 +5,7 @@ import { normalizePhoneNumber } from '../utils/phoneValidation.js';
 
 export const getAllUsers = async (req, res) => {
   try {
-    const { search } = req.query;
+    const { search, role, category, googleLinked, notifications, language } = req.query;
     const query = {};
 
     if (search) {
@@ -19,6 +19,11 @@ export const getAllUsers = async (req, res) => {
         { category: searchRegex },
       ];
     }
+    if (role) query.role = role;
+    if (category) query.category = category;
+    if (language) query.language = language;
+    if (googleLinked === 'true') query.googleId = { $exists: true, $ne: null };
+    if (googleLinked === 'false') query.googleId = null;
 
     const users = await User.find(query)
       .select('registerId name email phoneNumber role category profileImage language googleId createdAt')
@@ -52,7 +57,13 @@ export const getAllUsers = async (req, res) => {
       notificationsEnabled: notificationMap.get(user.registerId) === true,
     }));
 
-    res.json(usersWithNotifications);
+    res.json(
+      notifications === 'true'
+        ? usersWithNotifications.filter((user) => user.notificationsEnabled)
+        : notifications === 'false'
+          ? usersWithNotifications.filter((user) => !user.notificationsEnabled)
+          : usersWithNotifications,
+    );
   } catch {
     res.status(500).json({ message: 'Server error' });
   }

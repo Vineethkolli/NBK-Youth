@@ -1,12 +1,28 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
-import { Trash2, Bell, BellOff, Edit2, Search, CheckCircle, XCircle, UsersIcon, BarChart3, Fingerprint } from 'lucide-react';
+import {
+  Trash2,
+  Bell,
+  BellOff,
+  Edit2,
+  Search,
+  CheckCircle,
+  XCircle,
+  UsersIcon,
+  BarChart3,
+  Fingerprint,
+  ChevronDown,
+  ChevronRight,
+  Columns,
+  Filter,
+} from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { API_URL } from '../utils/config';
 import UpdateUserForm from '../components/users/UpdateUserForm';
 import DeleteUserConfirm from '../components/users/DeleteUserForm';
 import UserStats from '../components/users/UserStats';
+import UserFilters from '../components/users/UserFilters';
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
 
 function Users() {
@@ -18,6 +34,25 @@ function Users() {
   const [userToInvalidate, setUserToInvalidate] = useState(null);
   const [activeTab, setActiveTab] = useState('users');
   const [loading, setLoading] = useState(false);
+  const [openPanel, setOpenPanel] = useState(null);
+  const [filters, setFilters] = useState({
+    role: '',
+    category: '',
+    googleLinked: '',
+    notifications: '',
+    language: '',
+  });
+  const [visibleColumns, setVisibleColumns] = useState({
+    registerId: true,
+    name: true,
+    role: true,
+    category: true,
+    email: false,
+    phoneNumber: false,
+    google: false,
+    notifications: false,
+    language: false,
+  });
 
   if (!hasAccess('Privileged'))
     return <div className="text-center mt-10 text-red-500 font-semibold">Access denied</div>;
@@ -26,20 +61,23 @@ function Users() {
     if (activeTab === 'users') {
       fetchUsers();
     }
-  }, [search, activeTab]);
+  }, [search, filters, activeTab]);
 
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const { data } = await axios.get(
-        `${API_URL}/api/users${search ? `?search=${search}` : ''}`
-      );
+      const params = new URLSearchParams({ search, ...filters });
+      const { data } = await axios.get(`${API_URL}/api/users?${params}`);
       setUsers(data);
     } catch {
       toast.error('Failed to fetch users');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleColumnToggle = (column) => {
+    setVisibleColumns((prev) => ({ ...prev, [column]: !prev[column] }));
   };
 
   const handleRoleChange = async (userId, newRole) => {
@@ -126,20 +164,78 @@ function Users() {
             />
           </div>
 
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setOpenPanel(openPanel === 'filters' ? null : 'filters')}
+              className="flex items-center gap-3 px-3 py-1 bg-white rounded-md shadow border"
+            >
+              <span className="font-medium flex items-center gap-2">
+                <Filter className="h-4 w-4 text-gray-600" />
+                Filters
+              </span>
+              {openPanel === 'filters' ? (
+                <ChevronDown className="h-4 w-4" />
+              ) : (
+                <ChevronRight className="h-4 w-4" />
+              )}
+            </button>
+
+            <button
+              onClick={() => setOpenPanel(openPanel === 'columns' ? null : 'columns')}
+              className="flex items-center gap-3 px-3 py-1 bg-white rounded-md shadow border"
+            >
+              <span className="font-medium flex items-center gap-2">
+                <Columns className="h-4 w-4 text-gray-600" />
+                Columns
+              </span>
+              {openPanel === 'columns' ? (
+                <ChevronDown className="h-4 w-4" />
+              ) : (
+                <ChevronRight className="h-4 w-4" />
+              )}
+            </button>
+          </div>
+
+          {openPanel === 'filters' && (
+            <div className="bg-white rounded-lg shadow p-2 border animate-fadeIn">
+              <UserFilters filters={filters} onChange={setFilters} />
+            </div>
+          )}
+
+          {openPanel === 'columns' && (
+            <div className="bg-white rounded-lg shadow p-2 border animate-fadeIn">
+              <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
+                {Object.entries(visibleColumns).map(([column, isVisible]) => (
+                  <label key={column} className="inline-flex items-center text-sm">
+                    <input
+                      type="checkbox"
+                      checked={isVisible}
+                      onChange={() => handleColumnToggle(column)}
+                      className="form-checkbox"
+                    />
+                    <span className="ml-2 capitalize">
+                      {column === 'registerId' ? 'Reg ID' : column}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="bg-white shadow overflow-hidden sm:rounded-lg">
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+                <thead className="bg-gray-50 whitespace-nowrap">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Phone</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Google</th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Notifications</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Language</th>
+                    {visibleColumns.registerId && <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">REG ID</th>}
+                    {visibleColumns.name && <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>}
+                    {visibleColumns.email && <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>}
+                    {visibleColumns.phoneNumber && <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Phone</th>}
+                    {visibleColumns.role && <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Role</th>}
+                    {visibleColumns.category && <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>}
+                    {visibleColumns.google && <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Google</th>}
+                    {visibleColumns.notifications && <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Notifications</th>}
+                    {visibleColumns.language && <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Language</th>}
                     {hasAccess('Developer') && (
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
                     )}
@@ -149,10 +245,10 @@ function Users() {
                 <tbody className="bg-white divide-y divide-gray-200">
                   {users.map((user) => (
                     <tr key={user._id}>
-                      <td className="px-4 py-3 whitespace-nowrap text-sm notranslate">
+                      {visibleColumns.registerId && <td className="px-4 py-3 whitespace-nowrap text-sm notranslate">
                         {user.registerId}
-                      </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-sm">
+                      </td>}
+                      {visibleColumns.name && <td className="px-4 py-3 whitespace-nowrap text-sm">
                         {user.name}{' '}
                         {['developer', 'financier', 'admin'].includes(user?.role) && (
                           <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-red-300 text-red-900 ml-1">
@@ -169,17 +265,17 @@ function Users() {
                             V
                           </span>
                         )}
-                      </td>
+                      </td>}
 
-                      <td className="px-4 py-3 whitespace-nowrap text-sm notranslate">
+                      {visibleColumns.email && <td className="px-4 py-3 whitespace-nowrap text-sm notranslate">
                         {user.email || 'N/A'}
-                      </td>
+                      </td>}
 
-                      <td className="px-4 py-3 whitespace-nowrap text-sm notranslate">
+                      {visibleColumns.phoneNumber && <td className="px-4 py-3 whitespace-nowrap text-sm notranslate">
                         {formatPhone(user.phoneNumber)}
-                      </td>
+                      </td>}
 
-                      <td className="px-4 py-3 whitespace-nowrap text-sm">
+                      {visibleColumns.role && <td className="px-4 py-3 whitespace-nowrap text-sm">
                         <select
                           value={user.role}
                           onChange={(e) => handleRoleChange(user._id, e.target.value)}
@@ -193,9 +289,9 @@ function Users() {
                           <option value="financier">Financier</option>
                           <option value="developer">Developer</option>
                         </select>
-                      </td>
+                      </td>}
 
-                      <td className="px-4 py-3 whitespace-nowrap text-sm">
+                      {visibleColumns.category && <td className="px-4 py-3 whitespace-nowrap text-sm">
                         <select
                           value={user.category}
                           onChange={(e) => handleCategoryChange(user._id, e.target.value)}
@@ -208,27 +304,27 @@ function Users() {
                           <option value="villager">Villager</option>
                           <option value="general">General</option>
                         </select>
-                      </td>
+                      </td>}
 
-                      <td className="px-4 py-3 text-center">
+                      {visibleColumns.google && <td className="px-4 py-3 text-center">
                         {user.googleId ? (
                           <CheckCircle className="h-5 w-5 text-green-600" title="Google Linked" />
                         ) : (
                           <XCircle className="h-5 w-5 text-gray-400" title="Not Linked" />
                         )}
-                      </td>
+                      </td>}
 
-                      <td className="px-4 py-3 text-center">
+                      {visibleColumns.notifications && <td className="px-4 py-3 text-center">
                         {user.notificationsEnabled ? (
                           <Bell className="h-5 w-5 text-green-600" title="Enabled" />
                         ) : (
                           <BellOff className="h-5 w-5 text-gray-400" title="Disabled" />
                         )}
-                      </td>
+                      </td>}
 
-                      <td className="px-4 py-3 whitespace-nowrap text-sm">
+                      {visibleColumns.language && <td className="px-4 py-3 whitespace-nowrap text-sm">
                         {user.language === 'te' ? 'Telugu' : 'English'}
-                      </td>
+                      </td>}
 
                       {hasAccess('Developer') && (
                         <td className="px-4 py-3 whitespace-nowrap text-sm space-x-2">
