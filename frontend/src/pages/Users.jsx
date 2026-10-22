@@ -289,7 +289,7 @@ function Users() {
                           disabled={user.email === 'gangavaramnbkyouth@gmail.com'}
                           className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300
                                      focus:outline-none focus:ring-indigo-500 focus:border-indigo-500
-                                     sm:text-sm rounded-md"
+                                     sm:text-sm rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           <option value="user">User</option>
                           <option value="admin">Admin</option>
@@ -305,7 +305,7 @@ function Users() {
                           disabled={user.email === 'gangavaramnbkyouth@gmail.com'}
                           className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300
                                      focus:outline-none focus:ring-indigo-500 focus:border-indigo-500
-                                     sm:text-sm rounded-md"
+                                     sm:text-sm rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           <option value="youth">Youth</option>
                           <option value="villager">Villager</option>
