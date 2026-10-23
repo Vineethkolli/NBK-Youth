@@ -5,6 +5,11 @@ const maintenanceModeSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  maintenanceAccess: {
+    type: String,
+    enum: ['everyone', 'exceptFinanciers', 'exceptAdminsFinanciers'],
+    default: 'everyone'
+  },
   enabledBy: {
     type: String,
     required: true

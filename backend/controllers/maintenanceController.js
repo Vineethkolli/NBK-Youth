@@ -5,7 +5,7 @@ export const maintenanceController = {
   getStatus: async (req, res) => {
     try {
       const status = await MaintenanceMode.findOne().lean();
-      res.json(status || { isEnabled: false });
+      res.json(status || { isEnabled: false, maintenanceAccess: 'everyone' });
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch maintenance status' });
     }
@@ -14,7 +14,24 @@ export const maintenanceController = {
   
   toggleMode: async (req, res) => {
     try {
-      const { isEnabled, expectedBackAt } = req.body;
+      const {
+        isEnabled,
+        expectedBackAt,
+        maintenanceAccess = 'everyone'
+      } = req.body;
+      const validAccessLevels = [
+        'everyone',
+        'exceptFinanciers',
+        'exceptAdminsFinanciers'
+      ];
+
+      if (
+        typeof isEnabled !== 'boolean' ||
+        !validAccessLevels.includes(maintenanceAccess)
+      ) {
+        return res.status(400).json({ message: 'Invalid maintenance settings' });
+      }
+
       const registerId = req.user.registerId;
 
       const currentStatus = await MaintenanceMode.findOne();
@@ -24,6 +41,7 @@ export const maintenanceController = {
         {},
         { 
           isEnabled,
+          maintenanceAccess,
           enabledBy: registerId,
           enabledAt: new Date(),
           expectedBackAt: expectedBackAt ? new Date(expectedBackAt) : null
@@ -36,7 +54,10 @@ export const maintenanceController = {
         'UPDATE',
         'MaintenanceMode',
         'maintenance-mode',
-        { before: originalData, after: { isEnabled, expectedBackAt } },
+        {
+          before: originalData,
+          after: { isEnabled, expectedBackAt, maintenanceAccess }
+        },
         `Maintenance mode ${isEnabled ? 'enabled' : 'disabled'} by ${req.user.name}`
       );
 

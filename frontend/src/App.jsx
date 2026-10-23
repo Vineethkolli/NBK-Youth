@@ -60,7 +60,7 @@ import VersionUpdate from './components/common/VersionUpdate';
 
 function AppContent() {
   const { user } = useAuth();
-  const { isMaintenanceMode } = useMaintenanceMode();
+  const { canSeeMaintenancePage } = useMaintenanceMode();
   const location = useLocation(); 
 
   useEffect(() => {
@@ -73,7 +73,7 @@ function AppContent() {
     trackPageView(path);
   }, [user, location]); 
 
-  if (isMaintenanceMode && user?.role !== 'developer') {
+  if (canSeeMaintenancePage) {
     return <MaintenancePage />;
   }
 

@@ -4,12 +4,22 @@ import { Settings, Laptop2Icon } from 'lucide-react';
 import { useMaintenanceMode } from '../../context/MaintenanceModeContext';
 
 function MaintenanceMode() {
-  const { isMaintenanceMode, expectedBackAt, toggleMaintenanceMode } = useMaintenanceMode();
+  const {
+    isMaintenanceMode,
+    expectedBackAt,
+    maintenanceAccess,
+    toggleMaintenanceMode
+  } = useMaintenanceMode();
   const [localExpectedBackAt, setLocalExpectedBackAt] = useState(expectedBackAt || '');
+  const [localMaintenanceAccess, setLocalMaintenanceAccess] = useState(maintenanceAccess);
 
   useEffect(() => {
     setLocalExpectedBackAt(expectedBackAt || '');
   }, [expectedBackAt]);
+
+  useEffect(() => {
+    setLocalMaintenanceAccess(maintenanceAccess);
+  }, [maintenanceAccess]);
 
   const handleToggle = async () => {
     try {
@@ -17,9 +27,13 @@ function MaintenanceMode() {
         !isMaintenanceMode && localExpectedBackAt
           ? new Date(localExpectedBackAt).toISOString()
           : null;
-      await toggleMaintenanceMode(!isMaintenanceMode, expectedBackAtISO);
+      await toggleMaintenanceMode(
+        !isMaintenanceMode,
+        expectedBackAtISO,
+        localMaintenanceAccess
+      );
       toast.success(`Maintenance mode ${!isMaintenanceMode ? 'enabled' : 'disabled'}`);
-    } catch (error) {
+    } catch {
       toast.error('Failed to toggle maintenance mode');
     }
   };
@@ -32,10 +46,29 @@ function MaintenanceMode() {
       </h2>
 
       <p className="text-gray-600 mb-4">
-        When enabled, all users except the developer will see the maintenance page alone.
+        Choose who will see the maintenance page when it is enabled.
       </p>
 
       <div className="flex flex-col sm:flex-row sm:items-end sm:gap-4 mb-1">
+        <div className="flex-1 mb-2 sm:mb-0">
+          <label
+            htmlFor="maintenanceAccess"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Maintenance Mode:
+          </label>
+          <select
+            id="maintenanceAccess"
+            value={localMaintenanceAccess}
+            onChange={(e) => setLocalMaintenanceAccess(e.target.value)}
+            className="mt-0.5 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+          >
+            <option value="everyone">Everyone</option>
+            <option value="exceptFinanciers">Except Financiers</option>
+            <option value="exceptAdminsFinanciers">Except Admins &amp; Financiers</option>
+          </select>
+        </div>
+
         <div className="flex-1 mb-2 sm:mb-0">
           <label
             htmlFor="expectedBackAt"
