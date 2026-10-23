@@ -5,13 +5,13 @@ import 'leaflet/dist/leaflet.css';
 export const GANGAVARAM_CENTER = [15.809177, 80.164013];
 export const STREET_COORDINATES = {
   'Panchayat Street': GANGAVARAM_CENTER,
-  'Bodrai Bazar': GANGAVARAM_CENTER,
-  'Valeti Bazar': GANGAVARAM_CENTER,
-  'Jagrlamudi Bazar': GANGAVARAM_CENTER,
+  'Bodrai Street': GANGAVARAM_CENTER,
+  'Valeti Street': GANGAVARAM_CENTER,
+  'Jagrlamudi Street': GANGAVARAM_CENTER,
   'Shivalayam Street': GANGAVARAM_CENTER,
   Center: GANGAVARAM_CENTER,
   Patimeedha: GANGAVARAM_CENTER,
-  'Malluchama Bazar': GANGAVARAM_CENTER,
+  'Malluchamma Street': GANGAVARAM_CENTER,
   Others: GANGAVARAM_CENTER
 };
 

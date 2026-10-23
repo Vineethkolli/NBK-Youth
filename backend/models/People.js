@@ -10,8 +10,8 @@ const peopleSchema = new mongoose.Schema({
   street: {
     type: String,
     enum: [
-      'Panchayat Street', 'Bodrai Bazar', 'Valeti Bazar', 'Jagrlamudi Bazar',
-      'Shivalayam Street', 'Center', 'Patimeedha', 'Malluchama Bazar', 'Others'
+      'Panchayat Street', 'Bodrai Street', 'Library Street', 'Jagrlamudi Street',
+      'Shivalayam Street', 'Center', 'Patimeedha', 'Malluchamma Street', 'Others'
     ],
     required: true
   },
