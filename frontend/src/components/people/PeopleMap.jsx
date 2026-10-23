@@ -129,7 +129,27 @@ export function PeopleMap({ people = [], onSelect, selectedLocation, picker = fa
       {people.map((person) => person.location?.lat && person.location?.lng && (
         <Marker key={person._id || person.pid} position={[person.location.lat, person.location.lng]} icon={markerIcon(person.category)}>
           <Tooltip permanent direction="top" offset={[0, -26]}>{person.name}</Tooltip>
-          <Popup><strong>{person.name}</strong><br />{person.category} · {person.street}</Popup>
+         <Popup>
+  <strong>{person.name}</strong>
+  <br />
+  <span className="text-sm text-gray-600">
+    {person.category} · {person.street}
+  </span>
+  <br />
+  {Number.isFinite(Number(person.location?.lat)) &&
+    Number.isFinite(Number(person.location?.lng)) && (
+      <a
+        href={`https://www.google.com/maps/dir/?api=1&destination=${person.location.lat},${person.location.lng}&travelmode=driving`}
+        target="_blank"
+        rel="noopener noreferrer"
+        title="Navigate with Google Maps"
+        className="mt-1 inline-flex items-center text-blue-600 hover:text-blue-800"
+      >
+        <Navigation className="h-4 w-4" />
+        <span className="ml-1 text-sm">Navigate</span>
+      </a>
+    )}
+</Popup>
         </Marker>
       ))}
       {selected && <Marker position={selected} icon={markerIcon('Youth', true)} />}
