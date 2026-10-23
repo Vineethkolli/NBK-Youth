@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, LayersControl, Marker, Popup, Tooltip, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import { Navigation } from 'lucide-react';
@@ -8,13 +8,13 @@ import 'leaflet/dist/leaflet.css';
 export const GANGAVARAM_CENTER = [15.809177, 80.164013];
 export const STREET_COORDINATES = {
   'Panchayat Street': GANGAVARAM_CENTER,
-  'Bodrai Street': GANGAVARAM_CENTER,
-  'Valeti Street': GANGAVARAM_CENTER,
-  'Jagrlamudi Street': GANGAVARAM_CENTER,
-  'Shivalayam Street': GANGAVARAM_CENTER,
-  Center: GANGAVARAM_CENTER,
-  Patimeedha: GANGAVARAM_CENTER,
-  'Malluchamma Street': GANGAVARAM_CENTER,
+  'Bodrai Street': [15.808610, 80.164417],
+  'Library Street': [15.809312, 80.164720],
+  'Jagrlamudi Street': [15.809572, 80.165037],
+  'Shivalayam Street': [15.809002, 80.165010],
+  Center: [15.808349, 80.164433],
+  Patimeedha: [15.807454, 80.163664],
+  'Malluchamma Street': [15.807201, 80.164490],
   Others: GANGAVARAM_CENTER
 };
 
@@ -38,6 +38,16 @@ function LocationPicker({ onSelect }) {
       onSelect({ lat: Number(event.latlng.lat.toFixed(6)), lng: Number(event.latlng.lng.toFixed(6)) });
     }
   });
+  return null;
+}
+
+function MapCenterSync({ center }) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (center) map.flyTo(center, map.getZoom());
+  }, [center, map]);
+
   return null;
 }
 
@@ -87,24 +97,25 @@ function CurrentLocationControl({ onLocationFound, isLocating, setIsLocating }) 
   );
 }
 
-export function PeopleMap({ people = [], onSelect, selectedLocation, picker = false }) {
+export function PeopleMap({ people = [], onSelect, selectedLocation, picker = false, center = GANGAVARAM_CENTER }) {
   const [currentLocation, setCurrentLocation] = useState(null);
   const [isLocating, setIsLocating] = useState(false);
   const selected = selectedLocation ? [selectedLocation.lat, selectedLocation.lng] : null;
 
   return (
-    <MapContainer center={selected || GANGAVARAM_CENTER} zoom={19} maxZoom={22} className="h-full w-full">
+    <MapContainer center={selected || center} zoom={19} maxZoom={22} className="h-full w-full">
       <LayersControl position="topright">
         <LayersControl.BaseLayer checked name="Google Hybrid Satellite">
-          <TileLayer url="https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}" maxZoom={22} />
+          <TileLayer url="https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}" crossOrigin="anonymous" maxZoom={22} />
         </LayersControl.BaseLayer>
         <LayersControl.BaseLayer name="Google Satellite Pure">
-          <TileLayer url="https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}" maxZoom={22} />
+          <TileLayer url="https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}" crossOrigin="anonymous" maxZoom={22} />
         </LayersControl.BaseLayer>
         <LayersControl.BaseLayer name="Esri World Imagery">
-          <TileLayer url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}" maxZoom={22} maxNativeZoom={18} />
+          <TileLayer url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}" crossOrigin="anonymous" maxZoom={22} maxNativeZoom={18} />
         </LayersControl.BaseLayer>
       </LayersControl>
+      {!selected && <MapCenterSync center={center} />}
       <div className="leaflet-bottom leaflet-right">
         <div className="leaflet-control">
           <CurrentLocationControl

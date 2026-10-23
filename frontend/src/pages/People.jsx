@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Columns, ChevronDown, ChevronRight, Edit2, Filter, MapPinned, Plus, Search, Trash2, X } from 'lucide-react';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import { API_URL } from '../utils/config';
-import PeopleMap, { STREET_COORDINATES } from '../components/people/PeopleMap';
+import PeopleMap, { GANGAVARAM_CENTER, STREET_COORDINATES } from '../components/people/PeopleMap';
 import PeopleForm from '../components/people/PeopleForm';
 import PeopleEnglishPrint from '../components/people/PeopleEnglishPrint';
 import PeopleTeluguPrint from '../components/people/PeopleTeluguPrint';
@@ -34,6 +34,8 @@ function People() {
   const [panel, setPanel] = useState(null);
   const [showMap, setShowMap] = useState(false);
   const [mapFilters, setMapFilters] = useState({ category: '', street: '' });
+  const [mapSearch, setMapSearch] = useState('');
+  const mapElementRef = useRef(null);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState(null);
   const { language } = useLanguage();
@@ -55,6 +57,22 @@ function People() {
     (!mapFilters.category || person.category === mapFilters.category) &&
     (!mapFilters.street || person.street === mapFilters.street)
   ), [mapFilters, mapPeople]);
+  const searchableMapPeople = useMemo(() => {
+    const query = mapSearch.trim().toLowerCase();
+    if (!query) return filteredMapPeople;
+    return filteredMapPeople.filter((person) =>
+      [person.name, person.street].some((value) => value?.toLowerCase().includes(query))
+    );
+  }, [filteredMapPeople, mapSearch]);
+  const mapCenter = useMemo(() => {
+    const query = mapSearch.trim().toLowerCase();
+    if (query && searchableMapPeople[0]?.location) {
+      return [searchableMapPeople[0].location.lat, searchableMapPeople[0].location.lng];
+    }
+
+    const matchingStreet = STREETS.find((streetName) => streetName.toLowerCase().includes(query));
+    return STREET_COORDINATES[matchingStreet] || (mapFilters.street ? STREET_COORDINATES[mapFilters.street] : GANGAVARAM_CENTER);
+  }, [mapFilters.street, mapSearch, searchableMapPeople]);
   const openAdd = () => { setEditing(null); setShowForm(true); };
   const openEdit = (person) => {
     setEditing(person);
@@ -103,7 +121,7 @@ function People() {
       <div className="rounded-lg bg-white shadow"><div className="overflow-x-auto"><table className="min-w-full divide-y divide-gray-200"><thead className="bg-gray-50"><tr><th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">S.No</th>{columns.pid && <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">PID</th>}{columns.name && <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">Name</th>}{columns.category && <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">Category</th>}{columns.email && <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">Email</th>}{columns.phone && <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">Phone</th>}{columns.street && <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">Street</th>}{columns.location && <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">Location</th>}{hasAccess('Pro') && <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">Actions</th>}</tr></thead><tbody className="divide-y divide-gray-200">{people.map((person, index) => <tr key={person._id}><td className="whitespace-nowrap px-6 py-4 text-sm">{index + 1}</td>{columns.pid && <td className="whitespace-nowrap px-6 py-4 text-sm">{person.pid}</td>}{columns.name && <td className="whitespace-nowrap px-6 py-4 text-sm">{person.name}</td>}{columns.category && <td className="whitespace-nowrap px-6 py-4 text-sm">{person.category}</td>}{columns.email && <td className="whitespace-nowrap px-6 py-4 text-sm">{person.email || '-'}</td>}{columns.phone && <td className="whitespace-nowrap px-6 py-4 text-sm">{person.phone || '-'}</td>}{columns.street && <td className="whitespace-nowrap px-6 py-4 text-sm">{person.street}</td>}{columns.location && <td className="whitespace-nowrap px-6 py-4 text-sm">{person.location ? `${person.location.lat.toFixed(5)}, ${person.location.lng.toFixed(5)}` : '-'}</td>}{hasAccess('Pro') && <td className="flex gap-3 px-6 py-4"><button onClick={() => openEdit(person)} title="Edit"><Edit2 className="h-4 w-4 text-indigo-600" /></button><button onClick={() => handleDelete(person)} title="Delete"><Trash2 className="h-4 w-4 text-red-600" /></button></td>}</tr>)}</tbody></table>{people.length === 0 && <p className="py-4 text-center text-gray-500">No people found</p>}</div></div>
 
       {showForm && <PeopleForm person={editing} initialForm={initialForm} streets={STREETS} streetCoordinates={STREET_COORDINATES} onClose={() => { setShowForm(false); setEditing(null); }} onSuccess={() => { setShowForm(false); setEditing(null); fetchPeople(); }} />}
-      {showMap && <div className="fixed inset-0 z-50 bg-black/60 p-3 sm:p-8"><div className="relative flex h-full w-full flex-col overflow-hidden rounded-lg bg-white"><div className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b bg-white px-4 py-3"><div className="flex items-center gap-3"><h2 className="text-lg font-semibold">People Map</h2><select value={mapFilters.category} onChange={(event) => setMapFilters({ ...mapFilters, category: event.target.value })} className="rounded-md border p-1 text-sm"><option value="">Category</option><option>Youth</option><option>Villager</option></select><select value={mapFilters.street} onChange={(event) => setMapFilters({ ...mapFilters, street: event.target.value })} className="rounded-md border p-1 text-sm"><option value="">Street</option>{STREETS.map((mapStreet) => <option key={mapStreet}>{mapStreet}</option>)}</select><PeopleMapPrint people={filteredMapPeople} /></div><button onClick={() => setShowMap(false)} className="rounded-full p-2 text-gray-600 hover:bg-gray-100 hover:text-gray-900" aria-label="Close map"><X className="h-6 w-6" /></button></div><div className="min-h-0 flex-1"><PeopleMap people={filteredMapPeople} /></div></div></div>}
+      {showMap && <div className="fixed inset-0 z-50 bg-black/60 p-3 sm:p-8"><div className="relative flex h-full w-full flex-col overflow-hidden rounded-lg bg-white"><div className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b bg-white px-4 py-3"><div className="flex items-center gap-3"><h2 className="text-lg font-semibold">People Map</h2><select value={mapFilters.category} onChange={(event) => setMapFilters({ ...mapFilters, category: event.target.value })} className="rounded-md border p-1 text-sm"><option value="">Category</option><option>Youth</option><option>Villager</option></select><select value={mapFilters.street} onChange={(event) => setMapFilters({ ...mapFilters, street: event.target.value })} className="rounded-md border p-1 text-sm"><option value="">Street</option>{STREETS.map((mapStreet) => <option key={mapStreet}>{mapStreet}</option>)}</select><PeopleMapPrint people={filteredMapPeople} onSearchChange={setMapSearch} mapElementRef={mapElementRef} /></div><button onClick={() => setShowMap(false)} className="rounded-full p-2 text-gray-600 hover:bg-gray-100 hover:text-gray-900" aria-label="Close map"><X className="h-6 w-6" /></button></div><div ref={mapElementRef} className="min-h-0 flex-1"><PeopleMap people={searchableMapPeople} center={mapCenter} /></div></div></div>}
     </div>
   );
 }
