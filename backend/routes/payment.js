@@ -7,7 +7,7 @@ const router = express.Router();
 router.get('/', PaymentController.getAllPayments);
 router.get('/:paymentId', PaymentController.getPaymentById);
 
-router.get('/verification/data', auth, checkRole('Pro'), PaymentController.getVerificationData);
+router.get('/verification/data', auth, checkRole('Privileged'), PaymentController.getVerificationData);
 
 router.post('/', PaymentController.createPayment);
 

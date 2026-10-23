@@ -11,7 +11,7 @@ import { IndianRupee, DollarSign, ShieldCheck, Filter } from 'lucide-react';
 
 function Verification() {
   const { hasAccess, user } = useAuth();
-  if (!hasAccess('Pro')) 
+  if (!hasAccess('Privileged'))
     return <div className="text-center mt-10 text-red-500 font-semibold">Access denied</div>;
 
   const { lockSettings } = useLockSettings();
@@ -129,6 +129,7 @@ function Verification() {
           }
           type={activeTab}
           onVerifyLogUpdate={handleVerifyLogUpdate}
+          canManageActions={hasAccess('Pro')}
           isLocked={lockSettings.isLocked}
         />
       </div>

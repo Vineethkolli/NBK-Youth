@@ -17,9 +17,9 @@ function Sidebar({ isOpen, isCollapsed = false, onNavigate }) {
   { to: '/income', icon: IndianRupee, label: 'Income' },
   { to: '/expense', icon: DollarSign, label: 'Expense' },
   { to: '/estimation', icon: Calculator, label: 'Estimation' },
+  { to: '/people', icon: ContactRound, label: 'People' },
   { to: '/histories', icon: History, label: 'Histories' },
   { to: '/records', icon: FolderOpen, label: 'Records' },
-  { to: '/people', icon: ContactRound, label: 'People' },
   { to: '/profile', icon: User, label: 'Profile' },
   { to: '/pay-online', icon: ShieldCheck, label: 'Pay Online' },
   { to: '/notifications', icon: Bell, label: 'Notifications' },
@@ -29,7 +29,7 @@ function Sidebar({ isOpen, isCollapsed = false, onNavigate }) {
   { to: '/tech-stack', icon: Layers, label: 'Tech Stack' },
   { to: '/my-village', icon: Tractor, label: 'My Village' },
   
-  ...(hasAccess('Pro') ? [
+  ...(hasAccess('Privileged') ? [
     { to: '/verification', icon: CheckSquare, label: 'Verification' },
     { to: '/recycle-bin', icon: Trash2, label: 'Recycle Bin' },
   ] : []),

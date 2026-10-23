@@ -12,6 +12,9 @@ const accessControl = {
     'Income': { full: ['Financier'], view: ['User', 'Admin'] },
     'Expense': { full: ['Financier'], view: ['User', 'Admin'] },
     'Estimation': { full: ['Financier'], view: ['User', 'Admin'] },
+    'Verification': { full: ['Financier'], view: ['Admin'] },
+    'RecycleBin': { full: ['Financier'], view: ['Admin'] },
+    'People': { full: ['Financier'], view: ['User', 'Admin'] },
     'Histories': { full: [], view: ['User','Admin', 'Financier'] },
     'Records': { full: [], view: ['User', 'Admin', 'Financier'] },
     'Profile': { full: ['User', 'Admin', 'Financier'], view: [] },
@@ -22,9 +25,7 @@ const accessControl = {
     'Tools': { full: ['User', 'Admin','Financier'], view: [] },
     'TechStack': { full: [], view: ['User','Admin', 'Financier'] },
     'MyVillage': { full: [], view: ['User','Admin', 'Financier'] },
-    'Verification': { full: ['Financier'], view: [] },
-    'RecycleBin': { full: ['Financier'], view: [] },
-    'Users & Roles': { full: [], view: ['Admin','Financier'] },
+    'Users & Roles': { full: [], partial: ['Admin','Financier'] },
     'AdminPanel': { full: ['Admin','Financier'], view: [] },
     'Mailer': { full: ['Admin','Financier'], view: [] },
     'My Files': { full: ['Admin','Financier'], view: [] },
@@ -38,8 +39,10 @@ const accessControl = {
 const roles = ['User', 'Admin', 'Financier'];
 
 function getPermission(perms, role) {
-  if (perms.full.includes(role)) return 'Full';
-  if (perms.view.includes(role)) return 'View';
+  if (!perms) return null;
+  if ((perms.full ?? []).includes(role)) return 'Full';
+  if ((perms.view ?? []).includes(role)) return 'View';
+  if ((perms.partial ?? []).includes(role)) return 'Partial';
   return null;
 }
 
@@ -47,6 +50,7 @@ function permColor(perm) {
   switch (perm) {
     case 'View': return 'text-blue-500';
     case 'Full': return 'text-green-500';
+    case 'Partial': return 'text-yellow-500';
     default: return 'text-gray-400';
   }
 }

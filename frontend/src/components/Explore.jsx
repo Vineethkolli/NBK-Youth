@@ -30,7 +30,7 @@ function Explore() {
         { to: "/income", icon: IndianRupee, label: "Income" },
         { to: "/expense", icon: DollarSign, label: "Expense" },
         { to: "/estimation", icon: Calculator, label: "Estimation" },
-        ...(hasAccess("Pro")
+        ...(hasAccess("Privileged")
           ? [
               { to: "/verification", icon: CheckSquare, label: "Verification" },
               { to: "/recycle-bin", icon: Trash2, label: "Recycle Bin" },
@@ -42,9 +42,9 @@ function Explore() {
       title: "Records",
       icon: Library,
       pages: [
+        { to: "/people", icon: ContactRound, label: "People" },
         { to: "/histories", icon: History, label: "Histories" },
         { to: "/records", icon: FolderOpen, label: "Records" },
-        { to: "/people", icon: ContactRound, label: "People" },
       ],
     },
     {

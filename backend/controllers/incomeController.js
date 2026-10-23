@@ -176,6 +176,11 @@ export const incomeController = {
   updateVerificationStatus: async (req, res) => {
     try {
       const { verifyLog, registerId } = req.body;
+      const allowedStatuses = ['verified', 'not verified', 'rejected'];
+
+      if (!allowedStatuses.includes(verifyLog)) {
+        return res.status(400).json({ message: 'Invalid verification status' });
+      }
 
       const income = await Income.findById(req.params.id);
       if (!income) {
@@ -183,23 +188,29 @@ export const incomeController = {
       }
 
       const originalData = income.toObject();
+      const updateData = {
+        verifyLog,
+      };
 
       if (verifyLog === 'rejected') {
-        income.isDeleted = true;
-        income.deletedAt = new Date();
-        income.deletedBy = registerId;
+        updateData.isDeleted = true;
+        updateData.deletedAt = new Date();
+        updateData.deletedBy = req.user?.registerId || registerId;
       }
 
-      income.verifyLog = verifyLog;
-      await income.save();
+      const updatedIncome = await Income.findByIdAndUpdate(
+        req.params.id,
+        { $set: updateData },
+        { new: true, runValidators: true }
+      );
 
       await logActivity(
         req,
         'VERIFY',
         'Income',
-        income.incomeId,
-        { before: originalData, after: income.toObject() },
-        `Income ${income.incomeId} verification status changed to ${verifyLog} by ${registerId}`
+        updatedIncome.incomeId,
+        { before: originalData, after: updatedIncome.toObject() },
+        `Income ${updatedIncome.incomeId} verification status changed to ${verifyLog} by ${req.user?.registerId || registerId}`
       );
 
       res.json({ message: 'Verification status updated successfully' });

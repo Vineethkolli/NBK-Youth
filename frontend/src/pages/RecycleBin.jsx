@@ -11,6 +11,7 @@ import { useLockSettings } from '../context/LockContext';
 
 function RecycleBin() {
   const { hasAccess } = useAuth();
+  const canManageActions = hasAccess('Pro');
   const { lockSettings } = useLockSettings();
   const [deletedIncomes, setDeletedIncomes] = useState([]);
   const [deletedExpenses, setDeletedExpenses] = useState([]);
@@ -21,7 +22,7 @@ function RecycleBin() {
 
   const [activeBin, setActiveBin] = useState('income'); 
   
-  if (!hasAccess('Pro'))  {
+  if (!hasAccess('Privileged'))  {
     return <div className="text-center mt-10 text-red-500 font-semibold">Access denied</div>;
   }
 
@@ -156,7 +157,9 @@ const handlePermanentDeleteExpense = async (id) => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Verify Log</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Deleted At</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                {canManageActions && (
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                )}
               </tr>
             </thead>
 
@@ -189,7 +192,7 @@ const handlePermanentDeleteExpense = async (id) => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm">{item.category}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">{item.verifyLog}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">{formatDateTime(item.deletedAt)}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    {canManageActions && <td className="px-6 py-4 whitespace-nowrap text-sm">
                       <div
                         className={`flex space-x-3 ${
                           lockSettings.isLocked ? 'opacity-50 pointer-events-none' : ''
@@ -217,7 +220,7 @@ const handlePermanentDeleteExpense = async (id) => {
   {loadingDeleteIncomeId === item._id ? <Loader2 className="h-5 w-5 animate-spin" /> : <Trash2 className="h-5 w-5" />}
 </button>
                       </div>
-                    </td>
+                    </td>}
                   </tr>
                 );
               })}
@@ -243,7 +246,9 @@ const handlePermanentDeleteExpense = async (id) => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Bill Image</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Verify Log</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Deleted At</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                {canManageActions && (
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                )}
               </tr>
             </thead>
 
@@ -275,7 +280,7 @@ const handlePermanentDeleteExpense = async (id) => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">{item.verifyLog}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">{formatDateTime(item.deletedAt)}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    {canManageActions && <td className="px-6 py-4 whitespace-nowrap text-sm">
                       <div
                         className={`flex space-x-3 ${
                           lockSettings.isLocked ? 'opacity-50 pointer-events-none' : ''
@@ -303,7 +308,7 @@ const handlePermanentDeleteExpense = async (id) => {
   {loadingDeleteExpenseId === item._id ? <Loader2 className="h-5 w-5 animate-spin" /> : <Trash2 className="h-5 w-5" />}
 </button>
                       </div>
-                    </td>
+                    </td>}
                   </tr>
                 );
               })}

@@ -4,7 +4,7 @@ import { FaWhatsapp } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
 import { formatDateTime } from '../../utils/dateTime';
 
-function VerificationTable({ data, type, onVerifyLogUpdate, isLocked = false }) {
+function VerificationTable({ data, type, onVerifyLogUpdate, canManageActions = false, isLocked = false }) {
   // loadingAction: { id: string|null, type: 'verify'|'notVerified'|'reject'|'save'|null }
   const [loadingAction, setLoadingAction] = useState({ id: null, type: null });
 
@@ -174,7 +174,9 @@ function VerificationTable({ data, type, onVerifyLogUpdate, isLocked = false }) 
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Created At</th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Verify Log</th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+          {canManageActions && (
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+          )}
         </tr>
       );
     } else if (type === 'expense') {
@@ -190,7 +192,9 @@ function VerificationTable({ data, type, onVerifyLogUpdate, isLocked = false }) 
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Phone</th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Created At</th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Verify Log</th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+          {canManageActions && (
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+          )}
         </tr>
       );
     } else {
@@ -206,7 +210,9 @@ function VerificationTable({ data, type, onVerifyLogUpdate, isLocked = false }) 
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Transaction Status</th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Created At</th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Verify Log</th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+          {canManageActions && (
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+          )}
         </tr>
       );
     }
@@ -238,7 +244,7 @@ function VerificationTable({ data, type, onVerifyLogUpdate, isLocked = false }) 
                     >
                       {item.verifyLog}
                     </span>
-                    {type === 'payment' &&
+                    {canManageActions && type === 'payment' &&
                       (item.verifyLog === 'verified' || item.verifyLog === 'rejected') && (
                         <button
                           onClick={() => sendWhatsAppMessage(item)}
@@ -252,7 +258,7 @@ function VerificationTable({ data, type, onVerifyLogUpdate, isLocked = false }) 
                       )}
                   </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                {canManageActions && <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex space-x-2">
                     <button
                       onClick={() =>
@@ -296,7 +302,7 @@ function VerificationTable({ data, type, onVerifyLogUpdate, isLocked = false }) 
                       )}
                     </button>
                   </div>
-                </td>
+                </td>}
               </tr>
             );
           })}
