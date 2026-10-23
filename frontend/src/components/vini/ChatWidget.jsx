@@ -20,7 +20,6 @@ function ChatWidget({ isOpen, setIsOpen }) {
     if (user?.registerId) {
       fetchChatHistory();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   useEffect(() => {

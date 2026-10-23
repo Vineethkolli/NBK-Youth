@@ -42,7 +42,6 @@ function ActivityLogs() {
     } else if (activeTab === 'stats') {
       fetchStats();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab, search, filters, pagination.currentPage]);
 
   const fetchLogs = async () => {

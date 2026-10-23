@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/set-state-in-effect */
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Columns, ChevronDown, ChevronRight, Edit2, Filter, MapPinned, Plus, Search, Trash2, X } from 'lucide-react';
 import axios from 'axios';

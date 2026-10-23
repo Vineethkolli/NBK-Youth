@@ -1,4 +1,3 @@
-/* eslint-disable react/prop-types */
 import { MapContainer, TileLayer, LayersControl, Marker, Popup, Tooltip, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';

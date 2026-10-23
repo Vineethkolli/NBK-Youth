@@ -1,5 +1,6 @@
-import { Menu, User, LayoutGrid, Bell } from 'lucide-react';
+import { Menu, User, LayoutGrid } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import GlobalSearch from './common/GlobalSearch';
 
 function Header({ toggleSidebar }) {
   const navigate = useNavigate();
@@ -35,14 +36,8 @@ function Header({ toggleSidebar }) {
         </div>
 
          <div className="flex items-center space-x-2">
-          <button
-            onClick={() => navigate('/notifications')}
-            className="p-2 hover:bg-gray-100 rounded-full"
-            aria-label="Notifications"
-          >
-            <Bell className="h-6 w-6" />
-          </button>
-
+          <GlobalSearch />  
+          
           <button
             onClick={() => navigate('/profile')}
             className="p-2 hover:bg-gray-100 rounded-full"
