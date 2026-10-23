@@ -31,6 +31,21 @@ body {
   transform: rotate(-45deg);
 }
 
+.people-map-current-location {
+  background: transparent;
+  border: 0;
+}
+
+.people-map-current-location span {
+  display: block;
+  width: 18px;
+  height: 18px;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  background: #2563eb;
+  box-shadow: 0 0 0 6px rgb(37 99 235 / 25%), 0 2px 5px rgb(0 0 0 / 45%);
+}
+
 /* Hide Google Translate Tooltip */
 .goog-tooltip {
     display: none !important;
