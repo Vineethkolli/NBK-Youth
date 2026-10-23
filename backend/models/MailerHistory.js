@@ -32,16 +32,24 @@ const mailerHistorySchema = new mongoose.Schema(
     scheduleId: { type: mongoose.Schema.Types.ObjectId, ref: 'MailerSchedule', default: null },
     status: {
       type: String,
-      enum: ['pending', 'completed', 'failed'],
+      enum: ['pending', 'sending', 'completed', 'failed'],
       default: 'pending'
     },
     source: {
       type: String,
-      enum: ['immediate', 'scheduled'],
+      enum: ['immediate', 'scheduled', 'birthday'],
       default: 'immediate'
-    }
+    },
+    memberRegisterId: { type: String, default: null },
+    birthdayYear: { type: Number, default: null },
+    birthdayKey: { type: String, default: null }
   },
   { timestamps: true }
+);
+
+mailerHistorySchema.index(
+  { birthdayKey: 1 },
+  { unique: true, partialFilterExpression: { source: 'birthday', birthdayKey: { $type: 'string' } } }
 );
 
 export default mongoose.model('MailerHistory', mailerHistorySchema);

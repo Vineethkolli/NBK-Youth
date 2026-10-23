@@ -1,11 +1,11 @@
 import Agenda from 'agenda';
-import { DateTime } from 'luxon';
 import mongoose from 'mongoose';
 import MailerSchedule from '../models/MailerSchedule.js';
 import MailerHistory from '../models/MailerHistory.js';
 import ActivityLog from '../models/ActivityLog.js';
 import User from '../models/User.js';
 import { sendEmailsSequential } from './mailerService.js';
+import { sendBirthdayEmails } from './birthdayEmail.js';
 
 let agendaInstance = null;
 
@@ -141,6 +141,9 @@ const defineJobs = (agenda) => {
     });
   });
 
+  agenda.define('send-birthday-emails', { concurrency: 1, lockLifetime: 60 * 60 * 1000 }, async () => {
+    await sendBirthdayEmails();
+  });
 };
 
 export const startAgenda = async () => {
@@ -154,6 +157,18 @@ export const startAgenda = async () => {
   defineJobs(agendaInstance);
 
   await agendaInstance.start();
+  await agendaInstance.every(
+    '0 0 * * *',
+    'send-birthday-emails',
+    {},
+    { timezone: 'Asia/Kolkata' }
+  );
+
+  try {
+    await sendBirthdayEmails();
+  } catch (error) {
+    console.error('Birthday email catch-up failed during Agenda startup:', error.message);
+  }
 
   return agendaInstance;
 };
