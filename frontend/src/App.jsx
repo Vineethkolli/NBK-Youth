@@ -21,6 +21,7 @@ import PayOnline from './pages/PayOnline';
 import Settings from './pages/Settings';
 import Stats from './pages/Stats';
 import Income from './pages/Income';
+import People from './pages/People';
 import Expense from './pages/Expense';
 import Estimation from './pages/Estimation';
 import Verification from './pages/Verification';
@@ -104,6 +105,7 @@ function AppContent() {
           <Route path="/pay-online" element={<PayOnline />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/income" element={<Income />} />
+          <Route path="/people" element={<People />} />
           <Route path="/expense" element={<Expense />} />
           <Route path="/estimation" element={<Estimation />} />
           <Route path="/verification" element={<Verification />} />

@@ -102,7 +102,7 @@ export const activityLogController = {
         ActivityLog.aggregate([
           {
             $match: {
-              entityType: { $in: ['Income', 'Expense', 'EstimatedIncome', 'EstimatedExpense'] },
+              entityType: { $in: ['Income', 'Expense', 'People', 'EstimatedIncome', 'EstimatedExpense'] },
               registerId: { $exists: true, $ne: null, $ne: '' }
             }
           },

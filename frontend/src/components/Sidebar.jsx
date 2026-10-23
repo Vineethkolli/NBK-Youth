@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Home, User, History, FolderOpen, UserCog, Users, Bell, ShieldCheck, Settings, IndianRupee, DollarSign,
   Trash2, CheckSquare, BarChart2, Terminal, MusicIcon, CameraIcon, TrophyIcon, X, ChevronLeft, Calculator, 
-  Layers, LayoutDashboard, FileClock, Cpu, Fingerprint, ToolCase, MailCheck, Tractor, Files, BookMarked } from 'lucide-react';
+  Layers, LayoutDashboard, FileClock, Cpu, Fingerprint, ToolCase, MailCheck, Tractor, Files, BookMarked, ContactRound } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 function Sidebar({ isOpen, isCollapsed = false, onNavigate }) {
@@ -19,6 +19,7 @@ function Sidebar({ isOpen, isCollapsed = false, onNavigate }) {
   { to: '/estimation', icon: Calculator, label: 'Estimation' },
   { to: '/histories', icon: History, label: 'Histories' },
   { to: '/records', icon: FolderOpen, label: 'Records' },
+  { to: '/people', icon: ContactRound, label: 'People' },
   { to: '/profile', icon: User, label: 'Profile' },
   { to: '/pay-online', icon: ShieldCheck, label: 'Pay Online' },
   { to: '/notifications', icon: Bell, label: 'Notifications' },
@@ -67,7 +68,7 @@ function Sidebar({ isOpen, isCollapsed = false, onNavigate }) {
         <nav className={`flex-1 ${isCollapsed ? 'px-2' : 'px-2'} py-4 space-y-1`}>
           {links.map((link, index) => {
             const Icon = link.icon;
-            const isSeparator = [3, 7, 9, 13, 17, 19, 23].includes(index); 
+            const isSeparator = [3, 7, 10, 14, 18, 20, 24].includes(index); 
             return (
               <div key={link.to}>
                 <Link

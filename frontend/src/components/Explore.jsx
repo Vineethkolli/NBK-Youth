@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
 import { Home, User, History, FolderOpen, UserCog, Users, Bell, ShieldCheck, Settings, IndianRupee, DollarSign,
   Trash2, CheckSquare, BarChart2, Terminal, MusicIcon, CameraIcon, TrophyIcon, Calculator, Layers, LayoutDashboard,
-  FileClock, Cpu, Globe2, CreditCard, LockKeyhole, Code2, Fingerprint, ToolCase, MailCheck, Tractor, Files,
-  BookMarked } from "lucide-react";
+  FileClock, Cpu, Globe2, CreditCard, LockKeyhole, Code2, Fingerprint, ToolCase, MailCheck, Tractor, Files, ContactRound,
+  BookMarked, Library } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import Footer from "./Footer";
 
@@ -30,8 +30,21 @@ function Explore() {
         { to: "/income", icon: IndianRupee, label: "Income" },
         { to: "/expense", icon: DollarSign, label: "Expense" },
         { to: "/estimation", icon: Calculator, label: "Estimation" },
+        ...(hasAccess("Pro")
+          ? [
+              { to: "/verification", icon: CheckSquare, label: "Verification" },
+              { to: "/recycle-bin", icon: Trash2, label: "Recycle Bin" },
+            ]
+          : []),
+      ],
+    },
+    {
+      title: "Records",
+      icon: Library,
+      pages: [
         { to: "/histories", icon: History, label: "Histories" },
         { to: "/records", icon: FolderOpen, label: "Records" },
+        { to: "/people", icon: ContactRound, label: "People" },
       ],
     },
     {
@@ -58,12 +71,7 @@ function Explore() {
               { to: "/my-files", icon: Files, label: "My Files" },
             ]
           : []),
-        ...(hasAccess("Pro")
-          ? [
-              { to: "/verification", icon: CheckSquare, label: "Verification" },
-              { to: "/recycle-bin", icon: Trash2, label: "Recycle Bin" },
-            ]
-          : []),
+
       ],
     },
     {

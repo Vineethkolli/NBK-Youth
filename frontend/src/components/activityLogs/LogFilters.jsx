@@ -107,6 +107,7 @@ function LogFilters({ filters, onChange }) {
         <option value="User">User</option>
         <option value="Income">Income</option>
         <option value="Expense">Expense</option>
+        <option value="People">People</option>
         <option value="Email">Email</option>
         <option value="Mobile">Mobile</option>
         <option value="EstimatedIncome">Estimated Income</option>
