@@ -16,6 +16,24 @@ body {
     position: static !important;
 }
 
+/* Hide Google Translate Tooltip */
+.goog-tooltip {
+    display: none !important;
+}
+.goog-tooltip:hover {
+    display: none !important;
+}
+.goog-text-highlight {
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+#google_translate_element {
+    display: none !important;
+}
+
+
 .people-map-marker {
   background: transparent;
   border: 0;
@@ -46,19 +64,12 @@ body {
   box-shadow: 0 0 0 6px rgb(37 99 235 / 25%), 0 2px 5px rgb(0 0 0 / 45%);
 }
 
-/* Hide Google Translate Tooltip */
-.goog-tooltip {
-    display: none !important;
-}
-.goog-tooltip:hover {
-    display: none !important;
-}
-.goog-text-highlight {
-    background-color: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
+.leaflet-container {
+  z-index: 0;
 }
 
-#google_translate_element {
-    display: none !important;
+.leaflet-pane,
+.leaflet-top,
+.leaflet-bottom {
+  z-index: 1;
 }
