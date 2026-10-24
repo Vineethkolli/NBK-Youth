@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, LayersControl, Marker, Popup, Tooltip, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
-import { Compass, Navigation } from 'lucide-react';
+import { Navigation } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import 'leaflet/dist/leaflet.css';
 
@@ -97,85 +97,13 @@ function CurrentLocationControl({ onLocationFound, isLocating, setIsLocating }) 
   );
 }
 
-function OrientationControl({ heading, setHeading }) {
-  const [isEnabled, setIsEnabled] = useState(false);
-
-  useEffect(() => {
-    const OrientationEvent = window.DeviceOrientationEvent;
-    if (!OrientationEvent || typeof OrientationEvent.requestPermission === 'function') return undefined;
-    setIsEnabled(true);
-  }, []);
-
-  useEffect(() => {
-    if (!isEnabled) return undefined;
-
-    const handleOrientation = (event) => {
-      const nextHeading = Number.isFinite(event.webkitCompassHeading)
-        ? event.webkitCompassHeading
-        : Number.isFinite(event.alpha)
-          ? (360 - event.alpha) % 360
-          : null;
-      if (nextHeading !== null) setHeading(nextHeading);
-    };
-
-    window.addEventListener('deviceorientation', handleOrientation, true);
-    return () => window.removeEventListener('deviceorientation', handleOrientation, true);
-  }, [isEnabled, setHeading]);
-
-  const handleEnable = async (event) => {
-    event.stopPropagation();
-    const OrientationEvent = window.DeviceOrientationEvent;
-    if (!OrientationEvent) {
-      toast.error('Compass is not supported by this browser');
-      return;
-    }
-
-    try {
-      if (typeof OrientationEvent.requestPermission === 'function') {
-        const permission = await OrientationEvent.requestPermission();
-        if (permission !== 'granted') {
-          toast.error('Motion permission was denied');
-          return;
-        }
-      }
-      setIsEnabled(true);
-    } catch {
-      toast.error('Unable to enable compass mode');
-    }
-  };
-
-  return (
-    <button
-      type="button"
-      onClick={handleEnable}
-      className={`leaflet-control rounded-md border border-gray-300 bg-white p-2 text-gray-700 shadow-md hover:bg-gray-50 ${isEnabled ? 'text-indigo-600' : ''}`}
-      aria-label="Enable compass map rotation"
-      title={isEnabled ? `Map heading ${Math.round(heading)}°` : 'Rotate map with phone direction'}
-    >
-      <Compass className="h-5 w-5" style={{ transform: `rotate(${heading}deg)` }} />
-    </button>
-  );
-}
-
 export function PeopleMap({ people = [], onSelect, selectedLocation, picker = false, center = GANGAVARAM_CENTER }) {
   const [currentLocation, setCurrentLocation] = useState(null);
   const [isLocating, setIsLocating] = useState(false);
-  const [heading, setHeading] = useState(0);
   const selected = selectedLocation ? [selectedLocation.lat, selectedLocation.lng] : null;
 
   return (
-    <div className="relative h-full w-full overflow-hidden">
-      <MapContainer
-        center={selected || center}
-        zoom={19}
-        maxZoom={22}
-        className="h-full w-full"
-        style={{
-          transform: `rotate(${-heading}deg) scale(${heading ? 1.08 : 1})`,
-          transformOrigin: 'center center',
-          transition: 'transform 120ms linear'
-        }}
-      >
+    <MapContainer center={selected || center} zoom={19} maxZoom={22} className="h-full w-full">
       <LayersControl position="topright">
         <LayersControl.BaseLayer checked name="Google Hybrid Satellite">
           <TileLayer url="https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}" crossOrigin="anonymous" maxZoom={22} />
@@ -195,11 +123,6 @@ export function PeopleMap({ people = [], onSelect, selectedLocation, picker = fa
             isLocating={isLocating}
             setIsLocating={setIsLocating}
           />
-        </div>
-      </div>
-      <div className="leaflet-bottom leaflet-right" style={{ right: '48px' }}>
-        <div className="leaflet-control">
-          <OrientationControl heading={heading} setHeading={setHeading} />
         </div>
       </div>
       {picker && <LocationPicker onSelect={onSelect} />}
@@ -235,8 +158,7 @@ export function PeopleMap({ people = [], onSelect, selectedLocation, picker = fa
           <Popup>You are here</Popup>
         </Marker>
       )}
-      </MapContainer>
-    </div>
+    </MapContainer>
   );
 }
 
