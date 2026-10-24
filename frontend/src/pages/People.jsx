@@ -35,7 +35,7 @@ function People() {
   const [filters, setFilters] = useState({ category: '', street: '' });
   const [columns, setColumns] = useState({ pid: true, name: true, category: true, email: false, phone: false, street: false, location: false });
   const [panel, setPanel] = useState(null);
-  const [view, setView] = useState('people');
+  const [view, setView] = useState('stats');
   const [statsPeople, setStatsPeople] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState(null);
@@ -98,8 +98,8 @@ function People() {
                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
             }`}
           >
-            <Icon className={`h-4 w-4 ${key === 'map' || key === 'people' ? 'mr-1' : ''}`} />
-            {key !== 'stats' && label}
+           <Icon className={`h-4 w-4 ${key ? 'mr-1' : ''}`} />
+           {key && label}
           </button>
         ))}
         </div>
