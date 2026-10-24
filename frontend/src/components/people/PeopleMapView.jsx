@@ -50,9 +50,13 @@ function PeopleMapView({ people, streets, streetCoordinates }) {
         </select>
         <PeopleMapPrint people={filteredMapPeople} onSearchChange={setMapSearch} mapElementRef={mapElementRef} />
       </div>
-      <div ref={mapElementRef} className="h-[calc(100vh-14rem)] min-h-[32rem] overflow-hidden rounded-lg bg-white shadow">
-        <PeopleMap people={searchableMapPeople} center={mapCenter} />
-      </div>
+      <div
+  ref={mapElementRef}
+  translate="no"
+  className="notranslate h-[calc(100vh-14rem)] min-h-[32rem] overflow-hidden rounded-lg bg-white shadow"
+>
+  <PeopleMap people={searchableMapPeople} center={mapCenter} />
+</div>
     </section>
   );
 }

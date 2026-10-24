@@ -103,7 +103,13 @@ export function PeopleMap({ people = [], onSelect, selectedLocation, picker = fa
   const selected = selectedLocation ? [selectedLocation.lat, selectedLocation.lng] : null;
 
   return (
-    <MapContainer center={selected || center} zoom={19} maxZoom={22} className="h-full w-full">
+    <MapContainer
+  center={selected || center}
+  zoom={19}
+  maxZoom={22}
+  translate="no"
+  className="notranslate h-full w-full"
+>
       <LayersControl position="topright">
         <LayersControl.BaseLayer checked name="Google Hybrid Satellite">
           <TileLayer url="https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}" crossOrigin="anonymous" maxZoom={22} />
