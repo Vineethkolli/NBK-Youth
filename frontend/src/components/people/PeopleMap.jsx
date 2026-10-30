@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { MapContainer, TileLayer, LayersControl, Marker, Popup, Tooltip, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import { Navigation } from 'lucide-react';
@@ -25,11 +25,11 @@ const markerIcon = (category, selected = false) => L.divIcon({
   iconAnchor: [12, 31]
 });
 
-const currentLocationIcon = L.divIcon({
+const currentLocationIcon = (heading = 0) => L.divIcon({
   className: 'people-map-current-location',
-  html: '<span></span>',
-  iconSize: [24, 24],
-  iconAnchor: [12, 12]
+  html: `<span class="people-map-direction-cone" style="transform:rotate(${heading}deg)"></span><span class="people-map-location-dot"></span>`,
+  iconSize: [48, 48],
+  iconAnchor: [24, 24]
 });
 
 function LocationPicker({ onSelect }) {
@@ -53,33 +53,96 @@ function MapCenterSync({ center }) {
 
 function CurrentLocationControl({ onLocationFound, isLocating, setIsLocating }) {
   const map = useMap();
+  const watchIdRef = useRef(null);
+  const hasLocatedRef = useRef(false);
+  const lastLocationRef = useRef(null);
+  const [heading, setHeading] = useState(0);
 
-  const handleLocate = (event) => {
+  const stopTracking = useCallback(() => {
+    if (watchIdRef.current !== null) {
+      navigator.geolocation.clearWatch(watchIdRef.current);
+      watchIdRef.current = null;
+    }
+    hasLocatedRef.current = false;
+    lastLocationRef.current = null;
+    setHeading(0);
+    setIsLocating(false);
+  }, [setIsLocating]);
+
+  useEffect(() => stopTracking, [stopTracking]);
+
+  useEffect(() => {
+    if (!isLocating) return undefined;
+
+    const handleOrientation = (event) => {
+      const nextHeading = Number.isFinite(event.webkitCompassHeading)
+        ? event.webkitCompassHeading
+        : Number.isFinite(event.alpha) ? 360 - event.alpha : null;
+      if (nextHeading !== null) {
+        setHeading(nextHeading);
+        if (lastLocationRef.current) {
+          onLocationFound({ ...lastLocationRef.current, heading: nextHeading });
+        }
+      }
+    };
+
+    window.addEventListener('deviceorientationabsolute', handleOrientation, true);
+    window.addEventListener('deviceorientation', handleOrientation, true);
+    return () => {
+      window.removeEventListener('deviceorientationabsolute', handleOrientation, true);
+      window.removeEventListener('deviceorientation', handleOrientation, true);
+    };
+  }, [isLocating, onLocationFound]);
+
+  const handleLocate = async (event) => {
     event.stopPropagation();
+    if (isLocating) {
+      stopTracking();
+      return;
+    }
     if (!navigator.geolocation) {
       toast.error('Geolocation is not supported by this browser');
       return;
     }
 
+    if (typeof DeviceOrientationEvent !== 'undefined' &&
+      typeof DeviceOrientationEvent.requestPermission === 'function') {
+      try {
+        const permission = await DeviceOrientationEvent.requestPermission();
+        if (permission !== 'granted') {
+          toast.error('Device orientation permission was denied');
+        }
+      } catch {
+        toast.error('Unable to access device orientation');
+      }
+    }
+
     setIsLocating(true);
-    navigator.geolocation.getCurrentPosition(
+    watchIdRef.current = navigator.geolocation.watchPosition(
       ({ coords }) => {
         const location = {
           lat: Number(coords.latitude.toFixed(6)),
-          lng: Number(coords.longitude.toFixed(6))
+          lng: Number(coords.longitude.toFixed(6)),
+          heading: Number.isFinite(coords.heading) ? coords.heading : heading
         };
-        map.flyTo([location.lat, location.lng], Math.max(map.getZoom(), 18));
+        lastLocationRef.current = location;
+        const nextPosition = [location.lat, location.lng];
+        if (hasLocatedRef.current) {
+          map.panTo(nextPosition, { animate: true, duration: 0.6, easeLinearity: 0.25 });
+        } else {
+          map.flyTo(nextPosition, Math.max(map.getZoom(), 18));
+          hasLocatedRef.current = true;
+        }
         onLocationFound(location);
-        setIsLocating(false);
       },
       (error) => {
         const message = error.code === error.PERMISSION_DENIED
           ? 'Location permission was denied'
           : 'Unable to determine your location';
         toast.error(message);
-        setIsLocating(false);
+        stopTracking();
       },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
   };
 
@@ -87,10 +150,9 @@ function CurrentLocationControl({ onLocationFound, isLocating, setIsLocating }) 
     <button
       type="button"
       onClick={handleLocate}
-      disabled={isLocating}
-      className="leaflet-control rounded-md border border-gray-300 bg-white p-2 text-gray-700 shadow-md hover:bg-gray-50 disabled:cursor-wait disabled:opacity-60"
-      aria-label="Show my location"
-      title="Show my location"
+      className="leaflet-control rounded-md border border-gray-300 bg-white p-2 text-gray-700 shadow-md hover:bg-gray-50"
+      aria-label={isLocating ? 'Stop live location tracking' : 'Start live location tracking'}
+      title={isLocating ? 'Stop live location tracking' : 'Start live location tracking'}
     >
       <Navigation className={`h-5 w-5 ${isLocating ? 'animate-pulse' : ''}`} />
     </button>
@@ -122,14 +184,12 @@ export function PeopleMap({ people = [], onSelect, selectedLocation, picker = fa
         </LayersControl.BaseLayer>
       </LayersControl>
       {!selected && <MapCenterSync center={center} />}
-      <div className="leaflet-bottom leaflet-right">
-        <div className="leaflet-control">
-          <CurrentLocationControl
-            onLocationFound={setCurrentLocation}
-            isLocating={isLocating}
-            setIsLocating={setIsLocating}
-          />
-        </div>
+      <div className="people-map-location-control">
+        <CurrentLocationControl
+          onLocationFound={setCurrentLocation}
+          isLocating={isLocating}
+          setIsLocating={setIsLocating}
+        />
       </div>
       {picker && <LocationPicker onSelect={onSelect} />}
       {people.map((person) => person.location?.lat && person.location?.lng && (
@@ -160,7 +220,10 @@ export function PeopleMap({ people = [], onSelect, selectedLocation, picker = fa
       ))}
       {selected && <Marker position={selected} icon={markerIcon('Youth', true)} />}
       {currentLocation && (
-        <Marker position={[currentLocation.lat, currentLocation.lng]} icon={currentLocationIcon}>
+        <Marker
+          position={[currentLocation.lat, currentLocation.lng]}
+          icon={currentLocationIcon(currentLocation.heading)}
+        >
           <Popup>You are here</Popup>
         </Marker>
       )}
