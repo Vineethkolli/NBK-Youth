@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, LayersControl, Marker, Popup, Tooltip, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import { Navigation } from 'lucide-react';
@@ -25,9 +25,9 @@ const markerIcon = (category, selected = false) => L.divIcon({
   iconAnchor: [12, 31]
 });
 
-const currentLocationIcon = (heading) => L.divIcon({
+const currentLocationIcon = L.divIcon({
   className: 'people-map-current-location',
-  html: `<span style="--people-map-heading:${heading ?? 0}deg"></span>`,
+  html: '<span></span>',
   iconSize: [24, 24],
   iconAnchor: [12, 12]
 });
@@ -51,136 +51,35 @@ function MapCenterSync({ center }) {
   return null;
 }
 
-function RotatableMap() {
-  const map = useMap();
-  const rotationRef = useRef(0);
-
-  useEffect(() => {
-    const container = map.getContainer();
-    const mapPane = map.getPane('mapPane');
-    let baseTransform = mapPane.style.transform;
-    let startAngle = null;
-    let startRotation = 0;
-
-    const getAngle = (touches) => Math.atan2(
-      touches[1].clientY - touches[0].clientY,
-      touches[1].clientX - touches[0].clientX
-    ) * (180 / Math.PI);
-
-    const applyRotation = () => {
-      mapPane.style.transform = `${baseTransform} rotate(${rotationRef.current}deg)`;
-      mapPane.style.transformOrigin = 'center center';
-    };
-
-    const handleMapMove = () => {
-      baseTransform = mapPane.style.transform.replace(/\srotate\([^)]*\)/, '');
-      applyRotation();
-    };
-
-    const handleTouchStart = (event) => {
-      if (event.touches.length !== 2) return;
-      startAngle = getAngle(event.touches);
-      startRotation = rotationRef.current;
-    };
-
-    const handleTouchMove = (event) => {
-      if (event.touches.length !== 2 || startAngle === null) return;
-      event.preventDefault();
-      rotationRef.current = startRotation + getAngle(event.touches) - startAngle;
-      applyRotation();
-    };
-
-    const handleTouchEnd = () => {
-      startAngle = null;
-    };
-
-    container.addEventListener('touchstart', handleTouchStart, { passive: true });
-    container.addEventListener('touchmove', handleTouchMove, { passive: false });
-    container.addEventListener('touchend', handleTouchEnd);
-    map.on('move', handleMapMove);
-    applyRotation();
-
-    return () => {
-      container.removeEventListener('touchstart', handleTouchStart);
-      container.removeEventListener('touchmove', handleTouchMove);
-      container.removeEventListener('touchend', handleTouchEnd);
-      map.off('move', handleMapMove);
-      mapPane.style.transform = baseTransform;
-    };
-  }, [map]);
-
-  return null;
-}
-
 function CurrentLocationControl({ onLocationFound, isLocating, setIsLocating }) {
   const map = useMap();
-  const watchIdRef = useRef(null);
-  const headingRef = useRef(null);
-  const [heading, setHeading] = useState(null);
-
-  useEffect(() => () => {
-    if (watchIdRef.current !== null) navigator.geolocation?.clearWatch(watchIdRef.current);
-  }, []);
-
-  useEffect(() => {
-    const handleDeviceOrientation = (event) => {
-      if (!Number.isFinite(event.alpha)) return;
-      if (headingRef.current !== null) return;
-      const nextHeading = (360 - event.alpha) % 360;
-      headingRef.current = nextHeading;
-      setHeading(nextHeading);
-    };
-
-    window.addEventListener('deviceorientationabsolute', handleDeviceOrientation);
-    window.addEventListener('deviceorientation', handleDeviceOrientation);
-    return () => {
-      window.removeEventListener('deviceorientationabsolute', handleDeviceOrientation);
-      window.removeEventListener('deviceorientation', handleDeviceOrientation);
-    };
-  }, []);
-
-  const stopTracking = () => {
-    if (watchIdRef.current !== null) {
-      navigator.geolocation.clearWatch(watchIdRef.current);
-      watchIdRef.current = null;
-    }
-    setIsLocating(false);
-  };
 
   const handleLocate = (event) => {
     event.stopPropagation();
-    if (isLocating) {
-      stopTracking();
-      return;
-    }
     if (!navigator.geolocation) {
       toast.error('Geolocation is not supported by this browser');
       return;
     }
 
     setIsLocating(true);
-    watchIdRef.current = navigator.geolocation.watchPosition(
+    navigator.geolocation.getCurrentPosition(
       ({ coords }) => {
         const location = {
           lat: Number(coords.latitude.toFixed(6)),
           lng: Number(coords.longitude.toFixed(6))
         };
-        const nextHeading = Number.isFinite(coords.heading) ? coords.heading : headingRef.current;
-        if (Number.isFinite(coords.heading)) {
-          headingRef.current = coords.heading;
-          setHeading(coords.heading);
-        }
-        map.flyTo([location.lat, location.lng], Math.max(map.getZoom(), 18), { animate: true });
-        onLocationFound({ ...location, heading: nextHeading });
+        map.flyTo([location.lat, location.lng], Math.max(map.getZoom(), 18));
+        onLocationFound(location);
+        setIsLocating(false);
       },
       (error) => {
         const message = error.code === error.PERMISSION_DENIED
           ? 'Location permission was denied'
           : 'Unable to determine your location';
         toast.error(message);
-        stopTracking();
+        setIsLocating(false);
       },
-      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
     );
   };
 
@@ -188,14 +87,12 @@ function CurrentLocationControl({ onLocationFound, isLocating, setIsLocating }) 
     <button
       type="button"
       onClick={handleLocate}
-      className="people-map-location-control leaflet-control rounded-md border border-gray-300 bg-white p-2 text-gray-700 shadow-md hover:bg-gray-50"
-      aria-label={isLocating ? 'Stop following my location' : 'Show my location'}
-      title={isLocating ? 'Stop following my location' : 'Show my location'}
+      disabled={isLocating}
+      className="leaflet-control rounded-md border border-gray-300 bg-white p-2 text-gray-700 shadow-md hover:bg-gray-50 disabled:cursor-wait disabled:opacity-60"
+      aria-label="Show my location"
+      title="Show my location"
     >
-      <Navigation
-        className={`h-5 w-5 ${isLocating ? 'animate-pulse text-blue-600' : ''}`}
-        style={{ transform: `rotate(${heading ?? 0}deg)` }}
-      />
+      <Navigation className={`h-5 w-5 ${isLocating ? 'animate-pulse' : ''}`} />
     </button>
   );
 }
@@ -213,8 +110,7 @@ export function PeopleMap({ people = [], onSelect, selectedLocation, picker = fa
   translate="no"
   className="notranslate h-full w-full"
 >
-  <RotatableMap />
-  <LayersControl position="topright">
+      <LayersControl position="topright">
         <LayersControl.BaseLayer checked name="Google Hybrid Satellite">
           <TileLayer url="https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}" crossOrigin="anonymous" maxZoom={22} />
         </LayersControl.BaseLayer>
@@ -226,12 +122,14 @@ export function PeopleMap({ people = [], onSelect, selectedLocation, picker = fa
         </LayersControl.BaseLayer>
       </LayersControl>
       {!selected && <MapCenterSync center={center} />}
-      <div className="leaflet-top leaflet-right people-map-location-wrapper">
-        <CurrentLocationControl
-          onLocationFound={setCurrentLocation}
-          isLocating={isLocating}
-          setIsLocating={setIsLocating}
-        />
+      <div className="leaflet-bottom leaflet-right">
+        <div className="leaflet-control">
+          <CurrentLocationControl
+            onLocationFound={setCurrentLocation}
+            isLocating={isLocating}
+            setIsLocating={setIsLocating}
+          />
+        </div>
       </div>
       {picker && <LocationPicker onSelect={onSelect} />}
       {people.map((person) => person.location?.lat && person.location?.lng && (
@@ -262,7 +160,7 @@ export function PeopleMap({ people = [], onSelect, selectedLocation, picker = fa
       ))}
       {selected && <Marker position={selected} icon={markerIcon('Youth', true)} />}
       {currentLocation && (
-        <Marker position={[currentLocation.lat, currentLocation.lng]} icon={currentLocationIcon(currentLocation.heading)}>
+        <Marker position={[currentLocation.lat, currentLocation.lng]} icon={currentLocationIcon}>
           <Popup>You are here</Popup>
         </Marker>
       )}
