@@ -34,11 +34,33 @@ export const subscribe = async (req, res) => {
         (sub) => sub.endpoint === subscription.endpoint
       );
       if (!isAlreadySubscribed) {
+        const before = existingUser.toObject();
         existingUser.subscriptions.push(subscription);
         await existingUser.save();
+
+        await logActivity(
+          req,
+          'UPDATE',
+          'Notification',
+          authenticatedRegisterId,
+          { before, after: existingUser.toObject() },
+          `Added a notification subscription for ${authenticatedRegisterId}`
+        );
       }
     } else {
-      await Subscription.create({ registerId: authenticatedRegisterId, subscriptions: [subscription] });
+      const createdSubscription = await Subscription.create({
+        registerId: authenticatedRegisterId,
+        subscriptions: [subscription]
+      });
+
+      await logActivity(
+        req,
+        'CREATE',
+        'Notification',
+        authenticatedRegisterId,
+        { before: null, after: createdSubscription.toObject() },
+        `Created a notification subscription for ${authenticatedRegisterId}`
+      );
     }
 
     res.status(201).json({ message: 'Subscription saved successfully' });
@@ -62,6 +84,11 @@ export const unsubscribe = async (req, res) => {
   }
 
   try {
+    const existingSubscription = await Subscription.findOne({
+      registerId: authenticatedRegisterId,
+      'subscriptions.endpoint': endpoint
+    });
+
     const updateResult = await Subscription.updateOne(
       { registerId: authenticatedRegisterId, 'subscriptions.endpoint': endpoint },
       { $pull: { subscriptions: { endpoint } } }
@@ -70,6 +97,25 @@ export const unsubscribe = async (req, res) => {
     if (updateResult.modifiedCount === 0) {
       return res.status(404).json({ error: 'Subscription not found for this user' });
     }
+
+    await logActivity(
+      req,
+      'UPDATE',
+      'Notification',
+      authenticatedRegisterId,
+      {
+        before: existingSubscription?.toObject() || null,
+        after: existingSubscription
+          ? {
+              ...existingSubscription.toObject(),
+              subscriptions: existingSubscription.subscriptions.filter(
+                (subscriptionItem) => subscriptionItem.endpoint !== endpoint
+              )
+            }
+          : null
+      },
+      `Removed a notification subscription for ${authenticatedRegisterId}`
+    );
 
     res.status(200).json({ message: 'Unsubscribed successfully' });
   } catch (error) {
