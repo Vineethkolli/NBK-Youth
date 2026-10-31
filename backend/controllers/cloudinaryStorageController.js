@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import { v2 as cloudinary } from 'cloudinary';
 import axios from 'axios';
+import { logActivity } from '../middleware/activityLogger.js';
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -275,6 +276,14 @@ getStorageQuota: async (req, res) => {
           (result) => result.result === 'ok'
         ).length;
 
+        await logActivity(
+          req,
+          'DELETE',
+          'Monitor',
+          'Cloudinary',
+          { before: { folder, total: resources.length }, after: { deleted } },
+          `Cloudinary folder "${folder}" deleted`
+        );
         return res.json({
           message: 'Folder deletion processed',
           deleted,
@@ -295,6 +304,14 @@ getStorageQuota: async (req, res) => {
         });
       }
 
+      await logActivity(
+        req,
+        'DELETE',
+        'Monitor',
+        'Cloudinary',
+        { before: { publicId, resourceType }, after: null },
+        `Cloudinary item "${publicId}" deleted and moved to trash`
+      );
       return res.json({
         message:
           result.result === 'ok'
@@ -410,6 +427,14 @@ getStorageQuota: async (req, res) => {
         versionIds
       );
 
+      await logActivity(
+        req,
+        'DELETE',
+        'Monitor',
+        'Cloudinary',
+        { before: { assetId, versionCount: versionIds.length }, after: null },
+        `Cloudinary trash item "${assetId}" permanently deleted`
+      );
       return res.json({
         message: 'Backup deletion request completed',
         deletedVersionCount: versionIds.length,
@@ -504,6 +529,17 @@ getStorageQuota: async (req, res) => {
         }
       }
 
+      await logActivity(
+        req,
+        'DELETE',
+        'Monitor',
+        'Cloudinary',
+        {
+          before: { totalAssetsFound: assets.length },
+          after: { deletedAssets, deletedVersions, failures: failures.length },
+        },
+        `Cloudinary trash emptied (${deletedAssets} assets)`
+      );
       return res.json({
         message: failures.length
           ? 'Trash processing finished with some failures'

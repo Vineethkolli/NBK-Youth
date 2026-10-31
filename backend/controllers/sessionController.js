@@ -193,15 +193,38 @@ export const getUserSessions = async (req, res) => {
 export const signOutCurrent = async (req, res) => {
   try {
     const refreshToken = req.cookies.refreshToken;
+    let signedOutSession;
 
     // Prefer sessionId from auth middleware (access token), fallback to cookie-based lookup
     if (req.sessionId) {
-      await Session.findOneAndUpdate({ _id: req.sessionId }, { isValid: false });
+      signedOutSession = await Session.findOneAndUpdate(
+        { _id: req.sessionId },
+        { isValid: false },
+        { new: false }
+      );
     } else if (refreshToken) {
       const tokenHash = hashToken(refreshToken);
-      await Session.findOneAndUpdate({ tokenHash }, { isValid: false });
+      signedOutSession = await Session.findOneAndUpdate(
+        { tokenHash },
+        { isValid: false },
+        { new: false }
+      );
     } else {
       return res.json({ message: "Already signed out" });
+    }
+
+    if (signedOutSession) {
+      await logActivity(
+        req,
+        "UPDATE",
+        "User",
+        req.user.registerId,
+        {
+          before: { validSession: signedOutSession.isValid },
+          after: { validSession: false },
+        },
+        `Current session signed out for user ${req.user.registerId}`
+      );
     }
 
     // Clear cookie if present
@@ -233,6 +256,18 @@ export const signOutSession = async (req, res) => {
 
     session.isValid = false;
     await session.save();
+
+    await logActivity(
+      req,
+      "UPDATE",
+      "User",
+      req.user.registerId,
+      {
+        before: { validSession: true },
+        after: { validSession: false },
+      },
+      `Another device session signed out for user ${req.user.registerId}`
+    );
 
     res.json({ message: "Session signed out successfully" });
   } catch (error) {

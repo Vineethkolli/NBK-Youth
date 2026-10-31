@@ -18,7 +18,8 @@ function ClearData() {
     'User', 'Income', 'Expense', 'Payment', 'Vibe', 'Moment', 'Game', 'Banner', 'EstimatedIncome', 
     'EstimatedExpense', 'HiddenProfile', 'Slide', 'EventTimeline', 'Notification', 'PreviousYear', 'MaintenanceMode', 
     'DeveloperOptions', 'Committee', 'People', 'PaymentDetails', 'EventLabel', 'LockSettings', 'FinancialRecord', 'TimelineRecord',
-    'EventRecord', 'Snapshot', 'History', 'ScheduledNotification', 'Email', 'Mobile', 'Mailer', 'FileAsset', 'Note', 'UniversalPin'
+    'EventRecord', 'Snapshot', 'ProcessedRecord', 'History', 'ScheduledNotification', 'Email', 'Mobile', 'Mailer', 'FileAsset', 'Note',
+    'UniversalPin', 'Monitor'
   ];
 
   const openConfirmDialog = (type) => {

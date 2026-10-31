@@ -1,4 +1,5 @@
 import Redis from 'ioredis';
+import { logActivity } from '../middleware/activityLogger.js';
 
 const TIMEOUT = 20000;
 const LIMITS = {
@@ -125,6 +126,14 @@ export const redisController = {
     try {
       await redis.connect();
       const deleted = await redis.unlink(key);
+      await logActivity(
+        req,
+        'DELETE',
+        'Monitor',
+        'Upstash Redis',
+        { before: { key, deleted: deleted === 1 }, after: null },
+        `Upstash Redis key "${key}" deleted`
+      );
       res.json({ deleted: deleted === 1, key });
     } catch (error) {
       console.error(`Failed to delete Redis key "${key}":`, error);
@@ -147,6 +156,14 @@ export const redisController = {
       for (let index = 0; index < keys.length; index += 500) {
         deleted += Number(await redis.unlink(...keys.slice(index, index + 500))) || 0;
       }
+      await logActivity(
+        req,
+        'DELETE',
+        'Monitor',
+        'Upstash Redis',
+        { before: { keyCount: keys.length }, after: { deletedKeyCount: deleted } },
+        `All Upstash Redis keys deleted (${deleted})`
+      );
       res.json({ deleted });
     } catch (error) {
       console.error('Failed to delete all Redis data:', error);

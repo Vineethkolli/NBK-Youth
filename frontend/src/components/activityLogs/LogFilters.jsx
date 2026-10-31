@@ -132,6 +132,8 @@ function LogFilters({ filters, onChange }) {
         <option value="TimelineRecord">Timeline Record</option>
         <option value="EventRecord">Event Record</option>
         <option value="Snapshot">Snapshot</option>
+        <option value="ProcessedRecord">Processed Record</option>
+        <option value="Monitor">Monitor</option>
         <option value="History">History</option>
         <option value="Mailer">Mailer</option>
         <option value="ScheduledNotification">Scheduled Notification</option>

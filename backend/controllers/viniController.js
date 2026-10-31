@@ -3,6 +3,7 @@ import ChatHistory from '../models/ChatHistory.js';
 import ProcessedRecord from '../models/ProcessedRecords.js';
 import { processRecordIntoChunks, buildSnapshotTextFromRecord } from '../services/processedRecordsService.js';
 import { chatWithViniLogic } from '../services/viniService.js';
+import { logActivity } from '../middleware/activityLogger.js';
 
 export const viniController = {
 
@@ -40,6 +41,15 @@ export const viniController = {
         createdBy
       });
 
+      await logActivity(
+        req,
+        'CREATE',
+        'ProcessedRecord',
+        record._id,
+        { before: null, after: { eventName, year, selectedCollections, snapshotId } },
+        `Processed record created for ${eventName} ${year}`
+      );
+
       res.status(201).json(record);
     } catch (error) {
       if (error.code === 11000) {
@@ -60,6 +70,11 @@ export const viniController = {
         return res.status(404).json({ message: 'Processed record not found' });
       }
 
+      const previousState = {
+        status: record.status,
+        chunksCount: record.chunksCount
+      };
+
       record.status = 'processing';
       await record.save();
 
@@ -70,6 +85,18 @@ export const viniController = {
       record.chunksCount = chunkCount;
       record.status = 'ready';
       await record.save();
+
+      await logActivity(
+        req,
+        'UPDATE',
+        'ProcessedRecord',
+        record._id,
+        {
+          before: previousState,
+          after: { status: record.status, chunksCount: record.chunksCount }
+        },
+        `Processed record data for ${record.eventName} ${record.year}`
+      );
 
       res.json({ message: 'Data processed successfully', chunkCount });
     } catch (error) {
@@ -92,6 +119,11 @@ export const viniController = {
         return res.status(404).json({ message: 'Processed record not found' });
       }
 
+      const previousState = {
+        status: record.status,
+        chunksCount: record.chunksCount
+      };
+
       // Delete existing chunks
       await ProcessedChunk.deleteMany({ eventName: record.eventName, year: record.year });
 
@@ -107,6 +139,18 @@ export const viniController = {
       record.status = 'ready';
       await record.save();
 
+      await logActivity(
+        req,
+        'UPDATE',
+        'ProcessedRecord',
+        record._id,
+        {
+          before: previousState,
+          after: { status: record.status, chunksCount: record.chunksCount }
+        },
+        `Reprocessed data for ${record.eventName} ${record.year}`
+      );
+
       res.json({ message: 'Data reprocessed successfully', chunkCount });
     } catch (error) {
       console.error('Reprocessing error:', error);
@@ -121,9 +165,27 @@ export const viniController = {
       if (!record) {
         return res.status(404).json({ message: 'Processed record not found' });
       }
+      const originalData = {
+        eventName: record.eventName,
+        year: record.year,
+        snapshotId: record.snapshotId,
+        selectedCollections: record.selectedCollections,
+        chunksCount: record.chunksCount,
+        status: record.status,
+        createdBy: record.createdBy
+      };
       await ProcessedChunk.deleteMany({ eventName: record.eventName, year: record.year });
 
       await ProcessedRecord.findByIdAndDelete(req.params.id);
+
+      await logActivity(
+        req,
+        'DELETE',
+        'ProcessedRecord',
+        record._id,
+        { before: originalData, after: null },
+        `Processed record deleted for ${record.eventName} ${record.year}`
+      );
 
       res.json({ message: 'Processed record deleted successfully' });
     } catch (error) {

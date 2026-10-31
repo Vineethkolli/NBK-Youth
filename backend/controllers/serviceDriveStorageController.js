@@ -1,4 +1,5 @@
 import { google } from 'googleapis';
+import { logActivity } from '../middleware/activityLogger.js';
 
 let drive;
 try {
@@ -276,6 +277,14 @@ export const serviceDriveStorageController = {
           .json({ message: 'Confirmation required to move to trash' });
 
       await drive.files.update({ fileId, requestBody: { trashed: true } });
+      await logActivity(
+        req,
+        'UPDATE',
+        'Monitor',
+        'Service Drive',
+        { before: { fileId, trashed: false }, after: { fileId, trashed: true } },
+        `Service Drive item ${fileId} moved to trash`
+      );
       return res.json({ message: 'Item moved to trash' });
     } catch (err) {
       console.error(err);
@@ -296,6 +305,14 @@ export const serviceDriveStorageController = {
           .json({ message: 'Confirmation required to delete permanently' });
 
       await deleteFileRecursiveIfFolder(fileId);
+      await logActivity(
+        req,
+        'DELETE',
+        'Monitor',
+        'Service Drive',
+        { before: { fileId }, after: null },
+        `Service Drive item ${fileId} permanently deleted`
+      );
       return res.json({ message: 'Item permanently deleted' });
     } catch (err) {
       console.error(err);
@@ -335,6 +352,14 @@ export const serviceDriveStorageController = {
         nextPageToken = resFiles.data.nextPageToken;
       } while (nextPageToken);
 
+      await logActivity(
+        req,
+        'DELETE',
+        'Monitor',
+        'Service Drive',
+        { before: { trash: 'non-empty' }, after: { trash: 'empty' } },
+        'Service Drive trash emptied'
+      );
       return res.json({ message: 'Trash emptied successfully' });
     } catch (err) {
       console.error('Empty Trash Error:', err);
