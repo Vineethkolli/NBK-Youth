@@ -5,7 +5,6 @@ import mongoose from 'mongoose';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import webpush from 'web-push';
-import cron from 'node-cron';
 import helmet from "helmet";
 import cookieParser from 'cookie-parser';
 
@@ -27,7 +26,6 @@ import homepageRoutes from './routes/homepage.js';
 import momentsRoutes from './routes/moments.js';
 import gameRoutes from './routes/games.js';
 import notificationRoutes from './routes/notifications.js';
-import scheduledNotificationRoutes from './routes/scheduledNotifications.js';
 import maintenanceRoutes from './routes/maintenance.js';
 import estimationRoutes from './routes/estimation.js';
 import bannerRoutes from './routes/banners.js';
@@ -44,7 +42,6 @@ import monitorRoutes from './routes/monitor.js';
 import mailerRoutes from './routes/mailer.js';
 import myFilesRoutes from './routes/myFiles.js';
 import universalPinRoutes from './routes/universalPin.js';
-import { processDueNotifications } from './controllers/scheduledNotificationController.js';
 import { createDefaultDeveloper } from './utils/setupDefaults.js';
 import { startAgenda } from './services/agendaService.js';
 
@@ -113,7 +110,6 @@ app.use('/api/homepage', homepageRoutes);
 app.use('/api/moments', momentsRoutes);
 app.use('/api/games', gameRoutes);
 app.use('/api/notifications', notificationRoutes);
-app.use('/api/scheduled-notifications', scheduledNotificationRoutes);
 app.use('/api/maintenance', maintenanceRoutes);
 app.use('/api/estimation', estimationRoutes);
 app.use('/api/banners', bannerRoutes);
@@ -155,18 +151,6 @@ mongoose.connect(process.env.MONGODB_URI, mongooseOptions)
     console.error('MongoDB connection error:', err);
     process.exit(1); 
   });
-
-// Notification Scheduler runs at 7:00, 7:10, 7:25 AM IST every day
-cron.schedule('0,10,25 7 * * *', async () => {
-  try {
-    console.log('Running scheduled notifications');
-    await processDueNotifications();
-  } catch (err) {
-    console.error('Scheduled job error:', err);
-  }
-}, {
-  timezone: 'Asia/Kolkata'
-});
 
 // Error Handling Middleware
 app.use((err, req, res, next) => {

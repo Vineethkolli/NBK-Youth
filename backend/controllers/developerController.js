@@ -1,6 +1,7 @@
 import Income from '../models/Income.js';
 import Expense from '../models/Expense.js';
 import NotificationHistory from '../models/NotificationHistory.js';
+import NotificationSchedule from '../models/NotificationSchedule.js';
 import EstimatedIncome from '../models/EstimatedIncome.js';
 import EstimatedExpense from '../models/EstimatedExpense.js';
 import Game from '../models/Game.js';
@@ -14,7 +15,10 @@ import Counter from '../models/Counter.js';
 import PreviousYear from '../models/PreviousYear.js';
 import EventLabel from '../models/EventLabel.js';
 import MailerHistory from '../models/MailerHistory.js';
-import { clearAllAgendaJobs } from '../services/agendaService.js';
+import MailerSchedule from '../models/MailerSchedule.js';
+import {
+  clearAgendaJobsByName
+} from '../services/agendaService.js';
 import { redis } from '../utils/redis.js';
 
 export const developerController = {
@@ -63,12 +67,22 @@ export const developerController = {
           description = 'Cleared all activities records';
           break;
 
-        case 'mailerHistory&AgendaJobs':
-  await MailerHistory.deleteMany({});
-  await clearAllAgendaJobs();
+        case 'mailerHistory':
+          await MailerHistory.deleteMany({});
+          description = 'Cleared all mailer history';
+          break;
 
-  description = 'Cleared all mailer history records and Agenda jobs';
-  break;
+        case 'scheduledMails':
+          await MailerSchedule.deleteMany({});
+          await clearAgendaJobsByName('send-scheduled-email');
+          description = 'Cleared all scheduled mails and their Agenda jobs';
+          break;
+
+        case 'scheduledNotifications':
+          await NotificationSchedule.deleteMany({});
+          await clearAgendaJobsByName('send-scheduled-notification');
+          description = 'Cleared all scheduled notifications and their Agenda jobs';
+          break;
 
         case 'activityLog': {
           const payload = (req.body && Object.keys(req.body).length) ? req.body : (req.query || {});

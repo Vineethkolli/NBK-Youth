@@ -89,14 +89,12 @@ function MailerScheduleList({
               key={schedule._id}
               className="min-w-0 border rounded-lg p-4 space-y-2"
             >
-              {/* Subject + Actions + Status */}
               <div className="flex min-w-0 items-start justify-between gap-2">
                 <h4 className="min-w-0 break-words font-semibold text-gray-900">
                   {schedule.subject}
                 </h4>
 
                 <div className="flex shrink-0 items-center gap-1">
-                  {/* View Email */}
                   <button
                     type="button"
                     onClick={() => onView(schedule)}
@@ -130,7 +128,6 @@ function MailerScheduleList({
                     </>
                   )}
 
-                  {/* Status */}
                   <span
                     className={`text-xs font-semibold px-2 py-1 rounded-full ${
                       statusStyles[schedule.status] ||
@@ -142,29 +139,23 @@ function MailerScheduleList({
                 </div>
               </div>
 
-              {/* Body Preview */}
               <p className="break-words text-sm text-gray-600 line-clamp-2">
                 {schedule.body}
               </p>
 
-              {/* Email Information */}
               <div className="text-xs text-gray-500 flex flex-wrap gap-2">
                 <span>
                   Send Date: {formatDateTime(schedule.scheduledAt)}
                 </span>
-
-                <span>
-                  Recipients: {schedule.totalRecipients}
-                </span>
-
                 <span>
                   Target: {schedule.targetType}
                 </span>
+                <span>
+                  Recipients: {schedule.totalRecipients}
+                </span>
               </div>
-
-              {/* Recipient Preview */}
               <div className="break-words text-xs text-gray-500">
-                {formatRecipients(schedule.recipients)}
+                Register Id: {formatRecipients(schedule.recipients)}
               </div>
             </div>
           ))}

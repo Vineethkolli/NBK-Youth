@@ -3,6 +3,14 @@ import Subscription from '../models/Notification.js';
 import User from '../models/User.js';
 import NotificationHistory from '../models/NotificationHistory.js';
 import { logActivity } from '../middleware/activityLogger.js';
+import { DateTime } from 'luxon';
+import NotificationSchedule from '../models/NotificationSchedule.js';
+import {
+  cancelScheduledNotification,
+  scheduleImmediateNotification,
+  scheduleNotificationAtExactTime
+} from '../services/agendaService.js';
+import { getRecipientRegisterIds } from '../services/notificationService.js';
 
 export const getPublicKey = (req, res) => {
   res.json({ publicKey: process.env.PUBLIC_VAPID_KEY });
@@ -127,99 +135,30 @@ export const unsubscribe = async (req, res) => {
 
 export const sendNotification = async (req, res) => {
   const { title, body, link, target, registerId } = req.body;
-  const senderRegisterId = req.user.registerId;
-
-  const payload = JSON.stringify({ title, body, link });
-
   try {
-    let eligibleRegisterIds = [];
-    let subscriptionUsers = [];
-
-    if (target === 'All') {
-      const allUsers = await User.find({}, 'registerId').lean();
-      eligibleRegisterIds = allUsers.map((user) => user.registerId);
-      subscriptionUsers = await Subscription.find({ registerId: { $in: eligibleRegisterIds } });
-
-    } else if (target === 'Admins_Financiers_Developers') {
-      eligibleRegisterIds = await getRoleBasedRegisterIds(['admin', 'financier', 'developer']);
-      subscriptionUsers = await Subscription.find({ registerId: { $in: eligibleRegisterIds } });
-
-    } else if (target === 'Specific User' && registerId) {
-      // Check if user exists or not
-      const existingUser = await User.findOne({ registerId });
-      if (!existingUser) {
-        return res.status(404).json({ error: 'User does not exist' });
-      }
-
-      eligibleRegisterIds = [registerId];
-      subscriptionUsers = await Subscription.find({ registerId });
-
-    } else if (target === 'Youth_Category') {
-      eligibleRegisterIds = await getCategoryBasedRegisterIds('youth');
-      subscriptionUsers = await Subscription.find({ registerId: { $in: eligibleRegisterIds } });
-
-    }  else if (target === 'Youth_Villager_Category') {
-      eligibleRegisterIds = await getCategoryBasedRegisterIds(['youth', 'villager']);
-      subscriptionUsers = await Subscription.find({ registerId: { $in: eligibleRegisterIds } });
-
-    }else {
-      return res.status(400).json({ error: 'Invalid target selection' });
+    if (!title?.trim() || !body?.trim()) {
+      return res.status(400).json({ error: 'Title and message are required' });
     }
 
-    if (eligibleRegisterIds.length === 0) {
+    const eligibleRegisterIds = await getRecipientRegisterIds(target, registerId);
+    if (!eligibleRegisterIds.length) {
       return res.status(404).json({ error: 'No eligible users found for the selected target' });
     }
 
-    const notifications = subscriptionUsers.map(async (user) => {
-      let hasRemoved = false;
-
-      await Promise.all(
-        user.subscriptions.map(async (sub) => {
-          try {
-            await webpush.sendNotification(sub, payload, { 
-              urgency: 'high', 
-              TTL: 1296000 // 15 days 
-            });
-          } catch (error) {
-            if (error.statusCode === 410 || error.statusCode === 404) {
-              hasRemoved = true;
-              sub._remove = true;
-            } else {
-              console.error('Error sending notification:', error);
-            }
-          }
-        })
-      );
-
-      if (hasRemoved) {
-        user.subscriptions = user.subscriptions.filter((s) => !s._remove);
-        await user.save(); 
-      }
+    await scheduleImmediateNotification({
+      title: title.trim(),
+      body: body.trim(),
+      link: link?.trim() || '',
+      target,
+      senderRegisterId: req.user.registerId,
+      senderName: req.user.name,
+      recipients: eligibleRegisterIds
     });
 
-    await Promise.all(notifications);
-
-    await NotificationHistory.create({
-      title,
-      body,
-      link: link || undefined,
-      recipients: eligibleRegisterIds,
-      sentBy: senderRegisterId,
-    });
-
-    await logActivity(
-      req,
-      'CREATE',
-      'Notification',
-      Date.now(),
-      { before: null, after: { title, body, link, target, recipientCount: eligibleRegisterIds.length } },
-      `Notification "${title}" sent to ${target} (${eligibleRegisterIds.length} recipients) by ${req.user.name}`
-    );
-
-    res.status(200).json({ message: `Notifications sent to ${target}` });
+    res.status(202).json({ message: `Notification send started for ${target}` });
   } catch (error) {
     console.error('Error sending notifications:', error);
-    res.status(500).json({ error: 'Failed to send notifications' });
+    res.status(error.statusCode || 500).json({ error: error.message || 'Failed to start notifications' });
   }
 };
 
@@ -242,6 +181,184 @@ export const getNotificationHistory = async (req, res) => {
   } catch (error) {
     console.error('Error fetching notification history:', error);
     res.status(500).json({ error: 'Failed to fetch notification history' });
+  }
+};
+
+const parseScheduleDate = (scheduledAt) => {
+  if (!scheduledAt) {
+    const error = new Error('scheduledAt is required');
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const date = DateTime.fromISO(scheduledAt, { zone: 'Asia/Kolkata' });
+  if (!date.isValid) {
+    const error = new Error('Invalid scheduled date');
+    error.statusCode = 400;
+    throw error;
+  }
+  if (date.toJSDate() <= new Date()) {
+    const error = new Error('Scheduled date must be in the future');
+    error.statusCode = 400;
+    throw error;
+  }
+  return date.toJSDate();
+};
+
+const createNotificationSchedule = async ({
+  req,
+  title,
+  message,
+  link,
+  target = 'All',
+  registerId,
+  scheduledAt
+}) => {
+  if (!title?.trim() || !message?.trim()) {
+    const error = new Error('Title and message are required');
+    error.statusCode = 400;
+    throw error;
+  }
+  if (target === 'Specific User' && !registerId?.trim()) {
+    const error = new Error('Register ID is required for the specific user');
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const recipients = await getRecipientRegisterIds(target, registerId?.trim());
+  if (!recipients.length) {
+    const error = new Error('No eligible users found for the selected target');
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const schedule = await NotificationSchedule.create({
+    title: title.trim(),
+    message: message.trim(),
+    link: link?.trim() || '',
+    target,
+    registerId: target === 'Specific User' ? registerId.trim() : null,
+    recipients,
+    totalRecipients: recipients.length,
+    scheduledAt,
+    createdBy: req.user.registerId
+  });
+
+  await scheduleNotificationAtExactTime(schedule._id.toString(), scheduledAt);
+  return schedule;
+};
+
+export const createScheduledNotification = async (req, res) => {
+  try {
+    const schedule = await createNotificationSchedule({
+      req,
+      ...req.body,
+      scheduledAt: parseScheduleDate(req.body.scheduledAt)
+    });
+
+    await logActivity(
+      req,
+      'CREATE',
+      'Notification',
+      req.user.registerId,
+      { before: null, after: schedule.toObject() },
+      `Scheduled notification "${schedule.title}" for ${schedule.scheduledAt.toISOString()}`
+    );
+    res.status(201).json({ message: 'Notification scheduled', schedule });
+  } catch (error) {
+    console.error('Schedule notification error:', error.message);
+    res.status(error.statusCode || 500).json({ error: error.message || 'Failed to schedule notification' });
+  }
+};
+
+export const listScheduledNotifications = async (req, res) => {
+  try {
+    const schedules = await NotificationSchedule.find().sort({ scheduledAt: -1 }).lean();
+    res.json(schedules);
+  } catch (error) {
+    console.error('List notification schedules error:', error.message);
+    res.status(500).json({ error: 'Failed to fetch scheduled notifications' });
+  }
+};
+
+export const updateScheduledNotification = async (req, res) => {
+  try {
+    const schedule = await NotificationSchedule.findById(req.params.id);
+    if (!schedule) return res.status(404).json({ error: 'Scheduled notification not found' });
+    if (schedule.status !== 'pending') {
+      return res.status(409).json({ error: 'Sent notifications must be rescheduled' });
+    }
+
+    const replacement = await createNotificationSchedule({
+      req,
+      ...req.body,
+      scheduledAt: parseScheduleDate(req.body.scheduledAt)
+    });
+
+    await cancelScheduledNotification(schedule._id.toString());
+    await schedule.deleteOne();
+    await logActivity(
+      req,
+      'UPDATE',
+      'Notification',
+      req.user.registerId,
+      { before: schedule.toObject(), after: replacement.toObject() },
+      `Updated scheduled notification "${replacement.title}"`
+    );
+    res.json({ message: 'Scheduled notification updated', schedule: replacement });
+  } catch (error) {
+    console.error('Update notification schedule error:', error.message);
+    res.status(error.statusCode || 500).json({ error: error.message || 'Failed to update scheduled notification' });
+  }
+};
+
+export const rescheduleNotification = async (req, res) => {
+  try {
+    const schedule = await NotificationSchedule.findById(req.params.id);
+    if (!schedule) return res.status(404).json({ error: 'Scheduled notification not found' });
+    if (schedule.status === 'pending') {
+      return res.status(409).json({ error: 'Pending notifications should be edited' });
+    }
+
+    const replacement = await createNotificationSchedule({
+      req,
+      ...req.body,
+      scheduledAt: parseScheduleDate(req.body.scheduledAt)
+    });
+    await logActivity(
+      req,
+      'UPDATE',
+      'Notification',
+      req.user.registerId,
+      { before: schedule.toObject(), after: replacement.toObject() },
+      `Rescheduled notification "${replacement.title}"`
+    );
+    res.status(201).json({ message: 'Notification rescheduled', schedule: replacement });
+  } catch (error) {
+    console.error('Reschedule notification error:', error.message);
+    res.status(error.statusCode || 500).json({ error: error.message || 'Failed to reschedule notification' });
+  }
+};
+
+export const deleteScheduledNotification = async (req, res) => {
+  try {
+    const schedule = await NotificationSchedule.findById(req.params.id);
+    if (!schedule) return res.status(404).json({ error: 'Scheduled notification not found' });
+
+    await cancelScheduledNotification(schedule._id.toString());
+    await schedule.deleteOne();
+    await logActivity(
+      req,
+      'DELETE',
+      'Notification',
+      req.user.registerId,
+      { before: schedule.toObject(), after: null },
+      `Deleted scheduled notification "${schedule.title}"`
+    );
+    res.json({ message: 'Scheduled notification deleted' });
+  } catch (error) {
+    console.error('Delete notification schedule error:', error.message);
+    res.status(error.statusCode || 500).json({ error: error.message || 'Failed to delete scheduled notification' });
   }
 };
 

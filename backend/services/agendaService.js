@@ -6,6 +6,9 @@ import ActivityLog from '../models/ActivityLog.js';
 import User from '../models/User.js';
 import { sendEmailsSequential } from './mailerService.js';
 import { sendBirthdayEmails } from './birthdayEmail.js';
+import NotificationSchedule from '../models/NotificationSchedule.js';
+import NotificationHistory from '../models/NotificationHistory.js';
+import { sendNotificationPayload } from './notificationService.js';
 
 let agendaInstance = null;
 
@@ -144,6 +147,84 @@ const defineJobs = (agenda) => {
   agenda.define('send-birthday-emails', { concurrency: 1, lockLifetime: 60 * 60 * 1000 }, async () => {
     await sendBirthdayEmails();
   });
+
+  agenda.define('send-scheduled-notification', { concurrency: 1, lockLifetime: 60 * 60 * 1000 }, async (job) => {
+    const { scheduleId } = job.attrs.data || {};
+    if (!scheduleId) return;
+
+    const schedule = await NotificationSchedule.findById(scheduleId);
+    if (!schedule || schedule.status === 'completed') return;
+
+    schedule.sendStartedAt = new Date();
+    schedule.status = 'pending';
+    await schedule.save();
+
+    const recipients = schedule.recipients;
+    await NotificationHistory.create({
+      title: schedule.title,
+      body: schedule.message,
+      link: schedule.link || '',
+      recipients,
+      sentBy: schedule.createdBy
+    });
+
+    const { failedRecipients } = await sendNotificationPayload({
+      title: schedule.title,
+      body: schedule.message,
+      link: schedule.link,
+      target: schedule.target,
+      registerId: schedule.registerId,
+      recipientRegisterIds: recipients
+    });
+
+    schedule.totalRecipients = recipients.length;
+    schedule.failedRecipients = failedRecipients;
+    schedule.completedAt = new Date();
+    schedule.status = failedRecipients.length ? 'failed' : 'completed';
+    await schedule.save();
+  });
+
+  agenda.define('send-immediate-notification', { concurrency: 1, lockLifetime: 60 * 60 * 1000 }, async (job) => {
+    const {
+      title,
+      body,
+      link,
+      target,
+      senderRegisterId,
+      senderName,
+      recipients
+    } = job.attrs.data || {};
+    if (!title || !body || !senderRegisterId || !recipients?.length) return;
+
+    await NotificationHistory.create({
+      title,
+      body,
+      link: link || '',
+      recipients,
+      sentBy: senderRegisterId
+    });
+
+    const { failedRecipients } = await sendNotificationPayload({
+      title,
+      body,
+      link,
+      target,
+      recipientRegisterIds: recipients
+    });
+
+    await ActivityLog.create({
+      action: 'CREATE',
+      entityType: 'Notification',
+      entityId: Date.now().toString(),
+      registerId: senderRegisterId,
+      userName: senderName || 'NA',
+      changes: {
+        before: null,
+        after: { title, body, link, target, recipientCount: recipients.length, failedCount: failedRecipients.length }
+      },
+      description: `Notification "${title}" sent to ${target} (${recipients.length} recipients) by ${senderName || senderRegisterId}`
+    });
+  });
 };
 
 export const startAgenda = async () => {
@@ -204,10 +285,49 @@ export const cancelScheduledEmail = async (scheduleId) => {
   });
 };
 
+export const scheduleNotificationAtExactTime = async (scheduleId, scheduledAt) => {
+  if (!agendaInstance) {
+    throw new Error('Agenda is not started');
+  }
+  await agendaInstance.schedule(scheduledAt, 'send-scheduled-notification', { scheduleId });
+};
+
+export const scheduleImmediateNotification = async (data) => {
+  if (!agendaInstance) {
+    throw new Error('Agenda is not started');
+  }
+  await agendaInstance.now('send-immediate-notification', data);
+};
+
+export const cancelScheduledNotification = async (scheduleId) => {
+  if (!agendaInstance) {
+    throw new Error('Agenda is not started');
+  }
+  await agendaInstance.cancel({
+    name: 'send-scheduled-notification',
+    'data.scheduleId': {
+      $in: [
+        scheduleId,
+        ...(mongoose.Types.ObjectId.isValid(scheduleId)
+          ? [new mongoose.Types.ObjectId(scheduleId)]
+          : [])
+      ]
+    }
+  });
+};
+
 export const clearAllAgendaJobs = async () => {
   if (!agendaInstance) {
     throw new Error('Agenda is not started');
   }
 
   await agendaInstance.cancel({});
+};
+
+export const clearAgendaJobsByName = async (name) => {
+  if (!agendaInstance) {
+    throw new Error('Agenda is not started');
+  }
+
+  await agendaInstance.cancel({ name });
 };

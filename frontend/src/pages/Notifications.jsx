@@ -5,12 +5,15 @@ import NotificationHistory from '../components/notifications/NotificationHistory
 import { API_URL } from '../utils/config';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
+import NotificationScheduleList from '../components/notifications/NotificationScheduleList';
 
 function Notifications() {
-  const { user } = useAuth();
+  const { user, hasAccess } = useAuth();
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [historyType, setHistoryType] = useState('received');
+  const [editingSchedule, setEditingSchedule] = useState(null);
+  const [scheduleRefreshKey, setScheduleRefreshKey] = useState(0);
 
   const fetchHistory = async () => {
     if (!user?.registerId) return;
@@ -31,24 +34,32 @@ function Notifications() {
     fetchHistory();
   }, [user, historyType]);
 
-  const handleNewNotification = (notificationData) => {
-    const newEntry = {
-      _id: Math.random().toString(36).slice(2),
-      title: notificationData.title,
-      body: notificationData.body,
-      link: notificationData.link || '',
-      target: notificationData.target,
-      sentBy: user?.registerId || 'System',
-      createdAt: new Date().toISOString(),
-    };
+  const handleNewNotification = () => {
     fetchHistory();
+  };
+
+  const handleScheduled = () => {
+    setEditingSchedule(null);
+    setScheduleRefreshKey((value) => value + 1);
   };
 
   return (
     <div className="max-w-1xl mx-auto space-y-6">
       <h2 className="text-2xl font-semibold">Notifications</h2>
       <NotificationSettings />
-      <NotificationForm onSuccess={handleNewNotification} />
+      <NotificationForm
+        onSuccess={handleNewNotification}
+        onScheduled={handleScheduled}
+        editingSchedule={editingSchedule}
+        onCancelEdit={() => setEditingSchedule(null)}
+        canSchedule={hasAccess('Privileged')}
+      />
+      {hasAccess('Privileged') && (
+        <NotificationScheduleList
+          key={scheduleRefreshKey}
+          onEdit={setEditingSchedule}
+        />
+      )}
       <NotificationHistory
         history={history}
         loading={loading}

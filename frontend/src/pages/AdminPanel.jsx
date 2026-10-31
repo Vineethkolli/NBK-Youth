@@ -3,7 +3,6 @@ import PaymentDetails from '../components/adminPanel/PaymentDetails';
 import MaintenanceMode from '../components/adminPanel/MaintenanceMode';
 import BannerManager from '../components/adminPanel/BannerManager';
 import EventLabelManager from '../components/adminPanel/EventLabelManager';
-import ScheduledNotifications from '../components/adminPanel/ScheduledNotifications';
 
 function AdminPanel() {
   const { hasAccess } = useAuth();
@@ -19,7 +18,6 @@ function AdminPanel() {
       <MaintenanceMode />
       <EventLabelManager />
       <PaymentDetails />
-      <ScheduledNotifications />
     </div>
   );
 }
