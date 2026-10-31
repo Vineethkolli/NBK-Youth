@@ -7,6 +7,16 @@ const notificationHistorySchema = new mongoose.Schema(
     link: { type: String, required: false },
     recipients: { type: [String], required: true },
     sentBy: { type: String, required: true }, 
+    scheduleId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'NotificationSchedule',
+      default: null
+    },
+    source: {
+      type: String,
+      enum: ['immediate', 'scheduled'],
+      default: 'immediate'
+    },
     failedRecipients: { type: [String], default: [] },
     status: {
       type: String,

@@ -102,8 +102,8 @@ function ClearData() {
           { name: 'User Payments', type: 'payment' },
           { name: 'Notification History', type: 'notifications' },
           { name: 'Mailer History', type: 'mailerHistory' },
-          { name: 'Scheduled Mails & Agenda Jobs', type: 'scheduledMails' },
-          { name: 'Scheduled Notifications & Agenda Jobs', type: 'scheduledNotifications' },
+          { name: 'Scheduled Mails', type: 'scheduledMails' },
+          { name: 'Scheduled Notifications', type: 'scheduledNotifications' },
           { name: 'Activity Logs', type: 'activityLog' },
         ].map(({ name, type }) => (
           <div key={type} className="flex items-center justify-between">

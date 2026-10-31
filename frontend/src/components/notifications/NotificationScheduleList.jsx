@@ -49,9 +49,12 @@ function NotificationScheduleList({ onEdit }) {
           <h3 className="text-lg font-semibold text-gray-900">Scheduled Notifications</h3>
           <p className="text-xs text-gray-500">Notifications will be sent at their scheduled time (IST)</p>
         </div>
+        <div className="flex shrink-0 items-center gap-2">
         <button type="button" onClick={() => setEditMode((value) => !value)} className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium text-gray-500 hover:bg-gray-100">
           <Pencil className="h-4 w-4" /> {editMode ? 'Done' : 'Edit'}
         </button>
+        <CalendarClock className="h-5 w-5 text-gray-400" />
+        </div>
       </div>
       {loading ? <div className="text-sm text-gray-500">Loading...</div> : schedules.length === 0 ? <div className="text-sm text-gray-500">No scheduled notifications.</div> : (
         <div className="space-y-3">

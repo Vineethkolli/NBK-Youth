@@ -165,7 +165,9 @@ const defineJobs = (agenda) => {
       body: schedule.message,
       link: schedule.link || '',
       recipients,
-      sentBy: schedule.createdBy
+      sentBy: schedule.createdBy,
+      scheduleId: schedule._id,
+      source: 'scheduled'
     });
 
     const { failedRecipients } = await sendNotificationPayload({

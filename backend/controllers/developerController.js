@@ -46,6 +46,7 @@ export const developerController = {
           break;
 
         case 'notifications':
+          await clearAgendaJobsByName('send-immediate-notification');
           await NotificationHistory.deleteMany({});
           description = 'Cleared all notification history';
           break;
@@ -68,21 +69,24 @@ export const developerController = {
           break;
 
         case 'mailerHistory':
+          await clearAgendaJobsByName('send-immediate-email');
           await MailerHistory.deleteMany({});
           description = 'Cleared all mailer history';
           break;
 
-        case 'scheduledMails':
-          await MailerSchedule.deleteMany({});
+        case 'scheduledMails': {
           await clearAgendaJobsByName('send-scheduled-email');
-          description = 'Cleared all scheduled mails and their Agenda jobs';
+          await MailerSchedule.deleteMany({});
+          description = 'Cleared all scheduled mails';
           break;
+        }
 
-        case 'scheduledNotifications':
-          await NotificationSchedule.deleteMany({});
+        case 'scheduledNotifications': {
           await clearAgendaJobsByName('send-scheduled-notification');
-          description = 'Cleared all scheduled notifications and their Agenda jobs';
+          await NotificationSchedule.deleteMany({});
+          description = 'Cleared all scheduled notifications';
           break;
+        }
 
         case 'activityLog': {
           const payload = (req.body && Object.keys(req.body).length) ? req.body : (req.query || {});
