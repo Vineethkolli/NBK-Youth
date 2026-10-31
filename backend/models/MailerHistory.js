@@ -40,8 +40,6 @@ const mailerHistorySchema = new mongoose.Schema(
       enum: ['immediate', 'scheduled', 'birthday'],
       default: 'immediate'
     },
-    memberRegisterId: { type: String, default: null },
-    birthdayYear: { type: Number, default: null },
     birthdayKey: { type: String, default: null }
   },
   { timestamps: true }

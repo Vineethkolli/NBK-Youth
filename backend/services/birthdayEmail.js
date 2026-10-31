@@ -57,20 +57,20 @@ const parseBirthday = (birthday) => {
   return { day, month };
 };
 
-const logBirthdayEmailActivity = async ({ history, user, status, description }) => {
+const logBirthdayEmailActivity = async ({ history, user, year, status, description }) => {
   try {
     await ActivityLog.create({
       action: status === 'completed' ? 'CREATE' : 'UPDATE',
       entityType: 'Mailer',
       entityId: history._id.toString(),
-      registerId: history.memberRegisterId || 'SYSTEM',
+      registerId: user.registerId || 'SYSTEM',
       userName: user.name || 'NA',
       changes: {
         before: null,
         after: {
           subject: history.subject,
           recipient: user.email,
-          birthdayYear: history.birthdayYear,
+          birthdayYear: year,
           status
         }
       },
@@ -108,8 +108,6 @@ const claimBirthdayHistory = async ({ user, year, subject, body, footer }) => {
       sentAt: new Date(),
       status: 'sending',
       source: 'birthday',
-      memberRegisterId: user.registerId,
-      birthdayYear: year,
       birthdayKey
     });
   } catch (error) {
@@ -161,6 +159,7 @@ export const sendBirthdayEmails = async (referenceDate = DateTime.now()) => {
     await logBirthdayEmailActivity({
       history,
       user,
+      year: now.year,
       status: history.status,
       description: `Birthday email ${history.status} for ${user.name} (${now.year})`
     });
