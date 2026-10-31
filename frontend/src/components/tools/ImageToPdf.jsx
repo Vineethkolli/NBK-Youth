@@ -45,7 +45,7 @@ export default function ImageToPdfTool() {
 
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
-    const margin = 5; // 5mm margin
+    const margin = 5;
 
     const imgData = await getImageData(image);
 
@@ -58,13 +58,11 @@ export default function ImageToPdfTool() {
         let imgWidth = maxWidth;
         let imgHeight = (img.height / img.width) * imgWidth;
 
-        // If image is taller than page, scale down
         if (imgHeight > maxHeight) {
           imgHeight = maxHeight;
           imgWidth = (img.width / img.height) * imgHeight;
         }
 
-        // Center image on page
         const x = (pageWidth - imgWidth) / 2;
         const y = (pageHeight - imgHeight) / 2;
 

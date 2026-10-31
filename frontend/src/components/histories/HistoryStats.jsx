@@ -37,14 +37,12 @@ function HistoryStats({ stats, snapshotName }) {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="space-y-2">
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-semibold">Statistics</h1>
         </div>
       </div>
 
-      {/* Budget + User Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Budget Stats */}
         <div className="bg-white rounded-lg shadow p-6">
@@ -52,7 +50,6 @@ function HistoryStats({ stats, snapshotName }) {
             <IndianRupee className="mr-2" /> Budget Stats
           </h2>
           <div className="grid grid-cols-2 gap-4">
-            {/* Total Income */}
             <div>
               <p className="font-semibold">Total Income</p>
               <p className="text-sm text-gray-600">
@@ -63,7 +60,6 @@ function HistoryStats({ stats, snapshotName }) {
               </p>
             </div>
 
-            {/* Amount Received */}
             <div>
               <p className="font-semibold">Amount Received</p>
               <p className="text-sm text-gray-600">
@@ -78,7 +74,6 @@ function HistoryStats({ stats, snapshotName }) {
               </div>
             </div>
 
-            {/* Amount Pending */}
             <div>
               <p className="font-semibold">Amount Pending</p>
               <p className="text-sm text-gray-600">
@@ -89,7 +84,6 @@ function HistoryStats({ stats, snapshotName }) {
               </p>
             </div>
 
-            {/* Total Expenses */}
             <div>
               <p className="font-semibold">Total Expenses</p>
               <p className="text-sm text-gray-600">
@@ -100,7 +94,6 @@ function HistoryStats({ stats, snapshotName }) {
               </p>
             </div>
 
-            {/* Previous Year */}
             <div>
               <p className="font-semibold">Previous Year Amount</p>
               <p className="text-lg font-bold">
@@ -122,7 +115,6 @@ function HistoryStats({ stats, snapshotName }) {
               </div>
             </div>
 
-            {/* Amount Left */}
             <div>
               <div className="flex items-center gap-1.5">
                 <p className="font-semibold">Amount Left</p>
@@ -187,7 +179,6 @@ function HistoryStats({ stats, snapshotName }) {
         </div>
       </div>
 
-      {/* Villagers + Youth */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Villagers */}
         <div className="bg-white rounded-lg shadow p-6">

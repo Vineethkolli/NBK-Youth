@@ -54,7 +54,6 @@ function PaymentForm({ onSubmit }) {
     navigator.clipboard.writeText(text);
     toast.success(`${type} copied to clipboard`);
 
-    // Update copied details state based on type
     if (type === 'UPI Number') {
       setCopiedDetails({ ...copiedDetails, upiNumber: text, upiId: '' });
     } else if (type === 'UPI ID') {

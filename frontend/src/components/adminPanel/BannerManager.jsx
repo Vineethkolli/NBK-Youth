@@ -69,7 +69,7 @@ export default function BannerManager() {
         ...f,
         image: file,
         video: '',
-        deleteVideo: f.video && !f._id ? undefined : f.deleteVideo, // clear deleteVideo if not editing
+        deleteVideo: f.video && !f._id ? undefined : f.deleteVideo,
         deleteImage: f._id && f.image && !(f.image instanceof File) ? true : undefined
       }));
     } else if (type === 'video') {
@@ -77,7 +77,7 @@ export default function BannerManager() {
         ...f,
         video: file,
         image: '',
-        deleteImage: f.image && !f._id ? undefined : f.deleteImage, // clear deleteImage if not editing
+        deleteImage: f.image && !f._id ? undefined : f.deleteImage,
         deleteVideo: f._id && f.video && !(f.video instanceof File) ? true : undefined
       }));
     }
@@ -195,7 +195,6 @@ export default function BannerManager() {
     }
   };
   
-  // Render message text, replacing URLs with an "Open" button
   const renderMessageWithLinks = (text) =>
     text.split(/(https?:\/\/[^\s]+)/g).map((part, idx) =>
       /https?:\/\//.test(part) ? (
@@ -439,7 +438,6 @@ export default function BannerManager() {
                 )}
               </div>
 
-              {/* Settings */}
               <div className="grid grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">

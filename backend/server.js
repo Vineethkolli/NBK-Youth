@@ -64,7 +64,7 @@ app.use(
 // Environment variables validation
 const requiredVars = [ 'FRONTEND_URL', 'MONGODB_URI', 'JWT_SECRET', 'PUBLIC_VAPID_KEY', 'PRIVATE_VAPID_KEY',
   'CLOUDINARY_CLOUD_NAME', 'CLOUDINARY_API_KEY', 'CLOUDINARY_API_SECRET', 'GOOGLE_DRIVE_CREDENTIALS', 'GOOGLE_DRIVE_FOLDER_ID',
-   'DEFAULT_DEVELOPER_PASSWORD' ];
+  'DEFAULT_DEVELOPER_PASSWORD' ];
 requiredVars.forEach(v => {
   if (!process.env[v]) {
     console.error(`Missing required environment variable: ${v}`);
@@ -158,7 +158,6 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Internal server error' });
 });
 
-// 404 Handler
 app.use((req, res) => {
   res.status(404).json({ error: 'Endpoint not found' });
 });

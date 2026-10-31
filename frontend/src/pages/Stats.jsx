@@ -91,7 +91,6 @@ function Stats() {
     return <span translate="no" className="notranslate">{value}</span>;
   };
 
-  // Wrap currency values in a noTranslate span
   const formatAmount = (amount) => {
     const formatted = new Intl.NumberFormat('en-IN', {
       style: 'currency',

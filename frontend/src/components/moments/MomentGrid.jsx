@@ -120,7 +120,6 @@ useEffect(() => {
 
               {isEditMode && (
   <div className="absolute top-2 right-2 flex items-center space-x-2">
-    {/* Drive Indicator*/}
     {moment.type === 'drive' && (
       <div className="flex items-center bg-indigo-600 text-white text-xs font-medium px-2 py-1 rounded-full mr-2 shadow-sm">
         <FolderOpen className="h-4 w-4 mr-1"/>

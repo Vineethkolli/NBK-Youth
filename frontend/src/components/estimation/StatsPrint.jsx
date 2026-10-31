@@ -209,7 +209,6 @@ const StatsPrint = ({ stats, budgetStats }) => {
       ...commonTableOptions
     });
 
-    // Footer
     const timestamp = new Date().toLocaleString();
     const pageCount = doc.getNumberOfPages();
 for (let i = 1; i <= pageCount; i++) {

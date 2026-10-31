@@ -40,7 +40,6 @@ function PasswordChangeForm({
           </div>
         )}
 
-        {/* New Password */}
         <div>
           <label className="block text-sm font-medium text-gray-700">
             {isSettingPassword ? 'Password' : 'New Password'}
@@ -65,7 +64,6 @@ function PasswordChangeForm({
           </div>
         </div>
 
-        {/* Confirm Password */}
         <div>
           <label className="block text-sm font-medium text-gray-700">
             Confirm {isSettingPassword ? 'Password' : 'New Password'}

@@ -22,7 +22,6 @@ const StatsPrint = ({ stats }) => {
     const timestamp = new Date().toLocaleString();
     let yPos = 20;
 
-    // Title
     doc.setFontSize(20);
     doc.setTextColor(0, 0, 0);
     const title = 'Statistics Report';
@@ -40,7 +39,6 @@ const StatsPrint = ({ stats }) => {
       yPos += 5;
     }
 
-    // Budget Stats
     doc.setFontSize(14);
     doc.setTextColor(0, 0, 0);
     doc.text('Budget Statistics', 15, yPos);
@@ -74,7 +72,6 @@ const StatsPrint = ({ stats }) => {
     });
     yPos = doc.lastAutoTable.finalY + 16;
 
-    // Payment Mode Stats
     doc.setFontSize(14);
     doc.setTextColor(0, 0, 0);
     doc.text('Payment Mode Statistics', 15, yPos);
@@ -95,7 +92,6 @@ const StatsPrint = ({ stats }) => {
     });
     yPos = doc.lastAutoTable.finalY + 16;
 
-    // Villagers Stats
     doc.setFontSize(14);
     doc.setTextColor(0, 0, 0);
     doc.text('Villagers Statistics', 15, yPos);
@@ -117,7 +113,6 @@ const StatsPrint = ({ stats }) => {
     });
     yPos = doc.lastAutoTable.finalY + 16;
 
-    // Youth Stats
     doc.setFontSize(14);
     doc.setTextColor(0, 0, 0);
     doc.text('Youth Statistics', 15, yPos);
@@ -139,7 +134,6 @@ const StatsPrint = ({ stats }) => {
     });
     yPos = doc.lastAutoTable.finalY + 16;
 
-    // Date-wise Statistics
     if (stats.dateWiseStats && stats.dateWiseStats.length > 0) {
       doc.addPage();
       yPos = 20;
@@ -167,7 +161,6 @@ const StatsPrint = ({ stats }) => {
       });
     }
 
-    // Footer
 const pageCount = doc.getNumberOfPages();
 for (let i = 1; i <= pageCount; i++) {
   doc.setPage(i);

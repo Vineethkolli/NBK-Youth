@@ -17,7 +17,7 @@ function InstallApp() {
   const [isMobileDevice, setIsMobileDevice] = useState(false);
 
   useEffect(() => {
-    // Detect mobile/tablet devices
+    // Detect device
     const ua = navigator.userAgent;
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|Windows Phone/i.test(ua);
     setIsMobileDevice(isMobile);
@@ -31,7 +31,6 @@ function InstallApp() {
       setPlatform('desktop');
     }
 
-    // Check if already installed
     if (
       window.matchMedia('(display-mode: standalone)').matches ||
       window.navigator.standalone === true
@@ -100,7 +99,6 @@ function InstallApp() {
         </div>
       </div>
 
-      {/* iOS Popup Instructions */}
       {showIOSPopup && (
         <div
           className="fixed inset-0 flex items-center justify-center bg-black/50 z-50"

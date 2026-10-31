@@ -55,7 +55,6 @@ function GalleryReorder({ mediaFiles, onSave, onCancel }) {
 
   return (
     <div className="flex-1 overflow-y-auto p-4">
-      {/* Info + Save/Cancel */}
       <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4 flex flex-col items-center space-y-3 mb-6">
         <p className="text-indigo-800 text-sm text-center">
           <GripHorizontal className="h-4 w-4 inline mb-1" /> Drag or use arrows to change order of media files.
@@ -96,7 +95,6 @@ function GalleryReorder({ mediaFiles, onSave, onCancel }) {
                         snapshot.isDragging ? 'ring-2 ring-indigo-500' : 'hover:shadow-lg'
                       }`}
                     >
-                      {/* Media + Order Number */}
                       <div className="relative">
                         <div className="w-full h-32">
                           <img
@@ -113,7 +111,6 @@ function GalleryReorder({ mediaFiles, onSave, onCancel }) {
                           {index + 1}
                         </div>
                         
-                        {/* Video indicator - Bottom Left */}
                         {file.type === 'video' && (
                           <div className="absolute bottom-2 left-2 flex items-center space-x-1 bg-black/70 rounded-full px-2 py-1">
                             <div className="w-0 h-0 border-l-[4px] border-l-white border-t-[2px] border-t-transparent border-b-[2px] border-b-transparent"></div>
@@ -122,12 +119,10 @@ function GalleryReorder({ mediaFiles, onSave, onCancel }) {
                         )}
                       </div>
 
-                      {/* File Name */}
                       <div className="p-2 text-center text-xs font-semibold truncate">
                         {file.name || 'Untitled'}
                       </div>
 
-                      {/* Reorder Controls */}
                       <div className="p-2 bg-gray-50 border-t flex justify-center items-center space-x-3">
                         <div {...dragProvided.dragHandleProps} className="flex items-center">
                           <GripHorizontal className="h-4 w-4 text-gray-500 hover:text-gray-700" />

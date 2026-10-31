@@ -149,7 +149,6 @@ function MomentReorder({ moments, onSave, onCancel }) {
                           : 'hover:shadow-lg'
                       }`}
                     >
-                      {/* Media + Order Number */}
                       <div className="relative">
                         <div className="w-full h-48">
                           {moment.type === 'youtube' ? (
@@ -167,12 +166,10 @@ function MomentReorder({ moments, onSave, onCancel }) {
                         </div>
                       </div>
 
-                      {/* Title */}
                       <div className="p-2 text-center text-sm font-semibold truncate">
                         {moment.title || 'Untitled'}
                       </div>
 
-                      {/* Reorder Controls */}
                       <div className="p-3 bg-gray-50 border-t flex justify-center items-center space-x-4">
                         <div {...dragProvided.dragHandleProps} className="flex items-center">
                           <GripHorizontal className="h-5 w-5 text-gray-500 hover:text-gray-700" />

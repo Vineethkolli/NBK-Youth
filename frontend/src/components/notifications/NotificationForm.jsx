@@ -161,7 +161,7 @@ function NotificationForm({
             rows={3}
             value={body}
             onChange={(event) => setBody(event.target.value)}
-            placeholder="Write notification message"
+            placeholder="Notification message"
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
           />
         </div>

@@ -7,10 +7,8 @@ const IncomePrint = ({ incomes, visibleColumns, incomeFilters }) => {
   const { eventLabel } = useEventLabel();
 
   const generatePDF = () => {
-    // Clone incomes to avoid mutating the original array
     let sortedIncomes = [...incomes];
 
-    // Apply sorting if incomeFilters.sortOrder is provided
     if (incomeFilters && incomeFilters.sortOrder) {
       const { sortField, sortOrder } = incomeFilters;
       sortedIncomes.sort((a, b) => {
@@ -24,7 +22,6 @@ const IncomePrint = ({ incomes, visibleColumns, incomeFilters }) => {
     const timestamp = new Date().toLocaleString();
     const pageWidth = doc.internal.pageSize.getWidth();
 
-    // Title
     doc.setFontSize(16);
     doc.text('Estimated Income Report', pageWidth / 2, 15, { align: 'center' });
 
@@ -34,7 +31,6 @@ const IncomePrint = ({ incomes, visibleColumns, incomeFilters }) => {
       doc.text(eventLabel.label, pageWidth / 2, 22, { align: 'center' });
     }
 
-    // Prepare table header based on visible columns
     const tableColumns = [];
     if (visibleColumns.sno) tableColumns.push("S.No");
     if (visibleColumns.registerId) tableColumns.push("Register ID");
@@ -45,7 +41,6 @@ const IncomePrint = ({ incomes, visibleColumns, incomeFilters }) => {
     if (visibleColumns.status) tableColumns.push("Status");
     if (visibleColumns.remarks) tableColumns.push("Remarks");
 
-    // Prepare table rows dynamically from sorted incomes
     const tableRows = sortedIncomes.map((income, index) => {
       const row = [];
       if (visibleColumns.sno) row.push(index + 1);
@@ -59,7 +54,6 @@ const IncomePrint = ({ incomes, visibleColumns, incomeFilters }) => {
       return row;
     });
 
-    // Table
     autoTable(doc, {
       startY: eventLabel ? 30 : 25,
       head: [tableColumns],
@@ -67,7 +61,6 @@ const IncomePrint = ({ incomes, visibleColumns, incomeFilters }) => {
       margin: { top: 10 },
     });
 
-    // Footer
     const pageCount = doc.getNumberOfPages();
 for (let i = 1; i <= pageCount; i++) {
   doc.setPage(i);

@@ -13,14 +13,11 @@ function ClearData() {
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
 
-  // Options from ActivityLog entityTypes
-  const activityEntities = [
-    'User', 'Income', 'Expense', 'Payment', 'Vibe', 'Moment', 'Game', 'Banner', 'EstimatedIncome', 
-    'EstimatedExpense', 'HiddenProfile', 'Slide', 'EventTimeline', 'Notification', 'PreviousYear', 'MaintenanceMode', 
-    'DeveloperOptions', 'Committee', 'People', 'PaymentDetails', 'EventLabel', 'LockSettings', 'FinancialRecord', 'TimelineRecord',
-    'EventRecord', 'Snapshot', 'ProcessedRecord', 'History', 'Email', 'Mobile', 'Mailer', 'FileAsset', 'Note',
-    'UniversalPin', 'Monitor'
-  ];
+  const activityEntities = ['Banner', 'Committee', 'DeveloperOptions', 'Email', 'EventLabel', 'EventRecord', 'EventTimeline',
+  'EstimatedExpense', 'EstimatedIncome', 'Expense', 'FileAsset', 'FinancialRecord', 'Game', 'HiddenProfile', 'History',
+  'Income', 'LockSettings', 'Mailer', 'MaintenanceMode', 'Mobile', 'Monitor', 'Moment', 'Note', 'Notification', 'Payment',
+  'PaymentDetails', 'People', 'PreviousYear', 'ProcessedRecord', 'Slide', 'Snapshot', 'TimelineRecord', 'UniversalPin',
+  'User', 'Vibe' ];
 
   const openConfirmDialog = (type) => {
     setConfirmAction(type);

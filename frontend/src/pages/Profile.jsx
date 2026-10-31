@@ -96,7 +96,6 @@ function Profile() {
     const normalizedEmail = userData.email?.trim().toLowerCase() || '';
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     
-    // Check if developer is trying to change email
     if (user.email === 'gangavaramnbkyouth@gmail.com' && normalizedEmail !== user.email) {
       return toast.error("Developer email cannot be changed");
     }

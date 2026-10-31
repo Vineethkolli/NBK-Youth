@@ -67,15 +67,11 @@ function New() {
 
           <div className="relative bg-gradient-to-r from-indigo-600 via-blue-500 to-cyan-400 px-8 py-12 text-center text-white overflow-hidden">
 
-            {/* Rocket */}
-
             <div className="relative w-fit mx-auto rocketFloat">
 
               <div className="relative w-28 h-28 rounded-full bg-white/20 flex items-center justify-center backdrop-blur shadow-2xl">
 
                 <Rocket size={54} />
-
-                {/* Flames */}
 
                 <div className="absolute top-full flex flex-col items-center">
 
@@ -103,8 +99,6 @@ function New() {
           {/* CONTENT */}
 
           <div className="p-8 md:p-12">
-
-            {/* Animated Terminal */}
 
             <div className="bg-gray-900 rounded-2xl overflow-hidden shadow-xl mb-12">
 

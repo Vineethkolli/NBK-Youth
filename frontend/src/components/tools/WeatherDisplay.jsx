@@ -159,7 +159,7 @@ export default function WeatherDisplay({ weather, locationName, hourlyWindow, da
           </div>
         </div>
 
-        {/* Todat stats */}
+        {/* Today's stats */}
         <div className="grid grid-cols-3 gap-2 sm:gap-4">
           <div className="bg-red-50 border border-red-100 rounded-xl p-3 text-center">
             <div className="text-xs text-red-600 font-semibold uppercase">High</div>

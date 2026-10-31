@@ -121,11 +121,9 @@ const ActivityLogPrint = ({ filters, search }) => {
         ];
       });
 
-      // Title
       doc.setFontSize(16);
       doc.text(title, pageWidth / 2, 15, { align: 'center' });
 
-      // Table
       autoTable(doc, {
         head: [headers],
         body: rows,
@@ -133,7 +131,6 @@ const ActivityLogPrint = ({ filters, search }) => {
         styles: { fontSize: 10 },
       });
 
-      // Footer
       const pageCount = doc.getNumberOfPages();
       for (let i = 1; i <= pageCount; i++) {
         doc.setPage(i);

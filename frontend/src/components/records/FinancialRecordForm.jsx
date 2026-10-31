@@ -185,7 +185,6 @@ function FinancialRecordForm({ record, onClose, onSubmit }) {
             />
           </div>
 
-          {/* Checkbox for FD details */}
           <div className="flex items-center space-x-2">
             <input
               type="checkbox"
@@ -196,7 +195,6 @@ function FinancialRecordForm({ record, onClose, onSubmit }) {
             <label className="text-sm font-medium text-gray-700">FD Details</label>
           </div>
 
-          {/* FD Details (conditionally rendered) */}
 {showFdDetails && (
   <>
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

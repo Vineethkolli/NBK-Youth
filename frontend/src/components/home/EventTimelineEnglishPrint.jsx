@@ -37,7 +37,6 @@ function EventTimelineEnglishPrint({ events }) {
       styles: { fontSize: 10, cellPadding: 2, rowHeight: 7 },
     });
 
-    // Footer
 const pageCount = doc.getNumberOfPages();
 for (let i = 1; i <= pageCount; i++) {
   doc.setPage(i);

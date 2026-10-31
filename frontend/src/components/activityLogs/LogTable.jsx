@@ -150,7 +150,6 @@ function LogTable({ logs, loading, pagination, onPageChange }) {
         </table>
       </div>
 
-      {/* Pagination */}
       <div className="flex items-center justify-between px-6 py-3 border-t">
         <div className="text-sm text-gray-700">
           Showing page {pagination.currentPage} of {pagination.totalPages} (

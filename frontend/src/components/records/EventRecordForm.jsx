@@ -173,7 +173,6 @@ try {
           </button>
         </div>
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700">
@@ -197,7 +196,6 @@ try {
             </select>
           </div>
 
-          {/* Custom Event Name */}
           {formData.eventName === 'Other' && (
             <div>
               <label className="block text-sm font-medium text-gray-700">

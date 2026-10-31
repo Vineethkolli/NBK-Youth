@@ -73,7 +73,7 @@ function MailerEmailDialog({ email, onClose }) {
       }}
     >
       <div className="flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-xl bg-white shadow-2xl">
-        {/* Header */}
+
         <div className="flex items-start justify-between gap-4 border-b border-gray-200 px-5 py-4">
           <div className="min-w-0">
             <h2 className="break-words text-lg font-semibold text-gray-900">

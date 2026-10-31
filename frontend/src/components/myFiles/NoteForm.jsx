@@ -81,11 +81,7 @@ export default function NoteForm({
       const isEditing = Boolean(note);
 
       const headers = {};
-
-      // IMPORTANT:
-      // If this note was previously protected and the user
-      // entered the correct PIN to open it, send that same PIN
-      // when updating/unprotecting it.
+      
       if (isEditing && universalPin) {
         headers['X-Universal-Pin'] = universalPin;
       }

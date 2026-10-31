@@ -251,7 +251,6 @@ function Vibe() {
 
       <MusicPlayer />
       
-      {/* Ad free Box */}
       <div className="flex justify-center">
         <div className="w-full max-w-2xl text-center">
           <div className="rounded-2xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 p-[1px] shadow-lg">

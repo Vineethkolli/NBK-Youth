@@ -18,13 +18,12 @@ export const uploadToCloudinary = async (file, folder = 'PaymentScreenshots', ty
       quality: 'auto:good',
     };
 
-    // Decide resource_type
     if (folder === 'EventRecords') {
       options.resource_type = 'raw';
     } else if (['PaymentScreenshots', 'ExpenseBills', 'ProfileImages'].includes(folder)) {
       options.resource_type = 'image';
     } else if (folder === 'Vibe') {
-      options.resource_type = 'video'; // audio treated as video
+      options.resource_type = 'video';
     } else if (folder === 'Banners' || folder === 'HomepageSlides') {
       if (type === 'video') options.resource_type = 'video';
       else if (type === 'image') options.resource_type = 'image';

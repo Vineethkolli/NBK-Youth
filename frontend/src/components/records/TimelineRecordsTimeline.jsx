@@ -156,7 +156,6 @@ function TimelineRecordsTimeline({ records, isEditMode, onEdit, onDelete }) {
                         <p className="text-lg font-semibold">{formatAmount(additionalAmount)}</p>
                       </div>
                      
-                      {/* Final Amount Left */}
                       <div>
                         <div className="flex items-center gap-1.5">
                           <p className="text-sm text-gray-500">

@@ -68,7 +68,6 @@ function People() {
 
   const { category, street } = filters;
 
-  // Hide contact columns for users without privileged access.
   const visibleColumns = canViewContactDetails
     ? columns
     : {

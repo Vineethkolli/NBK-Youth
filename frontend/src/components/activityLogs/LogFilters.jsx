@@ -40,7 +40,6 @@ function LogFilters({ filters, onChange }) {
     onChange({ ...filters, [field]: '' });
   };
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (actionRef.current && !actionRef.current.contains(event.target)) {
@@ -59,7 +58,6 @@ function LogFilters({ filters, onChange }) {
         <Filter className="h-5 w-5 text-gray-400 mr-2" />
       </div>
 
-      {/* Action Checkboxes */}
       <div className="relative" ref={actionRef}>
         <button
           onClick={() => setShowActionDropdown((prev) => !prev)}
@@ -97,51 +95,49 @@ function LogFilters({ filters, onChange }) {
         )}
       </div>
 
-      {/* Entity Filter */}
       <select
         value={filters.entityType}
         onChange={(e) => onChange({ ...filters, entityType: e.target.value })}
         className="form-select"
       >
         <option value="">All Entities</option>
-        <option value="User">User</option>
-        <option value="Income">Income</option>
-        <option value="Expense">Expense</option>
-        <option value="People">People</option>
-        <option value="Email">Email</option>
-        <option value="Mobile">Mobile</option>
-        <option value="EstimatedIncome">Estimated Income</option>
-        <option value="EstimatedExpense">Estimated Expense</option>
-        <option value="Payment">Payment</option>
         <option value="Banner">PopUp Banner</option>
-        <option value="PreviousYear">Previous Year</option>
-        <option value="MaintenanceMode">Maintenance Mode</option>
-        <option value="HiddenProfile">Hidden Profile</option>
-        <option value="EventTimeline">Event Timeline</option>
-        <option value="Slide">Slide</option>
-        <option value="Notification">Notification</option>
-        <option value="Vibe">Vibe</option>
-        <option value="Moment">Moment</option>
-        <option value="Game">Game</option>
         <option value="Committee">Committee</option>
-        <option value="PaymentDetails">Payment Details</option>
         <option value="DeveloperOptions">Developer Options</option>
+        <option value="Email">Email</option>
         <option value="EventLabel">Event Label</option>
-        <option value="LockSettings">Lock Settings</option>
-        <option value="FinancialRecord">Financial Record</option>
-        <option value="TimelineRecord">Timeline Record</option>
         <option value="EventRecord">Event Record</option>
-        <option value="Snapshot">Snapshot</option>
-        <option value="ProcessedRecord">Processed Record</option>
-        <option value="Monitor">Monitor</option>
-        <option value="History">History</option>
-        <option value="Mailer">Mailer</option>
+        <option value="EventTimeline">Event Timeline</option>
+        <option value="EstimatedExpense">Estimated Expense</option>
+        <option value="EstimatedIncome">Estimated Income</option>
+        <option value="Expense">Expense</option>
         <option value="FileAsset">File Asset</option>
+        <option value="FinancialRecord">Financial Record</option>
+        <option value="Game">Game</option>
+        <option value="HiddenProfile">Hidden Profile</option>
+        <option value="History">History</option>
+        <option value="Income">Income</option>
+        <option value="LockSettings">Lock Settings</option>
+        <option value="Mailer">Mailer</option>
+        <option value="MaintenanceMode">Maintenance Mode</option>
+        <option value="Mobile">Mobile</option>
+        <option value="Monitor">Monitor</option>
+        <option value="Moment">Moment</option>
         <option value="Note">Note</option>
+        <option value="Notification">Notification</option>
+        <option value="Payment">Payment</option>
+        <option value="PaymentDetails">Payment Details</option>
+        <option value="People">People</option>
+        <option value="PreviousYear">Previous Year</option>
+        <option value="ProcessedRecord">Processed Record</option>
+        <option value="Slide">Slide</option>
+        <option value="Snapshot">Snapshot</option>
+        <option value="TimelineRecord">Timeline Record</option>
         <option value="UniversalPin">Universal PIN</option>
+        <option value="User">User</option>
+        <option value="Vibe">Vibe</option>
       </select>
 
-      {/* Start Date Picker */}
       <div className="flex items-center">
         <div className="flex items-center cursor-pointer" onClick={() => openPicker(startRef)}>
           <Calendar className="h-5 w-5 text-gray-400 mr-2" />
@@ -167,7 +163,6 @@ function LogFilters({ filters, onChange }) {
         )}
       </div>
 
-      {/* End Date Picker */}
       <div className="flex items-center">
         <div className="flex items-center cursor-pointer" onClick={() => openPicker(endRef)}>
           <Calendar className="h-5 w-5 text-gray-400 mr-2" />

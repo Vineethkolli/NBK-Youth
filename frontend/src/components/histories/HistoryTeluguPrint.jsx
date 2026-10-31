@@ -8,7 +8,6 @@ function TeluguPrint({ selectedHistory, activeTab, data, showCategory, showRemar
 
   // Get translated snapshot name from the webpage or translate it
   const getTranslatedSnapshotName = () => {
-    // First try to get from the webpage if it's already translated
     const renderedSnapshotElement = document.querySelector('[data-snapshot-name]');
     if (renderedSnapshotElement) {
       return renderedSnapshotElement.innerText?.trim();
@@ -22,7 +21,7 @@ function TeluguPrint({ selectedHistory, activeTab, data, showCategory, showRemar
       } else if (name.includes('Ganesh Chaturthi')) {
         return name.replace('Ganesh Chaturthi', 'గణేశ్ చతుర్థి');
       }
-      return name; // Return as-is if no translation available
+      return name;
     }
     return '';
   };

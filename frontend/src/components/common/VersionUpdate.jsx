@@ -57,7 +57,6 @@ export default function VersionUpdate({ isOpen, onReload, onLater }) {
           A new version of the app is ready. Reload now to get the latest updates and improvements.
         </p>
 
-        {/* What's New Section */}
         <div className="bg-gray-50 rounded-lg p-4 mb-6 border border-gray-200">
           <h3 className="text-sm font-semibold text-gray-800 mb-2">
             What&apos;s New

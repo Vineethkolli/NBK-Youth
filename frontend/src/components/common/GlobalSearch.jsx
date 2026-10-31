@@ -7,38 +7,38 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
 const searchablePages = [
-  { path: '/', label: 'Home', keywords: 'dashboard events', icon: Home },
-  { path: '/explore', label: 'Explore', keywords: 'discover all', icon: LayoutGrid },
-  { path: '/committee', label: 'Committee', keywords: 'youth members team', icon: Users },
-  { path: '/moments', label: 'Moments', keywords: 'photos videos media content', icon: CameraIcon },
-  { path: '/vibe', label: 'Vibe', keywords: 'music songs spotify playlist', icon: MusicIcon },
-  { path: '/stats', label: 'Stats', keywords: 'statistics finance budget overview', icon: BarChart2 },
-  { path: '/income', label: 'Income', keywords: 'budget finance', icon: IndianRupee },
-  { path: '/expense', label: 'Expense', keywords: 'budget finance', icon: DollarSign },
-  { path: '/estimation', label: 'Estimation', keywords: 'budget finance', icon: Calculator },
-  { path: '/people', label: 'People', keywords: 'members contacts list youth villager map street location', icon: ContactRound },
-  { path: '/histories', label: 'Histories', keywords: 'history records previous', icon: History },
-  { path: '/records', label: 'Records', keywords: 'events finance timeline', icon: FolderOpen },
-  { path: '/profile', label: 'Profile', keywords: 'account user mysession birthday role email phone register google change password sign out', icon: User },
-  { path: '/pay-online', label: 'Pay Online', keywords: 'payment upi', icon: ShieldCheck },
-  { path: '/notifications', label: 'Notifications', keywords: 'alerts announcements', icon: Bell },
-  { path: '/settings', label: 'Settings', keywords: 'language preferences download install privacy terms', icon: Settings },
-  { path: '/activities', label: 'Activities', keywords: 'games events', icon: TrophyIcon },
-  { path: '/tools', label: 'Tools', keywords: 'utilities weather timer toss pdf calculator voice recorder', icon: ToolCase },
-  { path: '/tech-stack', label: 'Tech Stack', keywords: 'technology developer kolli vineeth vini github developed owner access', icon: Layers },
-  { path: '/my-village', label: 'My Village', keywords: 'village services gangavaram', icon: Tractor },
-  { path: '/verification', label: 'Verification', keywords: 'verify', access: 'Privileged', icon: CheckSquare },
-  { path: '/recycle-bin', label: 'Recycle Bin', keywords: 'deleted', access: 'Privileged', icon: Trash2 },
-  { path: '/users', label: 'Users & Roles', keywords: 'people permissions category access', access: 'Privileged', icon: UserCog },
-  { path: '/admin-panel', label: 'Admin Panel', keywords: 'administration popup banner maintenance scheduled notifications event label', access: 'Privileged', icon: LayoutDashboard },
-  { path: '/mailer', label: 'Mailer', keywords: 'email scheduled', access: 'Privileged', icon: MailCheck },
-  { path: '/my-files', label: 'My Files', keywords: 'documents assets notes dumps', access: 'Privileged', icon: Files },
-  { path: '/developer-options', label: 'Developer Options', keywords: 'developer health editing controls universal pin auth sessions reset roles clear snapshots processed', access: 'Developer', icon: Terminal },
-  { path: '/activity-logs', label: 'Activity Logs', keywords: 'audit logs actions entities', access: 'Developer', icon: FileClock },
-  { path: '/auth-sessions', label: 'Auth Sessions', keywords: 'login security access activity', access: 'Developer', icon: Fingerprint },
-  { path: '/monitor', label: 'Monitor', keywords: 'system status health cloudinary upstash redis mongodb github actions backend render', access: 'Developer', icon: Cpu },
-  { path: '/documentation', label: 'Documentation', keywords: 'help guide', access: 'Developer', icon: BookMarked },
-  { path: '/new', label: 'New', keywords: 'updates announcements', icon: Sparkles }
+  { path: '/', label: 'Home', keywords: ['Dashboard', 'Events'], icon: Home },
+  { path: '/explore', label: 'Explore', keywords: ['Discover', 'All'], icon: LayoutGrid },
+  { path: '/committee', label: 'Committee', keywords: ['NBK Youth', 'NBK Members', 'NBK Team'], icon: Users },
+  { path: '/moments', label: 'Moments', keywords: ['Photos', 'Videos', 'Media', 'Content'], icon: CameraIcon },
+  { path: '/vibe', label: 'Vibe', keywords: ['Music', 'Songs', 'Playlist'], icon: MusicIcon },
+  { path: '/stats', label: 'Stats', keywords: ['Statistics', 'Finance', 'Budget', 'Overview'], icon: BarChart2 },
+  { path: '/income', label: 'Income', keywords: ['Budget', 'Finance'], icon: IndianRupee },
+  { path: '/expense', label: 'Expense', keywords: ['Budget', 'Finance'], icon: DollarSign },
+  { path: '/estimation', label: 'Estimation', keywords: ['Budget', 'Finance', 'Budget Planning'], icon: Calculator },
+  { path: '/people', label: 'People', keywords: ['Members', 'Contact List', 'Youth', 'Villagers', 'Map', 'Streets', 'Location'], icon: ContactRound },
+  { path: '/histories', label: 'Histories', keywords: ['History', 'Records', 'Previous Year data'], icon: History },
+  { path: '/records', label: 'Records', keywords: ['Events Records', 'Event Files', 'Financial Records', 'Timeline Records'], icon: FolderOpen },
+  { path: '/profile', label: 'Profile', keywords: ['Account', 'User', 'My Sessions', 'Birthday', 'Role', 'Email', 'Phone', 'Register Id', 'Google Account', 'Change Password', 'Sign Out'], icon: User },
+  { path: '/pay-online', label: 'Pay Online', keywords: ['Payment', 'Upi'], icon: ShieldCheck },
+  { path: '/notifications', label: 'Notifications', keywords: ['Alerts', 'Announcements', 'Scheduled Notifications',], icon: Bell },
+  { path: '/settings', label: 'Settings', keywords: ['Language Preferences', 'Notification Permission', 'Download App', 'Install App', 'Privacy Policy', 'Terms and Conditions', 'Help and Support', 'Queries'], icon: Settings },
+  { path: '/activities', label: 'Activities', keywords: ['Games', 'Events'], icon: TrophyIcon },
+  { path: '/tools', label: 'Tools', keywords: ['Utilities', 'Weather', 'Timer', 'Toss', 'Pdf Merger', 'Image to Pdf', 'Calculator', 'Voice Recorder'], icon: ToolCase },
+  { path: '/tech-stack', label: 'Tech Stack', keywords: ['Technologies', 'Developer', 'Kolli Vineeth', 'Vini', 'Github', 'Access Management', 'Follow us', 'Roles Management'], icon: Layers },
+  { path: '/my-village', label: 'My Village', keywords: ['Village Services', 'Gangavaram'], icon: Tractor },
+  { path: '/verification', label: 'Verification', keywords: ['Verify', 'Validate'], access: 'Privileged', icon: CheckSquare },
+  { path: '/recycle-bin', label: 'Recycle Bin', keywords: ['Deleted', 'Trash'], access: 'Privileged', icon: Trash2 },
+  { path: '/users', label: 'Users & Roles', keywords: ['People', 'Permissions', 'Category', 'Access'], access: 'Privileged', icon: UserCog },
+  { path: '/admin-panel', label: 'Admin Panel', keywords: ['Administration', 'Popup Banner', 'Maintenance Mode', 'Event Label', 'Payment Details'], access: 'Privileged', icon: LayoutDashboard },
+  { path: '/mailer', label: 'Mailer', keywords: ['Email', 'Scheduled Emails', 'Bulk Emails'], access: 'Privileged', icon: MailCheck },
+  { path: '/my-files', label: 'My Files', keywords: ['Documents', 'Assets', 'Notes', 'Dumps'], access: 'Privileged', icon: Files },
+  { path: '/developer-options', label: 'Developer Options', keywords: ['Editing Controls', 'Universal Pin', 'Auth Sessions Control', 'Reset Roles', 'Clear Data', 'Snapshots', 'Processed Records'], access: 'Developer', icon: Terminal },
+  { path: '/activity-logs', label: 'Activity Logs', keywords: ['Audit Logs','Actions Breakdown','Entities Breakdown'], access: 'Developer ', icon: FileClock },
+  { path: '/auth-sessions ', label: 'Auth Sessions ', keywords: ['Login Data', 'Security', 'Access Modes', 'Active Users', 'Active Sessions', 'Auth Activity'], access : "Developer", icon : Fingerprint},
+  { path : "/monitor", label : "Monitor", keywords : ['System Status', 'Backend Health Monitor', 'Cloudinary Monitor','Upstash Redis Monitor','Mongodb Monitor','Github Actions Monitor','Backend Render Monitor'], access : "Developer", icon : Cpu},
+  { path : "/documentation", label : "Documentation", keywords : ['Help','Guide', 'App Maintain Manual'], access : "Developer", icon : BookMarked},
+  { path : "/new", label : "New", keywords : ['Updates','Announcements'], icon : Sparkles }
 ];
 
 function GlobalSearch() {
@@ -60,11 +60,19 @@ function GlobalSearch() {
 
   const normalizedQuery = searchQuery.trim().toLowerCase();
 
+  const getSearchKeywords = (page) =>
+    Array.isArray(page.keywords) ? page.keywords : page.keywords.split(' ');
+
   const matchingPages = availablePages.filter((page) =>
     `${page.label} ${page.keywords}`
       .toLowerCase()
       .includes(normalizedQuery)
   );
+
+  const getMatchedKeywords = (page) =>
+    getSearchKeywords(page).filter((keyword) =>
+      keyword.toLowerCase().includes(normalizedQuery)
+    );
 
   useEffect(() => {
     if (isSearchOpen) {
@@ -272,7 +280,14 @@ function GlobalSearch() {
                       }`}
                     />
 
-                    <span className="min-w-0 truncate">{page.label}</span>
+                    <span className="min-w-0 truncate">
+                      <span className="block truncate">{page.label}</span>
+                      {normalizedQuery && getMatchedKeywords(page).length > 0 && (
+                        <span className="block truncate text-xs capitalize text-gray-500">
+                          {getMatchedKeywords(page).join(', ')}
+                        </span>
+                      )}
+                    </span>
                   </button>
                 );
               })

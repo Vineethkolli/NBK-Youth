@@ -113,12 +113,10 @@ function SlidesOrder({
                               : 'border-gray-200 hover:border-indigo-300 hover:shadow-md'
                           }`}
                         >
-                          {/* Order Number Badge */}
                           <div className="absolute top-1 left-1 bg-indigo-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold z-10">
                             {index + 1}
                           </div>
 
-                          {/* Slide Preview */}
                           <div className="aspect-video bg-gray-100">
                             {slide.type === 'image' ? (
                               <img
@@ -135,9 +133,7 @@ function SlidesOrder({
                             )}
                           </div>
 
-                          {/* Controls */}
                           <div className="p-2 bg-gray-50 flex justify-center items-center space-x-3">
-                             {/* Drag Handle Moved Here */}
                             <div
                               className="cursor-move p-1"
                               title="Drag"

@@ -3,7 +3,6 @@ import { Cloud } from "lucide-react";
 import LocationControls from "./LocationControls";
 import WeatherDisplay from "./WeatherDisplay";
 
-// Default location - Gangavaram
 const DEFAULT_LOCATION = {
   name: "Gangavaram",
   lat: 15.809177,

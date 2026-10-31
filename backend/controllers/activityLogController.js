@@ -158,7 +158,7 @@ export const activityLogController = {
         entityBreakdown[stat._id] = stat.count;
       });
 
-      // Convert user activity breakdown to a more usable format
+      // Convert user activity breakdown to a usable format
       const detailedUserBreakdown = {};
 
       const entityTotals = userActivityBreakdown.map(entityGroup => {

@@ -115,7 +115,6 @@ function SmallStat({ label, value, icon: Icon }) {
 export default function MyVillage() {
   return (
     <div className="space-y-6">
-      {/* Hero */}
       <section className="relative overflow-hidden bg-gradient-to-br from-emerald-700 via-green-700 to-teal-700">
         <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-white/10" />
         <div className="absolute -bottom-32 -left-20 h-72 w-72 rounded-full bg-white/10" />
@@ -275,7 +274,6 @@ export default function MyVillage() {
               </div>
             </div>
 
-            {/* Religion */}
             <div className="mt-6 pt-6">
               <div className="mb-3">
                 <h3 className="text-sm font-semibold text-gray-900">

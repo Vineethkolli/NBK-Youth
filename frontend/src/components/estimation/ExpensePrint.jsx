@@ -12,7 +12,6 @@ const ExpensePrint = ({ expenses, visibleColumns }) => {
     const timestamp = new Date().toLocaleString();
     const pageWidth = doc.internal.pageSize.getWidth();
 
-    // Title
     doc.setFontSize(16);
     doc.text('Estimated Expense Report', pageWidth / 2, 15, { align: 'center' });
 
@@ -41,7 +40,6 @@ const ExpensePrint = ({ expenses, visibleColumns }) => {
       return row;
     });
 
-    // Table
     autoTable(doc, {
       startY: eventLabel ? 30 : 25,
       head: [tableColumns],
@@ -49,7 +47,6 @@ const ExpensePrint = ({ expenses, visibleColumns }) => {
       margin: { top: 10 },
     });
 
-    // Footer
     const pageCount = doc.getNumberOfPages();
 for (let i = 1; i <= pageCount; i++) {
   doc.setPage(i);

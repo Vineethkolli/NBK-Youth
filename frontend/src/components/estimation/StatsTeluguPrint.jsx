@@ -73,7 +73,6 @@ const StatsTeluguPrint = ({ stats, budgetStats }) => {
   const expenseComparison = currentExpense - estimatedExpense;
   const amountLeftComparison = currentAmountLeft - estimatedAmountLeft;
 
-  // Comparison Analysis
   const comparisonCols = ['Comparison Type', 'Current', 'Estimated', 'Difference'];
   const comparisonRows = [
     ['Current Income vs Estimated Expense', formatAmount(currentIncome), formatAmount(estimatedExpense), formatAmount(incomeExpenseBalance)],
@@ -82,7 +81,6 @@ const StatsTeluguPrint = ({ stats, budgetStats }) => {
     ['Amount Left Comparison', formatAmount(currentAmountLeft), formatAmount(estimatedAmountLeft), formatAmount(amountLeftComparison)]
   ];
 
-  // Estimation Overview
   const estimationCols = ['Category', 'Entries', 'Amount'];
   const estimationRows = [
     ['Estimated Income', `${stats.incomeCount || 0} `, formatAmount(stats.totalEstimatedIncome)],
@@ -100,21 +98,18 @@ const StatsTeluguPrint = ({ stats, budgetStats }) => {
     ['Amount Left', '-', stats.balance < 0 ? `${formatAmount(stats.balance)} (Shortage)` : formatAmount(stats.balance)]
   ];
 
-  // Youth Payment Statistics
   const youthPaymentCols = ['Status', 'Entries', 'Amount'];
   const youthPaymentRows = [
     ['Paid', `${stats.youthPaidCount || '-'}`, formatAmount(stats.youthPaid || 0)],
     ['Not Paid', `${stats.youthNotPaidCount || '-'}`, formatAmount(stats.youthNotPaid || 0)]
   ];
 
-  // Villagers Payment Statistics
   const villagersPaymentCols = ['Status', 'Entries', 'Amount'];
   const villagersPaymentRows = [
     ['Paid', `${stats.villagersPaidCount || '-'}`, formatAmount(stats.villagersPaid || 0)],
     ['Not Paid', `${stats.villagersNotPaidCount || '-'}`, formatAmount(stats.villagersNotPaid || 0)]
   ];
 
-  // Overall Payment Status
   const overallPaymentCols = ['Status', 'Entries', 'Amount'];
   const overallPaymentRows = [
     ['Paid', `${stats.overallPaidCount || '-'}`, formatAmount(stats.totalEstimatedPaidIncome || 0)],

@@ -16,7 +16,6 @@ const ExpensePrint = ({ expenses, visibleColumns }) => {
     const title = "Expense Report";
     const timestamp = new Date().toLocaleString();
 
-    // Visible columns
     const columns = Object.keys(visibleColumns).filter(column => visibleColumns[column]);
 
     headers.push('S.No');
@@ -71,7 +70,6 @@ const ExpensePrint = ({ expenses, visibleColumns }) => {
       body.push(row);
     });
 
-    // Title
     doc.setFontSize(16);
     doc.text(title, 105, 15, { align: 'center' });
 
@@ -81,7 +79,6 @@ const ExpensePrint = ({ expenses, visibleColumns }) => {
       doc.text(eventLabel.label, 105, 22, { align: 'center' });
     }
 
-    // AutoTable
     autoTable(doc, {
       head: [headers],
       body: body,
@@ -89,7 +86,6 @@ const ExpensePrint = ({ expenses, visibleColumns }) => {
       margin: { top: 10 },
     });
 
-// Footer
 const pageCount = doc.getNumberOfPages();
 for (let i = 1; i <= pageCount; i++) {
   doc.setPage(i);

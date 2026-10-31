@@ -26,7 +26,6 @@ function PayOnline() {
     try {
       const response = await axios.post(`${API_URL}/api/payments`, paymentData);
 
-      // Add new payment to top of the list
       setPayments((prev) => [response.data, ...prev]);
 
       return response.data;

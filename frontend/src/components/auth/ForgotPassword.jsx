@@ -32,13 +32,11 @@ function ForgotPassword({
 
     if (initialIdentifier) {
       if (activeMethod === 'email') {
-        // Only restore email if it looks like one
         if (initialIdentifier.includes('@')) {
           setEmail(initialIdentifier);
           setPhoneNumber('');
         }
       } else if (activeMethod === 'phone') {
-        // Only restore phone if it looks like a number
         const parsed = parsePhoneNumberFromString(initialIdentifier);
         if (parsed && parsed.isValid()) {
           setPhoneNumber(parsed.number);
@@ -46,7 +44,6 @@ function ForgotPassword({
         }
       }
     } else {
-      // clean slate
       setEmail('');
       setPhoneNumber('');
     }
@@ -94,7 +91,6 @@ function ForgotPassword({
     };
   }, [resetMethod]);
 
-  // Toggle between email and phone
   const toggleMethod = () => {
     if (resetMethod === 'email') {
       lastEmail.current = email;

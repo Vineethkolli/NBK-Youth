@@ -24,14 +24,12 @@ function EnglishPrint({ selectedHistory, activeTab, data, showCategory, showRema
     let yPos = 20;
     const timestamp = new Date().toLocaleString();
 
-    // Title
     doc.setFontSize(16);
     doc.setTextColor(0, 0, 0);
     const title = `${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} Report`;
     doc.text(title, 105, yPos, { align: 'center' });
     yPos += 7;
 
-    // Snapshot Name
     if (selectedHistory.snapshotName) {
       doc.setFontSize(12);
       doc.setTextColor(100, 100, 100);
@@ -52,7 +50,6 @@ function EnglishPrint({ selectedHistory, activeTab, data, showCategory, showRema
       printEvents(doc, data, yPos);
     }
 
-    // Footer
 const pageCount = doc.getNumberOfPages();
 for (let i = 1; i <= pageCount; i++) {
   doc.setPage(i);

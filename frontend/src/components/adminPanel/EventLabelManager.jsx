@@ -136,7 +136,7 @@ function EventLabelManager() {
       {!eventLabel && !showForm && (
         <div className="text-center text-gray-500 py-4">
           <p>No event label set</p>
-          <p className="text-sm">Add an event label to describe the current batch of budget records</p>
+          <p className="text-sm">Add an event label to describe the current app data and records</p>
         </div>
       )}
 

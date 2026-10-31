@@ -257,14 +257,12 @@ function ChatWidget({ isOpen, setIsOpen }) {
 
         {chatHistory.map((chat, index) => (
           <div key={index} className="space-y-2">
-            {/* User Message */}
             <div className="flex justify-end">
               <div className="bg-indigo-600 text-white rounded-lg px-3 py-2 max-w-xs">
                 <p className="text-sm">{chat.message}</p>
               </div>
             </div>
             
-            {/* VINI Response */}
             <div className="flex justify-start">
               <div className="bg-gray-100 rounded-lg px-3 py-2 max-w-xs">
                 <div className="flex items-center space-x-1 mb-1">
@@ -290,7 +288,6 @@ function ChatWidget({ isOpen, setIsOpen }) {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input */}
       <div className="border-t p-4">
         <form onSubmit={handleSendMessage} className="flex space-x-2">
           <input

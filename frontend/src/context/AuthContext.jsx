@@ -46,7 +46,6 @@ const setCachedUser = (userObj) => {
       localStorage.removeItem("cachedUser");
     }
   } catch {
-    // Ignore cache errors
   }
 };
 

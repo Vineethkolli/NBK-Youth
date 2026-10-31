@@ -37,7 +37,7 @@ export default function GithubActionsMonitor() {
     }
   }, [workflowFilter]);
 
-  // combined fetch for initial load or sync
+  // combined fetch for sync
   const fetchAll = useCallback(async () => {
     setLoading(true);
     try {
@@ -68,7 +68,6 @@ export default function GithubActionsMonitor() {
         Data is from the last 100 jobs
       </p>
 
-      {/* Controls */}
       <div className="flex flex-wrap gap-3 items-center">
         <div className="flex items-center gap-2">
           <label className="text-sm font-medium">Workflow:</label>

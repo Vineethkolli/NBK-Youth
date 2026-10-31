@@ -65,7 +65,6 @@ if (startY > doc.internal.pageSize.height - 30 && game !== games[games.length - 
 }
     });
 
-    // Footer
 const pageCount = doc.getNumberOfPages();
 for (let i = 1; i <= pageCount; i++) {
   doc.setPage(i);

@@ -81,7 +81,6 @@ const handlePrint = () => {
     margin: { top: 10 },
   });
 
-// Footer
 const pageCount = doc.getNumberOfPages();
 for (let i = 1; i <= pageCount; i++) {
   doc.setPage(i);

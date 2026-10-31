@@ -97,7 +97,6 @@ function Explore() {
         (section) =>
           section.pages.length > 0 && (
             <div key={section.title}>
-              {/* Section Header */}
               <div className="flex items-center gap-2 mb-3 border-b border-gray-200 pb-1">
                 <section.icon className="h-4 w-4 sm:h-5 sm:w-5 text-indigo-600" />
                 <h2 className="text-base sm:text-lg md:text-xl font-semibold text-gray-800">
@@ -105,7 +104,6 @@ function Explore() {
                 </h2>
               </div>
 
-              {/* Grid of Items */}
               <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3 sm:gap-4 md:gap-5">
                 {section.pages.map(({ to, icon: Icon, label }) => (
                   <Link

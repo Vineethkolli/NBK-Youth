@@ -48,7 +48,6 @@ function PopupBanner() {
     }
   };
 
-  // Auto-close after duration
   useEffect(() => {
     if (banner?.duration > 0) {
       const timer = setTimeout(() => {

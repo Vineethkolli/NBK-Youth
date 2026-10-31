@@ -404,7 +404,6 @@ else {
         {item.modifiedTime ? new Date(item.modifiedTime).toLocaleDateString() : '-'}
       </td>
       <td className="p-3 whitespace-nowrap space-x-2">
-        {/* Action buttons */}
         <button
           onClick={() => handleDownload(item)}
           title="Download"
