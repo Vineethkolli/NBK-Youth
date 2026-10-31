@@ -54,7 +54,7 @@ paymentSchema.pre('save', async function () {
     const counter = await Counter.findByIdAndUpdate(
       'paymentId',
       { $inc: { seq: 1 } },
-      { new: true, upsert: true }
+      { returnDocument: 'after', upsert: true }
     );
     this.paymentId = `P${counter.seq}`;
   }

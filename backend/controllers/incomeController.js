@@ -154,7 +154,7 @@ export const incomeController = {
       }
 
       const updatedIncome = await Income.findByIdAndUpdate(req.params.id, updateData, {
-        new: true
+        returnDocument: 'after'
       });
 
       await logActivity(
@@ -201,7 +201,7 @@ export const incomeController = {
       const updatedIncome = await Income.findByIdAndUpdate(
         req.params.id,
         { $set: updateData },
-        { new: true, runValidators: true }
+        { returnDocument: 'after', runValidators: true }
       );
 
       await logActivity(

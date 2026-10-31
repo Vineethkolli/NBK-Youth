@@ -54,7 +54,7 @@ export const eventLabelController = {
       const eventLabel = await EventLabel.findByIdAndUpdate(
         req.params.id,
         { label },
-        { new: true }
+        { returnDocument: 'after' }
       );
 
       await logActivity(

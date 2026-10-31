@@ -44,7 +44,7 @@ estimatedIncomeSchema.pre('save', async function () {
     const counter = await Counter.findByIdAndUpdate(
       'estimatedIncomeId',
       { $inc: { seq: 1 } },
-      { new: true, upsert: true }
+      { returnDocument: 'after', upsert: true }
     );
     this.estimatedIncomeId = `EI${counter.seq}`;
   }

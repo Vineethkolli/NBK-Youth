@@ -170,7 +170,7 @@ export const bannerController = {
         updateOps.$unset = { ...(updateOps.$unset || {}), video: '', videoPublicId: '' };
       }
 
-      const banner = await Banner.findByIdAndUpdate(req.params.id, updateOps, { new: true });
+      const banner = await Banner.findByIdAndUpdate(req.params.id, updateOps, { returnDocument: 'after' });
 
       if (!banner) {
         return res.status(404).json({ message: 'Banner not found' });

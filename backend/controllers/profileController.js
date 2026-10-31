@@ -163,7 +163,7 @@ export const updateLanguage = async (req, res) => {
     const user = await User.findByIdAndUpdate(
       req.user.id,
       { language },
-      { new: true }
+      { returnDocument: 'after' }
     ).select('-password');
 
     await logActivity(

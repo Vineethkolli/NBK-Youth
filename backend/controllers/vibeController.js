@@ -85,7 +85,7 @@ const VibeController = {
       const collection = await Collection.findByIdAndUpdate(
         req.params.id,
         { name },
-        { new: true }
+        { returnDocument: 'after' }
       );
 
       await logActivity(

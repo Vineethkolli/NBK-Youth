@@ -106,7 +106,7 @@ export const estimationController = {
       const income = await EstimatedIncome.findByIdAndUpdate(
         req.params.id,
         req.body,
-        { new: true }
+        { returnDocument: 'after' }
       );
 
       await logActivity(
@@ -226,7 +226,7 @@ export const estimationController = {
       const expense = await EstimatedExpense.findByIdAndUpdate(
         req.params.id,
         req.body,
-        { new: true }
+        { returnDocument: 'after' }
       );
 
       await logActivity(

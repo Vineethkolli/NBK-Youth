@@ -91,7 +91,7 @@ const claimBirthdayHistory = async ({ user, year, subject, body, footer }) => {
     return MailerHistory.findOneAndUpdate(
       { _id: existing._id, status: { $in: ['pending', 'failed'] } },
       { $set: { status: 'sending', sentAt: new Date() } },
-      { new: true }
+      { returnDocument: 'after' }
     );
   }
 

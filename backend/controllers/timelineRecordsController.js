@@ -123,7 +123,7 @@ export const timelineRecordsController = {
       if (Object.prototype.hasOwnProperty.call(req.body, 'remarks')) updatePayload.remarks = req.body.remarks;
       if (Object.prototype.hasOwnProperty.call(req.body, 'responsible')) updatePayload.responsible = req.body.responsible;
 
-      const record = await TimelineRecord.findByIdAndUpdate(recordId, updatePayload, { new: true });
+      const record = await TimelineRecord.findByIdAndUpdate(recordId, updatePayload, { returnDocument: 'after' });
 
       await logActivity(
         req,

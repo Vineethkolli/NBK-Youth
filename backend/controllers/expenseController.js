@@ -130,7 +130,7 @@ export const expenseController = {
           billImagePublicId: billImagePublicId,
           verifyLog: 'not verified'
         },
-        { new: true }
+        { returnDocument: 'after' }
       );
 
       await logActivity(

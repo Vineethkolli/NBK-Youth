@@ -26,7 +26,7 @@ export const lockSettingsController = {
           isLocked,
           lockedBy: req.user.registerId
         },
-        { upsert: true, new: true }
+        { upsert: true, returnDocument: 'after'}
       );
 
       await logActivity(

@@ -110,7 +110,7 @@ export const snapshotController = {
       const updatedSnapshot = await Snapshot.findByIdAndUpdate(
         req.params.id,
         { eventName, year },
-        { new: true }
+        { returnDocument: 'after' }
       );
 
       await logActivity(

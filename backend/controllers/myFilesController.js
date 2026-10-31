@@ -57,7 +57,7 @@ export const myFilesController = {
         filename: `${req.body.title?.trim()}${getFileExtension(existing.filename)}`,
         passwordProtected: Boolean(req.body.passwordProtected),
       } },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!file) return res.status(404).json({ message: 'File not found' });
     await logActivity(req, 'UPDATE', 'FileAsset', file._id.toString(), { before: null, after: file.toObject() }, `File "${file.filename}" updated`);
@@ -214,7 +214,7 @@ downloadFile: async (req, res) => {
     if (existing.passwordProtected && !(await getPin(req))) { const error = pinError(req); return res.status(error.status).json(error); }
     const note = await Note.findByIdAndUpdate(req.params.id, {
       $set: { title: title?.trim(), content: content || '', passwordProtected: Boolean(passwordProtected) }
-    }, { new: true, runValidators: true });
+    }, { returnDocument: 'after', runValidators: true });
     if (!note) return res.status(404).json({ message: 'Note not found' });
     await logActivity(req, 'UPDATE', 'Note', note._id.toString(), { before: { title: existing.title, passwordProtected: existing.passwordProtected }, after: { title: note.title, passwordProtected: note.passwordProtected } }, `Note "${note.title}" updated`);
     res.json(note);

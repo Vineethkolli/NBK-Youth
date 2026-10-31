@@ -26,7 +26,7 @@ peopleSchema.pre('save', async function () {
     const counter = await Counter.findByIdAndUpdate(
       'peopleId',
       { $inc: { seq: 1 } },
-      { new: true, upsert: true }
+      { returnDocument: 'after', upsert: true }
     );
     this.pid = `P${counter.seq}`;
   }

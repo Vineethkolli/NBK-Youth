@@ -118,7 +118,7 @@ export const eventRecordsController = {
         }
       }
 
-      const record = await EventRecord.findByIdAndUpdate(req.params.id, updatePayload, { new: true });
+      const record = await EventRecord.findByIdAndUpdate(req.params.id, updatePayload, { returnDocument: 'after' });
 
       await logActivity(
         req,

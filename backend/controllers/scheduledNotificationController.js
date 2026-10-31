@@ -96,7 +96,7 @@ export const updateScheduledNotification = async (req, res) => {
 
     if (updates.link !== undefined) updates.link = updates.link.trim();
 
-    const doc = await ScheduledNotification.findByIdAndUpdate(id, updates, { new: true });
+    const doc = await ScheduledNotification.findByIdAndUpdate(id, updates, { returnDocument: 'after' });
 
     await logActivity(
       req,

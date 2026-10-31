@@ -46,7 +46,7 @@ export const maintenanceController = {
           enabledAt: new Date(),
           expectedBackAt: expectedBackAt ? new Date(expectedBackAt) : null
         },
-        { upsert: true, new: true }
+        { upsert: true, returnDocument: 'after'}
       );
 
       await logActivity(

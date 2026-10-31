@@ -200,14 +200,14 @@ export const signOutCurrent = async (req, res) => {
       signedOutSession = await Session.findOneAndUpdate(
         { _id: req.sessionId },
         { isValid: false },
-        { new: false }
+        { returnDocument: 'before' }
       );
     } else if (refreshToken) {
       const tokenHash = hashToken(refreshToken);
       signedOutSession = await Session.findOneAndUpdate(
         { tokenHash },
         { isValid: false },
-        { new: false }
+        { returnDocument: 'before' }
       );
     } else {
       return res.json({ message: "Already signed out" });

@@ -104,7 +104,7 @@ export const financialRecordsController = {
 
     const originalData = originalRecord.toObject();
 
-    const record = await FinancialRecord.findByIdAndUpdate(recordId, req.body, { new: true });
+    const record = await FinancialRecord.findByIdAndUpdate(recordId, req.body, { returnDocument: 'after' });
 
     await logActivity(
       req,
