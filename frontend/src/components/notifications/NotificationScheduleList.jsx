@@ -72,7 +72,7 @@ function NotificationScheduleList({ onEdit }) {
                 <span>Send Date: {formatDateTime(schedule.scheduledAt)}</span>
                 <span>Target: {schedule.target}</span>
                 <span>Recipients: {schedule.totalRecipients}</span>
-                <span>Register Id: {schedule.recipients}</span>
+                <span>Register Ids: {schedule.recipients?.join(', ') || 'None'}</span>
               </div>
             </div>
           ))}

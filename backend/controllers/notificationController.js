@@ -145,15 +145,16 @@ export const sendNotification = async (req, res) => {
       return res.status(404).json({ error: 'No eligible users found for the selected target' });
     }
 
-    await scheduleImmediateNotification({
+    const history = await NotificationHistory.create({
       title: title.trim(),
       body: body.trim(),
       link: link?.trim() || '',
-      target,
-      senderRegisterId: req.user.registerId,
-      senderName: req.user.name,
-      recipients: eligibleRegisterIds
+      recipients: eligibleRegisterIds,
+      sentBy: req.user.registerId,
+      status: 'pending'
     });
+
+    await scheduleImmediateNotification({ historyId: history._id });
 
     res.status(202).json({ message: `Notification send started for ${target}` });
   } catch (error) {

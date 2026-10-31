@@ -185,45 +185,53 @@ const defineJobs = (agenda) => {
   });
 
   agenda.define('send-immediate-notification', { concurrency: 1, lockLifetime: 60 * 60 * 1000 }, async (job) => {
-    const {
-      title,
-      body,
-      link,
-      target,
-      senderRegisterId,
-      senderName,
-      recipients
-    } = job.attrs.data || {};
-    if (!title || !body || !senderRegisterId || !recipients?.length) return;
+    const { historyId } = job.attrs.data || {};
+    if (!historyId) return;
 
-    await NotificationHistory.create({
-      title,
-      body,
-      link: link || '',
-      recipients,
-      sentBy: senderRegisterId
-    });
+    const history = await NotificationHistory.findOneAndUpdate(
+      { _id: historyId, status: 'pending' },
+      { $set: { status: 'sending' } },
+      { new: true }
+    );
+    if (!history) return;
 
-    const { failedRecipients } = await sendNotificationPayload({
-      title,
-      body,
-      link,
-      target,
-      recipientRegisterIds: recipients
-    });
+    try {
+      const { failedRecipients } = await sendNotificationPayload({
+        title: history.title,
+        body: history.body,
+        link: history.link,
+        recipientRegisterIds: history.recipients
+      });
 
-    await ActivityLog.create({
-      action: 'CREATE',
-      entityType: 'Notification',
-      entityId: Date.now().toString(),
-      registerId: senderRegisterId,
-      userName: senderName || 'NA',
-      changes: {
-        before: null,
-        after: { title, body, link, target, recipientCount: recipients.length, failedCount: failedRecipients.length }
-      },
-      description: `Notification "${title}" sent to ${target} (${recipients.length} recipients) by ${senderName || senderRegisterId}`
-    });
+      history.failedRecipients = failedRecipients;
+      history.status = failedRecipients.length ? 'failed' : 'completed';
+      await history.save();
+
+      await ActivityLog.create({
+        action: 'CREATE',
+        entityType: 'Notification',
+        entityId: history._id.toString(),
+        registerId: history.sentBy,
+        userName: history.sentBy,
+        changes: {
+          before: null,
+          after: {
+            title: history.title,
+            body: history.body,
+            link: history.link,
+            recipientCount: history.recipients.length,
+            failedCount: failedRecipients.length
+          }
+        },
+        description: `Notification "${history.title}" sent to ${history.recipients.length} recipients by ${history.sentBy}`
+      });
+    } catch (error) {
+      await NotificationHistory.updateOne(
+        { _id: history._id },
+        { $set: { status: 'failed' } }
+      );
+      throw error;
+    }
   });
 };
 

@@ -7,6 +7,12 @@ const notificationHistorySchema = new mongoose.Schema(
     link: { type: String, required: false },
     recipients: { type: [String], required: true },
     sentBy: { type: String, required: true }, 
+    failedRecipients: { type: [String], default: [] },
+    status: {
+      type: String,
+      enum: ['pending', 'sending', 'completed', 'failed'],
+      default: 'pending'
+    },
   },
   { timestamps: true }
 );
