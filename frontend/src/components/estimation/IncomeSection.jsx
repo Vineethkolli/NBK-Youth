@@ -254,6 +254,7 @@ function IncomeSection({ refreshStats }) {
           onEdit={handleEdit}
           onDelete={handleIncomeDelete}
           isLocked={lockSettings.isLocked}
+          canManage={hasAccess('Pro')}
         />
       </div>
 

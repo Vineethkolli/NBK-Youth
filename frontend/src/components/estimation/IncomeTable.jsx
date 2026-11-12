@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Edit2, Trash2, Loader2 } from 'lucide-react';
 
-function EstimatedIncomeTable({ incomes, visibleColumns, onEdit, onDelete, isLocked }) {
+function EstimatedIncomeTable({ incomes, visibleColumns, onEdit, onDelete, isLocked, canManage }) {
   const [deletingId, setDeletingId] = useState(null);
 
   const handleDelete = async (id) => {
@@ -37,7 +37,7 @@ function EstimatedIncomeTable({ incomes, visibleColumns, onEdit, onDelete, isLoc
             {visibleColumns.category && <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>}
             {visibleColumns.status && <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>}
             {visibleColumns.remarks && <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Remarks</th>}
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+            {canManage && <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>}
           </tr>
         </thead>
 
@@ -53,7 +53,7 @@ function EstimatedIncomeTable({ incomes, visibleColumns, onEdit, onDelete, isLoc
               {visibleColumns.status && <td className="px-6 py-4 whitespace-nowrap text-sm">{income.status}</td>}
               {visibleColumns.remarks && <td className="px-6 py-4 whitespace-nowrap text-sm">{income.remarks}</td>}
 
-              <td className="px-6 py-4 whitespace-nowrap text-sm flex items-center">
+              {canManage && <td className="px-6 py-4 whitespace-nowrap text-sm flex items-center">
                 <button
                   onClick={() => onEdit(income)}
                   className={`ml-2 ${isLocked || deletingId === income._id ? 'text-indigo-400 cursor-not-allowed' : 'text-indigo-600 hover:text-indigo-900'}`}
@@ -71,7 +71,7 @@ function EstimatedIncomeTable({ incomes, visibleColumns, onEdit, onDelete, isLoc
                 >
                   {deletingId === income._id ? <Loader2 className="h-5 w-5 animate-spin" /> : <Trash2 className="h-5 w-5" />}
                 </button>
-              </td>
+              </td>}
             </tr>
           ))}
         </tbody>

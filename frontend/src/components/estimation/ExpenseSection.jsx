@@ -234,6 +234,7 @@ function ExpenseSection({ refreshStats }) {
           onEdit={handleEdit}
           onDelete={handleExpenseDelete}
           isLocked={lockSettings.isLocked}
+          canManage={hasAccess("Pro")}
         />
       </div>
 

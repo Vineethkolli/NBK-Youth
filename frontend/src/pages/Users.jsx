@@ -29,7 +29,17 @@ import { formatBirthday } from '../components/profile/BirthdayInput';
 function Users() {
   const [users, setUsers] = useState([]);
   const [search, setSearch] = useState('');
-  const { hasAccess } = useAuth();
+  const { hasAccess, user: currentUser } = useAuth();
+  const roleOptions = [
+    { value: 'user', label: 'User' },
+    { value: 'admin', label: 'Admin' },
+    ...(currentUser?.role === 'financier' || currentUser?.role === 'developer'
+      ? [{ value: 'financier', label: 'Financier' }]
+      : []),
+    ...(currentUser?.role === 'developer'
+      ? [{ value: 'developer', label: 'Developer' }]
+      : []),
+  ];
   const [editingUser, setEditingUser] = useState(null);
   const [userToDelete, setUserToDelete] = useState(null);
   const [userToInvalidate, setUserToInvalidate] = useState(null);
@@ -200,7 +210,7 @@ function Users() {
 
           {openPanel === 'filters' && (
             <div className="bg-white rounded-lg shadow p-2 border animate-fadeIn">
-              <UserFilters filters={filters} onChange={setFilters} />
+              <UserFilters filters={filters} onChange={setFilters} roleOptions={roleOptions} />
             </div>
           )}
 
@@ -291,10 +301,9 @@ function Users() {
                                      focus:outline-none focus:ring-indigo-500 focus:border-indigo-500
                                      sm:text-sm rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                          <option value="user">User</option>
-                          <option value="admin">Admin</option>
-                          <option value="financier">Financier</option>
-                          <option value="developer">Developer</option>
+                          {roleOptions.map(({ value, label }) => (
+                            <option key={value} value={value}>{label}</option>
+                          ))}
                         </select>
                       </td>}
 

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Edit2, Trash2, Loader2 } from 'lucide-react';
 
-function EstimatedExpenseTable({ expenses, visibleColumns, onEdit, onDelete, isLocked }) {
+function EstimatedExpenseTable({ expenses, visibleColumns, onEdit, onDelete, isLocked, canManage }) {
   const [deletingId, setDeletingId] = useState(null);
 
   const handleDelete = async (id) => {
@@ -35,7 +35,7 @@ function EstimatedExpenseTable({ expenses, visibleColumns, onEdit, onDelete, isL
             {visibleColumns.previousAmount && <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Previous Amount</th>}
             {visibleColumns.presentAmount && <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Present Amount</th>}
             {visibleColumns.remarks && <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Remarks</th>}
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+            {canManage && <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>}
           </tr>
         </thead>
 
@@ -49,7 +49,7 @@ function EstimatedExpenseTable({ expenses, visibleColumns, onEdit, onDelete, isL
               {visibleColumns.presentAmount && <td className="px-6 py-4 whitespace-nowrap text-sm notranslate">{expense.presentAmount}</td>}
               {visibleColumns.remarks && <td className="px-6 py-4 whitespace-nowrap text-sm">{expense.remarks}</td>}
 
-              <td className="px-6 py-4 whitespace-nowrap text-sm flex items-center">
+              {canManage && <td className="px-6 py-4 whitespace-nowrap text-sm flex items-center">
                 <button
                   onClick={() => onEdit(expense)}
                   className={`ml-2 ${isLocked || deletingId === expense._id ? 'text-indigo-400 cursor-not-allowed' : 'text-indigo-600 hover:text-indigo-900'}`}
@@ -67,7 +67,7 @@ function EstimatedExpenseTable({ expenses, visibleColumns, onEdit, onDelete, isL
                 >
                   {deletingId === expense._id ? <Loader2 className="h-5 w-5 animate-spin" /> : <Trash2 className="h-5 w-5" />}
                 </button>
-              </td>
+              </td>}
             </tr>
           ))}
         </tbody>

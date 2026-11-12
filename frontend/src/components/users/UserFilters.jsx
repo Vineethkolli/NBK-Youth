@@ -1,4 +1,4 @@
-function UserFilters({ filters, onChange }) {
+function UserFilters({ filters, onChange, roleOptions }) {
   const handleChange = (field, value) => {
     onChange({
       ...filters,
@@ -14,10 +14,9 @@ function UserFilters({ filters, onChange }) {
         className="form-select"
       >
         <option value="">Role</option>
-        <option value="user">User</option>
-        <option value="admin">Admin</option>
-        <option value="financier">Financier</option>
-        <option value="developer">Developer</option>
+        {roleOptions.map(({ value, label }) => (
+          <option key={value} value={value}>{label}</option>
+        ))}
       </select>
 
       <select
